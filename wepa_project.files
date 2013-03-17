@@ -27,3 +27,7 @@ test/adt/SConstruct
 test/adt/SConscript
 test/adt/datablock_test.cc
 test/adt/config_adt.cc
+test/adt/asstring_test.cc
+source/adt/adt.AsHexString.cc
+include/wepa/adt/AsHexString.h
+test/adt/ashexstring_test.cc

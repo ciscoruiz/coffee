@@ -16,3 +16,14 @@ SConstruct
 SConstruct.all
 test/config/SConstruct
 test/config/SConscript
+source/adt/SConscript
+source/adt/SConstruct
+include/wepa/adt/DataBlock.h
+include/wepa/adt/RuntimeException.h
+source/adt/adt.DataBlock.cc
+include/wepa/adt/AsString.h
+source/adt/adt.AsString.cc
+test/adt/SConstruct
+test/adt/SConscript
+test/adt/datablock_test.cc
+test/adt/config_adt.cc

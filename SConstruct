@@ -37,11 +37,25 @@ for source in sources:
 
 env.Default (libraries)
 
+#
+# Run 'scons test' to compile unit-tests
+#
+unit_tests = []
+run_tests = []
+
 test = os.path.join (current_directory, "test")
 tests = Glob(test + '/*')
 for test in tests:
    ss = str (test)
    ss += '/SConstruct'
-   compile_library = SConscript (ss, exports='env')
+   test_unit_program = SConscript (ss, exports='env')
+   unit_tests.extend (test_unit_program)
+   print test_unit_program [0]
+   test_unit = Builder (action = '%s > $TARGET' % test_unit_program [0])
+   env ['BUILDERS']['RunTestUnit'] = test_unit
+   test_unit_result = env.RunTestUnit ('%s.output' % test_unit_program [0], 'SConstruct')
+   run_tests.extend (test_unit_result)
+   Depends (test_unit_result, test_unit_program)
 
+env.Alias ('test', run_tests)
 

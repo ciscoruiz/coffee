@@ -38,98 +38,75 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/AsString.h>
+#include <wepa/adt/AsHexString.h>
 #include <wepa/adt/DataBlock.h>
 
 using namespace std;
 using namespace wepa;
 
-BOOST_AUTO_TEST_CASE( asstring_integer )
+BOOST_AUTO_TEST_CASE( ashexstring_integer )
 {
    int val = 10;
 
-   string result = adt::AsString::apply(val);
+   string result = adt::AsHexString::apply(val);
 
-   BOOST_REQUIRE_EQUAL(result, "10");
+   BOOST_REQUIRE_EQUAL(result, "0xa");
 
-   result = adt::AsString::apply (0);
-   BOOST_REQUIRE_EQUAL(result, "0");
+   result = adt::AsHexString::apply (0);
+   BOOST_REQUIRE_EQUAL(result, "0x0");
 
    val = INT_MAX;
-   result = adt::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "2147483647");
+   result = adt::AsHexString::apply(val);
+   BOOST_REQUIRE_EQUAL(result, "0x7fffffff");
 
    val = INT_MIN;
-   result = adt::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "-2147483648");
+   result = adt::AsHexString::apply(val);
+   BOOST_REQUIRE_EQUAL(result, "0x80000000");
 }
 
-BOOST_AUTO_TEST_CASE( asstring_uinteger )
+BOOST_AUTO_TEST_CASE( ashexstring_uinteger )
 {
    unsigned int val = 10;
 
-   string result = adt::AsString::apply(val);
+   string result = adt::AsHexString::apply(val);
 
-   BOOST_REQUIRE_EQUAL(result, "10");
+   BOOST_REQUIRE_EQUAL(result, "0xa");
 
-   result = adt::AsString::apply (0);
-   BOOST_REQUIRE_EQUAL(result, "0");
+   result = adt::AsHexString::apply (0);
+   BOOST_REQUIRE_EQUAL(result, "0x0");
 
    val = UINT_MAX;
-   result = adt::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "4294967295");
+   result = adt::AsHexString::apply(val);
+   BOOST_REQUIRE_EQUAL(result, "0xffffffff");
 }
 
-BOOST_AUTO_TEST_CASE( asstring_integer64 )
+BOOST_AUTO_TEST_CASE( ashexstring_integer64 )
 {
    Integer64 val = 0;
    string result;
 
    val --;
-   result = adt::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "-1");
+   result = adt::AsHexString::apply(val);
+   BOOST_REQUIRE_EQUAL(result, "0xffffffffffffffff");
 
    val = LLONG_MAX;
-   result = adt::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "9223372036854775807");
+   result = adt::AsHexString::apply(val);
+   BOOST_REQUIRE_EQUAL(result, "0x7fffffffffffffff");
 
    val = LLONG_MIN;
-   result = adt::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "-9223372036854775808");
+   result = adt::AsHexString::apply(val);
+   BOOST_REQUIRE_EQUAL(result, "0x8000000000000000");
 }
 
-BOOST_AUTO_TEST_CASE( asstring_uinteger64 )
+BOOST_AUTO_TEST_CASE( ashexstring_uinteger64 )
 {
    Unsigned64 val = 0;
    string result;
 
-   result = adt::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0");
+   result = adt::AsHexString::apply(val);
+   BOOST_REQUIRE_EQUAL(result, "0x0");
 
    val = ULLONG_MAX;
-   result = adt::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "18446744073709551615");
-}
-
-BOOST_AUTO_TEST_CASE( asstring_bool )
-{
-   string result;
-
-   result = adt::AsString::apply(true);
-   BOOST_REQUIRE_EQUAL(result, "true");
-
-   result = adt::AsString::apply(false);
-   BOOST_REQUIRE_EQUAL(result, "false");
-}
-
-BOOST_AUTO_TEST_CASE( asstring_datablock )
-{
-   string result;
-   adt::DataBlock value ("hello world", 11);
-
-   result = adt::AsString::apply(value);
-
-   cout << result << endl;
-
-   BOOST_REQUIRE_GT (result.size (), 0);
+   result = adt::AsHexString::apply(val);
+   BOOST_REQUIRE_EQUAL(result, "0xffffffffffffffff");
 }

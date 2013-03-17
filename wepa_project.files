@@ -1,0 +1,16 @@
+include/wepa/config/defines.h
+include/wepa/config/Release.h
+source/config/debug/config.Release.cc
+source/config/debug/SConscript
+source/config/debug/SConstruct
+source/config/release/config.Release.cc
+source/config/release/SConscript
+source/config/release/SConstruct
+source/config/config.Release.cc
+source/config/SConscript
+source/config/SConstruct
+test/config/config_test.cc
+license_pattern.txt
+README.md
+SConstruct
+SConstruct.all

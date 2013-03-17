@@ -1,0 +1,8 @@
+Import ('env')
+
+sources = Glob('*.cc')
+
+result = env.StaticLibrary ('wepa.config.a', sources);
+
+Return ('result')
+

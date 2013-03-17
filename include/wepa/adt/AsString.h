@@ -50,6 +50,7 @@ class DataBlock;
  * @brief The AsString class. This class convert different data types into std::string.
  */
 class AsString {
+public:
    /**
       @return A string with the number.
    */

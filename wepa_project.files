@@ -14,3 +14,5 @@ license_pattern.txt
 README.md
 SConstruct
 SConstruct.all
+test/config/SConstruct
+test/config/SConscript

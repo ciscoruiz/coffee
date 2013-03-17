@@ -42,7 +42,7 @@
 #endif
 #define WEPA_LOCATION (const char*)__FILE__,(const int)__LINE__
 
-#define WEPA_VERSION 0x001303
+#define WEPA_VERSION 0x000d03
 
 #if defined(__linux__) && !defined (_NO_BUILTIN)
 #define wepa_memcpy(a,b,c) __builtin_memcpy((a),(b),(c))

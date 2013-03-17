@@ -36,4 +36,29 @@
 
 #include <boost/test/included/unit_test.hpp>
 
-#include <
+#include <iostream>
+
+#include <wepa/config/Release.h>
+
+using namespace std;
+using namespace wepa;
+
+BOOST_AUTO_TEST_CASE (release)
+{
+   string version = config::Release::getVersion();
+
+   cout << version << endl;
+
+   BOOST_REQUIRE (version.empty() == false);
+
+   int debug = version.find("/D");
+   int release = version.find("/O");
+
+   #ifdef _DEBUG
+      BOOST_REQUIRE (debug != string::npos);
+      BOOST_REQUIRE (release == string::npos);
+   #else
+      BOOST_REQUIRE (debug == string::npos);
+      BOOST_REQUIRE (release != string::npos);
+   #endif
+}

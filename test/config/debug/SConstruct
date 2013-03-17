@@ -1,0 +1,8 @@
+Import ('env')
+
+variant = env ['VARIANT']
+
+result = SConscript ('SConscript', exports='env', variant_dir='%s' % variant)
+
+Return ('result')
+

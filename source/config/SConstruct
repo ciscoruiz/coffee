@@ -4,9 +4,9 @@ Import ('env')
 
 # See http://stackoverflow.com/questions/4693826/scons-binary-directory
 if int(debug):
-    result = SConscript ('SConscript', exports='env', variant_dir="debug")
+    result = SConscript ('SConscript', exports='env', variant_dir="debug", duplicate=0)
 else:
-    result = SConscript ('SConscript', exports='env', variant_dir="release")
+    result = SConscript ('SConscript', exports='env', variant_dir="release", duplicate=0)
 
 Return ('result')
 

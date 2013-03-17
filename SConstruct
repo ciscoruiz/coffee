@@ -25,12 +25,17 @@ else:
    env.Append (CCFLAGS = '-O3')
    env.Append (VARIANT = 'release')
 
+libraries = [];
+
 source = os.path.join (current_directory, "source")
 sources = Glob(source + '/*')
 for source in sources:
    ss = str (source)
    ss += '/SConstruct'
    compile_library = SConscript (ss, exports='env')
+   libraries.extend (compile_library)
+
+env.Default (libraries)
 
 test = os.path.join (current_directory, "test")
 tests = Glob(test + '/*')

@@ -34,8 +34,28 @@
 //
 
 #include <wepa/adt/DataBlock.h>
-#include <wepa/adt/RuntimeException.h>
+#include <wepa/adt/StreamString.h>
 
 using namespace std;
 using namespace wepa;
 
+char adt::DataBlock::at (const size_t index) const
+   throw (adt::RuntimeException)
+{
+   if (index >= size ())  {
+      StreamString msg;
+      throw RuntimeException (msg << "Index " << index << " out of range [0," << size () << ")");
+   }
+
+   return std::string::at (index);
+}
+
+char& adt::DataBlock::at (const size_t index) throw (adt::RuntimeException)
+{
+   if (index >= size ()) {
+      StreamString msg;
+      throw RuntimeException (msg << "Index " << index << " out of range [0," << size () << ")");
+   }
+
+   return std::string::at (index);
+}

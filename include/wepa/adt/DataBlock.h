@@ -61,7 +61,6 @@ public:
    using std::string::insert;
    using std::string::operator +=;
    using std::string::operator =;
-   using std::string::operator [];
    using std::string::size;
 
    /**
@@ -94,6 +93,14 @@ public:
     * @return The reference of itself.
     */
    DataBlock& append (const char character) throw () { std::string::append (1, character); return *this;}
+
+   char at (const size_t index) const throw (RuntimeException);
+
+   char& at (const size_t index) throw (RuntimeException);
+
+   char operator[] (const size_type index) const throw (RuntimeException) { return at (index); }
+
+   char& operator[] (const size_type index) throw (RuntimeException) { return at (index); }
 };
 
 }

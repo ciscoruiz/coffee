@@ -49,11 +49,11 @@ namespace adt {
  *
  * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
  */
-class Exception : virtual std::logic_error, virtual public boost::exception {
+class RuntimeException : virtual std::logic_error, virtual public boost::exception {
 public:
-   explicit Exception (const std::string& str) : std::logic_error (str) {;}
-   explicit Exception (const std::stringstream& ss) : std::logic_error (ss.str()) {;}
-   explicit Exception (const std::basic_ostream<char>& ss) : std::logic_error (static_cast <const std::stringstream*> (&ss)->str()) {;}
+   explicit RuntimeException (const std::string& str) : std::logic_error (str) {;}
+   explicit RuntimeException (const std::stringstream& ss) : std::logic_error (ss.str()) {;}
+   explicit RuntimeException (const std::basic_ostream<char>& ss) : std::logic_error (static_cast <const std::stringstream*> (&ss)->str()) {;}
 };
 
 }

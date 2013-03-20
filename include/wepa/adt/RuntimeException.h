@@ -44,6 +44,8 @@ namespace wepa {
 
 namespace adt {
 
+class StreamString;
+
 /**
  * Defines exception used for this library.
  *
@@ -52,7 +54,6 @@ namespace adt {
 class RuntimeException : virtual std::logic_error, virtual public boost::exception {
 public:
    explicit RuntimeException (const std::string& str) : std::logic_error (str) {;}
-   explicit RuntimeException (const std::stringstream& ss) : std::logic_error (ss.str()) {;}
    explicit RuntimeException (const std::basic_ostream<char>& ss) : std::logic_error (static_cast <const std::stringstream*> (&ss)->str()) {;}
 };
 

@@ -31,3 +31,6 @@ test/adt/asstring_test.cc
 source/adt/adt.AsHexString.cc
 include/wepa/adt/AsHexString.h
 test/adt/ashexstring_test.cc
+include/wepa/adt/StreamString.h
+source/adt/adt.StreamString.cc
+test/adt/StreamString_test.cc

@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <wepa/adt/DataBlock.h>
+#include <wepa/adt/RuntimeException.h>
 
 using namespace std;
 using namespace wepa;
@@ -78,5 +79,14 @@ BOOST_AUTO_TEST_CASE( datablock_clear )
    var.clear();
    BOOST_REQUIRE_EQUAL (var.size(), 0);
    BOOST_REQUIRE_EQUAL (var.empty(), true);
+}
+
+BOOST_AUTO_TEST_CASE( datablock_out_of_range )
+{
+   adt::DataBlock var ("wow", 3);
+
+   char zz;
+   BOOST_CHECK_THROW (zz = var [10], adt::RuntimeException);
+   BOOST_CHECK_THROW (var [10] = 0, adt::RuntimeException);
 }
 

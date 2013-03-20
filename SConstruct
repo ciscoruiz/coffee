@@ -51,7 +51,7 @@ for test in tests:
    test_unit_program = SConscript (ss, exports='env')
    unit_tests.extend (test_unit_program)
    print test_unit_program [0]
-   test_unit = Builder (action = '%s > $TARGET' % test_unit_program [0])
+   test_unit = Builder (action = '%s --report_level=short > $TARGET' % test_unit_program [0])
    env ['BUILDERS']['RunTestUnit'] = test_unit
    test_unit_result = env.RunTestUnit ('%s.output' % test_unit_program [0], 'SConstruct')
    run_tests.extend (test_unit_result)

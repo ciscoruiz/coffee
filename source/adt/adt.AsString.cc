@@ -59,6 +59,14 @@ string adt::AsString::apply (const unsigned int number)
    return string (aux);
 }
 
+string adt::AsString::apply (const long number)
+   throw ()
+{
+   char aux [32];
+   sprintf (aux, "%ld", number);
+   return string (aux);
+}
+
 string adt::AsString::apply (const Integer64 number)
    throw ()
 {

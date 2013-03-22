@@ -64,6 +64,11 @@ public:
    /**
       @return A string with the number.
    */
+   static std::string apply (const long number) throw ();
+
+   /**
+      @return A string with the number.
+   */
    static std::string apply (const Integer64 number) throw ();
 
    /**

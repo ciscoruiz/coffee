@@ -32,7 +32,6 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-
 #ifndef _wepa_adt_RuntimeException_h
 #define _wepa_adt_RuntimeException_h
 
@@ -40,11 +39,11 @@
 #include <stdexcept>
 #include <sstream>
 
+#include <wepa/adt/StreamString.h>
+
 namespace wepa {
 
 namespace adt {
-
-class StreamString;
 
 /**
  * Defines exception used for this library.
@@ -53,11 +52,37 @@ class StreamString;
  */
 class RuntimeException : virtual std::logic_error, virtual public boost::exception {
 public:
-   explicit RuntimeException (const std::string& str) : std::logic_error (str) {;}
-   explicit RuntimeException (const std::basic_ostream<char>& ss) : std::logic_error (static_cast <const std::stringstream*> (&ss)->str()) {;}
+   explicit RuntimeException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
+      std::logic_error (str),
+      m_fromMethod (fromMethod),
+      m_fromFile (fromFile),
+      m_fromLine (fromLine),
+      m_errorCode (-1)
+   {;}
+
+   RuntimeException (const RuntimeException& other) :
+      std::logic_error (other),
+      m_fromMethod (other.m_fromMethod),
+      m_fromFile (other.m_fromFile),
+      m_fromLine (other.m_fromLine),
+      m_errorCode (-1)
+   {;}
+
+   int getErrorCode () const throw () { return m_errorCode; }
+
+   void setErrorCode (const int errorCode) throw () { m_errorCode = errorCode; }
+
+private:
+   const char* m_fromMethod;
+   const char* m_fromFile;
+   const unsigned m_fromLine;
+   int m_errorCode;
 };
 
 }
 }
+
+#define WEPA_THROW_EXCEPTION(msg) do { wepa::adt::StreamString str; str << msg; throw wepa::adt::RuntimeException (str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
+
 
 #endif // _wepa_adt_RuntimeException_h

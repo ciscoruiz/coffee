@@ -41,3 +41,5 @@ source/adt/adt.Millisecond.cc
 include/wepa/adt/Microsecond.h
 source/adt/adt.Microsecond.cc
 test/adt/TimeClasses_tes.cc
+source/adt/adt.RuntimeException.cc
+test/adt/RuntimeException.cc

@@ -32,96 +32,24 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <cctype> // for toupper
-#include <string>
-#include <algorithm>
-
+#include <wepa/adt/RuntimeException.h>
 #include <wepa/adt/StreamString.h>
-#include <wepa/adt/AsString.h>
-#include <wepa/adt/AsHexString.h>
 
 using namespace std;
 using namespace wepa;
 
-void adt::StreamString::toUpper ()
-   throw ()
+string adt::RuntimeException::asString() const throw ()
 {
-   std::transform(begin(), end(), begin(), (int(*)(int)) toupper);
-}
+   StreamString str;
 
-void adt::StreamString::toLower ()
-   throw ()
-{
-   std::transform(begin(), end(), begin(), (int(*)(int)) tolower);
-}
+   str << "[" << m_fromFile << "(" << m_fromLine << "): " << m_fromMethod << "] ";
 
-adt::StreamString& adt::StreamString::operator<< (const char vv)
-   throw ()
-{
-   string::operator +=(vv);
-   return *this;
-}
-
-adt::StreamString& adt::StreamString::operator<< (const char* vv)
-   throw ()
-{
-   if (vv == NULL) {
-      if (a_flags & Flag::ShowNull)
-         string::append ("<null>");
+   if (m_errorCode != NullErrorCode) {
+      str << "ErrorCode: " << m_errorCode << " | ";
    }
-   else
-      string:append (vv);
 
-   return *this;
+   str << what ();
+
+   return str;
 }
-
-adt::StreamString& adt::StreamString::operator<< (const int vv)
-   throw ()
-{
-   string::append(AsString::apply (vv));
-   return *this;
-}
-
-adt::StreamString& adt::StreamString::operator<< (const unsigned int vv)
-   throw ()
-{
-   string::append(AsString::apply (vv));
-   return *this;
-}
-
-adt::StreamString& adt::StreamString::operator<< (const bool vv)
-   throw ()
-{
-   string::append(AsString::apply (vv));
-   return *this;
-}
-
-adt::StreamString& adt::StreamString::operator<< (const Integer64 vv)
-   throw ()
-{
-   string::append(AsString::apply (vv));
-   return *this;
-}
-
-adt::StreamString& adt::StreamString::operator<< (const Unsigned64 vv)
-   throw ()
-{
-   string::append(AsString::apply (vv));
-   return *this;
-}
-
-adt::StreamString& adt::StreamString::operator<< (const float vv)
-   throw ()
-{
-   string::append(AsString::apply (vv, "%f"));
-   return *this;
-}
-
-adt::StreamString& adt::StreamString::operator<< (const double vv)
-   throw ()
-{
-   string::append(AsString::apply (vv, "%e"));
-   return *this;
-}
-
 

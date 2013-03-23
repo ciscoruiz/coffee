@@ -95,6 +95,7 @@ public:
     */
    void toLower () throw ();
 
+   StreamString& operator = (const char vv) throw () { std::string::clear (); return operator<< (vv); }
    StreamString& operator = (const char* vv) throw () { std::string::clear (); return operator<< (vv); }
    StreamString& operator = (const int vv) throw () { std::string::clear (); return operator<< (vv); }
    StreamString& operator = (const unsigned int vv) throw () { std::string::clear (); return operator<< (vv); }
@@ -105,6 +106,7 @@ public:
    StreamString& operator = (const double vv) throw () { std::string::clear (); return operator<< (vv); }
    StreamString& operator = (const std::string& vv) throw () { std::string::operator= (vv); return *this; }
 
+   StreamString& operator << (const char vv) throw ();
    StreamString& operator << (const char* vv) throw ();
    StreamString& operator << (const int vv) throw ();
    StreamString& operator << (const unsigned int vv) throw ();

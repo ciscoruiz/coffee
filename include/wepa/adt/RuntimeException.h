@@ -52,12 +52,16 @@ namespace adt {
  */
 class RuntimeException : virtual std::logic_error, virtual public boost::exception {
 public:
+   static const int NullErrorCode = -1;
+
+   using std::logic_error::what;
+
    explicit RuntimeException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
       std::logic_error (str),
       m_fromMethod (fromMethod),
       m_fromFile (fromFile),
       m_fromLine (fromLine),
-      m_errorCode (-1)
+      m_errorCode (NullErrorCode)
    {;}
 
    RuntimeException (const RuntimeException& other) :
@@ -65,12 +69,14 @@ public:
       m_fromMethod (other.m_fromMethod),
       m_fromFile (other.m_fromFile),
       m_fromLine (other.m_fromLine),
-      m_errorCode (-1)
+      m_errorCode (other.m_errorCode)
    {;}
 
    int getErrorCode () const throw () { return m_errorCode; }
 
    void setErrorCode (const int errorCode) throw () { m_errorCode = errorCode; }
+
+   std::string asString () const throw ();
 
 private:
    const char* m_fromMethod;

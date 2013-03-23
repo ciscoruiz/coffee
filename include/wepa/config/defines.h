@@ -37,10 +37,10 @@
 
 #include <sys/types.h>
 
-#ifdef WEPA_LOCATION
-#undef WEPA_LOCATION
+#ifdef WEPA_FILE_LOCATION
+#undef WEPA_FILE_LOCATION
 #endif
-#define WEPA_LOCATION (const char*)__FILE__,(const int)__LINE__
+#define WEPA_FILE_LOCATION __PRETTY_FUNCTION__,__FILE__,__LINE__
 
 #define WEPA_VERSION 0x000d03
 

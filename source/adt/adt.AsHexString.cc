@@ -35,10 +35,10 @@
 #include <ctype.h>
 #include <stdio.h>
 
-#include <wepa/config/defines.h>
+#include <wepa/config/defines.hpp>
 
-#include <wepa/adt/AsHexString.h>
-#include <wepa/adt/DataBlock.h>
+#include <wepa/adt/AsHexString.hpp>
+#include <wepa/adt/DataBlock.hpp>
 
 using namespace std;
 using namespace wepa;

@@ -39,7 +39,7 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <wepa/adt/StreamString.h>
+#include <wepa/adt/StreamString.hpp>
 
 namespace wepa {
 

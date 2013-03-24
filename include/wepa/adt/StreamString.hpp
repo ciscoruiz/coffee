@@ -39,7 +39,7 @@
 
 #include <stdio.h>
 
-#include <wepa/config/defines.h>
+#include <wepa/config/defines.hpp>
 
 namespace wepa  {
 

@@ -36,10 +36,10 @@
 #include <sys/time.h>
 #include <stdlib.h>
 
-#include <wepa/adt/AsString.h>
-#include <wepa/adt/Millisecond.h>
-#include <wepa/adt/Second.h>
-#include <wepa/adt/Microsecond.h>
+#include <wepa/adt/AsString.hpp>
+#include <wepa/adt/Millisecond.hpp>
+#include <wepa/adt/Second.hpp>
+#include <wepa/adt/Microsecond.hpp>
 
 using namespace std;
 using namespace wepa;

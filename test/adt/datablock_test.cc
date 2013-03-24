@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/DataBlock.h>
-#include <wepa/adt/RuntimeException.h>
+#include <wepa/adt/DataBlock.hpp>
+#include <wepa/adt/RuntimeException.hpp>
 
 using namespace std;
 using namespace wepa;

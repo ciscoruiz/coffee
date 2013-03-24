@@ -32,79 +32,45 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepa_adt_DataBlock_h
-#define _wepa_adt_DataBlock_h
+
+#ifndef _wepa_adt_AsHexString_h
+#define _wepa_adt_AAsHexString_h
 
 #include <string>
 
-#include <wepa/adt/RuntimeException.h>
-#include <wepa/config/defines.h>
+#include <wepa/config/defines.hpp>
 
 namespace wepa {
 
 namespace adt {
 
 /**
-   Class to facilitate access to data block of memory.
-   @author frr@tid.es cisco.tierra@gmail.com.
-*/
-class DataBlock : std::string {
+ * @brief The AsString class. This class convert different data types into std::string.
+ */
+class AsHexString {
 public:
-   using std::string::append;
-   using std::string::assign;
-   using std::string::begin;
-   using std::string::clear;
-   using std::string::data;
-   using std::string::empty;
-   using std::string::end;
-   using std::string::erase;
-   using std::string::insert;
-   using std::string::operator +=;
-   using std::string::operator =;
-   using std::string::size;
-
    /**
-    * Empty constructor.
-    */
-   DataBlock () {;}
-
-   /**
-     Constructor.
-
-     @param buffer Address to the memory buffer.
-     @param size Copy the first size bytes from the buffer pointed by \em buffer
+      @return A string with the number.
    */
-   DataBlock (const char* buffer, const size_t size) throw () : std::string (buffer, size) {;}
+   static std::string apply (const int number) throw ();
 
    /**
-     Copy Constructor.
-     @param other Datablock to copy.
+      @return A string with the number.
    */
-   DataBlock (const DataBlock& other) throw () : std::string (other) {;}
+   static std::string apply (const unsigned int number) throw ();
 
    /**
-      Destructor.
+      @return A string with the number.
    */
-   virtual ~DataBlock () {;}
+   static std::string apply (const Integer64 number) throw ();
 
    /**
-    * @brief append the received character
-    * @param character Character to append to the buffer
-    * @return The reference of itself.
-    */
-   DataBlock& append (const char character) throw () { std::string::append (1, character); return *this;}
-
-   char at (const size_t index) const throw (RuntimeException);
-
-   char& at (const size_t index) throw (RuntimeException);
-
-   char operator[] (const size_type index) const throw (RuntimeException) { return at (index); }
-
-   char& operator[] (const size_type index) throw (RuntimeException) { return at (index); }
+      @return A string with the number.
+   */
+   static std::string apply (const Unsigned64 number) throw ();
 };
 
 }
 }
 
 #endif
-

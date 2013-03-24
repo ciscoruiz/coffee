@@ -32,8 +32,8 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/adt/RuntimeException.h>
-#include <wepa/adt/StreamString.h>
+#include <wepa/adt/RuntimeException.hpp>
+#include <wepa/adt/StreamString.hpp>
 
 using namespace std;
 using namespace wepa;

@@ -33,8 +33,8 @@
 // Author: cisco.tierra@gmail.com
 //
 
-#include <wepa/adt/DataBlock.h>
-#include <wepa/adt/StreamString.h>
+#include <wepa/adt/DataBlock.hpp>
+#include <wepa/adt/StreamString.hpp>
 
 using namespace std;
 using namespace wepa;

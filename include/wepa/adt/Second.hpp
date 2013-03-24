@@ -37,8 +37,8 @@
 
 #include <string>
 
-#include <wepa/config/defines.h>
-#include <wepa/adt/RuntimeException.h>
+#include <wepa/config/defines.hpp>
+#include <wepa/adt/RuntimeException.hpp>
 
 namespace wepa {
 

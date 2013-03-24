@@ -36,9 +36,9 @@
 #include <string>
 #include <algorithm>
 
-#include <wepa/adt/StreamString.h>
-#include <wepa/adt/AsString.h>
-#include <wepa/adt/AsHexString.h>
+#include <wepa/adt/StreamString.hpp>
+#include <wepa/adt/AsString.hpp>
+#include <wepa/adt/AsHexString.hpp>
 
 using namespace std;
 using namespace wepa;

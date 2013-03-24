@@ -38,7 +38,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/StreamString.h>
+#include <wepa/adt/StreamString.hpp>
 
 using namespace std;
 using namespace wepa;

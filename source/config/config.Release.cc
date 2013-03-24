@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <sys/utsname.h>
 
-#include <wepa/config/Release.h>
-#include <wepa/config/defines.h>
+#include <wepa/config/Release.hpp>
+#include <wepa/config/defines.hpp>
 
 using namespace std;
 using namespace wepa;

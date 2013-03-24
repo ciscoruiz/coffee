@@ -33,21 +33,23 @@
 // Author: cisco.tierra@gmail.com
 //
 
-#ifndef _wepa_adt_AsHexString_h
-#define _wepa_adt_AAsHexString_h
+#ifndef _wepa_adt_ASSTRING_H
+#define _wepa_adt_ASSTRING_H
 
 #include <string>
 
-#include <wepa/config/defines.h>
+#include <wepa/config/defines.hpp>
 
 namespace wepa {
 
 namespace adt {
 
+class DataBlock;
+
 /**
  * @brief The AsString class. This class convert different data types into std::string.
  */
-class AsHexString {
+class AsString {
 public:
    /**
       @return A string with the number.
@@ -62,15 +64,40 @@ public:
    /**
       @return A string with the number.
    */
+   static std::string apply (const long number) throw ();
+
+   /**
+      @return A string with the number.
+   */
    static std::string apply (const Integer64 number) throw ();
 
    /**
       @return A string with the number.
    */
    static std::string apply (const Unsigned64 number) throw ();
+
+   /**
+      @return A string with the number.
+   */
+   static const char* apply (const bool _bool) throw () { return (_bool == true) ? "true": "false"; }
+
+   /**
+      @return A string with the number.
+   */
+   static std::string apply (const double v, const char* format="%e") throw ();
+
+   /**
+      @return A string with the number.
+   */
+   static std::string apply (const float v, const char* format="%f") throw ();
+
+   /**
+    * \return A string with a brief description of the data block.
+    */
+   static std::string apply (const DataBlock& dataBlock, const int characterByLine = 16) throw ();
 };
 
 }
 }
 
-#endif
+#endif // ASSTRING_H

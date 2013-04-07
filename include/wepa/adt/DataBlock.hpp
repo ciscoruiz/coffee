@@ -101,6 +101,13 @@ public:
    char operator[] (const size_type index) const throw (RuntimeException) { return at (index); }
 
    char& operator[] (const size_type index) throw (RuntimeException) { return at (index); }
+
+//
+// You can execute "g++ -E -dM -std=c++0x -x c++ /dev/null" to see list of macros 
+// See: http://stackoverflow.com/questions/2958398/gnu-c-how-to-check-when-std-c0x-is-in-effect
+   #ifdef __GXX_EXPERIMENTAL_CXX0X__
+      DataBlock& operator=(const DataBlock&) = default;
+   #endif
 };
 
 }

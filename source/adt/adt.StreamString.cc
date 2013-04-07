@@ -32,55 +32,96 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <ctype.h>
-#include <stdio.h>
+#include <cctype> // for toupper
+#include <string>
+#include <algorithm>
 
-#include <wepa/config/defines.hpp>
-
+#include <wepa/adt/StreamString.hpp>
+#include <wepa/adt/AsString.hpp>
 #include <wepa/adt/AsHexString.hpp>
-#include <wepa/adt/DataBlock.hpp>
 
 using namespace std;
 using namespace wepa;
 
-string adt::AsHexString::apply (const int number)
+void adt::StreamString::toUpper ()
    throw ()
 {
-   char aux [16];
-   sprintf (aux, "0x%x", number);
-   return string (aux);
+   std::transform(begin(), end(), begin(), (int(*)(int)) toupper);
 }
 
-string adt::AsHexString::apply (const unsigned int number)
+void adt::StreamString::toLower ()
    throw ()
 {
-   char aux [16];
-   sprintf (aux, "0x%x", number);
-   return string (aux);
+   std::transform(begin(), end(), begin(), (int(*)(int)) tolower);
 }
 
-string adt::AsHexString::apply (const Integer64 number)
+adt::StreamString& adt::StreamString::operator<< (const char vv)
    throw ()
 {
-   char aux [24];
-#ifdef __wepa64__
-   sprintf (aux, "0x%lx", number);
-#else
-   sprintf (aux, "0x%llx", number);
-#endif
-
-   return string (aux);
+   string::operator +=(vv);
+   return *this;
 }
 
-string adt::AsHexString::apply (const Unsigned64 number)
+adt::StreamString& adt::StreamString::operator<< (const char* vv)
    throw ()
 {
-   char aux [32];
-#ifdef __wepa64__
-   sprintf (aux, "0x%lx", number);
-#else
-   sprintf (aux, "0x%llx", number);
-#endif
-   return string (aux);
+   if (vv == NULL) {
+      if (a_flags & Flag::ShowNull)
+         string::append ("<null>");
+   }
+   else
+      string:append (vv);
+
+   return *this;
 }
+
+adt::StreamString& adt::StreamString::operator<< (const int vv)
+   throw ()
+{
+   string::append(AsString::apply (vv));
+   return *this;
+}
+
+adt::StreamString& adt::StreamString::operator<< (const unsigned int vv)
+   throw ()
+{
+   string::append(AsString::apply (vv));
+   return *this;
+}
+
+adt::StreamString& adt::StreamString::operator<< (const bool vv)
+   throw ()
+{
+   string::append(AsString::apply (vv));
+   return *this;
+}
+
+adt::StreamString& adt::StreamString::operator<< (const Integer64 vv)
+   throw ()
+{
+   string::append(AsString::apply (vv));
+   return *this;
+}
+
+adt::StreamString& adt::StreamString::operator<< (const Unsigned64 vv)
+   throw ()
+{
+   string::append(AsString::apply (vv));
+   return *this;
+}
+
+adt::StreamString& adt::StreamString::operator<< (const float vv)
+   throw ()
+{
+   string::append(AsString::apply (vv, "%f"));
+   return *this;
+}
+
+adt::StreamString& adt::StreamString::operator<< (const double vv)
+   throw ()
+{
+   string::append(AsString::apply (vv, "%e"));
+   return *this;
+}
+
 

@@ -32,55 +32,80 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <ctype.h>
-#include <stdio.h>
+#include <time.h>
+#include <sys/time.h>
+#include <stdlib.h>
 
-#include <wepa/config/defines.hpp>
-
-#include <wepa/adt/AsHexString.hpp>
-#include <wepa/adt/DataBlock.hpp>
+#include <wepa/adt/AsString.hpp>
+#include <wepa/adt/Millisecond.hpp>
+#include <wepa/adt/Second.hpp>
+#include <wepa/adt/Microsecond.hpp>
 
 using namespace std;
 using namespace wepa;
 
-string adt::AsHexString::apply (const int number)
+#define implement_operator(op) \
+   bool adt::Microsecond::operator op (const adt::Millisecond& other) const \
+      throw ()\
+   {\
+      return (m_value / 1000) op (((type_t) other.m_value));\
+   }\
+   bool adt::Microsecond::operator op (const adt::Second& other) const\
+      throw ()\
+   {\
+      return (m_value / 1000000) op ((type_t) other.m_value);\
+   }
+
+adt::Microsecond::Microsecond (const adt::Millisecond& other) : m_value (other.m_value) { m_value *= 1000; }
+
+adt::Microsecond::Microsecond (const adt::Second& other) : m_value (other.m_value) { m_value *= 1000000; }
+
+adt::Microsecond& adt::Microsecond::operator= (const adt::Millisecond& other)
    throw ()
 {
-   char aux [16];
-   sprintf (aux, "0x%x", number);
-   return string (aux);
+   m_value = other.m_value;
+   m_value *= 1000;
+   return *this;
 }
 
-string adt::AsHexString::apply (const unsigned int number)
+adt::Microsecond& adt::Microsecond::operator= (const adt::Second& other)
    throw ()
 {
-   char aux [16];
-   sprintf (aux, "0x%x", number);
-   return string (aux);
+   m_value = other.m_value;
+   m_value *= 1000000;
+   return *this;
 }
 
-string adt::AsHexString::apply (const Integer64 number)
+implement_operator (==)
+implement_operator (!=)
+implement_operator (>)
+implement_operator (<)
+
+
+//static
+adt::Microsecond adt::Microsecond::getTime ()
    throw ()
 {
-   char aux [24];
-#ifdef __wepa64__
-   sprintf (aux, "0x%lx", number);
-#else
-   sprintf (aux, "0x%llx", number);
-#endif
-
-   return string (aux);
+   struct timeval tv;
+   gettimeofday (&tv, NULL);
+   Microsecond result (Second (tv.tv_sec));
+   result.m_value += tv.tv_usec;
+   return result;
 }
 
-string adt::AsHexString::apply (const Unsigned64 number)
+string adt::Microsecond::asString () const
    throw ()
 {
-   char aux [32];
-#ifdef __wepa64__
-   sprintf (aux, "0x%lx", number);
-#else
-   sprintf (aux, "0x%llx", number);
-#endif
-   return string (aux);
+   string result (AsString::apply (m_value));
+   return result += " us";
 }
 
+//static
+adt::Microsecond adt::Microsecond::fromString (const std::string& value)
+   throw (adt::RuntimeException)
+{
+   if (value.find (" us") == string::npos)
+      WEPA_THROW_EXCEPTION ("String: " << value << " is not a valid microsecond expression");
+
+   return Microsecond (atoll (value.c_str ()));
+}

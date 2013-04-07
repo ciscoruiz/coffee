@@ -32,45 +32,6 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+#define BOOST_TEST_MODULE WEPA_ADT_TEST
 
-#ifndef _wepa_adt_AsHexString_h
-#define _wepa_adt_AAsHexString_h
-
-#include <string>
-
-#include <wepa/config/defines.h>
-
-namespace wepa {
-
-namespace adt {
-
-/**
- * @brief The AsString class. This class convert different data types into std::string.
- */
-class AsHexString {
-public:
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const int number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const unsigned int number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Integer64 number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Unsigned64 number) throw ();
-};
-
-}
-}
-
-#endif
+#include <boost/test/included/unit_test.hpp>

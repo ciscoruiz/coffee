@@ -32,13 +32,16 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#define BOOST_TEST_MODULE WEPA_CONFIG
+#define BOOST_TEST_MODULE WEPA_CONFIG_TEST
 
 #include <boost/test/included/unit_test.hpp>
 
 #include <iostream>
 
-#include <wepa/config/Release.h>
+#include <limits.h>
+
+#include <wepa/config/Release.hpp>
+#include <wepa/config/defines.hpp>
 
 using namespace std;
 using namespace wepa;
@@ -61,4 +64,19 @@ BOOST_AUTO_TEST_CASE (release)
       BOOST_REQUIRE (debug == string::npos);
       BOOST_REQUIRE (release != string::npos);
    #endif
+}
+
+BOOST_AUTO_TEST_CASE (numbers)
+{
+   Integer64 ii64;
+
+   ii64 = LLONG_MAX;
+   BOOST_REQUIRE_EQUAL (ii64, LLONG_MAX);
+
+   ii64 = LLONG_MIN;
+   BOOST_REQUIRE_EQUAL (ii64, LLONG_MIN);
+
+   Unsigned64 u64;
+   u64 = ULLONG_MAX;
+   BOOST_REQUIRE_EQUAL (u64, ULLONG_MAX);
 }

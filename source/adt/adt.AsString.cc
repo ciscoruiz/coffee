@@ -35,10 +35,10 @@
 #include <ctype.h>
 #include <stdio.h>
 
-#include <wepa/config/defines.h>
+#include <wepa/config/defines.hpp>
 
-#include <wepa/adt/AsString.h>
-#include <wepa/adt/DataBlock.h>
+#include <wepa/adt/AsString.hpp>
+#include <wepa/adt/DataBlock.hpp>
 
 using namespace std;
 using namespace wepa;
@@ -56,6 +56,14 @@ string adt::AsString::apply (const unsigned int number)
 {
    char aux [16];
    sprintf (aux, "%u", number);
+   return string (aux);
+}
+
+string adt::AsString::apply (const long number)
+   throw ()
+{
+   char aux [32];
+   sprintf (aux, "%ld", number);
    return string (aux);
 }
 

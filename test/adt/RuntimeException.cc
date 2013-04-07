@@ -32,81 +32,82 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <limits.h>
-
-#include <iostream>
-
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/AsHexString.hpp>
-#include <wepa/adt/DataBlock.hpp>
+#include <wepa/adt/RuntimeException.hpp>
 
 using namespace std;
 using namespace wepa;
 
-BOOST_AUTO_TEST_CASE( ashexstring_integer )
-{
-   int val = 10;
-
-   string result = adt::AsHexString::apply(val);
-
-   BOOST_REQUIRE_EQUAL(result, "0xa");
-
-   result = adt::AsHexString::apply (0);
-   BOOST_REQUIRE_EQUAL(result, "0x0");
-
-   val = INT_MAX;
-   result = adt::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0x7fffffff");
-
-   val = INT_MIN;
-   result = adt::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0x80000000");
+int goo () {
+   WEPA_THROW_EXCEPTION ("this is goo");
 }
 
-BOOST_AUTO_TEST_CASE( ashexstring_uinteger )
-{
-   unsigned int val = 10;
+int foo () {
+   try {
+      goo ();
+   }
+   catch (adt::RuntimeException&) {
+      throw;
+   }
 
-   string result = adt::AsHexString::apply(val);
-
-   BOOST_REQUIRE_EQUAL(result, "0xa");
-
-   result = adt::AsHexString::apply (0);
-   BOOST_REQUIRE_EQUAL(result, "0x0");
-
-   val = UINT_MAX;
-   result = adt::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0xffffffff");
+   return 0;
 }
 
-BOOST_AUTO_TEST_CASE( ashexstring_integer64 )
+
+class AAA {
+public:
+   void member (int xx, char zz) {
+      WEPA_THROW_EXCEPTION ("xx:" << xx << " zz:" << zz);
+   }
+   static void member2 (float zz) {
+      WEPA_THROW_EXCEPTION ("float: " << zz);
+   }
+};
+
+BOOST_AUTO_TEST_CASE( RuntimeException_asString )
 {
-   Integer64 val = 0;
-   string result;
+   try {
+      foo ();
+   }
+   catch (adt::RuntimeException& ex) {
+      BOOST_REQUIRE ( strcmp ("this is goo", ex.what ()) == 0 );
+      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/RuntimeException.cc(43): int goo()] this is goo");
+   }
 
-   val --;
-   result = adt::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0xffffffffffffffff");
+   AAA aaa;
 
-   val = LLONG_MAX;
-   result = adt::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0x7fffffffffffffff");
+   try {
+      aaa.member (10, 'z');
+   }
+   catch (adt::RuntimeException& ex) {
+      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/RuntimeException.cc(61): void AAA::member(int, char)] xx:10 zz:z");
+      BOOST_REQUIRE ( strcmp ("xx:10 zz:z", ex.what ()) == 0 );
+   }
 
-   val = LLONG_MIN;
-   result = adt::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0x8000000000000000");
+   try {
+      AAA::member2 (11.11);
+   }
+   catch (adt::RuntimeException& ex) {
+      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/RuntimeException.cc(64): static void AAA::member2(float)] float: 11.110000");
+      BOOST_REQUIRE ( strcmp ("float: 11.110000", ex.what ()) == 0 );
+   }
 }
 
-BOOST_AUTO_TEST_CASE( ashexstring_uinteger64 )
-{
-   Unsigned64 val = 0;
-   string result;
-
-   result = adt::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0x0");
-
-   val = ULLONG_MAX;
-   result = adt::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0xffffffffffffffff");
+void hoo () {
+   adt::RuntimeException ex ("this is hoo", WEPA_FILE_LOCATION);
+   ex.setErrorCode(100);
+   throw ex;
 }
+
+BOOST_AUTO_TEST_CASE( RuntimeException_errorCode )
+{
+   try {
+      hoo ();
+   }
+   catch (adt::RuntimeException& ex) {
+      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/RuntimeException.cc(98): void hoo()] ErrorCode: 100 | this is hoo");
+      BOOST_REQUIRE ( strcmp ("this is hoo", ex.what ()) == 0 );
+   }
+}
+

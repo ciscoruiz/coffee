@@ -37,8 +37,8 @@
 
 #include <string>
 
-#include <wepa/adt/RuntimeException.h>
-#include <wepa/config/defines.h>
+#include <wepa/adt/RuntimeException.hpp>
+#include <wepa/config/defines.hpp>
 
 namespace wepa {
 
@@ -61,7 +61,6 @@ public:
    using std::string::insert;
    using std::string::operator +=;
    using std::string::operator =;
-   using std::string::operator [];
    using std::string::size;
 
    /**
@@ -94,6 +93,21 @@ public:
     * @return The reference of itself.
     */
    DataBlock& append (const char character) throw () { std::string::append (1, character); return *this;}
+
+   char at (const size_t index) const throw (RuntimeException);
+
+   char& at (const size_t index) throw (RuntimeException);
+
+   char operator[] (const size_type index) const throw (RuntimeException) { return at (index); }
+
+   char& operator[] (const size_type index) throw (RuntimeException) { return at (index); }
+
+//
+// You can execute "g++ -E -dM -std=c++0x -x c++ /dev/null" to see list of macros 
+// See: http://stackoverflow.com/questions/2958398/gnu-c-how-to-check-when-std-c0x-is-in-effect
+   #ifdef __GXX_EXPERIMENTAL_CXX0X__
+      DataBlock& operator=(const DataBlock&) = default;
+   #endif
 };
 
 }

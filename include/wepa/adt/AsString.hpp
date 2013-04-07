@@ -38,7 +38,7 @@
 
 #include <string>
 
-#include <wepa/config/defines.h>
+#include <wepa/config/defines.hpp>
 
 namespace wepa {
 
@@ -60,6 +60,11 @@ public:
       @return A string with the number.
    */
    static std::string apply (const unsigned int number) throw ();
+
+   /**
+      @return A string with the number.
+   */
+   static std::string apply (const long number) throw ();
 
    /**
       @return A string with the number.

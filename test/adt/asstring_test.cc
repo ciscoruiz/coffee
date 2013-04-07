@@ -38,8 +38,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/AsString.h>
-#include <wepa/adt/DataBlock.h>
+#include <wepa/adt/AsString.hpp>
+#include <wepa/adt/DataBlock.hpp>
 
 using namespace std;
 using namespace wepa;

@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/DataBlock.h>
+#include <wepa/adt/DataBlock.hpp>
+#include <wepa/adt/RuntimeException.hpp>
 
 using namespace std;
 using namespace wepa;
@@ -80,3 +81,27 @@ BOOST_AUTO_TEST_CASE( datablock_clear )
    BOOST_REQUIRE_EQUAL (var.empty(), true);
 }
 
+BOOST_AUTO_TEST_CASE( datablock_operator_parenthesis )
+{
+   adt::DataBlock var ("wow", 3);
+
+   var [1] = 'i';
+
+   const adt::DataBlock copy (var);
+
+   BOOST_REQUIRE_EQUAL (strcmp (var.data (), "wiw"), 0);
+   BOOST_REQUIRE_EQUAL (copy [1], 'i');
+   BOOST_REQUIRE_EQUAL (var [1], 'i');
+}
+
+BOOST_AUTO_TEST_CASE( datablock_out_of_range )
+{
+   adt::DataBlock var ("wow", 3);
+
+   char zz;
+   BOOST_CHECK_THROW (zz = var [10], adt::RuntimeException);
+   BOOST_CHECK_THROW (var [10] = 0, adt::RuntimeException);
+
+   const adt::DataBlock copy (var);
+   BOOST_CHECK_THROW (var [10] == 0, adt::RuntimeException);
+}

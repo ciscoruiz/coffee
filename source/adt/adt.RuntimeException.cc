@@ -32,33 +32,24 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#define BOOST_TEST_MODULE WEPA_CONFIG
-
-#include <boost/test/included/unit_test.hpp>
-
-#include <iostream>
-
-#include <wepa/config/Release.h>
+#include <wepa/adt/RuntimeException.hpp>
+#include <wepa/adt/StreamString.hpp>
 
 using namespace std;
 using namespace wepa;
 
-BOOST_AUTO_TEST_CASE (release)
+string adt::RuntimeException::asString() const throw ()
 {
-   string version = config::Release::getVersion();
+   StreamString str;
 
-   cout << version << endl;
+   str << "[" << m_fromFile << "(" << m_fromLine << "): " << m_fromMethod << "] ";
 
-   BOOST_REQUIRE (version.empty() == false);
+   if (m_errorCode != NullErrorCode) {
+      str << "ErrorCode: " << m_errorCode << " | ";
+   }
 
-   int debug = version.find("/D");
-   int release = version.find("/O");
+   str << what ();
 
-   #ifdef _DEBUG
-      BOOST_REQUIRE (debug != string::npos);
-      BOOST_REQUIRE (release == string::npos);
-   #else
-      BOOST_REQUIRE (debug == string::npos);
-      BOOST_REQUIRE (release != string::npos);
-   #endif
+   return str;
 }
+

@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE( RuntimeException_asString )
    }
    catch (adt::RuntimeException& ex) {
       BOOST_REQUIRE ( strcmp ("this is goo", ex.what ()) == 0 );
-      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/release/RuntimeException.cc(43): int goo()] this is goo");
+      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/RuntimeException.cc(43): int goo()] this is goo");
    }
 
    AAA aaa;
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( RuntimeException_asString )
       aaa.member (10, 'z');
    }
    catch (adt::RuntimeException& ex) {
-      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/release/RuntimeException.cc(61): void AAA::member(int, char)] xx:10 zz:z");
+      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/RuntimeException.cc(61): void AAA::member(int, char)] xx:10 zz:z");
       BOOST_REQUIRE ( strcmp ("xx:10 zz:z", ex.what ()) == 0 );
    }
 
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( RuntimeException_asString )
       AAA::member2 (11.11);
    }
    catch (adt::RuntimeException& ex) {
-      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/release/RuntimeException.cc(64): static void AAA::member2(float)] float: 11.110000");
+      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/RuntimeException.cc(64): static void AAA::member2(float)] float: 11.110000");
       BOOST_REQUIRE ( strcmp ("float: 11.110000", ex.what ()) == 0 );
    }
 }
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE( RuntimeException_errorCode )
       hoo ();
    }
    catch (adt::RuntimeException& ex) {
-      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/release/RuntimeException.cc(98): void hoo()] ErrorCode: 100 | this is hoo");
+      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/RuntimeException.cc(98): void hoo()] ErrorCode: 100 | this is hoo");
       BOOST_REQUIRE ( strcmp ("this is hoo", ex.what ()) == 0 );
    }
 }

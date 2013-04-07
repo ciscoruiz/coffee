@@ -1,12 +1,12 @@
-debug = ARGUMENTS.get ('debug', 0)
+release = ARGUMENTS.get ('release', 0)
 
 Import ('env')
 
 # See http://stackoverflow.com/questions/4693826/scons-binary-directory
-if int(debug):
-    result = SConscript ('SConscript', exports='env', variant_dir="debug", duplicate=0)
-else:
+if int(release):
     result = SConscript ('SConscript', exports='env', variant_dir="release", duplicate=0)
+else:
+    result = SConscript ('SConscript', exports='env', variant_dir="debug", duplicate=0)
 
 Return ('result')
 

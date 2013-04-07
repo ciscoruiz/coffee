@@ -59,18 +59,18 @@ using namespace wepa;
 BOOST_AUTO_TEST_CASE( basic_use )
 { 
    {
-      TheClass& clazz = TheClass::instantiate ();
+      TheClass& clazz = TheClass::getInstance ();
       clazz.setSome (100);
    }
    {
-      TheClass& clazz = TheClass::instantiate ();
+      TheClass& clazz = TheClass::getInstance ();
       BOOST_REQUIRE_EQUAL (clazz.getSome (), 100);
    }
 }
 
 BOOST_AUTO_TEST_CASE( compare_pointer )
 { 
-   const TheClass* p1 = TheClass::const_pointer ();
-   const TheClass* p2 = TheClass::const_pointer ();
+   const TheClass* p1 = TheClass::getConstPointer ();
+   const TheClass* p2 = TheClass::getConstPointer ();
    BOOST_REQUIRE_EQUAL (p1, p2);
 }

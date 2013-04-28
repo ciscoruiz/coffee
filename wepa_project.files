@@ -43,4 +43,9 @@ source/adt/adt.Microsecond.cc
 test/adt/TimeClasses_tes.cc
 source/adt/adt.RuntimeException.cc
 test/adt/RuntimeException.cc
-include/wepa/Singleton.hpp
+include/wepa/adt/pattern/Singleton.hpp
+
+
+include/wepa/adt/pattern/observer/Observer.hpp
+include/wepa/adt/pattern/observer/Subject.hpp
+include/wepa/adt/NamedObject.hpp

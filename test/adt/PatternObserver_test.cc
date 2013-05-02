@@ -102,7 +102,7 @@ private:
    const TheSubject& m_mySubject;
    int m_value;
 
-   void update (const observer::Event& event) throw (RuntimeException) {
+   void update (const observer::Event& event) throw () {
       m_value = m_mySubject.getII ();
    }
 };
@@ -121,7 +121,7 @@ private:
    const TheSubject& m_mySubject;
    std::string m_value;
 
-   void update (const observer::Event& event) throw (RuntimeException) {
+   void update (const observer::Event& event) throw () {
       m_value = m_mySubject.getSS ();
    }
 };
@@ -141,7 +141,7 @@ private:
    int m_ii;
    unsigned m_uu;
 
-   void update (const observer::Event& event) throw (RuntimeException) {
+   void update (const observer::Event& event) throw () {
       m_uu =  m_mySubject.getUU ();
       m_ii = m_mySubject.getII ();
    }
@@ -165,7 +165,7 @@ private:
    int m_ii;
    unsigned m_uu;
 
-   void update (const observer::Event& event) throw (RuntimeException) {
+   void update (const observer::Event& event) throw () {
       m_uu =  m_mySubject.getUU ();
       m_ii = m_mySubject.getII ();
    }
@@ -175,8 +175,7 @@ class DullObserver : public observer::Observer {
 public:
    DullObserver () : observer::Observer ("DullObserver") {;}
 private:
-   void update (const observer::Event& event) throw (RuntimeException) {
-
+   void update (const observer::Event& event) throw () {
    }
 };
 
@@ -257,7 +256,7 @@ BOOST_AUTO_TEST_CASE (full_update)
 
    BOOST_REQUIRE_EQUAL (iiObserver.getValue (), -1);
    BOOST_REQUIRE_EQUAL (ssObserver.getValue (), finalValue);
-   BOOST_REQUIRE_EQUAL (nosyObserver.getValue (), 4294967295);
+   BOOST_REQUIRE_EQUAL (nosyObserver.getValue (), 4294967295U);
 }
 
 
@@ -282,3 +281,41 @@ BOOST_AUTO_TEST_CASE (too_many_events)
 
    BOOST_REQUIRE_THROW (subject.registerTooManyEvents(), wepa::adt::RuntimeException);
 }
+
+BOOST_AUTO_TEST_CASE (promicuous_observer)
+{
+   TheSubject subject1;
+   TheSubject subject2;
+
+   DualObserver theObserver (subject1);
+
+   BOOST_REQUIRE_THROW (subject2.subscribeObserver(&theObserver), wepa::adt::RuntimeException);
+}
+
+BOOST_AUTO_TEST_CASE (observer_out_of_scope)
+{
+   TheSubject subject;
+
+   TheObserverII iiObserver (subject);
+
+   if (true) {
+      DualObserver dualObserver (subject);
+
+      BOOST_REQUIRE_EQUAL(subject.countObservers(), 2);
+
+      subject.setII (1010);
+      subject.setUU (3333);
+
+      BOOST_REQUIRE_EQUAL (dualObserver.getII(), 1010);
+      BOOST_REQUIRE_EQUAL (dualObserver.getUU(), 3333);
+
+      BOOST_REQUIRE_EQUAL (iiObserver.getValue(), 1010);
+   }
+
+   BOOST_REQUIRE_EQUAL(subject.countObservers(), 1);
+
+   subject.setII (2020);
+
+   BOOST_REQUIRE_EQUAL (iiObserver.getValue(), 2020);
+}
+

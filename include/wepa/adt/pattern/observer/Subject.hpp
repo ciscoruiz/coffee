@@ -65,6 +65,8 @@ public:
    }
    bool unsubscribeObserver (Observer* observer) throw ();
 
+   size_t countObservers () const throw () { return m_observers.size (); }
+
    virtual StreamString asString () const throw () {
       StreamString result ("pattern::observer::Subject {");
       return result << NamedObject::asString() << "}";
@@ -79,7 +81,7 @@ protected:
    void notify (const Event::Id eventId) throw (RuntimeException) {
       notify (lookupEvent(eventId));
    }
-   void notify (const Event& event = nullEvent) throw (RuntimeException);
+   void notify (const Event& event = nullEvent) throw ();
 
    typedef std::pair <Observer*, Event::BitMask> Subscription;
    typedef std::vector <Subscription> Observers;

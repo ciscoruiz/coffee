@@ -57,6 +57,8 @@ void observer::Subject::subscribeObserver (Observer* observer, const Event& even
 
    m_observers.push_back(Subscription (observer, event.getBitMask()));
 
+   observer->m_subject = this;
+
    // Put status in common
    observer->update (event);
 }
@@ -113,7 +115,7 @@ throw (RuntimeException)
 }
 
 void observer::Subject::notify (const Event& event)
-   throw (RuntimeException)
+   throw ()
 {
    for (auto ii = observer_begin (), maxii = observer_end (); ii != maxii; ++ ii) {
       Event::BitMask bitmask = Subject::bitmask(ii);

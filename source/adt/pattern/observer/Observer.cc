@@ -40,8 +40,7 @@ using namespace wepa::adt::pattern;
 
 // virtual
 observer::Observer::~Observer()
-   throw (RuntimeException)
 {
    if (m_subject != NULL)
-      WEPA_THROW_EXCEPTION(asString () << " is observing to " << m_subject->asString ());
+      m_subject->unsubscribeObserver(this);
 }

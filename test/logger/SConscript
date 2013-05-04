@@ -1,0 +1,19 @@
+Import ('env')
+
+# See http://www.scons.org/doc/2.0.1/HTML/scons-user/c1809.html
+# about merging flags
+boost_library = { 'LIBS' : 'boost_unit_test_framework' }
+env.MergeFlags (boost_library)
+
+wepa_library = { 'LIBS' : [ 'wepa_config', 'wepa_logger', 'wepa_adt' ] }
+env.MergeFlags (wepa_library)
+
+pwd = Dir ('.').abspath;
+current_directory = str (pwd);
+
+libpath = current_directory.replace ('test/', 'source/');
+env.Append (LIBPATH = [libpath])
+
+result = env.Program ('wepa_logger_test', Glob ('*.cpp'))
+
+Return ('result')

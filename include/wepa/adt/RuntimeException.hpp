@@ -72,6 +72,10 @@ public:
       m_errorCode (other.m_errorCode)
    {;}
 
+   const char* getMethod () const throw () { return m_fromMethod; }
+   const char* getFile () const throw () { return m_fromFile; }
+   const unsigned getLine () const throw () { return m_fromLine; }
+
    int getErrorCode () const throw () { return m_errorCode; }
 
    void setErrorCode (const int errorCode) throw () { m_errorCode = errorCode; }

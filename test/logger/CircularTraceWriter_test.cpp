@@ -1,0 +1,123 @@
+// WEPA - Write Excellent Professional Applications
+//
+// (c) Copyright 2013 Francisco Ruiz Rayo
+//
+// https://github.com/ciscoruiz/wepa
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//     * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//     * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// Author: cisco.tierra@gmail.com
+//
+#include <boost/test/auto_unit_test.hpp>
+
+#include <limits.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include <wepa/logger/CircularTraceWriter.hpp>
+#include <wepa/logger/Logger.hpp>
+
+#include <wepa/adt/pattern/observer/Observer.hpp>
+
+using namespace wepa;
+
+class TraceObserver : public adt::pattern::observer::Observer {
+public:
+   TraceObserver () : adt::pattern::observer::Observer ("TraceObserver") , m_initCounter (0) {;}
+
+   int getInitCounter () const throw () { return m_initCounter; }
+
+private:
+   int m_initCounter;
+
+   void update (const adt::pattern::observer::Event&) throw () {
+      ++ m_initCounter;
+   }
+};
+
+BOOST_AUTO_TEST_CASE( CircularTraceWriter_oversized_file )
+{
+   unlink ("trace.log");
+   unlink ("trace.log.old");
+
+   logger::CircularTraceWriter* writer = new logger::CircularTraceWriter ("trace.log", 128);
+   std::shared_ptr <TraceObserver> observer (new TraceObserver ());
+
+   // This will generate the first 'update'
+   writer->subscribeObserver(observer.get ());
+
+   logger::Logger::initialize(writer);
+
+   BOOST_REQUIRE_NE (writer->getStream(), logger::CircularTraceWriter::NullStream);
+
+   std::string value (1024, 'x');
+
+   int loop = writer->getKbytesMaxSize() / value.size () + logger::CircularTraceWriter::CheckSizePeriod + 1;
+
+   for (int ii = 0; ii < loop; ++ ii) {
+      LOG_DEBUG(ii << " " << value);
+   }
+
+   BOOST_REQUIRE_EQUAL (observer->getInitCounter(), 1 + 2);
+
+   BOOST_REQUIRE_EQUAL (writer->getLineNo(), logger::CircularTraceWriter::CheckSizePeriod + 1);
+
+   int stream = open ("trace.log.old", O_RDWR | O_CREAT | O_EXCL, S_IRUSR |S_IWUSR | S_IRGRP| S_IROTH);
+
+   BOOST_REQUIRE (stream == -1 && errno == EEXIST);
+}
+
+BOOST_AUTO_TEST_CASE( CircularTraceWriter_can_not_write )
+{
+   logger::CircularTraceWriter* writer = new logger::CircularTraceWriter ("/trace.log", 128);
+   std::shared_ptr <TraceObserver> observer (new TraceObserver ());
+
+   // This will generate the first 'update'
+   writer->subscribeObserver(observer.get ());
+
+   // When the circular writer can not write over the file, then it will trace on cerr, but only traces with level error or lesser
+   BOOST_CHECK_THROW (logger::Logger::initialize(writer), adt::RuntimeException);
+
+   BOOST_REQUIRE_EQUAL (writer->getStream(), logger::CircularTraceWriter::NullStream);
+
+   logger::Logger::write (logger::Level::Emergency, "eee", WEPA_FILE_LOCATION);
+   logger::Logger::write (logger::Level::Alert, "AAA", WEPA_FILE_LOCATION);
+   logger::Logger::write (logger::Level::Critical, "CCC", WEPA_FILE_LOCATION);
+   logger::Logger::write (logger::Level::Error, "ee", WEPA_FILE_LOCATION);
+
+   LOG_WARN ("Ignored line");
+   LOG_NOTICE ("Ignored line");
+   LOG_INFO ("Ignored line");
+   LOG_DEBUG ("Ignored line");
+
+   BOOST_REQUIRE_EQUAL (observer->getInitCounter(), 1);
+
+   BOOST_REQUIRE_EQUAL (writer->getLineNo(), 4);
+}

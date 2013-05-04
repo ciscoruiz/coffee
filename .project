@@ -3,6 +3,7 @@
 	<name>wepa</name>
 	<comment></comment>
 	<projects>
+		<project>auto_enum</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

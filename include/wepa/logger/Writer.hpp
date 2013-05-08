@@ -48,7 +48,7 @@ class Writer : public adt::pattern::observer::Subject {
 protected:
    Writer (const std::string& name) : adt::pattern::observer::Subject (name) {;}
 
-   virtual bool isActive (const Level::_v level) const throw ();
+   virtual bool wantsToProcess (const Level::_v level) const throw ();
 
 private:
    Writer (const Writer&);

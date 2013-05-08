@@ -48,11 +48,15 @@ public:
    static const int CheckSizePeriod;
 
    CircularTraceWriter (const std::string& path, const size_t maxSize);
-   ~CircularTraceWriter () { closeStream (); }
+   virtual ~CircularTraceWriter () { closeStream (); }
 
    int getStream () const throw () { return m_stream; }
    size_t getLineNo () const throw () { return m_lineno; }
    size_t getKbytesMaxSize () const throw () { return m_maxSize; }
+
+protected:
+   virtual void apply (const Level::_v level, const std::string& line) throw ();
+   virtual bool wantsToProcess (const Level::_v level) const throw ();
 
 private:
    std::string m_path;
@@ -61,8 +65,6 @@ private:
    size_t m_lineno;
 
    void do_initialize () throw (adt::RuntimeException);
-   void apply (const Level::_v level, const std::string& line) throw ();
-   bool isActive (const Level::_v level) const throw ();
 
    void openStream () throw (adt::RuntimeException);
    bool oversizedStream () throw (adt::RuntimeException);

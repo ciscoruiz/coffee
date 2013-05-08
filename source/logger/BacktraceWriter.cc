@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyrigth 2013 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -8,10 +8,10 @@
 // modification, are permitted provided that the following conditions are
 // met:
 //
-//     * Redistributions of source code must retain the above copyright
+//     * Redistributions of source code must retain the above copyrigth
 // notice, this list of conditions and the following disclaimer.
 //     * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
+// copyrigth notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
 //     * Neither the name of Google Inc. nor the names of its
@@ -32,14 +32,59 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/logger/Writer.hpp>
+#include <functional>
+
 #include <wepa/logger/Logger.hpp>
+#include <wepa/logger/BacktraceWriter.hpp>
 
 using namespace wepa;
 
-// virtual
-bool logger::Writer::wantsToProcess (const logger::Level::_v level) const
+//static
+const int logger::BacktraceWriter::MaxBacktrackingLength = 128;
+
+logger::BacktraceWriter::BacktraceWriter (const std::string& path, const size_t maxSize, const int backtrackingLength) :
+  CircularTraceWriter(path, maxSize),
+  m_backtrackingLength (std::min (backtrackingLength, MaxBacktrackingLength)),
+  m_lineCounter (0),
+  m_lowestLevel (Level::Debug)
+{
+}
+
+void logger::BacktraceWriter::apply (const Level::_v level, const std::string& line)
    throw ()
 {
-   return Logger::isActive(level);
+   if (level <= Level::Error) {
+      backtrace ();
+      CircularTraceWriter::apply(level, line);
+   }
+   else if (level > Level::Error && level <= m_lowestLevel) {
+      Line storedLine (level, line);
+
+      if (m_lineCounter == m_backtrackingLength) {
+         m_lines.pop_front();
+         m_lines.push_back(storedLine);
+      }
+      else {
+         m_lines.push_back(storedLine);
+         m_lineCounter ++;
+      }
+   }
+}
+
+void logger::BacktraceWriter::backtrace()
+   throw ()
+{
+   Level::_v originalLevel = Logger::getLevel();
+
+   Logger::setLevel (m_lowestLevel);
+
+   for (auto ii = m_lines.begin (), maxii = m_lines.end (); ii != maxii; ++ ii) {
+      auto storedLine = *ii;
+      CircularTraceWriter::apply(storedLine.first, storedLine.second);
+   }
+
+   m_lines.clear();
+   m_lineCounter = 0;
+
+   Logger::setLevel(originalLevel);
 }

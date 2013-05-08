@@ -32,63 +32,39 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/logger/Logger.hpp>
+#ifndef __wepa_logger_BacktraceWriter_hpp
+#define __wepa_logger_BacktraceWriter_hpp
 
-#include <wepa/logger/Writer.hpp>
-#include <wepa/logger/DefaultFormatter.hpp>
-#include <wepa/logger/Level.hpp>
+#include <list>
 
-using namespace wepa;
+#include <wepa/logger/CircularTraceWriter.hpp>
 
-#ifdef _DEBUG
-   logger::Level::_v logger::Logger::m_level = Level::Debug;
-#else
-   logger::Level::_v logger::Logger::m_level = Level::Warning;
+namespace wepa {
+namespace logger {
+
+class BacktraceWriter : public CircularTraceWriter {
+public:
+   static const int MaxBacktrackingLength;
+
+   BacktraceWriter (const std::string& path, const size_t maxSize, const int backtrackingLength);
+
+   void setLowestLeveL (const Level::_v lowestLeveL) throw () { if (lowestLeveL > Level::Error) m_lowestLevel = lowestLeveL; }
+
+private:
+   typedef std::pair <Level::_v, std::string> Line;
+   typedef std::list <Line> Lines;
+
+   const int m_backtrackingLength;
+   Lines m_lines;
+   int m_lineCounter;
+   Level::_v m_lowestLevel;
+
+   void apply (const Level::_v level, const std::string& line) throw ();
+   bool wantsToProcess (const Level::_v level) const throw () { return level <= m_lowestLevel; }
+   void backtrace () throw ();
+};
+
+} /* namespace logger */
+} /* namespace wepa */
+
 #endif
-
-logger::Logger::FormatterPtr logger::Logger::m_formatter;
-logger::Logger::WriterPtr logger::Logger::m_writer;
-
-//static
-void logger::Logger::initialize (Writer* writer, Formatter* formatter)
-   throw (adt::RuntimeException)
-{
-   m_writer.reset (writer);
-   m_writer->initialize ();
-
-   m_formatter.reset (formatter);
-}
-
-//static
-void logger::Logger::initialize (Writer* writer)
-   throw (adt::RuntimeException)
-{
-   m_writer.reset (writer);
-   m_writer->initialize ();
-
-   m_formatter.reset (new DefaultFormatter ());
-}
-
-//static
-void logger::Logger::write (const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned line)
-   throw ()
-{
-   if (m_writer.get () == NULL || m_formatter.get () == NULL)
-      return;
-
-   // Writer will ask 'Logger' about what to do with this level, but it could be different for some kinds of writer.
-   if (m_writer->wantsToProcess (level) == false)
-      return;
-
-   m_writer->apply (level, m_formatter->apply (level, input, function, file, line));
-}
-
-//static
-bool logger::Logger::wantsToProcess (const Level::_v level)
-   throw ()
-{
-   if (m_writer.get () == NULL || m_formatter.get () == NULL)
-      return false;
-
-   return isActive (level) ? true: m_writer->wantsToProcess(level);
-}

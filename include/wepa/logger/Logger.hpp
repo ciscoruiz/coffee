@@ -63,10 +63,10 @@ public:
    static void write (const Level::_v level, const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw ();
 
    static void setLevel (const Level::_v level) throw () { m_level = level; }
+   static Level::_v getLevel () throw () { return m_level; }
 
-   static bool isActive (const Level::_v level) {
-      return (level <= Level::Error) ? true: (level <= m_level);
-   }
+   static bool isActive (const Level::_v level) throw () { return (level <= Level::Error) ? true: (level <= m_level); }
+   static bool wantsToProcess (const Level::_v level) throw ();
 
    static void error (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Error, streamString, function, file, line); }
    static void warning (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Warning, streamString, function, file, line); }
@@ -77,6 +77,7 @@ public:
    static void write (const adt::RuntimeException& ex) {
       error (ex.what (), ex.getMethod(), ex.getFile(), ex.getLine());
    }
+
 private:
    static Level::_v m_level;
    static WriterPtr m_writer;
@@ -88,7 +89,7 @@ private:
 
 #define LOG_ERROR(args)\
    do {\
-   if (wepa::logger::Logger::isActive (wepa::logger::Level::Error)) { \
+   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Error)) { \
       wepa::adt::StreamString msg; \
       wepa::logger::Logger::error (msg << args, WEPA_FILE_LOCATION); \
    } \
@@ -96,7 +97,7 @@ private:
 
 #define LOG_WARN(args)\
    do {\
-   if (wepa::logger::Logger::isActive (wepa::logger::Level::Warning)) { \
+   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Warning)) { \
       wepa::adt::StreamString msg; \
       wepa::logger::Logger::warning (msg << args, WEPA_FILE_LOCATION); \
    } \
@@ -104,7 +105,7 @@ private:
 
 #define LOG_NOTICE(args)\
    do {\
-   if (wepa::logger::Logger::isActive (wepa::logger::Level::Notice)) { \
+   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Notice)) { \
       wepa::adt::StreamString msg; \
       wepa::logger::Logger::notice(msg << args, WEPA_FILE_LOCATION); \
    } \
@@ -112,7 +113,7 @@ private:
 
 #define LOG_INFO(args)\
    do {\
-   if (wepa::logger::Logger::isActive (wepa::logger::Level::Information)) { \
+   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Information)) { \
       wepa::adt::StreamString msg; \
       wepa::logger::Logger::info (msg << args, WEPA_FILE_LOCATION); \
    } \
@@ -120,7 +121,7 @@ private:
 
 #define LOG_DEBUG(args)\
    do {\
-   if (wepa::logger::Logger::isActive (wepa::logger::Level::Debug)) { \
+   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Debug)) { \
       wepa::adt::StreamString msg; \
       wepa::logger::Logger::debug (msg << args, WEPA_FILE_LOCATION); \
    } \

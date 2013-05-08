@@ -103,10 +103,10 @@ void logger::CircularTraceWriter::apply(const Level::_v level, const std::string
 }
 
 // When there is some kind of error over the stream, it will only trace error's
-bool logger::CircularTraceWriter::isActive (const logger::Level::_v level) const
+bool logger::CircularTraceWriter::wantsToProcess (const logger::Level::_v level) const
    throw ()
 {
-   return (m_stream != NullStream) ? logger::Writer::isActive(level): level <= Level::Error;
+   return (m_stream != NullStream) ? logger::Writer::wantsToProcess(level): level <= Level::Error;
 }
 
 void wepa::logger::CircularTraceWriter::openStream()

@@ -15,4 +15,5 @@
 debug
 release
 .sconsign.dblite
-
+*.log
+*.old

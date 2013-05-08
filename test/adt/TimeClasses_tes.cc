@@ -60,6 +60,23 @@ BOOST_AUTO_TEST_CASE( TimeClasses_second )
    BOOST_REQUIRE_EQUAL (guide, other);
 }
 
+BOOST_AUTO_TEST_CASE( TimeClasses_local_second )
+{
+   adt::Second guide = adt::Second::getLocalTime();
+   adt::Millisecond ms (guide);
+   adt::Microsecond us (guide);
+
+   BOOST_REQUIRE (guide == ms);
+   BOOST_REQUIRE (guide == us);
+
+   adt::Second other;
+
+   other = ms;
+   BOOST_REQUIRE_EQUAL (guide, other);
+
+   other = us;
+   BOOST_REQUIRE_EQUAL (guide, other);
+}
 
 BOOST_AUTO_TEST_CASE( TimeClasses_millisecond )
 {

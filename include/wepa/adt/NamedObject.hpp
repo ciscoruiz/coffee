@@ -32,12 +32,8 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepa_adt_RuntimeException_h
-#define _wepa_adt_RuntimeException_h
-
-#include <boost/exception/exception.hpp>
-#include <stdexcept>
-#include <sstream>
+#ifndef _wepa_adt_pattern_NamedObject_h
+#define _wepa_adt_pattern_NamedObject_h
 
 #include <wepa/adt/StreamString.hpp>
 
@@ -45,54 +41,22 @@ namespace wepa {
 
 namespace adt {
 
-/**
- * Defines exception used for this library.
- *
- * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
- */
-class RuntimeException : virtual std::logic_error, virtual public boost::exception {
+class NamedObject {
 public:
-   static const int NullErrorCode = -1;
+  const std::string& getName () const throw () { return m_name; }
 
-   using std::logic_error::what;
+  virtual StreamString asString () const throw () { StreamString result ("adt::NamedObject { Name: "); return result << m_name << " }"; }
 
-   explicit RuntimeException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
-      std::logic_error (str),
-      m_fromMethod (fromMethod),
-      m_fromFile (fromFile),
-      m_fromLine (fromLine),
-      m_errorCode (NullErrorCode)
-   {;}
-
-   RuntimeException (const RuntimeException& other) :
-      std::logic_error (other),
-      m_fromMethod (other.m_fromMethod),
-      m_fromFile (other.m_fromFile),
-      m_fromLine (other.m_fromLine),
-      m_errorCode (other.m_errorCode)
-   {;}
-
-   const char* getMethod () const throw () { return m_fromMethod; }
-   const char* getFile () const throw () { return m_fromFile; }
-   const unsigned getLine () const throw () { return m_fromLine; }
-
-   int getErrorCode () const throw () { return m_errorCode; }
-
-   void setErrorCode (const int errorCode) throw () { m_errorCode = errorCode; }
-
-   std::string asString () const throw ();
+protected:
+   NamedObject (const std::string& name) : m_name (name) {;}
 
 private:
-   const char* m_fromMethod;
-   const char* m_fromFile;
-   const unsigned m_fromLine;
-   int m_errorCode;
+   const std::string m_name;
 };
 
 }
 }
 
-#define WEPA_THROW_EXCEPTION(msg) do { wepa::adt::StreamString str; str << msg; throw wepa::adt::RuntimeException (str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
 
+#endif
 
-#endif // _wepa_adt_RuntimeException_h

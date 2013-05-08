@@ -1,6 +1,8 @@
 Import ('env')
 
 sources = Glob('*.cc')
+sources.extend (Glob('pattern/*.cc'))
+sources.extend (Glob('pattern/observer/*.cc'))
 
 result = env.StaticLibrary ('wepa_adt', sources);
 

@@ -88,13 +88,14 @@ void logger::CircularTraceWriter::apply(const Level::_v level, const std::string
       write (m_stream, line.data (), line.length());
       write (m_stream, "\n", 1);
 
-      if ((++ m_lineno % CheckSizePeriod) == 0) {
-         if (oversizedStream () == true) {
-            closeStream ();
-            renameFile ();
-            openStream ();
-            logger::Writer::notify ();
-         }
+      if ((++ m_lineno % CheckSizePeriod) != 0)
+         return;
+
+      if (oversizedStream () == true) {
+         closeStream ();
+         renameFile ();
+         openStream ();
+         logger::Writer::notify ();
       }
    }
    catch (adt::RuntimeException& ex) {
@@ -144,7 +145,6 @@ void logger::CircularTraceWriter::closeStream()
       ::close (m_stream);
 
    m_stream = NullStream;
-   m_lineno = 0;
 }
 
 void logger::CircularTraceWriter::renameFile()

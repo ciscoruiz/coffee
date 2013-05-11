@@ -40,16 +40,16 @@
 using namespace wepa;
 using namespace wepa::logger;
 
-const adt::StreamString& DefaultFormatter::do_apply (const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned line, adt::StreamString& output)
+const adt::StreamString& DefaultFormatter::do_apply (const Elements& elements, adt::StreamString& output)
    throw ()
 {
    auto second = adt::Second::getLocalTime ();
 
    output.clear ();
    output << "[" << second.asDateTime() << "] ";
-   output << Level::enumNameEx(level) << " | ";
-   output << function << " [" << file << "(" << line << ")]: ";
-   output << input;
+   output << Level::enumNameEx(elements.level) << " | ";
+   output << elements.function << " [" << elements.file << "(" << elements.lineno << ")]: ";
+   output << elements.input;
 
    return output;
 }

@@ -78,20 +78,33 @@ BOOST_AUTO_TEST_CASE( CircularTraceWriter_oversized_file )
    writer->subscribeObserver(observer.get ());
 
    Logger::initialize(writer);
+   Logger::setLevel(Level::Debug);
 
    BOOST_REQUIRE_NE (writer->getStream(), CircularTraceWriter::NullStream);
 
    std::string value (1024, 'x');
 
-   int loop = writer->getKbytesMaxSize() / value.size () + CircularTraceWriter::CheckSizePeriod + 1;
+   int loop = writer->getKbytesMaxSize() / value.size ();
+
+   std::cout << "It will need " << loop << " loops to initialize the file trace" << std::endl;
 
    for (int ii = 0; ii < loop; ++ ii) {
       LOG_DEBUG(ii << " " << value);
    }
 
-   BOOST_REQUIRE_EQUAL (observer->getInitCounter(), 1 + 2);
+   LOG_DEBUG ("This line will generate an oversized file while the size is measured");
 
-   BOOST_REQUIRE_EQUAL (writer->getLineNo(), CircularTraceWriter::CheckSizePeriod + 1);
+   BOOST_REQUIRE_EQUAL (observer->getInitCounter(), 1 /* subscription */ + 1 /* initialization */ + 1 /* file size reached */);
+
+   for (int ii = 0; ii < loop; ++ ii) {
+      LOG_DEBUG(ii << " " << value);
+   }
+
+   LOG_DEBUG ("This line will generate an oversized file while the size is measured");
+
+   BOOST_REQUIRE_EQUAL (writer->getLineNo(), loop * 2 + 2);
+
+   BOOST_REQUIRE_EQUAL (observer->getInitCounter(), 1 /* subscription */ + 1 /* initialization */ + 2 /* file size reached */);
 
    int stream = open ("trace.log.old", O_RDWR | O_CREAT | O_EXCL, S_IRUSR |S_IWUSR | S_IRGRP| S_IROTH);
 

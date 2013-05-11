@@ -62,8 +62,7 @@ private:
    unsigned int m_total;
 
    void do_initialize () throw (adt::RuntimeException){
-      for (int ii = 0; ii <= logger::Level::Debug; ++ ii)
-         m_counters [ii] = 0;
+      memset (&m_counters, 0, sizeof (m_counters));
       m_total = 0;
    }
 

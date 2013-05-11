@@ -48,17 +48,29 @@ class Logger;
 
 class Formatter : public adt::NamedObject {
 public:
+   struct Elements {
+      const Level::_v level;
+      const adt::StreamString& input;
+      const char* function;
+      const char* file;
+      const unsigned lineno;
+
+      Elements (const Level::_v _level, const adt::StreamString& _input, const char* _function, const char* _file, const unsigned _lineno) :
+         level (_level), input (_input), function (_function), file (_file), lineno (_lineno)
+      {;}
+   };
+
    virtual ~Formatter () {;}
 
 protected:
    Formatter (const std::string& name) : adt::NamedObject (name) {;}
 
-   const adt::StreamString& apply (const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned line) throw () {
+   const adt::StreamString& apply (const Elements& elements) throw () {
       m_result.clear ();
-      return do_apply (level, input, function, file, line, m_result);
+      return do_apply (elements, m_result);
    }
 
-   virtual const adt::StreamString& do_apply (const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned line, adt::StreamString& output) throw () = 0;
+   virtual const adt::StreamString& do_apply (const Elements& elements, adt::StreamString& output) throw () = 0;
 
 private:
    adt::StreamString m_result;

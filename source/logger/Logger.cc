@@ -70,7 +70,7 @@ void logger::Logger::initialize (Writer* writer)
 }
 
 //static
-void logger::Logger::write (const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned line)
+void logger::Logger::write (const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned lineno)
    throw ()
 {
    if (m_writer.get () == NULL || m_formatter.get () == NULL)
@@ -80,7 +80,8 @@ void logger::Logger::write (const Level::_v level, const adt::StreamString& inpu
    if (m_writer->wantsToProcess (level) == false)
       return;
 
-   m_writer->apply (level, m_formatter->apply (level, input, function, file, line));
+   Formatter::Elements elements (level, input, function, file, lineno);
+   m_writer->apply (level, m_formatter->apply (elements));
 }
 
 //static

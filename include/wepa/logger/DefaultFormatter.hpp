@@ -45,7 +45,7 @@ public:
    DefaultFormatter () : Formatter ("DefaultFormatter") {;}
 
 private:
-   const adt::StreamString& do_apply (const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned line, adt::StreamString& output) throw ();
+   const adt::StreamString& do_apply (const Elements& elements, adt::StreamString& output) throw ();
 
 };
 

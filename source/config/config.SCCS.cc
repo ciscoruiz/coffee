@@ -32,64 +32,17 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/logger/Logger.hpp>
 
-#include <wepa/logger/Writer.hpp>
-#include <wepa/logger/DefaultFormatter.hpp>
-#include <wepa/logger/Level.hpp>
-#include <wepa/logger/SCCS.hpp>
+#include <wepa/config/SCCS.hpp>
+#include <wepa/config/SCCSRepository.hpp>
+
+wepa_sccs_define_tag (config, 0)
 
 using namespace wepa;
 
-#ifdef _DEBUG
-   logger::Level::_v logger::Logger::m_level = Level::Debug;
-#else
-   logger::Level::_v logger::Logger::m_level = Level::Warning;
-#endif
-
-logger::Logger::FormatterPtr logger::Logger::m_formatter;
-logger::Logger::WriterPtr logger::Logger::m_writer;
-
-//static
-void logger::Logger::initialize (Writer* writer, Formatter* formatter)
-   throw (adt::RuntimeException)
-{
-   SCCS::activate ();
-
-   m_writer.reset (writer);
-   m_writer->initialize ();
-
-   m_formatter.reset (formatter);
-}
-
-//static
-void logger::Logger::initialize (Writer* writer)
-   throw (adt::RuntimeException)
-{
-   initialize (writer, new DefaultFormatter ());
-}
-
-//static
-void logger::Logger::write (const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned lineno)
+void config::SCCS::activate()
    throw ()
 {
-   if (m_writer.get () == NULL || m_formatter.get () == NULL)
-      return;
-
-   // Writer will ask 'Logger' about what to do with this level, but it could be different for some kinds of writer.
-   if (m_writer->wantsToProcess (level) == false)
-      return;
-
-   Formatter::Elements elements (level, input, function, file, lineno);
-   m_writer->apply (level, m_formatter->apply (elements));
+   SCCSRepository::getInstance().registerModule(wepa_sccs_use_tag(config));
 }
 
-//static
-bool logger::Logger::wantsToProcess (const Level::_v level)
-   throw ()
-{
-   if (m_writer.get () == NULL || m_formatter.get () == NULL)
-      return false;
-
-   return isActive (level) ? true: m_writer->wantsToProcess(level);
-}

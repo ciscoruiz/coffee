@@ -32,64 +32,44 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/logger/Logger.hpp>
 
-#include <wepa/logger/Writer.hpp>
-#include <wepa/logger/DefaultFormatter.hpp>
-#include <wepa/logger/Level.hpp>
-#include <wepa/logger/SCCS.hpp>
+#ifndef _wepa_config_SCCSREPOSITORY_HPP_
+#define _wepa_config_SCCSREPOSITORY_HPP_
 
-using namespace wepa;
+#include <set>
 
-#ifdef _DEBUG
-   logger::Level::_v logger::Logger::m_level = Level::Debug;
-#else
-   logger::Level::_v logger::Logger::m_level = Level::Warning;
-#endif
+#include <wepa/adt/pattern/Singleton.hpp>
 
-logger::Logger::FormatterPtr logger::Logger::m_formatter;
-logger::Logger::WriterPtr logger::Logger::m_writer;
+namespace wepa {
+namespace config {
 
-//static
-void logger::Logger::initialize (Writer* writer, Formatter* formatter)
-   throw (adt::RuntimeException)
-{
-   SCCS::activate ();
+class SCCSRepository : public adt::pattern::Singleton <SCCSRepository>{
+public:
+   typedef const char* ModuleName;
+   typedef std::set <ModuleName> Entries;
+   typedef Entries::const_iterator const_entry_iterator;
 
-   m_writer.reset (writer);
-   m_writer->initialize ();
+   ~SCCSRepository() {
+      m_entries.clear ();
+   }
 
-   m_formatter.reset (formatter);
-}
+   void registerModule (ModuleName moduleName) throw () {
+      m_entries.insert (moduleName);
+   }
 
-//static
-void logger::Logger::initialize (Writer* writer)
-   throw (adt::RuntimeException)
-{
-   initialize (writer, new DefaultFormatter ());
-}
+   const_entry_iterator entry_begin () const throw () { return m_entries.begin (); }
+   const_entry_iterator entry_end () const throw () { return m_entries.end (); }
 
-//static
-void logger::Logger::write (const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned lineno)
-   throw ()
-{
-   if (m_writer.get () == NULL || m_formatter.get () == NULL)
-      return;
+   static ModuleName module_name (const_entry_iterator ii) { return *ii; }
 
-   // Writer will ask 'Logger' about what to do with this level, but it could be different for some kinds of writer.
-   if (m_writer->wantsToProcess (level) == false)
-      return;
+private:
+   Entries m_entries;
 
-   Formatter::Elements elements (level, input, function, file, lineno);
-   m_writer->apply (level, m_formatter->apply (elements));
-}
+   SCCSRepository() {;}
 
-//static
-bool logger::Logger::wantsToProcess (const Level::_v level)
-   throw ()
-{
-   if (m_writer.get () == NULL || m_formatter.get () == NULL)
-      return false;
+   friend class adt::pattern::Singleton <SCCSRepository>;
+};
 
-   return isActive (level) ? true: m_writer->wantsToProcess(level);
-}
+} /* namespace config */
+} /* namespace wepa */
+#endif /* SCCSREPOSITORY_HPP_ */

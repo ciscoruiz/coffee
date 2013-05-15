@@ -37,6 +37,7 @@
 #include <wepa/logger/Writer.hpp>
 #include <wepa/logger/DefaultFormatter.hpp>
 #include <wepa/logger/Level.hpp>
+#include <wepa/logger/SCCS.hpp>
 
 using namespace wepa;
 
@@ -53,6 +54,8 @@ logger::Logger::WriterPtr logger::Logger::m_writer;
 void logger::Logger::initialize (Writer* writer, Formatter* formatter)
    throw (adt::RuntimeException)
 {
+   SCCS::activate ();
+
    m_writer.reset (writer);
    m_writer->initialize ();
 
@@ -63,10 +66,7 @@ void logger::Logger::initialize (Writer* writer, Formatter* formatter)
 void logger::Logger::initialize (Writer* writer)
    throw (adt::RuntimeException)
 {
-   m_writer.reset (writer);
-   m_writer->initialize ();
-
-   m_formatter.reset (new DefaultFormatter ());
+   initialize (writer, new DefaultFormatter ());
 }
 
 //static

@@ -1,0 +1,11 @@
+Import ('env')
+
+sources = Glob('*.cc')
+
+localEnv = env.Clone ();
+localEnv.Append (CCFLAGS = '-I/usr/include/libxml2')
+
+result = localEnv.StaticLibrary ('wepa_xml', sources);
+
+Return ('result')
+

@@ -51,6 +51,14 @@ const char* xml::Attribute::nameExtractor (const Handler handler)
    return (const char*) (handler->name);
 }
 
+void xml::Attribute::setValue (const char* value)
+   throw (adt::RuntimeException)
+{
+   Handler handler = getHandler();
+   xmlSetProp(handler->parent, BAD_CAST handler->name, BAD_CAST value);
+   m_value.clear ();
+}
+
 const std::string& xml::Attribute::getValue () const
    throw ()
 {

@@ -35,6 +35,9 @@
 #ifndef __wepa_xxxx_Attribute_hpp
 #define __wepa_xxxx_Attribute_hpp
 
+#include <wepa/adt/AsString.hpp>
+#include <wepa/adt/RuntimeException.hpp>
+
 #include <wepa/xml/Wrapper.hpp>
 #include <wepa/xml/Content.hpp>
 
@@ -49,6 +52,12 @@ class Attribute : public Wrapper <_xmlAttr> {
 public:
    virtual ~Attribute () {;}
 
+   void setValue (const char* value) throw (adt::RuntimeException);
+   void setValue (const std::string& value) throw (adt::RuntimeException) { setValue (value.c_str ()); }
+
+   template <typename _T> void setValue(const _T value) throw (adt::RuntimeException) {
+      setValue (adt::AsString::apply(value));
+   }
    const std::string& getValue () const throw ();
 
    bool operator < (const Attribute& left) const throw ();
@@ -61,6 +70,7 @@ private:
    static const char* nameExtractor (const Handler handler) throw ();
 
    friend class Document;
+   friend class Node;
 };
 
 } /* namespace xml */

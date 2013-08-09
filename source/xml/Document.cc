@@ -74,6 +74,8 @@ void xml::Document::parse (const boost::filesystem::path& file)
    releaseHandler();
    parseFile (file);
    extractNodes (getHandler ());
+
+   xmlCleanupParser();
 }
 
 void xml::Document::parse (const adt::DataBlock& buffer)
@@ -82,6 +84,8 @@ void xml::Document::parse (const adt::DataBlock& buffer)
    releaseHandler();
    parseMemory (buffer);
    extractNodes (getHandler ());
+
+   xmlCleanupParser();
 }
 
 void xml::Document::parse (const char* buffer, const size_t size)

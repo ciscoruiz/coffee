@@ -41,6 +41,7 @@
 #include <boost/ptr_container/ptr_set.hpp>
 
 #include <wepa/adt/RuntimeException.hpp>
+#include <wepa/adt/AsString.hpp>
 
 #include <wepa/xml/Wrapper.hpp>
 #include <wepa/xml/Attribute.hpp>
@@ -66,6 +67,7 @@ public:
    typedef AttributeContainer::iterator attribute_iterator;
    typedef AttributeContainer::const_iterator const_attribute_iterator;
 
+   Node (const char* name);
    ~Node () {;}
 
    const Node& lookupChild (const char* name) const throw (adt::RuntimeException);
@@ -81,6 +83,16 @@ public:
    Node* searchChild (const std::string& name) throw () { return searchChild (name.c_str ()); }
 
    Node& childAt (const size_t ii) throw (adt::RuntimeException);
+
+   Node& createChild (const char* name) throw (adt::RuntimeException);
+   Attribute& createAttribute (const char* name, const char* value) throw (adt::RuntimeException);
+   Attribute& createAttribute (const char* name, const std::string& value) throw (adt::RuntimeException) { return createAttribute (name, value.c_str ()); }
+
+   template <typename _T> Attribute& createAttribute (const char* name, const _T value) throw (adt::RuntimeException) {
+      return createAttribute (name, adt::AsString::apply(value));
+   }
+
+   void createText (const char* text) throw (adt::RuntimeException);
 
    const Attribute& lookupAttribute (const char* name) const throw (adt::RuntimeException);
    const Attribute* searchAttribute (const char* name) const throw ();

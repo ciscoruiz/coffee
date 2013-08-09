@@ -68,5 +68,5 @@ void xml::Content::setValue (const char* value)
    }
 
    if (releaseMemory == true)
-      delete utf8Text;
+      delete [] utf8Text;
 }

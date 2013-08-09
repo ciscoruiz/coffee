@@ -39,6 +39,12 @@
 
 using namespace wepa;
 
+xml::Node::Node (const char* name) : Wrapper ()
+{
+   setHandler(xmlNewNode(NULL, BAD_CAST name));
+   setDeleter(xmlFreeNode);
+}
+
 xml::Node::Node (_xmlNode* handler) : Wrapper (handler)
 {
    setNameExtractor(nameExtractor);
@@ -138,6 +144,44 @@ xml::Node& xml::Node::childAt (const size_t ii)
    }
 
    return get_child (child_begin () + ii);
+}
+
+xml::Node& xml::Node::createChild (const char* name)
+   throw (adt::RuntimeException)
+{
+   if (getHandler() == NULL)
+      WEPA_THROW_EXCEPTION("Can not create a child on an empty XML node");
+
+   xml::Node* newChild = new xml::Node (xmlNewChild(getHandler (), NULL, BAD_CAST name, NULL));
+
+   addChild(newChild);
+
+   return std::ref (*newChild);
+}
+
+xml::Attribute& xml::Node::createAttribute (const char* name, const char* value)
+   throw (adt::RuntimeException)
+{
+   if (getHandler() == NULL)
+      WEPA_THROW_EXCEPTION("Can not create an attribute on an empty XML node");
+
+   xml::Attribute* newAttr = new xml::Attribute (xmlNewProp(getHandler (), BAD_CAST name, BAD_CAST value));
+
+   addAttribute(newAttr);
+
+   return std::ref (*newAttr);
+}
+
+void xml::Node::createText (const char* text)
+   throw (adt::RuntimeException)
+{
+   if (getHandler() == NULL)
+      WEPA_THROW_EXCEPTION("Can not create an attribute on an empty XML node");
+
+   Handler textNode = xmlNewText (BAD_CAST text);
+
+   xmlAddChild(getHandler (), textNode);
+   setText (text);
 }
 
 const xml::Attribute& xml::Node::lookupAttribute (const char* name) const

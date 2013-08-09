@@ -40,7 +40,7 @@
 
 #include <wepa/xml/SCCS.hpp>
 
-wepa_sccs_define_tag (xml, 0)
+wepa_sccs_define_tag (xml, 1)
 
 using namespace wepa;
 

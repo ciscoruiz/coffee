@@ -44,11 +44,12 @@ namespace xml {
 class Content {
 public:
    Content () {;}
-   virtual ~Content () { m_value.reset (NULL);}
+   virtual ~Content () { clear (); }
 
    bool isNull () const throw () { return m_value.get () == NULL; }
    const std::string& getValue () const throw () { return std::ref (*m_value.get ()); }
    void setValue (const char* text) throw ();
+   void clear () { m_value.reset (NULL); }
 
 private:
    std::auto_ptr <std::string> m_value;

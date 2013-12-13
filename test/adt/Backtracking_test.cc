@@ -82,26 +82,43 @@ bool AddUpIsANumber::accept (const Solution* solution, const int candidate) cons
 
 class Print {
 public:
-   void operator () (const AddUpIsANumber::Solution& solution, const int margin) {
+   void apply (const AddUpIsANumber::Solution& solution, const int margin) {
       for (int ii = 0; ii < margin; ++ ii)
-         std::cout << " ";
+         std::cout << "   ";
       std::cout << solution.getValue() << std::endl;
    }
 };
 
-BOOST_AUTO_TEST_CASE (sumup_is_ten)
+BOOST_AUTO_TEST_CASE (addup_is_ten)
 {
    AddUpIsANumber solver;
 
    solver.setStartingPoint(10);
 
-   const AddUpIsANumber::Solution* solution = solver.apply ();
+   const AddUpIsANumber::Solution* root = solver.apply ();
 
-   BOOST_REQUIRE(solution != NULL);
+   BOOST_REQUIRE(root != NULL);
 
    Print print;
 
-   AddUpIsANumber::Solution::depthFirst (solution, print);
+   root->depthFirst (print);
 
+   BOOST_REQUIRE_EQUAL (root->countSolutions (), 9);
+
+   const AddUpIsANumber::Solution* step;
+
+   step = root->getNextStep(2);
+
+   BOOST_REQUIRE_EQUAL (step->getValue(), 7);
+
+   step = step->getNextStep(1);
+
+   BOOST_REQUIRE_EQUAL (step->getValue(), 2);
+
+   step = step->getNextStep(0);
+
+   BOOST_REQUIRE_EQUAL (step->getValue(), 1);
+
+   BOOST_REQUIRE_THROW (root->getNextStep(10), wepa::adt::RuntimeException);
 }
 

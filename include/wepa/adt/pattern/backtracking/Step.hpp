@@ -38,6 +38,8 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
+#include <wepa/adt/RuntimeException.hpp>
+
 namespace wepa {
 
 namespace adt {
@@ -69,14 +71,48 @@ public:
    const_successor_iterator successor_end () const throw () { return m_successors.end (); }
    static const Step<_T>& get_successor (const_successor_iterator ii) throw (){ return *ii; }
 
+   bool hasSuccessor () const throw () { return m_successors.empty () == false; }
+
    const Step<_T>* getPredeccessor () const throw () { return m_predeccesor; }
    
-   template <typename _Predicate> static void depthFirst (const Step <_T>* solution, _Predicate& predicate, const int margin = 0) {
-      predicate (*solution, margin);
+   /**
+    * Runs over tree with depth-first algorithm and apply the \em _Predicate on every node.
+    * \param predicate Operation to apply on every Node. Must have a method apply which received a constant reference of this step and
+    * integer which indicates the depth of the node.
+    * \param depth Depth of this node
+    */
+   template <typename _Predicate> void depthFirst (_Predicate& predicate, const int depth = 0) const throw () {
+      predicate.apply (*this, depth);
 
-      for (const_successor_iterator ii = solution->successor_begin (), maxii = solution->successor_end (); ii != maxii; ++ ii) {
-         depthFirst (&get_successor (ii), predicate, margin + 1);
+      for (const_successor_iterator ii = successor_begin (), maxii = successor_end (); ii != maxii; ++ ii) {
+         get_successor (ii).depthFirst (predicate, depth + 1);
       }
+   }
+
+   /**
+    * @return The number of found solutions (which matches with the number of leaf nodes on the tree)
+    */
+   size_t countSolutions () const throw () {
+      if (hasSuccessor () == false)
+         return 1;
+
+      int result = 0;
+
+      for (const_successor_iterator ii = successor_begin (), maxii = successor_end (); ii != maxii; ++ ii) {
+         result += get_successor (ii).countSolutions ();
+      }
+
+      return result;
+   }
+
+   const Step<_T>* getNextStep (const int index) const
+      throw (RuntimeException)
+   {
+      if (m_successors.size () <= index) {
+         WEPA_THROW_EXCEPTION ("Index=" << index << " is out of range (" << m_successors.size () << ")");
+      }
+
+      return &get_successor (m_successors.begin () + index);
    }
 
 private:

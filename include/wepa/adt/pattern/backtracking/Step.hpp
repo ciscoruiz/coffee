@@ -55,6 +55,26 @@ public:
    typedef typename Successors::iterator successor_iterator;
    typedef typename Successors::const_iterator const_successor_iterator;
 
+   /**
+    * Class to operate on every step of the found solution
+    */
+   class Predicate {
+   public:
+      /**
+       * Destructor
+       * @param step
+       * @param depth
+       */
+      virtual ~Predicate () {;}
+
+      /**
+       * Apply the predicate on the received step.
+       * @param step One solution's step
+       * @param depth Depth of this step.
+       */
+      virtual void apply (const Step <_T>& step, const int depth) const throw () = 0;
+   };
+
    Step (const _T& value) : m_predeccesor (NULL), m_value (value) {;}
    Step (const _T& value, const Step* predeccesor) : m_predeccesor (predeccesor), m_value (value) {;}
    ~Step () { m_successors.clear (); }
@@ -77,11 +97,10 @@ public:
    
    /**
     * Runs over tree with depth-first algorithm and apply the \em _Predicate on every node.
-    * \param predicate Operation to apply on every Node. Must have a method apply which received a constant reference of this step and
-    * integer which indicates the depth of the node.
+    * \param predicate Operation to apply on every Node.
     * \param depth Depth of this node
     */
-   template <typename _Predicate> void depthFirst (_Predicate& predicate, const int depth = 0) const throw () {
+   void depthFirst (const Predicate& predicate, const int depth = 0) const throw () {
       predicate.apply (*this, depth);
 
       for (const_successor_iterator ii = successor_begin (), maxii = successor_end (); ii != maxii; ++ ii) {

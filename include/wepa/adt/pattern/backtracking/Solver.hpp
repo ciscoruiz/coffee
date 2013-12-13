@@ -87,9 +87,9 @@ public:
 protected:
    virtual _T getStartingPoint () const throw () = 0;
 
-   virtual _T first (const int value) const throw () = 0;
-   virtual bool stop (const int value) const throw () = 0;
-   virtual _T next (const int value) const throw () = 0;
+   virtual _T first (_T value) const throw () = 0;
+   virtual bool stop (_T value) const throw () = 0;
+   virtual _T next (_T value) const throw () = 0;
 
    virtual bool reject (const Solution* solution, const _T candidate) const throw () = 0;
    virtual bool accept (const Solution* solution, const _T candidate) const throw () = 0;

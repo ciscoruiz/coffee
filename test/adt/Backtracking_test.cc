@@ -32,6 +32,9 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+
+#include <stdlib.h>
+
 #include <boost/test/unit_test.hpp>
 
 #include <wepa/adt/pattern/backtracking/Solver.hpp>
@@ -49,9 +52,9 @@ private:
 
    int getStartingPoint () const throw () { return m_valueUnderStudy; }
 
-   int first (int value) const throw () { return (value > 0) ? value - 1: 0; }
-   bool stop (int value) const throw () { return value <= 0; }
-   int next (int value) const throw () { return value - 1; }
+   int first (const int depth, int value) const throw () { return (value > 0) ? value - 1: 0; }
+   bool stop (const int depth, int value) const throw () { return value <= 0; }
+   int next (const int depth, int value) const throw () { return value - 1; }
 
    bool reject (const Solution* solution, const int candidate) const throw () {
       return (addUp (solution) + candidate) > m_valueUnderStudy;
@@ -63,8 +66,7 @@ private:
    static int addUp (const Solution* solution) {
       int result = 0;
 
-      // Avoid root node value
-      while (solution->getPredeccessor() != NULL) {
+      while (solution != NULL) {
          result += solution->getValue();
          solution = solution->getPredeccessor();
       }
@@ -88,19 +90,18 @@ BOOST_AUTO_TEST_CASE (addup_is_ten)
 
    solver.setValueUnderStudy(10);
 
-   const AddUpIsANumber::Solution* root = solver.apply ();
-
-   BOOST_REQUIRE(root != NULL);
+   BOOST_REQUIRE_EQUAL(solver.apply (), true);
 
    PrintAddUp print;
 
-   root->depthFirst (print);
+   solver.depthFirst (print);
 
-   BOOST_REQUIRE_EQUAL (root->countSolutions (), 9);
+   BOOST_REQUIRE_EQUAL (solver.successors_size(), 6);
+   BOOST_REQUIRE_EQUAL (solver.countSolutions (), 9);
 
    const AddUpIsANumber::Solution* step;
 
-   step = root->getNextStep(2);
+   step = solver.getNextStep(2);
 
    BOOST_REQUIRE_EQUAL (step->getValue(), 7);
 
@@ -112,7 +113,7 @@ BOOST_AUTO_TEST_CASE (addup_is_ten)
 
    BOOST_REQUIRE_EQUAL (step->getValue(), 1);
 
-   BOOST_REQUIRE_THROW (root->getNextStep(10), wepa::adt::RuntimeException);
+   BOOST_REQUIRE_THROW (solver.getNextStep(10), wepa::adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE (addup_without_solution)
@@ -121,15 +122,12 @@ BOOST_AUTO_TEST_CASE (addup_without_solution)
 
    solver.setValueUnderStudy(2);
 
-   const AddUpIsANumber::Solution* root = solver.apply ();
-
-   BOOST_REQUIRE(root == NULL);
+   BOOST_REQUIRE_EQUAL(solver.apply (), false);
+   BOOST_REQUIRE_EQUAL(solver.hasSuccessor (), false);
 
    solver.setValueUnderStudy(0);
 
-   root = solver.apply ();
-
-   BOOST_REQUIRE(root == NULL);
+   BOOST_REQUIRE_EQUAL(solver.apply (), false);
 }
 
 // See: http://www.cs.uiuc.edu/~jeffe/teaching/algorithms/notes/02-backtracking.pdf
@@ -143,20 +141,29 @@ private:
    const int m_size;
 
    ColumnAndRow getStartingPoint () const throw () { return ColumnAndRow (0, 0); }
-   ColumnAndRow first (ColumnAndRow pos) const throw () { return next (pos);}
 
-   bool stop (ColumnAndRow pos) const throw () { return pos.second == m_size; }
-
-   ColumnAndRow next (ColumnAndRow pos) const throw ();
+   ColumnAndRow first (const int depth, ColumnAndRow pos) const throw ();
+   bool stop (const int depth, ColumnAndRow pos) const throw ();
+   ColumnAndRow next (const int depth, ColumnAndRow pos) const throw ();
 
    bool reject (const Solution* solution, const ColumnAndRow candidate) const throw ();
    bool accept (const Solution* solution, const ColumnAndRow candidate) const throw ();
 
-   static bool sharedDiagonal (const ColumnAndRow& step, const ColumnAndRow& candidate) throw ();
+   static bool diagonalCollision (const ColumnAndRow& step, const ColumnAndRow& candidate) throw ();
 };
 
-ColumnAndRow NQueen::next (ColumnAndRow pos) const throw () {
-   if (++ pos.first == m_size) {
+ColumnAndRow NQueen::first (const int depth, ColumnAndRow pos) const throw ()
+{
+   if (depth == 0)
+      return ColumnAndRow (0, 0);
+
+   return next (depth, pos);
+}
+
+ColumnAndRow NQueen::next (const int depth, ColumnAndRow pos) const throw () {
+   ++ pos.first;
+
+   if (depth != 0 && pos.first == m_size) {
       pos.first = 0;
       pos.second ++;
    }
@@ -164,9 +171,14 @@ ColumnAndRow NQueen::next (ColumnAndRow pos) const throw () {
    return pos;
 }
 
+bool NQueen::stop (const int depth, ColumnAndRow pos) const throw ()
+{
+   return (depth == 0) ? (pos.first == m_size): (pos.second == m_size);
+}
+
 bool NQueen::reject (const NQueen::Solution* solution, const ColumnAndRow candidate) const throw ()
 {
-   while (solution->getPredeccessor() != NULL) {
+   while (solution != NULL) {
       const ColumnAndRow& step = solution->getValue();
 
       if (step.first == candidate.first)
@@ -175,7 +187,7 @@ bool NQueen::reject (const NQueen::Solution* solution, const ColumnAndRow candid
       if (step.second == candidate.second)
          return true;
 
-      if (sharedDiagonal (step, candidate) == true)
+      if (diagonalCollision (step, candidate) == true)
          return true;
 
       solution = solution->getPredeccessor();
@@ -188,29 +200,36 @@ bool NQueen::accept (const Solution* solution, const ColumnAndRow candidate) con
 {
    int numberOfQueens = 0;
 
-   while (solution->getPredeccessor() != NULL) {
-      solution = solution->getPredeccessor();
+   while (solution != NULL) {
       numberOfQueens ++;
+      solution = solution->getPredeccessor();
    }
 
    return (numberOfQueens + 1) == m_size;
 }
 
 //static
-bool NQueen::sharedDiagonal (const ColumnAndRow& step, const ColumnAndRow& candidate) throw () {
+bool NQueen::diagonalCollision (const ColumnAndRow& step, const ColumnAndRow& candidate) throw () {
+   if (step.first == candidate.second && step.second == candidate.first)
+      return true;
+
    if ((step.first - step.second) == (candidate.first - candidate.second))
       return true;
 
    if ((step.second - step.first) == (candidate.second - candidate.first))
       return true;
 
-   return false;
+   // m = y2 - y1 / x2 - x1, If m is 1 then points are in the same diagonal.
+   return abs (step.second - candidate.second) * 100 / abs (step.first - candidate.first) == 100;
 }
 
 class PrintChessboard: public NQueen::Solution::Predicate {
 public:
-   void apply (const NQueen::Solution& solution, const int margin) const throw () {
-      for (int ii = 0; ii < margin; ++ ii)
+   void apply (const NQueen::Solution& solution, const int depth) const throw () {
+      if (depth == 0)
+         return;
+
+      for (int ii = 0; ii < depth; ++ ii)
          std::cout << "   ";
 
       ColumnAndRow columnAndRow (solution.getValue());
@@ -223,12 +242,12 @@ BOOST_AUTO_TEST_CASE (NQueen8x8)
 {
    NQueen solver (4);
 
-   const NQueen::Solution* root = solver.apply ();
-
-   BOOST_REQUIRE(root != NULL);
+   BOOST_REQUIRE_EQUAL(solver.apply (), true);
 
    PrintChessboard print;
 
-   root->depthFirst (print);
+   solver.depthFirst (print);
+
+   BOOST_REQUIRE_EQUAL (solver.countSolutions (), 2);
 }
 

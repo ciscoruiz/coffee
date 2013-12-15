@@ -36,7 +36,7 @@
 #ifndef _wepa_adt_pattern_backtracking_Solver_hpp_
 #define _wepa_adt_pattern_backtracking_Solver_hpp_
 
-#include <wepa/adt/pattern/backtracking/Step.hpp>
+#include <wepa/adt/pattern/backtracking/TreeNode.hpp>
 
 namespace wepa {
 
@@ -54,63 +54,66 @@ namespace backtracking {
  * \see http://en.wikipedia.org/wiki/Backtracking
  * \see http://www.cs.uiuc.edu/~jeffe/teaching/algorithms/notes/02-backtracking.pdf
  */
-template <typename _T> class Solver {
+template <typename _T> class Solver : public TreeNode <_T> {
 public:
-   typedef Step<_T> Solution;
+   typedef TreeNode <_T> Solution;
 
    /**
     * Constructor.
     */
-   Solver () : m_solution (NULL) {;}
+   Solver () {;}
 
    /**
     * Destructor.
     */
-   virtual ~Solver () { delete m_solution;}
+   virtual ~Solver () { ; }
 
    /**
     *
     * @param problem
     * @return Solutions for the received problem. It will erased when the Solver goes out of scope.
     */
-   const Solution* apply () throw () {
-      delete m_solution;
-      m_solution = NULL;
+   bool apply () throw () {
+      this->clear ();
 
-      _T startingPoint = getStartingPoint ();
+      Solution* solution = NULL;
 
-      m_solution = new Solution (startingPoint);
+      for (_T ii = first (0, getStartingPoint()); stop (0, ii) == false; ii = next (0, ii)) {
+         solution = new Solution (ii);
 
-      return forward (m_solution, startingPoint) == true ? m_solution: NULL;
+         if (exploreSolutions (1, solution) == true)
+            this->add (solution);
+         else
+            delete solution;
+      }
+
+      return this->hasSuccessor();
    }
 
 protected:
    virtual _T getStartingPoint () const throw () = 0;
 
-   virtual _T first (_T value) const throw () = 0;
-   virtual bool stop (_T value) const throw () = 0;
-   virtual _T next (_T value) const throw () = 0;
+   virtual _T first (const int depth, _T value) const throw () = 0;
+   virtual bool stop (const int depth, _T value) const throw () = 0;
+   virtual _T next (const int depth, _T value) const throw () = 0;
 
    virtual bool reject (const Solution* solution, const _T candidate) const throw () = 0;
    virtual bool accept (const Solution* solution, const _T candidate) const throw () = 0;
 
 private:
-   Solution* m_solution;
 
-   bool backtracking (Solution* onTestSolution, const _T candidate) throw () {
-      if (onTestSolution != NULL) {
-         if (reject (onTestSolution, candidate) == true) return false;
+   bool backtracking (const int depth, Solution* onTestSolution, const _T candidate) throw () {
+      if (reject (onTestSolution, candidate) == true) return false;
 
-         // onTestSolution + candidate become to a real Solution
-         if (accept (onTestSolution, candidate) == true) {
-            onTestSolution->add (new Solution (candidate, onTestSolution));
-            return true;
-         }
+      // onTestSolution + candidate become to a real Solution
+      if (accept (onTestSolution, candidate) == true) {
+         onTestSolution->add (new Solution (candidate, onTestSolution));
+         return true;
       }
 
       Solution* partialSolution = new Solution (candidate, onTestSolution);
 
-      if (forward (partialSolution, candidate) == false) {
+      if (exploreSolutions (depth + 1, partialSolution) == false) {
          delete partialSolution;
          return false;
       }
@@ -120,11 +123,11 @@ private:
       return true;
    }
 
-   bool forward (Solution* onTestSolution, const _T candidate) throw  () {
+   bool exploreSolutions (const int depth, Solution* onTestSolution) throw  () {
       bool hasSolution = false;
 
-      for (_T ii = first (candidate); stop (ii) == false; ii = next (ii)) {
-         if (backtracking (onTestSolution, ii) == true)
+      for (_T ii = first (depth, onTestSolution->getValue ()); stop (depth, ii) == false; ii = next (depth, ii)) {
+         if (backtracking (depth, onTestSolution, ii) == true)
             hasSolution = true;
       }
 

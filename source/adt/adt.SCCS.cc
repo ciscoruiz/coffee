@@ -38,7 +38,7 @@
 #include <wepa/config/SCCS.hpp>
 #include <wepa/adt/SCCS.hpp>
 
-wepa_sccs_define_tag (adt, 0)
+wepa_sccs_define_tag (adt, 1)
 
 using namespace wepa;
 

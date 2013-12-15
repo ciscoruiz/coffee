@@ -238,7 +238,7 @@ public:
    }
 };
 
-BOOST_AUTO_TEST_CASE (NQueen8x8)
+BOOST_AUTO_TEST_CASE (NQueen4x4)
 {
    NQueen solver (4);
 
@@ -248,6 +248,7 @@ BOOST_AUTO_TEST_CASE (NQueen8x8)
 
    solver.depthFirst (print);
 
+   BOOST_REQUIRE_EQUAL (solver.successors_size(), 2);
    BOOST_REQUIRE_EQUAL (solver.countSolutions (), 2);
 }
 

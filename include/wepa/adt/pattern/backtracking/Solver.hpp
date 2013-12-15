@@ -90,6 +90,8 @@ public:
       return this->hasSuccessor();
    }
 
+   const Solution* getSolution (const int index) const throw (RuntimeException) { return this->getNextStep(index); }
+
 protected:
    virtual _T getStartingPoint () const throw () = 0;
 

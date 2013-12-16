@@ -43,6 +43,8 @@ namespace adt {
 
 class NamedObject {
 public:
+  virtual ~NamedObject () { ;}
+
   const std::string& getName () const throw () { return m_name; }
 
   virtual StreamString asString () const throw () { StreamString result ("adt::NamedObject { Name: "); return result << m_name << " }"; }

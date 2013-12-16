@@ -77,7 +77,7 @@ public:
 
    TreeNode (const _T& value) : m_value (value), m_predeccesor (NULL) {;}
    TreeNode (const _T& value, const TreeNode* predeccesor) :  m_value (value), m_predeccesor (predeccesor) {;}
-   ~TreeNode () { m_successors.clear (); }
+   virtual ~TreeNode () { m_successors.clear (); }
 
    void add (TreeNode <_T>* treeNode) throw () { m_successors.push_back (treeNode); }
 

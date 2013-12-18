@@ -55,6 +55,7 @@ namespace xml {
 
 class Document;
 class Attribute;
+class Compiler;
 
 class Node : public Wrapper <_xmlNode> {
    typedef boost::ptr_vector <Node> ChildrenContainer;
@@ -139,6 +140,9 @@ private:
 
    static const char* nameExtractor (const Handler handler) throw ();
 
+   void compile (Compiler& compiler) const throw (adt::RuntimeException);
+
+   friend class Compiler;
    friend class Document;
 };
 

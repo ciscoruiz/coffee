@@ -33,9 +33,10 @@
 // Author: cisco.tierra@gmail.com
 //
 #include <libxml/tree.h>
-//#include <libxml/xmlstring.h>
+#include <libxml/xmlwriter.h>
 
 #include <wepa/xml/Node.hpp>
+#include <wepa/xml/Compiler.hpp>
 
 using namespace wepa;
 
@@ -43,6 +44,7 @@ xml::Node::Node (const char* name) : Wrapper ()
 {
    setHandler(xmlNewNode(NULL, BAD_CAST name));
    setDeleter(xmlFreeNode);
+   setNameExtractor(nameExtractor);
 }
 
 xml::Node::Node (_xmlNode* handler) : Wrapper (handler)
@@ -234,4 +236,47 @@ xml::Attribute* xml::Node::searchAttribute (const char* name)
    return NULL;
 }
 
+void xml::Node::compile (xml::Compiler& compiler) const
+   throw (adt::RuntimeException)
+{
+   int rc;
+
+   xmlNsPtr nameSpace = getHandler()->ns;
+
+   const unsigned char* name = BAD_CAST (getName ().c_str ());
+
+   if (m_text.isNull () == true) {
+      if (nameSpace == NULL)
+         rc = xmlTextWriterStartElement(compiler, name);
+      else
+         rc = xmlTextWriterStartElementNS(compiler, BAD_CAST (nameSpace->prefix), name, BAD_CAST (nameSpace->href));
+
+      if (rc < 0)
+         WEPA_THROW_EXCEPTION("Can not compile node " << getName ());
+
+      for (const_child_iterator ii = child_begin(), maxii = child_end (); ii != maxii; ++ ii) {
+         const Node& child = get_child(ii);
+         child.compile (compiler);
+      }
+
+      for (const_attribute_iterator ii = attribute_begin(), maxii = attribute_end (); ii != maxii; ++ ii) {
+         const Attribute& attribute = get_attribute(ii);
+         attribute.compile (compiler);
+      }
+
+      if (xmlTextWriterEndElement (compiler) < 0)
+         WEPA_THROW_EXCEPTION("Can not compile node " << getName ());
+   }
+   else {
+      const unsigned char* text = BAD_CAST (compiler.encode (m_text.getValue()));
+
+      if (nameSpace == NULL)
+         rc = xmlTextWriterWriteElement (compiler, name, text);
+      else
+         rc = xmlTextWriterWriteElementNS(compiler, BAD_CAST (nameSpace->prefix), name, BAD_CAST (nameSpace->href), text);
+
+      if (rc < 0)
+         WEPA_THROW_EXCEPTION("Can not compile node " << getName ());
+   }
+}
 

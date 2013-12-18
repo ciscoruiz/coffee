@@ -59,6 +59,7 @@ namespace xml {
 
 class Node;
 class DTD;
+class Compiler;
 
 class Document : public Wrapper <_xmlDoc> {
 public:
@@ -88,6 +89,10 @@ private:
 
    static void extractNodes (xml::Node& node) throw (adt::RuntimeException);
    static void extractAttributes (xml::Node& node) throw (adt::RuntimeException);
+
+   void compile (Compiler& compiler) const throw (adt::RuntimeException);
+
+   friend class Compiler;
 };
 
 } /* namespace xml */

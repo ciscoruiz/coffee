@@ -37,6 +37,14 @@
 
 #include <boost/function.hpp>
 
+#include <wepa/adt/RuntimeException.hpp>
+
+namespace wepa {
+
+namespace xml {
+
+class Compiler;
+
 template <typename _Handler> class  Wrapper {
 public:
    typedef boost::function <void (_Handler*)> Deleter;
@@ -83,11 +91,17 @@ protected:
       }
    }
 
+   virtual void compile (Compiler& compiler) const throw (adt::RuntimeException) {;} ;
+
 private:
    Handler m_handler;
    NameExtractor m_nameExtractor;
    Deleter m_deleter;
    mutable std::string m_name;
 };
+
+}
+
+}
 
 #endif

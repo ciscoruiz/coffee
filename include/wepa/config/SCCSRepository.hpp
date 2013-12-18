@@ -32,55 +32,44 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_logger_Formatter_hpp
-#define __wepa_logger_Formatter_hpp
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/NamedObject.hpp>
+#ifndef _wepa_config_SCCSREPOSITORY_HPP_
+#define _wepa_config_SCCSREPOSITORY_HPP_
 
-#include <wepa/logger/Level.hpp>
+#include <set>
+
+#include <wepa/adt/pattern/Singleton.hpp>
 
 namespace wepa {
+namespace config {
 
-namespace logger {
-
-class Logger;
-
-class Formatter : public adt::NamedObject {
+class SCCSRepository : public adt::pattern::Singleton <SCCSRepository>{
 public:
-   struct Elements {
-      const Level::_v level;
-      const adt::StreamString& input;
-      const char* function;
-      const char* file;
-      const unsigned lineno;
+   typedef const char* ModuleName;
+   typedef std::set <ModuleName> Entries;
+   typedef Entries::const_iterator const_entry_iterator;
 
-      Elements (const Level::_v _level, const adt::StreamString& _input, const char* _function, const char* _file, const unsigned _lineno) :
-         level (_level), input (_input), function (_function), file (_file), lineno (_lineno)
-      {;}
-   };
-
-   virtual ~Formatter () {;}
-
-protected:
-   Formatter (const std::string& name) : adt::NamedObject (name) {;}
-
-   const adt::StreamString& apply (const Elements& elements) throw () {
-      m_result.clear ();
-      return do_apply (elements, m_result);
+   ~SCCSRepository() {
+      m_entries.clear ();
    }
 
-   virtual const adt::StreamString& do_apply (const Elements& elements, adt::StreamString& output) throw () = 0;
+   void registerModule (ModuleName moduleName) throw () {
+      m_entries.insert (moduleName);
+   }
+
+   const_entry_iterator entry_begin () const throw () { return m_entries.begin (); }
+   const_entry_iterator entry_end () const throw () { return m_entries.end (); }
+
+   static ModuleName module_name (const_entry_iterator ii) { return *ii; }
 
 private:
-   adt::StreamString m_result;
+   Entries m_entries;
 
-   friend class Logger;
+   SCCSRepository() {;}
 
-   Formatter (const Formatter&);
+   friend class adt::pattern::Singleton <SCCSRepository>;
 };
 
-}
-}
-
-#endif
+} /* namespace config */
+} /* namespace wepa */
+#endif /* SCCSREPOSITORY_HPP_ */

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='ISO-8859-1'?> 
+   <peticion> 
+      <param nombre="Cita Médica">13:00 sala 23</param> 
+      <param nombre="asunto">Cita Médica</param>  
+      <param nombre="texto">Cita médica mañana a las 13.30 en el centro de salud MiraSierra</param> 
+   </peticion>

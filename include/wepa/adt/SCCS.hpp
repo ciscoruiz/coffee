@@ -32,55 +32,19 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_logger_Formatter_hpp
-#define __wepa_logger_Formatter_hpp
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/NamedObject.hpp>
-
-#include <wepa/logger/Level.hpp>
+#ifndef _wepa_adt_sccs_hpp_
+#define _wepa_adt_sccs_hpp_
 
 namespace wepa {
+namespace adt {
 
-namespace logger {
-
-class Logger;
-
-class Formatter : public adt::NamedObject {
+class SCCS {
 public:
-   struct Elements {
-      const Level::_v level;
-      const adt::StreamString& input;
-      const char* function;
-      const char* file;
-      const unsigned lineno;
-
-      Elements (const Level::_v _level, const adt::StreamString& _input, const char* _function, const char* _file, const unsigned _lineno) :
-         level (_level), input (_input), function (_function), file (_file), lineno (_lineno)
-      {;}
-   };
-
-   virtual ~Formatter () {;}
-
-protected:
-   Formatter (const std::string& name) : adt::NamedObject (name) {;}
-
-   const adt::StreamString& apply (const Elements& elements) throw () {
-      m_result.clear ();
-      return do_apply (elements, m_result);
-   }
-
-   virtual const adt::StreamString& do_apply (const Elements& elements, adt::StreamString& output) throw () = 0;
-
-private:
-   adt::StreamString m_result;
-
-   friend class Logger;
-
-   Formatter (const Formatter&);
+   static void activate () throw ();
 };
 
 }
 }
 
-#endif
+#endif /* _wepa_adt_sccs_hpp_ */

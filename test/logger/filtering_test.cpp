@@ -45,8 +45,8 @@ public:
    DummyFormatter () : logger::Formatter ("DummyFormatter") {;}
 
 private:
-   const adt::StreamString& do_apply (const logger::Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned line, adt::StreamString& output) throw () {
-      return output = input;
+   const adt::StreamString& do_apply (const Elements& elements, adt::StreamString& output) throw () {
+      return output = elements.input;
    }
 };
 
@@ -62,8 +62,7 @@ private:
    unsigned int m_total;
 
    void do_initialize () throw (adt::RuntimeException){
-      for (int ii = 0; ii <= logger::Level::Debug; ++ ii)
-         m_counters [ii] = 0;
+      memset (&m_counters, 0, sizeof (m_counters));
       m_total = 0;
    }
 

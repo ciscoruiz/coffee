@@ -60,3 +60,19 @@ for test in tests:
 
 env.Alias ('test', run_tests)
 
+usr_local_lib = os.path.join (prefix, "lib")
+env.Install (usr_local_lib, libraries)
+env.Alias ("install-lib", usr_local_lib)
+
+
+local_includes = os.path.join (current_directory, "include")
+directory_headers = Glob (local_includes, "wepa")
+env.Install (target_usr_local_headers, directory_headers)
+
+target_usr_local_headers = os.path.join (prefix, "include")
+env.Alias ("install-headers", target_usr_local_headers )
+
+env.Alias ("install", ['install-lib', 'install-headers'])
+ 
+env.Command ("uninstall", None, [ Delete (usr_local_lib), Delete (target_usr_local_headers) ])
+

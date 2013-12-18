@@ -37,6 +37,7 @@
 #include <wepa/logger/Writer.hpp>
 #include <wepa/logger/DefaultFormatter.hpp>
 #include <wepa/logger/Level.hpp>
+#include <wepa/logger/SCCS.hpp>
 
 using namespace wepa;
 
@@ -53,6 +54,8 @@ logger::Logger::WriterPtr logger::Logger::m_writer;
 void logger::Logger::initialize (Writer* writer, Formatter* formatter)
    throw (adt::RuntimeException)
 {
+   SCCS::activate ();
+
    m_writer.reset (writer);
    m_writer->initialize ();
 
@@ -63,14 +66,11 @@ void logger::Logger::initialize (Writer* writer, Formatter* formatter)
 void logger::Logger::initialize (Writer* writer)
    throw (adt::RuntimeException)
 {
-   m_writer.reset (writer);
-   m_writer->initialize ();
-
-   m_formatter.reset (new DefaultFormatter ());
+   initialize (writer, new DefaultFormatter ());
 }
 
 //static
-void logger::Logger::write (const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned line)
+void logger::Logger::write (const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned lineno)
    throw ()
 {
    if (m_writer.get () == NULL || m_formatter.get () == NULL)
@@ -80,7 +80,8 @@ void logger::Logger::write (const Level::_v level, const adt::StreamString& inpu
    if (m_writer->wantsToProcess (level) == false)
       return;
 
-   m_writer->apply (level, m_formatter->apply (level, input, function, file, line));
+   Formatter::Elements elements (level, input, function, file, lineno);
+   m_writer->apply (level, m_formatter->apply (elements));
 }
 
 //static

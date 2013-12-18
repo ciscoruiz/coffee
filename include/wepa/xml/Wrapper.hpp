@@ -32,55 +32,76 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_logger_Formatter_hpp
-#define __wepa_logger_Formatter_hpp
+#ifndef __wepa_xml_Wrapper_hpp
+#define __wepa_xml_Wrapper_hpp
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/NamedObject.hpp>
+#include <boost/function.hpp>
 
-#include <wepa/logger/Level.hpp>
+#include <wepa/adt/RuntimeException.hpp>
 
 namespace wepa {
 
-namespace logger {
+namespace xml {
 
-class Logger;
+class Compiler;
 
-class Formatter : public adt::NamedObject {
+template <typename _Handler> class  Wrapper {
 public:
-   struct Elements {
-      const Level::_v level;
-      const adt::StreamString& input;
-      const char* function;
-      const char* file;
-      const unsigned lineno;
+   typedef boost::function <void (_Handler*)> Deleter;
+   typedef _Handler* Handler;
+   typedef boost::function <const char* (const Handler)> NameExtractor;
 
-      Elements (const Level::_v _level, const adt::StreamString& _input, const char* _function, const char* _file, const unsigned _lineno) :
-         level (_level), input (_input), function (_function), file (_file), lineno (_lineno)
-      {;}
-   };
-
-   virtual ~Formatter () {;}
-
-protected:
-   Formatter (const std::string& name) : adt::NamedObject (name) {;}
-
-   const adt::StreamString& apply (const Elements& elements) throw () {
-      m_result.clear ();
-      return do_apply (elements, m_result);
+   virtual ~Wrapper () {
+      releaseHandler ();
    }
 
-   virtual const adt::StreamString& do_apply (const Elements& elements, adt::StreamString& output) throw () = 0;
+   Handler getHandler () throw () { return m_handler; }
+   Handler getHandler () const throw () { return m_handler; }
+
+   const std::string& getName () const {
+      if (m_handler == NULL) {
+         m_name.clear ();
+      }
+      else if (m_name.empty() == true) {
+         m_name = m_nameExtractor(m_handler);
+      }
+
+      return m_name;
+   }
+
+   operator Handler () throw () { return m_handler; }
+
+protected:
+   Wrapper () : m_handler (NULL), m_deleter (NULL), m_nameExtractor (NULL) {}
+   Wrapper (Handler handler) : m_handler (handler), m_deleter (NULL), m_nameExtractor (NULL) {}
+
+   void setDeleter (Deleter deleter) throw () { m_deleter = deleter; }
+   void setNameExtractor (NameExtractor nameExtractor) throw () { m_nameExtractor = nameExtractor; }
+   Handler setHandler (Handler handler) throw () { m_handler = handler; m_name.clear (); return m_handler; }
+
+   void releaseHandler ()
+      throw ()
+   {
+      if (m_handler != NULL) {
+         if (m_deleter) {
+            m_deleter (m_handler);
+         }
+         m_handler = NULL;
+         m_name.clear ();
+      }
+   }
+
+   virtual void compile (Compiler& compiler) const throw (adt::RuntimeException) {;} ;
 
 private:
-   adt::StreamString m_result;
-
-   friend class Logger;
-
-   Formatter (const Formatter&);
+   Handler m_handler;
+   NameExtractor m_nameExtractor;
+   Deleter m_deleter;
+   mutable std::string m_name;
 };
 
 }
+
 }
 
 #endif

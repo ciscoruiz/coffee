@@ -32,55 +32,41 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_logger_Formatter_hpp
-#define __wepa_logger_Formatter_hpp
+#include <libxml/xmlstring.h>
+#include <libxml/tree.h>
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/NamedObject.hpp>
+#include <wepa/xml/Content.hpp>
 
-#include <wepa/logger/Level.hpp>
+using namespace wepa;
 
-namespace wepa {
+void xml::Content::setValue (const char* value)
+   throw ()
+{
+   unsigned char* utf8Text = NULL;
+   const unsigned char* source = reinterpret_cast <const unsigned char*> (value);
+   bool releaseMemory = false;
 
-namespace logger {
-
-class Logger;
-
-class Formatter : public adt::NamedObject {
-public:
-   struct Elements {
-      const Level::_v level;
-      const adt::StreamString& input;
-      const char* function;
-      const char* file;
-      const unsigned lineno;
-
-      Elements (const Level::_v _level, const adt::StreamString& _input, const char* _function, const char* _file, const unsigned _lineno) :
-         level (_level), input (_input), function (_function), file (_file), lineno (_lineno)
-      {;}
-   };
-
-   virtual ~Formatter () {;}
-
-protected:
-   Formatter (const std::string& name) : adt::NamedObject (name) {;}
-
-   const adt::StreamString& apply (const Elements& elements) throw () {
-      m_result.clear ();
-      return do_apply (elements, m_result);
+   if (xmlCheckUTF8 (source) == 0) {
+      utf8Text = const_cast <unsigned char*> (source);
+      releaseMemory = false;
+   }
+   else {
+      int srcLen = xmlStrlen(source);
+      int targetLen = srcLen;
+      utf8Text = new unsigned char [srcLen + 1];
+      UTF8Toisolat1 (utf8Text, &targetLen, source, &srcLen);
+      utf8Text [targetLen] = 0;
+      releaseMemory = true;
    }
 
-   virtual const adt::StreamString& do_apply (const Elements& elements, adt::StreamString& output) throw () = 0;
+   if (m_value.get () != NULL) {
+      *m_value = (const char*) utf8Text;
+   }
+   else {
+      std::string* ww = new std::string ((const char*) utf8Text);
+      m_value.reset (ww);
+   }
 
-private:
-   adt::StreamString m_result;
-
-   friend class Logger;
-
-   Formatter (const Formatter&);
-};
-
+   if (releaseMemory == true)
+      delete [] utf8Text;
 }
-}
-
-#endif

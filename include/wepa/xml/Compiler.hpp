@@ -32,55 +32,51 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_logger_Formatter_hpp
-#define __wepa_logger_Formatter_hpp
+#ifndef __wepa_xml_Compiler_hpp
+#define __wepa_xml_Compiler_hpp
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/NamedObject.hpp>
+#include <wepa/adt/RuntimeException.hpp>
+#include <wepa/adt/DataBlock.hpp>
 
-#include <wepa/logger/Level.hpp>
+#include <wepa/xml/Wrapper.hpp>
+
+struct _xmlTextWriter;
+struct _xmlBuffer;
 
 namespace wepa {
+namespace xml {
 
-namespace logger {
+class Document;
+class Node;
 
-class Logger;
-
-class Formatter : public adt::NamedObject {
+class Compiler : public Wrapper <_xmlTextWriter> {
 public:
-   struct Elements {
-      const Level::_v level;
-      const adt::StreamString& input;
-      const char* function;
-      const char* file;
-      const unsigned lineno;
+   Compiler ();
+   virtual ~Compiler ();
 
-      Elements (const Level::_v _level, const adt::StreamString& _input, const char* _function, const char* _file, const unsigned _lineno) :
-         level (_level), input (_input), function (_function), file (_file), lineno (_lineno)
-      {;}
-   };
+   std::string apply (const Document& document) throw (adt::RuntimeException);
+   std::string apply (const Node& node) throw (adt::RuntimeException);
 
-   virtual ~Formatter () {;}
+   const char* encode (const char* text) throw (adt::RuntimeException);
+   const char* encode (const std::string& text) throw (adt::RuntimeException) { return encode (text.c_str ()); }
 
-protected:
-   Formatter (const std::string& name) : adt::NamedObject (name) {;}
-
-   const adt::StreamString& apply (const Elements& elements) throw () {
-      m_result.clear ();
-      return do_apply (elements, m_result);
-   }
-
-   virtual const adt::StreamString& do_apply (const Elements& elements, adt::StreamString& output) throw () = 0;
+   void setEncoding (const char* encoding) throw () { m_encoding = encoding; }
 
 private:
-   adt::StreamString m_result;
+   const char* m_encoding;
+   char* m_encodedBuffer;
+   int  m_encodedReservedSize;
 
-   friend class Logger;
+   Compiler (const Compiler&);
 
-   Formatter (const Formatter&);
+   class Buffer : public Wrapper <_xmlBuffer> {
+   public:
+      Buffer ();
+      ~Buffer () {;}
+      const char* getValue () const throw ();
+   };
 };
 
-}
-}
-
+} /* namespace xml */
+} /* namespace wepa */
 #endif

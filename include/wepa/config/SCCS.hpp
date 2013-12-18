@@ -32,55 +32,30 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_logger_Formatter_hpp
-#define __wepa_logger_Formatter_hpp
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/NamedObject.hpp>
+#ifndef _wepa_config_sccs_hpp_
+#define _wepa_config_sccs_hpp_
 
-#include <wepa/logger/Level.hpp>
+#ifndef _DEBUG
+   #define wepa_sccs_define_tag(module,release)  const char* wepa_sccs_##module = "@(#)WEPA."#module" VERSION alfa-13.05."#release"/O";
+   #define wepa_sccs_define_tag_ex(module,ex,release)  const char* wepa_sccs_##module = "@(#)WEPA."#ex" VERSION alfa-13.05."#release"/O";
+#else
+   #define wepa_sccs_define_tag(module,release)  const char* wepa_sccs_##module = "@(#)WEPA."#module" VERSION alfa-13.05."#release"/D";
+   #define wepa_sccs_define_tag_ex(module,ex,release)  const char* wepa_sccs_##module = "@(#)WEPA."#ex" VERSION alfa-13.05."#release"/D";
+#endif
+
+#define wepa_sccs_use_tag(module) (const char *) wepa_sccs_##module
+#define wepa_sccs_import_tag(module) extern const char* wepa_sccs_##module
 
 namespace wepa {
+namespace config {
 
-namespace logger {
-
-class Logger;
-
-class Formatter : public adt::NamedObject {
+class SCCS {
 public:
-   struct Elements {
-      const Level::_v level;
-      const adt::StreamString& input;
-      const char* function;
-      const char* file;
-      const unsigned lineno;
-
-      Elements (const Level::_v _level, const adt::StreamString& _input, const char* _function, const char* _file, const unsigned _lineno) :
-         level (_level), input (_input), function (_function), file (_file), lineno (_lineno)
-      {;}
-   };
-
-   virtual ~Formatter () {;}
-
-protected:
-   Formatter (const std::string& name) : adt::NamedObject (name) {;}
-
-   const adt::StreamString& apply (const Elements& elements) throw () {
-      m_result.clear ();
-      return do_apply (elements, m_result);
-   }
-
-   virtual const adt::StreamString& do_apply (const Elements& elements, adt::StreamString& output) throw () = 0;
-
-private:
-   adt::StreamString m_result;
-
-   friend class Logger;
-
-   Formatter (const Formatter&);
+   static void activate () throw ();
 };
 
 }
 }
 
-#endif
+#endif /* _wepa_config_sccs_hpp_ */

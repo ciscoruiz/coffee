@@ -32,55 +32,55 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_logger_Formatter_hpp
-#define __wepa_logger_Formatter_hpp
+#ifndef __wepa_xml_DTD_hpp
+#define __wepa_xml_DTD_hpp
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/NamedObject.hpp>
+#include <wepa/adt/RuntimeException.hpp>
 
-#include <wepa/logger/Level.hpp>
+#include <wepa/xml/Wrapper.hpp>
+
+struct _xmlDtd;
+struct _xmlValidCtxt;
+
+namespace boost {
+   namespace filesystem {
+      class path;
+   }
+}
 
 namespace wepa {
 
-namespace logger {
+namespace adt {
+   class DataBlock;
+}
 
-class Logger;
+namespace xml {
 
-class Formatter : public adt::NamedObject {
+class Document;
+
+class DTD : public Wrapper <_xmlDtd> {
 public:
-   struct Elements {
-      const Level::_v level;
-      const adt::StreamString& input;
-      const char* function;
-      const char* file;
-      const unsigned lineno;
+   DTD ();
+   virtual ~DTD ();
 
-      Elements (const Level::_v _level, const adt::StreamString& _input, const char* _function, const char* _file, const unsigned _lineno) :
-         level (_level), input (_input), function (_function), file (_file), lineno (_lineno)
-      {;}
-   };
-
-   virtual ~Formatter () {;}
-
-protected:
-   Formatter (const std::string& name) : adt::NamedObject (name) {;}
-
-   const adt::StreamString& apply (const Elements& elements) throw () {
-      m_result.clear ();
-      return do_apply (elements, m_result);
-   }
-
-   virtual const adt::StreamString& do_apply (const Elements& elements, adt::StreamString& output) throw () = 0;
+   void initialize (const boost::filesystem::path& path) throw (adt::RuntimeException);
+   void initialize (const char* buffer, const size_t size) throw (adt::RuntimeException);
+   void initialize (const adt::DataBlock& buffer) throw (adt::RuntimeException);
 
 private:
-   adt::StreamString m_result;
+   static char st_text [1024];
+   _xmlValidCtxt* m_context;
 
-   friend class Logger;
+   void validate (const xml::Document* document) const throw (adt::RuntimeException);
 
-   Formatter (const Formatter&);
+   static const char* nameExtractor(const Handler handler) throw ();
+
+   static void callbackErrorHandler (void *ctx,  const char *msg, ...) throw ();
+   static void callbackWarningHandler (void *ctx,  const char *msg, ...) throw ();
+
+   friend class wepa::xml::Document;
 };
 
-}
-}
-
+} /* namespace xml */
+} /* namespace wepa */
 #endif

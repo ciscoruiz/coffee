@@ -32,55 +32,50 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_logger_Formatter_hpp
-#define __wepa_logger_Formatter_hpp
+#ifndef __wepa_xxxx_Attribute_hpp
+#define __wepa_xxxx_Attribute_hpp
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/NamedObject.hpp>
+#include <wepa/adt/AsString.hpp>
+#include <wepa/adt/RuntimeException.hpp>
 
-#include <wepa/logger/Level.hpp>
+#include <wepa/xml/Wrapper.hpp>
+#include <wepa/xml/Content.hpp>
+
+struct _xmlAttr;
 
 namespace wepa {
+namespace xml {
 
-namespace logger {
+class Document;
+class Compile;
 
-class Logger;
-
-class Formatter : public adt::NamedObject {
+class Attribute : public Wrapper <_xmlAttr> {
 public:
-   struct Elements {
-      const Level::_v level;
-      const adt::StreamString& input;
-      const char* function;
-      const char* file;
-      const unsigned lineno;
+   virtual ~Attribute () {;}
 
-      Elements (const Level::_v _level, const adt::StreamString& _input, const char* _function, const char* _file, const unsigned _lineno) :
-         level (_level), input (_input), function (_function), file (_file), lineno (_lineno)
-      {;}
-   };
+   void setValue (const char* value) throw (adt::RuntimeException);
+   void setValue (const std::string& value) throw (adt::RuntimeException) { setValue (value.c_str ()); }
 
-   virtual ~Formatter () {;}
-
-protected:
-   Formatter (const std::string& name) : adt::NamedObject (name) {;}
-
-   const adt::StreamString& apply (const Elements& elements) throw () {
-      m_result.clear ();
-      return do_apply (elements, m_result);
+   template <typename _T> void setValue(const _T value) throw (adt::RuntimeException) {
+      setValue (adt::AsString::apply(value));
    }
+   const std::string& getValue () const throw ();
 
-   virtual const adt::StreamString& do_apply (const Elements& elements, adt::StreamString& output) throw () = 0;
+   bool operator < (const Attribute& left) const throw ();
 
 private:
-   adt::StreamString m_result;
+   mutable Content m_value;
 
-   friend class Logger;
+   Attribute (_xmlAttr* handler);
 
-   Formatter (const Formatter&);
+   static const char* nameExtractor (const Handler handler) throw ();
+
+   void compile (Compiler& compiler) const throw (adt::RuntimeException);
+
+   friend class Document;
+   friend class Node;
 };
 
-}
-}
-
+} /* namespace xml */
+} /* namespace wepa */
 #endif

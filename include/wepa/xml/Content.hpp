@@ -32,55 +32,29 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_logger_Formatter_hpp
-#define __wepa_logger_Formatter_hpp
+#ifndef __wepa_xml_Content_hpp
+#define __wepa_xml_Content_hpp
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/NamedObject.hpp>
-
-#include <wepa/logger/Level.hpp>
+#include <string>
+#include <memory>
 
 namespace wepa {
+namespace xml {
 
-namespace logger {
-
-class Logger;
-
-class Formatter : public adt::NamedObject {
+class Content {
 public:
-   struct Elements {
-      const Level::_v level;
-      const adt::StreamString& input;
-      const char* function;
-      const char* file;
-      const unsigned lineno;
+   Content () {;}
+   virtual ~Content () { clear (); }
 
-      Elements (const Level::_v _level, const adt::StreamString& _input, const char* _function, const char* _file, const unsigned _lineno) :
-         level (_level), input (_input), function (_function), file (_file), lineno (_lineno)
-      {;}
-   };
-
-   virtual ~Formatter () {;}
-
-protected:
-   Formatter (const std::string& name) : adt::NamedObject (name) {;}
-
-   const adt::StreamString& apply (const Elements& elements) throw () {
-      m_result.clear ();
-      return do_apply (elements, m_result);
-   }
-
-   virtual const adt::StreamString& do_apply (const Elements& elements, adt::StreamString& output) throw () = 0;
+   bool isNull () const throw () { return m_value.get () == NULL; }
+   const std::string& getValue () const throw () { return std::ref (*m_value.get ()); }
+   void setValue (const char* text) throw ();
+   void clear () { m_value.reset (NULL); }
 
 private:
-   adt::StreamString m_result;
-
-   friend class Logger;
-
-   Formatter (const Formatter&);
+   std::auto_ptr <std::string> m_value;
 };
 
-}
-}
-
+} /* namespace xml */
+} /* namespace wepa */
 #endif

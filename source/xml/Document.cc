@@ -33,6 +33,7 @@
 // Author: cisco.tierra@gmail.com
 //
 #include <libxml/parser.h>
+#include <libxml/xmlwriter.h>
 
 #include <iostream>
 #include <boost/filesystem.hpp>
@@ -44,6 +45,7 @@
 #include <wepa/xml/DTD.hpp>
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/SCCS.hpp>
+#include <wepa/xml/Compiler.hpp>
 
 using namespace wepa;
 
@@ -185,5 +187,22 @@ void xml::Document::extractAttributes (xml::Node& node)
       node.addAttribute(new xml::Attribute (xmlAttribute));
       xmlAttribute = xmlAttribute->next;
    }
+}
+
+void xml::Document::compile (xml::Compiler& compiler) const
+   throw (adt::RuntimeException)
+{
+   Compiler::Handler compilerHandler = compiler.getHandler();
+
+   Handler handler = getHandler();
+
+   if (xmlTextWriterStartDocument(compiler, (const char*) handler->version, (const char*) handler->encoding, NULL) < 0)
+      WEPA_THROW_EXCEPTION("Document " << getName() << " could not start document");
+
+   if (m_root.get() != NULL)
+      m_root.get ()->compile (compiler);
+
+   if (xmlTextWriterEndDocument(compiler) < 0)
+      WEPA_THROW_EXCEPTION("Document " << getName() << " could not start document");
 }
 

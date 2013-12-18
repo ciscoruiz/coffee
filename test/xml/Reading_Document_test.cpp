@@ -36,10 +36,12 @@
 #include <boost/filesystem.hpp>
 
 #include <wepa/adt/DataBlock.hpp>
+#include <wepa/adt/AsString.hpp>
 
 #include <wepa/xml/Document.hpp>
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Attribute.hpp>
+#include <wepa/xml/Compiler.hpp>
 
 using namespace wepa;
 using namespace wepa::xml;
@@ -353,4 +355,42 @@ BOOST_AUTO_TEST_CASE (file_document)
       BOOST_REQUIRE_EQUAL (child.attributes_size(), 1);
       BOOST_REQUIRE_EQUAL (child.hasText(), true);
    }
+}
+
+BOOST_AUTO_TEST_CASE (compile_document)
+{
+   const char* buffer = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node attr_aaa=\"text one\" attr_bbb=\"text two\" attr_ccc=\"text three\"/>\n";
+
+   adt::DataBlock content (buffer, strlen (buffer) + 1);
+
+   Document doc;
+
+   BOOST_REQUIRE (doc.getHandler() == NULL);
+
+   doc.parse (content);
+
+   Compiler compiler;
+
+   std::string str = compiler.apply (doc);
+
+   BOOST_REQUIRE_EQUAL (str, buffer);
+}
+
+BOOST_AUTO_TEST_CASE (compile_document_iso)
+{
+   const char* buffer = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node>Jörg</root_node>\n";
+
+   adt::DataBlock content (buffer, strlen (buffer) + 1);
+
+   Document doc;
+
+   BOOST_REQUIRE (doc.getHandler() == NULL);
+
+   doc.parse (content);
+
+   Compiler compiler;
+
+   std::string str = compiler.apply (doc);
+
+   BOOST_REQUIRE_EQUAL (str, buffer);
 }

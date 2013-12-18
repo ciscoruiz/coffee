@@ -34,6 +34,7 @@
 //
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <wepa/adt/DataBlock.hpp>
 #include <wepa/adt/Second.hpp>
@@ -41,13 +42,14 @@
 #include <wepa/xml/Document.hpp>
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Attribute.hpp>
+#include <wepa/xml/Compiler.hpp>
 
 using namespace wepa;
 using namespace wepa::xml;
 
 BOOST_AUTO_TEST_CASE (create_nodes)
 {
-   std::auto_ptr <xml::Node> root (new xml::Node ("the_root"));
+   boost::scoped_ptr <xml::Node> root (new xml::Node ("the_root"));
 
    xml::Node& level00 = root->createChild("level0-0");
    level00.createChild ("level1-0");
@@ -67,7 +69,7 @@ BOOST_AUTO_TEST_CASE (create_nodes)
 
 BOOST_AUTO_TEST_CASE (create_text)
 {
-   std::auto_ptr <xml::Node> root (new xml::Node ("the_root"));
+   boost::scoped_ptr <xml::Node> root (new xml::Node ("the_root"));
 
    xml::Node& level00 = root->createChild("level0-0");
    level00.createText ("0-0");
@@ -80,7 +82,7 @@ BOOST_AUTO_TEST_CASE (create_text)
 
 BOOST_AUTO_TEST_CASE (create_attribute)
 {
-   std::auto_ptr <xml::Node> root (new xml::Node ("the_root"));
+   boost::scoped_ptr <xml::Node> root (new xml::Node ("the_root"));
 
    root->createAttribute ("attr_char", "This is the char");
    root->createAttribute ("attr_int", 1024);
@@ -95,7 +97,7 @@ BOOST_AUTO_TEST_CASE (create_attribute)
 
 BOOST_AUTO_TEST_CASE (change_attribute)
 {
-   std::auto_ptr <xml::Node> root (new xml::Node ("the_root"));
+   boost::scoped_ptr <xml::Node> root (new xml::Node ("the_root"));
 
    root->createAttribute ("attr_char", "This is the char");
 
@@ -111,4 +113,56 @@ BOOST_AUTO_TEST_CASE (change_attribute)
    int ii;
 
    BOOST_REQUIRE_EQUAL (root->lookupAttribute("attr_char").getValue (), "zzz");
+}
+
+BOOST_AUTO_TEST_CASE (compile_text)
+{
+   boost::scoped_ptr <xml::Node> root (new xml::Node ("the_root"));
+
+   xml::Node& level00 = root->createChild("level0-0");
+   level00.createText ("0-0");
+
+   xml::Compiler compiler;
+
+   std::string str = compiler.apply (*root);
+
+   BOOST_REQUIRE_EQUAL (str, "<the_root><level0-0>0-0</level0-0></the_root>");
+}
+
+BOOST_AUTO_TEST_CASE (compile_tree)
+{
+   boost::scoped_ptr <xml::Node> root (new xml::Node ("the_root"));
+
+   xml::Node& level00 = root->createChild("level0");
+   level00.createChild ("level1");
+   level00.createChild ("level2");
+   xml::Node& last = level00.createChild ("level3").createChild ("LevelA");
+
+   last.createAttribute("first", "111");
+   last.createAttribute("second", 222);
+
+   xml::Compiler compiler;
+
+   std::string str = compiler.apply (*root);
+
+   BOOST_REQUIRE_EQUAL (str, "<the_root><level0><level1/><level2/><level3><LevelA first=\"111\" second=\"222\"/></level3></level0></the_root>");
+}
+
+BOOST_AUTO_TEST_CASE (compile_iso)
+{
+   boost::scoped_ptr <xml::Node> root (new xml::Node ("the_root"));
+
+   xml::Node& level00 = root->createChild("level00");
+   level00.createAttribute("Name", "Jörg1");
+   level00.createAttribute("Other", "Büörgä");
+
+   xml::Node& level01 = root->createChild("level01");
+   level01.createText ("Jörg2");
+
+   xml::Compiler compiler;
+
+   compiler.setEncoding("ISO-8859-1");
+   std::string str = compiler.apply (*root);
+
+   BOOST_REQUIRE_EQUAL (str, "<the_root><level00 Name=\"J&#xF6;rg1\" Other=\"B&#xFC;&#xF6;rg&#xE4;\"/><level01>Jörg2</level01></the_root>");
 }

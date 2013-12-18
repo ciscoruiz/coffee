@@ -35,8 +35,10 @@
 #include <string.h>
 
 #include <libxml/tree.h>
+#include <libxml/xmlwriter.h>
 
 #include <wepa/xml/Attribute.hpp>
+#include <wepa/xml/Compiler.hpp>
 
 using namespace wepa;
 
@@ -88,4 +90,23 @@ bool xml::Attribute::operator < (const Attribute& left) const
       return false;
 
    return strcmp (thisName, leftName) < 0;
+}
+
+void xml::Attribute::compile (Compiler& compiler) const
+   throw (adt::RuntimeException)
+{
+   xmlNsPtr nameSpace = getHandler()->ns;
+
+   int rc;
+
+   const unsigned char* name = BAD_CAST (getName ().c_str ());
+   const unsigned char* value = BAD_CAST (compiler.encode (getValue ()));
+
+   if (nameSpace == NULL)
+      rc = xmlTextWriterWriteAttribute (compiler, name, value);
+   else
+      rc = xmlTextWriterWriteAttributeNS (compiler, BAD_CAST (nameSpace->prefix), name, BAD_CAST (nameSpace->href), value);
+
+   if (rc < 0)
+      WEPA_THROW_EXCEPTION("Can not compile attribute " << getName ());
 }

@@ -32,48 +32,49 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_xxxx_Attribute_hpp
-#define __wepa_xxxx_Attribute_hpp
+#ifndef __wepa_xml_Compiler_hpp
+#define __wepa_xml_Compiler_hpp
 
-#include <wepa/adt/AsString.hpp>
 #include <wepa/adt/RuntimeException.hpp>
+#include <wepa/adt/DataBlock.hpp>
 
 #include <wepa/xml/Wrapper.hpp>
-#include <wepa/xml/Content.hpp>
 
-struct _xmlAttr;
+struct _xmlTextWriter;
+struct _xmlBuffer;
 
 namespace wepa {
 namespace xml {
 
 class Document;
-class Compile;
+class Node;
 
-class Attribute : public Wrapper <_xmlAttr> {
+class Compiler : public Wrapper <_xmlTextWriter> {
 public:
-   virtual ~Attribute () {;}
+   Compiler ();
+   virtual ~Compiler ();
 
-   void setValue (const char* value) throw (adt::RuntimeException);
-   void setValue (const std::string& value) throw (adt::RuntimeException) { setValue (value.c_str ()); }
+   std::string apply (const Document& document) throw (adt::RuntimeException);
+   std::string apply (const Node& node) throw (adt::RuntimeException);
 
-   template <typename _T> void setValue(const _T value) throw (adt::RuntimeException) {
-      setValue (adt::AsString::apply(value));
-   }
-   const std::string& getValue () const throw ();
+   const char* encode (const char* text) throw (adt::RuntimeException);
+   const char* encode (const std::string& text) throw (adt::RuntimeException) { return encode (text.c_str ()); }
 
-   bool operator < (const Attribute& left) const throw ();
+   void setEncoding (const char* encoding) throw () { m_encoding = encoding; }
 
 private:
-   mutable Content m_value;
+   const char* m_encoding;
+   char* m_encodedBuffer;
+   int  m_encodedReservedSize;
 
-   Attribute (_xmlAttr* handler);
+   Compiler (const Compiler&);
 
-   static const char* nameExtractor (const Handler handler) throw ();
-
-   void compile (Compiler& compiler) const throw (adt::RuntimeException);
-
-   friend class Document;
-   friend class Node;
+   class Buffer : public Wrapper <_xmlBuffer> {
+   public:
+      Buffer ();
+      ~Buffer () {;}
+      const char* getValue () const throw ();
+   };
 };
 
 } /* namespace xml */

@@ -32,42 +32,25 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef wepa_logger_Writer_hpp
-#define wepa_logger_Writer_hpp
+#ifndef __wepa_logger_TtyWriter_hpp
+#define __wepa_logger_TtyWriter_hpp
 
-#include <wepa/adt/pattern/observer/Subject.hpp>
-#include <wepa/logger/Level.hpp>
+#include <wepa/logger/Writer.hpp>
 
 namespace wepa {
-
 namespace logger {
 
-class Logger;
-
-class Writer : public adt::pattern::observer::Subject {
+class TtyWriter : public Writer {
 public:
-   virtual ~Writer () {;}
-
-protected:
-   Writer (const std::string& name) : adt::pattern::observer::Subject (name) {;}
-
-   virtual bool wantsToProcess (const Level::_v level) const throw ();
+   TtyWriter () : Writer ("TtyWriter") {;}
 
 private:
-   Writer (const Writer&);
-
-   void initialize () throw (adt::RuntimeException) {
-      do_initialize ();
-      notify ();
+   void do_initialize () throw (adt::RuntimeException) {;}
+   void apply (const Level::_v level, const std::string& line) throw () {
+      std::cout << line << std::endl;
    }
-
-   virtual void do_initialize () throw (adt::RuntimeException) = 0;
-   virtual void apply (const Level::_v level, const std::string& line) throw () = 0;
-
-   friend class Logger;
 };
 
-}
-}
-
+} /* namespace logger */
+} /* namespace wepa */
 #endif

@@ -127,7 +127,7 @@ void app::Application::start ()
    }
 
    if (sigset (SIGCHLD, handlerChildTerminate) != 0) {
-      LOG_ERROR (asString () << strerror (errno));
+      LOG_ERROR (asString () << " | " << strerror (errno));
    }
 
    try {

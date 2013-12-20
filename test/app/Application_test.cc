@@ -38,6 +38,9 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <wepa/logger/Logger.hpp>
+#include <wepa/logger/TtyWriter.hpp>
+
 #include <wepa/app/Application.hpp>
 
 using namespace std;
@@ -53,6 +56,8 @@ public:
 BOOST_AUTO_TEST_CASE( smallest_application )
 { 
    SmallestApplication application;
+
+   logger::Logger::initialize(new logger::TtyWriter);
 
    try {
       application.start ();

@@ -124,3 +124,22 @@ BOOST_AUTO_TEST_CASE( undefined_predecessor )
    BOOST_REQUIRE_EQUAL(application.isStopped(), true);
    BOOST_REQUIRE_EQUAL(application.isRunning(), false);
 }
+
+BOOST_AUTO_TEST_CASE( interdependence_predecessor )
+{
+   SmallestApplication application;
+
+   MyEngine myEngine00 (application, "00");
+   MyEngine myEngine01 (application, "01");
+
+   myEngine00.setPredecessor("01");
+   myEngine01.setPredecessor("00");
+
+   BOOST_REQUIRE_THROW(application.start (), adt::RuntimeException);;
+
+   BOOST_REQUIRE_EQUAL (myEngine00.getInitializedCounter(), 0);
+   BOOST_REQUIRE_EQUAL (myEngine00.getStoppedCounter(), 0);
+
+   BOOST_REQUIRE_EQUAL(application.isStopped(), true);
+   BOOST_REQUIRE_EQUAL(application.isRunning(), false);
+}

@@ -92,6 +92,11 @@ void app::EngineIf::initialize ()
             WEPA_THROW_EXCEPTION(asString () << " requires '" << name << "' which was not defined");
          }
 
+         if (predecessor->isRunning() == true) {
+            LOG_DEBUG ("Predecessor '" << name << "' already running");
+            continue;
+         }
+
          if (predecessor->isStarting()) {
             WEPA_THROW_EXCEPTION(asString () << " has loop with requirement '" << name << "'");
          }
@@ -100,6 +105,7 @@ void app::EngineIf::initialize ()
       }
 
       do_initialize ();
+      statusRunning();
    }
    catch (adt::RuntimeException&) {
       statusStopped ();

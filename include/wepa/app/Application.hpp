@@ -114,7 +114,6 @@ public:
    /**
       Activa la salida por pantalla del mensaje referente a la licencia GPL 3.0.
       \warning Para que tenga efecto debe ser invocado antes de ejecutar el metodo Application::start.
-      \since NemesisRD.app 1.6.1
    */
    void activateGeneralPublicLicense () throw () { a_enableGPL = true; }
 
@@ -135,7 +134,6 @@ public:
     * Este m�todo se invocar� cuando alguna capa superior a �sta detecte un problema tan grave
     * como para parar la aplicaci�n de forma s�bita.
     * \param className Nombre de la clase que genera el evento.
-    * \since NemesisRD.app 1.11.1, 2.10.06.1
     *
     * \warning En el momento de invocar a este m�todo la aplicaci�n puede estar en un estado
     * no muy estable por lo que se deber�an minizar las operaciones a realizar para evitar
@@ -214,7 +212,6 @@ protected:
    /**
       Metodo manejador que podemos re-escribir para tratar la recepcion de la senhal USR1.
       Por defecto volcar� el contexto.
-      \since NemesisRD.app 1.4.1
    */
    virtual void signalUSR1 () throw (adt::RuntimeException);
 
@@ -222,8 +219,6 @@ protected:
       Metodo manejador que podemos re-escribir para tratar la recepcion de la senhal USR1.
       Por defecto incrementar� el nivel de trazas actual. Si llega se alcanza el nivel Level::Debug
       volver� al nivel Level::Error.
-
-      \since NemesisRD.app 2.0.1
    */
    virtual void signalUSR2 () throw (adt::RuntimeException);
 

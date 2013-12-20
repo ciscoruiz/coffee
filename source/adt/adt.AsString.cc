@@ -43,11 +43,11 @@
 using namespace std;
 using namespace wepa;
 
-string adt::AsString::apply (const int number)
+string adt::AsString::apply (const int number, const char* format)
    throw ()
 {
    char aux [16];
-   sprintf (aux, "%d", number);
+   sprintf (aux, format, number);
    return string (aux);
 }
 

@@ -32,72 +32,35 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+#include <limits.h>
 
-#ifndef _wepa_adt_ASSTRING_H
-#define _wepa_adt_ASSTRING_H
+#include <iostream>
 
-#include <string>
+#include <boost/test/unit_test.hpp>
 
-#include <wepa/config/defines.hpp>
+#include <wepa/app/Application.hpp>
 
-namespace wepa {
+using namespace std;
+using namespace wepa;
 
-namespace adt {
-
-class DataBlock;
-
-/**
- * @brief The AsString class. This class convert different data types into std::string.
- */
-class AsString {
+class SmallestApplication : public app::Application {
 public:
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const int number, const char* format = "%d") throw ();
+   SmallestApplication () : app::Application ("SmallerApplication", "This is the title", "1.0") {;}
 
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const unsigned int number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const long number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Integer64 number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Unsigned64 number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static const char* apply (const bool _bool) throw () { return (_bool == true) ? "true": "false"; }
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const double v, const char* format="%e") throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const float v, const char* format="%f") throw ();
-
-   /**
-    * \return A string with a brief description of the data block.
-    */
-   static std::string apply (const DataBlock& dataBlock, const int characterByLine = 16) throw ();
+   void run () throw (adt::RuntimeException) {;}
 };
 
-}
+BOOST_AUTO_TEST_CASE( smallest_application )
+{ 
+   SmallestApplication application;
+
+   try {
+      application.start ();
+   }
+   catch (adt::RuntimeException& ex) {
+      std::cout << ex.asString() << std::endl;
+   }
+
+   BOOST_REQUIRE_EQUAL (application.getPid(), getpid());
 }
 
-#endif // ASSTRING_H

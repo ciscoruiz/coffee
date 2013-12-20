@@ -68,6 +68,10 @@ public:
       @return A string with the number.
    */
    static std::string apply (const Unsigned64 number) throw ();
+
+private:
+   AsHexString ();
+   AsHexString (const AsHexString&);
 };
 
 }

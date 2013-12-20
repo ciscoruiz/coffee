@@ -40,7 +40,7 @@
 
 #include <wepa/logger/SCCS.hpp>
 
-wepa_sccs_define_tag (logger, 0)
+wepa_sccs_define_tag (logger, 1)
 
 using namespace wepa;
 

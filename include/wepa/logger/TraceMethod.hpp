@@ -82,6 +82,6 @@ private:
 }
 }
 
-#define LOG_THIS_METHOD wepa::logger::TraceMethod (WEPA_FILE_LOCATION)
+#define LOG_THIS_METHOD() wepa::logger::TraceMethod (WEPA_FILE_LOCATION)
 
 #endif

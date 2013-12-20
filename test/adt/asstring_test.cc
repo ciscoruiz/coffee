@@ -52,6 +52,8 @@ BOOST_AUTO_TEST_CASE( asstring_integer )
 
    BOOST_REQUIRE_EQUAL(result, "10");
 
+   BOOST_REQUIRE_EQUAL (adt::AsString::apply(val, "%05d"), "00010");
+
    result = adt::AsString::apply (0);
    BOOST_REQUIRE_EQUAL(result, "0");
 

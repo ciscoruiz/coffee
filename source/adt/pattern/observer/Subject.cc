@@ -69,7 +69,7 @@ bool observer::Subject::unsubscribeObserver (Observer* _observer)
    const std::string& name = _observer->getName();
 
    for (auto ii = observer_begin (), maxii = observer_end (); ii != maxii; ++ ii) {
-      if (get_observer (ii)->getName () == name) {
+      if (get_observer (ii)->isEqual (name)) {
          m_observers.erase(ii);
          _observer->m_subject = NULL;
          return true;

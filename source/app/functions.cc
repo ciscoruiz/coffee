@@ -32,72 +32,23 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+#include <wepa/app/Application.hpp>
+#include <wepa/app/functions.hpp>
 
-#ifndef _wepa_adt_ASSTRING_H
-#define _wepa_adt_ASSTRING_H
+using namespace wepa;
 
-#include <string>
+//static
+app::Application* app::functions::st_application = NULL;
 
-#include <wepa/config/defines.hpp>
+//static
+app::Application& app::functions::getApp ()
+   throw (adt::RuntimeException)
+{
+   if (st_application == NULL)
+      WEPA_THROW_EXCEPTION("There is not any registered app::Application");
 
-namespace wepa {
-
-namespace adt {
-
-class DataBlock;
-
-/**
- * @brief The AsString class. This class convert different data types into std::string.
- */
-class AsString {
-public:
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const int number, const char* format = "%d") throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const unsigned int number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const long number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Integer64 number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Unsigned64 number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static const char* apply (const bool _bool) throw () { return (_bool == true) ? "true": "false"; }
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const double v, const char* format="%e") throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const float v, const char* format="%f") throw ();
-
-   /**
-    * \return A string with a brief description of the data block.
-    */
-   static std::string apply (const DataBlock& dataBlock, const int characterByLine = 16) throw ();
-};
-
-}
+   return *st_application;
 }
 
-#endif // ASSTRING_H
+
+

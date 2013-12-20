@@ -32,72 +32,83 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-
-#ifndef _wepa_adt_ASSTRING_H
-#define _wepa_adt_ASSTRING_H
-
-#include <string>
+#include <wepa/app/Runnable.hpp>
+#include <wepa/logger/Logger.hpp>
 
 #include <wepa/config/defines.hpp>
 
-namespace wepa {
+#include <wepa/adt/StreamString.hpp>
+#include <wepa/adt/AsString.hpp>
+#include <wepa/adt/AsHexString.hpp>
 
-namespace adt {
+#include <wepa/xml/Node.hpp>
+#include <wepa/xml/Attribute.hpp>
 
-class DataBlock;
+using namespace std;
+using namespace wepa;
 
-/**
- * @brief The AsString class. This class convert different data types into std::string.
- */
-class AsString {
-public:
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const int number, const char* format = "%d") throw ();
+void app::Runnable::requestStop ()
+   throw (adt::RuntimeException)
+{
+   if (isWaitingStop () == true)
+      return;
 
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const unsigned int number) throw ();
+   do_requestStop ();
 
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const long number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Integer64 number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Unsigned64 number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static const char* apply (const bool _bool) throw () { return (_bool == true) ? "true": "false"; }
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const double v, const char* format="%e") throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const float v, const char* format="%f") throw ();
-
-   /**
-    * \return A string with a brief description of the data block.
-    */
-   static std::string apply (const DataBlock& dataBlock, const int characterByLine = 16) throw ();
-};
-
-}
+   m_statusFlags |= StatusFlags::WaitingStop;
 }
 
-#endif // ASSTRING_H
+//virtual
+adt::StreamString app::Runnable::asString () const
+   throw ()
+{
+   adt::StreamString result ("wepa::app::Runnable { Reference: ");
+
+   result << adt::AsHexString::apply (wepa_ptrnumber_cast (this));
+
+   if (m_name != NULL) {
+      result << " | Name: " << *m_name;
+   }
+
+   result << " | Status:" << flagsAsString ();
+
+   return result += " }";
+}
+
+// virtual
+xml::Node& app::Runnable::asXML (xml::Node& parent) const
+   throw ()
+{
+   xml::Node& result = parent.createChild("Runnable");
+
+   result.createAttribute ("Reference", adt::AsHexString::apply (wepa_ptrnumber_cast (this)));
+
+   if (m_name != NULL)
+      result.createAttribute ("Name", *m_name);
+
+   result.createAttribute ("Status", flagsAsString());
+
+   return result;
+}
+
+std::string app::Runnable::flagsAsString () const
+   throw ()
+{
+   string result;
+
+   if (m_statusFlags == StatusFlags::Stopped) {
+      result += " Stopped";
+   }
+   else {
+      if (isWaitingStop () == true)
+         result += " WaitingStop";
+
+      if (isRunning() == true)
+         result += " Running";
+
+      if (isStarting() == true)
+         result += " Starting";
+   }
+
+   return result;
+}

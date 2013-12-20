@@ -32,72 +32,56 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+#ifndef __wepm_logger_TraceMethod_hpp
+#define __wepm_logger_TraceMethod_hpp
 
-#ifndef _wepa_adt_ASSTRING_H
-#define _wepa_adt_ASSTRING_H
-
-#include <string>
-
-#include <wepa/config/defines.hpp>
+#include <wepa/logger/Level.hpp>
 
 namespace wepa {
 
-namespace adt {
+namespace logger {
 
-class DataBlock;
-
-/**
- * @brief The AsString class. This class convert different data types into std::string.
- */
-class AsString {
+class TraceMethod  {
 public:
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const int number, const char* format = "%d") throw ();
+   TraceMethod (const char* methodName, const char* fromFile, const int fromLine) :
+      m_level (Level::Debug),
+      m_methodName (methodName),
+      m_fromFile (fromFile),
+      m_ok (false)
+   {
+      if ((m_ok = Logger::wantsToProcess (m_level)) == true)
+         Logger::write (m_level, "begin", methodName, fromFile, fromLine);
+   }
+
+   TraceMethod (const Level::_v level, const char* methodName, const char* fromFile, const int fromLine) :
+      m_level (level),
+      m_methodName (methodName),
+      m_fromFile (fromFile),
+      m_ok (false)
+   {
+      if ((m_ok = Logger::wantsToProcess (m_level)) == true)
+         Logger::write (m_level, "begin", methodName, fromFile, fromLine);
+   }
 
    /**
-      @return A string with the number.
+      Destructor.
    */
-   static std::string apply (const unsigned int number) throw ();
+   ~TraceMethod () {
+      if (m_ok == true && Logger::wantsToProcess(m_level) == true) {
+         Logger::write (m_level, "end", m_methodName, m_fromFile, 0);
+      }
+   }
 
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const long number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Integer64 number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Unsigned64 number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static const char* apply (const bool _bool) throw () { return (_bool == true) ? "true": "false"; }
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const double v, const char* format="%e") throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const float v, const char* format="%f") throw ();
-
-   /**
-    * \return A string with a brief description of the data block.
-    */
-   static std::string apply (const DataBlock& dataBlock, const int characterByLine = 16) throw ();
+private:
+   const Level::_v m_level;
+   const char* m_methodName;
+   const char* m_fromFile;
+   bool m_ok;
 };
 
 }
 }
 
-#endif // ASSTRING_H
+#define LOG_THIS_METHOD() wepa::logger::TraceMethod __traceMethod__ (WEPA_FILE_LOCATION)
+
+#endif

@@ -33,71 +33,22 @@
 // Author: cisco.tierra@gmail.com
 //
 
-#ifndef _wepa_adt_ASSTRING_H
-#define _wepa_adt_ASSTRING_H
+#include <wepa/config/SCCSRepository.hpp>
 
-#include <string>
+#include <wepa/config/SCCS.hpp>
+#include <wepa/adt/SCCS.hpp>
 
-#include <wepa/config/defines.hpp>
+#include <wepa/app/SCCS.hpp>
 
-namespace wepa {
+wepa_sccs_define_tag (app, 0)
 
-namespace adt {
+using namespace wepa;
 
-class DataBlock;
+void app::SCCS::activate()
+   throw ()
+{
+   adt::SCCS::activate ();
 
-/**
- * @brief The AsString class. This class convert different data types into std::string.
- */
-class AsString {
-public:
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const int number, const char* format = "%d") throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const unsigned int number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const long number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Integer64 number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Unsigned64 number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static const char* apply (const bool _bool) throw () { return (_bool == true) ? "true": "false"; }
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const double v, const char* format="%e") throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const float v, const char* format="%f") throw ();
-
-   /**
-    * \return A string with a brief description of the data block.
-    */
-   static std::string apply (const DataBlock& dataBlock, const int characterByLine = 16) throw ();
-};
-
-}
+   config::SCCSRepository::getInstance().registerModule(wepa_sccs_use_tag(app));
 }
 
-#endif // ASSTRING_H

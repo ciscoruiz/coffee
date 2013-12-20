@@ -32,72 +32,25 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+#ifndef __wepa_logger_TtyWriter_hpp
+#define __wepa_logger_TtyWriter_hpp
 
-#ifndef _wepa_adt_ASSTRING_H
-#define _wepa_adt_ASSTRING_H
-
-#include <string>
-
-#include <wepa/config/defines.hpp>
+#include <wepa/logger/Writer.hpp>
 
 namespace wepa {
+namespace logger {
 
-namespace adt {
-
-class DataBlock;
-
-/**
- * @brief The AsString class. This class convert different data types into std::string.
- */
-class AsString {
+class TtyWriter : public Writer {
 public:
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const int number, const char* format = "%d") throw ();
+   TtyWriter () : Writer ("TtyWriter") {;}
 
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const unsigned int number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const long number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Integer64 number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Unsigned64 number) throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static const char* apply (const bool _bool) throw () { return (_bool == true) ? "true": "false"; }
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const double v, const char* format="%e") throw ();
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const float v, const char* format="%f") throw ();
-
-   /**
-    * \return A string with a brief description of the data block.
-    */
-   static std::string apply (const DataBlock& dataBlock, const int characterByLine = 16) throw ();
+private:
+   void do_initialize () throw (adt::RuntimeException) {;}
+   void apply (const Level::_v level, const std::string& line) throw () {
+      std::cout << line << std::endl;
+   }
 };
 
-}
-}
-
-#endif // ASSTRING_H
+} /* namespace logger */
+} /* namespace wepa */
+#endif

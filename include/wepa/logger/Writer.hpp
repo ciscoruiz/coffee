@@ -45,6 +45,9 @@ namespace logger {
 class Logger;
 
 class Writer : public adt::pattern::observer::Subject {
+public:
+   virtual ~Writer () {;}
+
 protected:
    Writer (const std::string& name) : adt::pattern::observer::Subject (name) {;}
 

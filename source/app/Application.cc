@@ -203,6 +203,9 @@ void app::Application::stopEngines ()
    for (engine_iterator ii = engine_begin (); ii != engine_end (); ii ++) {
       engine = Application::engine (ii);
 
+      if (engine->isStopped() == true)
+         continue;
+
       LOG_INFO ("Finalizing engine | " <<  engine->asString ());
 
       try {

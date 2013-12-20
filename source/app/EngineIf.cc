@@ -89,21 +89,19 @@ void app::EngineIf::initialize ()
          const std::string& name = data (ii);
 
          if ((predecessor = a_app.engine_find (name.c_str ())) == NULL) {
-            WEPA_THROW_EXCEPTION(asString () << " requires " << name << " which was not defined");
+            WEPA_THROW_EXCEPTION(asString () << " requires '" << name << "' which was not defined");
          }
 
          if (predecessor->isStarting()) {
-            WEPA_THROW_EXCEPTION(asString () << " has loop with requirement" << name);
+            WEPA_THROW_EXCEPTION(asString () << " has loop with requirement '" << name << "'");
          }
 
          predecessor->initialize ();
       }
 
       do_initialize ();
-      statusRunning ();
    }
    catch (adt::RuntimeException&) {
-      do_stop ();
       statusStopped ();
       throw;
    }

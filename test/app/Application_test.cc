@@ -42,30 +42,85 @@
 #include <wepa/logger/TtyWriter.hpp>
 
 #include <wepa/app/Application.hpp>
+#include <wepa/app/EngineIf.hpp>
 
 using namespace std;
 using namespace wepa;
 
 class SmallestApplication : public app::Application {
 public:
-   SmallestApplication () : app::Application ("SmallerApplication", "This is the title", "1.0") {;}
+   SmallestApplication () : app::Application ("SmallerApplication", "This is the title", "1.0") {
+      logger::Logger::initialize(new logger::TtyWriter);
+   }
 
    void run () throw (adt::RuntimeException) {;}
+};
+
+class MyEngine : public app::EngineIf {
+public:
+   MyEngine (app::Application& application, const char* name) : EngineIf (application, name), m_initilized (0), m_stopped (0) {;}
+
+   int getInitializedCounter () const throw () { return m_initilized; }
+   int getStoppedCounter () const throw () { return m_stopped; }
+
+   void setPredecessor (const char* predecessor) throw () { this->addPredecessor(predecessor); }
+
+private:
+   int m_initilized;
+   int m_stopped;
+
+   void do_initialize () throw (adt::RuntimeException){ ++ m_initilized;}
+   void do_stop () throw (adt::RuntimeException) { ++ m_stopped;}
 };
 
 BOOST_AUTO_TEST_CASE( smallest_application )
 { 
    SmallestApplication application;
 
-   logger::Logger::initialize(new logger::TtyWriter);
+   BOOST_REQUIRE_EQUAL (application.engine_find("00") == NULL, true);
 
-   try {
-      application.start ();
-   }
-   catch (adt::RuntimeException& ex) {
-      std::cout << ex.asString() << std::endl;
-   }
+   MyEngine myEngine00 (application, "00");
+
+   application.start ();
 
    BOOST_REQUIRE_EQUAL (application.getPid(), getpid());
+
+   BOOST_REQUIRE_EQUAL(&myEngine00.getApplication(), &application);
+   BOOST_REQUIRE_EQUAL (application.engine_find("00"), &myEngine00);
+
+   BOOST_REQUIRE_EQUAL (myEngine00.getInitializedCounter(), 1);
+   BOOST_REQUIRE_EQUAL (myEngine00.getStoppedCounter(), 1);
 }
 
+BOOST_AUTO_TEST_CASE( status_application )
+{
+   SmallestApplication application;
+
+   BOOST_REQUIRE_EQUAL(application.isStopped(), true);
+   BOOST_REQUIRE_EQUAL(application.isRunning(), false);
+
+   application.start ();
+
+   BOOST_REQUIRE_EQUAL(application.isStopped(), true);
+   BOOST_REQUIRE_EQUAL(application.isRunning(), false);
+}
+
+
+BOOST_AUTO_TEST_CASE( undefined_predecessor )
+{
+   SmallestApplication application;
+
+   BOOST_REQUIRE_EQUAL (application.engine_find("00") == NULL, true);
+
+   MyEngine myEngine00 (application, "00");
+
+   myEngine00.setPredecessor("undefined");
+
+   BOOST_REQUIRE_THROW(application.start (), adt::RuntimeException);;
+
+   BOOST_REQUIRE_EQUAL (myEngine00.getInitializedCounter(), 0);
+   BOOST_REQUIRE_EQUAL (myEngine00.getStoppedCounter(), 0);
+
+   BOOST_REQUIRE_EQUAL(application.isStopped(), true);
+   BOOST_REQUIRE_EQUAL(application.isRunning(), false);
+}

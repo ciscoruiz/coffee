@@ -94,7 +94,7 @@ protected:
    BalanceIf (const char* name, const Requires::_v requires) : adt::NamedObject (name), m_requires (requires) {;}
 
    virtual void do_initialize () throw (adt::RuntimeException) {;}
-   virtual void do_initializer (Resource* resource) throw (adt::RuntimeException) {;}
+   virtual void do_initializer (Resource* resource) throw (adt::RuntimeException);
    virtual bool do_contains (const Resource* resource) const throw ();
 
    virtual Resource* do_apply (const int key) throw (adt::RuntimeException) = 0;

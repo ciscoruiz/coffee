@@ -52,7 +52,7 @@ public:
    MyResource (const int key) :
       Resource (adt::StreamString ("MyResource-").append (adt::AsString::apply (key, "%02d"))),
       m_key (key),
-      m_available (true) {;}
+      m_available (false) {;}
 
    void setAvailable (const bool available) throw () { m_available = available; }
    int getKey () const throw () { return m_key; }
@@ -62,6 +62,7 @@ private:
    bool m_available;
 
    bool isAvailable () const throw () { return m_available; }
+   void initialize () throw (adt::RuntimeException) { m_available = true; }
 };
 
 class MyBaseBalance : public BalanceIf {
@@ -138,11 +139,16 @@ Resource* MyKeyBalance::do_apply (const int key)
 
 BOOST_AUTO_TEST_CASE( count_availables )
 {
+   LOG_THIS_METHOD ();
+
    MyBasicBalance myBalance;
 
    BOOST_REQUIRE_THROW (myBalance.add (NULL), adt::RuntimeException);
 
    BOOST_REQUIRE_EQUAL(myBalance.add (myBalance.get (0)), false);
+
+   myBalance.initialize();
+
    BOOST_REQUIRE_EQUAL(myBalance.size (), MaxResources);
    BOOST_REQUIRE_EQUAL(myBalance.countAvailableResources(), MaxResources);
 
@@ -157,6 +163,8 @@ BOOST_AUTO_TEST_CASE( count_availables )
 BOOST_AUTO_TEST_CASE( dont_use_unavailables )
 {
    MyBasicBalance myBalance;
+
+   myBalance.initialize();
 
    Resource* resource = myBalance.apply();
 
@@ -179,6 +187,8 @@ BOOST_AUTO_TEST_CASE (must_have_key)
 {
    MyKeyBalance myBalance;
 
+   myBalance.initialize();
+
    BOOST_REQUIRE_THROW (myBalance.apply(), adt::RuntimeException);
 
    Resource* resource = myBalance.apply(MaxResources / 2);
@@ -190,6 +200,8 @@ BOOST_AUTO_TEST_CASE (must_have_key)
 BOOST_AUTO_TEST_CASE (avoid_using_unavailable)
 {
    MyKeyBalance myBalance;
+
+   myBalance.initialize();
 
    myBalance.get (MaxResources / 2)->setAvailable(false);
 

@@ -50,6 +50,8 @@ class Resource : public adt::NamedObject {
 public:
    virtual ~Resource () {;}
 
+   virtual void initialize () throw (adt::RuntimeException) {;}
+
    virtual bool isAvailable () const throw () = 0;
 
    virtual adt::StreamString asString () const throw ();

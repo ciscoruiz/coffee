@@ -54,13 +54,34 @@ const int balance::BalanceIf::NullKey = INT_MIN;
 void balance::BalanceIf::initialize ()
    throw (adt::RuntimeException)
 {
+   LOG_THIS_METHOD();
+
    do_initialize ();
 
-   for (resource_iterator ii = resource_begin(), maxii = resource_end(); ii != maxii; ++ ii)
-      do_initializer (resource (ii));
+   for (resource_iterator ii = resource_begin(), maxii = resource_end(); ii != maxii; ++ ii) {
+      try {
+         do_initializer (resource (ii));
+      }
+      catch (adt::RuntimeException& ex) {
+         LOG_ERROR (resource (ii)->getName () << " | " << ex.asString());
+      }
+   }
 
    if (m_resources.empty ())
       LOG_WARN (asString () << " does not have any resource");
+
+   if (countAvailableResources() == 0)
+      LOG_WARN (asString () << " does not have any available resource");
+
+}
+
+//virtual
+void balance::BalanceIf::do_initializer (Resource* resource)
+   throw (adt::RuntimeException)
+{
+   logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
+   resource->initialize();
+   LOG_DEBUG (resource->asString ());
 }
 
 balance::Resource* balance::BalanceIf::apply (const int key)

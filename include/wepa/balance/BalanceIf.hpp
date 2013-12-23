@@ -38,6 +38,8 @@
 #include <vector>
 #include <mutex>
 
+#include <auto_enum.h>
+
 #include <wepa/adt/RuntimeException.hpp>
 #include <wepa/adt/NamedObject.hpp>
 
@@ -62,6 +64,8 @@ public:
 
    struct Requires{
       enum _v { None = -1, Key, PositiveKey  };
+
+      auto_enum_declare (Requires);
    };
 
    virtual ~BalanceIf () { m_resources.clear (); }

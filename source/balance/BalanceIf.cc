@@ -48,6 +48,8 @@ using namespace wepa;
 
 using namespace wepa;
 
+auto_enum_assign (balance::BalanceIf::Requires) = { "Key", "PositiveKey", NULL };
+
 //static
 const int balance::BalanceIf::NullKey = INT_MIN;
 
@@ -188,7 +190,14 @@ adt::StreamString balance::BalanceIf::asString () const
    throw ()
 {
    adt::StreamString result ("balance::BalanceIf {");
+
    result += adt::NamedObject::asString();
+
+   const char* requires = Requires::enumName(m_requires);
+
+   if (requires != NULL)
+      result.append (" | Requires=").append (requires);
+
    result += " } | Available = ";
    result += adt::AsString::apply(countAvailableResources());
    result.append (" of ").append (adt::AsString::apply (size ()));
@@ -200,6 +209,11 @@ xml::Node& balance::BalanceIf::asXML (xml::Node& parent) const
    throw ()
 {
    xml::Node& result = parent.createChild (this->getName());
+
+   const char* requires = Requires::enumName(m_requires);
+
+   if (requires != NULL)
+      result.createAttribute("Requires", requires);
 
    for (const_resource_iterator ii = resource_begin(), maxii = resource_end(); ii != maxii; ++ ii) {
       resource (ii)->asXML(result);

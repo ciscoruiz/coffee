@@ -199,12 +199,10 @@ adt::StreamString balance::BalanceIf::asString () const
 xml::Node& balance::BalanceIf::asXML (xml::Node& parent) const
    throw ()
 {
-   xml::Node& result = parent.createChild ("balance.BalanceIf");
-
-   result.createAttribute("Name", this->getName());
+   xml::Node& result = parent.createChild (this->getName());
 
    for (const_resource_iterator ii = resource_begin(), maxii = resource_end(); ii != maxii; ++ ii) {
-      resource (ii)->asXML(parent);
+      resource (ii)->asXML(result);
    }
 
    return std::ref (result);

@@ -44,6 +44,9 @@
 #include <wepa/balance/Resource.hpp>
 #include <wepa/balance/BalanceIf.hpp>
 
+#include <wepa/xml/Node.hpp>
+#include <wepa/xml/Compiler.hpp>
+
 using namespace wepa;
 using namespace wepa::balance;
 
@@ -139,8 +142,6 @@ Resource* MyKeyBalance::do_apply (const int key)
 
 BOOST_AUTO_TEST_CASE( count_availables )
 {
-   LOG_THIS_METHOD ();
-
    MyBasicBalance myBalance;
 
    BOOST_REQUIRE_THROW (myBalance.add (NULL), adt::RuntimeException);
@@ -208,3 +209,30 @@ BOOST_AUTO_TEST_CASE (avoid_using_unavailable)
    BOOST_REQUIRE_THROW (myBalance.apply (MaxResources / 2), adt::RuntimeException);
 }
 
+BOOST_AUTO_TEST_CASE (as_string)
+{
+   MyKeyBalance myBalance;
+
+   myBalance.initialize();
+
+   myBalance.get (MaxResources / 2)->setAvailable(false);
+
+   BOOST_REQUIRE_EQUAL (myBalance.asString (), "balance::BalanceIf {adt::NamedObject { Name: MyBalance } } | Available = 9 of 10}");
+}
+
+BOOST_AUTO_TEST_CASE (as_xml)
+{
+   MyKeyBalance myBalance;
+
+   myBalance.initialize();
+
+   myBalance.get (MaxResources / 2)->setAvailable(false);
+
+   xml::Node root ("root");
+
+   myBalance.asXML(root);
+
+   xml::Compiler compiler;
+
+   std::cout << compiler.apply(root) << std::endl;
+}

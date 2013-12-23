@@ -85,9 +85,17 @@ balance::Resource* balance::BalanceIf::apply (const int key)
 
       if (result == NULL)
          WEPA_THROW_EXCEPTION(asString () << " does not have available any resources");
+
+      if (result->isAvailable() == false)
+         WEPA_THROW_EXCEPTION(asString () << " can not choose an unavailable resource " << result->asString ());
    }
 
-   LOG_DEBUG (asString () << " | Result=" << result->asString ());
+   if (requiresKey () == true) {
+      LOG_DEBUG ("Key=" << key << " | " << asString () << " | Result=" << result->asString ());
+   }
+   else {
+      LOG_DEBUG (asString () << " | Result=" << result->asString ());
+   }
 
    return result;
 }

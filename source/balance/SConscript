@@ -1,0 +1,8 @@
+Import ('env')
+
+sources = Glob('*.cc')
+
+result = env.StaticLibrary ('wepa_balance', sources);
+
+Return ('result')
+

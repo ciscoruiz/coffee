@@ -33,6 +33,8 @@
 // Author: cisco.tierra@gmail.com
 //
 #include <map>
+#include <thread>
+#include <mutex>
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
@@ -51,6 +53,14 @@
 
 using namespace wepa;
 using namespace wepa::balance;
+
+namespace RoundRobinTest {
+   typedef std::map <const Resource*, int> CounterContainer;
+   typedef CounterContainer::iterator counter_iterator;
+
+   void incrementUse (CounterContainer& container, const Resource* resource);
+   void do_round_robin_work (std::mutex& mutexContainer, CounterContainer& container, balance::BalanceIf& theBalance);
+}
 
 class MyResource : public Resource {
 public:
@@ -73,6 +83,7 @@ private:
 class MyRoundRobinBalance : public RoundRobin {
 public:
    static const int MaxResources;
+   static const int MaxLoop;
 
    MyRoundRobinBalance ();
    ~MyRoundRobinBalance () { m_resources.clear (); }
@@ -82,6 +93,9 @@ public:
 private:
    boost::ptr_vector<MyResource> m_resources;
 };
+
+const int MyRoundRobinBalance::MaxResources = 10;
+const int MyRoundRobinBalance::MaxLoop = 3;
 
 MyRoundRobinBalance::MyRoundRobinBalance () :
    balance::RoundRobin ()
@@ -96,13 +110,35 @@ MyRoundRobinBalance::MyRoundRobinBalance () :
    }
 }
 
-const int MyRoundRobinBalance::MaxResources = 10;
+void RoundRobinTest::incrementUse (CounterContainer& counterContainer, const Resource* resource)
+{
+   counter_iterator cc = counterContainer.find (resource);
+
+   if (cc == counterContainer.end ()) {
+      counterContainer [resource] = 1;
+   }
+   else {
+      cc->second ++;
+   }
+}
+
+void RoundRobinTest::do_round_robin_work(std::mutex& mutex, CounterContainer& counterContainer, BalanceIf& theBalance)
+{
+   for (int ii = 0; ii < MyRoundRobinBalance::MaxResources; ++ ii) {
+      Resource* resource = theBalance.apply ();
+
+      if (true) {
+         std::lock_guard <std::mutex> guard (mutex);
+         incrementUse (counterContainer, resource);
+      }
+   }
+}
 
 BOOST_AUTO_TEST_CASE( rr_balance_quality)
 {
+   using namespace RoundRobinTest;
+
    MyRoundRobinBalance myBalance;
-   typedef std::map <Resource*, int> CounterContainer;
-   typedef CounterContainer::iterator counter_iterator;
 
    BOOST_REQUIRE_THROW (myBalance.add (NULL), adt::RuntimeException);
 
@@ -112,29 +148,18 @@ BOOST_AUTO_TEST_CASE( rr_balance_quality)
 
    CounterContainer counterContainer;
 
-   const int maxLoop = 3;
-
-   for (int ii = 0; ii < MyRoundRobinBalance::MaxResources * maxLoop; ++ ii){
-      Resource* resource = myBalance.apply();
-
-      counter_iterator cc = counterContainer.find (resource);
-
-      if (cc == counterContainer.end ()) {
-         counterContainer [resource] = 1;
-      }
-      else {
-         cc->second ++;
-      }
+   for (int ii = 0; ii < MyRoundRobinBalance::MaxResources * MyRoundRobinBalance::MaxLoop; ++ ii){
+      incrementUse (counterContainer, myBalance.apply());
    }
 
    BOOST_REQUIRE_EQUAL (counterContainer.size (), MyRoundRobinBalance::MaxResources);
 
    for (counter_iterator ii = counterContainer.begin (), maxii = counterContainer.end (); ii != maxii; ++ ii) {
-      BOOST_REQUIRE_EQUAL (ii->second, maxLoop);
+      BOOST_REQUIRE_EQUAL (ii->second, MyRoundRobinBalance::MaxLoop);
    }
 }
 
-BOOST_AUTO_TEST_CASE( rr_dont_use_unavailables )
+BOOST_AUTO_TEST_CASE( rr_balance_dont_use_unavailables )
 {
    MyRoundRobinBalance myBalance;
 
@@ -155,4 +180,31 @@ BOOST_AUTO_TEST_CASE( rr_dont_use_unavailables )
    }
 
    BOOST_REQUIRE_THROW (myBalance.apply(), adt::RuntimeException);
+}
+
+BOOST_AUTO_TEST_CASE( rr_balance_multithread )
+{
+   using namespace RoundRobinTest;
+
+   MyRoundRobinBalance myBalance;
+   std::mutex mutexContainer;
+   CounterContainer counterContainer;
+
+   myBalance.initialize();
+
+   std::thread t1(do_round_robin_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (myBalance));
+   std::thread t2(do_round_robin_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (myBalance));
+   std::thread t3(do_round_robin_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (myBalance));
+
+   t1.join ();
+   t2.join ();
+   t3.join ();
+
+   int sumUse = 0;
+
+   for (auto& useCounter : counterContainer) {
+      sumUse += useCounter.second;
+   }
+
+   BOOST_REQUIRE_EQUAL(sumUse, MyRoundRobinBalance::MaxResources * MyRoundRobinBalance::MaxLoop);
 }

@@ -59,7 +59,10 @@ class BalanceIf : public adt::NamedObject  {
 public:
    typedef resource_container::iterator resource_iterator;
    typedef resource_container::const_iterator const_resource_iterator;
-   struct Requires{ enum _v { None, Key = 1, PositiveKey = 2 }; };
+
+   struct Requires{
+      enum _v { None = -1, Key, PositiveKey  };
+   };
 
    virtual ~BalanceIf () { m_resources.clear (); }
 

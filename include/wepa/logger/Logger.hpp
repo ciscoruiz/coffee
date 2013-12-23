@@ -127,6 +127,14 @@ private:
    } \
    } while (false);
 
+#define LOG_LOCAL7(args)\
+   do {\
+   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Local7)) { \
+      wepa::adt::StreamString msg; \
+      wepa::logger::Logger::debug (msg << args, WEPA_FILE_LOCATION); \
+   } \
+   } while (false);
+
 }
 }
 

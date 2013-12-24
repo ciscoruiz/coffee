@@ -74,7 +74,6 @@ void balance::BalanceIf::initialize ()
 
    if (countAvailableResources() == 0)
       LOG_WARN (asString () << " does not have any available resource");
-
 }
 
 //virtual

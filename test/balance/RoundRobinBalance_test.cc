@@ -62,7 +62,7 @@ namespace RoundRobinTest {
    typedef CounterContainer::iterator counter_iterator;
 
    void incrementUse (CounterContainer& container, const Resource* resource);
-   void do_round_robin_work (std::mutex& mutexContainer, CounterContainer& container, balance::BalanceIf& theBalance);
+   void do_work (std::mutex& mutexContainer, CounterContainer& container, balance::BalanceIf& theBalance);
 }
 
 class MyRoundRobinBalance : public RoundRobin {
@@ -107,7 +107,7 @@ void RoundRobinTest::incrementUse (CounterContainer& counterContainer, const Res
    }
 }
 
-void RoundRobinTest::do_round_robin_work(std::mutex& mutex, CounterContainer& counterContainer, BalanceIf& theBalance)
+void RoundRobinTest::do_work(std::mutex& mutex, CounterContainer& counterContainer, BalanceIf& theBalance)
 {
    for (int ii = 0; ii < MyRoundRobinBalance::MaxResources; ++ ii) {
       Resource* resource = theBalance.apply ();
@@ -177,9 +177,9 @@ BOOST_AUTO_TEST_CASE( rr_balance_multithread )
 
    myBalance.initialize();
 
-   std::thread t1(do_round_robin_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (myBalance));
-   std::thread t2(do_round_robin_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (myBalance));
-   std::thread t3(do_round_robin_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (myBalance));
+   std::thread t1(do_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (myBalance));
+   std::thread t2(do_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (myBalance));
+   std::thread t3(do_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (myBalance));
 
    t1.join ();
    t2.join ();

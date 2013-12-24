@@ -77,7 +77,7 @@ public:
    /**
     * It will call to pure virtual method \em do_initialize and do_initializer for every one of the associated resources.
     */
-   void initialize () throw (adt::RuntimeException);
+   virtual void initialize () throw (adt::RuntimeException);
 
    Resource* apply (const int key = NullKey) throw (adt::RuntimeException);
 

@@ -32,28 +32,38 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_balance_RoundRobin_hpp
-#define __wepa_balance_RoundRobin_hpp
+#ifndef _wepa_test_balance_TestResource_hpp
+#define _wepa_test_balance_TestResource_hpp
 
-#include <wepa/balance/BalanceIf.hpp>
+#include <wepa/balance/Resource.hpp>
+#include <wepa/adt/AsString.hpp>
 
 namespace wepa {
+
+namespace test {
+
 namespace balance {
 
-class RoundRobin : public BalanceIf {
+class TestResource : public wepa::balance::Resource {
 public:
-   RoundRobin ();
+   TestResource (const int key) :
+      Resource (adt::StreamString ("TestResource-").append (adt::AsString::apply (key, "%02d"))),
+      m_key (key),
+      m_available (false) {;}
+
+   void setAvailable (const bool available) throw () { m_available = available; }
+   int getKey () const throw () { return m_key; }
 
 private:
-   resource_iterator m_position;
+   const int m_key;
+   bool m_available;
 
-   void do_initialize () throw (adt::RuntimeException) {
-      m_position = this->resource_begin();
-   }
-
-   Resource* do_apply (const int key) throw (adt::RuntimeException);
+   bool isAvailable () const throw () { return m_available; }
+   void initialize () throw (adt::RuntimeException) { m_available = true; }
 };
 
-} /* namespace balance */
-} /* namespace wepa */
+}
+}
+}
+
 #endif

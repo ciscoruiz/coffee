@@ -65,11 +65,11 @@ balance::Resource* balance::RoundRobin::do_apply (const int key)
 
       if (w->isAvailable () == true) {
          // prepare the next call to this method
-         m_position = next (ww);
+         m_position = this->next (ww);
          result = w;
          break;
       }
-   } while ((ww = next (ww)) != end);
+   } while ((ww = this->next (ww)) != end);
 
    if (result != NULL)
       LOG_LOCAL7("Result=" << result);
@@ -77,13 +77,3 @@ balance::Resource* balance::RoundRobin::do_apply (const int key)
    return result;
 }
 
-balance::BalanceIf::resource_iterator balance::RoundRobin::next (balance::BalanceIf::resource_iterator ii)
-   throw ()
-{
-   ii ++;
-
-   if (ii == this->resource_end ())
-      ii = this->resource_begin ();
-
-   return ii;
-}

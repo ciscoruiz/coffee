@@ -46,7 +46,7 @@
 #include <wepa/logger/TtyWriter.hpp>
 
 #include <wepa/balance/Resource.hpp>
-#include <wepa/balance/RoundRobin.hpp>
+#include <wepa/balance/Indexed.hpp>
 
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Compiler.hpp>
@@ -57,7 +57,7 @@ using namespace wepa;
 using namespace wepa::balance;
 using namespace wepa::test::balance;
 
-namespace RoundRobinTest {
+namespace IndexedTest {
    typedef std::map <const Resource*, int> CounterContainer;
    typedef CounterContainer::iterator counter_iterator;
 
@@ -65,13 +65,13 @@ namespace RoundRobinTest {
    void do_round_robin_work (std::mutex& mutexContainer, CounterContainer& container, balance::BalanceIf& theBalance);
 }
 
-class MyRoundRobinBalance : public RoundRobin {
+class MyIndexedBalance : public Indexed {
 public:
    static const int MaxResources;
    static const int MaxLoop;
 
-   MyRoundRobinBalance ();
-   ~MyRoundRobinBalance () { m_resources.clear (); }
+   MyIndexedBalance ();
+   ~MyIndexedBalance () { m_resources.clear (); }
 
    TestResource* get (const int index) throw () { return &m_resources [index]; }
 
@@ -79,15 +79,15 @@ private:
    boost::ptr_vector<TestResource> m_resources;
 };
 
-const int MyRoundRobinBalance::MaxResources = 10;
-const int MyRoundRobinBalance::MaxLoop = 3;
+const int MyIndexedBalance::MaxResources = 10;
+const int MyIndexedBalance::MaxLoop = 3;
 
-MyRoundRobinBalance::MyRoundRobinBalance () :
-   balance::RoundRobin ()
+MyIndexedBalance::MyIndexedBalance () :
+   balance::Indexed ()
 {
    logger::Logger::initialize(new logger::TtyWriter);
 
-   for (int ii = 0; ii < MyRoundRobinBalance::MaxResources; ++ ii) {
+   for (int ii = 0; ii < MyIndexedBalance::MaxResources; ++ ii) {
       TestResource* resource = new TestResource (ii);
       m_resources.push_back (resource);
 
@@ -95,7 +95,7 @@ MyRoundRobinBalance::MyRoundRobinBalance () :
    }
 }
 
-void RoundRobinTest::incrementUse (CounterContainer& counterContainer, const Resource* resource)
+void IndexedTest::incrementUse (CounterContainer& counterContainer, const Resource* resource)
 {
    counter_iterator cc = counterContainer.find (resource);
 
@@ -107,10 +107,10 @@ void RoundRobinTest::incrementUse (CounterContainer& counterContainer, const Res
    }
 }
 
-void RoundRobinTest::do_round_robin_work(std::mutex& mutex, CounterContainer& counterContainer, BalanceIf& theBalance)
+void IndexedTest::do_round_robin_work(std::mutex& mutex, CounterContainer& counterContainer, BalanceIf& theBalance)
 {
-   for (int ii = 0; ii < MyRoundRobinBalance::MaxResources; ++ ii) {
-      Resource* resource = theBalance.apply ();
+   for (int ii = 100; ii < 100 + MyIndexedBalance::MaxResources; ++ ii) {
+      Resource* resource = theBalance.apply (ii);
 
       if (true) {
          std::lock_guard <std::mutex> guard (mutex);
@@ -119,11 +119,22 @@ void RoundRobinTest::do_round_robin_work(std::mutex& mutex, CounterContainer& co
    }
 }
 
-BOOST_AUTO_TEST_CASE( rr_balance_quality)
+BOOST_AUTO_TEST_CASE(inx_requires_key)
 {
-   using namespace RoundRobinTest;
+   using namespace IndexedTest;
 
-   MyRoundRobinBalance myBalance;
+   MyIndexedBalance myBalance;
+
+   myBalance.initialize();
+
+   BOOST_REQUIRE_THROW (myBalance.apply (), adt::RuntimeException);
+}
+
+BOOST_AUTO_TEST_CASE( inx_balance_quality)
+{
+   using namespace IndexedTest;
+
+   MyIndexedBalance myBalance;
 
    BOOST_REQUIRE_THROW (myBalance.add (NULL), adt::RuntimeException);
 
@@ -133,45 +144,47 @@ BOOST_AUTO_TEST_CASE( rr_balance_quality)
 
    CounterContainer counterContainer;
 
-   for (int ii = 0; ii < MyRoundRobinBalance::MaxResources * MyRoundRobinBalance::MaxLoop; ++ ii){
-      incrementUse (counterContainer, myBalance.apply());
+   for (int ii = 0; ii < MyIndexedBalance::MaxResources * MyIndexedBalance::MaxLoop; ++ ii){
+      incrementUse (counterContainer, myBalance.apply(ii));
    }
 
-   BOOST_REQUIRE_EQUAL (counterContainer.size (), MyRoundRobinBalance::MaxResources);
+   BOOST_REQUIRE_EQUAL (counterContainer.size (), MyIndexedBalance::MaxResources);
 
    for (counter_iterator ii = counterContainer.begin (), maxii = counterContainer.end (); ii != maxii; ++ ii) {
-      BOOST_REQUIRE_EQUAL (ii->second, MyRoundRobinBalance::MaxLoop);
+      BOOST_REQUIRE_EQUAL (ii->second, MyIndexedBalance::MaxLoop);
    }
 }
 
-BOOST_AUTO_TEST_CASE( rr_balance_dont_use_unavailables )
+BOOST_AUTO_TEST_CASE( inx_balance_dont_use_unavailables )
 {
-   MyRoundRobinBalance myBalance;
+   MyIndexedBalance myBalance;
 
    myBalance.initialize();
 
-   Resource* resource = myBalance.apply();
+   Resource* resource1 = myBalance.apply(5);
+   Resource* resource2 = myBalance.apply(15);
 
-   BOOST_REQUIRE_EQUAL (resource, myBalance.get (0));
+   BOOST_REQUIRE_EQUAL (resource1, resource2);
 
-   myBalance.get (1)->setAvailable(false);
+   myBalance.get (5)->setAvailable(false);
+   myBalance.get (6)->setAvailable(false);
 
-   resource = myBalance.apply();
+   resource1 = myBalance.apply(5);
 
-   BOOST_REQUIRE_EQUAL (resource, myBalance.get (2));
+   BOOST_REQUIRE_EQUAL (resource1, myBalance.get (7));
 
-   for (int ii = 0; ii < MyRoundRobinBalance::MaxResources; ++ ii) {
+   for (int ii = 0; ii < MyIndexedBalance::MaxResources; ++ ii) {
       myBalance.get(ii)->setAvailable(false);
    }
 
-   BOOST_REQUIRE_THROW (myBalance.apply(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (myBalance.apply(2), adt::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE( rr_balance_multithread )
+BOOST_AUTO_TEST_CASE( inx_balance_multithread )
 {
-   using namespace RoundRobinTest;
+   using namespace IndexedTest;
 
-   MyRoundRobinBalance myBalance;
+   MyIndexedBalance myBalance;
    std::mutex mutexContainer;
    CounterContainer counterContainer;
 
@@ -192,5 +205,5 @@ BOOST_AUTO_TEST_CASE( rr_balance_multithread )
       sumUse += useCounter.second;
    }
 
-   BOOST_REQUIRE_EQUAL(sumUse, MyRoundRobinBalance::MaxResources * MyRoundRobinBalance::MaxLoop);
+   BOOST_REQUIRE_EQUAL(sumUse, MyIndexedBalance::MaxResources * MyIndexedBalance::MaxLoop);
 }

@@ -32,28 +32,45 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_balance_RoundRobin_hpp
-#define __wepa_balance_RoundRobin_hpp
+#include <wepa/balance/Indexed.hpp>
+#include <wepa/balance/Resource.hpp>
 
-#include <wepa/balance/BalanceIf.hpp>
+#include <wepa/logger/Logger.hpp>
+#include <wepa/logger/TraceMethod.hpp>
 
-namespace wepa {
-namespace balance {
+using namespace wepa;
 
-class RoundRobin : public BalanceIf {
-public:
-   RoundRobin ();
+balance::Indexed::Indexed() :
+   balance::BalanceIf("balance::Indexed", Requires::Key)
+{
+}
 
-private:
-   resource_iterator m_position;
+balance::Resource* balance::Indexed::do_apply (const int key)
+   throw (adt::RuntimeException)
+{
+   logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
 
-   void do_initialize () throw (adt::RuntimeException) {
-      m_position = this->resource_begin();
-   }
+   if (this->size () == 0)
+      return NULL;
 
-   Resource* do_apply (const int key) throw (adt::RuntimeException);
-};
+   resource_iterator ww, end;
+   Resource* w;
+   balance::Resource* result = NULL;
 
-} /* namespace balance */
-} /* namespace wepa */
-#endif
+   ww = end = this->resource_begin () + (key % this->size ());
+
+   do {
+      w = resource (ww);
+
+      if (w->isAvailable () == true) {
+         result = w;
+         break;
+      }
+   } while ((ww = this->next (ww)) != end);
+
+   if (result != NULL)
+      LOG_LOCAL7("Result=" << result);
+
+   return result;
+}
+

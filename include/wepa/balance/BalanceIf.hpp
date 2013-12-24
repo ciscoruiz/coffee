@@ -109,6 +109,8 @@ protected:
    bool requiresKey () const throw () { return m_requires != Requires::None; }
    bool requiresPositiveKey () const throw () { return m_requires == Requires::PositiveKey; }
 
+   resource_iterator next (resource_iterator ii) throw ();
+
 private:
    mutable std::recursive_mutex m_mutex;
    const Requires::_v m_requires;

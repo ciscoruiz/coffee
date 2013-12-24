@@ -32,25 +32,19 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_balance_RoundRobin_hpp
-#define __wepa_balance_RoundRobin_hpp
+#ifndef __wepa_balance_Indexed_hpp
+#define __wepa_balance_Indexed_hpp
 
 #include <wepa/balance/BalanceIf.hpp>
 
 namespace wepa {
 namespace balance {
 
-class RoundRobin : public BalanceIf {
+class Indexed : public BalanceIf {
 public:
-   RoundRobin ();
+   Indexed ();
 
 private:
-   resource_iterator m_position;
-
-   void do_initialize () throw (adt::RuntimeException) {
-      m_position = this->resource_begin();
-   }
-
    Resource* do_apply (const int key) throw (adt::RuntimeException);
 };
 

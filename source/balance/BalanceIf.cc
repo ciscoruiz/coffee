@@ -185,6 +185,17 @@ size_t balance::BalanceIf::countAvailableResources () const
    return result;
 }
 
+balance::BalanceIf::resource_iterator balance::BalanceIf::next (balance::BalanceIf::resource_iterator ii)
+   throw ()
+{
+   ii ++;
+
+   if (ii == this->resource_end ())
+      ii = this->resource_begin ();
+
+   return ii;
+}
+
 //virtual
 adt::StreamString balance::BalanceIf::asString () const
    throw ()

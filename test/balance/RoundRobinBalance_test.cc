@@ -203,6 +203,7 @@ BOOST_AUTO_TEST_CASE( rr_balance_multithread )
    int sumUse = 0;
 
    for (auto& useCounter : counterContainer) {
+      BOOST_REQUIRE_GT (useCounter.second, 0);
       sumUse += useCounter.second;
    }
 

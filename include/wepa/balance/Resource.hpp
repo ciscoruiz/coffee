@@ -32,41 +32,37 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepm_adt_pattern_NamedObject_h
-#define _wepm_adt_pattern_NamedObject_h
+#ifndef __wepa_balance_Resource_hpp
+#define __wepa_balance_Resource_hpp
 
-#include <wepa/adt/StreamString.hpp>
+#include <wepa/adt/NamedObject.hpp>
+#include <wepa/adt/RuntimeException.hpp>
 
 namespace wepa {
 
-namespace adt {
+namespace xml {
+class Node;
+}
 
-class NamedObject {
+namespace balance {
+
+class Resource : public adt::NamedObject {
 public:
-  virtual ~NamedObject () { ;}
+   virtual ~Resource () {;}
 
-  const std::string& getName () const throw () { return m_name; }
+   virtual void initialize () throw (adt::RuntimeException) {;}
 
-  bool isEqual (const std::string& name) const throw () { return m_name == name; }
+   virtual bool isAvailable () const throw () = 0;
 
-  bool isEqual (const NamedObject& other) const throw () { return isEqual (other.m_name); }
-
-  bool operator == (const std::string& name) const throw () { return isEqual (name); }
-
-  bool operator == (const NamedObject& other) const throw () { return isEqual (other.m_name); }
-
-  virtual StreamString asString () const throw () { StreamString result ("adt::NamedObject { Name: "); return result << m_name << " }"; }
+   virtual adt::StreamString asString () const throw ();
+   virtual xml::Node& asXML (xml::Node& parent) const throw ();
 
 protected:
-   NamedObject (const std::string& name) : m_name (name) {;}
+   Resource(const std::string& name) : adt::NamedObject(name) {;}
 
-private:
-   const std::string m_name;
 };
 
-}
-}
-
-
+} /* namespace balance */
+} /* namespace wepa */
 #endif
 

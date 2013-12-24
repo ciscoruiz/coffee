@@ -86,6 +86,7 @@ public:
    Node& childAt (const size_t ii) throw (adt::RuntimeException);
 
    Node& createChild (const char* name) throw (adt::RuntimeException);
+   Node& createChild (const std::string& name) throw (adt::RuntimeException) { return createChild (name.c_str ()); }
    Attribute& createAttribute (const char* name, const char* value) throw (adt::RuntimeException);
    Attribute& createAttribute (const char* name, const std::string& value) throw (adt::RuntimeException) { return createAttribute (name, value.c_str ()); }
 

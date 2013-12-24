@@ -32,41 +32,28 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepm_adt_pattern_NamedObject_h
-#define _wepm_adt_pattern_NamedObject_h
+#ifndef __wepa_balance_RoundRobin_hpp
+#define __wepa_balance_RoundRobin_hpp
 
-#include <wepa/adt/StreamString.hpp>
+#include <wepa/balance/BalanceIf.hpp>
 
 namespace wepa {
+namespace balance {
 
-namespace adt {
-
-class NamedObject {
+class RoundRobin : public BalanceIf {
 public:
-  virtual ~NamedObject () { ;}
-
-  const std::string& getName () const throw () { return m_name; }
-
-  bool isEqual (const std::string& name) const throw () { return m_name == name; }
-
-  bool isEqual (const NamedObject& other) const throw () { return isEqual (other.m_name); }
-
-  bool operator == (const std::string& name) const throw () { return isEqual (name); }
-
-  bool operator == (const NamedObject& other) const throw () { return isEqual (other.m_name); }
-
-  virtual StreamString asString () const throw () { StreamString result ("adt::NamedObject { Name: "); return result << m_name << " }"; }
-
-protected:
-   NamedObject (const std::string& name) : m_name (name) {;}
+   RoundRobin ();
 
 private:
-   const std::string m_name;
+   resource_iterator m_position;
+
+   void do_initialize () throw (adt::RuntimeException) {
+      m_position = this->resource_begin();
+   }
+
+   Resource* do_apply (const int key) throw (adt::RuntimeException);
 };
 
-}
-}
-
-
+} /* namespace balance */
+} /* namespace wepa */
 #endif
-

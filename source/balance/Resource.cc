@@ -32,41 +32,36 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepm_adt_pattern_NamedObject_h
-#define _wepm_adt_pattern_NamedObject_h
+
+#include <wepa/balance/Resource.hpp>
 
 #include <wepa/adt/StreamString.hpp>
+#include <wepa/adt/AsString.hpp>
 
-namespace wepa {
+#include <wepa/xml/Node.hpp>
+#include <wepa/xml/Attribute.hpp>
 
-namespace adt {
+using namespace wepa;
 
-class NamedObject {
-public:
-  virtual ~NamedObject () { ;}
-
-  const std::string& getName () const throw () { return m_name; }
-
-  bool isEqual (const std::string& name) const throw () { return m_name == name; }
-
-  bool isEqual (const NamedObject& other) const throw () { return isEqual (other.m_name); }
-
-  bool operator == (const std::string& name) const throw () { return isEqual (name); }
-
-  bool operator == (const NamedObject& other) const throw () { return isEqual (other.m_name); }
-
-  virtual StreamString asString () const throw () { StreamString result ("adt::NamedObject { Name: "); return result << m_name << " }"; }
-
-protected:
-   NamedObject (const std::string& name) : m_name (name) {;}
-
-private:
-   const std::string m_name;
-};
-
-}
+//virtual
+adt::StreamString balance::Resource::asString () const
+   throw ()
+{
+   adt::StreamString result ("balance::Resource {");
+   result += adt::NamedObject::asString();
+   result += " } | Available = ";
+   result += adt::AsString::apply(isAvailable ());
+   return result.append ("}");
 }
 
+//virtual
+xml::Node& balance::Resource::asXML (xml::Node& parent) const
+   throw ()
+{
+   xml::Node& result = parent.createChild ("balance.Resource");
 
-#endif
+   result.createAttribute("Name", this->getName());
+   result.createAttribute ("IsAvailable", isAvailable());
 
+   return std::ref (result);
+}

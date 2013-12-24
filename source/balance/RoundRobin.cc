@@ -32,41 +32,48 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepm_adt_pattern_NamedObject_h
-#define _wepm_adt_pattern_NamedObject_h
+#include <wepa/balance/RoundRobin.hpp>
+#include <wepa/balance/Resource.hpp>
 
-#include <wepa/adt/StreamString.hpp>
+#include <wepa/logger/Logger.hpp>
+#include <wepa/logger/TraceMethod.hpp>
 
-namespace wepa {
+using namespace wepa;
 
-namespace adt {
-
-class NamedObject {
-public:
-  virtual ~NamedObject () { ;}
-
-  const std::string& getName () const throw () { return m_name; }
-
-  bool isEqual (const std::string& name) const throw () { return m_name == name; }
-
-  bool isEqual (const NamedObject& other) const throw () { return isEqual (other.m_name); }
-
-  bool operator == (const std::string& name) const throw () { return isEqual (name); }
-
-  bool operator == (const NamedObject& other) const throw () { return isEqual (other.m_name); }
-
-  virtual StreamString asString () const throw () { StreamString result ("adt::NamedObject { Name: "); return result << m_name << " }"; }
-
-protected:
-   NamedObject (const std::string& name) : m_name (name) {;}
-
-private:
-   const std::string m_name;
-};
-
-}
+balance::RoundRobin::RoundRobin() :
+   balance::BalanceIf("balance::RoundRobin", Requires::None)
+{
+   m_position = this->resource_begin();
 }
 
+balance::Resource* balance::RoundRobin::do_apply (const int key)
+   throw (adt::RuntimeException)
+{
+   logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
 
-#endif
+   if (m_position == this->resource_end ())
+      return NULL;
+
+   resource_iterator ww, end;
+   Resource* w;
+   balance::Resource* result = NULL;
+
+   ww = end = m_position;
+
+   do {
+      w = resource (ww);
+
+      if (w->isAvailable () == true) {
+         // prepare the next call to this method
+         m_position = this->next (ww);
+         result = w;
+         break;
+      }
+   } while ((ww = this->next (ww)) != end);
+
+   if (result != NULL)
+      LOG_LOCAL7("Result=" << result);
+
+   return result;
+}
 

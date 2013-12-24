@@ -32,41 +32,50 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepm_adt_pattern_NamedObject_h
-#define _wepm_adt_pattern_NamedObject_h
+#ifndef __wepa_balance_ByRange_hpp
+#define __wepa_balance_ByRange_hpp
 
-#include <wepa/adt/StreamString.hpp>
+#include <map>
+
+#include <wepa/balance/BalanceIf.hpp>
 
 namespace wepa {
+namespace balance {
 
-namespace adt {
+class ByRange : public BalanceIf {
+   typedef std::pair <int, int> Range;
+   typedef std::map <Range, BalanceIf*> Ranges;
+   typedef Ranges::iterator range_iterator;
 
-class NamedObject {
 public:
-  virtual ~NamedObject () { ;}
+   /**
+    * Constructor
+    */
+   ByRange ();
 
-  const std::string& getName () const throw () { return m_name; }
+   /**
+    * Destructor
+    */
+   ~ByRange () { m_ranges.clear (); }
 
-  bool isEqual (const std::string& name) const throw () { return m_name == name; }
+   void initialize () throw (adt::RuntimeException);
 
-  bool isEqual (const NamedObject& other) const throw () { return isEqual (other.m_name); }
-
-  bool operator == (const std::string& name) const throw () { return isEqual (name); }
-
-  bool operator == (const NamedObject& other) const throw () { return isEqual (other.m_name); }
-
-  virtual StreamString asString () const throw () { StreamString result ("adt::NamedObject { Name: "); return result << m_name << " }"; }
-
-protected:
-   NamedObject (const std::string& name) : m_name (name) {;}
+   /**
+    * \warning Once you call this method you can not append more resources to this \em balanceIf
+    * @param bottom Minimal value for this range
+    * @param top Maximal value for this range
+    * @param balanceIf Load balancing algorithm used under this range.
+    */
+   void addRange (const int bottom, const int top, BalanceIf* balanceIf) throw (adt::RuntimeException);
 
 private:
-   const std::string m_name;
+   Ranges m_ranges;
+
+   BalanceIf* find_range (const int key) throw ();
+
+   Resource* do_apply (const int key) throw (adt::RuntimeException);
 };
 
-}
-}
-
-
+} /* namespace balance */
+} /* namespace wepa */
 #endif
-

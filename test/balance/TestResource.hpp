@@ -32,41 +32,38 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepm_adt_pattern_NamedObject_h
-#define _wepm_adt_pattern_NamedObject_h
+#ifndef _wepa_test_balance_TestResource_hpp
+#define _wepa_test_balance_TestResource_hpp
 
-#include <wepa/adt/StreamString.hpp>
+#include <wepa/balance/Resource.hpp>
+#include <wepa/adt/AsString.hpp>
 
 namespace wepa {
 
-namespace adt {
+namespace test {
 
-class NamedObject {
+namespace balance {
+
+class TestResource : public wepa::balance::Resource {
 public:
-  virtual ~NamedObject () { ;}
+   TestResource (const int key) :
+      Resource (adt::StreamString ("TestResource-").append (adt::AsString::apply (key, "%02d"))),
+      m_key (key),
+      m_available (false) {;}
 
-  const std::string& getName () const throw () { return m_name; }
-
-  bool isEqual (const std::string& name) const throw () { return m_name == name; }
-
-  bool isEqual (const NamedObject& other) const throw () { return isEqual (other.m_name); }
-
-  bool operator == (const std::string& name) const throw () { return isEqual (name); }
-
-  bool operator == (const NamedObject& other) const throw () { return isEqual (other.m_name); }
-
-  virtual StreamString asString () const throw () { StreamString result ("adt::NamedObject { Name: "); return result << m_name << " }"; }
-
-protected:
-   NamedObject (const std::string& name) : m_name (name) {;}
+   void setAvailable (const bool available) throw () { m_available = available; }
+   int getKey () const throw () { return m_key; }
 
 private:
-   const std::string m_name;
+   const int m_key;
+   bool m_available;
+
+   bool isAvailable () const throw () { return m_available; }
+   void initialize () throw (adt::RuntimeException) { m_available = true; }
 };
 
 }
 }
-
+}
 
 #endif
-

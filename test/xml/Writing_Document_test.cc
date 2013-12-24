@@ -134,7 +134,11 @@ BOOST_AUTO_TEST_CASE (compile_tree)
    boost::scoped_ptr <xml::Node> root (new xml::Node ("the_root"));
 
    xml::Node& level00 = root->createChild("level0");
-   level00.createChild ("level1");
+
+   level00.createAttribute ("MyAttr", "It works");
+   xml::Node& level1 = level00.createChild ("level1");
+   level1.createAttribute ("ZZ", "zz");
+
    level00.createChild ("level2");
    xml::Node& last = level00.createChild ("level3").createChild ("LevelA");
 
@@ -145,7 +149,7 @@ BOOST_AUTO_TEST_CASE (compile_tree)
 
    std::string str = compiler.apply (*root);
 
-   BOOST_REQUIRE_EQUAL (str, "<the_root><level0><level1/><level2/><level3><LevelA first=\"111\" second=\"222\"/></level3></level0></the_root>");
+   BOOST_REQUIRE_EQUAL (str, "<the_root><level0 MyAttr=\"It works\"><level1 ZZ=\"zz\"/><level2/><level3><LevelA first=\"111\" second=\"222\"/></level3></level0></the_root>");
 }
 
 BOOST_AUTO_TEST_CASE (compile_iso)

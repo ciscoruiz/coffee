@@ -32,41 +32,6 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepm_adt_pattern_NamedObject_h
-#define _wepm_adt_pattern_NamedObject_h
+#define BOOST_TEST_MODULE WEPA_BALANCE_TEST
 
-#include <wepa/adt/StreamString.hpp>
-
-namespace wepa {
-
-namespace adt {
-
-class NamedObject {
-public:
-  virtual ~NamedObject () { ;}
-
-  const std::string& getName () const throw () { return m_name; }
-
-  bool isEqual (const std::string& name) const throw () { return m_name == name; }
-
-  bool isEqual (const NamedObject& other) const throw () { return isEqual (other.m_name); }
-
-  bool operator == (const std::string& name) const throw () { return isEqual (name); }
-
-  bool operator == (const NamedObject& other) const throw () { return isEqual (other.m_name); }
-
-  virtual StreamString asString () const throw () { StreamString result ("adt::NamedObject { Name: "); return result << m_name << " }"; }
-
-protected:
-   NamedObject (const std::string& name) : m_name (name) {;}
-
-private:
-   const std::string m_name;
-};
-
-}
-}
-
-
-#endif
-
+#include <boost/test/included/unit_test.hpp>

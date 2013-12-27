@@ -40,13 +40,13 @@
 #include <wepa/xml/SCCS.hpp>
 #include <wepa/logger/SCCS.hpp>
 
-#include <wepa/app/SCCS.hpp>
+#include <wepa/balance/SCCS.hpp>
 
-wepa_sccs_define_tag (app, 0)
+wepa_sccs_define_tag (balance, 0)
 
 using namespace wepa;
 
-void app::SCCS::activate()
+void balance::SCCS::activate()
    throw ()
 {
    config::SCCS::activate ();
@@ -54,6 +54,6 @@ void app::SCCS::activate()
    xml::SCCS::activate ();
    logger::SCCS::activate();
 
-   config::SCCSRepository::getInstance().registerModule(wepa_sccs_use_tag(app));
+   config::SCCSRepository::getInstance().registerModule(wepa_sccs_use_tag(balance));
 }
 

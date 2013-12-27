@@ -33,27 +33,18 @@
 // Author: cisco.tierra@gmail.com
 //
 
-#include <wepa/config/SCCSRepository.hpp>
+#ifndef _wepa_balance_sccs_hpp_
+#define _wepa_balance_sccs_hpp_
 
-#include <wepa/config/SCCS.hpp>
-#include <wepa/adt/SCCS.hpp>
-#include <wepa/xml/SCCS.hpp>
-#include <wepa/logger/SCCS.hpp>
+namespace wepa {
+namespace balance {
 
-#include <wepa/app/SCCS.hpp>
+class SCCS {
+public:
+   static void activate () throw ();
+};
 
-wepa_sccs_define_tag (app, 0)
-
-using namespace wepa;
-
-void app::SCCS::activate()
-   throw ()
-{
-   config::SCCS::activate ();
-   adt::SCCS::activate ();
-   xml::SCCS::activate ();
-   logger::SCCS::activate();
-
-   config::SCCSRepository::getInstance().registerModule(wepa_sccs_use_tag(app));
+}
 }
 
+#endif /* _wepa_balance_sccs_hpp_ */

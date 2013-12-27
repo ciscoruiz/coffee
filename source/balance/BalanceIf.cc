@@ -46,6 +46,8 @@ using namespace wepa;
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Attribute.hpp>
 
+#include <wepa/balance/SCCS.hpp>
+
 using namespace wepa;
 
 auto_enum_assign (balance::BalanceIf::Requires) = { "Key", "PositiveKey", NULL };
@@ -57,6 +59,8 @@ void balance::BalanceIf::initialize ()
    throw (adt::RuntimeException)
 {
    LOG_THIS_METHOD();
+
+   SCCS::activate();
 
    do_initialize ();
 

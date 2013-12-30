@@ -74,7 +74,7 @@ public:
    static void info (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Information, streamString, function, file, line); }
    static void debug (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Debug, streamString, function, file, line); }
 
-   static void write (const adt::RuntimeException& ex) {
+   static void write (const adt::Exception& ex) {
       error (ex.what (), ex.getMethod(), ex.getFile(), ex.getLine());
    }
 

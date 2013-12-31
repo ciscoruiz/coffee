@@ -32,57 +32,62 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepm_logger_TraceMethod_hpp
-#define __wepm_logger_TraceMethod_hpp
+#include <boost/test/unit_test.hpp>
 
-#include <wepa/logger/Level.hpp>
-#include <wepa/logger/Logger.hpp>
+#include <unistd.h>
 
-namespace wepa {
+#include <wepa/adt/DelayMeter.hpp>
+#include <wepa/adt/Second.hpp>
+#include <wepa/adt/Millisecond.hpp>
+#include <wepa/adt/Microsecond.hpp>
 
-namespace logger {
+using namespace wepa;
 
-class TraceMethod  {
-public:
-   TraceMethod (const char* methodName, const char* fromFile, const int fromLine) :
-      m_level (Level::Debug),
-      m_methodName (methodName),
-      m_fromFile (fromFile),
-      m_ok (false)
-   {
-      if ((m_ok = Logger::wantsToProcess (m_level)) == true)
-         Logger::write (m_level, "begin", methodName, fromFile, fromLine);
-   }
+BOOST_AUTO_TEST_CASE( delaymeter_seconds )
+{
+   adt::DelayMeter <adt::Second> meter;
 
-   TraceMethod (const Level::_v level, const char* methodName, const char* fromFile, const int fromLine) :
-      m_level (level),
-      m_methodName (methodName),
-      m_fromFile (fromFile),
-      m_ok (false)
-   {
-      if ((m_ok = Logger::wantsToProcess (m_level)) == true)
-         Logger::write (m_level, "begin", methodName, fromFile, fromLine);
-   }
+   sleep(2);
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (2));
 
-   /**
-      Destructor.
-   */
-   ~TraceMethod () {
-      if (m_ok == true && Logger::wantsToProcess(m_level) == true) {
-         Logger::write (m_level, "end", m_methodName, m_fromFile, 0);
-      }
-   }
+   sleep (1);
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (3));
 
-private:
-   const Level::_v m_level;
-   const char* m_methodName;
-   const char* m_fromFile;
-   bool m_ok;
-};
+   meter.reset ();
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (0));
 
-}
+   sleep(2);
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (2));
+
+   adt::DelayMeter <adt::Second> meter2 (meter);
+   BOOST_REQUIRE_EQUAL(meter.getValue(), meter2.getValue());
+
+   meter2.reset ();
+   meter2 = meter;
+   BOOST_REQUIRE_EQUAL(meter.getValue(), meter2.getValue());
 }
 
-#define LOG_THIS_METHOD() wepa::logger::TraceMethod __traceMethod__ (WEPA_FILE_LOCATION)
+BOOST_AUTO_TEST_CASE( delaymeter_milliseconds )
+{
+   adt::DelayMeter <adt::Millisecond> meter;
 
-#endif
+   usleep(2000);
+   adt::Millisecond tt;
+
+   tt = meter.getValue();
+   BOOST_REQUIRE_GE (tt, adt::Millisecond (2));
+   BOOST_REQUIRE_LE (tt, adt::Millisecond (3));
+
+   usleep (1500);
+   tt = meter.getValue();
+   BOOST_REQUIRE_GT (tt, adt::Millisecond (3));
+   BOOST_REQUIRE_LE (tt, adt::Millisecond (5));
+
+   meter.reset ();
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Millisecond (0));
+
+   usleep(2500);
+   tt = meter.getValue();
+   BOOST_REQUIRE_GT (tt, adt::Millisecond (2));
+   BOOST_REQUIRE_LE (tt, adt::Millisecond (3));
+}

@@ -32,57 +32,38 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepm_logger_TraceMethod_hpp
-#define __wepm_logger_TraceMethod_hpp
-
-#include <wepa/logger/Level.hpp>
-#include <wepa/logger/Logger.hpp>
+#ifndef __wepa_adt_DelayMeter_hpp
+#define __wepa_adt_DelayMeter_hpp
 
 namespace wepa {
 
-namespace logger {
+namespace adt {
 
-class TraceMethod  {
+template <class _TimeUnit> class DelayMeter {
 public:
-   TraceMethod (const char* methodName, const char* fromFile, const int fromLine) :
-      m_level (Level::Debug),
-      m_methodName (methodName),
-      m_fromFile (fromFile),
-      m_ok (false)
-   {
-      if ((m_ok = Logger::wantsToProcess (m_level)) == true)
-         Logger::write (m_level, "begin", methodName, fromFile, fromLine);
+   DelayMeter () { m_timeStamp = _TimeUnit::getTime (); }
+   DelayMeter (const DelayMeter& other) { m_timeStamp = other.m_timeStamp; }
+
+   _TimeUnit getValue () const throw () {
+      return _TimeUnit::getTime () - m_timeStamp;
    }
 
-   TraceMethod (const Level::_v level, const char* methodName, const char* fromFile, const int fromLine) :
-      m_level (level),
-      m_methodName (methodName),
-      m_fromFile (fromFile),
-      m_ok (false)
-   {
-      if ((m_ok = Logger::wantsToProcess (m_level)) == true)
-         Logger::write (m_level, "begin", methodName, fromFile, fromLine);
+   operator _TimeUnit () const throw () { return getValue (); }
+
+   void reset () throw () {
+      m_timeStamp = _TimeUnit::getTime ();
    }
 
-   /**
-      Destructor.
-   */
-   ~TraceMethod () {
-      if (m_ok == true && Logger::wantsToProcess(m_level) == true) {
-         Logger::write (m_level, "end", m_methodName, m_fromFile, 0);
-      }
-   }
+   DelayMeter <_TimeUnit>& operator= (const DelayMeter& other) throw () { m_timeStamp = other.m_timeStamp; return *this; }
+   bool operator < (const _TimeUnit& other) const throw () { return getValue () < other; }
+   bool operator > (const _TimeUnit& other) const throw () { return getValue () > other; }
+   bool operator == (const _TimeUnit& other) const throw () { return getValue () == other; }
 
 private:
-   const Level::_v m_level;
-   const char* m_methodName;
-   const char* m_fromFile;
-   bool m_ok;
+   _TimeUnit m_timeStamp;
 };
 
 }
 }
-
-#define LOG_THIS_METHOD() wepa::logger::TraceMethod __traceMethod__ (WEPA_FILE_LOCATION)
 
 #endif

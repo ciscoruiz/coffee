@@ -68,6 +68,7 @@ public:
    static bool isActive (const Level::_v level) throw () { return (level <= Level::Error) ? true: (level <= m_level); }
    static bool wantsToProcess (const Level::_v level) throw ();
 
+   static void critical (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Critical, streamString, function, file, line); }
    static void error (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Error, streamString, function, file, line); }
    static void warning (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Warning, streamString, function, file, line); }
    static void notice (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Notice, streamString, function, file, line); }
@@ -86,6 +87,14 @@ private:
    Logger ();
    Logger (const Logger&);
 };
+
+#define LOG_CRITICAL(args)\
+   do {\
+   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Critical)) { \
+      wepa::adt::StreamString msg; \
+      wepa::logger::Logger::critical (msg << args, WEPA_FILE_LOCATION); \
+   } \
+   } while (false);
 
 #define LOG_ERROR(args)\
    do {\

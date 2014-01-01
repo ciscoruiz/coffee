@@ -95,6 +95,7 @@ public:
    }
 
    void createText (const char* text) throw (adt::RuntimeException);
+   void createText (const std::string& text) throw (adt::RuntimeException) { createText (text.c_str ()); }
 
    const Attribute& lookupAttribute (const char* name) const throw (adt::RuntimeException);
    const Attribute* searchAttribute (const char* name) const throw ();

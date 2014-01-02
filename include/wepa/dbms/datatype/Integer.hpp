@@ -23,7 +23,7 @@ public:
       \param isNulleable Indica si el dato puede tomar valores nulos
    */
    explicit Integer (const char* name, const bool isNulleable = false) :
-      datatype::Abstract (name, Type::Integer, sizeof (int), isNulleable),
+      datatype::Abstract (name, Datatype::Integer, sizeof (int), isNulleable),
       m_value (0)
    {
       datatype::Abstract::setBuffer (&m_value);
@@ -37,7 +37,7 @@ public:
       \since NemesisRD.dbms 2.10.06.3
    */
    explicit Integer (const std::string& name, const bool isNulleable = false) :
-      datatype::Abstract (name, Type::Integer, sizeof (int), isNulleable),
+      datatype::Abstract (name, Datatype::Integer, sizeof (int), isNulleable),
       m_value (0)
    {
       datatype::Abstract::setBuffer (&m_value);

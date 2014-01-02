@@ -17,7 +17,7 @@ namespace datatype {
 */
 class Abstract  {
 public:
-   struct Type {
+   struct Datatype {
       enum _v {
          Integer, /**< Numeros enteros */
          String,  /**< Cadenas de caracteres */
@@ -47,7 +47,7 @@ public:
       Devuelve el tipo de dato.
       \return El tipo de datos.
    */
-   Type::_v getType () const throw () { return m_type; }
+   Datatype::_v getType () const throw () { return m_type; }
 
    /**
       Devuelve el area de memoria asociada a esta variable.
@@ -113,7 +113,7 @@ protected:
 
       \warning los tipos de datos complejos deberia reimplementar los metodos #code and #decode.
    */
-   explicit Abstract (const char* name, const Type::_v type, const int maxSize, const bool isNulleable) :
+   explicit Abstract (const char* name, const Datatype::_v type, const int maxSize, const bool isNulleable) :
       m_name (name),
       m_type (type),
       m_maxSize (maxSize),
@@ -132,7 +132,7 @@ protected:
 
       \warning los tipos de datos complejos deberia reimplementar los metodos #code and #decode.
    */
-   explicit Abstract (const std::string& name, const Type::_v type, const int maxSize, const bool isNulleable) :
+   explicit Abstract (const std::string& name, const Datatype::_v type, const int maxSize, const bool isNulleable) :
       m_name (name),
       m_type (type),
       m_maxSize (maxSize),
@@ -163,7 +163,7 @@ protected:
 
 private:
    const std::string m_name;
-   const Type::_v m_type;
+   const Datatype::_v m_type;
    const int m_maxSize;
    const bool m_isNulleable;
    void* m_buffer;

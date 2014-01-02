@@ -45,7 +45,7 @@ using namespace wepa;
 using namespace wepa::dbms;
 
 datatype::Date::Date (const char* name, const bool isNulleable, const char* format) :
-   datatype::Abstract (name, Type::Date, MaxDateSize, isNulleable)
+   datatype::Abstract (name, Datatype::Date, MaxDateSize, isNulleable)
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
@@ -54,7 +54,7 @@ datatype::Date::Date (const char* name, const bool isNulleable, const char* form
 }
 
 datatype::Date::Date (const string& name, const bool isNulleable, const char* format) :
-   datatype::Abstract (name, Type::Date, MaxDateSize, isNulleable)
+   datatype::Abstract (name, Datatype::Date, MaxDateSize, isNulleable)
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
@@ -62,7 +62,7 @@ datatype::Date::Date (const string& name, const bool isNulleable, const char* fo
    wepa_memset (&m_value, 0, sizeof (m_value));
 }
 
-datatype::Date::Date (const char* name, const datatype::Abstract::Type::_v type,  const bool isNulleable, const char* format) :
+datatype::Date::Date (const char* name, const datatype::Abstract::Datatype::_v type,  const bool isNulleable, const char* format) :
    datatype::Abstract (name, type, MaxDateSize, isNulleable)
 {
    datatype::Abstract::setBuffer (m_buffer);
@@ -71,7 +71,7 @@ datatype::Date::Date (const char* name, const datatype::Abstract::Type::_v type,
    wepa_memset (&m_value, 0, sizeof (m_value));
 }
 
-datatype::Date::Date (const string& name, const datatype::Abstract::Type::_v type,  const bool isNulleable, const char* format) :
+datatype::Date::Date (const string& name, const datatype::Abstract::Datatype::_v type,  const bool isNulleable, const char* format) :
    datatype::Abstract (name, type, MaxDateSize, isNulleable)
 {
    datatype::Abstract::setBuffer (m_buffer);

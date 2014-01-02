@@ -437,7 +437,7 @@ protected:
       \param isNulleable Indica si el dato puede tomar valores nulos.
       \param format Formato usado para representar los datos de esta fecha.
     */
-   explicit Date (const char* name, const Type::_v type, const bool isNulleable, const char* format);
+   explicit Date (const char* name, const Datatype::_v type, const bool isNulleable, const char* format);
 
    /**
     * Constructor invocado desde el constructor de TimeStamp.
@@ -448,7 +448,7 @@ protected:
 
       \since NemesisRD.dbms 2.10.06.3
     */
-   explicit Date (const std::string& name, const Type::_v type, const bool isNulleable, const char* format);
+   explicit Date (const std::string& name, const Datatype::_v type, const bool isNulleable, const char* format);
 
 private:
    void set (const char* what, int& variable, const int value, const int min, const int max) throw (adt::RuntimeException);

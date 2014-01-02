@@ -130,7 +130,7 @@ public:
       \endcode
     */
    explicit TimeStamp (const char* name, const bool isNulleable = false, const char* format=NULL)  :
-      Date (name, datatype::Abstract::Type::TimeStamp, isNulleable, format),
+      Date (name, datatype::Abstract::Datatype::TimeStamp, isNulleable, format),
       m_fractionalSecond (0)
       {;}
 
@@ -242,7 +242,7 @@ public:
       \endcode
    */
    explicit TimeStamp (const std::string& name, const bool isNulleable = false, const char* format=NULL)  :
-      Date (name, datatype::Abstract::Type::TimeStamp, isNulleable, format),
+      Date (name, datatype::Abstract::Datatype::TimeStamp, isNulleable, format),
       m_fractionalSecond (0)
       {;}
 

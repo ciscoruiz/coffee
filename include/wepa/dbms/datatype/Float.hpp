@@ -26,7 +26,7 @@ public:
       que printf, scanf, etc. Su uso depender� del gestor de base de datos usado.
    */
    explicit Float (const char* name, const bool isNulleable = false, const char* format="%f") :
-      datatype::Abstract (name, Type::Float, sizeof (float), isNulleable),
+      datatype::Abstract (name, Datatype::Float, sizeof (float), isNulleable),
       m_format (format),
       m_value (0.0)
    {
@@ -43,7 +43,7 @@ public:
       \since NemesisRD.dbms 2.10.06.3
    */
    explicit Float (const std::string& name, const bool isNulleable = false, const char* format="%f") :
-      datatype::Abstract (name, Type::Float, sizeof (float), isNulleable),
+      datatype::Abstract (name, Datatype::Float, sizeof (float), isNulleable),
       m_format (format),
       m_value (0.0)
    {

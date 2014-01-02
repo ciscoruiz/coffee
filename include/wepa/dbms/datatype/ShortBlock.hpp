@@ -33,7 +33,7 @@ public:
       \param isNulleable Indica si el dato puede tomar valores nulos.
    */
    explicit ShortBlock (const char* name, const int maxSize, const bool isNulleable = false) :
-      datatype::Abstract (name, Type::ShortBlock, maxSize, isNulleable),
+      datatype::Abstract (name, Datatype::ShortBlock, maxSize, isNulleable),
       m_value ()
    {
       m_value.reserve(maxSize);
@@ -49,7 +49,7 @@ public:
       \since NemesisRD.dbms 2.10.06.3
    */
    explicit ShortBlock (const std::string& name, const int maxSize, const bool isNulleable = false) :
-      datatype::Abstract (name, Type::ShortBlock, maxSize, isNulleable),
+      datatype::Abstract (name, Datatype::ShortBlock, maxSize, isNulleable),
       m_value ()
    {
       m_value.reserve(maxSize);

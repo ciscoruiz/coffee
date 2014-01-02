@@ -57,7 +57,7 @@ void binder::Output::write () const
 {
    const datatype::Abstract& data = this->getData ();
 
-   if (data.getType () != datatype::Abstract::Type::LongBlock) {
+   if (data.getType () != datatype::Abstract::Datatype::LongBlock) {
       WEPA_THROW_EXCEPTION("This method only works over dbms::datatype::LongBlock");
    }
 

@@ -66,7 +66,7 @@ public:
       \param isNulleable Indica si el dato puede tomar valores nulos.
    */
    explicit LongBlock (const char* name, const bool isNulleable = false) :
-      datatype::Abstract (name, Type::LongBlock, 0, isNulleable),
+      datatype::Abstract (name, Datatype::LongBlock, 0, isNulleable),
       m_value ()
    {
       datatype::Abstract::setBuffer ((void*) NULL);
@@ -80,7 +80,7 @@ public:
       \since NemesisRD.dbms 2.10.06.3
    */
    explicit LongBlock (const std::string& name, const bool isNulleable = false) :
-      datatype::Abstract (name, Type::LongBlock, 0, isNulleable),
+      datatype::Abstract (name, Datatype::LongBlock, 0, isNulleable),
       m_value ()
    {
       datatype::Abstract::setBuffer ((void*) NULL);

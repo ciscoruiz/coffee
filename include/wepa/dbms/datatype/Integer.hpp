@@ -1,0 +1,122 @@
+// WEPA - Write Excellent Professional Applications
+#ifndef _wepa_dbms_datatype_Integer_h
+#define _wepa_dbms_datatype_Integer_h
+
+#include <wepa/dbms/datatype/Abstract.hpp>
+
+namespace wepa {
+
+namespace dbms {
+
+namespace datatype {
+
+/**
+   Cadena usada como entrada y/o salida de las sentencias SQL.
+
+   @author cisco.tierra@gmail.com.
+*/
+class Integer : public datatype::Abstract {
+public:
+   /**
+      Constructor.
+      \param name Nombre l�gico de este miembro.
+      \param isNulleable Indica si el dato puede tomar valores nulos
+   */
+   explicit Integer (const char* name, const bool isNulleable = false) :
+      datatype::Abstract (name, Type::Integer, sizeof (int), isNulleable),
+      m_value (0)
+   {
+      datatype::Abstract::setBuffer (&m_value);
+   }
+
+   /**
+      Constructor.
+      \param name Nombre l�gico de este miembro.
+      \param isNulleable Indica si el dato puede tomar valores nulos
+
+      \since NemesisRD.dbms 2.10.06.3
+   */
+   explicit Integer (const std::string& name, const bool isNulleable = false) :
+      datatype::Abstract (name, Type::Integer, sizeof (int), isNulleable),
+      m_value (0)
+   {
+      datatype::Abstract::setBuffer (&m_value);
+   }
+
+   /**
+      Constructor copia.
+      \param other Instancia de la que copiar.
+      \since NemesisRD.dbms 1.1.1
+   */
+   Integer (const Integer& other) :
+      datatype::Abstract (other),
+      m_value (other.m_value)
+   {
+      datatype::Abstract::setBuffer (&m_value);
+   }
+
+   /**
+      Devuelve el valor entero asociado a esta instancia.
+      \return El valor entero asociado a esta instancia.
+   */
+   int getValue () const throw () { return m_value; }
+
+   /**
+      Operador de asignacin entero.
+      \param i Valor entero a asignar.
+      \return La referencia a esta instancia.
+   */
+   Integer& operator = (const int i)
+      throw ()
+   {
+      m_value = i;
+      datatype::Abstract::setNull (false);
+      return *this;
+   }
+
+   /**
+      Operador copia.
+      \param other Instancia de la que copiar.
+      \return La referencia a esta instancia.
+   */
+   Integer& operator = (const Integer& other)
+      throw ()
+   {
+      if (this != &other) {
+         setNull (other.isNull ());
+         m_value = other.m_value;
+      }
+      return *this;
+   }
+
+   /**
+      Operador de conversion.
+      \return El valor entero asociado a esta instancia.
+   */
+   operator int () const throw () { return m_value; }
+
+   /**
+      Devuelve una cadena con la informacion referente a esta instancia.
+      @return Una cadena con la informacion referente a esta instancia.
+   */
+   adt::StreamString asString () const throw ();
+
+   /**
+    * Devuelve el nombre l�gico de esta clase
+    * \return el nombre l�gico de esta clase
+    * \since NemesisRD.dbms 2.10.16.04
+    */
+   static const char* className () throw () { return "dbms::datatype::Integer"; }
+
+private:
+   int m_value;
+
+   void do_clear () throw () { m_value = 0; }
+};
+
+}
+}
+}
+
+#endif
+

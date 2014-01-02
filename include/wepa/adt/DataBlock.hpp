@@ -62,6 +62,7 @@ public:
    using std::string::operator +=;
    using std::string::operator =;
    using std::string::size;
+   using std::string::reserve;
 
    /**
     * Empty constructor.

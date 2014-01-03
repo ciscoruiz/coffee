@@ -84,7 +84,7 @@ void dbms::Database::do_initialize ()
 
    for (connection_iterator iic = connection_begin (), maxiic = connection_end (); iic != maxiic; iic ++) {
       try {
-         connection (iic)->open ();
+         connection (iic).open ();
          counter ++;
       }
       catch (adt::Exception& ex) {
@@ -106,12 +106,9 @@ void dbms::Database::do_stop ()
    LOG_THIS_METHOD();
 
    try {
-      Connection* _connection;
-
       for (connection_iterator iic = connection_begin (), maxiic = connection_end (); iic != maxiic; iic ++) {
-         _connection = connection (iic);
-         _connection->close ();
-         delete _connection;
+         Connection& _connection = connection (iic);
+         _connection.close ();
       }
 
       m_connections.clear ();
@@ -132,7 +129,7 @@ dbms::Connection* dbms::Database::createConnection (const char* name, const char
    }
 
    for (connection_iterator ii = connection_begin (), maxii = connection_end (); ii != maxii; ii ++) {
-      if (connection (ii)->getName () == name) {
+      if (connection (ii).getName () == name) {
          WEPA_THROW_EXCEPTION(asString () << " | Connection=" << name << " is already defined");
       }
    }
@@ -172,8 +169,8 @@ dbms::Connection& dbms::Database::findConnection (const char* name)
    Connection* result = NULL;
 
    for (connection_iterator ii = connection_begin (), maxii = connection_end (); ii != maxii; ii ++) {
-      if (wepa_strcmp (connection (ii)->getName ().c_str (), name) == 0) {
-         result = connection (ii);
+      if (wepa_strcmp (connection_ptr (ii)->getName ().c_str (), name) == 0) {
+         result = connection_ptr (ii);
          break;
       }
    }
@@ -196,8 +193,10 @@ dbms::Statement* dbms::Database::createStatement (const char* name, const char* 
 {
    logger::TraceMethod ttmm (logger::Level::Local7, WEPA_FILE_LOCATION);
 
-   if (findStatement (name) != NULL)
-      WEPA_THROW_EXCEPTION("Sentence '" << name << "' is already defined");
+   for (statement_iterator ii = statement_begin(), maxii = statement_end(); ii != maxii; ++ ii) {
+      if (statement(ii).getName () == name)
+         WEPA_THROW_EXCEPTION("Sentence '" << name << "' is already defined");
+   }
 
    if (m_statementTranslator != NULL)
       expression = m_statementTranslator->apply (expression);
@@ -211,42 +210,24 @@ dbms::Statement* dbms::Database::createStatement (const char* name, const char* 
    return result;
 }
 
-dbms::Statement* dbms::Database::findStatement (const char* name)
-   throw ()
+dbms::Statement& dbms::Database::findStatement (const char* name)
+   throw (adt::RuntimeException)
 {
    logger::TraceMethod ttmm (logger::Level::Local7, WEPA_FILE_LOCATION);
 
    Statement* result (NULL);
 
    for (statement_iterator ii = statement_begin (), maxii = statement_end (); ii != maxii; ii ++) {
-      if (wepa_strcmp (statement (ii)->getName ().c_str (), name) == 0) {
-         result = statement (ii);
+      if (wepa_strcmp (statement (ii).getName ().c_str (), name) == 0) {
+         result = statement_ptr (ii);
          break;
       }
    }
 
-   return result;
-}
+   if (result == NULL)
+      WEPA_THROW_EXCEPTION("Statement '" << name << "' was not found");
 
-void dbms::Database::releaseStatement (Statement* statement)
-   throw ()
-{
-   logger::TraceMethod ttmm (logger::Level::Local7, WEPA_FILE_LOCATION);
-
-   if (statement == NULL) {
-      LOG_WARN (asString () << " | Can not release NULL statement");
-      return;
-   }
-
-   LOG_DEBUG (statement->asString ());
-
-   statement_iterator end = statement_end ();
-   statement_iterator ii = std::find (statement_begin (), end, statement);
-
-   if (ii != end) {
-      m_statements.erase (ii);
-      delete statement;
-   }
+   return std::ref (*result);
 }
 
 void dbms::Database::breakConnection (dbms::Connection& connection)
@@ -304,11 +285,11 @@ xml::Node& dbms::Database::asXML (xml::Node& parent) const
 
    xml::Node& connections = result. createChild ("Connections");
    for (const_connection_iterator ii = connection_begin (), maxii = connection_end (); ii != maxii; ii ++)
-      connection (ii)->asXML (connections);
+      connection (ii).asXML (connections);
 
    xml::Node& statements = result. createChild ("Statements");
    for (const_statement_iterator ii = statement_begin (), maxii = statement_end (); ii != maxii; ii ++)
-      statement (ii)->asXML (statements);
+      statement (ii).asXML (statements);
 
    return result;
 }

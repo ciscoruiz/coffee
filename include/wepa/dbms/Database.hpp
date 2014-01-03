@@ -2,7 +2,7 @@
 #ifndef _wepm_dbms_Database_h
 #define _wepm_dbms_Database_h
 
-#include <vector>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 #include <wepa/app/EngineIf.hpp>
 
@@ -37,10 +37,16 @@ class StatementTranslator;
    @author cisco.tierra@gmail.com.
 */
 class Database : public app::EngineIf {
+protected:
+   typedef boost::ptr_vector <Connection> connection_container;
+   typedef connection_container::iterator connection_iterator;
+
+   typedef boost::ptr_vector <Statement> statement_container;
+   typedef statement_container::iterator statement_iterator;
+
 public:
    /**
       Numero maximo de conexiones que podemos crear.
-      \since NemesisRD.dbms 1.1.5
    */
    static const int MaxConnection = 32;
 
@@ -49,8 +55,8 @@ public:
    */
    struct Type { enum _v { Local, Remote }; };
 
-   typedef std::vector <Connection*>::const_iterator const_connection_iterator; /**<Iterador para acceder a las conexiones de esta base de datos */
-   typedef std::vector <Statement*>::const_iterator const_statement_iterator; /**<Iterador para acceder a las conexiones de esta base de datos */
+   typedef connection_container::const_iterator const_connection_iterator; /**<Iterador para acceder a las conexiones de esta base de datos */
+   typedef statement_container::const_iterator const_statement_iterator; /**<Iterador para acceder a las conexiones de esta base de datos */
 
    /**
       Destructor.
@@ -124,7 +130,7 @@ public:
       \return El objeto sobre el que esta posicionado el iterator recibido como parametro.
       \since NemesisRD.dbms 1.0.2
    */
-   static const Connection* connection (const_connection_iterator ii) throw () { return *ii; }
+   static const Connection& connection (const_connection_iterator ii) throw () { return std::ref (*ii); }
 
    /**
       Crea y registra una nueva sentencia SQL asociada a esta base de datos.
@@ -167,14 +173,7 @@ public:
       @return La instancia de la sentencia SQL  asociada al nombre recibido.
       Puede ser NULL si el nombre no fue registrado previamente con #createStatement.
    */
-   Statement* findStatement (const char* name) throw ();
-
-   /**
-      Libera los recursos de la sentencia SQL recibida como parametro.
-      \param statement Instancia de la sentencia SQL a liberar. deberia haber sido obtenida mediante
-      el metodo #createStatement.
-   */
-   void releaseStatement (Statement* statement) throw ();
+   Statement& findStatement (const char* name) throw (adt::RuntimeException);
 
    /**
       Devuelve un iterator al comienzo de la lista de sentencias SQL creadas en esta base de datos.
@@ -196,7 +195,7 @@ public:
       \return El objeto sobre el que esta posicionado el iterator recibido como parametro.
       \since NemesisRD.dbms 1.2.2
    */
-   static Statement* statement (const_statement_iterator ii) throw () { return *ii; }
+   static const Statement& statement (const_statement_iterator ii) throw () { return std::ref (*ii); }
 
    /**
       Devuelve una cadena con la informacion mas relevante de esta instancia.
@@ -212,12 +211,6 @@ public:
    virtual xml::Node& asXML (xml::Node& parent) const throw ();
 
 protected:
-   typedef std::vector <Connection*> connection_container;
-   typedef connection_container::iterator connection_iterator; /**<Iterador para acceder a las conexiones de esta base de datos */
-
-   typedef std::vector <Statement*> statement_container;
-   typedef statement_container::iterator statement_iterator;
-
    /**
       Contructor.
       \param app Instancia de la aplicaci�n sobre la que corre.
@@ -269,7 +262,7 @@ protected:
       \return El objeto sobre el que esta posicionado el iterator recibido como parametro.
       \since NemesisRD.dbms 1.1.1
    */
-   static Connection* connection (connection_iterator ii) throw () { return *ii; }
+   static Connection& connection (connection_iterator ii) throw () { return std::ref (*ii); }
 
    /**
       Devuelve un iterator al comienzo de la lista de sentencias SQL creadas en esta base de datos.
@@ -291,7 +284,7 @@ protected:
       \return El objeto sobre el que esta posicionado el iterator recibido como parametro.
       \since NemesisRD.dbms 1.2.2
    */
-   static Statement* statement (statement_iterator ii) throw () { return *ii; }
+   static Statement& statement (statement_iterator ii) throw () { return std::ref (*ii); }
 
 private:
    const std::string m_name;
@@ -302,6 +295,9 @@ private:
    StatementTranslator* m_statementTranslator;
 
    Database (const Database&);
+
+   static Connection* connection_ptr (connection_iterator ii) throw () { Connection& result = std::ref (*ii); return &result; }
+   static Statement* statement_ptr (statement_iterator ii) throw () { Statement& result = std::ref (*ii); return &result; }
 
    virtual Connection* allocateConnection (const std::string& name, const char* user, const char* password)
       throw (adt::RuntimeException) = 0;

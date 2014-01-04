@@ -50,7 +50,34 @@ adt::StreamString datatype::Abstract::asString () const
    result << " | Buffer: " << adt::AsHexString::apply(wepa_ptrnumber_cast (m_buffer));
    result << " | MaxSize: " << m_maxSize;
    result << " | Null: " << m_isNull;
+   result << " | Nulleable: " << m_isNulleable;
 
    return result += " }";
 }
 
+void datatype::Abstract::setNull (const bool isNull)
+   throw (adt::RuntimeException)
+{
+   if (m_isNulleable == false && isNull == true) {
+      WEPA_THROW_EXCEPTION(asString () << " | Data can not be NULL");
+   }
+
+   m_isNull = isNull;
+}
+
+void datatype::Abstract::clear ()
+   throw ()
+{
+   if (m_isNulleable)
+      m_isNull = true;
+
+   do_clear ();
+}
+
+void datatype::Abstract::exceptionWhenIsNull () const
+   throw (adt::RuntimeException)
+{
+   if (m_isNull == true) {
+      WEPA_THROW_EXCEPTION("Data '" << m_name << "' is null and it can not return any value");
+   }
+}

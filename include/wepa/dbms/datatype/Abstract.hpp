@@ -3,6 +3,7 @@
 #define _wepa_dbms_type_Abstract_h
 
 #include <wepa/adt/StreamString.hpp>
+#include <wepa/adt/RuntimeException.hpp>
 
 namespace wepa {
 
@@ -72,7 +73,7 @@ public:
       \warning Slo tendr�efecto en caso de haber indicado en el constructor que
       el dato puede tomar valores nulos.
    */
-   void setNull (const bool isNull) throw () { if (m_isNulleable == true) m_isNull = isNull; }
+   void setNull (const bool isNull) throw (adt::RuntimeException);
 
    /**
       Incorpora el m�todo clear para todos tipos de datos con lo que podemos obtener informaci�n
@@ -81,13 +82,8 @@ public:
       Si el dato est� definido como "nuleable" activar� el indicador que indica que el dato est� vac�o,
       en otro caso se asignar� un valor adecuado dependiendo del tipo del dato, cero para los n�meros,
       "" para las cadenas, etc.
-
-      \since NemesisRD.dbms 1.10.2
    */
-   void clear () throw () {
-      setNull (true);
-      do_clear ();
-   }
+   void clear () throw ();
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.
@@ -98,7 +94,6 @@ public:
    /**
     * Devuelve el nombre l�gico de esta clase
     * \return el nombre l�gico de esta clase
-    * \since NemesisRD.dbms 2.10.16.04
     */
    static const char* className () throw () { return "dbms::type::Abstract"; }
 
@@ -160,6 +155,8 @@ protected:
       \param buffer Direccion de memoria donde comienza el contenido esta variable.
    */
    void setBuffer (void* buffer) throw () { m_buffer = buffer; }
+
+   void exceptionWhenIsNull () const throw (adt::RuntimeException);
 
 private:
    const std::string m_name;

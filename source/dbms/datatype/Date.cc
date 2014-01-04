@@ -34,6 +34,8 @@
 //
 #include <string.h>
 
+#include <time.h>
+
 #include <wepa/config/defines.hpp>
 
 #include <wepa/adt/Second.hpp>
@@ -96,14 +98,32 @@ datatype::Date::~Date ()
 }
 
 const char* datatype::Date::getCStringValue () const
-   throw ()
+   throw (adt::RuntimeException)
 {
+   this->exceptionWhenIsNull();
+
    const char* format;
 
    if ((format = m_format) == NULL)
       format = "%d/%m/%Y %H:%M:%S";
 
    return (strftime (const_cast <Date*> (this)->m_buffer, MaxDateSize, format, &m_value) == 0) ? NULL: m_buffer;
+}
+
+adt::Second datatype::Date::getSecondValue () const
+throw (adt::RuntimeException)
+{
+   this->exceptionWhenIsNull();
+
+   Date& _this = const_cast <Date&> (*this);
+
+   int rr = mktime (&_this.m_value);
+
+   if (rr == -1) {
+      WEPA_THROW_EXCEPTION(asctime (&_this.m_value) << " can not be converted as adt::Second");
+   }
+
+   return adt::Second (rr);
 }
 
 datatype::Date& datatype::Date::operator = (const Date& other)

@@ -280,14 +280,14 @@ public:
       \return El contenido de esta fecha.
       \warning Si el metodo type::Abstract::isNull devolvio \em true el contenido de la estructura no esta definido.
    */
-   tm& getValue () throw () { return m_value; }
+   tm& getValue () throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
    /**
     * Interpreta el contenido de la fecha y lo transfiere al buffer.
     * \return El buffer que contiene esta fecha interpretada con el formato indicado en el contructor.
     *  \warning El resultado sera NULL en caso de no poder interpretar correctamente la fecha.
     */
-   virtual const char* getCStringValue () const throw ();
+   virtual const char* getCStringValue () const throw (adt::RuntimeException);
 
    /**
     * Interpreta el contenido de esta fecha como el numero de segundos transcurridos desde el 1 de Enero de 1970.
@@ -297,7 +297,7 @@ public:
     * Si el contenido de la columna sociada es nulo este metodo devolvera 0. Si la conversion a
     * segundos no puede ser realizada devolvera -1.
     */
-   adt::Second getSecondValue () const throw () { return adt::Second ((Abstract::isNull () == true) ? 0: mktime (&const_cast <Date*> (this)->m_value)); }
+   adt::Second getSecondValue () const throw (adt::RuntimeException);
 
    /**
     * Devuelve el formato indicado en el constructor de la clase.

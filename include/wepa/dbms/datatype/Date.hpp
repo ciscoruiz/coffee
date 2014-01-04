@@ -261,7 +261,6 @@ public:
       Constructor copia.
       \param other Instancia de la que copiar.
    */
-   Date (const Date& other);
 
    /**
       Destructor.
@@ -405,14 +404,6 @@ public:
    void setValue (const adt::Second& second) throw (adt::RuntimeException);
 
    /**
-      Operador de copia.
-      \param date Fecha de la que copiar.
-      \return La instancia de esta fecha.
-      \warning Solo copia el contenido de la fecha recibida, no cambia el formato de interpretacion de la fecha origen.
-   */
-   Date& operator = (const Date& date) throw (adt::RuntimeException);
-
-   /**
       Devuelve una cadena con la informacion referente a esta instancia.
       \return Una cadena con la informacion referente a esta instancia.
    */
@@ -451,6 +442,8 @@ protected:
    explicit Date (const std::string& name, const Datatype::_v type, const bool isNulleable, const char* format);
 
 private:
+   Date (const Date& other);
+
    void set (const char* what, int& variable, const int value, const int min, const int max) throw (adt::RuntimeException);
    void do_clear () throw () { wepa_memset (&m_value, 0, sizeof (m_value)); }
 };

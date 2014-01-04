@@ -82,15 +82,6 @@ datatype::Date::Date (const string& name, const datatype::Abstract::Datatype::_v
    wepa_memset (&m_value, 0, sizeof (m_value));
 }
 
-datatype::Date::Date (const Date& other) :
-   datatype::Abstract (other)
-{
-   datatype::Abstract::setBuffer (m_buffer);
-   m_buffer [0] = 0;
-   m_format = (other.m_format == NULL) ? NULL: strdup (other.m_format);
-   wepa_memcpy (&m_value, &other.m_value, sizeof (m_value));
-}
-
 datatype::Date::~Date ()
 {
    if (m_format != NULL)
@@ -124,23 +115,6 @@ throw (adt::RuntimeException)
    }
 
    return adt::Second (rr);
-}
-
-datatype::Date& datatype::Date::operator = (const Date& other)
-   throw (adt::RuntimeException)
-{
-   if (this != &other) {
-      if (other.isNull () == true) {
-         setNull (true);
-         wepa_memset (&m_value, 0, sizeof (m_value));
-      }
-      else {
-         setNull (false);
-         wepa_memcpy (&m_value, &other.m_value, sizeof (m_value));
-      }
-   }
-
-   return *this;
 }
 
 void datatype::Date::setValue (const char* str)

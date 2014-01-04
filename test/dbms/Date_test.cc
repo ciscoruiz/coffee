@@ -141,4 +141,7 @@ BOOST_AUTO_TEST_CASE (date_is_not_nulleable)
 
    std::string str_date ("00/01/1900T00:00");
    BOOST_REQUIRE_EQUAL (str_date, column.getCStringValue());
+
+   column.setNull (false);
+   BOOST_REQUIRE_EQUAL (column.isNull(), false);
 }

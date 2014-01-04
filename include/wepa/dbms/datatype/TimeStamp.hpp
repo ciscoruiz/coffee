@@ -265,26 +265,6 @@ public:
     */
    virtual const char* getCStringValue () const throw ();
 
-   /**
-      Operador de copia.
-      \param timeStamp Fecha de la que copiar.
-      \return La instancia de esta fecha.
-      \warning Solo copia el contenido de la fecha recibida, no cambia el formato de interpretacion de la fecha origen.
-   */
-   TimeStamp& operator = (const TimeStamp& timeStamp) throw (adt::RuntimeException) {
-      Date::operator= (timeStamp);
-      m_fractionalSecond = timeStamp.m_fractionalSecond;
-      return *this;
-   }
-
-   /**
-      Operador de copia.
-      \param date Fecha de la que copiar.
-      \return La instancia de esta fecha.
-      \warning Solo copia el contenido de la fecha recibida, no cambia el formato de interpretacion de la fecha origen.
-   */
-   TimeStamp& operator = (const Date& date) throw (adt::RuntimeException) { Date::operator= (date); m_fractionalSecond = 0; return *this; }
-
 private:
    char m_anotherBuffer [MaxDateSize + 1];
    int m_fractionalSecond;

@@ -39,21 +39,6 @@
 using namespace wepa;
 using namespace wepa::dbms;
 
-datatype::String& datatype::String::operator = (const datatype::String& other)
-   throw (adt::RuntimeException)
-{
-   if (this == &other)
-      return *this;
-
-   if (other.isNull () == true) {
-      setNull (true);
-      m_value [0] = 0;
-      return *this;
-   }
-
-   return operator= (other.m_value);
-}
-
 datatype::String& datatype::String::operator = (const char* str)
    throw (adt::RuntimeException)
 {
@@ -65,7 +50,7 @@ datatype::String& datatype::String::operator = (const char* str)
       wepa_strcpy (m_value, str);
    }
 
-   datatype::Abstract::setNull (false);
+   this->isNotNull();
 
    return *this;
 }

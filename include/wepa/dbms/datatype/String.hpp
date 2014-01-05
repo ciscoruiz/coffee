@@ -74,15 +74,7 @@ public:
       \return El contenido de la cadena.
       \warning Si el metodo datatype::Abstract::isNull devolvio \em true el resultado de este metodo no esta definido.
    */
-   const char* getValue () const throw () { return m_value; }
-
-   /**
-      Operador de copia.
-      \param str Cadena de la que copiar. Si la longitud de la cadena sobrepasa el tamao maximo
-      indicado en el constructor obtendremos una excepcin.
-      \return La instancia de esta cadena.
-   */
-   String& operator = (const String& str) throw (adt::RuntimeException);
+   const char* getValue () const throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
    /**
       Operador de asignacin.
@@ -105,7 +97,7 @@ public:
       fue nulo este metodo devolvera NULL.
       \return El contenido de esta cadena.
    */
-   operator const char* () const throw () { return (datatype::Abstract::isNull () == true) ? NULL: m_value; }
+   operator const char* () const throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return  m_value; }
 
    /**
       Elimina los espacios a la derecha de la cadena recibida.
@@ -122,7 +114,6 @@ public:
    /**
     * Devuelve el nombre l�gico de esta clase
     * \return el nombre l�gico de esta clase
-    * \since NemesisRD.dbms 2.10.16.04
     */
    static const char* className () throw () { return "dbms::datatype::String"; }
 

@@ -114,21 +114,14 @@ public:
       \return  Devuelve el contenido de la este bloque de memoria.
       \warning Si el metodo datatype::Abstract::isNull devolvio \em true el resultado de este metodo no esta definido.
    */
-   const adt::DataBlock& getValue () const throw () { return m_value; }
+   const adt::DataBlock& getValue (adt::RuntimeException) const throw () { this->exceptionWhenIsNull(); return m_value; }
 
    /**
       Devuelve el contenido de la este bloque de memoria.
       \return  Devuelve el contenido de la este bloque de memoria.
       \warning Si el metodo datatype::Abstract::isNull devolvio \em true el resultado de este metodo no esta definido.
    */
-   adt::DataBlock& getValue () throw () { return m_value; }
-
-   /**
-      Operador de asignacin.
-      \param other Bloque del que copiar.
-      \return La instancia de este bloque de memoria.
-   */
-   LongBlock& operator = (const LongBlock& other) throw (adt::RuntimeException);
+   adt::DataBlock& getValue () throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
    /**
       Operador de asignacin.
@@ -141,13 +134,13 @@ public:
       Operador de conversion.
       \return El adt::DataBlock asociado a esta instancia.
    */
-   operator adt::DataBlock& () throw () { return m_value; }
+   operator adt::DataBlock& () throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
    /**
       Operador de conversion.
       \return El adt::DataBlock asociado a esta instancia.
    */
-   operator const adt::DataBlock& () const throw () { return m_value; }
+   operator const adt::DataBlock& () const throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.

@@ -65,14 +65,14 @@ public:
       \return el contenido del campo de tipo Float.
       \warning Si el metodo datatype::Abstract::isNull devolvio \em true el resultado de este metodo no esta definido.
    */
-   float getFloatValue () const throw () { return getValue (); }
+   float getFloatValue () const throw (adt::RuntimeException) { return getValue (); }
 
    /**
     * Devuelve el valor asociado a este campo.
     * \return Devuelve el valor asociado a este campo.
     * \since NemesisRD.dbms 1.7.4.
     */
-   float getValue () const throw () { return m_value; }
+   float getValue () const throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
    /**
     * Devuelve el formato que indica la forma en la que el n�mero ser� representado sobre
@@ -82,27 +82,13 @@ public:
    const char* getFormat () const throw () { return m_format; }
 
    /**
-      Operador de copia.
-      \param other Float del que copiar.
-      \return La instancia de esta cadena.
-   */
-   Float& operator = (const Float& other) throw ()
-   {
-      if (this != &other) {
-         setNull (other.isNull ());
-         m_value = other.m_value;
-      }
-      return *this;
-   }
-
-   /**
       Operador de asignacion.
       \param value Float del que copiar.
       \return La instancia de esta cadena.
    */
    Float& operator = (const float value) throw () {
       m_value = value;
-      setNull (false);
+      isNotNull();
       return *this;
    }
 
@@ -111,7 +97,7 @@ public:
       \warning Si la columna asociada tiene un valor NULL, devolvera 0.0.
       \return El contenido de esta cadena.
    */
-   operator float () const throw () { return getValue (); }
+   operator float () const throw (adt::RuntimeException) { return getValue (); }
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.

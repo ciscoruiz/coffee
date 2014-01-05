@@ -55,14 +55,14 @@ adt::StreamString datatype::Abstract::asString () const
    return result += " }";
 }
 
-void datatype::Abstract::setNull (const bool isNull)
+void datatype::Abstract::isNull ()
    throw (adt::RuntimeException)
 {
-   if (m_isNulleable == false && isNull == true) {
+   if (m_isNulleable == false) {
       WEPA_THROW_EXCEPTION(asString () << " | Data can not be NULL");
    }
 
-   m_isNull = isNull;
+   m_isNull = true;
 }
 
 void datatype::Abstract::clear ()

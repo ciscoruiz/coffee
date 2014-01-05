@@ -32,29 +32,49 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/dbms/datatype/LongBlock.hpp>
+#include <iostream>
+#include <time.h>
+
+#include <boost/test/unit_test.hpp>
+
+#include <wepa/dbms/datatype/Float.hpp>
 
 using namespace wepa;
 using namespace wepa::dbms;
 
-datatype::LongBlock& datatype::LongBlock::operator = (const adt::DataBlock& value)
-   throw (adt::RuntimeException)
+
+BOOST_AUTO_TEST_CASE (float_is_nulleable)
 {
-   m_value = value;
-   this->isNotNull();
-   return *this;
+   datatype::Float column ("nulleable", true);
+
+   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
+
+   column.clear ();
+
+   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
+
+   BOOST_REQUIRE_THROW (column.getValue (), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (column.getFloatValue(), adt::RuntimeException);
+
+   column = 10.12;
+
+   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
+   BOOST_REQUIRE_CLOSE (column.getValue(),10.12, 0.1);
+
+   column.clear ();
+   BOOST_REQUIRE_EQUAL (column.hasValue (), false);;
 }
 
-adt::StreamString datatype::LongBlock::asString () const
-   throw ()
+BOOST_AUTO_TEST_CASE (float_is_not_nulleable)
 {
-   adt::StreamString result ("datatype::LongBlock { ");
-   result += datatype::Abstract::asString ();
-   result += " | Size: ";
-   if (this->hasValue () == true)
-      result << m_value.size ();
-   else
-      result += "(null)";
-   return result += " }";
-}
+   datatype::Float column ("not_nulleable", false);
 
+   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
+
+   column = 0.0;
+   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
+   BOOST_REQUIRE_EQUAL (column.getValue(), 0.0);
+
+   column.clear();
+   BOOST_REQUIRE_EQUAL (column.hasValue(), true);
+}

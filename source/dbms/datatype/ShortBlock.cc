@@ -39,20 +39,6 @@
 using namespace wepa;
 using namespace wepa::dbms;
 
-datatype::ShortBlock& datatype::ShortBlock::operator = (const datatype::ShortBlock& other)
-   throw (adt::RuntimeException)
-{
-   if (this == &other)
-      return *this;
-
-   if (other.isNull () == true) {
-      setNull (true);
-      return *this;
-   }
-
-   return operator= (other.m_value);
-}
-
 datatype::ShortBlock& datatype::ShortBlock::operator = (const adt::DataBlock& value)
    throw (adt::RuntimeException)
 {
@@ -60,7 +46,7 @@ datatype::ShortBlock& datatype::ShortBlock::operator = (const adt::DataBlock& va
       WEPA_THROW_EXCEPTION("Block out of range (" << datatype::Abstract::getMaxSize () << " and " << value.size ());
    }
    m_value = value;
-   setNull (m_value.empty ());
+   this->isNotNull();
    return *this;
 }
 
@@ -71,10 +57,10 @@ adt::StreamString datatype::ShortBlock::asString () const
    result += datatype::Abstract::asString ();
    result += " | Value: ";
 
-   if (isNull ())
-      result += "(null)";
-   else
+   if (this->hasValue() == true)
       result << adt::AsString::apply (m_value);
+   else
+      result += "(null)";
 
    return result += " }";
 }

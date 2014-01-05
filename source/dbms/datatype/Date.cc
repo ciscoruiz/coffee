@@ -131,7 +131,7 @@ void datatype::Date::setValue (const char* str)
       WEPA_THROW_EXCEPTION("It is not a valid date");
    }
 
-   datatype::Abstract::setNull (false);
+   this->isNotNull();
    wepa_memcpy (&m_value, &aux, sizeof (m_value));
 }
 
@@ -145,7 +145,7 @@ void datatype::Date::setValue (const adt::Second& second)
       WEPA_THROW_EXCEPTION(asString () << second.asString() << " | It is not a valid date");
    }
 
-   datatype::Abstract::setNull (false);
+   this->isNotNull();
    wepa_memcpy (&m_value, aux, sizeof (m_value));
 }
 
@@ -160,7 +160,7 @@ void datatype::Date::set (const char* what, int& variable, const int value, cons
       WEPA_THROW_EXCEPTION(what << " must be less or equal to " << max);
    }
 
-   datatype::Abstract::setNull (false);
+   this->isNotNull();
    variable = value;
 }
 
@@ -175,7 +175,7 @@ adt::StreamString datatype::Date::asString () const
    result += (m_format == NULL) ? "<null>": m_format;
    result += " | Value: ";
 
-   if (datatype::Abstract::isNull () == false) {
+   if (this->hasValue () == true) {
       if ((cstring = getCStringValue ()) == NULL)
          result += "<not valid>";
       else

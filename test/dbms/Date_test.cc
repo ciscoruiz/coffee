@@ -91,15 +91,17 @@ BOOST_AUTO_TEST_CASE (date_is_nulleable)
 {
    datatype::Date column ("nulleable", true, "%d/%m/%YT%H:%M");
 
-   BOOST_REQUIRE_EQUAL (column.isNull(), true);
+   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
 
-   column.setNull(false);
+   column.clear ();
+   BOOST_REQUIRE_EQUAL (column.hasValue(), false);
 
-   BOOST_REQUIRE_EQUAL (column.isNull(), false);
-   std::string str_date ("00/01/1900T00:00");
+   std::string str_date ("01/01/1900T00:00");
+   BOOST_REQUIRE_NO_THROW(column.setValue (str_date));
+   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
    BOOST_REQUIRE_EQUAL (str_date, column.getCStringValue());
 
-   column.setNull(true);
+   column.clear ();
    BOOST_REQUIRE_THROW (column.getValue (), adt::RuntimeException);
    BOOST_REQUIRE_THROW (column.getCStringValue (), adt::RuntimeException);
    BOOST_REQUIRE_THROW (column.getSecondValue (), adt::RuntimeException);
@@ -107,7 +109,7 @@ BOOST_AUTO_TEST_CASE (date_is_nulleable)
    str_date = "25/10/2013T02:00";
 
    column.setValue(str_date);
-   BOOST_REQUIRE_EQUAL (column.isNull(), false);
+   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 
    const tm& time_t = column.getValue();
    BOOST_REQUIRE_EQUAL (time_t.tm_year, 2013 - 1900);
@@ -125,23 +127,20 @@ BOOST_AUTO_TEST_CASE (date_is_nulleable)
    BOOST_REQUIRE_EQUAL (str_date, column.getCStringValue());
 
    column.clear ();
-   BOOST_REQUIRE_EQUAL (column.isNull(), true);
+   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
 }
 
 BOOST_AUTO_TEST_CASE (date_is_not_nulleable)
 {
    datatype::Date column ("not_nulleable", false, "%d/%m/%YT%H:%M");
 
-   BOOST_REQUIRE_EQUAL (column.isNull(), false);
+   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 
-   BOOST_REQUIRE_THROW (column.setNull (true), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (column.isNull (), adt::RuntimeException);
 
    column.clear();
-   BOOST_REQUIRE_EQUAL (column.isNull(), false);
+   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 
    std::string str_date ("00/01/1900T00:00");
    BOOST_REQUIRE_EQUAL (str_date, column.getCStringValue());
-
-   column.setNull (false);
-   BOOST_REQUIRE_EQUAL (column.isNull(), false);
 }

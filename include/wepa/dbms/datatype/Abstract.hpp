@@ -59,7 +59,7 @@ public:
       Devuelve el indicador de nulo de esta instancia.
       \return El indicador de nulo de esta instancia.
    */
-   bool isNull () const throw () { return m_isNull; }
+   bool hasValue () const throw () { return m_isNull == false; }
 
    /**
       Devuelve el valor que indica si este dato puede tomar valores nulos.
@@ -73,7 +73,7 @@ public:
       \warning Slo tendr�efecto en caso de haber indicado en el constructor que
       el dato puede tomar valores nulos.
    */
-   void setNull (const bool isNull) throw (adt::RuntimeException);
+   void isNull () throw (adt::RuntimeException);
 
    /**
       Incorpora el m�todo clear para todos tipos de datos con lo que podemos obtener informaci�n
@@ -155,6 +155,8 @@ protected:
       \param buffer Direccion de memoria donde comienza el contenido esta variable.
    */
    void setBuffer (void* buffer) throw () { m_buffer = buffer; }
+
+   void isNotNull () throw () { m_isNull = false; }
 
    void exceptionWhenIsNull () const throw (adt::RuntimeException);
 

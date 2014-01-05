@@ -59,7 +59,7 @@ public:
       Devuelve el valor entero asociado a esta instancia.
       \return El valor entero asociado a esta instancia.
    */
-   int getValue () const throw () { return m_value; }
+   int getValue () const throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
    /**
       Operador de asignacin entero.
@@ -70,22 +70,7 @@ public:
       throw ()
    {
       m_value = i;
-      datatype::Abstract::setNull (false);
-      return *this;
-   }
-
-   /**
-      Operador copia.
-      \param other Instancia de la que copiar.
-      \return La referencia a esta instancia.
-   */
-   Integer& operator = (const Integer& other)
-      throw ()
-   {
-      if (this != &other) {
-         setNull (other.isNull ());
-         m_value = other.m_value;
-      }
+      this->isNotNull();
       return *this;
    }
 
@@ -93,7 +78,7 @@ public:
       Operador de conversion.
       \return El valor entero asociado a esta instancia.
    */
-   operator int () const throw () { return m_value; }
+   operator int () const throw (adt::RuntimeException) { return getValue(); }
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.

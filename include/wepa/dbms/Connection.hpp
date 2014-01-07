@@ -75,6 +75,48 @@ public:
    }
 
    /**
+      Devuelve una cadena con la informacion referente a esta instancia.
+      @return Una cadena con la informacion referente a esta instancia.
+   */
+   virtual adt::StreamString asString () const throw ();
+
+   /**
+      Devuelve un documento XML con la informacion referente a esta instancia.
+      \param parent Nodo XML del que debe colgar la informacion.
+      @return un documento XML con la informacion referente a esta instancia.
+   */
+   virtual xml::Node& asXML (xml::Node& parent) const throw ();
+
+protected:
+   /**
+     Instancia de la base de datos asociada a esta conexion.
+     Coincidiria con la indicada en el constructor.
+   */
+   Database& m_dbmsDatabase;
+   std::string m_user; /**< Nombre del usuario */
+   std::string m_password; /**< Clave de acceso del usuario. */
+
+   /**
+      Contructor.
+
+      @param dbmsDatabase Instancia de la base de datos asociada a esta conexion.
+      @param name Nombre logico de la conexion.
+      @param user Nombre del usuario con el que realizamos la conexion.
+      @param password Codigo de acceso del usuario.
+   */
+   Connection (Database& dbmsDatabase, const std::string& name, const char* user, const char* password) :
+      balance::Resource (name),
+      m_dbmsDatabase (dbmsDatabase),
+      m_user (user),
+      m_password (password),
+      m_lockingCounter (0),
+      m_commitPending (0),
+      m_rollbackPending (false),
+      m_maxCommitPending (0),
+      m_accesingCounter (0)
+   {}
+
+   /**
       Desactiva el indicador de que la conexion requiere una invocacion a #rollback.
       \warning La invocacion a este metodo debera hacerse con una seccion critica activada sobre la
       esta conexion.
@@ -127,48 +169,6 @@ public:
    ResultCode execute (Statement& statement) throw (adt::RuntimeException, DatabaseException) { return execute (&statement); }
 
    /**
-      Devuelve una cadena con la informacion referente a esta instancia.
-      @return Una cadena con la informacion referente a esta instancia.
-   */
-   virtual adt::StreamString asString () const throw ();
-
-   /**
-      Devuelve un documento XML con la informacion referente a esta instancia.
-      \param parent Nodo XML del que debe colgar la informacion.
-      @return un documento XML con la informacion referente a esta instancia.
-   */
-   virtual xml::Node& asXML (xml::Node& parent) const throw ();
-
-protected:
-   /**
-     Instancia de la base de datos asociada a esta conexion.
-     Coincidiria con la indicada en el constructor.
-   */
-   Database& m_dbmsDatabase;
-   std::string m_user; /**< Nombre del usuario */
-   std::string m_password; /**< Clave de acceso del usuario. */
-
-   /**
-      Contructor.
-
-      @param dbmsDatabase Instancia de la base de datos asociada a esta conexion.
-      @param name Nombre logico de la conexion.
-      @param user Nombre del usuario con el que realizamos la conexion.
-      @param password Codigo de acceso del usuario.
-   */
-   Connection (Database& dbmsDatabase, const std::string& name, const char* user, const char* password) :
-      balance::Resource (name),
-      m_dbmsDatabase (dbmsDatabase),
-      m_user (user),
-      m_password (password),
-      m_lockingCounter (0),
-      m_commitPending (0),
-      m_rollbackPending (false),
-      m_maxCommitPending (0),
-      m_accesingCounter (0)
-   {}
-
-   /**
       Metodo que fija los cambios realizados en la ejecucion de los comandos SQL.
    */
    void commit () throw (adt::RuntimeException, DatabaseException);
@@ -210,7 +210,7 @@ private:
    friend class Database;
 
    friend class GuardConnection;
-      // lock, unlock
+      // lock, unlock. execute, commit, rollback and so on
 };
 
 }

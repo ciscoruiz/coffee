@@ -44,6 +44,7 @@
 
 #include <wepa/dbms/DatabaseException.hpp>
 #include <wepa/dbms/ResultCode.hpp>
+#include <wepa/dbms/ActionOnError.hpp>
 
 namespace wepa {
 
@@ -106,7 +107,7 @@ public:
       Solo aplicara en sentencias que no sean de seleccion.
       \return El indicador de criticidad de esta sentencia.
    */
-   bool isCritical () const throw () { return m_isCritical; }
+   ActionOnError::_v actionOnError () const throw () { return m_actionOnError; }
 
    /**
       Devuelve la instancia de la base de datos asociada a esta sentencia.
@@ -265,12 +266,12 @@ protected:
       la conexion con la que ejecutamos esta sentencia se invocara a Connection::rollback, en otro caso
       aunque falle se invocara a Connection::commit. Solo aplicara en sentencias que no sean de seleccion.
    */
-   Statement (Database& database, const char* name, const char* expression, const bool isCritical) :
+   Statement (Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
       m_database (database),
       m_name (name),
       m_expression (expression),
       m_prepared (false),
-      m_isCritical (isCritical),
+      m_actionOnError (actionOnError),
       m_measureTiming ("Timing", "us"),
       m_requiresCommit (false)
    {
@@ -287,12 +288,12 @@ protected:
       aunque falle se invocara a Connection::commit. Solo aplicara en cuenta en sentencias que no
       sean de seleccion.
    */
-   Statement (Database& database, const char* name, const std::string& expression, const bool isCritical) :
+   Statement (Database& database, const char* name, const std::string& expression, const ActionOnError::_v actionOnError) :
       m_database (database),
       m_name (name),
       m_expression (expression),
       m_prepared (false),
-      m_isCritical (isCritical),
+      m_actionOnError (actionOnError),
       m_measureTiming ("Timing", "us"),
       m_requiresCommit (false)
    {
@@ -319,7 +320,7 @@ private:
    input_container m_inputBinds;  /**< Lista de variables de entrada */
    output_container m_outputBinds; /**< Lista de variables de salida */
    bool m_prepared;
-   const bool m_isCritical;
+   const ActionOnError::_v m_actionOnError;
    adt::Average <adt::Microsecond> m_measureTiming;
    bool m_requiresCommit;
 

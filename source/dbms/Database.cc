@@ -188,7 +188,7 @@ dbms::Connection& dbms::Database::findConnection (const char* name)
    return *result;
 }
 
-dbms::Statement* dbms::Database::createStatement (const char* name, const char* expression, const bool isCritical)
+dbms::Statement* dbms::Database::createStatement (const char* name, const char* expression, const ActionOnError::_v actionOnError)
    throw (adt::RuntimeException)
 {
    logger::TraceMethod ttmm (logger::Level::Local7, WEPA_FILE_LOCATION);
@@ -201,7 +201,7 @@ dbms::Statement* dbms::Database::createStatement (const char* name, const char* 
    if (m_statementTranslator != NULL)
       expression = m_statementTranslator->apply (expression);
 
-   Statement* result = allocateStatement (name, expression, isCritical);
+   Statement* result = allocateStatement (name, expression, actionOnError);
 
    LOG_DEBUG(asString ());
 

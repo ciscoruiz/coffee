@@ -97,7 +97,7 @@ dbms::ResultCode dbms::Connection::execute (Statement* statement)
 
    if (statement->requiresCommit () == true) {  // (1)
       if (result.successful () == false) {
-         if (statement->isCritical () == true) {
+         if (statement->actionOnError() == ActionOnError::Rollback) {
             m_rollbackPending = true;
             WEPA_THROW_NAME_DB_EXCEPTION(statement->getName (), result);
          }
@@ -115,10 +115,6 @@ dbms::ResultCode dbms::Connection::execute (Statement* statement)
    return result;
 }
 
-//------------------------------------------------------------------------------------------------
-// (1) Esto no es estrictamente necesario, pero lo hacemos para que no nos despisten las trazas
-// y los volcados de contexto.
-//------------------------------------------------------------------------------------------------
 void dbms::Connection::commit () 
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
@@ -129,14 +125,10 @@ void dbms::Connection::commit ()
    }   
    
    do_commit ();
-   m_commitPending = 0;                 // (1)
+   m_commitPending = 0;
    m_rollbackPending = false;
 }
 
-//------------------------------------------------------------------------------------------------
-// (1) Esto no es estrictamente necesario, pero lo hacemos para que no nos despisten las trazas
-// y los volcados de contexto.
-//------------------------------------------------------------------------------------------------
 void dbms::Connection::rollback () 
    throw ()
 {
@@ -145,11 +137,10 @@ void dbms::Connection::rollback ()
    if (isAvailable () == false) {
       LOG_WARN (asString () << " | Connection is not available");
    }
-   else {
-      do_rollback ();
-      m_commitPending = 0;
-      m_rollbackPending = false;               // (1)
-   }
+
+   do_rollback ();
+   m_commitPending = 0;
+   m_rollbackPending = false;
 }
 
 void dbms::Connection::lock ()

@@ -7,6 +7,7 @@
 #include <wepa/app/EngineIf.hpp>
 
 #include <wepa/dbms/DatabaseException.hpp>
+#include <wepa/dbms/ActionOnError.hpp>
 
 namespace wepa {
 
@@ -145,7 +146,7 @@ public:
 
       \return Una nueva instancia de una conexion a base de datos. No puede ser NULL.
    */
-   Statement* createStatement (const char* name, const char* expression, const bool isCritical = true)
+   Statement* createStatement (const char* name, const char* expression, const ActionOnError::_v actionOnError = ActionOnError::Rollback)
       throw (adt::RuntimeException);
 
    /**
@@ -161,10 +162,10 @@ public:
 
       \return Una nueva instancia de una conexion a base de datos. No puede ser NULL.
    */
-   Statement* createStatement (const char* name, const std::string& expression, const bool isCritical = true)
+   Statement* createStatement (const char* name, const std::string& expression, const ActionOnError::_v actionOnError = ActionOnError::Rollback)
       throw (adt::RuntimeException)
    {
-      return createStatement (name, expression.c_str (), isCritical);
+      return createStatement (name, expression.c_str (), actionOnError);
    }
 
    /**
@@ -302,7 +303,7 @@ private:
    virtual Connection* allocateConnection (const std::string& name, const char* user, const char* password)
       throw (adt::RuntimeException) = 0;
 
-   virtual Statement* allocateStatement (const char* name, const std::string& expression, const bool isCritical)
+   virtual Statement* allocateStatement (const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
       throw (adt::RuntimeException) = 0;
 
    virtual binder::Input* allocateInputBind (datatype::Abstract& data) throw (adt::RuntimeException) = 0;

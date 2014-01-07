@@ -72,46 +72,39 @@ public:
    /**
       Destructor.
    */
-   virtual ~ShortBlock () {;}
+   ~ShortBlock () {;}
 
    /**
       Devuelve el tamao actual de este dato.
       \return El tamao actual de este dato.
    */
-   int getSize () const throw () { return m_value.size (); }
+   int getSize () const throw () { return (hasValue () == true) ? m_value.size (): 0; }
 
    /**
       Devuelve el contenido de la este bloque de memoria.
       \return  Devuelve el contenido de la este bloque de memoria.
       \warning Si el metodo datatype::Abstract::isNull devolvio \em true el resultado de este metodo no esta definido.
    */
-   const adt::DataBlock& getValue () const throw () { return m_value; }
-
-   /**
-      Operador de asignacin.
-      \param other Bloque del que copiar.
-      \return La instancia de este bloque de memoria.
-   */
-   ShortBlock& operator = (const ShortBlock& other) throw (adt::RuntimeException);
+   const adt::DataBlock& getValue () const throw (adt::RuntimeException) {  this->exceptionWhenIsNull();return m_value; }
 
    /**
       Operador de asignacin.
       \param value Valor que queremos a asignar.
       \return La instancia de esta cadena.
    */
-   ShortBlock& operator = (const adt::DataBlock& value) throw (adt::RuntimeException);
+   void setValue (const adt::DataBlock& value) throw (adt::RuntimeException);
 
    /**
       Operador de conversion.
       \return El adt::DataBlock asociado a esta instancia.
    */
-   operator adt::DataBlock& () throw () { return m_value; }
+   operator adt::DataBlock& () throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
    /**
       Operador de conversion.
       \return El adt::DataBlock asociado a esta instancia.
    */
-   operator const adt::DataBlock& () const throw () { return m_value; }
+   operator const adt::DataBlock& () const throw (adt::RuntimeException) { return getValue (); }
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.
@@ -121,6 +114,8 @@ public:
 
 protected:
    adt::DataBlock m_value;
+
+   void do_clear () throw () { m_value.clear (); }
 };
 
 }

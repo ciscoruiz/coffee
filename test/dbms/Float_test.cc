@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE (float_is_nulleable)
    BOOST_REQUIRE_THROW (column.getValue (), adt::RuntimeException);
    BOOST_REQUIRE_THROW (column.getFloatValue(), adt::RuntimeException);
 
-   column = 10.12;
+   column.setValue (10.12);
 
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
    BOOST_REQUIRE_CLOSE (column.getValue(),10.12, 0.1);
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE (float_is_not_nulleable)
 
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 
-   column = 0.0;
+   column.setValue (0.0);
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
    BOOST_REQUIRE_EQUAL (column.getValue(), 0.0);
 

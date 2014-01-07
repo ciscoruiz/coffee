@@ -45,7 +45,7 @@ using namespace wepa::dbms;
 
 BOOST_AUTO_TEST_CASE (string_is_nulleable)
 {
-   datatype::String column ("nulleable", 128, true);
+   datatype::String column ("nulleable", 16, true);
 
    void* init = column.getBuffer();
 
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE (string_is_nulleable)
    BOOST_REQUIRE_THROW (column.getValue (), adt::RuntimeException);
    BOOST_REQUIRE_EQUAL (column.getSize (), 0);
 
-   column = "hello world";
+   column.setValue ("hello world");
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
    BOOST_REQUIRE_EQUAL (column.getSize(), wepa_strlen ("hello world"));
    BOOST_REQUIRE_EQUAL (strncmp(column.getValue(), "hello world", wepa_strlen ("hello world")), 0);
@@ -66,7 +66,15 @@ BOOST_AUTO_TEST_CASE (string_is_nulleable)
    BOOST_REQUIRE_EQUAL (column.hasValue (), false);
    BOOST_REQUIRE_EQUAL(column.getSize(), 0);
 
+   column.setValue ("zzz");
+   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
+
+   column.setValue (NULL);
+   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
+
    BOOST_REQUIRE_EQUAL(init, column.getBuffer());
+
+   BOOST_REQUIRE_THROW (column.setValue ("size out of range"), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE (string_is_not_nulleable)
@@ -77,7 +85,7 @@ BOOST_AUTO_TEST_CASE (string_is_not_nulleable)
 
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 
-   column = "bye";
+   column.setValue ("bye");
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
    BOOST_REQUIRE_EQUAL (column.getSize(), wepa_strlen ("bye"));
    BOOST_REQUIRE_EQUAL (strncmp(column.getValue(), "bye", wepa_strlen ("bye")), 0);
@@ -88,5 +96,6 @@ BOOST_AUTO_TEST_CASE (string_is_not_nulleable)
 
    BOOST_REQUIRE_EQUAL(init, column.getBuffer());
 
-   BOOST_REQUIRE_THROW (column = "size out of range", adt::RuntimeException);
+   BOOST_REQUIRE_THROW (column.setValue ("size out of range"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (column.setValue (NULL), adt::RuntimeException);
 }

@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE (shortblock_is_nulleable)
 
    BOOST_REQUIRE_EQUAL (other.size (), 7);
 
-   column = other;
+   column.setValue (other);
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
    BOOST_REQUIRE_EQUAL (column.getSize(), 7);
    BOOST_REQUIRE_EQUAL (strncmp(column.getValue().data(), "hello w", 7), 0);
@@ -85,10 +85,10 @@ BOOST_AUTO_TEST_CASE (shortblock_is_not_nulleable)
 
    adt::DataBlock other ("hello world", 7);
 
-   BOOST_REQUIRE_THROW(column = other, adt::RuntimeException);
+   BOOST_REQUIRE_THROW(column.setValue (other), adt::RuntimeException);
 
    other.assign ("hello", 4);
-   column = other;
+   column.setValue (other);
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
    BOOST_REQUIRE_EQUAL (column.getSize(), 4);
    BOOST_REQUIRE_EQUAL (strncmp(column.getValue().data(), "hello w", 4), 0);
@@ -100,5 +100,5 @@ BOOST_AUTO_TEST_CASE (shortblock_is_not_nulleable)
    BOOST_REQUIRE_EQUAL(init, column.getBuffer());
 
    other.assign ("size out of range");
-   BOOST_REQUIRE_THROW (column = other, adt::RuntimeException);
+   BOOST_REQUIRE_THROW (column.setValue (other), adt::RuntimeException);
 }

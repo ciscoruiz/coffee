@@ -66,12 +66,11 @@ public:
       \param i Valor entero a asignar.
       \return La referencia a esta instancia.
    */
-   Integer& operator = (const int i)
+   void setValue (const int i)
       throw ()
    {
       m_value = i;
       this->isNotNull();
-      return *this;
    }
 
    /**

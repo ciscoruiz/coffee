@@ -39,15 +39,15 @@
 using namespace wepa;
 using namespace wepa::dbms;
 
-datatype::ShortBlock& datatype::ShortBlock::operator = (const adt::DataBlock& value)
+void datatype::ShortBlock::setValue(const adt::DataBlock& value)
    throw (adt::RuntimeException)
 {
    if (value.size () > datatype::Abstract::getMaxSize ()) {
       WEPA_THROW_EXCEPTION("Block out of range (" << datatype::Abstract::getMaxSize () << " and " << value.size ());
    }
-   m_value = value;
+//   wepa_memcpy(m_value.data (), value.data (), value.size ());
+   m_value.assign(value.data (), value.size ());
    this->isNotNull();
-   return *this;
 }
 
 adt::StreamString datatype::ShortBlock::asString () const

@@ -37,12 +37,11 @@
 using namespace wepa;
 using namespace wepa::dbms;
 
-datatype::LongBlock& datatype::LongBlock::operator = (const adt::DataBlock& value)
+void datatype::LongBlock::setValue (const adt::DataBlock& value)
    throw (adt::RuntimeException)
 {
    m_value = value;
    this->isNotNull();
-   return *this;
 }
 
 adt::StreamString datatype::LongBlock::asString () const

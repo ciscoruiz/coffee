@@ -107,7 +107,7 @@ public:
       Devuelve el tamao actual de este dato.
       \return El tamao actual de este dato.
    */
-   int getSize () const throw () { return m_value.size (); }
+   int getSize () const throw () { return (hasValue () == true) ? m_value.size (): 0; }
 
    /**
       Devuelve el contenido de la este bloque de memoria.
@@ -128,7 +128,7 @@ public:
       \param value Valor que queremos a asignar.
       \return La instancia de esta cadena.
    */
-   LongBlock& operator = (const adt::DataBlock& value) throw (adt::RuntimeException);
+   void setValue (const adt::DataBlock& value) throw (adt::RuntimeException);
 
    /**
       Operador de conversion.

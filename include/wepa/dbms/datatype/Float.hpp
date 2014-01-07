@@ -86,10 +86,9 @@ public:
       \param value Float del que copiar.
       \return La instancia de esta cadena.
    */
-   Float& operator = (const float value) throw () {
+   void setValue (const float value) throw () {
       m_value = value;
       isNotNull();
-      return *this;
    }
 
    /**

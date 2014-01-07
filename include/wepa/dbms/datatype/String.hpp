@@ -67,7 +67,9 @@ public:
    /**
       Destructor.
    */
-   virtual ~String () { delete [] m_value; }
+   ~String () { delete [] m_value; }
+
+   int getSize () const throw () { return (hasValue () == true) ? wepa_strlen(m_value): 0; }
 
    /**
       Devuelve el contenido de la cadena.
@@ -82,7 +84,7 @@ public:
       indicado en el constructor obtendremos una excepcin.
       \return La instancia de esta cadena.
    */
-   String& operator = (const char* str) throw (adt::RuntimeException);
+   void setValue (const char* str) throw (adt::RuntimeException);
 
    /**
       Operador de asignacin.
@@ -90,7 +92,7 @@ public:
       indicado en el constructor obtendremos una excepcin.
       \return La instancia de esta cadena.
    */
-   String& operator = (const std::string& str) throw (adt::RuntimeException) { return operator= (str.c_str ()); }
+   void setValue (const std::string& str) throw (adt::RuntimeException) { return setValue (str.c_str ()); }
 
    /**
       Operador de conversion. Desde NemesisRD.dbms 1.5.3 si el contenido de la columna sociada

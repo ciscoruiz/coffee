@@ -49,6 +49,9 @@ BOOST_AUTO_TEST_CASE( datablock_size )
    var.assign("second");
 
    BOOST_REQUIRE_EQUAL (var.size (), 6);
+
+   var.assign ("three", 2);
+   BOOST_REQUIRE_EQUAL (var.size (), 2);
 }
 
 BOOST_AUTO_TEST_CASE( datablock_copy )

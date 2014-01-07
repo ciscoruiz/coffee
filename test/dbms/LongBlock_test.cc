@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE (longblock_is_nulleable)
 
    other.assign ("hello world", 7);
 
-   column = other;
+   column.setValue (other);
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
    BOOST_REQUIRE_EQUAL (column.getSize(), 7);
    BOOST_REQUIRE_EQUAL (strncmp(column.getValue().data(), "hello w", 7), 0);
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE (longblock_is_not_nulleable)
 
    adt::DataBlock other ("hello world", 7);
 
-   column = other;
+   column.setValue (other);
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
    BOOST_REQUIRE_EQUAL (column.getSize(), 7);
    BOOST_REQUIRE_EQUAL (strncmp(column.getValue().data(), "hello w", 7), 0);

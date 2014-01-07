@@ -39,9 +39,15 @@
 using namespace wepa;
 using namespace wepa::dbms;
 
-datatype::String& datatype::String::operator = (const char* str)
+void datatype::String::setValue (const char* str)
    throw (adt::RuntimeException)
 {
+   if (str == NULL) {
+      this->isNull ();
+      clear ();
+      return;
+   }
+
    if (m_value != str) {
       auto len = wepa_strlen (str);
       if (len > datatype::Abstract::getMaxSize ()) {
@@ -51,8 +57,6 @@ datatype::String& datatype::String::operator = (const char* str)
    }
 
    this->isNotNull();
-
-   return *this;
 }
 
 char* datatype::String::strip (char *str)

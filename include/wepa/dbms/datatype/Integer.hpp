@@ -92,6 +92,8 @@ public:
     */
    static const char* className () throw () { return "dbms::datatype::Integer"; }
 
+   wepa_declare_datatype_downcast(Integer)
+
 private:
    int m_value;
 

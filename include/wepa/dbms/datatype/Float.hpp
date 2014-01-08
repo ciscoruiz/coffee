@@ -111,6 +111,8 @@ public:
     */
    static const char* className () throw () { return "dbms::datatype::Float"; }
 
+   wepa_declare_datatype_downcast(Float)
+
 private:
    float m_value;
    const char* m_format;

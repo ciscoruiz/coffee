@@ -38,6 +38,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <wepa/dbms/datatype/Integer.hpp>
+#include <wepa/dbms/datatype/Float.hpp>
 
 using namespace wepa;
 using namespace wepa::dbms;
@@ -77,4 +78,19 @@ BOOST_AUTO_TEST_CASE (integer_is_not_nulleable)
 
    column.clear();
    BOOST_REQUIRE_EQUAL (column.hasValue(), true);
+}
+
+BOOST_AUTO_TEST_CASE (integer_downcast)
+{
+   datatype::Integer column ("not_nulleable");
+
+   datatype::Abstract& abs = column;
+
+   datatype::Integer& other = wepa_datatype_downcast(datatype::Integer, abs);
+
+   BOOST_REQUIRE_EQUAL (&other, &column);
+
+   datatype::Float zzz ("zzz");
+
+   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::Integer, zzz), adt::RuntimeException);
 }

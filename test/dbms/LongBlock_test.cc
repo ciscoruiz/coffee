@@ -38,6 +38,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <wepa/dbms/datatype/LongBlock.hpp>
+#include <wepa/dbms/datatype/Integer.hpp>
 
 using namespace wepa;
 using namespace wepa::dbms;
@@ -85,4 +86,19 @@ BOOST_AUTO_TEST_CASE (longblock_is_not_nulleable)
    column.clear();
    BOOST_REQUIRE_EQUAL (column.hasValue(), true);
    BOOST_REQUIRE_EQUAL(column.getSize(), 0);
+}
+
+BOOST_AUTO_TEST_CASE (longblock_downcast)
+{
+   datatype::LongBlock column ("not_nulleable", false);
+
+   datatype::Abstract& abs = column;
+
+   datatype::LongBlock& other = wepa_datatype_downcast(datatype::LongBlock, abs);
+
+   BOOST_REQUIRE_EQUAL (&other, &column);
+
+   datatype::Integer zzz ("zzz");
+
+   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::LongBlock, zzz), adt::RuntimeException);
 }

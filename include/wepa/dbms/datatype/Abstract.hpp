@@ -2,6 +2,8 @@
 #ifndef _wepa_dbms_type_Abstract_h
 #define _wepa_dbms_type_Abstract_h
 
+#include <functional>
+
 #include <wepa/adt/StreamString.hpp>
 #include <wepa/adt/RuntimeException.hpp>
 
@@ -170,6 +172,31 @@ private:
 
    virtual void do_clear () throw () = 0;
 };
+
+#define wepa_declare_datatype_downcast(inherit) \
+   static const inherit& downcast (const datatype::Abstract& data,const char* function, const char* file, const int lineno) \
+   throw (adt::RuntimeException) { \
+      const inherit* result = dynamic_cast <const inherit*> (&data); \
+      if (result == NULL) { \
+         wepa::adt::StreamString str; \
+         str << data.asString () << " | Invalid down cast"; \
+         throw wepa::adt::RuntimeException (str, function, file, lineno); \
+      } \
+      return std::ref (*result); \
+   } \
+   \
+   static inherit& downcast (datatype::Abstract& data,const char* function, const char* file, const int lineno) \
+   throw (adt::RuntimeException) { \
+      inherit* result = dynamic_cast <inherit*> (&data); \
+      if (result == NULL) { \
+         wepa::adt::StreamString str; \
+         str << data.asString () << " | Invalid down cast"; \
+         throw wepa::adt::RuntimeException (str, function, file, lineno); \
+      } \
+      return std::ref (*result); \
+   }
+
+#define wepa_datatype_downcast(inherit,reference) inherit::downcast(reference,WEPA_FILE_LOCATION)
 
 }
 }

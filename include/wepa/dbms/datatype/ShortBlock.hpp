@@ -112,6 +112,8 @@ public:
    */
    adt::StreamString asString () const throw ();
 
+   wepa_declare_datatype_downcast(ShortBlock)
+
 protected:
    adt::DataBlock m_value;
 

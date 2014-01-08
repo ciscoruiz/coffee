@@ -265,6 +265,8 @@ public:
     */
    virtual const char* getCStringValue () const throw ();
 
+   wepa_declare_datatype_downcast(TimeStamp)
+
 private:
    char m_anotherBuffer [MaxDateSize + 1];
    int m_fractionalSecond;

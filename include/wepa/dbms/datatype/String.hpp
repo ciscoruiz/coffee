@@ -119,6 +119,8 @@ public:
     */
    static const char* className () throw () { return "dbms::datatype::String"; }
 
+   wepa_declare_datatype_downcast(String)
+
 private:
    char* m_value;
 

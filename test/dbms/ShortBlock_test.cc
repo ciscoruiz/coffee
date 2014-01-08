@@ -38,6 +38,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <wepa/dbms/datatype/ShortBlock.hpp>
+#include <wepa/dbms/datatype/Integer.hpp>
 
 using namespace wepa;
 using namespace wepa::dbms;
@@ -101,4 +102,19 @@ BOOST_AUTO_TEST_CASE (shortblock_is_not_nulleable)
 
    other.assign ("size out of range");
    BOOST_REQUIRE_THROW (column.setValue (other), adt::RuntimeException);
+}
+
+BOOST_AUTO_TEST_CASE (shortblock_downcast)
+{
+   datatype::ShortBlock column ("not_nulleable", 4, false);
+
+   datatype::Abstract& abs = column;
+
+   datatype::ShortBlock& other = wepa_datatype_downcast(datatype::ShortBlock, abs);
+
+   BOOST_REQUIRE_EQUAL (&other, &column);
+
+   datatype::Integer zzz ("zzz");
+
+   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::ShortBlock, zzz), adt::RuntimeException);
 }

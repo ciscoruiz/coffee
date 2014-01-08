@@ -38,6 +38,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <wepa/dbms/datatype/String.hpp>
+#include <wepa/dbms/datatype/Integer.hpp>
 
 using namespace wepa;
 using namespace wepa::dbms;
@@ -98,4 +99,19 @@ BOOST_AUTO_TEST_CASE (string_is_not_nulleable)
 
    BOOST_REQUIRE_THROW (column.setValue ("size out of range"), adt::RuntimeException);
    BOOST_REQUIRE_THROW (column.setValue (NULL), adt::RuntimeException);
+}
+
+BOOST_AUTO_TEST_CASE (string_downcast)
+{
+   datatype::String column ("not_nulleable", 4, false);
+
+   datatype::Abstract& abs = column;
+
+   datatype::String& other = wepa_datatype_downcast(datatype::String, abs);
+
+   BOOST_REQUIRE_EQUAL (&other, &column);
+
+   datatype::Integer zzz ("zzz");
+
+   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::String, zzz), adt::RuntimeException);
 }

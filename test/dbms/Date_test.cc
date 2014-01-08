@@ -38,6 +38,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <wepa/dbms/datatype/Date.hpp>
+#include <wepa/dbms/datatype/Integer.hpp>
 
 using namespace wepa;
 using namespace wepa::dbms;
@@ -143,4 +144,19 @@ BOOST_AUTO_TEST_CASE (date_is_not_nulleable)
 
    std::string str_date ("00/01/1900T00:00");
    BOOST_REQUIRE_EQUAL (str_date, column.getCStringValue());
+}
+
+BOOST_AUTO_TEST_CASE (date_downcast)
+{
+   datatype::Date column ("not_nulleable", false, "%d/%m/%YT%H:%M");
+
+   datatype::Abstract& abs = column;
+
+   datatype::Date& other = wepa_datatype_downcast(datatype::Date, abs);
+
+   BOOST_REQUIRE_EQUAL (&other, &column);
+
+   datatype::Integer zzz ("zzz");
+
+   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::Date, zzz), adt::RuntimeException);
 }

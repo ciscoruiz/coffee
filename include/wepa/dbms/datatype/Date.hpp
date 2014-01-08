@@ -416,6 +416,8 @@ public:
     */
    static const char* className () throw () { return "dbms::type::Date"; }
 
+   wepa_declare_datatype_downcast(Date)
+
 protected:
    char* m_format;
    tm m_value;
@@ -440,6 +442,9 @@ protected:
       \since NemesisRD.dbms 2.10.06.3
     */
    explicit Date (const std::string& name, const Datatype::_v type, const bool isNulleable, const char* format);
+
+   static const Date& downcast (const datatype::Abstract& data) throw (adt::RuntimeException);
+   static Date& downcast (datatype::Abstract& data) throw (adt::RuntimeException);
 
 private:
    Date (const Date& other);

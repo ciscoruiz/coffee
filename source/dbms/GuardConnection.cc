@@ -44,7 +44,22 @@ dbms::GuardConnection::GuardConnection(Connection& connection)  throw (adt::Runt
    connection.lock();
 }
 
+dbms::GuardConnection::GuardConnection(Connection* connection)  throw (adt::RuntimeException) :
+   m_connection (*connection)
+{
+   if (connection == NULL)
+      WEPA_THROW_EXCEPTION("Connection can not be NULL");
+
+   connection->lock();
+}
+
 dbms::GuardConnection::~GuardConnection()
 {
    m_connection.unlock();
+}
+
+dbms::ResultCode dbms::GuardConnection::execute (Statement* statement)
+   throw (adt::RuntimeException, DatabaseException)
+{
+   return m_connection.execute(statement);
 }

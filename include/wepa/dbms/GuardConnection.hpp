@@ -36,14 +36,23 @@
 #define __wepa_dbms_GuardConnection_hpp
 
 #include <wepa/adt/RuntimeException.hpp>
+#include <wepa/dbms/ResultCode.hpp>
 
 namespace wepa {
 namespace dbms {
 
+class Connection;
+
 class GuardConnection {
 public:
    GuardConnection (Connection&) throw (adt::RuntimeException);
+   GuardConnection (Connection*) throw (adt::RuntimeException);
    ~GuardConnection ();
+
+   ResultCode execute (Statement* statement) throw (adt::RuntimeException, DatabaseException);
+   ResultCode execute (Statement& statement) throw (adt::RuntimeException, DatabaseException) {
+      return execute (&statement);
+   }
 
 private:
    Connection& m_connection;

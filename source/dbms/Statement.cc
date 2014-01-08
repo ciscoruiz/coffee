@@ -36,6 +36,26 @@ binder::Input* Statement::createBinderInput (datatype::Abstract& data)
    return result;
 }
 
+datatype::Abstract& Statement::getInputData (const int pos)
+   throw (adt::RuntimeException)
+{
+   if (pos >= input_size ()) {
+      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << input_size() << "]");
+   }
+
+   return std::ref (m_inputBinds [pos].getData ());
+}
+
+const datatype::Abstract& Statement::getOutputData (const int pos) const
+   throw (adt::RuntimeException)
+{
+   if (pos >= output_size ()) {
+      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << "]");
+   }
+
+   return std::ref (m_inputBinds [pos].getData ());
+}
+
 binder::Output* Statement::createBinderOutput (datatype::Abstract& data)
    throw (adt::RuntimeException)
 {

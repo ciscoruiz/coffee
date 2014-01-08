@@ -97,7 +97,7 @@ void dbms::Database::do_initialize ()
       WEPA_THROW_EXCEPTION(asString () << " | There is not connection available");
    }
 
-   LOG_INFO(asString () << " connected");
+   LOG_INFO(asString () << " | It is initialized");
 }
 
 void dbms::Database::do_stop ()

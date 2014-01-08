@@ -83,7 +83,12 @@ adt::StreamString datatype::String::asString () const
    adt::StreamString result ("dbms::datatype::String { ");
    result += datatype::Abstract::asString ();
    result += " | Value: ";
-   result += m_value;
+
+   if (this->hasValue () == true)
+      result << "'" << m_value << "'";
+   else
+      result += "<null>";
+
    return result += " }";
 }
 

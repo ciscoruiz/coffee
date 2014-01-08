@@ -32,6 +32,13 @@ public:
    ResultCode () : m_errorText (NULL), m_database (NULL), m_errorCode (0) {;}
 
    /**
+      Constructor vacio.
+      \warning Antes de usarse debe asignarse a algun otro ResultCode obtenido mediante la invocacion
+      a wepa::dbms::Connection::execute.
+   */
+   explicit ResultCode (const Database& database, const int opCode) : m_errorText (NULL), m_database (&database), m_errorCode (opCode) {;}
+
+   /**
       Constructor copia.      
       @param other Instancia de la que copiar los datos.
    */
@@ -125,9 +132,9 @@ protected:
       NULL si no hay ningun texto de error asociado al codigo recibido.
       \param database Decofidicador de errores.
    */
-   ResultCode (const int errorCode, const char* errorText, const Database* database) :
+   ResultCode (const int errorCode, const char* errorText, const Database& database) :
       m_errorText (NULL),
-      m_database (database)
+      m_database (&database)
    {
       set (errorCode, errorText);  
    }

@@ -154,6 +154,8 @@ public:
    */
    binder::Input* createBinderInput (datatype::Abstract& data) throw (adt::RuntimeException);
 
+   datatype::Abstract& getInputData (const int pos) throw (adt::RuntimeException);
+
    /**
       Establece el parametro de salida de la sentencia SQL.Cada una de las variables de salida indicadas
       en esta sentencia SQL deberia tener un parametro de salida asociado. La correspondencia entre esta
@@ -178,6 +180,8 @@ public:
       \warning Solo las sentencias SQL del tipo \em select usan las variables de salida.
    */
    dbms::binder::Output* createBinderOutput (datatype::Abstract& data) throw (adt::RuntimeException);
+
+   const datatype::Abstract& getOutputData (const int pos) const throw (adt::RuntimeException);
 
    /**
       Transfiere la informacion de una fila de la sentencia SQL de seleccion a las

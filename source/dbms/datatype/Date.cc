@@ -128,7 +128,7 @@ void datatype::Date::setValue (const char* str)
    char* r = strptime (str, m_format, &aux);
 
    if (r == NULL) {
-      WEPA_THROW_EXCEPTION("It is not a valid date");
+      WEPA_THROW_EXCEPTION("'" << str << "' It is not a valid date using format '" << m_format << "'");
    }
 
    this->isNotNull();
@@ -171,15 +171,15 @@ adt::StreamString datatype::Date::asString () const
 
    adt::StreamString result ("dbms::datatype::Date { ");
    result << dbms::datatype::Abstract::asString ();
-   result << " | Format: ";
+   result << " | Format: '";
    result += (m_format == NULL) ? "<null>": m_format;
-   result += " | Value: ";
+   result += "' | Value: ";
 
    if (this->hasValue () == true) {
       if ((cstring = getCStringValue ()) == NULL)
          result += "<not valid>";
       else
-         result += cstring;
+         result << "'" << cstring << "'";
    }
    else
       result += "<null>";

@@ -118,7 +118,7 @@ dbms::ResultCode dbms::Connection::execute (Statement* statement)
 void dbms::Connection::commit () 
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
-   LOG_INFO(asString ());
+   LOG_INFO(asString () << " | State before commit");
    
    if (isAvailable () == false) {
       WEPA_THROW_EXCEPTION(asString () << " | Connection is not available");
@@ -127,6 +127,8 @@ void dbms::Connection::commit ()
    do_commit ();
    m_commitPending = 0;
    m_rollbackPending = false;
+
+   LOG_DEBUG (asString () << " | State after commit");
 }
 
 void dbms::Connection::rollback () 
@@ -141,6 +143,8 @@ void dbms::Connection::rollback ()
    do_rollback ();
    m_commitPending = 0;
    m_rollbackPending = false;
+
+   LOG_DEBUG (asString () << " | State after rollback");
 }
 
 void dbms::Connection::lock ()

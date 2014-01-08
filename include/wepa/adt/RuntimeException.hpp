@@ -76,7 +76,7 @@ private:
 }
 }
 
-#define WEPA_THROW_EXCEPTION(msg) do { wepa::adt::StreamString str; str << msg; throw wepa::adt::RuntimeException (str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
+#define WEPA_THROW_EXCEPTION(msg) do { wepa::adt::StreamString __str; __str << msg; throw wepa::adt::RuntimeException (__str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
 
 
 #endif // _wepa_adt_RuntimeException_h

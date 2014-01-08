@@ -87,6 +87,9 @@ public:
    */
    virtual xml::Node& asXML (xml::Node& parent) const throw ();
 
+   Connection (const Connection&) = delete;
+   Connection& operator= (const Connection&) = delete;
+
 protected:
    /**
      Instancia de la base de datos asociada a esta conexion.
@@ -197,9 +200,6 @@ private:
    unsigned int m_accesingCounter;  // N� de veces que se ha usado esta conexi�n
    std::mutex m_mutex;
 
-   Connection (const Connection&);
-
-   void initialize () throw (adt::RuntimeException);
    void lock () throw (adt::RuntimeException);
    void unlock () throw ();
 

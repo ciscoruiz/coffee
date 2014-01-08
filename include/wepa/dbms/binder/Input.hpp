@@ -26,9 +26,7 @@ protected:
    explicit Input (datatype::Abstract& value) : BinderIf (value) {;}
 
 private:
-   // �ste metodo no sera invocado nunca. A partir de un Input nunca hay que
-   // convertir de C++ -> RDBMS
-   void decode () const throw (adt::RuntimeException) {;}
+   void do_decode () throw (adt::RuntimeException) {;}
 };
 
 }

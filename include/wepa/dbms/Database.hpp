@@ -104,6 +104,12 @@ public:
    Connection* createConnection (const char* name, const char* user, const char* password)
       throw (adt::RuntimeException, DatabaseException);
 
+   Connection* createConnection (const std::string& name, const char* user, const char* password)
+      throw (adt::RuntimeException, DatabaseException)
+   {
+      return createConnection(name.c_str (), user, password);
+   }
+
    /**
       Devuelve la conexion asociada al nombre logico recibido como parametro.
       \param name Nombre logico de la conexion que queremos obtener.
@@ -211,6 +217,9 @@ public:
    */
    virtual xml::Node& asXML (xml::Node& parent) const throw ();
 
+   Database& operator= (const Database&) = delete;
+   Database (const Database&) = delete;
+
 protected:
    /**
       Contructor.
@@ -294,8 +303,6 @@ private:
    const Type::_v m_type;
    FailRecoveryHandler* m_failRecoveryHandler;
    StatementTranslator* m_statementTranslator;
-
-   Database (const Database&);
 
    static Connection* connection_ptr (connection_iterator ii) throw () { Connection& result = std::ref (*ii); return &result; }
    static Statement* statement_ptr (statement_iterator ii) throw () { Statement& result = std::ref (*ii); return &result; }

@@ -52,7 +52,7 @@ adt::StreamString binder::Output::asString() const
    return result += "}";
 }
 
-void binder::Output::write () const
+void binder::Output::write ()
    throw (adt::RuntimeException, DatabaseException)
 {
    const datatype::Abstract& data = this->getData ();

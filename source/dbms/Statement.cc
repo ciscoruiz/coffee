@@ -10,6 +10,8 @@
 #include <wepa/dbms/binder/Input.hpp>
 #include <wepa/dbms/binder/Output.hpp>
 
+#include <wepa/dbms/datatype/Abstract.hpp>
+
 using namespace std;
 using namespace wepa;
 using namespace wepa::dbms;
@@ -17,14 +19,79 @@ using namespace wepa::dbms;
 // virtual
 Statement::~Statement ()
 {
-   for (input_iterator ii = input_begin (), maxii = input_end (); ii != maxii; ii ++)
-      delete inputBind (ii);
-
-   for (output_iterator ii = output_begin (), maxii = output_end (); ii != maxii; ii ++)
-      delete outputBind (ii);
-
    m_inputBinds.clear ();
    m_outputBinds.clear ();
+}
+
+
+binder::Input* Statement::createBinderInput (datatype::Abstract& data)
+   throw (adt::RuntimeException)
+{
+   binder::Input* result = m_database.allocateInputBind (data);
+
+   if (result == NULL)
+      WEPA_THROW_EXCEPTION(data.asString () << " | Data returned a null binder");
+
+   m_inputBinds.push_back (result);
+   return result;
+}
+
+binder::Output* Statement::createBinderOutput (datatype::Abstract& data)
+   throw (adt::RuntimeException)
+{
+   binder::Output* result = m_database.allocateOutputBind (data);
+
+   if (result == NULL)
+      WEPA_THROW_EXCEPTION(data.asString () << " | Data returned a null binder");
+
+   m_outputBinds.push_back (result);
+   return result;
+}
+
+void Statement::prepare (Connection* connection)
+   throw (adt::RuntimeException, DatabaseException)
+{
+   LOG_THIS_METHOD();
+
+   do_prepare (connection);
+
+   int pos = 0;
+   for (binder::Input& ii : m_inputBinds) {
+      ii.do_prepare(this, connection, pos ++);
+   }
+
+   pos = 0;
+   for (binder::Output& oo : m_outputBinds) {
+      oo.do_prepare(this, connection, pos ++);
+   }
+}
+
+ResultCode Statement::execute (Connection* connection)
+   throw (adt::RuntimeException, DatabaseException)
+{
+   for (binder::Input& ii : m_inputBinds) {
+      LOG_DEBUG (ii.asString());
+      ii.do_encode ();
+   }
+
+   return do_execute (connection);
+}
+
+bool Statement::fetch()
+   throw (adt::RuntimeException, DatabaseException)
+{
+   LOG_THIS_METHOD();
+
+   bool result;
+
+   if ((result = do_fetch ()) == true) {
+      for (binder::Output& oo : m_outputBinds) {
+         oo.do_decode();
+         LOG_DEBUG (oo.asString());
+      }
+   }
+
+   return result;
 }
 
 adt::StreamString  Statement::asString () const
@@ -56,30 +123,3 @@ xml::Node& dbms::Statement::asXML (xml::Node& parent) const
 
    return result;
 }
-
-void Statement::bindInput (datatype::Abstract& data)
-   throw ()
-{
-   m_inputBinds.push_back (m_database.allocateInputBind (data));
-}
-
-const binder::Output* Statement::bindOutput (datatype::Abstract& data)
-   throw ()
-{
-   binder::Output* result = m_database.allocateOutputBind (data);
-   m_outputBinds.push_back (result);
-   return result;
-}
-
-datatype::Abstract& Statement::input (input_iterator ii)
-   throw ()
-{
-   return (*ii)->getData ();
-}
-
-datatype::Abstract& Statement::output (output_iterator ii)
-   throw ()
-{
-   return (*ii)->getData ();
-}
-

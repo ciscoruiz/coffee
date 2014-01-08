@@ -36,17 +36,15 @@ public:
       \warning Este metodo solo puede ser usado para variables de tipo dbms::Data::Type::LongBlock y
       siempre y cuando hayamos abierto el BLOB con una sentencia SQL de seleccion.
    */
-   void write () const throw (adt::RuntimeException, dbms::DatabaseException);
+   void write () throw (adt::RuntimeException, dbms::DatabaseException);
 
 protected:
    Output (datatype::Abstract& value) : BinderIf (value) {;}
 
 private:
-   // este metodo no sera invocado nunca. A partir de un Output nunca hay que
-   // convertir de C++ -> RDBMS
-   void encode () const throw (adt::RuntimeException) {;}
+   void do_encode () throw (adt::RuntimeException) {;}
 
-   virtual void do_write (const datatype::LongBlock&) const throw (adt::RuntimeException, dbms::DatabaseException) = 0;
+   virtual void do_write (const datatype::LongBlock&) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
 };
 
 }

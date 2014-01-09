@@ -119,7 +119,7 @@ public:
       Devuelve una cadena con la informacion sobre esta clase.
       \return Una cadena con la informacion sobre esta clase.
    */
-   std::string asString () const throw ();
+   adt::StreamString asString () const throw ();
 
 protected:
    static const int MaxErrorLen = 512;

@@ -53,7 +53,7 @@ const datatype::Abstract& Statement::getOutputData (const int pos) const
       WEPA_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << "]");
    }
 
-   return std::ref (m_inputBinds [pos].getData ());
+   return std::ref (m_outputBinds [pos].getData ());
 }
 
 binder::Output* Statement::createBinderOutput (datatype::Abstract& data)
@@ -89,12 +89,18 @@ void Statement::prepare (Connection* connection)
 ResultCode Statement::execute (Connection* connection)
    throw (adt::RuntimeException, DatabaseException)
 {
+   LOG_THIS_METHOD();
+
    for (binder::Input& ii : m_inputBinds) {
       LOG_DEBUG (ii.asString());
       ii.do_encode ();
    }
 
-   return do_execute (connection);
+   ResultCode result = do_execute (connection);
+
+   LOG_DEBUG (result.asString ());
+
+   return result;
 }
 
 bool Statement::fetch()

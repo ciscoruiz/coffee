@@ -106,7 +106,7 @@ void dbms::ResultCode::copy (const char* text)
    }
 }
 
-std::string dbms::ResultCode::asString () const
+adt::StreamString dbms::ResultCode::asString () const
    throw ()
 {
    adt::StreamString result ("dbms::ResultCode { Error: ");

@@ -49,6 +49,7 @@
 #include <wepa/dbms/Database.hpp>
 #include <wepa/dbms/Statement.hpp>
 #include <wepa/dbms/Connection.hpp>
+#include <wepa/dbms/GuardConnection.hpp>
 
 #include <wepa/dbms/datatype/Integer.hpp>
 #include <wepa/dbms/datatype/String.hpp>
@@ -66,7 +67,7 @@ struct MyRecord {
    std::string m_name;
    int m_integer;
    float m_float;
-   time_t m_time;
+   adt::Second m_time;
 };
 
 typedef std::map <int, MyRecord> Container;
@@ -114,7 +115,7 @@ protected:
       m_name ("name", 64),
       m_integer ("integer", true),
       m_float ("float"),
-      m_time ("time")
+      m_time ("time", false)
    {;}
 
    MyRecord& getRecord () throw () { return std::ref (m_record); }
@@ -160,12 +161,21 @@ public:
    MyConnection (Database& database, const std::string& name, const char* user, const char* password) :
       Connection (database, name, user, password),
       m_container (NULL)
-   {;}
+   {
+      m_commitCounter = m_rollbackCounter = 0;
+   }
+
+   int operation_size () const throw () { return m_operations.size (); }
+
+   unsigned int getCommitCounter () const throw () { return m_commitCounter; }
+   unsigned int getRollbackCounter () const throw () { return m_commitCounter; }
 
 private:
    enum OpCode {  Write, Delete };
    typedef std::pair <OpCode, MyRecord> Operation;
    typedef std::vector <Operation> Operations;
+   unsigned int m_commitCounter;
+   unsigned int m_rollbackCounter;
 
    Container* m_container;
    Operations m_operations;
@@ -174,7 +184,7 @@ private:
    void open () throw (DatabaseException);
    void close () throw () { m_container = NULL; }
    void do_commit () throw () ;
-   void do_rollback () throw () { m_operations.clear ();}
+   void do_rollback () throw () { m_rollbackCounter ++; m_operations.clear ();}
 
    friend class MyReadStatement;
    friend class MyWriteStatement;
@@ -185,6 +195,8 @@ public:
    enum ErrorCode { NotFound, Successful, Lock, LostConnection };
 
    MyDatabase (app::Application& app) : Database (app, "map", "my_database") {;}
+
+   int container_size () const throw () { return m_container.size (); }
 
 private:
    Container m_container;
@@ -273,22 +285,28 @@ test::MyReadStatement::MyReadStatement (Database& database, const char* name, co
 dbms::ResultCode test::MyReadStatement::do_execute (dbms::Connection* connection)
    throw (adt::RuntimeException, DatabaseException)
 {
+   LOG_THIS_METHOD();
+
    m_index = 0;
 
    const MyConnection& _connection (static_cast <MyConnection&> (*connection));
 
    m_selection.clear ();
    for (auto ii : *_connection.m_container) {
-      if (ii.second.m_id > m_id.getValue()) {
+      if (ii.second.m_id >= m_id.getValue()) {
          m_selection.push_back(ii.second);
       }
    }
 
-   return ResultCode (getDatabase(), MyDatabase::Successful);
+   LOG_DEBUG ("n-size:" << m_selection.size());
+
+   return ResultCode (getDatabase(), (m_selection.size () == 0) ? MyDatabase::NotFound: MyDatabase::Successful);
 }
 
 bool test::MyReadStatement::do_fetch () throw (adt::RuntimeException, DatabaseException)
 {
+   LOG_THIS_METHOD();
+
    if (m_index >= m_selection.size ())
       return false;
 
@@ -316,7 +334,9 @@ test::MyWriteStatement::MyWriteStatement (Database& database, const char* name, 
 dbms::ResultCode test::MyWriteStatement::do_execute (dbms::Connection* connection)
    throw (adt::RuntimeException, DatabaseException)
 {
-   MyConnection::OpCode opCode = (getName () == "write") ? MyConnection::Write: MyConnection::Delete;
+   LOG_THIS_METHOD();
+
+   MyConnection::OpCode opCode = (getName () == "the_write") ? MyConnection::Write: MyConnection::Delete;
 
    MyRecord record;
    dbms::ResultCode result (getDatabase(), MyDatabase::Successful);
@@ -327,8 +347,10 @@ dbms::ResultCode test::MyWriteStatement::do_execute (dbms::Connection* connectio
       record.m_name = static_cast <datatype::String&> (m_binders [1]->getData ()).getValue();
       record.m_integer = static_cast <datatype::Integer&> (m_binders [2]->getData ()).getValue();
       record.m_float = static_cast <datatype::Float&> (m_binders [3]->getData ()).getValue();
-      record.m_time = static_cast <datatype::Date&> (m_binders [4]->getData ()).getSecondValue().getValue();
+      record.m_time = static_cast <datatype::Date&> (m_binders [4]->getData ()).getValue();
    }
+
+   LOG_DEBUG ("ID = " << record.m_id);
 
    static_cast <MyConnection*> (connection)->m_operations.push_back (MyConnection::Operation (opCode, record));
 
@@ -338,31 +360,72 @@ dbms::ResultCode test::MyWriteStatement::do_execute (dbms::Connection* connectio
 void test::MyConnection::open ()
    throw (DatabaseException)
 {
+   LOG_THIS_METHOD();
+
    m_operations.clear ();
    m_container = &reinterpret_cast <MyDatabase&> (getDatabase()).m_container;
 }
 
 void test::MyConnection::do_commit () throw ()
 {
+   LOG_THIS_METHOD();
+
    Container& container (*m_container);
+
+   m_commitCounter ++;
+
+   LOG_DEBUG("Commiting " << operation_size() << " changes");
 
    for (Operation& operation : m_operations) {
       switch (operation.first) {
       case Write:
+         LOG_DEBUG ("Writing " << operation.second.m_id);
          container [operation.second.m_id] = operation.second;
          break;
       case Delete:
-      {
-         auto ii = container.find (operation.second.m_id);
-         if (ii != container.end ())
-            container.erase(ii);
-      }
-      break;
+         {
+            auto ii = container.find (operation.second.m_id);
+            if (ii != container.end ()) {
+               LOG_DEBUG ("Deleting " << operation.second.m_id);
+               container.erase(ii);
+            }
+         }
+         break;
       }
    }
+
+   m_operations.clear ();
 }
 
-BOOST_AUTO_TEST_CASE (dbms_find_stuff)
+BOOST_AUTO_TEST_CASE (dbms_define_structure)
+{
+   test::MyApplication application;
+
+   test::MyDatabase database (application);
+
+   dbms::Connection* conn0 = database.createConnection("0", "0", "0");
+
+   BOOST_REQUIRE_THROW (database.createConnection("0", "bis0", "bis0"), adt::RuntimeException);
+
+   dbms::Connection& conn = database.findConnection("0");
+
+   BOOST_REQUIRE_EQUAL (conn0, &conn);
+
+   BOOST_REQUIRE_THROW (database.findConnection("zzzz"), adt::RuntimeException);
+
+   dbms::Statement* st0 = database.createStatement("one", "write");
+
+   BOOST_REQUIRE_THROW (database.createStatement("one", "write"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (database.createStatement("the_null", "null"), adt::RuntimeException);
+
+   dbms::Statement& st = database.findStatement("one");
+
+   BOOST_REQUIRE_EQUAL (st0, &st);
+
+   BOOST_REQUIRE_THROW (database.findStatement("zzzz"), adt::RuntimeException);
+}
+
+BOOST_AUTO_TEST_CASE (dbms_write_and_read)
 {
    test::MyApplication application;
 
@@ -370,16 +433,90 @@ BOOST_AUTO_TEST_CASE (dbms_find_stuff)
 
    application.disableTermination();
 
-   std::thread tr (std::ref (application));
+   test::MyConnection* conn0 = static_cast <test::MyConnection*> (database.createConnection("0", "0", "0"));
+   dbms::Statement* writer = database.createStatement("the_write", "write");
+   dbms::Statement* reader = database.createStatement("the_read", "read");
+   ResultCode resultCode;
 
+   std::thread tr (std::ref (application));
    usleep (500);
 
    BOOST_REQUIRE_EQUAL (application.isRunning(), true);
    BOOST_REQUIRE_EQUAL (database.isRunning(), true);
 
-   dbms::Statement* write = database.createStatement("the_write", "write");
+   if (true) {
+      try {
+         dbms::GuardConnection guard (conn0);
 
+         BOOST_REQUIRE_THROW(writer->getInputData(10), adt::RuntimeException);
 
+         wepa_datatype_downcast(datatype::Integer, writer->getInputData(0)).setValue (2);
+         wepa_datatype_downcast(datatype::String, writer->getInputData(1)).setValue ("the 2");
+         wepa_datatype_downcast(datatype::Integer, writer->getInputData(2)).setValue (2 * 2);
+         wepa_datatype_downcast(datatype::Float, writer->getInputData(3)).setValue (2.2);
+         wepa_datatype_downcast(datatype::Date, writer->getInputData(4)).setValue ("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+         guard.execute(writer);
+
+         BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
+         BOOST_REQUIRE_EQUAL (database.container_size(), 0);
+
+         wepa_datatype_downcast(datatype::Integer, writer->getInputData(0)).setValue (5);
+         wepa_datatype_downcast(datatype::String, writer->getInputData(1)).setValue ("the 5");
+         wepa_datatype_downcast(datatype::Integer, writer->getInputData(2)).setValue (5 * 5);
+         wepa_datatype_downcast(datatype::Float, writer->getInputData(3)).setValue (5.5);
+         wepa_datatype_downcast(datatype::Date, writer->getInputData(4)).setValue ("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
+         guard.execute(writer);
+
+         BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
+         BOOST_REQUIRE_EQUAL (database.container_size(), 0);
+
+         wepa_datatype_downcast(datatype::Integer, writer->getInputData(0)).setValue (6);
+         wepa_datatype_downcast(datatype::String, writer->getInputData(1)).setValue ("the 6");
+         wepa_datatype_downcast(datatype::Integer, writer->getInputData(2)).setValue (6 * 6);
+         wepa_datatype_downcast(datatype::Float, writer->getInputData(3)).setValue (6.6);
+         wepa_datatype_downcast(datatype::Date, writer->getInputData(4)).setValue ("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
+         resultCode = guard.execute(writer);
+
+         BOOST_REQUIRE_EQUAL (resultCode.getErrorCode(), test::MyDatabase::Successful);
+         BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
+         BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
+         BOOST_REQUIRE_EQUAL (database.container_size(), 0);
+      }
+      catch (adt::Exception& ex) {
+         logger::Logger::write (ex);
+      }
+   }
+
+   BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL (database.container_size(), 3);
+   BOOST_REQUIRE_EQUAL (conn0->getCommitCounter(), 1);
+
+   if (true) {
+      dbms::GuardConnection guard (conn0);
+
+      datatype::Integer& id = wepa_datatype_downcast(datatype::Integer, reader->getInputData(0));
+      const datatype::Integer& integer = wepa_datatype_downcast(datatype::Integer, reader->getOutputData(1));
+
+      id.setValue(5);
+      resultCode = guard.execute(reader);
+
+      BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
+
+      int counter = 0;
+
+      while (reader->fetch() == true) {
+         ++ counter;
+         BOOST_REQUIRE_EQUAL (id.getValue () * id.getValue (), integer.getValue());
+      }
+
+      BOOST_REQUIRE_EQUAL (counter, 2);
+
+      id.setValue (1111);
+      resultCode = guard.execute(reader);
+      BOOST_REQUIRE_EQUAL (resultCode.successful(), false);
+      BOOST_REQUIRE_EQUAL (resultCode.notFound(), true);
+      BOOST_REQUIRE_EQUAL (reader->fetch(), false);
+   }
 
    LOG_DEBUG ("Enables termination");
    application.enableTermination();

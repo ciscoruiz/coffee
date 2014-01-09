@@ -124,6 +124,8 @@ dbms::Connection* dbms::Database::createConnection (const char* name, const char
 {
    logger::TraceMethod ttmm (logger::Level::Local7, WEPA_FILE_LOCATION);
 
+   LOG_DEBUG ("Name=" << name << " | User=" << user);
+
    if (m_connections.size () >= MaxConnection) {
       WEPA_THROW_EXCEPTION(asString () << " Can not create more than " << MaxConnection);
    }
@@ -166,10 +168,12 @@ dbms::Connection& dbms::Database::findConnection (const char* name)
 {
    logger::TraceMethod ttmm (logger::Level::Local7, WEPA_FILE_LOCATION);
 
+   LOG_DEBUG ("Name=" << name);
+
    Connection* result = NULL;
 
    for (connection_iterator ii = connection_begin (), maxii = connection_end (); ii != maxii; ii ++) {
-      if (wepa_strcmp (connection_ptr (ii)->getName ().c_str (), name) == 0) {
+      if (connection_ptr (ii)->getName () == name) {
          result = connection_ptr (ii);
          break;
       }
@@ -179,19 +183,17 @@ dbms::Connection& dbms::Database::findConnection (const char* name)
       WEPA_THROW_EXCEPTION(asString () << " | Connection='" << name << "' is not defined");
    }
 
-   if (result->isAvailable () == false) {
-      WEPA_THROW_EXCEPTION(asString () << " | Connection='" << name << "' is not available");
-   }
-
    LOG_DEBUG (result->asString ());
 
-   return *result;
+   return std::ref (*result);
 }
 
 dbms::Statement* dbms::Database::createStatement (const char* name, const char* expression, const ActionOnError::_v actionOnError)
    throw (adt::RuntimeException)
 {
    logger::TraceMethod ttmm (logger::Level::Local7, WEPA_FILE_LOCATION);
+
+   LOG_DEBUG ("Name=" << name);
 
    for (statement_iterator ii = statement_begin(), maxii = statement_end(); ii != maxii; ++ ii) {
       if (statement(ii).getName () == name)
@@ -203,7 +205,11 @@ dbms::Statement* dbms::Database::createStatement (const char* name, const char* 
 
    Statement* result = allocateStatement (name, expression, actionOnError);
 
-   LOG_DEBUG(asString ());
+   if (result == NULL) {
+      WEPA_THROW_EXCEPTION(asString () << " could not create connection");
+   }
+
+   LOG_DEBUG(result->asString ());
 
    m_statements.push_back (result);
 
@@ -217,8 +223,10 @@ dbms::Statement& dbms::Database::findStatement (const char* name)
 
    Statement* result (NULL);
 
+   LOG_DEBUG ("Name=" << name);
+
    for (statement_iterator ii = statement_begin (), maxii = statement_end (); ii != maxii; ii ++) {
-      if (wepa_strcmp (statement (ii).getName ().c_str (), name) == 0) {
+      if (statement_ptr (ii)->getName () == name) {
          result = statement_ptr (ii);
          break;
       }
@@ -226,6 +234,8 @@ dbms::Statement& dbms::Database::findStatement (const char* name)
 
    if (result == NULL)
       WEPA_THROW_EXCEPTION("Statement '" << name << "' was not found");
+
+   LOG_DEBUG (result->asString ());
 
    return std::ref (*result);
 }

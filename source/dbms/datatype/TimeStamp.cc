@@ -43,25 +43,3 @@ using namespace std;
 using namespace wepa;
 using namespace wepa::dbms;
 
-const char* datatype::TimeStamp::getCStringValue () const
-   throw ()
-{
-   const char* format;
-
-   if ((format = m_format) == NULL)
-      format = "%d/%m/%Y %H:%M:%S.%%d";
-
-   TimeStamp* _this = const_cast <TimeStamp*> (this);
-
-   char* result = _this->m_buffer;
-
-   if (strftime (result, MaxDateSize, format, &m_value) == 0)
-      return NULL;
-
-   if (wepa_strstr (result, "%d")) {
-      wepa_strcpy (_this->m_anotherBuffer, result);
-      sprintf (result, _this->m_anotherBuffer, m_fractionalSecond);
-   }
-
-   return result;
-}

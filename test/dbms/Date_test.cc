@@ -52,80 +52,76 @@ BOOST_AUTO_TEST_CASE (date_setter_second)
 
    column.setValue(date_01_31_1987_23_59_59);
 
-   BOOST_REQUIRE_EQUAL(column.getDay(), 31);
-   BOOST_REQUIRE_EQUAL(column.getMonth(), 1);
-   BOOST_REQUIRE_EQUAL(column.getYear (), 1987);
-   BOOST_REQUIRE_EQUAL(column.getHour(), 17); // This test was written under GMT+1
-   BOOST_REQUIRE_EQUAL(column.getMinute(), 59);
-   BOOST_REQUIRE_EQUAL(column.getSecond (), 59);
+   tm* localTime = column.getLocalTime();
 
-   BOOST_REQUIRE_EQUAL (column.getSecondValue (), 539110799);
+   BOOST_REQUIRE_EQUAL(localTime->tm_mday, 31);
+   BOOST_REQUIRE_EQUAL(localTime->tm_mon, 0);
+   BOOST_REQUIRE_EQUAL(localTime->tm_year, 1987 - 1900);
+   BOOST_REQUIRE_EQUAL(localTime->tm_hour, 17); // This test was written under GMT+1
+   BOOST_REQUIRE_EQUAL(localTime->tm_min, 59);
+   BOOST_REQUIRE_EQUAL(localTime->tm_sec, 59);
 
-   BOOST_REQUIRE_EQUAL (strcmp ("31/01/1987 17:59:59", column.getCStringValue()), 0);
+   BOOST_REQUIRE_EQUAL (column.getValue (), 539110799);
 }
 
 BOOST_AUTO_TEST_CASE (date_setter_text)
 {
-   datatype::Date column ("from_text", false, "%d/%m/%YT%T");
+   datatype::Date column ("from_text", false);
 
    std::string str_date ("31/01/1996T22:17:10");
 
    try {
-      column.setValue (str_date);
+      column.setValue (str_date, "%d/%m/%YT%T");
 
-      BOOST_REQUIRE_EQUAL(column.getDay(), 31);
-      BOOST_REQUIRE_EQUAL(column.getMonth(), 1);
-      BOOST_REQUIRE_EQUAL(column.getYear (), 1996);
-      BOOST_REQUIRE_EQUAL(column.getHour(), 22);
-      BOOST_REQUIRE_EQUAL(column.getMinute(), 17);
+      tm* localTime = column.getLocalTime();
+
+      BOOST_REQUIRE_EQUAL(localTime->tm_mday, 31);
+      BOOST_REQUIRE_EQUAL(localTime->tm_mon, 0);
+      BOOST_REQUIRE_EQUAL(localTime->tm_year, 1996 - 1900);
+      BOOST_REQUIRE_EQUAL(localTime->tm_hour, 22); // This test was written under GMT+1
+      BOOST_REQUIRE_EQUAL(localTime->tm_min, 17);
+      BOOST_REQUIRE_EQUAL(localTime->tm_sec, 10);
    }
    catch (adt::RuntimeException& ex) {
       std::cout << ex.what () << std::endl;
    }
 
-   BOOST_REQUIRE_EQUAL (str_date, column.getCStringValue());
-
-   BOOST_REQUIRE_THROW (column.setValue ("12:10"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (column.setValue ("12:10", "%d/%m/%YT%T"), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE (date_is_nulleable)
 {
-   datatype::Date column ("nulleable", true, "%d/%m/%YT%H:%M");
+   datatype::Date column ("nulleable", true);
+
+   const char* format = "%d/%m/%YT%H:%M:%S";
 
    BOOST_REQUIRE_EQUAL (column.hasValue (), false);
 
    column.clear ();
    BOOST_REQUIRE_EQUAL (column.hasValue(), false);
 
-   std::string str_date ("01/01/1900T00:00");
-   BOOST_REQUIRE_NO_THROW(column.setValue (str_date));
+   std::string str_date ("01/01/1900T00:00:00");
+   BOOST_REQUIRE_THROW(column.setValue (str_date, format), adt::RuntimeException);
+   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
+
+   BOOST_REQUIRE_NO_THROW(column.setValue ("01/01/2000T00:00:00", format));
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
-   BOOST_REQUIRE_EQUAL (str_date, column.getCStringValue());
 
    column.clear ();
    BOOST_REQUIRE_THROW (column.getValue (), adt::RuntimeException);
-   BOOST_REQUIRE_THROW (column.getCStringValue (), adt::RuntimeException);
-   BOOST_REQUIRE_THROW (column.getSecondValue (), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (column.getLocalTime (), adt::RuntimeException);
 
-   str_date = "25/10/2013T02:00";
+   str_date = "25/10/2013T02:00:10";
 
-   column.setValue(str_date);
+   column.setValue(str_date, "%d/%m/%YT%H:%M:%S");
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 
-   const tm& time_t = column.getValue();
-   BOOST_REQUIRE_EQUAL (time_t.tm_year, 2013 - 1900);
-   BOOST_REQUIRE_EQUAL (time_t.tm_mon, 9);
-   BOOST_REQUIRE_EQUAL (time_t.tm_mday, 25);
+   const tm* time_t = column.getLocalTime ();
+   BOOST_REQUIRE_EQUAL (time_t->tm_year, 2013 - 1900);
+   BOOST_REQUIRE_EQUAL (time_t->tm_mon, 9);
+   BOOST_REQUIRE_EQUAL (time_t->tm_mday, 25);
 
-   try {
-      BOOST_REQUIRE_EQUAL (column.getSecondValue(), adt::Second (1382659200));
-   }
-   catch (adt::RuntimeException& ex) {
-      std::cout << ex.asString () << std::endl;
-      BOOST_REQUIRE_EQUAL(0, 1);
-   }
-
-   BOOST_REQUIRE_EQUAL (str_date, column.getCStringValue());
+   BOOST_REQUIRE_EQUAL (column.getValue(), adt::Second (1382659210));
 
    column.clear ();
    BOOST_REQUIRE_EQUAL (column.hasValue (), false);
@@ -133,7 +129,7 @@ BOOST_AUTO_TEST_CASE (date_is_nulleable)
 
 BOOST_AUTO_TEST_CASE (date_is_not_nulleable)
 {
-   datatype::Date column ("not_nulleable", false, "%d/%m/%YT%H:%M");
+   datatype::Date column ("not_nulleable", false);
 
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 
@@ -142,13 +138,12 @@ BOOST_AUTO_TEST_CASE (date_is_not_nulleable)
    column.clear();
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 
-   std::string str_date ("00/01/1900T00:00");
-   BOOST_REQUIRE_EQUAL (str_date, column.getCStringValue());
+   BOOST_REQUIRE_EQUAL (column.getValue (), 0);
 }
 
 BOOST_AUTO_TEST_CASE (date_downcast)
 {
-   datatype::Date column ("not_nulleable", false, "%d/%m/%YT%H:%M");
+   datatype::Date column ("not_nulleable", false);
 
    datatype::Abstract& abs = column;
 

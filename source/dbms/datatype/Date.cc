@@ -46,122 +46,88 @@ using namespace std;
 using namespace wepa;
 using namespace wepa::dbms;
 
-datatype::Date::Date (const char* name, const bool isNulleable, const char* format) :
+datatype::Date::Date (const char* name, const bool isNulleable) :
    datatype::Abstract (name, Datatype::Date, MaxDateSize, isNulleable)
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
-   m_format = (format == NULL) ? NULL: strdup (format);
    wepa_memset (&m_value, 0, sizeof (m_value));
 }
 
-datatype::Date::Date (const string& name, const bool isNulleable, const char* format) :
+datatype::Date::Date (const string& name, const bool isNulleable) :
    datatype::Abstract (name, Datatype::Date, MaxDateSize, isNulleable)
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
-   m_format = (format == NULL) ? NULL: strdup (format);
    wepa_memset (&m_value, 0, sizeof (m_value));
 }
 
-datatype::Date::Date (const char* name, const datatype::Abstract::Datatype::_v type,  const bool isNulleable, const char* format) :
+datatype::Date::Date (const char* name, const datatype::Abstract::Datatype::_v type,  const bool isNulleable) :
    datatype::Abstract (name, type, MaxDateSize, isNulleable)
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
-   m_format = (format == NULL) ? NULL: strdup (format);
    wepa_memset (&m_value, 0, sizeof (m_value));
 }
 
-datatype::Date::Date (const string& name, const datatype::Abstract::Datatype::_v type,  const bool isNulleable, const char* format) :
+datatype::Date::Date (const string& name, const datatype::Abstract::Datatype::_v type,  const bool isNulleable) :
    datatype::Abstract (name, type, MaxDateSize, isNulleable)
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
-   m_format = (format == NULL) ? NULL: strdup (format);
    wepa_memset (&m_value, 0, sizeof (m_value));
 }
 
 datatype::Date::~Date ()
 {
-   if (m_format != NULL)
-      free (m_format);
 }
 
-const char* datatype::Date::getCStringValue () const
+struct tm* datatype::Date::getLocalTime () const
    throw (adt::RuntimeException)
 {
    this->exceptionWhenIsNull();
 
-   const char* format;
+   adt::Second::type_t tt = m_value.getValue ();
+   tm* result = localtime ((time_t*) &tt);
 
-   if ((format = m_format) == NULL)
-      format = "%d/%m/%Y %H:%M:%S";
-
-   return (strftime (const_cast <Date*> (this)->m_buffer, MaxDateSize, format, &m_value) == 0) ? NULL: m_buffer;
-}
-
-adt::Second datatype::Date::getSecondValue () const
-throw (adt::RuntimeException)
-{
-   this->exceptionWhenIsNull();
-
-   Date& _this = const_cast <Date&> (*this);
-
-   int rr = mktime (&_this.m_value);
-
-   if (rr == -1) {
-      WEPA_THROW_EXCEPTION(asctime (&_this.m_value) << " can not be converted as adt::Second");
+   if (result == NULL) {
+      WEPA_THROW_EXCEPTION(asString () << " | It is not a valid date");
    }
 
-   return adt::Second (rr);
+   return result;
 }
 
-void datatype::Date::setValue (const char* str)
+void datatype::Date::setValue (const char* str, const char* format)
    throw (adt::RuntimeException)
 {
-   if (m_format == NULL) {
+   clear ();
+
+   if (format == NULL) {
       WEPA_THROW_EXCEPTION("This method requires a format specification");
    }
 
    tm aux;
-   char* r = strptime (str, m_format, &aux);
+   char* r = strptime (str, format, &aux);
 
    if (r == NULL) {
-      WEPA_THROW_EXCEPTION("'" << str << "' It is not a valid date using format '" << m_format << "'");
+      WEPA_THROW_EXCEPTION("'" << str << "' is not a valid date using format '" << format << "'");
+   }
+
+   time_t newValue = mktime (&aux);
+
+   if (newValue == -1) {
+      WEPA_THROW_EXCEPTION("'" << str << "' can not be treated as adt::Second '" << format << "'");
    }
 
    this->isNotNull();
-   wepa_memcpy (&m_value, &aux, sizeof (m_value));
+   m_value = newValue;
 }
 
-void datatype::Date::setValue (const adt::Second& second)
+void datatype::Date::setValue (const adt::Second& value)
    throw (adt::RuntimeException)
 {
-   adt::Second::type_t tt = second.getValue();
-   tm* aux = localtime ((time_t*) &tt);
-
-   if (aux == NULL) {
-      WEPA_THROW_EXCEPTION(asString () << second.asString() << " | It is not a valid date");
-   }
-
    this->isNotNull();
-   wepa_memcpy (&m_value, aux, sizeof (m_value));
-}
-
-void datatype::Date::set (const char* what, int& variable, const int value, const int min, const int max)
-   throw (adt::RuntimeException)
-{
-   if (value < min) {
-      WEPA_THROW_EXCEPTION(what << " must be greater or equal to  " <<  min);
-   }
-
-   if (value > max && max != -1) {
-      WEPA_THROW_EXCEPTION(what << " must be less or equal to " << max);
-   }
-
-   this->isNotNull();
-   variable = value;
+   m_value = value;
 }
 
 adt::StreamString datatype::Date::asString () const
@@ -171,16 +137,10 @@ adt::StreamString datatype::Date::asString () const
 
    adt::StreamString result ("dbms::datatype::Date { ");
    result << dbms::datatype::Abstract::asString ();
-   result << " | Format: '";
-   result += (m_format == NULL) ? "<null>": m_format;
    result += "' | Value: ";
 
-   if (this->hasValue () == true) {
-      if ((cstring = getCStringValue ()) == NULL)
-         result += "<not valid>";
-      else
-         result << "'" << cstring << "'";
-   }
+   if (this->hasValue () == true)
+      result << m_value.asString ();
    else
       result += "<null>";
 

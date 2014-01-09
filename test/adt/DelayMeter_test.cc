@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( delaymeter_milliseconds )
 
    usleep (1500);
    tt = meter.getValue();
-   BOOST_REQUIRE_GT (tt, adt::Millisecond (3));
+   BOOST_REQUIRE_GE (tt, adt::Millisecond (3));
    BOOST_REQUIRE_LE (tt, adt::Millisecond (5));
 
    meter.reset ();
@@ -88,6 +88,6 @@ BOOST_AUTO_TEST_CASE( delaymeter_milliseconds )
 
    usleep(2500);
    tt = meter.getValue();
-   BOOST_REQUIRE_GT (tt, adt::Millisecond (2));
+   BOOST_REQUIRE_GE (tt, adt::Millisecond (2));
    BOOST_REQUIRE_LE (tt, adt::Millisecond (3));
 }

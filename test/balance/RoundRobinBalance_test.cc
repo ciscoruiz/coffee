@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE( rr_balance_multithread )
    std::mutex mutexContainer;
    CounterContainer counterContainer;
 
-   myBalance.initialize();
+   BOOST_REQUIRE_NO_THROW (myBalance.initialize());
 
    std::thread t1(do_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (myBalance));
    std::thread t2(do_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (myBalance));

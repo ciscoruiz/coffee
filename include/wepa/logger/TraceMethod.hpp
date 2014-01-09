@@ -36,6 +36,7 @@
 #define __wepm_logger_TraceMethod_hpp
 
 #include <wepa/logger/Level.hpp>
+#include <wepa/logger/Logger.hpp>
 
 namespace wepa {
 

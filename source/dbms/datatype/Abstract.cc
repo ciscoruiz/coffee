@@ -32,51 +32,52 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepa_adt_RuntimeException_h
-#define _wepa_adt_RuntimeException_h
-
-#include <sstream>
-
 #include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/Exception.hpp>
 
-namespace wepa {
+#include <wepa/adt/AsHexString.hpp>
 
-namespace adt {
+#include <wepa/dbms/datatype/Abstract.hpp>
 
-/**
- * Defines exception used for this library.
- *
- * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
- */
-class RuntimeException : public Exception {
-public:
-   static const int NullErrorCode = -1;
+using namespace wepa;
+using namespace wepa::dbms;
 
-   RuntimeException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
-      Exception (str, fromMethod, fromFile, fromLine),
-      m_errorCode (NullErrorCode)
-   {;}
+adt::StreamString datatype::Abstract::asString () const
+   throw ()
+{
+   adt::StreamString result;
 
-   RuntimeException (const RuntimeException& other) :
-      Exception (other),
-      m_errorCode (other.m_errorCode)
-   {;}
+   result << "dbms::type::Abstract { Name: " << m_name;
+   result << " | Buffer: " << adt::AsHexString::apply(wepa_ptrnumber_cast (m_buffer));
+   result << " | MaxSize: " << m_maxSize;
+   result << " | Null: " << m_isNull;
+   result << " | Nulleable: " << m_isNulleable;
 
-   int getErrorCode () const throw () { return m_errorCode; }
-
-   void setErrorCode (const int errorCode) throw () { m_errorCode = errorCode; }
-
-   std::string asString () const throw ();
-
-private:
-   int m_errorCode;
-};
-
-}
+   return result += " }";
 }
 
-#define WEPA_THROW_EXCEPTION(msg) do { wepa::adt::StreamString __str; __str << msg; throw wepa::adt::RuntimeException (__str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
+void datatype::Abstract::isNull ()
+   throw (adt::RuntimeException)
+{
+   if (m_isNulleable == false) {
+      WEPA_THROW_EXCEPTION(asString () << " | Data can not be NULL");
+   }
 
+   m_isNull = true;
+}
 
-#endif // _wepa_adt_RuntimeException_h
+void datatype::Abstract::clear ()
+   throw ()
+{
+   if (m_isNulleable)
+      m_isNull = true;
+
+   do_clear ();
+}
+
+void datatype::Abstract::exceptionWhenIsNull () const
+   throw (adt::RuntimeException)
+{
+   if (m_isNull == true) {
+      WEPA_THROW_EXCEPTION("Data '" << m_name << "' is null and it can not return any value");
+   }
+}

@@ -32,51 +32,63 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepa_adt_RuntimeException_h
-#define _wepa_adt_RuntimeException_h
+#include <wepa/config/defines.hpp>
 
-#include <sstream>
+#include <wepa/dbms/datatype/String.hpp>
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/Exception.hpp>
+using namespace wepa;
+using namespace wepa::dbms;
 
-namespace wepa {
+void datatype::String::setValue (const char* str)
+   throw (adt::RuntimeException)
+{
+   if (str == NULL) {
+      this->isNull ();
+      clear ();
+      return;
+   }
 
-namespace adt {
+   if (m_value != str) {
+      auto len = wepa_strlen (str);
+      if (len > datatype::Abstract::getMaxSize ()) {
+         WEPA_THROW_EXCEPTION("'" << str << "' out of range | MaxLen=" << datatype::Abstract::getMaxSize () << " | Len=" << len);
+      }
+      wepa_strcpy (m_value, str);
+   }
 
-/**
- * Defines exception used for this library.
- *
- * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
- */
-class RuntimeException : public Exception {
-public:
-   static const int NullErrorCode = -1;
-
-   RuntimeException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
-      Exception (str, fromMethod, fromFile, fromLine),
-      m_errorCode (NullErrorCode)
-   {;}
-
-   RuntimeException (const RuntimeException& other) :
-      Exception (other),
-      m_errorCode (other.m_errorCode)
-   {;}
-
-   int getErrorCode () const throw () { return m_errorCode; }
-
-   void setErrorCode (const int errorCode) throw () { m_errorCode = errorCode; }
-
-   std::string asString () const throw ();
-
-private:
-   int m_errorCode;
-};
-
-}
+   this->isNotNull();
 }
 
-#define WEPA_THROW_EXCEPTION(msg) do { wepa::adt::StreamString __str; __str << msg; throw wepa::adt::RuntimeException (__str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
+char* datatype::String::strip (char *str)
+   throw ()
+{
+   int len;
 
+   if (str == NULL || (len = wepa_strlen (str)) == 0)
+      return str;
 
-#endif // _wepa_adt_RuntimeException_h
+   register int end = len - 1;
+
+   while (end >= 0 && str [end] == ' ') end --;
+
+   if (end >= 0)
+      str [++ end] = 0;
+
+   return str;
+}
+
+adt::StreamString datatype::String::asString () const
+   throw ()
+{
+   adt::StreamString result ("dbms::datatype::String { ");
+   result += datatype::Abstract::asString ();
+   result += " | Value: ";
+
+   if (this->hasValue () == true)
+      result << "'" << m_value << "'";
+   else
+      result += "<null>";
+
+   return result += " }";
+}
+

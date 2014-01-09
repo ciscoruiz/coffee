@@ -32,51 +32,30 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepa_adt_RuntimeException_h
-#define _wepa_adt_RuntimeException_h
 
-#include <sstream>
+#include <wepa/config/SCCSRepository.hpp>
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/Exception.hpp>
+#include <wepa/config/SCCS.hpp>
+#include <wepa/adt/SCCS.hpp>
+#include <wepa/xml/SCCS.hpp>
+#include <wepa/logger/SCCS.hpp>
+#include <wepa/app/SCCS.hpp>
 
-namespace wepa {
+#include <wepa/dbms/SCCS.hpp>
 
-namespace adt {
+wepa_sccs_define_tag (dbms, 0)
 
-/**
- * Defines exception used for this library.
- *
- * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
- */
-class RuntimeException : public Exception {
-public:
-   static const int NullErrorCode = -1;
+using namespace wepa;
 
-   RuntimeException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
-      Exception (str, fromMethod, fromFile, fromLine),
-      m_errorCode (NullErrorCode)
-   {;}
+void dbms::SCCS::activate()
+   throw ()
+{
+   config::SCCS::activate ();
+   adt::SCCS::activate ();
+   xml::SCCS::activate ();
+   logger::SCCS::activate();
+   app::SCCS::activate();
 
-   RuntimeException (const RuntimeException& other) :
-      Exception (other),
-      m_errorCode (other.m_errorCode)
-   {;}
-
-   int getErrorCode () const throw () { return m_errorCode; }
-
-   void setErrorCode (const int errorCode) throw () { m_errorCode = errorCode; }
-
-   std::string asString () const throw ();
-
-private:
-   int m_errorCode;
-};
-
-}
+   config::SCCSRepository::getInstance().registerModule(wepa_sccs_use_tag(dbms));
 }
 
-#define WEPA_THROW_EXCEPTION(msg) do { wepa::adt::StreamString __str; __str << msg; throw wepa::adt::RuntimeException (__str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
-
-
-#endif // _wepa_adt_RuntimeException_h

@@ -32,51 +32,36 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepa_adt_RuntimeException_h
-#define _wepa_adt_RuntimeException_h
+#include <wepa/adt/AsString.hpp>
 
-#include <sstream>
+#include <wepa/dbms/datatype/ShortBlock.hpp>
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/Exception.hpp>
+using namespace wepa;
+using namespace wepa::dbms;
 
-namespace wepa {
-
-namespace adt {
-
-/**
- * Defines exception used for this library.
- *
- * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
- */
-class RuntimeException : public Exception {
-public:
-   static const int NullErrorCode = -1;
-
-   RuntimeException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
-      Exception (str, fromMethod, fromFile, fromLine),
-      m_errorCode (NullErrorCode)
-   {;}
-
-   RuntimeException (const RuntimeException& other) :
-      Exception (other),
-      m_errorCode (other.m_errorCode)
-   {;}
-
-   int getErrorCode () const throw () { return m_errorCode; }
-
-   void setErrorCode (const int errorCode) throw () { m_errorCode = errorCode; }
-
-   std::string asString () const throw ();
-
-private:
-   int m_errorCode;
-};
-
-}
+void datatype::ShortBlock::setValue(const adt::DataBlock& value)
+   throw (adt::RuntimeException)
+{
+   if (value.size () > datatype::Abstract::getMaxSize ()) {
+      WEPA_THROW_EXCEPTION("Block out of range (" << datatype::Abstract::getMaxSize () << " and " << value.size ());
+   }
+//   wepa_memcpy(m_value.data (), value.data (), value.size ());
+   m_value.assign(value.data (), value.size ());
+   this->isNotNull();
 }
 
-#define WEPA_THROW_EXCEPTION(msg) do { wepa::adt::StreamString __str; __str << msg; throw wepa::adt::RuntimeException (__str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
+adt::StreamString datatype::ShortBlock::asString () const
+   throw ()
+{
+   adt::StreamString result ("dbms::datatype::ShortBlock { ");
+   result += datatype::Abstract::asString ();
+   result += " | Value: ";
 
+   if (this->hasValue() == true)
+      result << adt::AsString::apply (m_value);
+   else
+      result += "(null)";
 
-#endif // _wepa_adt_RuntimeException_h
+   return result += " }";
+}
+

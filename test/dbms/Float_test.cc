@@ -32,51 +32,65 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepa_adt_RuntimeException_h
-#define _wepa_adt_RuntimeException_h
+#include <iostream>
+#include <time.h>
 
-#include <sstream>
+#include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/Exception.hpp>
+#include <wepa/dbms/datatype/Float.hpp>
+#include <wepa/dbms/datatype/Integer.hpp>
 
-namespace wepa {
+using namespace wepa;
+using namespace wepa::dbms;
 
-namespace adt {
 
-/**
- * Defines exception used for this library.
- *
- * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
- */
-class RuntimeException : public Exception {
-public:
-   static const int NullErrorCode = -1;
+BOOST_AUTO_TEST_CASE (float_is_nulleable)
+{
+   datatype::Float column ("nulleable", true);
 
-   RuntimeException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
-      Exception (str, fromMethod, fromFile, fromLine),
-      m_errorCode (NullErrorCode)
-   {;}
+   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
 
-   RuntimeException (const RuntimeException& other) :
-      Exception (other),
-      m_errorCode (other.m_errorCode)
-   {;}
+   column.clear ();
 
-   int getErrorCode () const throw () { return m_errorCode; }
+   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
 
-   void setErrorCode (const int errorCode) throw () { m_errorCode = errorCode; }
+   BOOST_REQUIRE_THROW (column.getValue (), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (column.getFloatValue(), adt::RuntimeException);
 
-   std::string asString () const throw ();
+   column.setValue (10.12);
 
-private:
-   int m_errorCode;
-};
+   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
+   BOOST_REQUIRE_CLOSE (column.getValue(),10.12, 0.1);
 
-}
+   column.clear ();
+   BOOST_REQUIRE_EQUAL (column.hasValue (), false);;
 }
 
-#define WEPA_THROW_EXCEPTION(msg) do { wepa::adt::StreamString __str; __str << msg; throw wepa::adt::RuntimeException (__str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
+BOOST_AUTO_TEST_CASE (float_is_not_nulleable)
+{
+   datatype::Float column ("not_nulleable", false);
 
+   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 
-#endif // _wepa_adt_RuntimeException_h
+   column.setValue (0.0);
+   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
+   BOOST_REQUIRE_EQUAL (column.getValue(), 0.0);
+
+   column.clear();
+   BOOST_REQUIRE_EQUAL (column.hasValue(), true);
+}
+
+BOOST_AUTO_TEST_CASE (float_downcast)
+{
+   datatype::Float column ("not_nulleable");
+
+   datatype::Abstract& abs = column;
+
+   datatype::Float& other = wepa_datatype_downcast(datatype::Float, abs);
+
+   BOOST_REQUIRE_EQUAL (&other, &column);
+
+   datatype::Integer zzz ("zzz");
+
+   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::Float, zzz), adt::RuntimeException);
+}

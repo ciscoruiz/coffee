@@ -32,24 +32,62 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/adt/RuntimeException.hpp>
-#include <wepa/adt/StreamString.hpp>
+#include <boost/test/unit_test.hpp>
 
-using namespace std;
+#include <unistd.h>
+
+#include <wepa/adt/DelayMeter.hpp>
+#include <wepa/adt/Second.hpp>
+#include <wepa/adt/Millisecond.hpp>
+#include <wepa/adt/Microsecond.hpp>
+
 using namespace wepa;
 
-string adt::RuntimeException::asString() const throw ()
+BOOST_AUTO_TEST_CASE( delaymeter_seconds )
 {
-   StreamString str;
+   adt::DelayMeter <adt::Second> meter;
 
-   str << "[" << m_fromFile << "(" << m_fromLine << "): " << m_fromMethod << "] ";
+   sleep(2);
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (2));
 
-   if (m_errorCode != NullErrorCode) {
-      str << "ErrorCode: " << m_errorCode << " | ";
-   }
+   sleep (1);
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (3));
 
-   str << what ();
+   meter.reset ();
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (0));
 
-   return str;
+   sleep(2);
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (2));
+
+   adt::DelayMeter <adt::Second> meter2 (meter);
+   BOOST_REQUIRE_EQUAL(meter.getValue(), meter2.getValue());
+
+   meter2.reset ();
+   meter2 = meter;
+   BOOST_REQUIRE_EQUAL(meter.getValue(), meter2.getValue());
 }
 
+BOOST_AUTO_TEST_CASE( delaymeter_milliseconds )
+{
+   adt::DelayMeter <adt::Millisecond> meter;
+
+   usleep(2000);
+   adt::Millisecond tt;
+
+   tt = meter.getValue();
+   BOOST_REQUIRE_GE (tt, adt::Millisecond (2));
+   BOOST_REQUIRE_LE (tt, adt::Millisecond (3));
+
+   usleep (1500);
+   tt = meter.getValue();
+   BOOST_REQUIRE_GT (tt, adt::Millisecond (3));
+   BOOST_REQUIRE_LE (tt, adt::Millisecond (5));
+
+   meter.reset ();
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Millisecond (0));
+
+   usleep(2500);
+   tt = meter.getValue();
+   BOOST_REQUIRE_GT (tt, adt::Millisecond (2));
+   BOOST_REQUIRE_LE (tt, adt::Millisecond (3));
+}

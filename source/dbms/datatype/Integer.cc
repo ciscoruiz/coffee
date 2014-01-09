@@ -32,51 +32,17 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepa_adt_RuntimeException_h
-#define _wepa_adt_RuntimeException_h
+#include <wepa/dbms/datatype/Integer.hpp>
 
-#include <sstream>
+using namespace wepa;
+using namespace wepa::dbms;
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/Exception.hpp>
-
-namespace wepa {
-
-namespace adt {
-
-/**
- * Defines exception used for this library.
- *
- * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
- */
-class RuntimeException : public Exception {
-public:
-   static const int NullErrorCode = -1;
-
-   RuntimeException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
-      Exception (str, fromMethod, fromFile, fromLine),
-      m_errorCode (NullErrorCode)
-   {;}
-
-   RuntimeException (const RuntimeException& other) :
-      Exception (other),
-      m_errorCode (other.m_errorCode)
-   {;}
-
-   int getErrorCode () const throw () { return m_errorCode; }
-
-   void setErrorCode (const int errorCode) throw () { m_errorCode = errorCode; }
-
-   std::string asString () const throw ();
-
-private:
-   int m_errorCode;
-};
-
-}
+adt::StreamString datatype::Integer::asString () const
+   throw ()
+{
+   adt::StreamString result;
+   result << "dbms::datatype::Integer { " << datatype::Abstract::asString ();
+   result <<  " | Value: " << m_value;
+   return result += " }";
 }
 
-#define WEPA_THROW_EXCEPTION(msg) do { wepa::adt::StreamString __str; __str << msg; throw wepa::adt::RuntimeException (__str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
-
-
-#endif // _wepa_adt_RuntimeException_h

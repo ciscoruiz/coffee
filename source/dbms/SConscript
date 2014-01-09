@@ -1,0 +1,10 @@
+Import ('env')
+
+sources = Glob('*.cc')
+sources.extend (Glob('datatype/*.cc'))
+sources.extend (Glob('binder/*.cc'))
+
+result = env.StaticLibrary ('wepa_dbms', sources);
+
+Return ('result')
+

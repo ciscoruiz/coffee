@@ -32,51 +32,44 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepa_adt_RuntimeException_h
-#define _wepa_adt_RuntimeException_h
+#ifndef _wepa_dbms_FailRecoveryHandler_hpp
+#define _wepa_dbms_FailRecoveryHandler_hpp
 
-#include <sstream>
-
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/Exception.hpp>
-
+#include <wepa/adt/RuntimeException.hpp>
+  
 namespace wepa {
 
-namespace adt {
+namespace dbms {
+
+class Database;
+class Connection;
 
 /**
- * Defines exception used for this library.
- *
- * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
- */
-class RuntimeException : public Exception {
-public:
-   static const int NullErrorCode = -1;
+   Interfaz que deben cumplir los manejadores que reciben la notificacion de que no ha sido posible
+   restaurar una determina conexion con la base de datos.
 
-   RuntimeException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
-      Exception (str, fromMethod, fromFile, fromLine),
-      m_errorCode (NullErrorCode)
-   {;}
+   @author cisco.tierra@gmail.com.
+*/
+class FailRecoveryHandler {
+   virtual ~FailRecoveryHandler () {;}
 
-   RuntimeException (const RuntimeException& other) :
-      Exception (other),
-      m_errorCode (other.m_errorCode)
-   {;}
-
-   int getErrorCode () const throw () { return m_errorCode; }
-
-   void setErrorCode (const int errorCode) throw () { m_errorCode = errorCode; }
-
-   std::string asString () const throw ();
-
-private:
-   int m_errorCode;
+   /**
+      Este metodo debe ser reimplementado para describir las operaciones que vamos a realizar en caso
+      de no poder recuperar la conexion recibida como parametro.
+      \param connection Instancia de la conexion en la que hemos detectado el fallo.
+      \param tryCounter Numero de intentos de recuperacion de la conexion.
+      
+      \warning Este metodo se invocara automaticamente desde wepa::dbms::Database::recover.
+   */
+   virtual void apply (const Connection& connection) throw (adt::RuntimeException) = 0;
+   
+   friend class Database;
 };
 
 }
 }
 
-#define WEPA_THROW_EXCEPTION(msg) do { wepa::adt::StreamString __str; __str << msg; throw wepa::adt::RuntimeException (__str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
+#endif
 
 
-#endif // _wepa_adt_RuntimeException_h
+

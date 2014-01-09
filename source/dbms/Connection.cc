@@ -106,8 +106,6 @@ dbms::ResultCode dbms::Connection::execute (Statement* statement)
          m_commitPending ++;
          if (m_maxCommitPending > 0 && m_commitPending > m_maxCommitPending)  {
             commit ();
-            m_commitPending = 0;
-            m_rollbackPending = false;
          }
       }
    }

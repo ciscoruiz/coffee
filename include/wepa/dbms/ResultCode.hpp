@@ -46,13 +46,20 @@ public:
       m_errorText (NULL),
       m_database (other.m_database)
    {
-      set (other.m_errorCode, other.m_errorText);
+      initialize (other.m_errorCode, other.m_errorText);
    }   
    
    /**
       Destructor.
    */
    virtual ~ResultCode () { if (m_errorText != NULL) free (m_errorText); }
+
+   void initialize (const int errorCode, const char* errorText)
+      throw ()
+   {
+      m_errorCode = errorCode;
+      copy (errorText);
+   }
 
    /**
       Devuelve el codigo de error del ultimo comando ejecutado contra la base de datos.   
@@ -77,7 +84,7 @@ public:
    {
       if (this != &resultCode) {
          m_database = resultCode.m_database;
-         set (resultCode.m_errorCode, resultCode.m_errorText);
+         initialize (resultCode.m_errorCode, resultCode.m_errorText);
       }
    
       return *this;
@@ -136,7 +143,7 @@ protected:
       m_errorText (NULL),
       m_database (&database)
    {
-      set (errorCode, errorText);  
+      initialize (errorCode, errorText);  
    }
 
    /**
@@ -145,12 +152,6 @@ protected:
       \param errorCode Codigo de error asociado a la ultima operacion realizada contra la base de datos.   
       \param errorText Texto asociado al error de ultima operacion realizada contra la base de datos.
    */   
-   void set (const int errorCode, const char* errorText) 
-      throw ()
-   {
-      m_errorCode = errorCode;
-      copy (errorText);
-   }
 
 private:
    int m_errorCode;

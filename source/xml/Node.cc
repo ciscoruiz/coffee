@@ -254,14 +254,14 @@ void xml::Node::compile (xml::Compiler& compiler) const
       if (rc < 0)
          WEPA_THROW_EXCEPTION("Can not compile node " << getName ());
 
-      for (const_child_iterator ii = child_begin(), maxii = child_end (); ii != maxii; ++ ii) {
-         const Node& child = get_child(ii);
-         child.compile (compiler);
-      }
-
       for (const_attribute_iterator ii = attribute_begin(), maxii = attribute_end (); ii != maxii; ++ ii) {
          const Attribute& attribute = get_attribute(ii);
          attribute.compile (compiler);
+      }
+
+      for (const_child_iterator ii = child_begin(), maxii = child_end (); ii != maxii; ++ ii) {
+         const Node& child = get_child(ii);
+         child.compile (compiler);
       }
 
       if (xmlTextWriterEndElement (compiler) < 0)

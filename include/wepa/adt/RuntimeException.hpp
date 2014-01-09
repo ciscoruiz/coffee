@@ -35,11 +35,10 @@
 #ifndef _wepa_adt_RuntimeException_h
 #define _wepa_adt_RuntimeException_h
 
-#include <boost/exception/exception.hpp>
-#include <stdexcept>
 #include <sstream>
 
 #include <wepa/adt/StreamString.hpp>
+#include <wepa/adt/Exception.hpp>
 
 namespace wepa {
 
@@ -50,31 +49,19 @@ namespace adt {
  *
  * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
  */
-class RuntimeException : virtual std::logic_error, virtual public boost::exception {
+class RuntimeException : public Exception {
 public:
    static const int NullErrorCode = -1;
 
-   using std::logic_error::what;
-
-   explicit RuntimeException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
-      std::logic_error (str),
-      m_fromMethod (fromMethod),
-      m_fromFile (fromFile),
-      m_fromLine (fromLine),
+   RuntimeException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
+      Exception (str, fromMethod, fromFile, fromLine),
       m_errorCode (NullErrorCode)
    {;}
 
    RuntimeException (const RuntimeException& other) :
-      std::logic_error (other),
-      m_fromMethod (other.m_fromMethod),
-      m_fromFile (other.m_fromFile),
-      m_fromLine (other.m_fromLine),
+      Exception (other),
       m_errorCode (other.m_errorCode)
    {;}
-
-   const char* getMethod () const throw () { return m_fromMethod; }
-   const char* getFile () const throw () { return m_fromFile; }
-   const unsigned getLine () const throw () { return m_fromLine; }
 
    int getErrorCode () const throw () { return m_errorCode; }
 
@@ -83,16 +70,13 @@ public:
    std::string asString () const throw ();
 
 private:
-   const char* m_fromMethod;
-   const char* m_fromFile;
-   const unsigned m_fromLine;
    int m_errorCode;
 };
 
 }
 }
 
-#define WEPA_THROW_EXCEPTION(msg) do { wepa::adt::StreamString str; str << msg; throw wepa::adt::RuntimeException (str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
+#define WEPA_THROW_EXCEPTION(msg) do { wepa::adt::StreamString __str; __str << msg; throw wepa::adt::RuntimeException (__str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
 
 
 #endif // _wepa_adt_RuntimeException_h

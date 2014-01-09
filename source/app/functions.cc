@@ -32,24 +32,23 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/adt/RuntimeException.hpp>
-#include <wepa/adt/StreamString.hpp>
+#include <wepa/app/Application.hpp>
+#include <wepa/app/functions.hpp>
 
-using namespace std;
 using namespace wepa;
 
-string adt::RuntimeException::asString() const throw ()
+//static
+app::Application* app::functions::st_application = NULL;
+
+//static
+app::Application& app::functions::getApp ()
+   throw (adt::RuntimeException)
 {
-   StreamString str;
+   if (st_application == NULL)
+      WEPA_THROW_EXCEPTION("There is not any registered app::Application");
 
-   str << "[" << m_fromFile << "(" << m_fromLine << "): " << m_fromMethod << "] ";
-
-   if (m_errorCode != NullErrorCode) {
-      str << "ErrorCode: " << m_errorCode << " | ";
-   }
-
-   str << what ();
-
-   return str;
+   return *st_application;
 }
+
+
 

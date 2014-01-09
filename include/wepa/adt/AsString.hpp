@@ -54,7 +54,7 @@ public:
    /**
       @return A string with the number.
    */
-   static std::string apply (const int number) throw ();
+   static std::string apply (const int number, const char* format = "%d") throw ();
 
    /**
       @return A string with the number.

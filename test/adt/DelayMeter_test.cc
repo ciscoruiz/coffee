@@ -34,80 +34,60 @@
 //
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/RuntimeException.hpp>
+#include <unistd.h>
 
-using namespace std;
+#include <wepa/adt/DelayMeter.hpp>
+#include <wepa/adt/Second.hpp>
+#include <wepa/adt/Millisecond.hpp>
+#include <wepa/adt/Microsecond.hpp>
+
 using namespace wepa;
 
-int goo () {
-   WEPA_THROW_EXCEPTION ("this is goo");
-}
-
-int foo () {
-   try {
-      goo ();
-   }
-   catch (adt::RuntimeException&) {
-      throw;
-   }
-
-   return 0;
-}
-
-
-class AAA {
-public:
-   void member (int xx, char zz) {
-      WEPA_THROW_EXCEPTION ("xx:" << xx << " zz:" << zz);
-   }
-   static void member2 (float zz) {
-      WEPA_THROW_EXCEPTION ("float: " << zz);
-   }
-};
-
-BOOST_AUTO_TEST_CASE( RuntimeException_asString )
+BOOST_AUTO_TEST_CASE( delaymeter_seconds )
 {
-   try {
-      foo ();
-   }
-   catch (adt::RuntimeException& ex) {
-      BOOST_REQUIRE ( strcmp ("this is goo", ex.what ()) == 0 );
-      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/RuntimeException.cc(43): int goo()] this is goo");
-   }
+   adt::DelayMeter <adt::Second> meter;
 
-   AAA aaa;
+   sleep(2);
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (2));
 
-   try {
-      aaa.member (10, 'z');
-   }
-   catch (adt::RuntimeException& ex) {
-      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/RuntimeException.cc(61): void AAA::member(int, char)] xx:10 zz:z");
-      BOOST_REQUIRE ( strcmp ("xx:10 zz:z", ex.what ()) == 0 );
-   }
+   sleep (1);
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (3));
 
-   try {
-      AAA::member2 (11.11);
-   }
-   catch (adt::RuntimeException& ex) {
-      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/RuntimeException.cc(64): static void AAA::member2(float)] float: 11.110000");
-      BOOST_REQUIRE ( strcmp ("float: 11.110000", ex.what ()) == 0 );
-   }
+   meter.reset ();
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (0));
+
+   sleep(2);
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (2));
+
+   adt::DelayMeter <adt::Second> meter2 (meter);
+   BOOST_REQUIRE_EQUAL(meter.getValue(), meter2.getValue());
+
+   meter2.reset ();
+   meter2 = meter;
+   BOOST_REQUIRE_EQUAL(meter.getValue(), meter2.getValue());
 }
 
-void hoo () {
-   adt::RuntimeException ex ("this is hoo", WEPA_FILE_LOCATION);
-   ex.setErrorCode(100);
-   throw ex;
-}
-
-BOOST_AUTO_TEST_CASE( RuntimeException_errorCode )
+BOOST_AUTO_TEST_CASE( delaymeter_milliseconds )
 {
-   try {
-      hoo ();
-   }
-   catch (adt::RuntimeException& ex) {
-      BOOST_REQUIRE_EQUAL (ex.asString (), "[test/adt/RuntimeException.cc(98): void hoo()] ErrorCode: 100 | this is hoo");
-      BOOST_REQUIRE ( strcmp ("this is hoo", ex.what ()) == 0 );
-   }
-}
+   adt::DelayMeter <adt::Millisecond> meter;
 
+   usleep(2000);
+   adt::Millisecond tt;
+
+   tt = meter.getValue();
+   BOOST_REQUIRE_GE (tt, adt::Millisecond (2));
+   BOOST_REQUIRE_LE (tt, adt::Millisecond (3));
+
+   usleep (1500);
+   tt = meter.getValue();
+   BOOST_REQUIRE_GT (tt, adt::Millisecond (3));
+   BOOST_REQUIRE_LE (tt, adt::Millisecond (5));
+
+   meter.reset ();
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Millisecond (0));
+
+   usleep(2500);
+   tt = meter.getValue();
+   BOOST_REQUIRE_GT (tt, adt::Millisecond (2));
+   BOOST_REQUIRE_LE (tt, adt::Millisecond (3));
+}

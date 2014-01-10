@@ -149,7 +149,7 @@ void app::Application::start ()
       cout << "WEPA - Write Excellent Professional Applications. Version " << config::Release::getVersion () << endl;
       cout << "Developed by Francisco Ruiz" << endl;
       cout << "Release date: " << __DATE__ << " " << __TIME__ << endl;
-      cout << "(c) Copyright 2013 by Francisco Ruiz." << endl << endl;
+      cout << "(c) Copyright 2013,2014 by Francisco Ruiz." << endl << endl;
 
       initialize ();
 

@@ -32,8 +32,8 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_dbms_GuardConnection_hpp
-#define __wepa_dbms_GuardConnection_hpp
+#ifndef __wepa_dbms_GuardStatement_hpp
+#define __wepa_dbms_GuardStatement_hpp
 
 #include <wepa/adt/RuntimeException.hpp>
 #include <wepa/dbms/ResultCode.hpp>
@@ -41,27 +41,38 @@
 namespace wepa {
 namespace dbms {
 
-class Connection;
-class GuardStatement;
+namespace datatype {
+class Abstract;
+}
 
-class GuardConnection {
+class GuardConnection;
+
+class Statement;
+
+/**
+ * This class will be previously protected by the GuardConnection it will assure that it will no be possible
+ * a deadlock.
+ */
+class GuardStatement {
 public:
-   GuardConnection (Connection&) throw (adt::RuntimeException);
-   GuardConnection (Connection*) throw (adt::RuntimeException);
-   ~GuardConnection ();
+   GuardStatement (GuardConnection& guardConnection, Statement&) throw (adt::RuntimeException);
+   GuardStatement (GuardConnection& guardConnection, Statement*) throw (adt::RuntimeException);
+   ~GuardStatement ();
 
-   int getCountLinkedStatement () const noexcept { return m_countLinkedStatement; }
+   Statement* operator-> () noexcept { return &m_statement; }
+
+   datatype::Abstract& getInputData (const int pos) throw (adt::RuntimeException);
+   const datatype::Abstract& getOutputData (const int pos) const throw (adt::RuntimeException);
+
+   ResultCode execute () throw (adt::RuntimeException, DatabaseException);
+
+   bool fetch () throw (adt::RuntimeException, DatabaseException);
+
+   void setRequiresCommit (const bool requiresCommit) noexcept;
 
 private:
-   Connection& m_connection;
-   int m_countLinkedStatement;
-
-   void linkStatement () noexcept { m_countLinkedStatement ++; }
-   void unlinkStatement () noexcept { m_countLinkedStatement --; }
-
-   ResultCode execute (Statement& statement) throw (adt::RuntimeException, DatabaseException);
-
-   friend class GuardStatement;
+   GuardConnection& m_guardConnection;
+   Statement& m_statement;
 };
 }
 }

@@ -52,25 +52,21 @@ using namespace wepa;
 //-----------------------------------------------------------------------------------------------------------
 // (1) Si no tiene variables de salida => consideramos que es un update, insert o delete.
 //-----------------------------------------------------------------------------------------------------------
-dbms::ResultCode dbms::Connection::execute (Statement* statement)
+dbms::ResultCode dbms::Connection::execute (Statement& statement)
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
-   if (statement == NULL) {
-      WEPA_THROW_EXCEPTION(asString () << " | Can not execute a NULL statement");
-   }
-
    LOG_THIS_METHOD();
 
    adt::DelayMeter <adt::Microsecond> delay;
 
-   if (statement->m_prepared == false) {
-      statement->prepare (this);
-      statement->m_prepared = true;
+   if (statement.m_prepared == false) {
+      statement.prepare (this);
+      statement.m_prepared = true;
    }
 
-   LOG_DEBUG("Using " << asString () << " to run " << statement->asString());
+   LOG_DEBUG("Using " << asString () << " to run " << statement);
 
-   if (statement->requiresCommit () == true && m_rollbackPending == true) {      // (1)
+   if (statement.requiresCommit () == true && m_rollbackPending == true) {      // (1)
       WEPA_THROW_EXCEPTION(asString () << " | This connection must execute a previous ROLLBACK's");
    }
 
@@ -78,28 +74,28 @@ dbms::ResultCode dbms::Connection::execute (Statement* statement)
    bool stop = false;
 
    while (stop == false) {
-      result = statement->execute (this);
+      result = statement.execute (this);
 
       if (result.lostConnection () == false)
          break;
 
-      LOG_CRITICAL (asString () << " | " << statement->asString () << " | " << result.asString ());
+      LOG_CRITICAL (asString () << " | " << statement.asString () << " | " << result.asString ());
 
       m_dbmsDatabase.breakConnection (*this);
       stop = true;
    }
 
-   statement->measureTiming (delay);
+   statement.measureTiming (delay);
 
    if (result.successful () == false && result.notFound () == false) {
-      LOG_ERROR (asString () << " | " << statement->asString () << " | " << result.asString ());
+      LOG_ERROR (asString () << " | " << statement.asString () << " | " << result.asString ());
    }
 
-   if (statement->requiresCommit () == true) {  // (1)
+   if (statement.requiresCommit () == true) {  // (1)
       if (result.successful () == false) {
-         if (statement->actionOnError() == ActionOnError::Rollback) {
+         if (statement.actionOnError() == ActionOnError::Rollback) {
             m_rollbackPending = true;
-            WEPA_THROW_NAME_DB_EXCEPTION(statement->getName (), result);
+            WEPA_THROW_NAME_DB_EXCEPTION(statement.getName (), result);
          }
       }
       else {

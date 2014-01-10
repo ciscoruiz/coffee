@@ -32,38 +32,66 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_dbms_GuardConnection_hpp
-#define __wepa_dbms_GuardConnection_hpp
 
-#include <wepa/adt/RuntimeException.hpp>
-#include <wepa/dbms/ResultCode.hpp>
+#include <wepa/dbms/Statement.hpp>
+#include <wepa/dbms/GuardStatement.hpp>
+#include <wepa/dbms/GuardConnection.hpp>
 
-namespace wepa {
-namespace dbms {
+using namespace wepa;
 
-class Connection;
-class GuardStatement;
-
-class GuardConnection {
-public:
-   GuardConnection (Connection&) throw (adt::RuntimeException);
-   GuardConnection (Connection*) throw (adt::RuntimeException);
-   ~GuardConnection ();
-
-   int getCountLinkedStatement () const noexcept { return m_countLinkedStatement; }
-
-private:
-   Connection& m_connection;
-   int m_countLinkedStatement;
-
-   void linkStatement () noexcept { m_countLinkedStatement ++; }
-   void unlinkStatement () noexcept { m_countLinkedStatement --; }
-
-   ResultCode execute (Statement& statement) throw (adt::RuntimeException, DatabaseException);
-
-   friend class GuardStatement;
-};
-}
+dbms::GuardStatement::GuardStatement(GuardConnection& guardConnection, Statement& statement)  throw (adt::RuntimeException) :
+   m_guardConnection (guardConnection),
+   m_statement (statement)
+{
+   guardConnection.linkStatement();
+   statement.lock();
 }
 
-#endif
+dbms::GuardStatement::GuardStatement(GuardConnection& guardConnection, Statement* statement) throw (adt::RuntimeException) :
+   m_guardConnection (guardConnection),
+   m_statement (*statement)
+{
+   if (statement == NULL)
+      WEPA_THROW_EXCEPTION("Statement can not be NULL");
+
+   guardConnection.linkStatement();
+
+   statement->lock();
+}
+
+dbms::GuardStatement::~GuardStatement()
+{
+   m_statement.unlock();
+   m_guardConnection.unlinkStatement();
+}
+
+dbms::datatype::Abstract& dbms::GuardStatement::getInputData (const int pos)
+   throw (adt::RuntimeException)
+{
+   return m_statement.getInputData(pos);
+}
+
+const dbms::datatype::Abstract& dbms::GuardStatement::getOutputData (const int pos) const
+   throw (adt::RuntimeException)
+{
+   return m_statement.getOutputData(pos);
+}
+
+dbms::ResultCode dbms::GuardStatement::execute ()
+   throw (adt::RuntimeException, DatabaseException)
+{
+   return m_guardConnection.execute (m_statement);
+}
+
+bool dbms::GuardStatement::fetch ()
+   throw (adt::RuntimeException, DatabaseException)
+{
+   return m_statement.fetch();
+}
+
+void dbms::GuardStatement::setRequiresCommit (const bool requiresCommit) noexcept
+{
+   m_statement.setRequiresCommit(requiresCommit);
+}
+
+

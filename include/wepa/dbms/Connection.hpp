@@ -74,6 +74,8 @@ public:
       return result;
    }
 
+   operator adt::StreamString () const noexcept { return asString (); }
+
    /**
       Devuelve una cadena con la informacion referente a esta instancia.
       @return Una cadena con la informacion referente a esta instancia.
@@ -91,10 +93,6 @@ public:
    Connection& operator= (const Connection&) = delete;
 
 protected:
-   /**
-     Instancia de la base de datos asociada a esta conexion.
-     Coincidiria con la indicada en el constructor.
-   */
    Database& m_dbmsDatabase;
    std::string m_user; /**< Nombre del usuario */
    std::string m_password; /**< Clave de acceso del usuario. */
@@ -151,25 +149,7 @@ protected:
             connection.execute (someStatement);
       \endcode
    */
-   ResultCode execute (Statement* statement) throw (adt::RuntimeException, DatabaseException);
-
-   /**
-      Ejecuta la sentencia recibida como parametro. Si la sentencia no tiene variables de salida consideraria
-      que es un comando \em update, \em insert o \em delete, lo cual, implica la invocacion automatica a los
-      #commit o #rollback cuando termine la seccion critica de esta conexion.
-
-      \param statement Sentencia que vamos a ejecuta
-
-      \return La estructura con el resultado de la ejecucion de la sentencia.
-
-      \warning La invocacion a este metodo debera hacerse con una seccion critica activada sobre la
-      esta conexion, por ejemplo:
-      \code
-            Guard guard (connection);
-            connection.execute (someStatement);
-      \endcode
-   */
-   ResultCode execute (Statement& statement) throw (adt::RuntimeException, DatabaseException) { return execute (&statement); }
+   ResultCode execute (Statement& statement) throw (adt::RuntimeException, DatabaseException);
 
    /**
       Metodo que fija los cambios realizados en la ejecucion de los comandos SQL.

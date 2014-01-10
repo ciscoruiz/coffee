@@ -50,6 +50,7 @@
 #include <wepa/dbms/Statement.hpp>
 #include <wepa/dbms/Connection.hpp>
 #include <wepa/dbms/GuardConnection.hpp>
+#include <wepa/dbms/GuardStatement.hpp>
 
 #include <wepa/dbms/datatype/Integer.hpp>
 #include <wepa/dbms/datatype/String.hpp>
@@ -74,7 +75,7 @@ typedef std::map <int, MyRecord> Container;
 
 class MyApplication : public app::Application {
 public:
-   MyApplication ();
+   MyApplication (const char* title);
 
    void disableTermination () noexcept { m_termination.lock (); }
    void operator ()();
@@ -252,7 +253,7 @@ using namespace wepa;
 using namespace wepa::dbms;
 
 
-test::MyApplication::MyApplication () : app::Application ("MyApp", "the application", "0.0")
+test::MyApplication::MyApplication (const char* title) : app::Application ("MyApp", title, "0.0")
 {
    logger::Logger::initialize(new logger::TtyWriter);
 }
@@ -420,7 +421,7 @@ void test::MyConnection::do_rollback ()
 
 BOOST_AUTO_TEST_CASE (dbms_define_structure)
 {
-   test::MyApplication application;
+   test::MyApplication application ("dbms_define_structure");
 
    test::MyDatabase database (application);
 
@@ -446,18 +447,67 @@ BOOST_AUTO_TEST_CASE (dbms_define_structure)
    BOOST_REQUIRE_THROW (database.findStatement("zzzz"), adt::RuntimeException);
 }
 
+BOOST_AUTO_TEST_CASE (dbms_link_guards)
+{
+   test::MyApplication application ("dbms_link_guards");
+
+   test::MyDatabase database (application);
+
+   dbms::Connection* conn0;
+   dbms::Statement* st0;
+   dbms::Statement* st1;
+
+   BOOST_REQUIRE_NO_THROW(conn0 = database.createConnection("0", "0", "0"));
+   BOOST_REQUIRE_NO_THROW(st0 = database.createStatement("zero", "write"));
+   BOOST_REQUIRE_NO_THROW(st1= database.createStatement("one", "write"));
+
+   application.disableTermination();
+
+   std::thread tr (std::ref (application));
+   usleep (500);
+
+   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
+
+   if (true) {
+      dbms::GuardConnection guardConnection (conn0);
+
+      BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 0);
+
+      if (true) {
+         dbms::GuardStatement guardSt0 (guardConnection, st0);
+
+         BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 1);
+
+         if (true) {
+            dbms::GuardStatement guardSt1 (guardConnection, st1);
+            BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 2);
+         }
+
+         BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 1);
+      }
+
+      BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 0);
+   }
+
+   LOG_DEBUG ("Enables termination");
+   application.enableTermination();
+
+   tr.join ();
+}
+
 BOOST_AUTO_TEST_CASE (dbms_write_and_read_and_delete)
 {
-   test::MyApplication application;
+   test::MyApplication application ("dbms_write_and_read_and_delete");
 
    test::MyDatabase database (application);
 
    application.disableTermination();
 
    test::MyConnection* conn0 = static_cast <test::MyConnection*> (database.createConnection("0", "0", "0"));
-   dbms::Statement* writer = database.createStatement("the_write", "write");
-   dbms::Statement* reader = database.createStatement("the_read", "read");
-   dbms::Statement* eraser = database.createStatement("the_erase", "delete");
+   dbms::Statement* stWriter = database.createStatement("the_write", "write");
+   dbms::Statement* stReader = database.createStatement("the_read", "read");
+   dbms::Statement* stEraser = database.createStatement("the_erase", "delete");
    ResultCode resultCode;
 
    std::thread tr (std::ref (application));
@@ -469,35 +519,38 @@ BOOST_AUTO_TEST_CASE (dbms_write_and_read_and_delete)
    if (true) {
       try {
          dbms::GuardConnection guard (conn0);
+         dbms::GuardStatement writer (guard, stWriter);
 
-         BOOST_REQUIRE_THROW(writer->getInputData(10), adt::RuntimeException);
+         BOOST_REQUIRE_EQUAL (guard.getCountLinkedStatement(), 1);
 
-         wepa_datatype_downcast(datatype::Integer, writer->getInputData(0)).setValue (2);
-         wepa_datatype_downcast(datatype::String, writer->getInputData(1)).setValue ("the 2");
-         wepa_datatype_downcast(datatype::Integer, writer->getInputData(2)).setValue (2 * 2);
-         wepa_datatype_downcast(datatype::Float, writer->getInputData(3)).setValue (2.2);
-         wepa_datatype_downcast(datatype::Date, writer->getInputData(4)).setValue ("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
-         guard.execute(writer);
+         BOOST_REQUIRE_THROW(writer.getInputData(10), adt::RuntimeException);
+
+         wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (2);
+         wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 2");
+         wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (2 * 2);
+         wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (2.2);
+         wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+         writer.execute ();
 
          BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
          BOOST_REQUIRE_EQUAL (database.container_size(), 0);
 
-         wepa_datatype_downcast(datatype::Integer, writer->getInputData(0)).setValue (5);
-         wepa_datatype_downcast(datatype::String, writer->getInputData(1)).setValue ("the 5");
-         wepa_datatype_downcast(datatype::Integer, writer->getInputData(2)).setValue (5 * 5);
-         wepa_datatype_downcast(datatype::Float, writer->getInputData(3)).setValue (5.5);
-         wepa_datatype_downcast(datatype::Date, writer->getInputData(4)).setValue ("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
-         guard.execute(writer);
+         wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (5);
+         wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 5");
+         wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (5 * 5);
+         wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (5.5);
+         wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
+         writer.execute ();
 
          BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
          BOOST_REQUIRE_EQUAL (database.container_size(), 0);
 
-         wepa_datatype_downcast(datatype::Integer, writer->getInputData(0)).setValue (6);
-         wepa_datatype_downcast(datatype::String, writer->getInputData(1)).setValue ("the 6");
-         wepa_datatype_downcast(datatype::Integer, writer->getInputData(2)).setValue (6 * 6);
-         wepa_datatype_downcast(datatype::Float, writer->getInputData(3)).setValue (6.6);
-         wepa_datatype_downcast(datatype::Date, writer->getInputData(4)).setValue ("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
-         resultCode = guard.execute(writer);
+         wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (6);
+         wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 6");
+         wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (6 * 6);
+         wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (6.6);
+         wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
+         resultCode = writer.execute ();
 
          BOOST_REQUIRE_EQUAL (resultCode.getErrorCode(), test::MyDatabase::Successful);
          BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
@@ -516,17 +569,20 @@ BOOST_AUTO_TEST_CASE (dbms_write_and_read_and_delete)
    if (true) {
       dbms::GuardConnection guard (conn0);
 
-      datatype::Integer& id = wepa_datatype_downcast(datatype::Integer, reader->getInputData(0));
-      const datatype::Integer& integer = wepa_datatype_downcast(datatype::Integer, reader->getOutputData(1));
+      dbms::GuardStatement reader (guard, stReader);
+      BOOST_REQUIRE_EQUAL (guard.getCountLinkedStatement(), 1);
+
+      datatype::Integer& id = wepa_datatype_downcast(datatype::Integer, reader.getInputData(0));
+      const datatype::Integer& integer = wepa_datatype_downcast(datatype::Integer, reader.getOutputData(1));
 
       id.setValue(5);
-      resultCode = guard.execute(reader);
+      resultCode = reader.execute ();
 
       BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
 
       int counter = 0;
 
-      while (reader->fetch() == true) {
+      while (reader.fetch() == true) {
          ++ counter;
          BOOST_REQUIRE_EQUAL (id.getValue () * id.getValue (), integer.getValue());
       }
@@ -534,10 +590,10 @@ BOOST_AUTO_TEST_CASE (dbms_write_and_read_and_delete)
       BOOST_REQUIRE_EQUAL (counter, 2);
 
       id.setValue (1111);
-      resultCode = guard.execute(reader);
+      resultCode = reader.execute ();
       BOOST_REQUIRE_EQUAL (resultCode.successful(), false);
       BOOST_REQUIRE_EQUAL (resultCode.notFound(), true);
-      BOOST_REQUIRE_EQUAL (reader->fetch(), false);
+      BOOST_REQUIRE_EQUAL (reader.fetch(), false);
    }
 
    BOOST_REQUIRE_EQUAL (database.container_size(), 3);
@@ -546,17 +602,19 @@ BOOST_AUTO_TEST_CASE (dbms_write_and_read_and_delete)
    if (true) {
       dbms::GuardConnection guard (conn0);
 
-      datatype::Integer& id = wepa_datatype_downcast(datatype::Integer, eraser->getInputData(0));
+      dbms::GuardStatement eraser (guard, stEraser);
+
+      datatype::Integer& id = wepa_datatype_downcast(datatype::Integer, eraser.getInputData(0));
 
       id.setValue (6);
-      resultCode = guard.execute(eraser);
+      resultCode = eraser.execute();
       BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL (database.container_size(), 3);
 
       id.setValue (2);
-      resultCode = guard.execute(eraser);
+      resultCode = eraser.execute();
       BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
@@ -574,7 +632,7 @@ BOOST_AUTO_TEST_CASE (dbms_write_and_read_and_delete)
 
 BOOST_AUTO_TEST_CASE (dbms_write_rollback)
 {
-   test::MyApplication application;
+   test::MyApplication application ("dbms_write_rollback");
 
    test::MyDatabase database (application);
 
@@ -593,35 +651,38 @@ BOOST_AUTO_TEST_CASE (dbms_write_rollback)
 
    if (true) {
       dbms::GuardConnection guard (conn0);
+      dbms::GuardStatement writer (guard, rollbackWriter);
 
-      BOOST_REQUIRE_THROW(rollbackWriter->getInputData(10), adt::RuntimeException);
+      BOOST_REQUIRE_EQUAL (guard.getCountLinkedStatement(), 1);
 
-      wepa_datatype_downcast(datatype::Integer, rollbackWriter->getInputData(0)).setValue (2);
-      wepa_datatype_downcast(datatype::String, rollbackWriter->getInputData(1)).setValue ("the 2");
-      wepa_datatype_downcast(datatype::Integer, rollbackWriter->getInputData(2)).setValue (2 * 2);
-      wepa_datatype_downcast(datatype::Float, rollbackWriter->getInputData(3)).setValue (2.2);
-      wepa_datatype_downcast(datatype::Date, rollbackWriter->getInputData(4)).setValue ("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
-      guard.execute(rollbackWriter);
+      BOOST_REQUIRE_THROW(writer.getInputData(10), adt::RuntimeException);
+
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (2);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 2");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (2 * 2);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (2.2);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+      writer.execute ();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL (database.container_size(), 0);
 
-      wepa_datatype_downcast(datatype::Integer, rollbackWriter->getInputData(0)).setValue (5);
-      wepa_datatype_downcast(datatype::String, rollbackWriter->getInputData(1)).setValue ("the 5");
-      wepa_datatype_downcast(datatype::Integer, rollbackWriter->getInputData(2)).setValue (5 * 5);
-      wepa_datatype_downcast(datatype::Float, rollbackWriter->getInputData(3)).setValue (5.5);
-      wepa_datatype_downcast(datatype::Date, rollbackWriter->getInputData(4)).setValue ("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
-      guard.execute(rollbackWriter);
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (5);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 5");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (5 * 5);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (5.5);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
+      writer.execute ();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
       BOOST_REQUIRE_EQUAL (database.container_size(), 0);
 
-      wepa_datatype_downcast(datatype::Integer, rollbackWriter->getInputData(0)).setValue (6);
-      wepa_datatype_downcast(datatype::String, rollbackWriter->getInputData(1)).setValue ("the 6");
-      wepa_datatype_downcast(datatype::Integer, rollbackWriter->getInputData(2)).setValue (6 * 6);
-      wepa_datatype_downcast(datatype::Float, rollbackWriter->getInputData(3)).setValue (6.6);
-      wepa_datatype_downcast(datatype::Date, rollbackWriter->getInputData(4)).setValue ("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
-      resultCode = guard.execute(rollbackWriter);
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (6);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 6");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (6 * 6);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (6.6);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
+      resultCode = writer.execute ();
 
       BOOST_REQUIRE_EQUAL (resultCode.getErrorCode(), test::MyDatabase::Successful);
       BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
@@ -636,24 +697,25 @@ BOOST_AUTO_TEST_CASE (dbms_write_rollback)
 
    if (true) {
       dbms::GuardConnection guard (conn0);
+      dbms::GuardStatement writer (guard, rollbackWriter);
 
-      wepa_datatype_downcast(datatype::Integer, rollbackWriter->getInputData(0)).setValue (8);
-      wepa_datatype_downcast(datatype::String, rollbackWriter->getInputData(1)).setValue ("the 8");
-      wepa_datatype_downcast(datatype::Integer, rollbackWriter->getInputData(2)).setValue (8 * 8);
-      wepa_datatype_downcast(datatype::Float, rollbackWriter->getInputData(3)).setValue (8.8);
-      wepa_datatype_downcast(datatype::Date, rollbackWriter->getInputData(4)).setValue ("8/8/2008T08:08:08", "%d/%m/%YT%H:%M");
-      guard.execute(rollbackWriter);
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (8);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 8");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (8 * 8);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (8.8);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("8/8/2008T08:08:08", "%d/%m/%YT%H:%M");
+      writer.execute ();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL (database.container_size(), 3);
 
-      wepa_datatype_downcast(datatype::Integer, rollbackWriter->getInputData(0)).setValue (666);
-      wepa_datatype_downcast(datatype::String, rollbackWriter->getInputData(1)).setValue ("the 666");
-      wepa_datatype_downcast(datatype::Integer, rollbackWriter->getInputData(2)).setValue (666 * 666);
-      wepa_datatype_downcast(datatype::Float, rollbackWriter->getInputData(3)).setValue (3.3);
-      wepa_datatype_downcast(datatype::Date, rollbackWriter->getInputData(4)).setValue ("3/3/2003T03:03:03", "%d/%m/%YT%H:%M");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (666);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 666");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (666 * 666);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (3.3);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("3/3/2003T03:03:03", "%d/%m/%YT%H:%M");
 
-      BOOST_REQUIRE_THROW(guard.execute(rollbackWriter), dbms::DatabaseException);
+      BOOST_REQUIRE_THROW(writer.execute (), dbms::DatabaseException);
    }
 
    BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
@@ -663,24 +725,25 @@ BOOST_AUTO_TEST_CASE (dbms_write_rollback)
 
    if (true) {
       dbms::GuardConnection guard (conn0);
+      dbms::GuardStatement writer (guard, noRollbackWriter);
 
-      wepa_datatype_downcast(datatype::Integer, noRollbackWriter->getInputData(0)).setValue (8);
-      wepa_datatype_downcast(datatype::String, noRollbackWriter->getInputData(1)).setValue ("the 8");
-      wepa_datatype_downcast(datatype::Integer, noRollbackWriter->getInputData(2)).setValue (8 * 8);
-      wepa_datatype_downcast(datatype::Float, noRollbackWriter->getInputData(3)).setValue (8.8);
-      wepa_datatype_downcast(datatype::Date, noRollbackWriter->getInputData(4)).setValue ("8/8/2008T08:08:08", "%d/%m/%YT%H:%M");
-      guard.execute(noRollbackWriter);
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (8);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 8");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (8 * 8);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (8.8);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("8/8/2008T08:08:08", "%d/%m/%YT%H:%M");
+      writer.execute ();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL (database.container_size(), 3);
 
-      wepa_datatype_downcast(datatype::Integer, noRollbackWriter->getInputData(0)).setValue (666);
-      wepa_datatype_downcast(datatype::String, noRollbackWriter->getInputData(1)).setValue ("the 666");
-      wepa_datatype_downcast(datatype::Integer, noRollbackWriter->getInputData(2)).setValue (666 * 666);
-      wepa_datatype_downcast(datatype::Float, noRollbackWriter->getInputData(3)).setValue (3.3);
-      wepa_datatype_downcast(datatype::Date, noRollbackWriter->getInputData(4)).setValue ("3/3/2003T03:03:03", "%d/%m/%YT%H:%M");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (666);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 666");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (666 * 666);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (3.3);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("3/3/2003T03:03:03", "%d/%m/%YT%H:%M");
 
-      BOOST_REQUIRE_NO_THROW(resultCode = guard.execute(noRollbackWriter));
+      BOOST_REQUIRE_NO_THROW(resultCode = writer.execute ());
 
       BOOST_REQUIRE_EQUAL (resultCode.successful(), false);
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
@@ -700,14 +763,14 @@ BOOST_AUTO_TEST_CASE (dbms_write_rollback)
 
 BOOST_AUTO_TEST_CASE (dbms_erase_rollback)
 {
-   test::MyApplication application;
+   test::MyApplication application ("dbms_erase_rollback");
 
    test::MyDatabase database (application);
 
    application.disableTermination();
 
    test::MyConnection* conn0 = static_cast <test::MyConnection*> (database.createConnection("0", "0", "0"));
-   dbms::Statement* writer = database.createStatement("writer", "write");
+   dbms::Statement* stWriter = database.createStatement("writer", "write");
    dbms::Statement* rollbackEraser = database.createStatement("rollback_eraser", "delete");
    dbms::Statement* noRollbackEraser = database.createStatement("no_rollback_eraser", "delete", dbms::ActionOnError::Ignore);
    ResultCode resultCode;
@@ -720,35 +783,38 @@ BOOST_AUTO_TEST_CASE (dbms_erase_rollback)
 
    if (true) {
       dbms::GuardConnection guard (conn0);
+      dbms::GuardStatement writer (guard, stWriter);
 
-      BOOST_REQUIRE_THROW(writer->getInputData(10), adt::RuntimeException);
+      BOOST_REQUIRE_EQUAL (guard.getCountLinkedStatement(), 1);
 
-      wepa_datatype_downcast(datatype::Integer, writer->getInputData(0)).setValue (2);
-      wepa_datatype_downcast(datatype::String, writer->getInputData(1)).setValue ("the 2");
-      wepa_datatype_downcast(datatype::Integer, writer->getInputData(2)).setValue (2 * 2);
-      wepa_datatype_downcast(datatype::Float, writer->getInputData(3)).setValue (2.2);
-      wepa_datatype_downcast(datatype::Date, writer->getInputData(4)).setValue ("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
-      guard.execute(writer);
+      BOOST_REQUIRE_THROW(writer.getInputData(10), adt::RuntimeException);
+
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (2);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 2");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (2 * 2);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (2.2);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+      writer.execute ();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL (database.container_size(), 0);
 
-      wepa_datatype_downcast(datatype::Integer, writer->getInputData(0)).setValue (5);
-      wepa_datatype_downcast(datatype::String, writer->getInputData(1)).setValue ("the 5");
-      wepa_datatype_downcast(datatype::Integer, writer->getInputData(2)).setValue (5 * 5);
-      wepa_datatype_downcast(datatype::Float, writer->getInputData(3)).setValue (5.5);
-      wepa_datatype_downcast(datatype::Date, writer->getInputData(4)).setValue ("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
-      guard.execute(writer);
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (5);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 5");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (5 * 5);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (5.5);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
+      writer.execute ();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
       BOOST_REQUIRE_EQUAL (database.container_size(), 0);
 
-      wepa_datatype_downcast(datatype::Integer, writer->getInputData(0)).setValue (6);
-      wepa_datatype_downcast(datatype::String, writer->getInputData(1)).setValue ("the 6");
-      wepa_datatype_downcast(datatype::Integer, writer->getInputData(2)).setValue (6 * 6);
-      wepa_datatype_downcast(datatype::Float, writer->getInputData(3)).setValue (6.6);
-      wepa_datatype_downcast(datatype::Date, writer->getInputData(4)).setValue ("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
-      resultCode = guard.execute(writer);
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (6);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 6");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (6 * 6);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (6.6);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
+      resultCode = writer.execute ();
 
       BOOST_REQUIRE_EQUAL (resultCode.getErrorCode(), test::MyDatabase::Successful);
       BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
@@ -763,15 +829,16 @@ BOOST_AUTO_TEST_CASE (dbms_erase_rollback)
 
    if (true) {
       dbms::GuardConnection guard (conn0);
+      dbms::GuardStatement eraser (guard, rollbackEraser);
 
-      wepa_datatype_downcast(datatype::Integer, rollbackEraser->getInputData(0)).setValue (6);
-      guard.execute(rollbackEraser);
+      wepa_datatype_downcast(datatype::Integer, eraser.getInputData(0)).setValue (6);
+      eraser.execute ();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL (database.container_size(), 3);
 
-      wepa_datatype_downcast(datatype::Integer, rollbackEraser->getInputData(0)).setValue (666);
-      BOOST_REQUIRE_THROW(guard.execute(rollbackEraser), dbms::DatabaseException);
+      wepa_datatype_downcast(datatype::Integer, eraser.getInputData(0)).setValue (666);
+      BOOST_REQUIRE_THROW(eraser.execute (), dbms::DatabaseException);
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL (database.container_size(), 3);
@@ -784,15 +851,16 @@ BOOST_AUTO_TEST_CASE (dbms_erase_rollback)
 
    if (true) {
       dbms::GuardConnection guard (conn0);
+      dbms::GuardStatement eraser (guard, noRollbackEraser);
 
-      wepa_datatype_downcast(datatype::Integer, noRollbackEraser->getInputData(0)).setValue (2);
-      guard.execute(noRollbackEraser);
+      wepa_datatype_downcast(datatype::Integer, eraser.getInputData(0)).setValue (2);
+      eraser.execute ();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL (database.container_size(), 3);
 
-      wepa_datatype_downcast(datatype::Integer, noRollbackEraser->getInputData(0)).setValue (666);
-      BOOST_REQUIRE_NO_THROW(resultCode = guard.execute(noRollbackEraser));
+      wepa_datatype_downcast(datatype::Integer, eraser.getInputData(0)).setValue (666);
+      BOOST_REQUIRE_NO_THROW(resultCode = eraser.execute ());
 
       BOOST_REQUIRE_EQUAL (resultCode.successful(), false);
       BOOST_REQUIRE_EQUAL (resultCode.notFound(), true);

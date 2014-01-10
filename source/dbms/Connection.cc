@@ -81,7 +81,7 @@ dbms::ResultCode dbms::Connection::execute (Statement& statement)
 
       LOG_CRITICAL (asString () << " | " << statement << " | " << result);
 
-      m_dbmsDatabase.breakConnection (*this);
+      m_dbmsDatabase.recoverConnection (*this);
       stop = true;
    }
 
@@ -100,7 +100,7 @@ dbms::ResultCode dbms::Connection::execute (Statement& statement)
       }
       else {
          m_commitPending ++;
-         if (m_maxCommitPending > 0 && m_commitPending > m_maxCommitPending)  {
+         if (m_maxCommitPending > 0 && m_commitPending >= m_maxCommitPending)  {
             commit ();
          }
       }
@@ -128,7 +128,7 @@ void dbms::Connection::commit ()
 void dbms::Connection::rollback () 
    noexcept
 {
-   LOG_WARN (asString ());
+   LOG_WARN (asString () << " | State before rollback");
 
    if (isAvailable () == false) {
       LOG_WARN (asString () << " | Connection is not available");

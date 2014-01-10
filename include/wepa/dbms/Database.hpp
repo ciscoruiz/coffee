@@ -236,7 +236,7 @@ protected:
       ser invocado por el programador.
       \param connection Instancia de la conexion en la que hemos detectado el fallo.
    */
-   void breakConnection (Connection& connection) throw (adt::RuntimeException);
+   void recoverConnection (Connection& connection) throw (adt::RuntimeException);
 
    /**
       Inicializa las conexiones definidas sobre esta base de datos. Este metodo se invocaria

@@ -50,6 +50,9 @@ public:
    GuardConnection (Connection*) throw (adt::RuntimeException);
    ~GuardConnection ();
 
+   int setMaxCommitPending (const int maxCommitPending) noexcept;
+   void clearMaxCommitPending () noexcept;
+
    int getCountLinkedStatement () const noexcept { return m_countLinkedStatement; }
 
 private:

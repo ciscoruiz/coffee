@@ -51,6 +51,7 @@
 #include <wepa/dbms/Connection.hpp>
 #include <wepa/dbms/GuardConnection.hpp>
 #include <wepa/dbms/GuardStatement.hpp>
+#include <wepa/dbms/StatementTranslator.hpp>
 
 #include <wepa/dbms/datatype/Integer.hpp>
 #include <wepa/dbms/datatype/String.hpp>
@@ -163,13 +164,15 @@ public:
       Connection (database, name, user, password),
       m_container (NULL)
    {
-      m_commitCounter = m_rollbackCounter = 0;
+      m_commitCounter = m_rollbackCounter = m_openCounter = m_closeCounter = 0;
    }
 
    int operation_size () const noexcept { return m_operations.size (); }
 
    unsigned int getCommitCounter () const noexcept { return m_commitCounter; }
    unsigned int getRollbackCounter () const noexcept { return m_rollbackCounter; }
+   unsigned int getOpenCounter () const noexcept { return m_openCounter; }
+   unsigned int getCloseCounter () const noexcept { return m_closeCounter; }
 
    adt::StreamString asString () const noexcept {
       adt::StreamString result ("MyConnection {");
@@ -183,15 +186,18 @@ private:
    enum OpCode {  Write, Delete };
    typedef std::pair <OpCode, MyRecord> Operation;
    typedef std::vector <Operation> Operations;
+
    unsigned int m_commitCounter;
    unsigned int m_rollbackCounter;
+   unsigned int m_openCounter;
+   unsigned int m_closeCounter;
 
    Container* m_container;
    Operations m_operations;
 
    bool isAvailable () const noexcept { return m_container != NULL; }
    void open () throw (DatabaseException);
-   void close () noexcept { m_container = NULL; }
+   void close () noexcept;
    void do_commit () noexcept ;
    void do_rollback () noexcept;
 
@@ -218,7 +224,7 @@ private:
    Statement* allocateStatement (const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
       throw (adt::RuntimeException)
    {
-      if (expression == "read")
+      if (expression == "read" || expression == "READ")
          return new MyReadStatement (std::ref (*this), name, expression.c_str(), actionOnError);
 
       if (expression == "write" || expression == "delete")
@@ -243,6 +249,17 @@ private:
 
    friend class MyConnection;
 
+};
+
+class MyTranslator : public dbms::StatementTranslator {
+public:
+   MyTranslator () : dbms::StatementTranslator ("MyTranslator"), m_buffer (NULL) {;}
+   ~MyTranslator () { if (m_buffer != NULL) free (m_buffer); }
+
+private:
+   char* m_buffer;
+
+   const char* apply (const char* statement) throw (adt::RuntimeException);
 };
 
 }
@@ -374,10 +391,17 @@ dbms::ResultCode test::MyWriteStatement::do_execute (dbms::Connection* connectio
 void test::MyConnection::open ()
    throw (DatabaseException)
 {
-   LOG_THIS_METHOD();
-
    m_operations.clear ();
    m_container = &reinterpret_cast <MyDatabase&> (getDatabase()).m_container;
+   ++ m_openCounter;
+   LOG_DEBUG ("OpenCounter=" << m_openCounter);
+}
+
+void test::MyConnection::close () noexcept
+{
+   ++ m_closeCounter;
+   LOG_DEBUG ("CloseCounter=" << m_closeCounter);
+   m_container = NULL;
 }
 
 void test::MyConnection::do_commit () noexcept
@@ -419,6 +443,25 @@ void test::MyConnection::do_rollback ()
    m_operations.clear ();
 }
 
+const char* test::MyTranslator::apply (const char* statement)
+   throw (adt::RuntimeException)
+{
+   if (m_buffer != NULL) {
+      free (m_buffer);
+      m_buffer = NULL;
+   }
+
+   m_buffer = strdup (statement);
+   char* ww = m_buffer;
+
+   while (*ww) {
+      *ww = toupper(*ww);
+      ++ ww;
+   }
+
+   return m_buffer;
+}
+
 BOOST_AUTO_TEST_CASE (dbms_define_structure)
 {
    test::MyApplication application ("dbms_define_structure");
@@ -449,6 +492,23 @@ BOOST_AUTO_TEST_CASE (dbms_define_structure)
    adt::StreamString xxx = conn;
 
    BOOST_REQUIRE_NE (xxx.find ("CommitCounter"), std::string::npos);
+
+}
+
+BOOST_AUTO_TEST_CASE (dbms_translator)
+{
+   test::MyApplication application ("dbms_define_structure");
+
+   test::MyDatabase database (application);
+   test::MyTranslator translator;
+
+   dbms::Statement* st0 = database.createStatement("zero", "read");
+   BOOST_REQUIRE_EQUAL (st0->getExpression (), "read");
+
+   database.setStatementTranslator(&translator);
+
+   dbms::Statement* st1 = database.createStatement("one", "read");
+   BOOST_REQUIRE_EQUAL (st1->getExpression (), "READ");
 }
 
 BOOST_AUTO_TEST_CASE (dbms_link_guards)
@@ -876,6 +936,74 @@ BOOST_AUTO_TEST_CASE (dbms_erase_rollback)
    BOOST_REQUIRE_EQUAL (database.container_size(), 2);
    BOOST_REQUIRE_EQUAL (conn0->getCommitCounter(), 2);
    BOOST_REQUIRE_EQUAL (conn0->getRollbackCounter(), 1);
+
+   LOG_DEBUG ("Enables termination");
+   application.enableTermination();
+
+   tr.join ();
+}
+
+BOOST_AUTO_TEST_CASE (dbms_set_max_commit)
+{
+   test::MyApplication application ("dbms_write_and_read_and_delete");
+
+   test::MyDatabase database (application);
+
+   application.disableTermination();
+
+   test::MyConnection* conn0 = static_cast <test::MyConnection*> (database.createConnection("0", "0", "0"));
+   dbms::Statement* stWriter = database.createStatement("the_write", "write");
+   dbms::Statement* stReader = database.createStatement("the_read", "read");
+
+   std::thread tr (std::ref (application));
+
+   while (application.isRunning () == false);
+
+   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
+
+   if (true) {
+      GuardConnection connection (conn0);
+      GuardStatement writer (connection, stWriter);
+
+      BOOST_REQUIRE_EQUAL (connection.setMaxCommitPending(5), 0);
+
+      for (int ii = 1; ii <= 15; ++ ii) {
+         wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (ii);
+         wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the ii");
+         wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (ii * ii);
+         wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (100 / ii);
+         wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue (adt::Second (ii));
+         BOOST_REQUIRE_NO_THROW(writer.execute ());
+      }
+
+      BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
+      BOOST_REQUIRE_EQUAL (conn0->getCommitCounter(), 3);
+      BOOST_REQUIRE_EQUAL (conn0->getRollbackCounter(), 0);
+   }
+
+   BOOST_REQUIRE_EQUAL (database.container_size(), 15);
+
+   if (true) {
+      GuardConnection connection (conn0);
+      GuardStatement writer (connection, stWriter);
+
+      connection.clearMaxCommitPending();
+
+      for (int ii = 16; ii <= 30; ++ ii) {
+         wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (ii);
+         wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the ii");
+         wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (ii * ii);
+         wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (100 / ii);
+         wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue (adt::Second (ii));
+         BOOST_REQUIRE_NO_THROW(writer.execute ());
+      }
+   }
+
+   BOOST_REQUIRE_EQUAL (conn0->getCommitCounter(), 4);
+   BOOST_REQUIRE_EQUAL (conn0->getRollbackCounter(), 0);
+   BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL (database.container_size(), 30);
 
    LOG_DEBUG ("Enables termination");
    application.enableTermination();

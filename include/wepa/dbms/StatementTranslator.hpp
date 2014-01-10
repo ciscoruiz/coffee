@@ -67,8 +67,7 @@ class Database;
  * 
  * \see wepa::dbms::Database::setStatementTranslator
  *
- * @author frr@tid.es cisco.tierra@gmail.com
- * \since NemesisRD 1.7.4
+ * @author cisco.tierra@gmail.com
  */
 class StatementTranslator {
 public:

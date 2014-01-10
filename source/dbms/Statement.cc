@@ -86,7 +86,7 @@ void Statement::prepare (Connection* connection)
    }
 }
 
-ResultCode Statement::execute (Connection* connection)
+ResultCode Statement::execute (Connection& connection)
    throw (adt::RuntimeException, DatabaseException)
 {
    LOG_THIS_METHOD();

@@ -70,19 +70,12 @@ dbms::ResultCode dbms::Connection::execute (Statement& statement)
       WEPA_THROW_EXCEPTION(asString () << " | This connection must execute a previous ROLLBACK's");
    }
 
-   ResultCode result;
-   bool stop = false;
+   ResultCode result = statement.execute (*this);
 
-   while (stop == false) {
-      result = statement.execute (this);
-
-      if (result.lostConnection () == false)
-         break;
-
-      LOG_CRITICAL (asString () << " | " << statement << " | " << result);
-
+   if (result.lostConnection () == true) {
+      LOG_CRITICAL ("Detected lost connection " << asString () << " while running '" << statement.getName ()  << "' | " << result);
       m_dbmsDatabase.recoverConnection (*this);
-      stop = true;
+      WEPA_THROW_NAME_DB_EXCEPTION(statement.getName (), result);
    }
 
    statement.measureTiming (delay);
@@ -91,18 +84,19 @@ dbms::ResultCode dbms::Connection::execute (Statement& statement)
       LOG_ERROR (asString () << " | " << statement << " | " << result);
    }
 
-   if (statement.requiresCommit () == true) {  // (1)
-      if (result.successful () == false) {
-         if (statement.actionOnError() == ActionOnError::Rollback) {
-            m_rollbackPending = true;
-            WEPA_THROW_NAME_DB_EXCEPTION(statement.getName (), result);
-         }
+   if (statement.requiresCommit () == false)
+      return result;
+
+   if (result.successful () == false) {
+      if (statement.actionOnError() == ActionOnError::Rollback) {
+         m_rollbackPending = true;
+         WEPA_THROW_NAME_DB_EXCEPTION(statement.getName (), result);
       }
-      else {
-         m_commitPending ++;
-         if (m_maxCommitPending > 0 && m_commitPending >= m_maxCommitPending)  {
-            commit ();
-         }
+   }
+   else {
+      m_commitPending ++;
+      if (m_maxCommitPending > 0 && m_commitPending >= m_maxCommitPending)  {
+         commit ();
       }
    }
 

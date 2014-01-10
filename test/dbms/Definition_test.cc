@@ -144,7 +144,7 @@ private:
    int m_index;
 
    void do_prepare (Connection* connection) throw (adt::RuntimeException, DatabaseException) {;}
-   ResultCode do_execute (Connection* connection) throw (adt::RuntimeException, DatabaseException);
+   ResultCode do_execute (Connection& connection) throw (adt::RuntimeException, DatabaseException);
    bool do_fetch () throw (adt::RuntimeException, DatabaseException);
 };
 
@@ -154,7 +154,7 @@ public:
 
 private:
    void do_prepare (Connection* connection) throw (adt::RuntimeException, DatabaseException) {;}
-   ResultCode do_execute (Connection* connection) throw (adt::RuntimeException, DatabaseException);
+   ResultCode do_execute (Connection& connection) throw (adt::RuntimeException, DatabaseException);
    bool do_fetch () throw (adt::RuntimeException, DatabaseException) { return false; }
 };
 
@@ -168,6 +168,9 @@ public:
    }
 
    int operation_size () const noexcept { return m_operations.size (); }
+
+   void manualBreak () noexcept { m_container = NULL; }
+   bool isAvailable () const noexcept { return m_container != NULL; }
 
    unsigned int getCommitCounter () const noexcept { return m_commitCounter; }
    unsigned int getRollbackCounter () const noexcept { return m_rollbackCounter; }
@@ -195,7 +198,6 @@ private:
    Container* m_container;
    Operations m_operations;
 
-   bool isAvailable () const noexcept { return m_container != NULL; }
    void open () throw (DatabaseException);
    void close () noexcept;
    void do_commit () noexcept ;
@@ -308,14 +310,14 @@ test::MyReadStatement::MyReadStatement (Database& database, const char* name, co
    m_binders [4] = this->createBinderOutput(m_time);
 }
 
-dbms::ResultCode test::MyReadStatement::do_execute (dbms::Connection* connection)
+dbms::ResultCode test::MyReadStatement::do_execute (dbms::Connection& connection)
    throw (adt::RuntimeException, DatabaseException)
 {
    LOG_THIS_METHOD();
 
    m_index = 0;
 
-   const MyConnection& _connection (static_cast <MyConnection&> (*connection));
+   const MyConnection& _connection (static_cast <MyConnection&> (connection));
 
    m_selection.clear ();
    for (auto ii : *_connection.m_container) {
@@ -357,15 +359,22 @@ test::MyWriteStatement::MyWriteStatement (Database& database, const char* name, 
    m_binders [4] = this->createBinderInput(m_time);
 }
 
-dbms::ResultCode test::MyWriteStatement::do_execute (dbms::Connection* connection)
+dbms::ResultCode test::MyWriteStatement::do_execute (dbms::Connection& connection)
    throw (adt::RuntimeException, DatabaseException)
 {
    LOG_THIS_METHOD();
 
+   dbms::ResultCode result (getDatabase(), MyDatabase::Successful);
+
+   if (connection.isAvailable() == false) {
+      LOG_DEBUG (connection << " | Connection is not available");
+      result.initialize(MyDatabase::LostConnection, NULL);
+      return result;
+   }
+
    MyConnection::OpCode opCode = (getExpression() == "write") ? MyConnection::Write: MyConnection::Delete;
 
    MyRecord record;
-   dbms::ResultCode result (getDatabase(), MyDatabase::Successful);
 
    record.m_id = static_cast <datatype::Integer&> (m_binders [0]->getData ()).getValue();
 
@@ -383,7 +392,7 @@ dbms::ResultCode test::MyWriteStatement::do_execute (dbms::Connection* connectio
 
    LOG_DEBUG ("ID = " << record.m_id);
 
-   static_cast <MyConnection*> (connection)->m_operations.push_back (MyConnection::Operation (opCode, record));
+   static_cast <MyConnection&> (connection).m_operations.push_back (MyConnection::Operation (opCode, record));
 
    return result;
 }
@@ -945,7 +954,7 @@ BOOST_AUTO_TEST_CASE (dbms_erase_rollback)
 
 BOOST_AUTO_TEST_CASE (dbms_set_max_commit)
 {
-   test::MyApplication application ("dbms_write_and_read_and_delete");
+   test::MyApplication application ("dbms_set_max_commit");
 
    test::MyDatabase database (application);
 
@@ -1004,6 +1013,63 @@ BOOST_AUTO_TEST_CASE (dbms_set_max_commit)
    BOOST_REQUIRE_EQUAL (conn0->getRollbackCounter(), 0);
    BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
    BOOST_REQUIRE_EQUAL (database.container_size(), 30);
+
+   LOG_DEBUG ("Enables termination");
+   application.enableTermination();
+
+   tr.join ();
+}
+
+BOOST_AUTO_TEST_CASE (dbms_break_connection)
+{
+   test::MyApplication application ("dbms_break_connection");
+
+   test::MyDatabase database (application);
+
+   application.disableTermination();
+
+   test::MyConnection* conn0 = static_cast <test::MyConnection*> (database.createConnection("0", "0", "0"));
+   dbms::Statement* stWriter = database.createStatement("the_write", "write");
+
+   std::thread tr (std::ref (application));
+
+   while (application.isRunning () == false);
+
+   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
+
+   if (true) {
+      GuardConnection connection (conn0);
+      GuardStatement writer (connection, stWriter);
+
+      BOOST_REQUIRE_EQUAL (conn0->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL (conn0->getCloseCounter(), 0);
+
+      int ii = 1;
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (ii);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the ii");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (ii * ii);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (100 / ii);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue (adt::Second (ii));
+      BOOST_REQUIRE_NO_THROW(writer.execute ());
+
+      conn0->manualBreak ();
+
+      ii = 2;
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (ii);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the ii");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (ii * ii);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (100 / ii);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue (adt::Second (ii));
+      BOOST_REQUIRE_THROW(writer.execute (), dbms::DatabaseException);
+
+      BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
+      BOOST_REQUIRE_EQUAL (conn0->getOpenCounter(), 2);
+      BOOST_REQUIRE_EQUAL (conn0->getCloseCounter(), 1);
+   }
+
+   BOOST_REQUIRE_EQUAL (conn0->isAvailable(), true);
+   BOOST_REQUIRE_EQUAL (database.container_size(), 0);
 
    LOG_DEBUG ("Enables termination");
    application.enableTermination();

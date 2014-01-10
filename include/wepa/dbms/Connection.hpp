@@ -107,9 +107,7 @@ private:
    virtual void close () noexcept = 0;
 
    friend class Database;
-
    friend class GuardConnection;
-      // lock, unlock. execute, commit, rollback and so on
 };
 
 }

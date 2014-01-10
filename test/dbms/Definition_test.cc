@@ -52,6 +52,7 @@
 #include <wepa/dbms/GuardConnection.hpp>
 #include <wepa/dbms/GuardStatement.hpp>
 #include <wepa/dbms/StatementTranslator.hpp>
+#include <wepa/dbms/FailRecoveryHandler.hpp>
 
 #include <wepa/dbms/datatype/Integer.hpp>
 #include <wepa/dbms/datatype/String.hpp>
@@ -165,12 +166,15 @@ public:
       m_container (NULL)
    {
       m_commitCounter = m_rollbackCounter = m_openCounter = m_closeCounter = 0;
+      m_avoidRecovery = false;
    }
 
    int operation_size () const noexcept { return m_operations.size (); }
 
    void manualBreak () noexcept { m_container = NULL; }
    bool isAvailable () const noexcept { return m_container != NULL; }
+   void avoidRecovery () noexcept { m_avoidRecovery = true; }
+   void clearAvoidRecovery () noexcept { m_avoidRecovery = false; }
 
    unsigned int getCommitCounter () const noexcept { return m_commitCounter; }
    unsigned int getRollbackCounter () const noexcept { return m_rollbackCounter; }
@@ -197,6 +201,7 @@ private:
 
    Container* m_container;
    Operations m_operations;
+   bool m_avoidRecovery;
 
    void open () throw (DatabaseException);
    void close () noexcept;
@@ -211,7 +216,7 @@ class MyDatabase : public Database {
 public:
    enum ErrorCode { NotFound, Successful, Lock, LostConnection };
 
-   MyDatabase (app::Application& app) : Database (app, "map", "my_database") {;}
+   MyDatabase (app::Application& app) : Database (app, "map", app.getTitle ().c_str ()) {;}
 
    int container_size () const noexcept { return m_container.size (); }
 
@@ -264,6 +269,20 @@ private:
    const char* apply (const char* statement) throw (adt::RuntimeException);
 };
 
+class MyRecoveryHandler : public dbms::FailRecoveryHandler {
+public:
+   MyRecoveryHandler () : m_thisWasUsed (0) {;}
+
+   int thisWasUsed () const noexcept { return m_thisWasUsed; }
+
+private:
+   int m_thisWasUsed;
+
+   void apply (const dbms::Connection& connection) throw (adt::RuntimeException) {
+      ++ m_thisWasUsed;
+   }
+};
+
 }
 }
 }
@@ -296,7 +315,6 @@ void test::MyApplication::run ()
    m_termination.lock ();
 
    // It will be block until something frees the mutex by calling enableTermination
-
 }
 
 test::MyReadStatement::MyReadStatement (Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
@@ -401,6 +419,11 @@ void test::MyConnection::open ()
    throw (DatabaseException)
 {
    m_operations.clear ();
+
+   if (m_avoidRecovery == true) {
+      WEPA_THROW_DB_EXCEPTION(dbms::ResultCode (getDatabase(), MyDatabase::LostConnection));
+   }
+
    m_container = &reinterpret_cast <MyDatabase&> (getDatabase()).m_container;
    ++ m_openCounter;
    LOG_DEBUG ("OpenCounter=" << m_openCounter);
@@ -1151,7 +1174,6 @@ BOOST_AUTO_TEST_CASE (dbms_break_detected_locking)
    }
 
    if (true) {
-      // It will detect the lost connection but it will try to recover and it will get it.
       GuardConnection connection (conn0);
       GuardStatement writer (connection, stWriter);
 
@@ -1171,6 +1193,127 @@ BOOST_AUTO_TEST_CASE (dbms_break_detected_locking)
    // It will recover the connection after it will detect
    BOOST_REQUIRE_EQUAL (conn0->isAvailable(), true);
    BOOST_REQUIRE_EQUAL (database.container_size(), 3);
+
+   LOG_DEBUG ("Enables termination");
+   application.enableTermination();
+
+   tr.join ();
+}
+
+BOOST_AUTO_TEST_CASE (dbms_break_unrecovery_executing)
+{
+   test::MyApplication application ("dbms_break_unrecovery_executing");
+
+   test::MyDatabase database (application);
+
+   test::MyRecoveryHandler recoveryHandler;
+   database.setFailRecoveryHandler(&recoveryHandler);
+
+   application.disableTermination();
+
+   test::MyConnection* conn0 = static_cast <test::MyConnection*> (database.createConnection("0", "0", "0"));
+   dbms::Statement* stWriter = database.createStatement("the_write", "write");
+
+   std::thread tr (std::ref (application));
+
+   while (application.isRunning () == false);
+
+   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
+
+   if (true) {
+      GuardConnection connection (conn0);
+      GuardStatement writer (connection, stWriter);
+
+      BOOST_REQUIRE_EQUAL (conn0->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL (conn0->getCloseCounter(), 0);
+
+      int ii = 1;
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (ii);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the ii");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (ii * ii);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (100 / ii);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue (adt::Second (ii));
+      BOOST_REQUIRE_NO_THROW(writer.execute ());
+
+      conn0->manualBreak ();
+      conn0->avoidRecovery();
+
+      ii = 2;
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (ii);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the ii");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (ii * ii);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (100 / ii);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue (adt::Second (ii));
+
+      // It will detect the lost connection but it will try to recover and it will get it.
+      BOOST_REQUIRE_THROW(writer.execute (), dbms::DatabaseException);
+
+      BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
+      BOOST_REQUIRE_EQUAL (conn0->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL (conn0->getCloseCounter(), 1);
+      BOOST_REQUIRE_EQUAL (recoveryHandler.thisWasUsed(), 1);
+   }
+
+   // It will recover the connection after it will detect
+   BOOST_REQUIRE_EQUAL (conn0->isAvailable(), false);
+   BOOST_REQUIRE_EQUAL (database.container_size(), 0);
+
+   LOG_DEBUG ("Enables termination");
+   application.enableTermination();
+
+   tr.join ();
+}
+
+BOOST_AUTO_TEST_CASE (dbms_break_unrecovery_locking)
+{
+   test::MyApplication application ("dbms_break_connection");
+
+   test::MyDatabase database (application);
+   test::MyRecoveryHandler recoveryHandler;
+   database.setFailRecoveryHandler(&recoveryHandler);
+
+   application.disableTermination();
+
+   test::MyConnection* conn0 = static_cast <test::MyConnection*> (database.createConnection("0", "0", "0"));
+   dbms::Statement* stWriter = database.createStatement("the_write", "write");
+
+   std::thread tr (std::ref (application));
+
+   while (application.isRunning () == false);
+
+   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
+
+   if (true) {
+      GuardConnection connection (conn0);
+      GuardStatement writer (connection, stWriter);
+
+      BOOST_REQUIRE_EQUAL (conn0->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL (conn0->getCloseCounter(), 0);
+
+      int ii = 1;
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (ii);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the ii");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (ii * ii);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (100 / ii);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue (adt::Second (ii));
+      BOOST_REQUIRE_NO_THROW(writer.execute ());
+   }
+
+   conn0->manualBreak ();
+   conn0->avoidRecovery();
+
+   if (true) {
+      BOOST_REQUIRE_THROW (GuardConnection connection (conn0), adt::RuntimeException);
+      BOOST_REQUIRE_EQUAL (conn0->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL (conn0->getCloseCounter(), 1);
+      BOOST_REQUIRE_EQUAL (recoveryHandler.thisWasUsed(), 1);
+   }
+
+   // It will recover the connection after it will detect
+   BOOST_REQUIRE_EQUAL (conn0->isAvailable(), false);
+   BOOST_REQUIRE_EQUAL (database.container_size(), 1);
 
    LOG_DEBUG ("Enables termination");
    application.enableTermination();

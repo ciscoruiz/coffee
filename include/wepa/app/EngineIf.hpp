@@ -94,6 +94,8 @@ public:
    */
    const char* getClassName () const noexcept { return getName (); }
 
+   operator adt::StreamString () const noexcept { return asString (); }
+
    /**
       Devuelve una cadena con la informacion mas relevante de esta instancia.
       \return Una cadena con la informacion mas relevante de esta instancia.

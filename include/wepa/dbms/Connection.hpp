@@ -98,6 +98,7 @@ private:
 
    void lock () throw (adt::RuntimeException);
    void unlock () noexcept;
+   bool recover () noexcept;
 
    virtual bool do_beginTransaction () throw (adt::RuntimeException, DatabaseException) { return false;}
    virtual void do_commit () throw (adt::RuntimeException, DatabaseException) = 0;

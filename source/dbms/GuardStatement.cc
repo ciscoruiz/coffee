@@ -36,6 +36,7 @@
 #include <wepa/dbms/Statement.hpp>
 #include <wepa/dbms/GuardStatement.hpp>
 #include <wepa/dbms/GuardConnection.hpp>
+#include <wepa/dbms/Connection.hpp>
 
 using namespace wepa;
 
@@ -43,7 +44,12 @@ dbms::GuardStatement::GuardStatement(GuardConnection& guardConnection, Statement
    m_guardConnection (guardConnection),
    m_statement (statement)
 {
+   if (guardConnection->isAvailable () == false) {
+      WEPA_THROW_EXCEPTION(guardConnection->asString () << " | Connection is not available");
+   }
+
    guardConnection.linkStatement();
+
    statement.lock();
 }
 
@@ -53,6 +59,10 @@ dbms::GuardStatement::GuardStatement(GuardConnection& guardConnection, Statement
 {
    if (statement == NULL)
       WEPA_THROW_EXCEPTION("Statement can not be NULL");
+
+   if (guardConnection->isAvailable () == false) {
+      WEPA_THROW_EXCEPTION(guardConnection->asString () << " | Connection is not available");
+   }
 
    guardConnection.linkStatement();
 

@@ -1020,7 +1020,7 @@ BOOST_AUTO_TEST_CASE (dbms_set_max_commit)
    tr.join ();
 }
 
-BOOST_AUTO_TEST_CASE (dbms_break_connection)
+BOOST_AUTO_TEST_CASE (dbms_break_detected_executing)
 {
    test::MyApplication application ("dbms_break_connection");
 
@@ -1061,6 +1061,8 @@ BOOST_AUTO_TEST_CASE (dbms_break_connection)
       wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (ii * ii);
       wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (100 / ii);
       wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue (adt::Second (ii));
+
+      // It will detect the lost connection but it will try to recover and it will get it.
       BOOST_REQUIRE_THROW(writer.execute (), dbms::DatabaseException);
 
       BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
@@ -1068,8 +1070,107 @@ BOOST_AUTO_TEST_CASE (dbms_break_connection)
       BOOST_REQUIRE_EQUAL (conn0->getCloseCounter(), 1);
    }
 
+   // It will recover the connection after it will detect
    BOOST_REQUIRE_EQUAL (conn0->isAvailable(), true);
    BOOST_REQUIRE_EQUAL (database.container_size(), 0);
+
+   LOG_DEBUG ("Enables termination");
+   application.enableTermination();
+
+   tr.join ();
+}
+
+BOOST_AUTO_TEST_CASE (dbms_break_detected_locking)
+{
+   test::MyApplication application ("dbms_break_connection");
+
+   test::MyDatabase database (application);
+
+   application.disableTermination();
+
+   test::MyConnection* conn0 = static_cast <test::MyConnection*> (database.createConnection("0", "0", "0"));
+   dbms::Statement* stWriter = database.createStatement("the_write", "write");
+
+   std::thread tr (std::ref (application));
+
+   while (application.isRunning () == false);
+
+   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
+
+   if (true) {
+      GuardConnection connection (conn0);
+      GuardStatement writer (connection, stWriter);
+
+      BOOST_REQUIRE_EQUAL (conn0->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL (conn0->getCloseCounter(), 0);
+
+      int ii = 1;
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (ii);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the ii");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (ii * ii);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (100 / ii);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue (adt::Second (ii));
+      BOOST_REQUIRE_NO_THROW(writer.execute ());
+   }
+
+   conn0->manualBreak ();
+
+   if (true) {
+      // It will detect the lost connection but it will try to recover and it will get it.
+      GuardConnection connection (conn0);
+      GuardStatement writer (connection, stWriter);
+
+      BOOST_REQUIRE_EQUAL (conn0->getOpenCounter(), 2);
+      BOOST_REQUIRE_EQUAL (conn0->getCloseCounter(), 1);
+
+      int ii = 2;
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (ii);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the ii");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (ii * ii);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (100 / ii);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue (adt::Second (ii));
+
+      BOOST_REQUIRE_NO_THROW(writer.execute ());
+   }
+
+   // It will recover the connection after it will detect
+   BOOST_REQUIRE_EQUAL (conn0->isAvailable(), true);
+   BOOST_REQUIRE_EQUAL (database.container_size(), 2);
+
+   if (true) {
+      // It will detect the lost connection but it will try to recover and it will get it.
+      GuardConnection connection (conn0);
+
+      conn0->manualBreak();
+
+      BOOST_REQUIRE_THROW(GuardStatement writer (connection, stWriter), adt::RuntimeException);
+
+      BOOST_REQUIRE_EQUAL (conn0->getOpenCounter(), 2);
+      BOOST_REQUIRE_EQUAL (conn0->getCloseCounter(), 1);
+   }
+
+   if (true) {
+      // It will detect the lost connection but it will try to recover and it will get it.
+      GuardConnection connection (conn0);
+      GuardStatement writer (connection, stWriter);
+
+      BOOST_REQUIRE_EQUAL (conn0->getOpenCounter(), 3);
+      BOOST_REQUIRE_EQUAL (conn0->getCloseCounter(), 2);
+
+      int ii = 3;
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (ii);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the ii");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (ii * ii);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (100 / ii);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue (adt::Second (ii));
+
+      BOOST_REQUIRE_NO_THROW(writer.execute ());
+   }
+
+   // It will recover the connection after it will detect
+   BOOST_REQUIRE_EQUAL (conn0->isAvailable(), true);
+   BOOST_REQUIRE_EQUAL (database.container_size(), 3);
 
    LOG_DEBUG ("Enables termination");
    application.enableTermination();

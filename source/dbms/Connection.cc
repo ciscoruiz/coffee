@@ -74,7 +74,7 @@ dbms::ResultCode dbms::Connection::execute (Statement& statement)
 
    if (result.lostConnection () == true) {
       LOG_CRITICAL ("Detected lost connection " << asString () << " while running '" << statement.getName ()  << "' | " << result);
-      m_dbmsDatabase.recoverConnection (*this);
+      recover ();
       WEPA_THROW_NAME_DB_EXCEPTION(statement.getName (), result);
    }
 
@@ -139,7 +139,9 @@ void dbms::Connection::lock ()
    throw (adt::RuntimeException)
 {
    if (isAvailable () == false) {
-      WEPA_THROW_EXCEPTION(asString () << " | Connection is not available");
+      if (recover () == false) {
+         WEPA_THROW_EXCEPTION(asString () << " | Connection is not available");
+      }
    }   
    
    m_mutex.lock();
@@ -179,6 +181,28 @@ void dbms::Connection::unlock ()
    }
 
    m_mutex.unlock();
+}
+
+bool dbms::Connection::recover ()
+   noexcept
+{
+   LOG_THIS_METHOD();
+
+   bool result = false;
+
+   try {
+      close ();
+      open ();
+      result = true;
+   }
+   catch (DatabaseException& edbms) {
+      logger::Logger::write (edbms);
+      m_dbmsDatabase.notifyRecoveryFail (*this);
+   }
+
+   LOG_WARN(asString () << " | Result=" << result);
+
+   return result;
 }
 
 adt::StreamString dbms::Connection::asString () const

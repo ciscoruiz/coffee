@@ -240,22 +240,13 @@ dbms::Statement& dbms::Database::findStatement (const char* name)
    return std::ref (*result);
 }
 
-void dbms::Database::recoverConnection (dbms::Connection& connection)
+void dbms::Database::notifyRecoveryFail (dbms::Connection& connection)
    throw (adt::RuntimeException)
 {
    LOG_WARN(connection.asString ());
 
-   try {
-      connection.close ();
-      connection.open ();
-
-      LOG_WARN(connection.asString ());
-   }
-   catch (DatabaseException& edbms) {
-      logger::Logger::write (edbms);
-      if (m_failRecoveryHandler != NULL)
-         m_failRecoveryHandler->apply (connection);
-   }
+   if (m_failRecoveryHandler != NULL)
+      m_failRecoveryHandler->apply (connection);
 }
 
 adt::StreamString dbms::Database::asString () const

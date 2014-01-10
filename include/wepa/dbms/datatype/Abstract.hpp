@@ -87,6 +87,8 @@ public:
    */
    void clear () noexcept;
 
+   operator adt::StreamString () const noexcept { return asString (); }
+
    /**
       Devuelve una cadena con la informacion referente a esta instancia.
       @return Una cadena con la informacion referente a esta instancia.

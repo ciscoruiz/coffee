@@ -445,6 +445,10 @@ BOOST_AUTO_TEST_CASE (dbms_define_structure)
    BOOST_REQUIRE_EQUAL (st0, &st);
 
    BOOST_REQUIRE_THROW (database.findStatement("zzzz"), adt::RuntimeException);
+
+   adt::StreamString xxx = conn;
+
+   BOOST_REQUIRE_NE (xxx.find ("CommitCounter"), std::string::npos);
 }
 
 BOOST_AUTO_TEST_CASE (dbms_link_guards)

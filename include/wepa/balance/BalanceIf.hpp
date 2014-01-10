@@ -94,6 +94,8 @@ public:
    const_resource_iterator resource_end () const noexcept { return m_resources.end (); }
    static const Resource* resource (const_resource_iterator ii) noexcept { return *ii; }
 
+   operator adt::StreamString () const noexcept { return asString (); }
+
    virtual adt::StreamString asString () const noexcept;
    virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 

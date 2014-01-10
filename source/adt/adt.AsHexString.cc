@@ -44,7 +44,7 @@ using namespace std;
 using namespace wepa;
 
 string adt::AsHexString::apply (const int number)
-   throw ()
+   noexcept
 {
    char aux [16];
    sprintf (aux, "0x%x", number);
@@ -52,7 +52,7 @@ string adt::AsHexString::apply (const int number)
 }
 
 string adt::AsHexString::apply (const unsigned int number)
-   throw ()
+   noexcept
 {
    char aux [16];
    sprintf (aux, "0x%x", number);
@@ -60,7 +60,7 @@ string adt::AsHexString::apply (const unsigned int number)
 }
 
 string adt::AsHexString::apply (const Integer64 number)
-   throw ()
+   noexcept
 {
    char aux [24];
 #ifdef __wepa64__
@@ -73,7 +73,7 @@ string adt::AsHexString::apply (const Integer64 number)
 }
 
 string adt::AsHexString::apply (const Unsigned64 number)
-   throw ()
+   noexcept
 {
    char aux [32];
 #ifdef __wepa64__

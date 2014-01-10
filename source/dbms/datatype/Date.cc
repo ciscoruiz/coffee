@@ -131,7 +131,7 @@ void datatype::Date::setValue (const adt::Second& value)
 }
 
 adt::StreamString datatype::Date::asString () const
-   throw ()
+   noexcept
 {
    const char* cstring;
 

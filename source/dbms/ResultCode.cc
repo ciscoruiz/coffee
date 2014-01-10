@@ -80,7 +80,7 @@ bool dbms::ResultCode::lostConnection () const
 // correcta => no har� falta reservar ninguna memoria.
 //
 void dbms::ResultCode::copy (const char* text)
-   throw ()
+   noexcept
 {
    if (text == NULL) {
       if (m_errorText != NULL) {
@@ -107,7 +107,7 @@ void dbms::ResultCode::copy (const char* text)
 }
 
 adt::StreamString dbms::ResultCode::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("dbms::ResultCode { Error: ");
    result << m_errorCode;

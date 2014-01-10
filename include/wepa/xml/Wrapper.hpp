@@ -55,8 +55,8 @@ public:
       releaseHandler ();
    }
 
-   Handler getHandler () throw () { return m_handler; }
-   Handler getHandler () const throw () { return m_handler; }
+   Handler getHandler () noexcept { return m_handler; }
+   Handler getHandler () const noexcept { return m_handler; }
 
    const std::string& getName () const {
       if (m_handler == NULL) {
@@ -69,18 +69,18 @@ public:
       return m_name;
    }
 
-   operator Handler () throw () { return m_handler; }
+   operator Handler () noexcept { return m_handler; }
 
 protected:
    Wrapper () : m_handler (NULL), m_deleter (NULL), m_nameExtractor (NULL) {}
    Wrapper (Handler handler) : m_handler (handler), m_deleter (NULL), m_nameExtractor (NULL) {}
 
-   void setDeleter (Deleter deleter) throw () { m_deleter = deleter; }
-   void setNameExtractor (NameExtractor nameExtractor) throw () { m_nameExtractor = nameExtractor; }
-   Handler setHandler (Handler handler) throw () { m_handler = handler; m_name.clear (); return m_handler; }
+   void setDeleter (Deleter deleter) noexcept { m_deleter = deleter; }
+   void setNameExtractor (NameExtractor nameExtractor) noexcept { m_nameExtractor = nameExtractor; }
+   Handler setHandler (Handler handler) noexcept { m_handler = handler; m_name.clear (); return m_handler; }
 
    void releaseHandler ()
-      throw ()
+      noexcept
    {
       if (m_handler != NULL) {
          if (m_deleter) {

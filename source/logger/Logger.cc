@@ -71,7 +71,7 @@ void logger::Logger::initialize (Writer* writer)
 
 //static
 void logger::Logger::write (const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned lineno)
-   throw ()
+   noexcept
 {
    if (m_writer.get () == NULL || m_formatter.get () == NULL)
       return;
@@ -86,7 +86,7 @@ void logger::Logger::write (const Level::_v level, const adt::StreamString& inpu
 
 //static
 bool logger::Logger::wantsToProcess (const Level::_v level)
-   throw ()
+   noexcept
 {
    if (m_writer.get () == NULL || m_formatter.get () == NULL)
       return false;

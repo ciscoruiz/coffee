@@ -76,9 +76,9 @@ class MyApplication : public app::Application {
 public:
    MyApplication ();
 
-   void disableTermination () throw () { m_termination.lock (); }
+   void disableTermination () noexcept { m_termination.lock (); }
    void operator ()();
-   void enableTermination() throw () { m_termination.unlock (); }
+   void enableTermination() noexcept { m_termination.unlock (); }
 
 private:
    std::mutex m_termination;
@@ -92,7 +92,7 @@ public:
 
 private:
    void do_prepare (Statement* statement, Connection* connection, const int pos) throw (adt::RuntimeException, DatabaseException) {;}
-   void do_release (Statement* statement) throw () {;}
+   void do_release (Statement* statement) noexcept {;}
    void do_encode () throw (adt::RuntimeException) {;}
 };
 
@@ -102,7 +102,7 @@ public:
 
 private:
    void do_prepare (Statement* statement, Connection* connection, const int pos) throw (adt::RuntimeException, DatabaseException) {;}
-   void do_release (Statement* statement) throw () {;}
+   void do_release (Statement* statement) noexcept {;}
    void do_decode () throw (adt::RuntimeException) {;}
    void do_write (const datatype::LongBlock&) throw (adt::RuntimeException, dbms::DatabaseException) {;}
 };
@@ -118,7 +118,7 @@ protected:
       m_time ("time", false)
    {;}
 
-   MyRecord& getRecord () throw () { return std::ref (m_record); }
+   MyRecord& getRecord () noexcept { return std::ref (m_record); }
 
 protected:
    binder::BinderIf* m_binders [5];
@@ -165,12 +165,12 @@ public:
       m_commitCounter = m_rollbackCounter = 0;
    }
 
-   int operation_size () const throw () { return m_operations.size (); }
+   int operation_size () const noexcept { return m_operations.size (); }
 
-   unsigned int getCommitCounter () const throw () { return m_commitCounter; }
-   unsigned int getRollbackCounter () const throw () { return m_rollbackCounter; }
+   unsigned int getCommitCounter () const noexcept { return m_commitCounter; }
+   unsigned int getRollbackCounter () const noexcept { return m_rollbackCounter; }
 
-   adt::StreamString asString () const throw () {
+   adt::StreamString asString () const noexcept {
       adt::StreamString result ("MyConnection {");
       result << Connection::asString ();
       result << " | CommitCounter=" << m_commitCounter;
@@ -188,11 +188,11 @@ private:
    Container* m_container;
    Operations m_operations;
 
-   bool isAvailable () const throw () { return m_container != NULL; }
+   bool isAvailable () const noexcept { return m_container != NULL; }
    void open () throw (DatabaseException);
-   void close () throw () { m_container = NULL; }
-   void do_commit () throw () ;
-   void do_rollback () throw ();
+   void close () noexcept { m_container = NULL; }
+   void do_commit () noexcept ;
+   void do_rollback () noexcept;
 
    friend class MyReadStatement;
    friend class MyWriteStatement;
@@ -204,15 +204,15 @@ public:
 
    MyDatabase (app::Application& app) : Database (app, "map", "my_database") {;}
 
-   int container_size () const throw () { return m_container.size (); }
+   int container_size () const noexcept { return m_container.size (); }
 
 private:
    Container m_container;
 
-   bool notFound (const int errorCode) const throw () { return errorCode == NotFound; }
-   bool successful (const int errorCode) const throw () { return errorCode == Successful; }
-   bool locked (const int errorCode) const throw () { return errorCode == Lock; }
-   bool lostConnection (const int errorCode) const throw () { return errorCode == LostConnection; }
+   bool notFound (const int errorCode) const noexcept { return errorCode == NotFound; }
+   bool successful (const int errorCode) const noexcept { return errorCode == Successful; }
+   bool locked (const int errorCode) const noexcept { return errorCode == Lock; }
+   bool lostConnection (const int errorCode) const noexcept { return errorCode == LostConnection; }
 
    Statement* allocateStatement (const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
       throw (adt::RuntimeException)
@@ -379,7 +379,7 @@ void test::MyConnection::open ()
    m_container = &reinterpret_cast <MyDatabase&> (getDatabase()).m_container;
 }
 
-void test::MyConnection::do_commit () throw ()
+void test::MyConnection::do_commit () noexcept
 {
    LOG_THIS_METHOD();
 
@@ -411,7 +411,7 @@ void test::MyConnection::do_commit () throw ()
 }
 
 void test::MyConnection::do_rollback ()
-   throw ()
+   noexcept
 {
    LOG_THIS_METHOD();
    m_rollbackCounter ++;

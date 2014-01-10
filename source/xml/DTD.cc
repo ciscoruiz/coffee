@@ -63,7 +63,7 @@ xml::DTD::~DTD()
 
 //static
 const char* xml::DTD::nameExtractor(const Handler handler)
-   throw ()
+   noexcept
 {
    return (const char*) handler->name;
 }
@@ -87,7 +87,7 @@ void xml::DTD::validate (const xml::Document* document) const
 
 /* static */
 void xml::DTD::callbackErrorHandler (void *ctx,  const char *msg, ...)
-   throw ()
+   noexcept
 {
    va_list ap;
 
@@ -105,7 +105,7 @@ void xml::DTD::callbackErrorHandler (void *ctx,  const char *msg, ...)
 
 /* static */
 void xml::DTD::callbackWarningHandler (void *ctx,  const char *msg, ...)
-   throw ()
+   noexcept
 {
    va_list ap;
 

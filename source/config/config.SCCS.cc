@@ -41,7 +41,7 @@ wepa_sccs_define_tag (config, 0)
 using namespace wepa;
 
 void config::SCCS::activate()
-   throw ()
+   noexcept
 {
    SCCSRepository::getInstance().registerModule(wepa_sccs_use_tag(config));
 }

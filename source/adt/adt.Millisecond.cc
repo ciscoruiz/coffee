@@ -12,12 +12,12 @@ using namespace wepa;
 
 #define implement_operator(op) \
    bool adt::Millisecond::operator op (const adt::Second& other) const \
-      throw ()\
+      noexcept\
    {\
       return (m_value / 1000) op (other.m_value);\
    }\
    bool adt::Millisecond::operator op (const Microsecond& other) const\
-      throw ()\
+      noexcept\
    {\
       return m_value op (other.m_value / 1000);\
    }
@@ -27,7 +27,7 @@ adt::Millisecond::Millisecond (const adt::Second& other) : m_value (other.m_valu
 adt::Millisecond::Millisecond (const adt::Microsecond& other) : m_value (other.m_value / 1000) {;}
 
 adt::Millisecond& adt::Millisecond::operator= (const adt::Second& other)
-   throw ()
+   noexcept
 {
    m_value = other.m_value;
    m_value *= 1000;
@@ -35,7 +35,7 @@ adt::Millisecond& adt::Millisecond::operator= (const adt::Second& other)
 }
 
 adt::Millisecond& adt::Millisecond::operator= (const Microsecond& other)
-   throw ()
+   noexcept
 {
    m_value = (other.m_value / 1000);
    return *this;
@@ -48,7 +48,7 @@ implement_operator (<)
 
 //static
 adt::Millisecond adt::Millisecond::getTime ()
-   throw ()
+   noexcept
 {
    struct timeval tv;
    gettimeofday (&tv, NULL);
@@ -60,7 +60,7 @@ adt::Millisecond adt::Millisecond::getTime ()
 }
 
 timeval* adt::Millisecond::getTimeVal (timeval& tv) const
-   throw ()
+   noexcept
 {
    if (m_value < 0)
       return NULL;
@@ -72,7 +72,7 @@ timeval* adt::Millisecond::getTimeVal (timeval& tv) const
 }
 
 string adt::Millisecond::asString () const
-   throw ()
+   noexcept
 {
    string result (AsString::apply (m_value));
    return result += " ms";

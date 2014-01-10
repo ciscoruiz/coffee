@@ -45,7 +45,7 @@ using namespace wepa;
 
 //virtual
 adt::StreamString balance::Resource::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("balance::Resource {");
    result += adt::NamedObject::asString();
@@ -56,7 +56,7 @@ adt::StreamString balance::Resource::asString () const
 
 //virtual
 xml::Node& balance::Resource::asXML (xml::Node& parent) const
-   throw ()
+   noexcept
 {
    xml::Node& result = parent.createChild ("balance.Resource");
 

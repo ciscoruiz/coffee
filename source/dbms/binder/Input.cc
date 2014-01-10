@@ -40,7 +40,7 @@ using namespace wepa;
 using namespace wepa::dbms;
 
 adt::StreamString binder::Input::asString() const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("binder.Input {");
 

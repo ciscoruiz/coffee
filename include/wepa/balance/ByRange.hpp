@@ -71,7 +71,7 @@ public:
 private:
    Ranges m_ranges;
 
-   BalanceIf* find_range (const int key) throw ();
+   BalanceIf* find_range (const int key) noexcept;
 
    Resource* do_apply (const int key) throw (adt::RuntimeException);
 };

@@ -42,7 +42,7 @@ using namespace wepa::dbms;
 
 
 adt::StreamString datatype::Float::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result;
    result <<  "dbms::type::Float { " << datatype::Abstract::asString ();

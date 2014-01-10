@@ -63,11 +63,11 @@ public:
       m_errorCode (other.m_errorCode)
    {;}
 
-   int getErrorCode () const throw () { return m_errorCode; }
+   int getErrorCode () const noexcept { return m_errorCode; }
 
-   void setErrorCode (const int errorCode) throw () { m_errorCode = errorCode; }
+   void setErrorCode (const int errorCode) noexcept { m_errorCode = errorCode; }
 
-   std::string asString () const throw ();
+   std::string asString () const noexcept;
 
 private:
    int m_errorCode;

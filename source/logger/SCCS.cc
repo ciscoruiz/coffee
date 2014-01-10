@@ -45,7 +45,7 @@ wepa_sccs_define_tag (logger, 1)
 using namespace wepa;
 
 void logger::SCCS::activate()
-   throw ()
+   noexcept
 {
    adt::SCCS::activate ();
 

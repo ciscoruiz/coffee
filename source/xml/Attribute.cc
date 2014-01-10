@@ -48,7 +48,7 @@ xml::Attribute::Attribute (_xmlAttr* handler) : Wrapper (handler)
 }
 
 const char* xml::Attribute::nameExtractor (const Handler handler)
-   throw ()
+   noexcept
 {
    return (const char*) (handler->name);
 }
@@ -62,7 +62,7 @@ void xml::Attribute::setValue (const char* value)
 }
 
 const std::string& xml::Attribute::getValue () const
-   throw ()
+   noexcept
 {
    Handler handler = getHandler();
 
@@ -75,7 +75,7 @@ const std::string& xml::Attribute::getValue () const
 }
 
 bool xml::Attribute::operator < (const Attribute& left) const
-   throw ()
+   noexcept
 {
    const char* thisName = nameExtractor (getHandler());
    const char* leftName = nameExtractor (left.getHandler());

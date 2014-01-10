@@ -54,47 +54,47 @@ public:
    /**
       @return A string with the number.
    */
-   static std::string apply (const int number, const char* format = "%d") throw ();
+   static std::string apply (const int number, const char* format = "%d") noexcept;
 
    /**
       @return A string with the number.
    */
-   static std::string apply (const unsigned int number) throw ();
+   static std::string apply (const unsigned int number) noexcept;
 
    /**
       @return A string with the number.
    */
-   static std::string apply (const long number) throw ();
+   static std::string apply (const long number) noexcept;
 
    /**
       @return A string with the number.
    */
-   static std::string apply (const Integer64 number) throw ();
+   static std::string apply (const Integer64 number) noexcept;
 
    /**
       @return A string with the number.
    */
-   static std::string apply (const Unsigned64 number) throw ();
+   static std::string apply (const Unsigned64 number) noexcept;
 
    /**
       @return A string with the number.
    */
-   static const char* apply (const bool _bool) throw () { return (_bool == true) ? "true": "false"; }
+   static const char* apply (const bool _bool) noexcept { return (_bool == true) ? "true": "false"; }
 
    /**
       @return A string with the number.
    */
-   static std::string apply (const double v, const char* format="%e") throw ();
+   static std::string apply (const double v, const char* format="%e") noexcept;
 
    /**
       @return A string with the number.
    */
-   static std::string apply (const float v, const char* format="%f") throw ();
+   static std::string apply (const float v, const char* format="%f") noexcept;
 
    /**
     * \return A string with a brief description of the data block.
     */
-   static std::string apply (const DataBlock& dataBlock, const int characterByLine = 16) throw ();
+   static std::string apply (const DataBlock& dataBlock, const int characterByLine = 16) noexcept;
 };
 
 }

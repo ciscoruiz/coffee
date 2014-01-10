@@ -42,7 +42,7 @@ using namespace wepa;
 using namespace wepa::dbms;
 
 adt::StreamString datatype::Abstract::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result;
 
@@ -66,7 +66,7 @@ void datatype::Abstract::isNull ()
 }
 
 void datatype::Abstract::clear ()
-   throw ()
+   noexcept
 {
    if (m_isNulleable)
       m_isNull = true;

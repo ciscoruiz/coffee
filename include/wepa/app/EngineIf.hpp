@@ -86,26 +86,26 @@ public:
     * \return la aplicaci�n asociado a este enginee.
     * \since NemesisRD.app 2.0.0
     */
-   Application& getApplication () throw () { return a_app; }
+   Application& getApplication () noexcept { return a_app; }
 
    /**
       Devuelve el nombre de esta clase indicado en el constructor.
       \return El nombre de la clase indicado en el constructor.
    */
-   const char* getClassName () const throw () { return getName (); }
+   const char* getClassName () const noexcept { return getName (); }
 
    /**
       Devuelve una cadena con la informacion mas relevante de esta instancia.
       \return Una cadena con la informacion mas relevante de esta instancia.
    */
-   virtual adt::StreamString asString () const throw ();
+   virtual adt::StreamString asString () const noexcept;
 
    /**
       Devuelve un documento XML con la informacion mas relevante de esta instancia.
       \param parent Nodo XML del que colgar la informacion referente a esta instancia.
       \return Un documento XML con la informacion mas relevante de esta instancia.
    */
-   virtual xml::Node& asXML (xml::Node& parent) const throw ();
+   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
 protected:
    /**
@@ -120,7 +120,7 @@ protected:
       \param engineName Nombre de enginee requerido por esta instancia.
       \warning Solo tendra efecto antes de inicializar el enginee.
    */
-   void addPredecessor (const char* engineName) throw ();
+   void addPredecessor (const char* engineName) noexcept;
 
    /**
       metodo que debemos implementar si la clase heredada necesita algn tipo de inicializacin.
@@ -143,7 +143,7 @@ protected:
 
       Este metodo implementa un metodo de parada no controlada.
    */
-   virtual void kill () throw () { stop (); }
+   virtual void kill () noexcept { stop (); }
 
 private:
    typedef std::vector <std::string>::iterator iterator;
@@ -152,9 +152,9 @@ private:
    std::vector <std::string> a_predecessors;
 
    EngineIf (const EngineIf& other);
-   iterator begin () throw () { return a_predecessors.begin (); }
-   iterator end () throw () { return a_predecessors.end (); }
-   const std::string& data (iterator ii) throw () { return *ii; }
+   iterator begin () noexcept { return a_predecessors.begin (); }
+   iterator end () noexcept { return a_predecessors.end (); }
+   const std::string& data (iterator ii) noexcept { return *ii; }
 
    /**
       metodo que debemos implementar si la clase heredada necesita algn tipo de inicializacin.

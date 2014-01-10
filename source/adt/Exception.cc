@@ -38,7 +38,7 @@
 using namespace std;
 using namespace wepa;
 /*
-string adt::Exception::asString() const throw ()
+string adt::Exception::asString() const noexcept
 {
    StreamString str;
 
@@ -50,7 +50,7 @@ string adt::Exception::asString() const throw ()
 }
 */
 std::string adt::Exception::filePosition () const
-   throw ()
+   noexcept
 {
    StreamString str;
 

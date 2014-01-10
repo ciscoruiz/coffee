@@ -25,19 +25,19 @@ class BinderIf {
 public:
    virtual ~BinderIf () {;}
 
-   datatype::Abstract& getData () throw () { return std::ref (m_data); }
-   const datatype::Abstract& getData () const throw () { return std::ref (m_data); }
+   datatype::Abstract& getData () noexcept { return std::ref (m_data); }
+   const datatype::Abstract& getData () const noexcept { return std::ref (m_data); }
 
 protected:
    BinderIf (dbms::datatype::Abstract& data) : m_data (data) {;}
 
-   virtual adt::StreamString asString () const throw () = 0;
+   virtual adt::StreamString asString () const noexcept = 0;
 
 private:
    datatype::Abstract& m_data;
 
    virtual void do_prepare (Statement* statement, Connection* connection, const int pos) throw (adt::RuntimeException, DatabaseException) = 0;
-   virtual void do_release (Statement* statement) throw () = 0;
+   virtual void do_release (Statement* statement) noexcept = 0;
    virtual void do_encode () throw (adt::RuntimeException) = 0;
    virtual void do_decode () throw (adt::RuntimeException) = 0;
 

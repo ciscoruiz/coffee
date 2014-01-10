@@ -186,14 +186,14 @@ public:
       Devuelve una cadena con la informacion referente a esta instancia.
       \return Una cadena con la informacion referente a esta instancia.
    */
-   virtual adt::StreamString asString () const throw ();
+   virtual adt::StreamString asString () const noexcept;
 
    /**
     * Devuelve el nombre l�gico de esta clase
     * \return el nombre l�gico de esta clase
     * \since NemesisRD.dbms 2.10.16.04
     */
-   static const char* className () throw () { return "dbms::type::Date"; }
+   static const char* className () noexcept { return "dbms::type::Date"; }
 
    Date (const Date& other) = delete;
    Date& operator= (const Date&) = delete;
@@ -224,7 +224,7 @@ protected:
     */
    explicit Date (const std::string& name, const Datatype::_v type, const bool isNulleable);
 
-   void do_clear () throw () { m_value = 0; }
+   void do_clear () noexcept { m_value = 0; }
 };
 
 }

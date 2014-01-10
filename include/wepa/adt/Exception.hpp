@@ -45,11 +45,11 @@ class Exception : std::logic_error {
 public:
    using std::logic_error::what;
 
-   virtual ~Exception () throw () {;}
+   virtual ~Exception () noexcept {;}
 
-   const char* getMethod () const throw () { return m_fromMethod; }
-   const char* getFile () const throw () { return m_fromFile; }
-   const unsigned getLine () const throw () { return m_fromLine; }
+   const char* getMethod () const noexcept { return m_fromMethod; }
+   const char* getFile () const noexcept { return m_fromFile; }
+   const unsigned getLine () const noexcept { return m_fromLine; }
 
 protected:
    Exception (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
@@ -66,7 +66,7 @@ protected:
       m_fromLine (other.m_fromLine)
    {;}
 
-   std::string filePosition () const throw ();
+   std::string filePosition () const noexcept;
 
 private:
    const char* m_fromMethod;

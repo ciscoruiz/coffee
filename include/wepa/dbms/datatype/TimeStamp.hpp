@@ -53,13 +53,13 @@ public:
     * Devuelve la parte fraccionaria de los segundos asociados a este objeto.
     * \return La parte fraccionaria de los segundos asociados a este objeto.
     */
-   int getFractionalSecond () const throw () { return m_fractionalSecond; }
+   int getFractionalSecond () const noexcept { return m_fractionalSecond; }
 
    /**
     * Establece la parte fraccionaria de los segundos de este objeto.
     * \param fsec Parte fraccionaria de los segundos.
     */
-   void setFractionalSecond (const int fsec) throw () { m_fractionalSecond = fsec; }
+   void setFractionalSecond (const int fsec) noexcept { m_fractionalSecond = fsec; }
 
    wepa_declare_datatype_downcast(TimeStamp)
 
@@ -67,7 +67,7 @@ private:
    char m_anotherBuffer [MaxDateSize + 1];
    int m_fractionalSecond;
 
-   void do_clear () throw () { Date::do_clear (); m_fractionalSecond = 0; m_anotherBuffer [0] = 0; }
+   void do_clear () noexcept { Date::do_clear (); m_fractionalSecond = 0; m_anotherBuffer [0] = 0; }
 };
 
 }

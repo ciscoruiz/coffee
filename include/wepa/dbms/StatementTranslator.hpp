@@ -78,7 +78,7 @@ public:
     * Devuelve el nombre l�gico de este traductor.
     * \return el nombre l�gico de este traductor.
     */
-   const char* getName () const throw () { return a_name; }
+   const char* getName () const noexcept { return a_name; }
    
 protected:
    /**

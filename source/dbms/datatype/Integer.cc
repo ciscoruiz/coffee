@@ -38,7 +38,7 @@ using namespace wepa;
 using namespace wepa::dbms;
 
 adt::StreamString datatype::Integer::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result;
    result << "dbms::datatype::Integer { " << datatype::Abstract::asString ();

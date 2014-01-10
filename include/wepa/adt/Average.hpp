@@ -62,45 +62,45 @@ public:
       Devuelve el indicador de validez de esta media.
       \return \em true Si la media no tiene ningun valor o \em false en caso contrario.      
    */
-   bool isEmpty () const throw ()  { return (a_n == 0); }
+   bool isEmpty () const noexcept  { return (a_n == 0); }
 
    /**
       Devuelve \em true si el valor de la media es cero, bien por no tener valores o 
       bien porque todos ellos eran cero.
       \return \em true el valor de la media es cero o \em false en otro caso.
    */
-   bool isZero () const throw () { return a_n == 0 || a_accumulator == 0; }
+   bool isZero () const noexcept { return a_n == 0 || a_accumulator == 0; }
 
    /**
       Devuelve el numero de elementos de contiene la media.
       \return el numero de elementos de contiene la media.
    */
-   int size () const throw () { return a_n; }
+   int size () const noexcept { return a_n; }
 
    /**
       Devuelve el valor acumulado.
       \return el valor acumulado.
    */
-   _T getAccumulator () const throw () { return a_accumulator; }
+   _T getAccumulator () const noexcept { return a_accumulator; }
 
    /**
       Devuelve la media de la sucesion de valores numericos asociados a esta.
       \return La media de la sucesion de valores numericos asociados a esta.      
       \warning Antes de invocar a este operador hay que verificar que #isEmpty devuelve \em false.
    */
-   _T value () const throw () { return (isEmpty () == true) ? _T(0): (a_accumulator / a_n);  }
+   _T value () const noexcept { return (isEmpty () == true) ? _T(0): (a_accumulator / a_n);  }
    
    /**
       Inicializa el valor de la media.      
    */
-   void clear () throw () {  a_accumulator = 0; a_n = 0; }
+   void clear () noexcept {  a_accumulator = 0; a_n = 0; }
 
    /**
     * Establece manualmente el valor de la estad�stica.
     * \param value Valor que tomar� el acumulador de este instancia.
     * \param _n valor que tomar� el conteador de esta instancia.
     */
-   void setValue (const _T& value, const unsigned int _n) throw () {
+   void setValue (const _T& value, const unsigned int _n) noexcept {
       a_accumulator = value;
       a_n = _n;
    }
@@ -110,7 +110,7 @@ public:
       \return La media de la sucesion de valores numericos asociados a esta.      
       \warning Antes de invocar a este operador hay que verificar que #isEmpty devuelve \em false.
    */
-   operator _T () const throw () { return value (); }
+   operator _T () const noexcept { return value (); }
 
    /**
       Inicializa el valor de esta media.
@@ -118,7 +118,7 @@ public:
       \return La referencia a esta instancia.
    */
    Average<_T>& operator = (const _T value)
-      throw () 
+      noexcept 
    {
       a_accumulator = value;
       a_n = 1;
@@ -131,7 +131,7 @@ public:
       \return La referencia a esta instancia.
    */
    Average<_T>& operator = (const Average<_T>& other)
-      throw () 
+      noexcept 
    {
       a_accumulator = other.a_accumulator;
       a_n = other.a_n;
@@ -144,7 +144,7 @@ public:
       \return La referencia a esta instancia.
    */
    Average<_T>& operator += (const _T& v)
-      throw () 
+      noexcept 
    {
       const _T backup (a_accumulator);
       if ((a_accumulator += v) < backup) {
@@ -163,7 +163,7 @@ public:
       \return La referencia a esta instancia.
    */
    Average<_T>& operator -= (const _T v)
-      throw () 
+      noexcept 
    {
       if (a_accumulator > v && a_n > 1) {
          a_accumulator -= v;
@@ -181,7 +181,7 @@ public:
       \return Una cadena con la informacion referente a esta clase.
    */
    StreamString asString () const
-      throw ()
+      noexcept
    {
       StreamString result (a_name);
       result << " { Accumulator:" << a_accumulator;

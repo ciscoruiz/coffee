@@ -104,7 +104,7 @@ xml::Compiler::Buffer::Buffer ()
 }
 
 const char* xml::Compiler::Buffer::getValue () const
-   throw ()
+   noexcept
 {
    return (const char*) getHandler ()->content;
 }

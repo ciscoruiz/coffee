@@ -43,7 +43,7 @@ wepa_sccs_define_tag (adt, 1)
 using namespace wepa;
 
 void adt::SCCS::activate()
-   throw ()
+   noexcept
 {
    config::SCCS::activate ();
 

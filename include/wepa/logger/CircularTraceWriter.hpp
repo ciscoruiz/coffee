@@ -50,13 +50,13 @@ public:
    CircularTraceWriter (const std::string& path, const size_t maxSize);
    virtual ~CircularTraceWriter () { closeStream (); }
 
-   int getStream () const throw () { return m_stream; }
-   size_t getLineNo () const throw () { return m_lineno; }
-   size_t getKbytesMaxSize () const throw () { return m_maxSize; }
+   int getStream () const noexcept { return m_stream; }
+   size_t getLineNo () const noexcept { return m_lineno; }
+   size_t getKbytesMaxSize () const noexcept { return m_maxSize; }
 
 protected:
-   virtual void apply (const Level::_v level, const std::string& line) throw ();
-   virtual bool wantsToProcess (const Level::_v level) const throw ();
+   virtual void apply (const Level::_v level, const std::string& line) noexcept;
+   virtual bool wantsToProcess (const Level::_v level) const noexcept;
 
 private:
    std::string m_path;
@@ -68,7 +68,7 @@ private:
 
    void openStream () throw (adt::RuntimeException);
    bool oversizedStream () throw (adt::RuntimeException);
-   void closeStream () throw ();
+   void closeStream () noexcept;
    void renameFile () throw (adt::RuntimeException);
 };
 

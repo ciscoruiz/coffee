@@ -121,7 +121,7 @@ bool Statement::fetch()
 }
 
 adt::StreamString  Statement::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString  result ("dbms::Statement { Name: ");
    result += m_name;
@@ -133,7 +133,7 @@ adt::StreamString  Statement::asString () const
 }
 
 xml::Node& dbms::Statement::asXML (xml::Node& parent) const
-   throw ()
+   noexcept
 {
    xml::Node& result = parent.createChild ("dbms.Statement");
 

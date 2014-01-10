@@ -56,10 +56,10 @@ public:
    Event (const Id id, const BitMask bitMask) : m_id (id), m_bitMask (bitMask) {;}
    Event (const Event& other) : m_id (other.m_id), m_bitMask (other.m_bitMask) {;}
 
-   Id getId () const throw () { return m_id; }
-   BitMask getBitMask () const throw () { return m_bitMask; }
+   Id getId () const noexcept { return m_id; }
+   BitMask getBitMask () const noexcept { return m_bitMask; }
 
-   bool operator== (const Event& other) const throw () { return m_id == other.m_id; }
+   bool operator== (const Event& other) const noexcept { return m_id == other.m_id; }
 
    Event& operator= (const Event& other) {
       m_id = other.m_id;
@@ -75,13 +75,13 @@ private:
 };
 
 inline Event operator+ (const Event& left, const Event& right)
-   throw ()
+   noexcept
 {
    return Event (Event::NullId, left.getBitMask () | right.getBitMask ());
 }
 
 inline bool operator < (const Event& right, const Event& left)
-   throw ()
+   noexcept
 {
    return right.getId () < left.getId ();
 }

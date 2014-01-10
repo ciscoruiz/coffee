@@ -26,7 +26,7 @@ namespace binder {
 */
 class Output : public BinderIf {
 public:
-   adt::StreamString asString () const throw ();
+   adt::StreamString asString () const noexcept;
 
    /**
       Graba el valor de la variable wepa::dbms::LongBlock asociada a esta Output. Cualquier

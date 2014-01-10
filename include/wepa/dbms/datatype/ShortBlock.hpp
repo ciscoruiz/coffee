@@ -78,7 +78,7 @@ public:
       Devuelve el tamao actual de este dato.
       \return El tamao actual de este dato.
    */
-   int getSize () const throw () { return (hasValue () == true) ? m_value.size (): 0; }
+   int getSize () const noexcept { return (hasValue () == true) ? m_value.size (): 0; }
 
    /**
       Devuelve el contenido de la este bloque de memoria.
@@ -110,14 +110,14 @@ public:
       Devuelve una cadena con la informacion referente a esta instancia.
       \return Una cadena con la informacion referente a esta instancia.
    */
-   adt::StreamString asString () const throw ();
+   adt::StreamString asString () const noexcept;
 
    wepa_declare_datatype_downcast(ShortBlock)
 
 protected:
    adt::DataBlock m_value;
 
-   void do_clear () throw () { m_value.clear (); }
+   void do_clear () noexcept { m_value.clear (); }
 };
 
 }

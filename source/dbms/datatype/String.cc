@@ -60,7 +60,7 @@ void datatype::String::setValue (const char* str)
 }
 
 char* datatype::String::strip (char *str)
-   throw ()
+   noexcept
 {
    int len;
 
@@ -78,7 +78,7 @@ char* datatype::String::strip (char *str)
 }
 
 adt::StreamString datatype::String::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("dbms::datatype::String { ");
    result += datatype::Abstract::asString ();

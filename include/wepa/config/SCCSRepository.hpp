@@ -53,12 +53,12 @@ public:
       m_entries.clear ();
    }
 
-   void registerModule (ModuleName moduleName) throw () {
+   void registerModule (ModuleName moduleName) noexcept {
       m_entries.insert (moduleName);
    }
 
-   const_entry_iterator entry_begin () const throw () { return m_entries.begin (); }
-   const_entry_iterator entry_end () const throw () { return m_entries.end (); }
+   const_entry_iterator entry_begin () const noexcept { return m_entries.begin (); }
+   const_entry_iterator entry_end () const noexcept { return m_entries.end (); }
 
    static ModuleName module_name (const_entry_iterator ii) { return *ii; }
 

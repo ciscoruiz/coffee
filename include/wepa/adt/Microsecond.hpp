@@ -62,58 +62,58 @@ public:
 
    Microsecond (const Second& other);
 
-   operator type_t () const throw () { return m_value; }
+   operator type_t () const noexcept { return m_value; }
 
-   Microsecond& operator= (const type_t other) throw () { m_value = other; return *this; }
+   Microsecond& operator= (const type_t other) noexcept { m_value = other; return *this; }
 
-   Microsecond& operator= (const Microsecond& other) throw () { m_value = other.m_value; return *this; }
+   Microsecond& operator= (const Microsecond& other) noexcept { m_value = other.m_value; return *this; }
 
-   Microsecond& operator= (const Millisecond& other) throw ();
+   Microsecond& operator= (const Millisecond& other) noexcept;
 
-   Microsecond& operator= (const Second& other) throw ();
+   Microsecond& operator= (const Second& other) noexcept;
 
-   bool operator== (const Microsecond& other) const throw () { return m_value == other.m_value; }
+   bool operator== (const Microsecond& other) const noexcept { return m_value == other.m_value; }
 
-   bool operator== (const Millisecond& other) const throw ();
+   bool operator== (const Millisecond& other) const noexcept;
 
-   bool operator== (const Second& other) const throw ();
+   bool operator== (const Second& other) const noexcept;
 
-   bool operator!= (const Microsecond& other) const throw () { return m_value != other.m_value; }
+   bool operator!= (const Microsecond& other) const noexcept { return m_value != other.m_value; }
 
-   bool operator!= (const Millisecond& other) const throw ();
+   bool operator!= (const Millisecond& other) const noexcept;
 
-   bool operator!= (const Second& other) const throw ();
+   bool operator!= (const Second& other) const noexcept;
 
-   bool operator> (const Microsecond& other) const throw () { return m_value > other.m_value; }
+   bool operator> (const Microsecond& other) const noexcept { return m_value > other.m_value; }
 
-   bool operator> (const Millisecond& other) const throw ();
+   bool operator> (const Millisecond& other) const noexcept;
 
-   bool operator> (const Second& other) const throw ();
+   bool operator> (const Second& other) const noexcept;
 
-   bool operator< (const Microsecond& other) const throw () { return m_value < other.m_value; }
+   bool operator< (const Microsecond& other) const noexcept { return m_value < other.m_value; }
 
-   bool operator< (const Millisecond& other) const throw ();
+   bool operator< (const Millisecond& other) const noexcept;
 
-   bool operator< (const Second& other) const throw ();
+   bool operator< (const Second& other) const noexcept;
 
-   bool operator>= (const Microsecond& other) const throw () { return m_value >= other.m_value; }
+   bool operator>= (const Microsecond& other) const noexcept { return m_value >= other.m_value; }
 
-   bool operator>= (const Millisecond& other) const throw () { return (operator==(other) == true) ? true: operator>(other); }
+   bool operator>= (const Millisecond& other) const noexcept { return (operator==(other) == true) ? true: operator>(other); }
 
-   bool operator>= (const Second& other) const throw () { return (operator==(other) == true) ? true: operator>(other); }
+   bool operator>= (const Second& other) const noexcept { return (operator==(other) == true) ? true: operator>(other); }
 
-   bool operator<= (const Microsecond& other) const throw () { return m_value <= other.m_value; }
+   bool operator<= (const Microsecond& other) const noexcept { return m_value <= other.m_value; }
 
-   bool operator<= (const Millisecond& other) const throw () { return (operator==(other) == true) ? true: operator<(other); }
+   bool operator<= (const Millisecond& other) const noexcept { return (operator==(other) == true) ? true: operator<(other); }
 
-   bool operator<= (const Second& other) const throw () { return (operator==(other) == true) ? true: operator<(other); }
+   bool operator<= (const Second& other) const noexcept { return (operator==(other) == true) ? true: operator<(other); }
 
-   Microsecond& operator+= (const Microsecond& other) throw () { m_value += other.m_value; return *this; }
+   Microsecond& operator+= (const Microsecond& other) noexcept { m_value += other.m_value; return *this; }
 
-   type_t getValue () const throw () { return m_value; }
+   type_t getValue () const noexcept { return m_value; }
 
-   static Microsecond getTime () throw ();
-   std::string asString () const throw ();
+   static Microsecond getTime () noexcept;
+   std::string asString () const noexcept;
 
    static Microsecond fromString (const std::string& value) throw (RuntimeException);
 
@@ -123,39 +123,39 @@ private:
    friend class Millisecond;
    friend class Second;
 
-   friend class Microsecond operator - (const Microsecond& left, const Microsecond& right) throw ();
-   friend class Microsecond operator + (const Microsecond& left, const Microsecond& right) throw ();
-   friend class Microsecond operator / (const Microsecond& left, const Microsecond& right) throw ();
-   friend class Microsecond operator / (const Microsecond& left, const int right) throw ();
-   friend class Microsecond operator / (const Microsecond& left, const unsigned int right) throw ();
+   friend class Microsecond operator - (const Microsecond& left, const Microsecond& right) noexcept;
+   friend class Microsecond operator + (const Microsecond& left, const Microsecond& right) noexcept;
+   friend class Microsecond operator / (const Microsecond& left, const Microsecond& right) noexcept;
+   friend class Microsecond operator / (const Microsecond& left, const int right) noexcept;
+   friend class Microsecond operator / (const Microsecond& left, const unsigned int right) noexcept;
 };
 
 inline Microsecond operator - (const Microsecond& left, const Microsecond& right)
-   throw ()
+   noexcept
 {
    return Microsecond (left.m_value - right.m_value);
 }
 
 inline Microsecond operator + (const Microsecond& left, const Microsecond& right)
-   throw ()
+   noexcept
 {
    return Microsecond (left.m_value + right.m_value);
 }
 
 inline Microsecond operator / (const Microsecond& left, const Microsecond& right)
-   throw ()
+   noexcept
 {
    return Microsecond (left.m_value / right.m_value);
 }
 
 inline Microsecond operator / (const Microsecond& left, const int right)
-   throw ()
+   noexcept
 {
    return Microsecond (left.m_value / right);
 }
 
 inline Microsecond operator / (const Microsecond& left, const unsigned int right)
-   throw ()
+   noexcept
 {
    return Microsecond (left.m_value / right);
 }

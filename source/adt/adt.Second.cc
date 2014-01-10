@@ -47,12 +47,12 @@ using namespace wepa;
 
 #define implement_operator(op) \
    bool adt::Second::operator op (const Millisecond& other) const \
-      throw ()\
+      noexcept\
    {\
       return m_value op (other.m_value / 1000);\
    }\
    bool adt::Second::operator op (const Microsecond& other) const\
-      throw ()\
+      noexcept\
    {\
       return m_value op (other.m_value / 1000000);\
    }
@@ -62,14 +62,14 @@ adt::Second::Second (const adt::Millisecond& other) : m_value (other.m_value / 1
 adt::Second::Second (const adt::Microsecond& other) : m_value (other.m_value / 1000000) {;}
 
 adt::Second& adt::Second::operator= (const adt::Millisecond& other)
-   throw ()
+   noexcept
 {
    m_value = (other.m_value / 1000);
    return *this;
 }
 
 adt::Second& adt::Second::operator= (const adt::Microsecond& other)
-   throw ()
+   noexcept
 {
    m_value = (other.m_value / 1000000);
    return *this;
@@ -81,7 +81,7 @@ implement_operator (>)
 implement_operator (<)
 
 string adt::Second::asDateTime (const char* format) const
-   throw ()
+   noexcept
 {
    char aux [DateTimeSizeString];
 
@@ -89,7 +89,7 @@ string adt::Second::asDateTime (const char* format) const
 }
 
 const char* adt::Second::asDateTime (char* result, const char* format) const
-   throw ()
+   noexcept
 {
    struct tm* tt = localtime ((time_t*) &m_value);
    char aux [256];
@@ -102,7 +102,7 @@ const char* adt::Second::asDateTime (char* result, const char* format) const
 
 //static
 adt::Second adt::Second::getTime ()
-   throw ()
+   noexcept
 {
    struct timeval tv;
    gettimeofday (&tv, NULL);
@@ -111,13 +111,13 @@ adt::Second adt::Second::getTime ()
 
 //static
 adt::Second adt::Second::getLocalTime ()
-   throw ()
+   noexcept
 {
    return adt::Second (time (NULL));
 }
 
 string adt::Second::asString () const
-   throw ()
+   noexcept
 {
    string result (AsString::apply (m_value));
    return result += " sec";

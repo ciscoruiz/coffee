@@ -41,21 +41,21 @@ public:
    /**
       Devuelve la instancia de la base de datos asociada a esta conexion.
    */
-   Database& getDatabase () const throw () { return m_dbmsDatabase; }
+   Database& getDatabase () const noexcept { return m_dbmsDatabase; }
 
    /**
     * Devuelve el usuario con el que fu� realizada esta conexi�n.
     * \return el usuario con el que fu� realizada esta conexi�n.
     * \since NemesisRD.dbms 1.9.1
     */
-   const std::string& getUser () const throw () { return m_user; }
+   const std::string& getUser () const noexcept { return m_user; }
 
    /**
     * Devuelve el password del usuario con el que fu� realizada esta conexi�n.
     * \return el password del usuario con el que fu� realizada esta conexi�n.
     * \since NemesisRD.dbms 1.9.1
     */
-   const std::string& getPassword () const throw () { return m_password; }
+   const std::string& getPassword () const noexcept { return m_password; }
 
    /**
       Establece el periodo de grabacion de esta conexion. Damos la posibilidad de que la conexion confirme
@@ -68,7 +68,7 @@ public:
       esta conexion.
       \since NemesisRD.dbms 1.1.12
    */
-   int setMaxCommitPending (const int maxCommitPending) throw () {
+   int setMaxCommitPending (const int maxCommitPending) noexcept {
       const int result = m_maxCommitPending;
       m_maxCommitPending = maxCommitPending;
       return result;
@@ -78,14 +78,14 @@ public:
       Devuelve una cadena con la informacion referente a esta instancia.
       @return Una cadena con la informacion referente a esta instancia.
    */
-   virtual adt::StreamString asString () const throw ();
+   virtual adt::StreamString asString () const noexcept;
 
    /**
       Devuelve un documento XML con la informacion referente a esta instancia.
       \param parent Nodo XML del que debe colgar la informacion.
       @return un documento XML con la informacion referente a esta instancia.
    */
-   virtual xml::Node& asXML (xml::Node& parent) const throw ();
+   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
    Connection (const Connection&) = delete;
    Connection& operator= (const Connection&) = delete;
@@ -125,7 +125,7 @@ protected:
       esta conexion.
       \since NemesisRD.dbms 1.1.12
    */
-   void resetRollbackPending () throw () { m_rollbackPending =  false; }
+   void resetRollbackPending () noexcept { m_rollbackPending =  false; }
 
    /**
       Activa de forma externa el indicador de que la conexion requiere una invocacion a #rollback.
@@ -133,7 +133,7 @@ protected:
       esta conexion.
       \since NemesisRD.dbms 1.2.11
    */
-   void activateRollbackPending () throw () { m_rollbackPending = true; }
+   void activateRollbackPending () noexcept { m_rollbackPending = true; }
 
    /**
       Ejecuta la sentencia recibida como parametro. Si la sentencia no tiene variables de salida consideraria
@@ -180,7 +180,7 @@ protected:
       Metodo que debemos re-escribir para descartar los cambios realizados sobre las tablas mediante
       esta conexion.
    */
-   void rollback () throw ();
+   void rollback () noexcept;
 
    /**
       Metodo que debemos re-escribir para hacer efectiva esta conexion.
@@ -190,7 +190,7 @@ protected:
    /**
       Metodo que debemos re-escribir para cerrar la conexion.
    */
-   virtual void close () throw () = 0;
+   virtual void close () noexcept = 0;
 
 private:
    int m_commitPending; // Numero de sentencias a las que no se han fijado cambios.
@@ -201,11 +201,11 @@ private:
    std::mutex m_mutex;
 
    void lock () throw (adt::RuntimeException);
-   void unlock () throw ();
+   void unlock () noexcept;
 
    virtual bool do_beginTransaction () throw (adt::RuntimeException, DatabaseException) { return false;}
    virtual void do_commit () throw (adt::RuntimeException, DatabaseException) = 0;
-   virtual void do_rollback () throw () = 0;
+   virtual void do_rollback () noexcept = 0;
 
    friend class Database;
 

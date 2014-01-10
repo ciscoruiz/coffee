@@ -56,7 +56,7 @@ protected:
    Observer (const std::string& name) : NamedObject (name), m_subject (NULL) {;}
    virtual ~Observer (); 
 
-   virtual void update (const Event&) throw () = 0 ;
+   virtual void update (const Event&) noexcept = 0 ;
 
 private:
    Subject* m_subject;

@@ -45,7 +45,7 @@ void datatype::LongBlock::setValue (const adt::DataBlock& value)
 }
 
 adt::StreamString datatype::LongBlock::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("datatype::LongBlock { ");
    result += datatype::Abstract::asString ();

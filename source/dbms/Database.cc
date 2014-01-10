@@ -101,7 +101,7 @@ void dbms::Database::do_initialize ()
 }
 
 void dbms::Database::do_stop ()
-   throw ()
+   noexcept
 {
    LOG_THIS_METHOD();
 
@@ -259,7 +259,7 @@ void dbms::Database::breakConnection (dbms::Connection& connection)
 }
 
 adt::StreamString dbms::Database::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("dbms::Database { ");
 
@@ -279,7 +279,7 @@ adt::StreamString dbms::Database::asString () const
 }
 
 xml::Node& dbms::Database::asXML (xml::Node& parent) const
-   throw ()
+   noexcept
 {
    xml::Node& result = parent.createChild ("dbms.Database");
 

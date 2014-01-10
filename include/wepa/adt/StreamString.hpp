@@ -88,34 +88,34 @@ public:
    /**
     * Convert to upper case.
     */
-   void toUpper () throw ();
+   void toUpper () noexcept;
 
    /**
     * Convert to lower case.
     */
-   void toLower () throw ();
+   void toLower () noexcept;
 
-   StreamString& operator = (const char vv) throw () { std::string::clear (); return operator<< (vv); }
-   StreamString& operator = (const char* vv) throw () { std::string::clear (); return operator<< (vv); }
-   StreamString& operator = (const int vv) throw () { std::string::clear (); return operator<< (vv); }
-   StreamString& operator = (const unsigned int vv) throw () { std::string::clear (); return operator<< (vv); }
-   StreamString& operator = (const bool vv) throw () { std::string::clear (); return operator<< (vv); }
-   StreamString& operator = (const Integer64 vv) throw () { std::string::clear (); return operator<< (vv); }
-   StreamString& operator = (const Unsigned64 vv) throw () { std::string::clear (); return operator<< (vv); }
-   StreamString& operator = (const float vv) throw () { std::string::clear (); return operator<< (vv); }
-   StreamString& operator = (const double vv) throw () { std::string::clear (); return operator<< (vv); }
-   StreamString& operator = (const std::string& vv) throw () { std::string::operator= (vv); return *this; }
+   StreamString& operator = (const char vv) noexcept { std::string::clear (); return operator<< (vv); }
+   StreamString& operator = (const char* vv) noexcept { std::string::clear (); return operator<< (vv); }
+   StreamString& operator = (const int vv) noexcept { std::string::clear (); return operator<< (vv); }
+   StreamString& operator = (const unsigned int vv) noexcept { std::string::clear (); return operator<< (vv); }
+   StreamString& operator = (const bool vv) noexcept { std::string::clear (); return operator<< (vv); }
+   StreamString& operator = (const Integer64 vv) noexcept { std::string::clear (); return operator<< (vv); }
+   StreamString& operator = (const Unsigned64 vv) noexcept { std::string::clear (); return operator<< (vv); }
+   StreamString& operator = (const float vv) noexcept { std::string::clear (); return operator<< (vv); }
+   StreamString& operator = (const double vv) noexcept { std::string::clear (); return operator<< (vv); }
+   StreamString& operator = (const std::string& vv) noexcept { std::string::operator= (vv); return *this; }
 
-   StreamString& operator << (const char vv) throw ();
-   StreamString& operator << (const char* vv) throw ();
-   StreamString& operator << (const int vv) throw ();
-   StreamString& operator << (const unsigned int vv) throw ();
-   StreamString& operator << (const bool vv) throw ();
-   StreamString& operator << (const Integer64 vv) throw ();
-   StreamString& operator << (const Unsigned64 vv) throw ();
-   StreamString& operator << (const float vv) throw ();
-   StreamString& operator << (const double vv) throw ();
-   StreamString& operator << (const std::string& vv) throw () { std::string::append (vv); return *this; }
+   StreamString& operator << (const char vv) noexcept;
+   StreamString& operator << (const char* vv) noexcept;
+   StreamString& operator << (const int vv) noexcept;
+   StreamString& operator << (const unsigned int vv) noexcept;
+   StreamString& operator << (const bool vv) noexcept;
+   StreamString& operator << (const Integer64 vv) noexcept;
+   StreamString& operator << (const Unsigned64 vv) noexcept;
+   StreamString& operator << (const float vv) noexcept;
+   StreamString& operator << (const double vv) noexcept;
+   StreamString& operator << (const std::string& vv) noexcept { std::string::append (vv); return *this; }
 
 private:
    Flag::_v a_flags;

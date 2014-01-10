@@ -41,7 +41,7 @@ using namespace wepa;
 using namespace wepa::logger;
 
 const adt::StreamString& DefaultFormatter::do_apply (const Elements& elements, adt::StreamString& output)
-   throw ()
+   noexcept
 {
    auto second = adt::Second::getLocalTime ();
 

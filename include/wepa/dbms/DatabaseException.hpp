@@ -52,16 +52,16 @@ public:
    /**
       Destructor.
    */
-   ~DatabaseException () throw () {;}
+   ~DatabaseException () noexcept {;}
    
    /**
       Devuelve el resultado de base de datos asociado a la excepcion   
    
       @return El resultado de base de datos asociado a la excepcion   
    */   
-   const ResultCode& getResultCode () const throw () { return m_resultCode; }
+   const ResultCode& getResultCode () const noexcept { return m_resultCode; }
    
-   std::string asString () const throw ();
+   std::string asString () const noexcept;
 
 private:
    const ResultCode m_resultCode;

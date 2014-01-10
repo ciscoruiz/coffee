@@ -41,7 +41,7 @@ namespace balance {
 
 class SCCS {
 public:
-   static void activate () throw ();
+   static void activate () noexcept;
 };
 
 }

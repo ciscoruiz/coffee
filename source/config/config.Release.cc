@@ -7,7 +7,7 @@
 using namespace std;
 using namespace wepa;
 
-string config::Release::getVersion () throw ()
+string config::Release::getVersion () noexcept
 {
    static const int version = WEPA_VERSION;
 
@@ -22,7 +22,7 @@ string config::Release::getVersion () throw ()
 }
 
 // (1) It only will use the main OS version
-string config::Release::getArchitecture () throw ()
+string config::Release::getArchitecture () noexcept
 {
    string result;
 

@@ -20,7 +20,7 @@ namespace binder {
  */
 class Input : public BinderIf {
 public:
-   adt::StreamString asString () const throw ();
+   adt::StreamString asString () const noexcept;
 
 protected:
    explicit Input (datatype::Abstract& value) : BinderIf (value) {;}

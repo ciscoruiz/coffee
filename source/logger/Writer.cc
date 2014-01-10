@@ -39,7 +39,7 @@ using namespace wepa;
 
 // virtual
 bool logger::Writer::wantsToProcess (const logger::Level::_v level) const
-   throw ()
+   noexcept
 {
    return Logger::isActive(level);
 }

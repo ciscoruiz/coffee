@@ -54,7 +54,7 @@ xml::Node::Node (_xmlNode* handler) : Wrapper (handler)
 
 // static
 const char* xml::Node::nameExtractor (const Handler handler)
-   throw ()
+   noexcept
 {
    return (const char*) (handler->name);
 }
@@ -91,7 +91,7 @@ const xml::Node& xml::Node::lookupChild (const char* name) const
 }
 
 const xml::Node* xml::Node::searchChild (const char* name) const
-   throw ()
+   noexcept
 {
    for (const_child_iterator ii = child_begin(), maxii = child_end (); ii != maxii; ++ ii) {
       const Node& child = get_child(ii);
@@ -126,7 +126,7 @@ xml::Node& xml::Node::lookupChild (const char* name)
 }
 
 xml::Node* xml::Node::searchChild (const char* name)
-   throw ()
+   noexcept
 {
    for (child_iterator ii = child_begin(), maxii = child_end (); ii != maxii; ++ ii) {
       Node& child = get_child(ii);
@@ -199,7 +199,7 @@ const xml::Attribute& xml::Node::lookupAttribute (const char* name) const
 }
 
 const xml::Attribute* xml::Node::searchAttribute (const char* name) const
-   throw ()
+   noexcept
 {
    for (const_attribute_iterator ii = attribute_begin(), maxii = attribute_end (); ii != maxii; ++ ii) {
       const Attribute& attribute = get_attribute(ii);
@@ -224,7 +224,7 @@ xml::Attribute& xml::Node::lookupAttribute (const char* name)
 }
 
 xml::Attribute* xml::Node::searchAttribute (const char* name)
-   throw ()
+   noexcept
 {
    for (attribute_iterator ii = attribute_begin(), maxii = attribute_end (); ii != maxii; ++ ii) {
       Attribute& attribute = get_attribute(ii);

@@ -48,19 +48,19 @@ public:
    /**
       @return La instancia de la clase indicada en la creacin de la template.
    */
-   static _T& getInstance () throw () { return std::ref (*pointer ()); }
+   static _T& getInstance () noexcept { return std::ref (*pointer ()); }
 
    /**
       @return La instancia de la clase indicada en la creacin de la template.
    */
-   static const _T* getConstPointer () throw () { return pointer (); }
+   static const _T* getConstPointer () noexcept { return pointer (); }
 
 private:
    /**
       @return El puntero de la clase indicada en la creacin de la template.
       \warning Este puntero nunca se debe liberar por parte del usuario.
    */
-   static _T* pointer () throw () {
+   static _T* pointer () noexcept {
       static std::mutex mutex;
       static _T* result (NULL);
 

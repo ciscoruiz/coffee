@@ -99,7 +99,7 @@ app::Application::Application (const char* shortName, const char* title, const c
 }
 
 app::EngineIf* app::Application::engine_find (const char* className)
-   throw ()
+   noexcept
 {
    EngineIf* engine;
 
@@ -194,7 +194,7 @@ void app::Application::startEngines ()
 }
 
 void app::Application::stopEngines ()
-   throw ()
+   noexcept
 {
    LOG_THIS_METHOD ();
 
@@ -298,7 +298,7 @@ void app::Application::writeContext (const std::string& file)
 }
 
 xml::Node& app::Application::asXML (xml::Node& root) const
-   throw ()
+   noexcept
 {
    xml::Node& app = root.createChild ("app.Application");
 
@@ -351,7 +351,7 @@ void app::Application::signalUSR2 ()
 
 // static
 void app::Application::handlerUserSignal (int signalID)
-   throw ()
+   noexcept
 {
    try {
       Application& app = app::functions::getApp ();
@@ -368,7 +368,7 @@ void app::Application::handlerUserSignal (int signalID)
 
 // static
 void app::Application::handlerSignalTerminate (int)
-   throw ()
+   noexcept
 {
    try {
       Application& app = app::functions::getApp();
@@ -387,7 +387,7 @@ void app::Application::handlerSignalTerminate (int)
  */
 // static
 void app::Application::handlerChildTerminate (int sig)
-   throw ()
+   noexcept
 {
    if (sig == SIGCHLD) {
       int status;

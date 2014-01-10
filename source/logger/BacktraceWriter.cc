@@ -51,7 +51,7 @@ logger::BacktraceWriter::BacktraceWriter (const std::string& path, const size_t 
 }
 
 void logger::BacktraceWriter::apply (const Level::_v level, const std::string& line)
-   throw ()
+   noexcept
 {
    if (level <= Level::Error) {
       backtrace ();
@@ -72,7 +72,7 @@ void logger::BacktraceWriter::apply (const Level::_v level, const std::string& l
 }
 
 void logger::BacktraceWriter::backtrace()
-   throw ()
+   noexcept
 {
    Level::_v originalLevel = Logger::getLevel();
 

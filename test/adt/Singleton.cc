@@ -43,7 +43,7 @@
 class TheClass : public wepa::adt::pattern::Singleton <TheClass> {
 public:
    void setSome (const int some) { m_some = some; }
-   int getSome () const throw () { return m_some; }
+   int getSome () const noexcept { return m_some; }
 
 private:
    int m_some;

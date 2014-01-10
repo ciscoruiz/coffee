@@ -55,7 +55,7 @@ public:
    virtual ~ResultCode () { if (m_errorText != NULL) free (m_errorText); }
 
    void initialize (const int errorCode, const char* errorText)
-      throw ()
+      noexcept
    {
       m_errorCode = errorCode;
       copy (errorText);
@@ -65,13 +65,13 @@ public:
       Devuelve el codigo de error del ultimo comando ejecutado contra la base de datos.   
       @return El codigo de error del ultimo comando ejecutado contra la base de datos.
    */   
-   int getErrorCode () const throw () { return m_errorCode; }
+   int getErrorCode () const noexcept { return m_errorCode; }
    
    /**
       Devuelve el texto del error del ultimo comando ejecutado contra la base de datos.
       @return El texto del error del ultimo comando ejecutado contra la base de datos.
    */
-   const char* getErrorText () const throw () { return (m_errorText != NULL) ? m_errorText: ""; }
+   const char* getErrorText () const noexcept { return (m_errorText != NULL) ? m_errorText: ""; }
 
    // Operadores
    /**
@@ -80,7 +80,7 @@ public:
       @return Una instancia de si mismo.
    */      
    ResultCode& operator = (const ResultCode& resultCode) 
-      throw ()
+      noexcept
    {
       if (this != &resultCode) {
          m_database = resultCode.m_database;
@@ -126,7 +126,7 @@ public:
       Devuelve una cadena con la informacion sobre esta clase.
       \return Una cadena con la informacion sobre esta clase.
    */
-   adt::StreamString asString () const throw ();
+   adt::StreamString asString () const noexcept;
 
 protected:
    static const int MaxErrorLen = 512;
@@ -158,7 +158,7 @@ private:
    char* m_errorText;
    const Database* m_database;
    
-   void copy (const char* text) throw ();
+   void copy (const char* text) noexcept;
 };
 
 }

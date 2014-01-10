@@ -107,14 +107,14 @@ public:
       Devuelve el tamao actual de este dato.
       \return El tamao actual de este dato.
    */
-   int getSize () const throw () { return (hasValue () == true) ? m_value.size (): 0; }
+   int getSize () const noexcept { return (hasValue () == true) ? m_value.size (): 0; }
 
    /**
       Devuelve el contenido de la este bloque de memoria.
       \return  Devuelve el contenido de la este bloque de memoria.
       \warning Si el metodo datatype::Abstract::isNull devolvio \em true el resultado de este metodo no esta definido.
    */
-   const adt::DataBlock& getValue (adt::RuntimeException) const throw () { this->exceptionWhenIsNull(); return m_value; }
+   const adt::DataBlock& getValue (adt::RuntimeException) const noexcept { this->exceptionWhenIsNull(); return m_value; }
 
    /**
       Devuelve el contenido de la este bloque de memoria.
@@ -146,14 +146,14 @@ public:
       Devuelve una cadena con la informacion referente a esta instancia.
       \return Una cadena con la informacion referente a esta instancia.
    */
-   adt::StreamString asString () const throw ();
+   adt::StreamString asString () const noexcept;
 
    wepa_declare_datatype_downcast(LongBlock)
 
 protected:
    adt::DataBlock m_value;
 
-   void do_clear () throw () { m_value.clear (); }
+   void do_clear () noexcept { m_value.clear (); }
 };
 
 }

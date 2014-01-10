@@ -51,7 +51,7 @@ void datatype::ShortBlock::setValue(const adt::DataBlock& value)
 }
 
 adt::StreamString datatype::ShortBlock::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("dbms::datatype::ShortBlock { ");
    result += datatype::Abstract::asString ();

@@ -73,10 +73,10 @@ private:
 
    void validate (const xml::Document* document) const throw (adt::RuntimeException);
 
-   static const char* nameExtractor(const Handler handler) throw ();
+   static const char* nameExtractor(const Handler handler) noexcept;
 
-   static void callbackErrorHandler (void *ctx,  const char *msg, ...) throw ();
-   static void callbackWarningHandler (void *ctx,  const char *msg, ...) throw ();
+   static void callbackErrorHandler (void *ctx,  const char *msg, ...) noexcept;
+   static void callbackWarningHandler (void *ctx,  const char *msg, ...) noexcept;
 
    friend class wepa::xml::Document;
 };

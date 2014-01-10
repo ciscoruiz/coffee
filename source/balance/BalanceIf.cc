@@ -153,7 +153,7 @@ bool balance::BalanceIf::add (Resource* resource)
 }
 
 bool balance::BalanceIf::contains (const balance::Resource* resource) const
-   throw ()
+   noexcept
 {
    if (resource == NULL)
       return false;
@@ -167,7 +167,7 @@ bool balance::BalanceIf::contains (const balance::Resource* resource) const
 
 // virtual
 bool balance::BalanceIf::do_contains (const balance::Resource* resource) const
-   throw ()
+   noexcept
 {
    const_resource_iterator end = resource_end ();
 
@@ -176,7 +176,7 @@ bool balance::BalanceIf::do_contains (const balance::Resource* resource) const
 
 
 size_t balance::BalanceIf::countAvailableResources () const
-   throw ()
+   noexcept
 {
    size_t result = 0;
 
@@ -189,7 +189,7 @@ size_t balance::BalanceIf::countAvailableResources () const
 }
 
 balance::BalanceIf::resource_iterator balance::BalanceIf::next (balance::BalanceIf::resource_iterator ii)
-   throw ()
+   noexcept
 {
    ii ++;
 
@@ -201,7 +201,7 @@ balance::BalanceIf::resource_iterator balance::BalanceIf::next (balance::Balance
 
 //virtual
 adt::StreamString balance::BalanceIf::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("balance::BalanceIf {");
 
@@ -220,7 +220,7 @@ adt::StreamString balance::BalanceIf::asString () const
 
 //virtual
 xml::Node& balance::BalanceIf::asXML (xml::Node& parent) const
-   throw ()
+   noexcept
 {
    xml::Node& result = parent.createChild (this->getName());
 

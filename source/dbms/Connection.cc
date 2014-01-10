@@ -130,7 +130,7 @@ void dbms::Connection::commit ()
 }
 
 void dbms::Connection::rollback () 
-   throw ()
+   noexcept
 {
    LOG_WARN (asString ());
 
@@ -171,7 +171,7 @@ void dbms::Connection::lock ()
 }
 
 void dbms::Connection::unlock ()
-   throw ()
+   noexcept
 {
    LOG_DEBUG (asString ());
 
@@ -192,7 +192,7 @@ void dbms::Connection::unlock ()
 }
 
 adt::StreamString dbms::Connection::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("dbms::Connection { ");
    result += balance::Resource::asString ();
@@ -205,7 +205,7 @@ adt::StreamString dbms::Connection::asString () const
 }
 
 xml::Node& dbms::Connection::asXML (xml::Node& parent) const
-   throw ()
+   noexcept
 {
    xml::Node& result = parent.createChild ("dbms.Connection");
 

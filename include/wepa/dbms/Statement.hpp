@@ -95,13 +95,13 @@ public:
       Devuelve el nombre logico de esta sentencia.
       \return El nombre logico de esta sentencia.
    */
-   const std::string& getName () const throw () { return m_name; }
+   const std::string& getName () const noexcept { return m_name; }
 
    /**
       Devuelve la expresion SQL recibida en el constructor.
       \return La expresion SQL recibida en el constructor.
    */
-   const std::string& getExpression () const throw () { return m_expression; }
+   const std::string& getExpression () const noexcept { return m_expression; }
 
    /**
       Devuelve el indicador de criticidad, si vale \em true indica que si la ejecucion de esta sentencia
@@ -110,20 +110,20 @@ public:
       Solo aplicara en sentencias que no sean de seleccion.
       \return El indicador de criticidad de esta sentencia.
    */
-   ActionOnError::_v actionOnError () const throw () { return m_actionOnError; }
+   ActionOnError::_v actionOnError () const noexcept { return m_actionOnError; }
 
    /**
       Devuelve la instancia de la base de datos asociada a esta sentencia.
       \return La instancia de la base de datos asociada a la sentencia.
    */
-   Database& getDatabase () const throw () { return m_database; }
+   Database& getDatabase () const noexcept { return m_database; }
 
    /**
       Establece el valor del indicador que activa/desactiva la necesidad de invocar al
       \em commit y/o \em rollback despues de ejecutar esta sentencia.
       \since NemesisRD.dbms 1.5.2.
    */
-   void setRequiresCommit (const bool requiresCommit) throw () { m_requiresCommit = requiresCommit; }
+   void setRequiresCommit (const bool requiresCommit) noexcept { m_requiresCommit = requiresCommit; }
 
    /**
       Devuelve \em true si la sentencia requiere la invocacion a \em commit o \em rollback
@@ -132,7 +132,7 @@ public:
       mediante la llamada #setRequiresCommit
       \since NemesisRD.dbms 1.5.2.
    */
-   bool requiresCommit () const throw () { return (m_requiresCommit == true) || (m_outputBinds.empty () == true); }
+   bool requiresCommit () const noexcept { return (m_requiresCommit == true) || (m_outputBinds.empty () == true); }
 
    /**
       Establece el parametro de entrada de la sentencia SQL.Cada una de las variables de entrada indicadas
@@ -197,13 +197,13 @@ public:
       \param parent Nodo XML del que debe colgar la informacion.
       @return un documento XML con la informacion referente a esta instancia.
    */
-   virtual xml::Node& asXML (xml::Node& parent) const throw ();
+   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.
       @return Una cadena con la informacion referente a esta instancia.
    */
-   virtual adt::StreamString asString () const throw ();
+   virtual adt::StreamString asString () const noexcept;
 
    Statement (const Statement&) = delete;
    Statement& operator= (const Statement&) = delete;
@@ -252,8 +252,8 @@ protected:
    {
    }
 
-   int input_size () const throw () { return m_inputBinds.size (); }
-   int output_size () const throw () { return m_outputBinds.size (); }
+   int input_size () const noexcept { return m_inputBinds.size (); }
+   int output_size () const noexcept { return m_outputBinds.size (); }
 
 private:
    Database& m_database;
@@ -266,7 +266,7 @@ private:
    adt::Average <adt::Microsecond> m_measureTiming;
    bool m_requiresCommit;
 
-   void measureTiming (const adt::DelayMeter <adt::Microsecond>& delay) throw () { m_measureTiming += delay.getValue(); }
+   void measureTiming (const adt::DelayMeter <adt::Microsecond>& delay) noexcept { m_measureTiming += delay.getValue(); }
 
    void prepare (Connection* connection) throw (adt::RuntimeException, DatabaseException);
    virtual void do_prepare (Connection* connection) throw (adt::RuntimeException, DatabaseException) = 0;

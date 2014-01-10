@@ -44,26 +44,26 @@ using namespace std;
 using namespace wepa;
 
 void adt::StreamString::toUpper ()
-   throw ()
+   noexcept
 {
    std::transform(begin(), end(), begin(), (int(*)(int)) toupper);
 }
 
 void adt::StreamString::toLower ()
-   throw ()
+   noexcept
 {
    std::transform(begin(), end(), begin(), (int(*)(int)) tolower);
 }
 
 adt::StreamString& adt::StreamString::operator<< (const char vv)
-   throw ()
+   noexcept
 {
    string::operator +=(vv);
    return *this;
 }
 
 adt::StreamString& adt::StreamString::operator<< (const char* vv)
-   throw ()
+   noexcept
 {
    if (vv == NULL) {
       if (a_flags & Flag::ShowNull)
@@ -76,49 +76,49 @@ adt::StreamString& adt::StreamString::operator<< (const char* vv)
 }
 
 adt::StreamString& adt::StreamString::operator<< (const int vv)
-   throw ()
+   noexcept
 {
    string::append(AsString::apply (vv));
    return *this;
 }
 
 adt::StreamString& adt::StreamString::operator<< (const unsigned int vv)
-   throw ()
+   noexcept
 {
    string::append(AsString::apply (vv));
    return *this;
 }
 
 adt::StreamString& adt::StreamString::operator<< (const bool vv)
-   throw ()
+   noexcept
 {
    string::append(AsString::apply (vv));
    return *this;
 }
 
 adt::StreamString& adt::StreamString::operator<< (const Integer64 vv)
-   throw ()
+   noexcept
 {
    string::append(AsString::apply (vv));
    return *this;
 }
 
 adt::StreamString& adt::StreamString::operator<< (const Unsigned64 vv)
-   throw ()
+   noexcept
 {
    string::append(AsString::apply (vv));
    return *this;
 }
 
 adt::StreamString& adt::StreamString::operator<< (const float vv)
-   throw ()
+   noexcept
 {
    string::append(AsString::apply (vv, "%f"));
    return *this;
 }
 
 adt::StreamString& adt::StreamString::operator<< (const double vv)
-   throw ()
+   noexcept
 {
    string::append(AsString::apply (vv, "%e"));
    return *this;

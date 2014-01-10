@@ -45,7 +45,7 @@ wepa_sccs_define_tag (xml, 1)
 using namespace wepa;
 
 void xml::SCCS::activate()
-   throw ()
+   noexcept
 {
    adt::SCCS::activate ();
 

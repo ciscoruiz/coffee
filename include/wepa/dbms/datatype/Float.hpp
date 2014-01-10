@@ -79,14 +79,14 @@ public:
     * una cadena, en caso de que fuera necesario.
     * \since NemesisRD.dbms 1.7.4
     */
-   const char* getFormat () const throw () { return m_format; }
+   const char* getFormat () const noexcept { return m_format; }
 
    /**
       Operador de asignacion.
       \param value Float del que copiar.
       \return La instancia de esta cadena.
    */
-   void setValue (const float value) throw () {
+   void setValue (const float value) noexcept {
       m_value = value;
       isNotNull();
    }
@@ -102,14 +102,14 @@ public:
       Devuelve una cadena con la informacion referente a esta instancia.
       \return Una cadena con la informacion referente a esta instancia.
    */
-   adt::StreamString asString () const throw ();
+   adt::StreamString asString () const noexcept;
 
    /**
     * Devuelve el nombre l�gico de esta clase
     * \return el nombre l�gico de esta clase
     * \since NemesisRD.dbms 2.10.16.04
     */
-   static const char* className () throw () { return "dbms::datatype::Float"; }
+   static const char* className () noexcept { return "dbms::datatype::Float"; }
 
    wepa_declare_datatype_downcast(Float)
 
@@ -117,7 +117,7 @@ private:
    float m_value;
    const char* m_format;
 
-   void do_clear () throw () { m_value = 0.0; }
+   void do_clear () noexcept { m_value = 0.0; }
 };
 
 }

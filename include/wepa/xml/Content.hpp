@@ -46,9 +46,9 @@ public:
    Content () {;}
    virtual ~Content () { clear (); }
 
-   bool isNull () const throw () { return m_value.get () == NULL; }
-   const std::string& getValue () const throw () { return std::ref (*m_value.get ()); }
-   void setValue (const char* text) throw ();
+   bool isNull () const noexcept { return m_value.get () == NULL; }
+   const std::string& getValue () const noexcept { return std::ref (*m_value.get ()); }
+   void setValue (const char* text) noexcept;
    void clear () { m_value.reset (NULL); }
 
 private:

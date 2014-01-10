@@ -91,7 +91,7 @@ void balance::ByRange::addRange (const int bottom, const int top, BalanceIf* bal
 }
 
 balance::BalanceIf* balance::ByRange::find_range (const int key)
-throw ()
+noexcept
 {
    for (auto& range : m_ranges) {
       if (range.first.first >= key && range.first.second <= key)

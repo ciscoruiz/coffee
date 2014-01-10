@@ -69,7 +69,7 @@ public:
    */
    ~String () { delete [] m_value; }
 
-   int getSize () const throw () { return (hasValue () == true) ? wepa_strlen(m_value): 0; }
+   int getSize () const noexcept { return (hasValue () == true) ? wepa_strlen(m_value): 0; }
 
    /**
       Devuelve el contenido de la cadena.
@@ -105,26 +105,26 @@ public:
       Elimina los espacios a la derecha de la cadena recibida.
       \return La misma cadena recibida pero con los espacios eliminados.
    */
-   static char* strip (char *str) throw ();
+   static char* strip (char *str) noexcept;
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.
       \return Una cadena con la informacion referente a esta instancia.
    */
-   virtual adt::StreamString asString () const throw ();
+   virtual adt::StreamString asString () const noexcept;
 
    /**
     * Devuelve el nombre l�gico de esta clase
     * \return el nombre l�gico de esta clase
     */
-   static const char* className () throw () { return "dbms::datatype::String"; }
+   static const char* className () noexcept { return "dbms::datatype::String"; }
 
    wepa_declare_datatype_downcast(String)
 
 private:
    char* m_value;
 
-   void do_clear () throw () { m_value [0] = 0; }
+   void do_clear () noexcept { m_value [0] = 0; }
 };
 
 }

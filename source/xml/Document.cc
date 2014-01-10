@@ -65,7 +65,7 @@ xml::Document::~Document ()
 
 // static
 const char* xml::Document::nameExtractor (const Handler handler)
-   throw ()
+   noexcept
 {
    return (const char*) (handler->name);
 }

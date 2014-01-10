@@ -60,20 +60,20 @@ public:
    static void initialize (Writer* writer, Formatter* formatter) throw (adt::RuntimeException);
    static void initialize (Writer* writer) throw (adt::RuntimeException);
 
-   static void write (const Level::_v level, const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw ();
+   static void write (const Level::_v level, const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept;
 
-   static void setLevel (const Level::_v level) throw () { m_level = level; }
-   static Level::_v getLevel () throw () { return m_level; }
+   static void setLevel (const Level::_v level) noexcept { m_level = level; }
+   static Level::_v getLevel () noexcept { return m_level; }
 
-   static bool isActive (const Level::_v level) throw () { return (level <= Level::Error) ? true: (level <= m_level); }
-   static bool wantsToProcess (const Level::_v level) throw ();
+   static bool isActive (const Level::_v level) noexcept { return (level <= Level::Error) ? true: (level <= m_level); }
+   static bool wantsToProcess (const Level::_v level) noexcept;
 
-   static void critical (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Critical, streamString, function, file, line); }
-   static void error (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Error, streamString, function, file, line); }
-   static void warning (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Warning, streamString, function, file, line); }
-   static void notice (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Notice, streamString, function, file, line); }
-   static void info (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Information, streamString, function, file, line); }
-   static void debug (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Debug, streamString, function, file, line); }
+   static void critical (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Critical, streamString, function, file, line); }
+   static void error (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Error, streamString, function, file, line); }
+   static void warning (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Warning, streamString, function, file, line); }
+   static void notice (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Notice, streamString, function, file, line); }
+   static void info (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Information, streamString, function, file, line); }
+   static void debug (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Debug, streamString, function, file, line); }
 
    static void write (const adt::Exception& ex) {
       error (ex.what (), ex.getMethod(), ex.getFile(), ex.getLine());

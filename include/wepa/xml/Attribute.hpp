@@ -59,16 +59,16 @@ public:
    template <typename _T> void setValue(const _T value) throw (adt::RuntimeException) {
       setValue (adt::AsString::apply(value));
    }
-   const std::string& getValue () const throw ();
+   const std::string& getValue () const noexcept;
 
-   bool operator < (const Attribute& left) const throw ();
+   bool operator < (const Attribute& left) const noexcept;
 
 private:
    mutable Content m_value;
 
    Attribute (_xmlAttr* handler);
 
-   static const char* nameExtractor (const Handler handler) throw ();
+   static const char* nameExtractor (const Handler handler) noexcept;
 
    void compile (Compiler& compiler) const throw (adt::RuntimeException);
 

@@ -67,7 +67,7 @@ public:
       \return La referencia a esta instancia.
    */
    void setValue (const int i)
-      throw ()
+      noexcept
    {
       m_value = i;
       this->isNotNull();
@@ -83,21 +83,21 @@ public:
       Devuelve una cadena con la informacion referente a esta instancia.
       @return Una cadena con la informacion referente a esta instancia.
    */
-   adt::StreamString asString () const throw ();
+   adt::StreamString asString () const noexcept;
 
    /**
     * Devuelve el nombre l�gico de esta clase
     * \return el nombre l�gico de esta clase
     * \since NemesisRD.dbms 2.10.16.04
     */
-   static const char* className () throw () { return "dbms::datatype::Integer"; }
+   static const char* className () noexcept { return "dbms::datatype::Integer"; }
 
    wepa_declare_datatype_downcast(Integer)
 
 private:
    int m_value;
 
-   void do_clear () throw () { m_value = 0; }
+   void do_clear () noexcept { m_value = 0; }
 };
 
 }

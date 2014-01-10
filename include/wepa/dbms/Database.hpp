@@ -68,13 +68,13 @@ public:
       Devuelve el tipo de conexion de esta base de datos.
       \return El tipo de conexion de esta base de datos.
    */
-   const Type::_v getType () const throw () { return m_type; }
+   const Type::_v getType () const noexcept { return m_type; }
 
    /**
       Devuelve el nombre de la base de datos indicado en el constructor.
       \return El nombre de la base de datos indicado en el constructor.
    */
-   const std::string& getName () const throw () { return m_name; }
+   const std::string& getName () const noexcept { return m_name; }
 
    /**
       Establece el manejador encargado de actuar cuando la recuperacion de la conexion falla.
@@ -82,13 +82,13 @@ public:
       \param failRecoveryHandler Manejador que seria invocado en caso de que no sea posible recuperar
       una determina conexion.
    */
-   void setFailRecoveryHandler (FailRecoveryHandler* failRecoveryHandler) throw () { m_failRecoveryHandler = failRecoveryHandler; }
+   void setFailRecoveryHandler (FailRecoveryHandler* failRecoveryHandler) noexcept { m_failRecoveryHandler = failRecoveryHandler; }
 
    /**
     * Establece el traductor de sentencias SQL usado ajustar las sentencias SQL al
     * motor de base de datos usados en la aplicaci�n.
     */
-   void setStatementTranslator (StatementTranslator* statementTranslator) throw () { m_statementTranslator = statementTranslator; }
+   void setStatementTranslator (StatementTranslator* statementTranslator) noexcept { m_statementTranslator = statementTranslator; }
 
    /**
       Crea y registra una nueva conexion con esta base de datos.
@@ -123,13 +123,13 @@ public:
       Devuelve un iterator al comienzo de la lista de conexiones establecidas con esta base de datos.
       \return Un iterator al comienzo de la lista de conexiones establecidas con esta base de datos.
    */
-   const_connection_iterator connection_begin () const throw () { return m_connections.begin (); }
+   const_connection_iterator connection_begin () const noexcept { return m_connections.begin (); }
 
    /**
       Devuelve un iterator al final de la lista de conexiones establecidas con esta base de datos.
       \return Un iterator al final de la lista de conexiones establecidas con esta base de datos.
    */
-   const_connection_iterator connection_end () const throw () { return m_connections.end (); }
+   const_connection_iterator connection_end () const noexcept { return m_connections.end (); }
 
    /**
       Devuelve el objeto sobre el que esta posicionado el iterator recibido como parametro.
@@ -137,7 +137,7 @@ public:
       \return El objeto sobre el que esta posicionado el iterator recibido como parametro.
       \since NemesisRD.dbms 1.0.2
    */
-   static const Connection& connection (const_connection_iterator ii) throw () { return std::ref (*ii); }
+   static const Connection& connection (const_connection_iterator ii) noexcept { return std::ref (*ii); }
 
    /**
       Crea y registra una nueva sentencia SQL asociada a esta base de datos.
@@ -187,14 +187,14 @@ public:
       \return Un iterator al comienzo de la lista de sentencias SQL creadas en esta base de datos.
       \since NemesisRD.dbms 1.2.2
    */
-   const_statement_iterator statement_begin () const throw () { return m_statements.begin (); }
+   const_statement_iterator statement_begin () const noexcept { return m_statements.begin (); }
 
    /**
       Devuelve un iterator al final de la lista de sentencias SQL creadas en esta base de datos.
       \return Un iterator al final de la lista de sentencias SQL creadas en esta base de datos.
       \since NemesisRD.dbms 1.2.2
    */
-   const_statement_iterator statement_end () const throw () { return m_statements.end (); }
+   const_statement_iterator statement_end () const noexcept { return m_statements.end (); }
 
    /**
       Devuelve el objeto sobre el que esta posicionado el iterator recibido como parametro.
@@ -202,20 +202,20 @@ public:
       \return El objeto sobre el que esta posicionado el iterator recibido como parametro.
       \since NemesisRD.dbms 1.2.2
    */
-   static const Statement& statement (const_statement_iterator ii) throw () { return std::ref (*ii); }
+   static const Statement& statement (const_statement_iterator ii) noexcept { return std::ref (*ii); }
 
    /**
       Devuelve una cadena con la informacion mas relevante de esta instancia.
       \return Una cadena con la informacion mas relevante de esta instancia.
    */
-   virtual adt::StreamString  asString () const throw ();
+   virtual adt::StreamString  asString () const noexcept;
 
    /**
       Devuelve un documento XML con la informacion mas relevante de esta instancia.
       \param parent Nodo XML del que colgar la informacion referente a esta instancia.
       \return Un documento XML con la informacion mas relevante de esta instancia.
    */
-   virtual xml::Node& asXML (xml::Node& parent) const throw ();
+   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
    Database& operator= (const Database&) = delete;
    Database (const Database&) = delete;
@@ -250,21 +250,21 @@ protected:
       Elimina las conexiones definidas sobre esta base de datos. Este metodo se invocaria automaticamente
       desde el nucleo de NemesisRD.
    */
-   virtual void do_stop () throw ();
+   virtual void do_stop () noexcept;
 
    /**
       Devuelve un iterator al comienzo de la lista de conexiones establecidas con esta base de datos.
       \return Un iterator al comienzo de la lista de conexiones establecidas con esta base de datos.
       \since NemesisRD.dbms 1.1.1
    */
-   connection_iterator connection_begin () throw () { return m_connections.begin (); }
+   connection_iterator connection_begin () noexcept { return m_connections.begin (); }
 
    /**
       Devuelve un iterator al final de la lista de conexiones establecidas con esta base de datos.
       \return Un iterator al final de la lista de conexiones establecidas con esta base de datos.
       \since NemesisRD.dbms 1.1.1
    */
-   connection_iterator connection_end () throw () { return m_connections.end (); }
+   connection_iterator connection_end () noexcept { return m_connections.end (); }
 
    /**
       Devuelve el objeto sobre el que esta posicionado el iterator recibido como parametro.
@@ -272,21 +272,21 @@ protected:
       \return El objeto sobre el que esta posicionado el iterator recibido como parametro.
       \since NemesisRD.dbms 1.1.1
    */
-   static Connection& connection (connection_iterator ii) throw () { return std::ref (*ii); }
+   static Connection& connection (connection_iterator ii) noexcept { return std::ref (*ii); }
 
    /**
       Devuelve un iterator al comienzo de la lista de sentencias SQL creadas en esta base de datos.
       \return Un iterator al comienzo de la lista de sentencias SQL creadas en esta base de datos.
       \since NemesisRD.dbms 1.2.2
    */
-   statement_iterator statement_begin () throw () { return m_statements.begin (); }
+   statement_iterator statement_begin () noexcept { return m_statements.begin (); }
 
    /**
       Devuelve un iterator al final de la lista de sentencias SQL creadas en esta base de datos.
       \return Un iterator al final de la lista de sentencias SQL creadas en esta base de datos.
       \since NemesisRD.dbms 1.2.2
    */
-   statement_iterator statement_end () throw () { return m_statements.end (); }
+   statement_iterator statement_end () noexcept { return m_statements.end (); }
 
    /**
       Devuelve el objeto sobre el que esta posicionado el iterator recibido como parametro.
@@ -294,7 +294,7 @@ protected:
       \return El objeto sobre el que esta posicionado el iterator recibido como parametro.
       \since NemesisRD.dbms 1.2.2
    */
-   static Statement& statement (statement_iterator ii) throw () { return std::ref (*ii); }
+   static Statement& statement (statement_iterator ii) noexcept { return std::ref (*ii); }
 
 private:
    const std::string m_name;
@@ -304,8 +304,8 @@ private:
    FailRecoveryHandler* m_failRecoveryHandler;
    StatementTranslator* m_statementTranslator;
 
-   static Connection* connection_ptr (connection_iterator ii) throw () { Connection& result = std::ref (*ii); return &result; }
-   static Statement* statement_ptr (statement_iterator ii) throw () { Statement& result = std::ref (*ii); return &result; }
+   static Connection* connection_ptr (connection_iterator ii) noexcept { Connection& result = std::ref (*ii); return &result; }
+   static Statement* statement_ptr (statement_iterator ii) noexcept { Statement& result = std::ref (*ii); return &result; }
 
    virtual Connection* allocateConnection (const std::string& name, const char* user, const char* password)
       throw (adt::RuntimeException) = 0;
@@ -316,10 +316,10 @@ private:
    virtual binder::Input* allocateInputBind (datatype::Abstract& data) throw (adt::RuntimeException) = 0;
    virtual binder::Output* allocateOutputBind (datatype::Abstract& data) throw (adt::RuntimeException) = 0;
 
-   virtual bool notFound (const int errorCode) const throw () = 0;
-   virtual bool successful (const int errorCode) const throw () = 0;
-   virtual bool locked (const int errorCode) const throw () = 0;
-   virtual bool lostConnection (const int errorCode) const throw () = 0;
+   virtual bool notFound (const int errorCode) const noexcept = 0;
+   virtual bool successful (const int errorCode) const noexcept = 0;
+   virtual bool locked (const int errorCode) const noexcept = 0;
+   virtual bool lostConnection (const int errorCode) const noexcept = 0;
 
    friend class Statement;
    friend class ResultCode;

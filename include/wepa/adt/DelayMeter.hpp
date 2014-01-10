@@ -44,20 +44,20 @@ public:
    DelayMeter () { m_timeStamp = _TimeUnit::getTime (); }
    DelayMeter (const DelayMeter& other) { m_timeStamp = other.m_timeStamp; }
 
-   _TimeUnit getValue () const throw () {
+   _TimeUnit getValue () const noexcept {
       return _TimeUnit::getTime () - m_timeStamp;
    }
 
-   operator _TimeUnit () const throw () { return getValue (); }
+   operator _TimeUnit () const noexcept { return getValue (); }
 
-   void reset () throw () {
+   void reset () noexcept {
       m_timeStamp = _TimeUnit::getTime ();
    }
 
-   DelayMeter <_TimeUnit>& operator= (const DelayMeter& other) throw () { m_timeStamp = other.m_timeStamp; return *this; }
-   bool operator < (const _TimeUnit& other) const throw () { return getValue () < other; }
-   bool operator > (const _TimeUnit& other) const throw () { return getValue () > other; }
-   bool operator == (const _TimeUnit& other) const throw () { return getValue () == other; }
+   DelayMeter <_TimeUnit>& operator= (const DelayMeter& other) noexcept { m_timeStamp = other.m_timeStamp; return *this; }
+   bool operator < (const _TimeUnit& other) const noexcept { return getValue () < other; }
+   bool operator > (const _TimeUnit& other) const noexcept { return getValue () > other; }
+   bool operator == (const _TimeUnit& other) const noexcept { return getValue () == other; }
 
 private:
    _TimeUnit m_timeStamp;

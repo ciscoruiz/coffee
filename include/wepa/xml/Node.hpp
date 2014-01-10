@@ -72,16 +72,16 @@ public:
    ~Node () {;}
 
    const Node& lookupChild (const char* name) const throw (adt::RuntimeException);
-   const Node* searchChild (const char* name) const throw ();
+   const Node* searchChild (const char* name) const noexcept;
    const Node& lookupChild (const std::string& name) const throw (adt::RuntimeException) { return lookupChild (name.c_str ()); }
-   const Node* searchChild (const std::string& name) const throw () { return searchChild (name.c_str ()); }
+   const Node* searchChild (const std::string& name) const noexcept { return searchChild (name.c_str ()); }
 
    const Node& childAt (const size_t ii) const throw (adt::RuntimeException);
 
    Node& lookupChild (const char* name) throw (adt::RuntimeException);
-   Node* searchChild (const char* name) throw ();
+   Node* searchChild (const char* name) noexcept;
    Node& lookupChild (const std::string& name) throw (adt::RuntimeException) { return lookupChild (name.c_str ()); }
-   Node* searchChild (const std::string& name) throw () { return searchChild (name.c_str ()); }
+   Node* searchChild (const std::string& name) noexcept { return searchChild (name.c_str ()); }
 
    Node& childAt (const size_t ii) throw (adt::RuntimeException);
 
@@ -98,36 +98,36 @@ public:
    void createText (const std::string& text) throw (adt::RuntimeException) { createText (text.c_str ()); }
 
    const Attribute& lookupAttribute (const char* name) const throw (adt::RuntimeException);
-   const Attribute* searchAttribute (const char* name) const throw ();
+   const Attribute* searchAttribute (const char* name) const noexcept;
    const Attribute& lookupAttribute (const std::string& name) const throw (adt::RuntimeException) { return lookupAttribute (name.c_str ()); }
-   const Attribute* searchAttribute (const std::string& name) const throw () { return searchAttribute (name.c_str ()); }
+   const Attribute* searchAttribute (const std::string& name) const noexcept { return searchAttribute (name.c_str ()); }
 
    Attribute& lookupAttribute (const char* name) throw (adt::RuntimeException);
-   Attribute* searchAttribute (const char* name) throw ();
+   Attribute* searchAttribute (const char* name) noexcept;
    Attribute& lookupAttribute (const std::string& name) throw (adt::RuntimeException) { return lookupAttribute (name.c_str ()); }
-   Attribute* searchAttribute (const std::string& name) throw () { return searchAttribute (name.c_str ()); }
+   Attribute* searchAttribute (const std::string& name) noexcept { return searchAttribute (name.c_str ()); }
 
-   child_iterator child_begin () throw () { return m_children.begin (); }
-   child_iterator child_end () throw () { return m_children.end(); }
-   static Node& get_child (child_iterator ii) throw () { return std::ref (*ii); }
+   child_iterator child_begin () noexcept { return m_children.begin (); }
+   child_iterator child_end () noexcept { return m_children.end(); }
+   static Node& get_child (child_iterator ii) noexcept { return std::ref (*ii); }
 
-   size_t children_size () const throw () { return m_children.size (); }
-   const_child_iterator child_begin () const throw () { return m_children.begin (); }
-   const_child_iterator child_end () const throw () { return m_children.end(); }
-   static const Node& get_child (const_child_iterator ii) throw () { return std::ref (*ii); }
+   size_t children_size () const noexcept { return m_children.size (); }
+   const_child_iterator child_begin () const noexcept { return m_children.begin (); }
+   const_child_iterator child_end () const noexcept { return m_children.end(); }
+   static const Node& get_child (const_child_iterator ii) noexcept { return std::ref (*ii); }
 
-   attribute_iterator attribute_begin () throw () { return m_attributes.begin (); }
-   attribute_iterator attribute_end () throw () { return m_attributes.end(); }
-   static Attribute& get_attribute (attribute_iterator ii) throw () { return std::ref (*ii); }
+   attribute_iterator attribute_begin () noexcept { return m_attributes.begin (); }
+   attribute_iterator attribute_end () noexcept { return m_attributes.end(); }
+   static Attribute& get_attribute (attribute_iterator ii) noexcept { return std::ref (*ii); }
 
-   size_t attributes_size () const throw () { return m_attributes.size (); }
-   const_attribute_iterator attribute_begin () const throw () { return m_attributes.begin (); }
-   const_attribute_iterator attribute_end () const throw () { return m_attributes.end(); }
-   static const Attribute& get_attribute (const_attribute_iterator ii) throw () { return std::ref (*ii); }
+   size_t attributes_size () const noexcept { return m_attributes.size (); }
+   const_attribute_iterator attribute_begin () const noexcept { return m_attributes.begin (); }
+   const_attribute_iterator attribute_end () const noexcept { return m_attributes.end(); }
+   static const Attribute& get_attribute (const_attribute_iterator ii) noexcept { return std::ref (*ii); }
 
-   bool hasText() const throw () { return m_text.isNull () == false; }
+   bool hasText() const noexcept { return m_text.isNull () == false; }
    const std::string& getText () const throw (adt::RuntimeException);
-   void setText (const char* text) throw () { m_text.setValue (text); }
+   void setText (const char* text) noexcept { m_text.setValue (text); }
 
 protected:
    Node (_xmlNode* xmlNode);
@@ -137,10 +137,10 @@ private:
    AttributeContainer m_attributes;
    Content m_text;
 
-   void addChild (Node* child) throw () { m_children.push_back(child); }
+   void addChild (Node* child) noexcept { m_children.push_back(child); }
    void addAttribute (Attribute* attribute) throw (adt::RuntimeException);
 
-   static const char* nameExtractor (const Handler handler) throw ();
+   static const char* nameExtractor (const Handler handler) noexcept;
 
    void compile (Compiler& compiler) const throw (adt::RuntimeException);
 

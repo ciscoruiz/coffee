@@ -50,16 +50,16 @@ public:
 private:
    int m_valueUnderStudy;
 
-   int getStartingPoint () const throw () { return m_valueUnderStudy; }
+   int getStartingPoint () const noexcept { return m_valueUnderStudy; }
 
-   int first (const int depth, int value) const throw () { return (value > 0) ? value - 1: 0; }
-   bool stop (const int depth, int value) const throw () { return value <= 0; }
-   int next (const int depth, int value) const throw () { return value - 1; }
+   int first (const int depth, int value) const noexcept { return (value > 0) ? value - 1: 0; }
+   bool stop (const int depth, int value) const noexcept { return value <= 0; }
+   int next (const int depth, int value) const noexcept { return value - 1; }
 
-   bool reject (const Solution* solution, const int candidate) const throw () {
+   bool reject (const Solution* solution, const int candidate) const noexcept {
       return (addUp (solution) + candidate) > m_valueUnderStudy;
    }
-   bool accept (const Solution* solution, const int candidate) const throw () {
+   bool accept (const Solution* solution, const int candidate) const noexcept {
       return (addUp (solution) + candidate) == m_valueUnderStudy;
    }
 
@@ -77,7 +77,7 @@ private:
 
 class PrintAddUp : public AddUpIsANumber::Solution::Predicate {
 public:
-   void apply (const AddUpIsANumber::Solution& solution, const int margin) const throw () {
+   void apply (const AddUpIsANumber::Solution& solution, const int margin) const noexcept {
       for (int ii = 0; ii < margin; ++ ii)
          std::cout << "   ";
       std::cout << solution.getValue() << std::endl;
@@ -140,19 +140,19 @@ public:
 private:
    const int m_size;
 
-   ColumnAndRow getStartingPoint () const throw () { return ColumnAndRow (0, 0); }
+   ColumnAndRow getStartingPoint () const noexcept { return ColumnAndRow (0, 0); }
 
-   ColumnAndRow first (const int depth, ColumnAndRow pos) const throw ();
-   bool stop (const int depth, ColumnAndRow pos) const throw ();
-   ColumnAndRow next (const int depth, ColumnAndRow pos) const throw ();
+   ColumnAndRow first (const int depth, ColumnAndRow pos) const noexcept;
+   bool stop (const int depth, ColumnAndRow pos) const noexcept;
+   ColumnAndRow next (const int depth, ColumnAndRow pos) const noexcept;
 
-   bool reject (const Solution* solution, const ColumnAndRow candidate) const throw ();
-   bool accept (const Solution* solution, const ColumnAndRow candidate) const throw ();
+   bool reject (const Solution* solution, const ColumnAndRow candidate) const noexcept;
+   bool accept (const Solution* solution, const ColumnAndRow candidate) const noexcept;
 
-   static bool diagonalCollision (const ColumnAndRow& step, const ColumnAndRow& candidate) throw ();
+   static bool diagonalCollision (const ColumnAndRow& step, const ColumnAndRow& candidate) noexcept;
 };
 
-ColumnAndRow NQueen::first (const int depth, ColumnAndRow pos) const throw ()
+ColumnAndRow NQueen::first (const int depth, ColumnAndRow pos) const noexcept
 {
    if (depth == 0)
       return ColumnAndRow (0, 0);
@@ -160,7 +160,7 @@ ColumnAndRow NQueen::first (const int depth, ColumnAndRow pos) const throw ()
    return next (depth, pos);
 }
 
-ColumnAndRow NQueen::next (const int depth, ColumnAndRow pos) const throw () {
+ColumnAndRow NQueen::next (const int depth, ColumnAndRow pos) const noexcept {
    ++ pos.first;
 
    if (depth != 0 && pos.first == m_size) {
@@ -171,12 +171,12 @@ ColumnAndRow NQueen::next (const int depth, ColumnAndRow pos) const throw () {
    return pos;
 }
 
-bool NQueen::stop (const int depth, ColumnAndRow pos) const throw ()
+bool NQueen::stop (const int depth, ColumnAndRow pos) const noexcept
 {
    return (depth == 0) ? (pos.first == m_size): (pos.second == m_size);
 }
 
-bool NQueen::reject (const NQueen::Solution* solution, const ColumnAndRow candidate) const throw ()
+bool NQueen::reject (const NQueen::Solution* solution, const ColumnAndRow candidate) const noexcept
 {
    while (solution != NULL) {
       const ColumnAndRow& step = solution->getValue();
@@ -196,7 +196,7 @@ bool NQueen::reject (const NQueen::Solution* solution, const ColumnAndRow candid
    return false;
 }
 
-bool NQueen::accept (const Solution* solution, const ColumnAndRow candidate) const throw ()
+bool NQueen::accept (const Solution* solution, const ColumnAndRow candidate) const noexcept
 {
    int numberOfQueens = 0;
 
@@ -209,7 +209,7 @@ bool NQueen::accept (const Solution* solution, const ColumnAndRow candidate) con
 }
 
 //static
-bool NQueen::diagonalCollision (const ColumnAndRow& step, const ColumnAndRow& candidate) throw () {
+bool NQueen::diagonalCollision (const ColumnAndRow& step, const ColumnAndRow& candidate) noexcept {
    if (step.first == candidate.second && step.second == candidate.first)
       return true;
 
@@ -225,7 +225,7 @@ bool NQueen::diagonalCollision (const ColumnAndRow& step, const ColumnAndRow& ca
 
 class PrintChessboard: public NQueen::Solution::Predicate {
 public:
-   void apply (const NQueen::Solution& solution, const int depth) const throw () {
+   void apply (const NQueen::Solution& solution, const int depth) const noexcept {
       if (depth == 0)
          return;
 

@@ -38,36 +38,36 @@ public:
     * Nombre l�gico del dato, indicado en el contructor.
     * \return Nombre l�gico del dato, indicado en el contructor.
     */
-   const char* getName () const throw () { return m_name.c_str (); }
+   const char* getName () const noexcept { return m_name.c_str (); }
 
    /**
       Devuelve el tamano maximo de este dato que coincidiria con el indicado en el constructor.
       \return El tamano maximo de este dato que coincidiria con el indicado en el constructor.
    */
-   int getMaxSize () const throw () { return m_maxSize; }
+   int getMaxSize () const noexcept { return m_maxSize; }
 
    /**
       Devuelve el tipo de dato.
       \return El tipo de datos.
    */
-   Datatype::_v getType () const throw () { return m_type; }
+   Datatype::_v getType () const noexcept { return m_type; }
 
    /**
       Devuelve el area de memoria asociada a esta variable.
    */
-   void* getBuffer () throw () { return m_buffer; }
+   void* getBuffer () noexcept { return m_buffer; }
 
    /**
       Devuelve el indicador de nulo de esta instancia.
       \return El indicador de nulo de esta instancia.
    */
-   bool hasValue () const throw () { return m_isNull == false; }
+   bool hasValue () const noexcept { return m_isNull == false; }
 
    /**
       Devuelve el valor que indica si este dato puede tomar valores nulos.
       \return El valor que indica si este dato puede tomar valores nulos.
    */
-   bool isNulleable () const throw () { return m_isNulleable; }
+   bool isNulleable () const noexcept { return m_isNulleable; }
 
    /**
       Establece el indicador de nulo de esta instancia.
@@ -85,19 +85,19 @@ public:
       en otro caso se asignar� un valor adecuado dependiendo del tipo del dato, cero para los n�meros,
       "" para las cadenas, etc.
    */
-   void clear () throw ();
+   void clear () noexcept;
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.
       @return Una cadena con la informacion referente a esta instancia.
    */
-   virtual adt::StreamString asString () const throw ();
+   virtual adt::StreamString asString () const noexcept;
 
    /**
     * Devuelve el nombre l�gico de esta clase
     * \return el nombre l�gico de esta clase
     */
-   static const char* className () throw () { return "dbms::type::Abstract"; }
+   static const char* className () noexcept { return "dbms::type::Abstract"; }
 
 protected:
    /**
@@ -156,9 +156,9 @@ protected:
       Establece el area de memoria asociada a esta variable.
       \param buffer Direccion de memoria donde comienza el contenido esta variable.
    */
-   void setBuffer (void* buffer) throw () { m_buffer = buffer; }
+   void setBuffer (void* buffer) noexcept { m_buffer = buffer; }
 
-   void isNotNull () throw () { m_isNull = false; }
+   void isNotNull () noexcept { m_isNull = false; }
 
    void exceptionWhenIsNull () const throw (adt::RuntimeException);
 
@@ -170,7 +170,7 @@ private:
    void* m_buffer;
    bool m_isNull;
 
-   virtual void do_clear () throw () = 0;
+   virtual void do_clear () noexcept = 0;
 };
 
 #define wepa_declare_datatype_downcast(inherit) \

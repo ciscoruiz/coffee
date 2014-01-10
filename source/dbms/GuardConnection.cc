@@ -32,6 +32,7 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+#include <wepa/logger/Logger.hpp>
 
 #include <wepa/dbms/Connection.hpp>
 #include <wepa/dbms/GuardConnection.hpp>
@@ -39,13 +40,15 @@
 using namespace wepa;
 
 dbms::GuardConnection::GuardConnection(Connection& connection)  throw (adt::RuntimeException) :
-   m_connection (connection)
+   m_connection (connection),
+   m_countLinkedStatement (0)
 {
    connection.lock();
 }
 
 dbms::GuardConnection::GuardConnection(Connection* connection)  throw (adt::RuntimeException) :
-   m_connection (*connection)
+   m_connection (*connection),
+   m_countLinkedStatement (0)
 {
    if (connection == NULL)
       WEPA_THROW_EXCEPTION("Connection can not be NULL");
@@ -55,10 +58,13 @@ dbms::GuardConnection::GuardConnection(Connection* connection)  throw (adt::Runt
 
 dbms::GuardConnection::~GuardConnection()
 {
+   if (m_countLinkedStatement != 0) {
+      LOG_CRITICAL(m_connection << " as freed before some of its linked GuardStatement");
+   }
    m_connection.unlock();
 }
 
-dbms::ResultCode dbms::GuardConnection::execute (Statement* statement)
+dbms::ResultCode dbms::GuardConnection::execute (Statement& statement)
    throw (adt::RuntimeException, DatabaseException)
 {
    return m_connection.execute(statement);

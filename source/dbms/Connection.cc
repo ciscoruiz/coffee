@@ -70,19 +70,12 @@ dbms::ResultCode dbms::Connection::execute (Statement& statement)
       WEPA_THROW_EXCEPTION(asString () << " | This connection must execute a previous ROLLBACK's");
    }
 
-   ResultCode result;
-   bool stop = false;
+   ResultCode result = statement.execute (*this);
 
-   while (stop == false) {
-      result = statement.execute (this);
-
-      if (result.lostConnection () == false)
-         break;
-
-      LOG_CRITICAL (asString () << " | " << statement << " | " << result);
-
-      m_dbmsDatabase.breakConnection (*this);
-      stop = true;
+   if (result.lostConnection () == true) {
+      LOG_CRITICAL ("Detected lost connection " << asString () << " while running '" << statement.getName ()  << "' | " << result);
+      recover ();
+      WEPA_THROW_NAME_DB_EXCEPTION(statement.getName (), result);
    }
 
    statement.measureTiming (delay);
@@ -91,18 +84,19 @@ dbms::ResultCode dbms::Connection::execute (Statement& statement)
       LOG_ERROR (asString () << " | " << statement << " | " << result);
    }
 
-   if (statement.requiresCommit () == true) {  // (1)
-      if (result.successful () == false) {
-         if (statement.actionOnError() == ActionOnError::Rollback) {
-            m_rollbackPending = true;
-            WEPA_THROW_NAME_DB_EXCEPTION(statement.getName (), result);
-         }
+   if (statement.requiresCommit () == false)
+      return result;
+
+   if (result.successful () == false) {
+      if (statement.actionOnError() == ActionOnError::Rollback) {
+         m_rollbackPending = true;
+         WEPA_THROW_NAME_DB_EXCEPTION(statement.getName (), result);
       }
-      else {
-         m_commitPending ++;
-         if (m_maxCommitPending > 0 && m_commitPending > m_maxCommitPending)  {
-            commit ();
-         }
+   }
+   else {
+      m_commitPending ++;
+      if (m_maxCommitPending > 0 && m_commitPending >= m_maxCommitPending)  {
+         commit ();
       }
    }
 
@@ -128,7 +122,7 @@ void dbms::Connection::commit ()
 void dbms::Connection::rollback () 
    noexcept
 {
-   LOG_WARN (asString ());
+   LOG_WARN (asString () << " | State before rollback");
 
    if (isAvailable () == false) {
       LOG_WARN (asString () << " | Connection is not available");
@@ -145,7 +139,9 @@ void dbms::Connection::lock ()
    throw (adt::RuntimeException)
 {
    if (isAvailable () == false) {
-      WEPA_THROW_EXCEPTION(asString () << " | Connection is not available");
+      if (recover () == false) {
+         WEPA_THROW_EXCEPTION(asString () << " | Connection is not available");
+      }
    }   
    
    m_mutex.lock();
@@ -185,6 +181,28 @@ void dbms::Connection::unlock ()
    }
 
    m_mutex.unlock();
+}
+
+bool dbms::Connection::recover ()
+   noexcept
+{
+   LOG_THIS_METHOD();
+
+   bool result = false;
+
+   try {
+      close ();
+      open ();
+      result = true;
+   }
+   catch (DatabaseException& edbms) {
+      logger::Logger::write (edbms);
+      m_dbmsDatabase.notifyRecoveryFail (*this);
+   }
+
+   LOG_WARN(asString () << " | Result=" << result);
+
+   return result;
 }
 
 adt::StreamString dbms::Connection::asString () const

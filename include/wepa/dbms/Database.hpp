@@ -229,14 +229,7 @@ protected:
    */
    Database (app::Application& app, const char* rdbmsName, const char* dbmsName);
 
-   /**
-      M�todo invocado desde el n�cleo cuando se detecta que una conexi�n ha dejado de funcionar. Por ahora
-      s�lo se invocar� desde dbms::Connection::execute.
-      \warning Este metodo se invoca automaticamente desde el nucleo de NemesisRD.dbms y nunca deberia
-      ser invocado por el programador.
-      \param connection Instancia de la conexion en la que hemos detectado el fallo.
-   */
-   void breakConnection (Connection& connection) throw (adt::RuntimeException);
+   void notifyRecoveryFail (Connection& connection) throw (adt::RuntimeException);
 
    /**
       Inicializa las conexiones definidas sobre esta base de datos. Este metodo se invocaria

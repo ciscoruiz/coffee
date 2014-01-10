@@ -206,7 +206,7 @@ dbms::Statement* dbms::Database::createStatement (const char* name, const char* 
    Statement* result = allocateStatement (name, expression, actionOnError);
 
    if (result == NULL) {
-      WEPA_THROW_EXCEPTION(asString () << " could not create connection");
+      WEPA_THROW_EXCEPTION(asString () << " could not create statement '" << name << "'");
    }
 
    LOG_DEBUG(result->asString ());
@@ -240,22 +240,13 @@ dbms::Statement& dbms::Database::findStatement (const char* name)
    return std::ref (*result);
 }
 
-void dbms::Database::breakConnection (dbms::Connection& connection)
+void dbms::Database::notifyRecoveryFail (dbms::Connection& connection)
    throw (adt::RuntimeException)
 {
    LOG_WARN(connection.asString ());
 
-   try {
-      connection.close ();
-      connection.open ();
-
-      LOG_WARN(connection.asString ());
-   }
-   catch (DatabaseException& edbms) {
-      logger::Logger::write (edbms);
-      if (m_failRecoveryHandler != NULL)
-         m_failRecoveryHandler->apply (connection);
-   }
+   if (m_failRecoveryHandler != NULL)
+      m_failRecoveryHandler->apply (connection);
 }
 
 adt::StreamString dbms::Database::asString () const

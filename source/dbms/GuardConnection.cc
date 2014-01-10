@@ -64,6 +64,16 @@ dbms::GuardConnection::~GuardConnection()
    m_connection.unlock();
 }
 
+int dbms::GuardConnection::setMaxCommitPending (const int maxCommitPending) noexcept
+{
+   return m_connection.setMaxCommitPending(maxCommitPending);
+}
+
+void dbms::GuardConnection::clearMaxCommitPending () noexcept
+{
+   m_connection.clearMaxCommitPending ();
+}
+
 dbms::ResultCode dbms::GuardConnection::execute (Statement& statement)
    throw (adt::RuntimeException, DatabaseException)
 {

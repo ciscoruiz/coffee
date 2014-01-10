@@ -260,8 +260,8 @@ private:
    datatype::Abstract& getInputData (const int pos) throw (adt::RuntimeException);
    const datatype::Abstract& getOutputData (const int pos) const throw (adt::RuntimeException);
 
-   ResultCode execute (Connection* connection) throw (adt::RuntimeException, DatabaseException);
-   virtual ResultCode do_execute (Connection* connection) throw (adt::RuntimeException, DatabaseException) = 0;
+   ResultCode execute (Connection& connection) throw (adt::RuntimeException, DatabaseException);
+   virtual ResultCode do_execute (Connection& connection) throw (adt::RuntimeException, DatabaseException) = 0;
 
    void setRequiresCommit (const bool requiresCommit) noexcept { m_requiresCommit = requiresCommit; }
 

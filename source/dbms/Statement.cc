@@ -30,7 +30,7 @@ binder::Input* Statement::createBinderInput (datatype::Abstract& data)
    binder::Input* result = m_database.allocateInputBind (data);
 
    if (result == NULL)
-      WEPA_THROW_EXCEPTION(data.asString () << " | Data returned a null binder");
+      WEPA_THROW_EXCEPTION(data << " | Data returned a null binder");
 
    m_inputBinds.push_back (result);
    return result;
@@ -62,7 +62,7 @@ binder::Output* Statement::createBinderOutput (datatype::Abstract& data)
    binder::Output* result = m_database.allocateOutputBind (data);
 
    if (result == NULL)
-      WEPA_THROW_EXCEPTION(data.asString () << " | Data returned a null binder");
+      WEPA_THROW_EXCEPTION(data << " | Data returned a null binder");
 
    m_outputBinds.push_back (result);
    return result;

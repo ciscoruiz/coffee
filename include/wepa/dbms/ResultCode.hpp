@@ -122,6 +122,8 @@ public:
    */
    bool lostConnection () const throw (adt::RuntimeException);
 
+   operator adt::StreamString () const noexcept { return asString (); }
+
    /**
       Devuelve una cadena con la informacion sobre esta clase.
       \return Una cadena con la informacion sobre esta clase.

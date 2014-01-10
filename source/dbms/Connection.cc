@@ -79,7 +79,7 @@ dbms::ResultCode dbms::Connection::execute (Statement& statement)
       if (result.lostConnection () == false)
          break;
 
-      LOG_CRITICAL (asString () << " | " << statement.asString () << " | " << result.asString ());
+      LOG_CRITICAL (asString () << " | " << statement << " | " << result);
 
       m_dbmsDatabase.breakConnection (*this);
       stop = true;
@@ -88,7 +88,7 @@ dbms::ResultCode dbms::Connection::execute (Statement& statement)
    statement.measureTiming (delay);
 
    if (result.successful () == false && result.notFound () == false) {
-      LOG_ERROR (asString () << " | " << statement.asString () << " | " << result.asString ());
+      LOG_ERROR (asString () << " | " << statement << " | " << result);
    }
 
    if (statement.requiresCommit () == true) {  // (1)

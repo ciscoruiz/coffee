@@ -54,6 +54,8 @@ public:
 
    virtual bool isAvailable () const noexcept = 0;
 
+   operator adt::StreamString () const noexcept { return asString (); }
+
    virtual adt::StreamString asString () const noexcept;
    virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 

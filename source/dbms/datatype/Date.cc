@@ -46,32 +46,32 @@ using namespace std;
 using namespace wepa;
 using namespace wepa::dbms;
 
-datatype::Date::Date (const char* name, const bool isNulleable) :
-   datatype::Abstract (name, Datatype::Date, MaxDateSize, isNulleable)
+datatype::Date::Date (const char* name, const Constraint::_v constraint) :
+   datatype::Abstract (name, Datatype::Date, MaxDateSize, constraint)
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
    wepa_memset (&m_value, 0, sizeof (m_value));
 }
 
-datatype::Date::Date (const string& name, const bool isNulleable) :
-   datatype::Abstract (name, Datatype::Date, MaxDateSize, isNulleable)
+datatype::Date::Date (const string& name, const Constraint::_v constraint) :
+   datatype::Abstract (name, Datatype::Date, MaxDateSize, constraint)
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
    wepa_memset (&m_value, 0, sizeof (m_value));
 }
 
-datatype::Date::Date (const char* name, const datatype::Abstract::Datatype::_v type,  const bool isNulleable) :
-   datatype::Abstract (name, type, MaxDateSize, isNulleable)
+datatype::Date::Date (const char* name, const datatype::Abstract::Datatype::_v type,  const Constraint::_v constraint) :
+   datatype::Abstract (name, type, MaxDateSize, constraint)
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
    wepa_memset (&m_value, 0, sizeof (m_value));
 }
 
-datatype::Date::Date (const string& name, const datatype::Abstract::Datatype::_v type,  const bool isNulleable) :
-   datatype::Abstract (name, type, MaxDateSize, isNulleable)
+datatype::Date::Date (const string& name, const datatype::Abstract::Datatype::_v type,  const Constraint::_v constraint) :
+   datatype::Abstract (name, type, MaxDateSize, constraint)
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
@@ -137,10 +137,10 @@ adt::StreamString datatype::Date::asString () const
 
    adt::StreamString result ("dbms::datatype::Date { ");
    result << dbms::datatype::Abstract::asString ();
-   result += "' | Value: ";
+   result += " | Value: ";
 
    if (this->hasValue () == true)
-      result << m_value.asString ();
+      result << "'" << m_value.asString () << "'";
    else
       result += "<null>";
 

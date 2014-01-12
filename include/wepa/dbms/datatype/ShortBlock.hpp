@@ -30,10 +30,10 @@ public:
       Constructor.
       \param name Nombre l�gico de este miembro.
       \param maxSize Tamao maximo que puede tener este bloque.
-      \param isNulleable Indica si el dato puede tomar valores nulos.
+      \param constraint Indica si el dato puede tomar valores nulos.
    */
-   explicit ShortBlock (const char* name, const int maxSize, const bool isNulleable = false) :
-      datatype::Abstract (name, Datatype::ShortBlock, maxSize, isNulleable),
+   explicit ShortBlock (const char* name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull) :
+      datatype::Abstract (name, Datatype::ShortBlock, maxSize, constraint),
       m_value ()
    {
       m_value.reserve(maxSize);
@@ -44,12 +44,12 @@ public:
       Constructor.
       \param name Nombre l�gico de este miembro.
       \param maxSize Tamao maximo que puede tener este bloque.
-      \param isNulleable Indica si el dato puede tomar valores nulos.
+      \param constraint Indica si el dato puede tomar valores nulos.
 
       \since NemesisRD.dbms 2.10.06.3
    */
-   explicit ShortBlock (const std::string& name, const int maxSize, const bool isNulleable = false) :
-      datatype::Abstract (name, Datatype::ShortBlock, maxSize, isNulleable),
+   explicit ShortBlock (const std::string& name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull) :
+      datatype::Abstract (name, Datatype::ShortBlock, maxSize, constraint),
       m_value ()
    {
       m_value.reserve(maxSize);

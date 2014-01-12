@@ -50,7 +50,7 @@ adt::StreamString datatype::Abstract::asString () const
    result << " | Buffer: " << adt::AsHexString::apply(wepa_ptrnumber_cast (m_buffer));
    result << " | MaxSize: " << m_maxSize;
    result << " | Null: " << m_isNull;
-   result << " | Nulleable: " << m_isNulleable;
+   result << " | Constraint: " << ((m_constraint == Constraint::CanBeNull) ? "CanBeNull": "CanNotBeNull");
 
    return result += " }";
 }
@@ -58,7 +58,7 @@ adt::StreamString datatype::Abstract::asString () const
 void datatype::Abstract::isNull ()
    throw (adt::RuntimeException)
 {
-   if (m_isNulleable == false) {
+   if (m_constraint == Constraint::CanNotBeNull) {
       WEPA_THROW_EXCEPTION(asString () << " | Data can not be NULL");
    }
 
@@ -68,7 +68,7 @@ void datatype::Abstract::isNull ()
 void datatype::Abstract::clear ()
    noexcept
 {
-   if (m_isNulleable)
+   if (m_constraint == Constraint::CanBeNull)
       m_isNull = true;
 
    do_clear ();

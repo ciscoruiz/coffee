@@ -46,7 +46,7 @@ using namespace wepa::dbms;
 
 BOOST_AUTO_TEST_CASE (string_is_nulleable)
 {
-   datatype::String column ("nulleable", 16, true);
+   datatype::String column ("nulleable", 16, datatype::Constraint::CanBeNull);
 
    void* init = column.getBuffer();
 
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE (string_is_nulleable)
 
 BOOST_AUTO_TEST_CASE (string_is_not_nulleable)
 {
-   datatype::String column ("not_nulleable", 4, false);
+   datatype::String column ("not_nulleable", 4, datatype::Constraint::CanNotBeNull);
 
    void* init = column.getBuffer();
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE (string_is_not_nulleable)
 
 BOOST_AUTO_TEST_CASE (string_downcast)
 {
-   datatype::String column ("not_nulleable", 4, false);
+   datatype::String column ("not_nulleable", 4);
 
    datatype::Abstract& abs = column;
 

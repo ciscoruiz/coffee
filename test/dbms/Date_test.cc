@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE (date_setter_second)
 
 BOOST_AUTO_TEST_CASE (date_setter_text)
 {
-   datatype::Date column ("from_text", false);
+   datatype::Date column ("from_text");
 
    std::string str_date ("31/01/1996T22:17:10");
 
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE (date_setter_text)
 
 BOOST_AUTO_TEST_CASE (date_is_nulleable)
 {
-   datatype::Date column ("nulleable", true);
+   datatype::Date column ("nulleable", datatype::Constraint::CanBeNull);
 
    const char* format = "%d/%m/%YT%H:%M:%S";
 
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE (date_is_nulleable)
 
 BOOST_AUTO_TEST_CASE (date_is_not_nulleable)
 {
-   datatype::Date column ("not_nulleable", false);
+   datatype::Date column ("not_nulleable", datatype::Constraint::CanNotBeNull);
 
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE (date_is_not_nulleable)
 
 BOOST_AUTO_TEST_CASE (date_downcast)
 {
-   datatype::Date column ("not_nulleable", false);
+   datatype::Date column ("not_nulleable", datatype::Constraint::CanNotBeNull);
 
    datatype::Abstract& abs = column;
 

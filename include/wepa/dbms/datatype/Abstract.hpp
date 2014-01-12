@@ -6,6 +6,7 @@
 
 #include <wepa/adt/StreamString.hpp>
 #include <wepa/adt/RuntimeException.hpp>
+#include <wepa/dbms/datatype/Constraint.hpp>
 
 namespace wepa {
 
@@ -67,7 +68,7 @@ public:
       Devuelve el valor que indica si este dato puede tomar valores nulos.
       \return El valor que indica si este dato puede tomar valores nulos.
    */
-   bool isNulleable () const noexcept { return m_isNulleable; }
+   bool canBeNull () const noexcept { return m_constraint == Constraint::CanBeNull; }
 
    /**
       Establece el indicador de nulo de esta instancia.
@@ -108,16 +109,16 @@ protected:
       \param type Tipo de dato de esta instancia.
       \param maxSize Tamao maximo que puede tener este dato. Deberia coincidir con el indicado
       por la columna con la que vaya a corresponder en la sentencia.
-      \param isNulleable Indica si el dato puede tomar valores nulos.
+      \param constraint Indica si el dato puede tomar valores nulos.
 
       \warning los tipos de datos complejos deberia reimplementar los metodos #code and #decode.
    */
-   explicit Abstract (const char* name, const Datatype::_v type, const int maxSize, const bool isNulleable) :
+   explicit Abstract (const char* name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
       m_name (name),
       m_type (type),
       m_maxSize (maxSize),
-      m_isNulleable (isNulleable),
-      m_isNull (isNulleable),
+      m_constraint (constraint),
+      m_isNull (constraint == Constraint::CanBeNull),
       m_buffer (NULL)
    {;}
 
@@ -127,16 +128,16 @@ protected:
       \param type Tipo de dato de esta instancia.
       \param maxSize Tamao maximo que puede tener este dato. Deberia coincidir con el indicado
       por la columna con la que vaya a corresponder en la sentencia.
-      \param isNulleable Indica si el dato puede tomar valores nulos.
+      \param constraint Indica si el dato puede tomar valores nulos.
 
       \warning los tipos de datos complejos deberia reimplementar los metodos #code and #decode.
    */
-   explicit Abstract (const std::string& name, const Datatype::_v type, const int maxSize, const bool isNulleable) :
+   explicit Abstract (const std::string& name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
       m_name (name),
       m_type (type),
       m_maxSize (maxSize),
-      m_isNulleable (isNulleable),
-      m_isNull (isNulleable),
+      m_constraint (constraint),
+      m_isNull (constraint == Constraint::CanBeNull),
       m_buffer (NULL)
    {;}
 
@@ -149,7 +150,7 @@ protected:
       m_name (other.m_name),
       m_type (other.m_type),
       m_maxSize (other.m_maxSize),
-      m_isNulleable (other.m_isNulleable),
+      m_constraint (other.m_constraint),
       m_isNull (other.m_isNull),
       m_buffer (other.m_buffer)
    {;}
@@ -168,7 +169,7 @@ private:
    const std::string m_name;
    const Datatype::_v m_type;
    const int m_maxSize;
-   const bool m_isNulleable;
+   const bool m_constraint;
    void* m_buffer;
    bool m_isNull;
 

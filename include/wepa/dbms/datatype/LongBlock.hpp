@@ -63,10 +63,10 @@ public:
    /**
       Constructor.
       \param name Nombre l�gico de este miembro.
-      \param isNulleable Indica si el dato puede tomar valores nulos.
+      \param constraint Indica si el dato puede tomar valores nulos.
    */
-   explicit LongBlock (const char* name, const bool isNulleable = false) :
-      datatype::Abstract (name, Datatype::LongBlock, 0, isNulleable),
+   explicit LongBlock (const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) :
+      datatype::Abstract (name, Datatype::LongBlock, 0, constraint),
       m_value ()
    {
       datatype::Abstract::setBuffer ((void*) NULL);
@@ -75,12 +75,12 @@ public:
    /**
       Constructor.
       \param name Nombre l�gico de este miembro.
-      \param isNulleable Indica si el dato puede tomar valores nulos.
+      \param constraint Indica si el dato puede tomar valores nulos.
 
       \since NemesisRD.dbms 2.10.06.3
    */
-   explicit LongBlock (const std::string& name, const bool isNulleable = false) :
-      datatype::Abstract (name, Datatype::LongBlock, 0, isNulleable),
+   explicit LongBlock (const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) :
+      datatype::Abstract (name, Datatype::LongBlock, 0, constraint),
       m_value ()
    {
       datatype::Abstract::setBuffer ((void*) NULL);

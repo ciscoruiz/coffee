@@ -25,10 +25,10 @@ public:
       \param name Nombre l�gico de este miembro.
       \param maxSize Tamao maximo que puede tener esta cadena. Deberia coincidir con el indicado
       por la columna con la que vaya a corresponder en la sentencia.
-      \param isNulleable Indica si el dato puede tomar valores nulos.
+      \param constraint Indica si el dato puede tomar valores nulos.
    */
-   explicit String (const char* name, const int maxSize, const bool isNulleable = false) :
-      datatype::Abstract (name, Datatype::String, maxSize, isNulleable)
+   explicit String (const char* name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull) :
+      datatype::Abstract (name, Datatype::String, maxSize, constraint)
    {
       datatype::Abstract::setBuffer (m_value = new char [maxSize + 1]);
       wepa_memset (m_value, 0, maxSize + 1);
@@ -39,12 +39,12 @@ public:
       \param name Nombre l�gico de este miembro.
       \param maxSize Tamao maximo que puede tener esta cadena. Deberia coincidir con el indicado
       por la columna con la que vaya a corresponder en la sentencia.
-      \param isNulleable Indica si el dato puede tomar valores nulos.
+      \param constraint Indica si el dato puede tomar valores nulos.
 
       \since NemesisRD.dbms 2.10.06.3
    */
-   explicit String (const std::string& name, const int maxSize, const bool isNulleable = false) :
-      datatype::Abstract (name, Datatype::String, maxSize, isNulleable)
+   explicit String (const std::string& name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull) :
+      datatype::Abstract (name, Datatype::String, maxSize, constraint)
    {
       datatype::Abstract::setBuffer (m_value = new char [maxSize + 1]);
       wepa_memset (m_value, 0, maxSize + 1);

@@ -116,9 +116,9 @@ protected:
       Statement (database, name, expression, actionOnError),
       m_id ("ID"),
       m_name ("name", 64),
-      m_integer ("integer", true),
+      m_integer ("integer", datatype::Constraint::CanBeNull),
       m_float ("float"),
-      m_time ("time", true)
+      m_time ("time", datatype::Constraint::CanBeNull)
    {;}
 
    MyRecord& getRecord () noexcept { return std::ref (m_record); }

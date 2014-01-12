@@ -25,27 +25,27 @@ public:
    /**
       Constructor.
       \param name Nombre l�gico de este miembro.
-      \param isNulleable Indica si el dato puede tomar valores nulos.
+      \param constraint Indica si el dato puede tomar valores nulos.
 
       \code
       TimeStamp oneTime (false, "%T.%%d")
       \endcode
     */
-   explicit TimeStamp (const char* name, const bool isNulleable = false)  :
-      Date (name, datatype::Abstract::Datatype::TimeStamp, isNulleable),
+   explicit TimeStamp (const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull)  :
+      Date (name, datatype::Abstract::Datatype::TimeStamp, constraint),
       m_fractionalSecond (0)
       {;}
 
    /**
       Constructor.
       \param name Nombre l�gico de este miembro.
-      \param isNulleable Indica si el dato puede tomar valores nulos.
+      \param constraint Indica si el dato puede tomar valores nulos.
       \code
       TimeStamp oneTime (false, "%T.%%d")
       \endcode
    */
-   explicit TimeStamp (const std::string& name, const bool isNulleable = false, const char* format=NULL)  :
-      Date (name, datatype::Abstract::Datatype::TimeStamp, isNulleable),
+   explicit TimeStamp (const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull, const char* format=NULL)  :
+      Date (name, datatype::Abstract::Datatype::TimeStamp, constraint),
       m_fractionalSecond (0)
       {;}
 

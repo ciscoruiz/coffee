@@ -46,7 +46,7 @@ using namespace wepa::dbms;
 
 BOOST_AUTO_TEST_CASE (float_is_nulleable)
 {
-   datatype::Float column ("nulleable", true);
+   datatype::Float column ("nulleable", datatype::Constraint::CanBeNull);
 
    BOOST_REQUIRE_EQUAL (column.hasValue (), false);
 
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE (float_is_nulleable)
 
 BOOST_AUTO_TEST_CASE (float_is_not_nulleable)
 {
-   datatype::Float column ("not_nulleable", false);
+   datatype::Float column ("not_nulleable", datatype::Constraint::CanNotBeNull);
 
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 

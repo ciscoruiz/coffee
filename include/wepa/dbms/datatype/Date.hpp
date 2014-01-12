@@ -33,7 +33,7 @@ public:
       \param name Nombre l�gico de este campo
       \param isNulleable Indica si el dato puede tomar valores nulos.
    */
-   explicit Date (const char* name, const bool isNulleable = false) ;
+   explicit Date (const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) ;
 
    /**
        Constructor.
@@ -44,7 +44,7 @@ public:
 
        \since NemesisRD.dbms 2.10.06.3
    */
-   explicit Date (const std::string& name, const bool isNulleable = false) ;
+   explicit Date (const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) ;
 
    /**
       Constructor copia.
@@ -211,7 +211,7 @@ protected:
       \param isNulleable Indica si el dato puede tomar valores nulos.
       \param format Formato usado para representar los datos de esta fecha.
     */
-   explicit Date (const char* name, const Datatype::_v type, const bool isNulleable);
+   explicit Date (const char* name, const Datatype::_v type, const Constraint::_v constraint);
 
    /**
     * Constructor invocado desde el constructor de TimeStamp.
@@ -222,7 +222,7 @@ protected:
 
       \since NemesisRD.dbms 2.10.06.3
     */
-   explicit Date (const std::string& name, const Datatype::_v type, const bool isNulleable);
+   explicit Date (const std::string& name, const Datatype::_v type, const Constraint::_v constraint);
 
    void do_clear () noexcept { m_value = 0; }
 };

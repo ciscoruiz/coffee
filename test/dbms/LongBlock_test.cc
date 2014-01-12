@@ -46,7 +46,7 @@ using namespace wepa::dbms;
 
 BOOST_AUTO_TEST_CASE (longblock_is_nulleable)
 {
-   datatype::LongBlock column ("nulleable", true);
+   datatype::LongBlock column ("nulleable", datatype::Constraint::CanBeNull);
 
    BOOST_REQUIRE_EQUAL (column.hasValue (), false);
 
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE (longblock_is_nulleable)
 
 BOOST_AUTO_TEST_CASE (longblock_is_not_nulleable)
 {
-   datatype::LongBlock column ("not_nulleable", false);
+   datatype::LongBlock column ("not_nulleable", datatype::Constraint::CanNotBeNull);
 
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE (longblock_is_not_nulleable)
 
 BOOST_AUTO_TEST_CASE (longblock_downcast)
 {
-   datatype::LongBlock column ("not_nulleable", false);
+   datatype::LongBlock column ("not_nulleable");
 
    datatype::Abstract& abs = column;
 

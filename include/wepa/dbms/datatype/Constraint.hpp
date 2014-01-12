@@ -32,65 +32,17 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <iostream>
-#include <time.h>
 
-#include <boost/test/unit_test.hpp>
+namespace wepa {
 
-#include <wepa/dbms/datatype/Integer.hpp>
-#include <wepa/dbms/datatype/Float.hpp>
+namespace dbms {
 
-using namespace wepa;
-using namespace wepa::dbms;
+namespace datatype {
 
+struct Constraint {
+   enum _v { CanBeNull, CanNotBeNull };
+};
 
-BOOST_AUTO_TEST_CASE (integer_is_nulleable)
-{
-   datatype::Integer column ("nulleable", datatype::Constraint::CanBeNull);
-
-   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
-
-   column.clear ();
-
-   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
-
-   BOOST_REQUIRE_THROW (column.getValue (), adt::RuntimeException);
-   BOOST_REQUIRE_THROW (column + 2, adt::RuntimeException);
-
-   column.setValue (10);
-   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
-   BOOST_REQUIRE_EQUAL (column.getValue(),10);
-
-   column.clear ();
-   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
 }
-
-BOOST_AUTO_TEST_CASE (integer_is_not_nulleable)
-{
-   datatype::Integer column ("not_nulleable", datatype::Constraint::CanNotBeNull);
-
-   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
-
-   column.setValue (11);
-   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
-   BOOST_REQUIRE_EQUAL (column.getValue(), 11);
-   BOOST_REQUIRE_EQUAL (column + 10, 21);
-
-   column.clear();
-   BOOST_REQUIRE_EQUAL (column.hasValue(), true);
 }
-
-BOOST_AUTO_TEST_CASE (integer_downcast)
-{
-   datatype::Integer column ("not_nulleable");
-
-   datatype::Abstract& abs = column;
-
-   datatype::Integer& other = wepa_datatype_downcast(datatype::Integer, abs);
-
-   BOOST_REQUIRE_EQUAL (&other, &column);
-
-   datatype::Float zzz ("zzz");
-
-   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::Integer, zzz), adt::RuntimeException);
 }

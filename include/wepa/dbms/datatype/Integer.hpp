@@ -20,10 +20,10 @@ public:
    /**
       Constructor.
       \param name Nombre l�gico de este miembro.
-      \param isNulleable Indica si el dato puede tomar valores nulos
+      \param constraint Indica si el dato puede tomar valores nulos
    */
-   explicit Integer (const char* name, const bool isNulleable = false) :
-      datatype::Abstract (name, Datatype::Integer, sizeof (int), isNulleable),
+   explicit Integer (const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) :
+      datatype::Abstract (name, Datatype::Integer, sizeof (int), constraint),
       m_value (0)
    {
       datatype::Abstract::setBuffer (&m_value);
@@ -32,12 +32,12 @@ public:
    /**
       Constructor.
       \param name Nombre l�gico de este miembro.
-      \param isNulleable Indica si el dato puede tomar valores nulos
+      \param constraint Indica si el dato puede tomar valores nulos
 
       \since NemesisRD.dbms 2.10.06.3
    */
-   explicit Integer (const std::string& name, const bool isNulleable = false) :
-      datatype::Abstract (name, Datatype::Integer, sizeof (int), isNulleable),
+   explicit Integer (const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) :
+      datatype::Abstract (name, Datatype::Integer, sizeof (int), constraint),
       m_value (0)
    {
       datatype::Abstract::setBuffer (&m_value);

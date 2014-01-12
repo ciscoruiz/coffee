@@ -118,7 +118,7 @@ protected:
       m_name ("name", 64),
       m_integer ("integer", true),
       m_float ("float"),
-      m_time ("time", false)
+      m_time ("time", true)
    {;}
 
    MyRecord& getRecord () noexcept { return std::ref (m_record); }
@@ -358,12 +358,29 @@ bool test::MyReadStatement::do_fetch () throw (adt::RuntimeException, DatabaseEx
 
    const MyRecord& record = m_selection [m_index ++];
 
+   datatype::Integer& id = wepa_datatype_downcast(datatype::Integer, m_binders [0]->getData ());
+
+   id.setValue (record.m_id);
+
    static_cast <datatype::Integer&> (m_binders [0]->getData()).setValue(record.m_id);
    static_cast <datatype::String&> (m_binders [1]->getData ()).setValue(record.m_name);
-   static_cast <datatype::Integer&> (m_binders [2]->getData ()).setValue(record.m_integer);
-   static_cast <datatype::Float&> (m_binders [3]->getData ()).setValue(record.m_float);
-   static_cast <datatype::Date&> (m_binders [4]->getData ()).setValue(adt::Second (record.m_time));
+   
+   datatype::Integer& myInteger = wepa_datatype_downcast(datatype::Integer, m_binders [2]->getData ());
+   datatype::Date& myDate = wepa_datatype_downcast(datatype::Date, m_binders [4]->getData ());
 
+   if (record.m_integer == -1)
+      myInteger.isNull ();
+   else
+      myInteger.setValue (record.m_integer);
+
+   static_cast <datatype::Float&> (m_binders [3]->getData ()).setValue(record.m_float);
+
+   if (record.m_time == 0)
+      myDate.isNull ();
+   else
+      myDate.setValue (record.m_time);
+
+   LOG_DEBUG (id.asString () << " | " << myInteger.asString () << " | " << myDate.asString ())
    return true;
 }
 
@@ -402,10 +419,13 @@ dbms::ResultCode test::MyWriteStatement::do_execute (dbms::Connection& connectio
    }
 
    if (opCode != MyConnection::Delete) {
+      datatype::Integer& myInteger =  wepa_datatype_downcast(datatype::Integer, m_binders [2]->getData ());
+      datatype::Date& myDate = wepa_datatype_downcast(datatype::Date, m_binders [4]->getData ());
+
       record.m_name = static_cast <datatype::String&> (m_binders [1]->getData ()).getValue();
-      record.m_integer = static_cast <datatype::Integer&> (m_binders [2]->getData ()).getValue();
+      record.m_integer = (myInteger.hasValue ()) ? myInteger.getValue (): -1;
       record.m_float = static_cast <datatype::Float&> (m_binders [3]->getData ()).getValue();
-      record.m_time = static_cast <datatype::Date&> (m_binders [4]->getData ()).getValue();
+      record.m_time = (myDate.hasValue ()) ? myDate.getValue (): 0;
    }
 
    LOG_DEBUG ("ID = " << record.m_id);
@@ -672,15 +692,22 @@ BOOST_AUTO_TEST_CASE (dbms_write_and_read_and_delete)
       const datatype::Integer& integer = wepa_datatype_downcast(datatype::Integer, reader.getOutputData(1));
 
       id.setValue(5);
-      resultCode = reader.execute ();
+      BOOST_REQUIRE_NO_THROW (resultCode = reader.execute ());
 
       BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
 
       int counter = 0;
 
+      try {
       while (reader.fetch() == true) {
          ++ counter;
+         BOOST_REQUIRE_EQUAL (integer.hasValue (), true);
+
          BOOST_REQUIRE_EQUAL (id.getValue () * id.getValue (), integer.getValue());
+      }
+      }
+      catch (adt::Exception& ex) {
+         std::cout << ex.what () << std::endl;
       }
 
       BOOST_REQUIRE_EQUAL (counter, 2);
@@ -1320,3 +1347,100 @@ BOOST_AUTO_TEST_CASE (dbms_break_unrecovery_locking)
 
    tr.join ();
 }
+
+BOOST_AUTO_TEST_CASE (dbms_dealing_with_nulls)
+{
+   test::MyApplication application ("dbms_dealing_with_nulls");
+
+   test::MyDatabase database (application);
+
+   application.disableTermination();
+
+   test::MyConnection* conn0 = static_cast <test::MyConnection*> (database.createConnection("0", "0", "0"));
+   dbms::Statement* stWriter = database.createStatement("the_write", "write");
+   dbms::Statement* stReader = database.createStatement("the_read", "read");
+   ResultCode resultCode;
+
+   std::thread tr (std::ref (application));
+   usleep (500);
+
+   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
+
+   if (true) {
+      try {
+         dbms::GuardConnection guard (conn0);
+         dbms::GuardStatement writer (guard, stWriter);
+
+         wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (20);
+         wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 20");
+         wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).isNull ();
+         wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (20.20);
+         wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+         writer.execute ();
+
+         BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
+         BOOST_REQUIRE_EQUAL (database.container_size(), 0);
+
+         wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (25);
+         wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 25");
+         wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (25 * 25);
+         wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (25.25);
+         wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).isNull ();
+         ResultCode resultCode = writer.execute ();
+
+         BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
+         BOOST_REQUIRE_EQUAL (database.container_size(), 0);
+
+         BOOST_REQUIRE_EQUAL (resultCode.getErrorCode(), test::MyDatabase::Successful);
+         BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
+         BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
+         BOOST_REQUIRE_EQUAL (database.container_size(), 0);
+      }
+      catch (adt::Exception& ex) {
+         logger::Logger::write (ex);
+      }
+   }
+
+   BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL (database.container_size(), 2);
+   BOOST_REQUIRE_EQUAL (conn0->getCommitCounter(), 1);
+
+   if (true) {
+      dbms::GuardConnection guard (conn0);
+
+      dbms::GuardStatement reader (guard, stReader);
+      BOOST_REQUIRE_EQUAL (guard.getCountLinkedStatement(), 1);
+
+      datatype::Integer& id = wepa_datatype_downcast(datatype::Integer, reader.getInputData(0));
+      const datatype::Integer& integer = wepa_datatype_downcast(datatype::Integer, reader.getOutputData(1));
+      const datatype::Date& date = wepa_datatype_downcast(datatype::Date, reader.getOutputData(3));
+
+      id.setValue(0);
+      resultCode = reader.execute ();
+
+      BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
+
+      BOOST_REQUIRE_EQUAL (reader.fetch (), true);
+
+      BOOST_REQUIRE_EQUAL (id.getValue (), 20);
+      BOOST_REQUIRE_EQUAL (integer.hasValue (), false);
+      BOOST_REQUIRE_THROW (integer.getValue (), adt::RuntimeException);
+      BOOST_REQUIRE_EQUAL (date.hasValue (), true);
+
+      BOOST_REQUIRE_EQUAL (reader.fetch (), true);
+
+      BOOST_REQUIRE_EQUAL (id.getValue (), 25);
+      BOOST_REQUIRE_EQUAL (integer.hasValue (), true);
+      BOOST_REQUIRE_EQUAL (date.hasValue (), false);
+      BOOST_REQUIRE_THROW (date.getValue (), adt::RuntimeException);
+
+      BOOST_REQUIRE_EQUAL (reader.fetch (), false);
+   }
+
+   LOG_DEBUG ("Enables termination");
+   application.enableTermination();
+
+   tr.join ();
+}
+

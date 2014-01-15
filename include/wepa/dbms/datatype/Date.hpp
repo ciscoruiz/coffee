@@ -182,6 +182,8 @@ public:
     */
    void setValue (const adt::Second& second) throw (adt::RuntimeException);
 
+   operator adt::StreamString () const noexcept { return asString (); }
+
    /**
       Devuelve una cadena con la informacion referente a esta instancia.
       \return Una cadena con la informacion referente a esta instancia.

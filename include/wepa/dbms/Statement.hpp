@@ -148,7 +148,7 @@ public:
       \param data Variable que deseamos asociar como variable de entrada. La correspondencia entre esta
       y la sentencia SQL vendra dada por el orden de declaracion.
    */
-   binder::Input* createBinderInput (datatype::Abstract& data) throw (adt::RuntimeException);
+   void createBinderInput (datatype::Abstract& data) throw (adt::RuntimeException);
 
    /**
       Establece el parametro de salida de la sentencia SQL.Cada una de las variables de salida indicadas
@@ -173,7 +173,7 @@ public:
 
       \warning Solo las sentencias SQL del tipo \em select usan las variables de salida.
    */
-   dbms::binder::Output* createBinderOutput (datatype::Abstract& data) throw (adt::RuntimeException);
+   void createBinderOutput (datatype::Abstract& data) throw (adt::RuntimeException);
 
    /**
       Devuelve un documento XML con la informacion referente a esta instancia.

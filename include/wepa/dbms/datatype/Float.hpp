@@ -91,12 +91,7 @@ public:
       isNotNull();
    }
 
-   /**
-      Operador de conversion.
-      \warning Si la columna asociada tiene un valor NULL, devolvera 0.0.
-      \return El contenido de esta cadena.
-   */
-   operator float () const throw (adt::RuntimeException) { return getValue (); }
+   operator adt::StreamString () const noexcept { return asString (); }
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.

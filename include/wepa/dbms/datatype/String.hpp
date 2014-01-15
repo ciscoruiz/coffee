@@ -95,17 +95,12 @@ public:
    void setValue (const std::string& str) throw (adt::RuntimeException) { return setValue (str.c_str ()); }
 
    /**
-      Operador de conversion. Desde NemesisRD.dbms 1.5.3 si el contenido de la columna sociada
-      fue nulo este metodo devolvera NULL.
-      \return El contenido de esta cadena.
-   */
-   operator const char* () const throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return  m_value; }
-
-   /**
       Elimina los espacios a la derecha de la cadena recibida.
       \return La misma cadena recibida pero con los espacios eliminados.
    */
    static char* strip (char *str) noexcept;
+
+   operator adt::StreamString () const noexcept { return asString (); }
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.

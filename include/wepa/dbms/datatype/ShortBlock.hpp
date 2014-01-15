@@ -94,17 +94,7 @@ public:
    */
    void setValue (const adt::DataBlock& value) throw (adt::RuntimeException);
 
-   /**
-      Operador de conversion.
-      \return El adt::DataBlock asociado a esta instancia.
-   */
-   operator adt::DataBlock& () throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
-
-   /**
-      Operador de conversion.
-      \return El adt::DataBlock asociado a esta instancia.
-   */
-   operator const adt::DataBlock& () const throw (adt::RuntimeException) { return getValue (); }
+   operator adt::StreamString () const noexcept { return asString (); }
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.

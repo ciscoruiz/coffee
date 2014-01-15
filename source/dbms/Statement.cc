@@ -24,7 +24,7 @@ Statement::~Statement ()
 }
 
 
-binder::Input* Statement::createBinderInput (datatype::Abstract& data)
+void Statement::createBinderInput (datatype::Abstract& data)
    throw (adt::RuntimeException)
 {
    binder::Input* result = m_database.allocateInputBind (data);
@@ -33,7 +33,6 @@ binder::Input* Statement::createBinderInput (datatype::Abstract& data)
       WEPA_THROW_EXCEPTION(data << " | Data returned a null binder");
 
    m_inputBinds.push_back (result);
-   return result;
 }
 
 datatype::Abstract& Statement::getInputData (const int pos)
@@ -56,7 +55,7 @@ const datatype::Abstract& Statement::getOutputData (const int pos) const
    return std::ref (m_outputBinds [pos].getData ());
 }
 
-binder::Output* Statement::createBinderOutput (datatype::Abstract& data)
+void Statement::createBinderOutput (datatype::Abstract& data)
    throw (adt::RuntimeException)
 {
    binder::Output* result = m_database.allocateOutputBind (data);
@@ -65,7 +64,6 @@ binder::Output* Statement::createBinderOutput (datatype::Abstract& data)
       WEPA_THROW_EXCEPTION(data << " | Data returned a null binder");
 
    m_outputBinds.push_back (result);
-   return result;
 }
 
 void Statement::prepare (Connection* connection)

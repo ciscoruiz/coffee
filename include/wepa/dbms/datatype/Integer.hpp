@@ -73,11 +73,7 @@ public:
       this->isNotNull();
    }
 
-   /**
-      Operador de conversion.
-      \return El valor entero asociado a esta instancia.
-   */
-   operator int () const throw (adt::RuntimeException) { return getValue(); }
+   operator adt::StreamString () const noexcept { return asString (); }
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.

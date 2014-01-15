@@ -321,11 +321,11 @@ test::MyReadStatement::MyReadStatement (Database& database, const char* name, co
    MyStatement (database, name, expression, actionOnError),
    m_index (0)
 {
-   m_binders [0] = this->createBinderInput(m_id);
-   m_binders [1] = this->createBinderOutput (m_name);
-   m_binders [2] = this->createBinderOutput(m_integer);
-   m_binders [3] = this->createBinderOutput(m_float);
-   m_binders [4] = this->createBinderOutput(m_time);
+   this->createBinderInput(m_id);
+   this->createBinderOutput (m_name);
+   this->createBinderOutput(m_integer);
+   this->createBinderOutput(m_float);
+   this->createBinderOutput(m_time);
 }
 
 dbms::ResultCode test::MyReadStatement::do_execute (dbms::Connection& connection)
@@ -358,40 +358,34 @@ bool test::MyReadStatement::do_fetch () throw (adt::RuntimeException, DatabaseEx
 
    const MyRecord& record = m_selection [m_index ++];
 
-   datatype::Integer& id = wepa_datatype_downcast(datatype::Integer, m_binders [0]->getData ());
-
-   id.setValue (record.m_id);
-
-   static_cast <datatype::Integer&> (m_binders [0]->getData()).setValue(record.m_id);
-   static_cast <datatype::String&> (m_binders [1]->getData ()).setValue(record.m_name);
+    m_id.setValue (record.m_id);
+    m_name.setValue(record.m_name);
    
-   datatype::Integer& myInteger = wepa_datatype_downcast(datatype::Integer, m_binders [2]->getData ());
-   datatype::Date& myDate = wepa_datatype_downcast(datatype::Date, m_binders [4]->getData ());
-
    if (record.m_integer == -1)
-      myInteger.isNull ();
+      m_integer.isNull ();
    else
-      myInteger.setValue (record.m_integer);
+      m_integer.setValue (record.m_integer);
 
-   static_cast <datatype::Float&> (m_binders [3]->getData ()).setValue(record.m_float);
+   m_float.setValue (record.m_float);
 
    if (record.m_time == 0)
-      myDate.isNull ();
+      m_time.isNull ();
    else
-      myDate.setValue (record.m_time);
+      m_time.setValue (record.m_time);
 
-   LOG_DEBUG (id.asString () << " | " << myInteger.asString () << " | " << myDate.asString ())
+   LOG_DEBUG (m_id << " | " << m_integer  << " | " << m_time);
+
    return true;
 }
 
 test::MyWriteStatement::MyWriteStatement (Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
    MyStatement (database, name, expression, actionOnError)
 {
-   m_binders [0] = this->createBinderInput(m_id);
-   m_binders [1] = this->createBinderInput (m_name);
-   m_binders [2] = this->createBinderInput(m_integer);
-   m_binders [3] = this->createBinderInput(m_float);
-   m_binders [4] = this->createBinderInput(m_time);
+   this->createBinderInput(m_id);
+   this->createBinderInput (m_name);
+   this->createBinderInput(m_integer);
+   this->createBinderInput(m_float);
+   this->createBinderInput(m_time);
 }
 
 dbms::ResultCode test::MyWriteStatement::do_execute (dbms::Connection& connection)
@@ -411,7 +405,7 @@ dbms::ResultCode test::MyWriteStatement::do_execute (dbms::Connection& connectio
 
    MyRecord record;
 
-   record.m_id = static_cast <datatype::Integer&> (m_binders [0]->getData ()).getValue();
+   record.m_id = m_id.getValue ();
 
    if (record.m_id == 666) {
       result.initialize(MyDatabase::NotFound, NULL);
@@ -419,13 +413,10 @@ dbms::ResultCode test::MyWriteStatement::do_execute (dbms::Connection& connectio
    }
 
    if (opCode != MyConnection::Delete) {
-      datatype::Integer& myInteger =  wepa_datatype_downcast(datatype::Integer, m_binders [2]->getData ());
-      datatype::Date& myDate = wepa_datatype_downcast(datatype::Date, m_binders [4]->getData ());
-
-      record.m_name = static_cast <datatype::String&> (m_binders [1]->getData ()).getValue();
-      record.m_integer = (myInteger.hasValue ()) ? myInteger.getValue (): -1;
-      record.m_float = static_cast <datatype::Float&> (m_binders [3]->getData ()).getValue();
-      record.m_time = (myDate.hasValue ()) ? myDate.getValue (): 0;
+      record.m_name = m_name.getValue ();
+      record.m_integer = (m_integer.hasValue ()) ? m_integer.getValue (): -1;
+      record.m_float = m_float.getValue();
+      record.m_time = (m_time.hasValue ()) ? m_time.getValue (): 0;
    }
 
    LOG_DEBUG ("ID = " << record.m_id);

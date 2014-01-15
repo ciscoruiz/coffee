@@ -58,7 +58,6 @@ BOOST_AUTO_TEST_CASE (shortblock_is_nulleable)
 
    adt::DataBlock other;
    BOOST_REQUIRE_THROW (column.getValue (), adt::RuntimeException);
-   BOOST_REQUIRE_THROW (other = column, adt::RuntimeException);
 
    other.assign ("hello world", 7);
 

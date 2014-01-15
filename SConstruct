@@ -34,7 +34,8 @@ for source in sources:
    ss = str (source)
    ss += '/SConstruct'
    compile_library = SConscript (ss, exports='env')
-   libraries.extend (compile_library)
+   if (compile_library != None):
+      libraries.extend (compile_library)
 
 env.Default (libraries)
 
@@ -49,14 +50,17 @@ tests = Glob(test + '/*')
 for test in tests:
    ss = str (test)
    ss += '/SConstruct'
-   test_unit_program = SConscript (ss, exports='env')
-   unit_tests.extend (test_unit_program)
-   print test_unit_program [0]
-   test_unit = Builder (action = '%s --report_level=short > $TARGET' % test_unit_program [0])
-   env ['BUILDERS']['RunTestUnit'] = test_unit
-   test_unit_result = env.RunTestUnit ('%s.output' % test_unit_program [0], 'SConstruct')
-   run_tests.extend (test_unit_result)
-   Depends (test_unit_result, test_unit_program)
+   test_unit_program = SConscript (ss, exports='env')   
+   if test_unit_program != None:
+      unit_tests.extend (test_unit_program)
+      print test_unit_program [0]
+      test_unit = Builder (action = '%s --report_level=short > $TARGET' % test_unit_program [0])
+      env ['BUILDERS']['RunTestUnit'] = test_unit
+      test_unit_result = env.RunTestUnit ('%s.output' % test_unit_program [0], 'SConstruct')   
+      if test_unit_result != None:
+         run_tests.extend (test_unit_result)
+         Depends (test_unit_result, test_unit_program)
+      
 
 env.Alias ('test', run_tests)
 

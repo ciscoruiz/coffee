@@ -136,13 +136,33 @@ BOOST_AUTO_TEST_CASE (persistence_primary_key_sort)
       primaryKey->addComponent(svalue);
    }
 
-   std::sort (keys.begin (), keys.end (), PrimaryKeyTestPtrLess ());
+   bool isSorted = true;
 
    for (int ii = 1; ii < 10; ++ ii) {
-      std::cout << "Index=" << ii << std::endl;
-      std::cout << "\t" << keys [ii - 1].asString () << std::endl;
-      std::cout << "\t" << keys [ii].asString () << std::endl;
-      BOOST_REQUIRE_EQUAL (keys [ii - 1] < keys [ii], true);
+      if ((keys [ii - 1] < keys [ii]) == false) {
+         std::cout << "Unsorted Index=" << ii << std::endl;
+         std::cout << "\t" << keys [ii - 1].asString () << std::endl;
+         std::cout << "\t" << keys [ii].asString () << std::endl;
+         isSorted = false;
+         break;
+      }
    }
+
+   BOOST_REQUIRE_EQUAL (isSorted, false);
+
+   std::sort (keys.begin (), keys.end (), PrimaryKeyTestPtrLess ());
+
+   isSorted = true;
+   for (int ii = 1; ii < 10; ++ ii) {
+      if ((keys [ii - 1] < keys [ii]) == false) {
+         std::cout << "Failed Index=" << ii << std::endl;
+         std::cout << "\t" << keys [ii - 1].asString () << std::endl;
+         std::cout << "\t" << keys [ii].asString () << std::endl;
+         isSorted = false;
+         break;
+      }
+   }
+
+   BOOST_REQUIRE_EQUAL (isSorted, true);
 }
 

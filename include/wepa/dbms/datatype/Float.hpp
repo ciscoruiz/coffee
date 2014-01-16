@@ -113,6 +113,7 @@ private:
    const char* m_format;
 
    void do_clear () noexcept { m_value = 0.0; }
+   int do_compare (const Abstract& other) const throw (adt::RuntimeException);
 };
 
 }

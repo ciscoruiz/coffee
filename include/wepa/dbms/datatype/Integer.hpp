@@ -94,6 +94,7 @@ private:
    int m_value;
 
    void do_clear () noexcept { m_value = 0; }
+   int do_compare (const Abstract& other) const throw (adt::RuntimeException);
 };
 
 }

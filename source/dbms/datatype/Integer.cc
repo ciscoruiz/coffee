@@ -46,3 +46,10 @@ adt::StreamString datatype::Integer::asString () const
    return result += " }";
 }
 
+int datatype::Integer::do_compare (const datatype::Abstract& other) const
+   throw (adt::RuntimeException)
+{
+   const Integer& _other = wepa_datatype_downcast(Integer, other);
+
+   return this->m_value - _other.m_value;
+}

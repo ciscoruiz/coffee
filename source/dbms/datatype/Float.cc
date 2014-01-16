@@ -50,3 +50,17 @@ adt::StreamString datatype::Float::asString () const
    return result += " }";
 }
 
+int datatype::Float::do_compare (const datatype::Abstract& other) const
+   throw (adt::RuntimeException)
+{
+   const Float& _other = wepa_datatype_downcast(Float, other);
+
+   double rr = this->m_value - _other.m_value;
+
+   if (rr == 0)
+      return 0;
+   else if (rr < 0.0)
+      return -1;
+   else
+      return 1;
+}

@@ -57,3 +57,8 @@ adt::StreamString datatype::LongBlock::asString () const
    return result += " }";
 }
 
+int datatype::LongBlock::do_compare (const datatype::Abstract& other) const
+   throw (adt::RuntimeException)
+{
+   WEPA_THROW_EXCEPTION(asString () << " | Can not apply");
+}

@@ -81,3 +81,23 @@ void datatype::Abstract::exceptionWhenIsNull () const
       WEPA_THROW_EXCEPTION("Data '" << m_name << "' is null and it can not return any value");
    }
 }
+
+// this - other
+int datatype::Abstract::compare (const Abstract& other) const
+   throw (adt::RuntimeException)
+{
+   if (this->hasValue() == false && other.hasValue () == false)
+      return 0;
+
+   if (this->hasValue () == true && other.hasValue () == false)
+      return 1;
+
+   if (this->hasValue () == false && other.hasValue () == true)
+      return -1;
+
+   if (this->getType () != other.getType()) {
+      WEPA_THROW_EXCEPTION(this->asString () << " type does not matches with " << other);
+   }
+
+   return this->do_compare (other);
+}

@@ -65,3 +65,8 @@ adt::StreamString datatype::ShortBlock::asString () const
    return result += " }";
 }
 
+int datatype::ShortBlock::do_compare (const datatype::Abstract& other) const
+   throw (adt::RuntimeException)
+{
+   WEPA_THROW_EXCEPTION(asString () << " | Can not apply");
+}

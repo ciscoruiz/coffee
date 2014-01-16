@@ -227,6 +227,7 @@ protected:
    explicit Date (const std::string& name, const Datatype::_v type, const Constraint::_v constraint);
 
    void do_clear () noexcept { m_value = 0; }
+   int do_compare (const Abstract& other) const throw (adt::RuntimeException);
 };
 
 }

@@ -92,3 +92,11 @@ adt::StreamString datatype::String::asString () const
    return result += " }";
 }
 
+int datatype::String::do_compare (const datatype::Abstract& other) const
+   throw (adt::RuntimeException)
+{
+   const String& _other = wepa_datatype_downcast(String, other);
+
+   return wepa_strcmp (this->m_value,_other.m_value);
+}
+

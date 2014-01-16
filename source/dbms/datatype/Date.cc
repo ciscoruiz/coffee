@@ -147,3 +147,10 @@ adt::StreamString datatype::Date::asString () const
    return result += " }";
 }
 
+int datatype::Date::do_compare (const datatype::Abstract& other) const
+   throw (adt::RuntimeException)
+{
+   const Date& _other = wepa_datatype_downcast(Date, other);
+
+   return this->m_value - _other.m_value;
+}

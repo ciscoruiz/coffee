@@ -257,6 +257,7 @@ private:
    void prepare (Connection* connection) throw (adt::RuntimeException, DatabaseException);
    virtual void do_prepare (Connection* connection) throw (adt::RuntimeException, DatabaseException) = 0;
 
+   // These methods will be called from GuardStatement
    datatype::Abstract& getInputData (const int pos) throw (adt::RuntimeException);
    const datatype::Abstract& getOutputData (const int pos) const throw (adt::RuntimeException);
 

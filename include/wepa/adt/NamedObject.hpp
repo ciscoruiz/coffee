@@ -57,7 +57,7 @@ public:
 
   operator StreamString () const noexcept { return asString (); }
 
-  virtual StreamString asString () const noexcept { StreamString result ("adt::NamedObject { Name: "); return result << m_name << " }"; }
+  virtual StreamString asString () const noexcept { StreamString result ("adt.NamedObject { Name: "); return result << m_name << " }"; }
 
 protected:
    NamedObject (const std::string& name) : m_name (name) {;}

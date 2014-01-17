@@ -203,7 +203,7 @@ balance::BalanceIf::resource_iterator balance::BalanceIf::next (balance::Balance
 adt::StreamString balance::BalanceIf::asString () const
    noexcept
 {
-   adt::StreamString result ("balance::BalanceIf {");
+   adt::StreamString result ("balance.BalanceIf { ");
 
    result += adt::NamedObject::asString();
 
@@ -215,7 +215,7 @@ adt::StreamString balance::BalanceIf::asString () const
    result += " } | Available = ";
    result += adt::AsString::apply(countAvailableResources());
    result.append (" of ").append (adt::AsString::apply (size ()));
-   return result.append ("}");
+   return result.append (" }");
 }
 
 //virtual

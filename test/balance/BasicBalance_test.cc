@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE (as_string)
 
    myBalance.get (MaxResources / 2)->setAvailable(false);
 
-   BOOST_REQUIRE_EQUAL (myBalance.asString (), "balance::BalanceIf {adt::NamedObject { Name: MyBalance } | Requires=Key } | Available = 9 of 10}");
+   BOOST_REQUIRE_EQUAL (myBalance.asString (), "balance.BalanceIf { adt.NamedObject { Name: MyBalance } | Requires=Key } | Available = 9 of 10 }");
 }
 
 BOOST_AUTO_TEST_CASE (as_xml)

@@ -2,6 +2,8 @@ release = ARGUMENTS.get ('release', 0)
 
 Import ('env')
 
+env = env.Clone ()
+
 # See http://stackoverflow.com/questions/4693826/scons-binary-directory
 if int(release):
     result = SConscript ('SConscript', exports='env', variant_dir="release", duplicate=0)

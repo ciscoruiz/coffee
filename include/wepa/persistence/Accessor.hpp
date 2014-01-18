@@ -32,8 +32,8 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_persistence_AccessorIf_hpp
-#define __wepa_persistence_AccessorIf_hpp
+#ifndef __wepa_persistence_Accessor_hpp
+#define __wepa_persistence_Accessor_hpp
 
 #include <vector>
 
@@ -60,11 +60,11 @@ class Class;
 class GuardClass;
 class Object;
 
-class AccessorIf : public adt::NamedObject {
+class Accessor : public adt::NamedObject {
    typedef std::vector <dbms::datatype::Abstract*> Values;
 
 public:
-   virtual ~AccessorIf () { m_statement = NULL; }
+   virtual ~Accessor () { m_statement = NULL; }
 
    void initialize (Class& _class, dbms::Statement* statement) throw (adt::RuntimeException);
 
@@ -73,10 +73,10 @@ public:
 
    virtual void apply (GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
 
-   AccessorIf (const AccessorIf&) = delete;
+   Accessor (const Accessor&) = delete;
 
 protected:
-   AccessorIf (const char* name, const int ident) : adt::NamedObject (name), m_ident (ident), m_statement (NULL) {;}
+   Accessor (const char* name, const int ident) : adt::NamedObject (name), m_ident (ident), m_statement (NULL) {;}
 
    dbms::Statement& getStatement () throw (adt::RuntimeException);
 

@@ -35,7 +35,7 @@
 
 #include <functional>
 
-#include <wepa/persistence/AccessorIf.hpp>
+#include <wepa/persistence/Accessor.hpp>
 #include <wepa/persistence/Class.hpp>
 
 #include <wepa/logger/Logger.hpp>
@@ -45,7 +45,7 @@
 
 using namespace wepa;
 
-void persistence::AccessorIf::initialize (Class& _class, dbms::Statement* statement)
+void persistence::Accessor::initialize (Class& _class, dbms::Statement* statement)
    throw (adt::RuntimeException)
 {
    m_statement = statement;
@@ -85,7 +85,7 @@ void persistence::AccessorIf::initialize (Class& _class, dbms::Statement* statem
    LOG_DEBUG (_class << " | " << m_statement->asString ());
 }
 
-const persistence::PrimaryKey& persistence::AccessorIf::getPrimaryKey () const
+const persistence::PrimaryKey& persistence::Accessor::getPrimaryKey () const
    throw (adt::RuntimeException)
 {
    if (m_primaryKey.isDefined() == false) {
@@ -95,7 +95,7 @@ const persistence::PrimaryKey& persistence::AccessorIf::getPrimaryKey () const
    return std::ref (m_primaryKey);
 }
 
-dbms::Statement& persistence::AccessorIf::getStatement ()
+dbms::Statement& persistence::Accessor::getStatement ()
    throw (adt::RuntimeException)
 {
    if (m_statement == NULL) {

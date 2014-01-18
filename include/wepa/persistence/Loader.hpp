@@ -35,16 +35,16 @@
 #ifndef __wepa_persistence_Loader_hpp
 #define __wepa_persistence_Loader_hpp
 
-#include <wepa/persistence/AccessorIf.hpp>
+#include <wepa/persistence/Accessor.hpp>
 
 #include <wepa/adt/RuntimeException.hpp>
 
 namespace wepa {
 namespace persistence {
 
-class Loader : public AccessorIf {
+class Loader : public Accessor {
 public:
-   explicit Loader (const char* name, const int ident) : AccessorIf(name, ident) {;}
+   explicit Loader (const char* name, const int ident) : Accessor(name, ident) {;}
 
    virtual bool hasToRefresh (GuardClass& _class, const Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
 };

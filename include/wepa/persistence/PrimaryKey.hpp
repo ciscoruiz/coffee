@@ -51,7 +51,7 @@ namespace dbms {
 
 namespace persistence {
 
-class AccessorIf;
+class Accessor;
 class Storage;
 
 class PrimaryKey {
@@ -89,7 +89,7 @@ private:
 
    PrimaryKey* clone () const throw (adt::RuntimeException);
 
-   friend class AccessorIf;
+   friend class Accessor;
    friend class Storage;
 };
 

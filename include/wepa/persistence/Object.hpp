@@ -43,7 +43,7 @@
 namespace wepa {
 namespace persistence {
 
-class AccessorIf;
+class Accessor;
 class Storage;
 class Loader;
 class PrimaryKey;

@@ -53,7 +53,7 @@ namespace xml {
 namespace persistence {
 
 class Object;
-class AccessorIf;
+class Accessor;
 class GuardClass;
 
 class Class : public adt::NamedObject {
@@ -85,7 +85,7 @@ private:
    virtual dbms::datatype::Abstract* do_createMember (const int columnNumber) const noexcept = 0;
    virtual Object* createObject () noexcept = 0;
 
-   friend class AccessorIf;
+   friend class Accessor;
    friend class GuardClass;
 };
 

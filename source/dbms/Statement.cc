@@ -96,7 +96,7 @@ ResultCode Statement::execute (Connection& connection)
 
    ResultCode result = do_execute (connection);
 
-   LOG_DEBUG (result.asString ());
+   LOG_DEBUG (getName () << " | " << result.asString ());
 
    return result;
 }

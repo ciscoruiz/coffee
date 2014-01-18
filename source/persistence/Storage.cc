@@ -86,7 +86,11 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
       try {
          entry.m_object = _class.createObject();
          entry.m_object->setPrimaryKey (clonedPrimaryKey);
-         loader.apply (connection, _class, std::ref (*entry.m_object));
+         dbms::ResultCode resultCode = loader.apply (connection, _class, std::ref (*entry.m_object));
+
+         if (resultCode.successful() == false)
+            WEPA_THROW_NAME_DB_EXCEPTION(loader.getName(), resultCode);
+
          entry.m_useCounter = 1;
          m_objects [clonedPrimaryKey] = entry;
       }
@@ -177,8 +181,11 @@ persistence::Object* persistence::Storage::AccessMode::reload (dbms::Connection&
       object.releaseDependences();
 
       LOG_DEBUG ("Reloading data for " << entry.m_object->asString ());
-      loader.apply (connection, _class, object);
-   }
+      dbms::ResultCode resultCode = loader.apply (connection, _class, object);
+
+      if (resultCode.successful() == false)
+         WEPA_THROW_NAME_DB_EXCEPTION(loader.getName(), resultCode);
+ }
 
    LOG_DEBUG ("Result=" << entry.m_object->asString ());
 

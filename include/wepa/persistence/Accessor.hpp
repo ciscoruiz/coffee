@@ -41,6 +41,7 @@
 #include <wepa/adt/NamedObject.hpp>
 
 #include <wepa/dbms/DatabaseException.hpp>
+#include <wepa/dbms/ResultCode.hpp>
 
 #include <wepa/persistence/PrimaryKey.hpp>
 
@@ -74,7 +75,7 @@ public:
    const PrimaryKey& getPrimaryKey () const throw (adt::RuntimeException);
    const int getIdent () const noexcept { return m_ident; }
 
-   void apply (dbms::Connection& connection, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
+   dbms::ResultCode apply (dbms::Connection& connection, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
 
    Accessor (const Accessor&) = delete;
 
@@ -87,7 +88,7 @@ protected:
    virtual bool isPrimaryKeyComponent (const int columnNumber) const noexcept = 0;
    virtual bool isOutputValue (const int columnNumber) const noexcept = 0;
 
-   virtual void do_apply (dbms::GuardConnection& connection, dbms::GuardStatement& statement, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
+   virtual dbms::ResultCode do_apply (dbms::GuardStatement& statement, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
 
 private:
    // Store pointers to remove when terminate the AccessoIf

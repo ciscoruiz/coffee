@@ -88,7 +88,7 @@ void persistence::Accessor::initialize (Class& _class, dbms::Statement* statemen
    LOG_DEBUG (_class << " | " << m_statement->asString ());
 }
 
-void persistence::Accessor::apply (dbms::Connection& connection, GuardClass& _class, Object& object)
+dbms::ResultCode persistence::Accessor::apply (dbms::Connection& connection, GuardClass& _class, Object& object)
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
    if (m_statement == NULL) {
@@ -103,8 +103,11 @@ void persistence::Accessor::apply (dbms::Connection& connection, GuardClass& _cl
 
    dbms::GuardStatement gStatement (gConnection, *m_statement);
 
-   // Data will be transfered by using 'binders' from statement to _class
-   do_apply(gConnection, gStatement, _class, object);
+   dbms::ResultCode result = do_apply(gStatement, _class, object);
+
+   LOG_DEBUG (getName () << " | " << result);
+
+   return result;
 }
 
 const persistence::PrimaryKey& persistence::Accessor::getPrimaryKey () const

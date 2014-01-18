@@ -40,7 +40,10 @@
 
 #include <wepa/logger/Logger.hpp>
 
+#include <wepa/dbms/Connection.hpp>
+#include <wepa/dbms/GuardConnection.hpp>
 #include <wepa/dbms/Statement.hpp>
+#include <wepa/dbms/GuardStatement.hpp>
 #include <wepa/dbms/datatype/Abstract.hpp>
 
 using namespace wepa;
@@ -83,6 +86,25 @@ void persistence::Accessor::initialize (Class& _class, dbms::Statement* statemen
    LOG_DEBUG (getName () << " | " << m_primaryKey);
 
    LOG_DEBUG (_class << " | " << m_statement->asString ());
+}
+
+void persistence::Accessor::apply (dbms::Connection& connection, GuardClass& _class, Object& object)
+   throw (adt::RuntimeException, dbms::DatabaseException)
+{
+   if (m_statement == NULL) {
+      WEPA_THROW_EXCEPTION(asString () << " | Statement can not be null");
+   }
+
+   if (m_inputValues.size() == 0 && m_outputValues.size() == 0) {
+      WEPA_THROW_EXCEPTION(asString () << " | " << m_statement->asString () << " | Accessor was not initialized");
+   }
+
+   dbms::GuardConnection gConnection (connection);
+
+   dbms::GuardStatement gStatement (gConnection, *m_statement);
+
+   // Data will be transfered by using 'binders' from statement to _class
+   do_apply(gConnection, gStatement, _class, object);
 }
 
 const persistence::PrimaryKey& persistence::Accessor::getPrimaryKey () const

@@ -48,6 +48,9 @@ namespace wepa {
 
 namespace dbms {
    class Statement;
+   class Connection;
+   class GuardConnection;
+   class GuardStatement;
 
    namespace datatype {
       class Abstract;
@@ -71,7 +74,7 @@ public:
    const PrimaryKey& getPrimaryKey () const throw (adt::RuntimeException);
    const int getIdent () const noexcept { return m_ident; }
 
-   virtual void apply (GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
+   void apply (dbms::Connection& connection, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
 
    Accessor (const Accessor&) = delete;
 
@@ -83,6 +86,8 @@ protected:
    virtual bool isInputValue (const int columnNumber) const noexcept = 0;
    virtual bool isPrimaryKeyComponent (const int columnNumber) const noexcept = 0;
    virtual bool isOutputValue (const int columnNumber) const noexcept = 0;
+
+   virtual void do_apply (dbms::GuardConnection& connection, dbms::GuardStatement& statement, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
 
 private:
    // Store pointers to remove when terminate the AccessoIf

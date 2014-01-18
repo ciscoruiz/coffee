@@ -43,7 +43,7 @@ using namespace wepa;
 persistence::PrimaryKey* persistence::PrimaryKey::clone () const
    throw (adt::RuntimeException)
 {
-   if (this->isDefined()) {
+   if (this->isDefined() == false) {
       WEPA_THROW_EXCEPTION("lvalue was not initialized");
    }
 
@@ -80,6 +80,16 @@ int persistence::PrimaryKey::compareTo (const PrimaryKey& other) const
    }
 
    return result;
+}
+
+const dbms::datatype::Abstract* persistence::PrimaryKey::getComponent (const int pos) const
+   throw (adt::RuntimeException)
+{
+   if (pos >= m_components.size ()) {
+      WEPA_THROW_EXCEPTION("Position " << pos << " is out of range");
+   }
+
+   return m_components [pos];
 }
 
 adt::StreamString persistence::PrimaryKey::asString () const noexcept

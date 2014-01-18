@@ -47,20 +47,18 @@
 #include <wepa/dbms/DatabaseException.hpp>
 
 namespace wepa {
-
-namespace xml {
-class Node;
-}
+   namespace xml {
+      class Node;
+   }
 
 namespace persistence {
 
 class Repository;
 class Object;
 class Loader;
+class GuardClass;
 
 class Storage : public adt::NamedObject {
-   typedef Object* (*ObjectFactory) ();
-
    struct Entry {
       Object* m_object;
       unsigned int m_useCounter;
@@ -85,10 +83,10 @@ public:
       auto_enum_declare (AccessMode);
 
    protected:
-      Object* reload (Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
+      Object* reload (GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
 
    private:
-      virtual Object* run (Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException) = 0;
+      virtual Object* run (GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException) = 0;
 
       friend class Storage;
    };
@@ -97,7 +95,7 @@ public:
 
    ~Storage ();
 
-   Object& load (Loader& loader) throw (adt::RuntimeException, dbms::DatabaseException);
+   Object& load (GuardClass& _class, Loader& loader) throw (adt::RuntimeException, dbms::DatabaseException);
 
    operator adt::StreamString () const noexcept { return asString (); }
 
@@ -123,22 +121,21 @@ protected:
 private:
    Entries m_objects;
    const AccessMode::_v m_accessMode;
-   ObjectFactory m_objectFactory;
    mutable unsigned int m_hitCounter;
    mutable unsigned int m_faultCounter;
 
-   Storage (const char* name, const AccessMode::_v accessMode, ObjectFactory objectFactory);
+   Storage (const char* name, const AccessMode::_v accessMode);
 
    class AccessModeReadOnly : public AccessMode {
-      Object* run (Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
+      Object* run (GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
    };
 
    class AccessModeReadWrite : public AccessMode {
-      Object* run (Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
+      Object* run (GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
    };
 
    class AccessModeReadAlways : public AccessMode {
-      Object* run (Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
+      Object* run (GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
    };
 
    static const AccessMode& instanciateAccessMode (const AccessMode::_v accessMode) throw (adt::RuntimeException);

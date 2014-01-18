@@ -35,12 +35,12 @@
 #ifndef __wepa_persistence_AccessorIf_hpp
 #define __wepa_persistence_AccessorIf_hpp
 
-#include <mutex>
-
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <vector>
 
 #include <wepa/adt/RuntimeException.hpp>
 #include <wepa/adt/NamedObject.hpp>
+
+#include <wepa/dbms/DatabaseException.hpp>
 
 #include <wepa/persistence/PrimaryKey.hpp>
 
@@ -56,33 +56,40 @@ namespace dbms {
 
 namespace persistence {
 
+class Class;
+class GuardClass;
+class Object;
+
 class AccessorIf : public adt::NamedObject {
-   typedef boost::ptr_vector <dbms::datatype::Abstract> Values;
+   typedef std::vector <dbms::datatype::Abstract*> Values;
 
 public:
    virtual ~AccessorIf () { m_statement = NULL; }
 
-   void initialize (dbms::Statement* statement) throw (adt::RuntimeException);
+   void initialize (Class& _class, dbms::Statement* statement) throw (adt::RuntimeException);
+
+   const PrimaryKey& getPrimaryKey () const throw (adt::RuntimeException);
+   const int getIdent () const noexcept { return m_ident; }
+
+   virtual void apply (GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
 
    AccessorIf (const AccessorIf&) = delete;
 
-   const PrimaryKey& getPrimaryKey () const throw (adt::RuntimeException);
-
 protected:
-   AccessorIf (const char* name) : adt::NamedObject (name), m_statement (NULL) {;}
+   AccessorIf (const char* name, const int ident) : adt::NamedObject (name), m_ident (ident), m_statement (NULL) {;}
 
    dbms::Statement& getStatement () throw (adt::RuntimeException);
 
-   virtual dbms::datatype::Abstract* do_createInputValue (const int pos) noexcept = 0;
-   virtual bool do_isPrimaryKeyComponent (const int pos) noexcept = 0;
-   virtual dbms::datatype::Abstract* do_createOutputValue (const int pos) noexcept = 0;
+   virtual bool isInputValue (const int columnNumber) const noexcept = 0;
+   virtual bool isPrimaryKeyComponent (const int columnNumber) const noexcept = 0;
+   virtual bool isOutputValue (const int columnNumber) const noexcept = 0;
 
 private:
    // Store pointers to remove when terminate the AccessoIf
    Values m_inputValues;
    Values m_outputValues;
    PrimaryKey m_primaryKey;
-
+   const int m_ident;
    dbms::Statement* m_statement;
 };
 

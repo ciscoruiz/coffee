@@ -70,6 +70,8 @@ public:
 
    bool operator < (const PrimaryKey& other) const throw (adt::RuntimeException){ return compareTo(other) < 0; }
 
+   const dbms::datatype::Abstract* getComponent (const int pos) const throw (adt::RuntimeException);
+
    /**
     * \warning This method will be public for Unit test purposes
     * @param component

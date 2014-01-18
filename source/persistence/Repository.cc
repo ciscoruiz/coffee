@@ -41,7 +41,7 @@
 
 using namespace wepa;
 
-persistence::Storage* persistence::Repository::createStorage (const Storage::Ident ident, const char* name, const Storage::AccessMode::_v accessMode, Storage::ObjectFactory factory)
+persistence::Storage* persistence::Repository::createStorage (const Storage::Ident ident, const char* name, const Storage::AccessMode::_v accessMode)
    throw (adt::RuntimeException)
 {
    persistence::Storage* result;
@@ -56,7 +56,7 @@ persistence::Storage* persistence::Repository::createStorage (const Storage::Ide
       WEPA_THROW_EXCEPTION("Ident=" << ident << " has already been used");
    }
 
-   result = new Storage (name, accessMode, factory);
+   result = new Storage (name, accessMode);
 
    LOG_DEBUG(result->asString ());
 

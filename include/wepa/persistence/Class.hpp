@@ -32,21 +32,61 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_persistence_Loader_hpp
-#define __wepa_persistence_Loader_hpp
+#ifndef __wepa_persistence_Class_hpp
+#define __wepa_persistence_Class_hpp
 
-#include <wepa/persistence/AccessorIf.hpp>
+#include <mutex>
 
+#include <boost/ptr_container/ptr_vector.hpp>
+
+#include <wepa/adt/NamedObject.hpp>
 #include <wepa/adt/RuntimeException.hpp>
 
+#include <wepa/dbms/datatype/Abstract.hpp>
+
 namespace wepa {
+
+namespace xml {
+   class Node;
+}
+
 namespace persistence {
 
-class Loader : public AccessorIf {
-public:
-   explicit Loader (const char* name, const int ident) : AccessorIf(name, ident) {;}
+class Object;
+class AccessorIf;
+class GuardClass;
 
-   virtual bool hasToRefresh (GuardClass& _class, const Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
+class Class : public adt::NamedObject {
+   typedef boost::ptr_vector <dbms::datatype::Abstract> Members;
+
+public:
+   virtual ~Class ();
+
+   void createMembers () throw (adt::RuntimeException);
+
+   int member_size () const noexcept { return m_members.size (); }
+
+   adt::StreamString asString () const noexcept;
+
+   xml::Node& asXML (xml::Node& parent) const noexcept;
+
+   Class (const Class&) = delete;
+
+protected:
+   Class (const char* name) : adt::NamedObject (name) {;}
+
+   dbms::datatype::Abstract& getMember (const int columnNumber) throw (adt::RuntimeException);
+   const dbms::datatype::Abstract& getMember (const int columnNumber) const throw (adt::RuntimeException);
+
+private:
+   Members m_members;
+   std::recursive_mutex m_mutex;
+
+   virtual dbms::datatype::Abstract* do_createMember (const int columnNumber) const noexcept = 0;
+   virtual Object* createObject () noexcept = 0;
+
+   friend class AccessorIf;
+   friend class GuardClass;
 };
 
 } /* namespace persistence */

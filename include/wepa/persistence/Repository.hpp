@@ -50,12 +50,13 @@ class Node;
 
 namespace persistence {
 
+
 class Repository : public adt::NamedObject {
 public:
    explicit Repository (const char* name) : NamedObject(name) {;}
    explicit Repository (const std::string& name) : NamedObject(name) {;}
 
-   Storage* createStorage (const Storage::Ident ident, const char* name, const Storage::AccessMode::_v accessMode, Storage::ObjectFactory factory)
+   Storage* createStorage (const Storage::Ident ident, const char* name, const Storage::AccessMode::_v accessMode)
       throw (adt::RuntimeException);
 
    Storage& findStorage (const Storage::Ident ident) throw (adt::RuntimeException);

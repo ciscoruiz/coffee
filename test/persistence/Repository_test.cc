@@ -48,6 +48,7 @@
 
 #include <wepa/persistence/Repository.hpp>
 #include <wepa/persistence/Storage.hpp>
+#include <wepa/persistence/Class.hpp>
 
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Compiler.hpp>
@@ -58,7 +59,7 @@ BOOST_AUTO_TEST_CASE (persistence_define_structure)
 {
    persistence::Repository repository ("persistence_define_structure");
 
-   persistence::Storage* ii = repository.createStorage(0, "the 0", persistence::Storage::AccessMode::ReadOnly, NULL);
+   persistence::Storage* ii = repository.createStorage(0, "the 0", persistence::Storage::AccessMode::ReadOnly);
 
    BOOST_REQUIRE_NE (ii, (void*) 0);
 
@@ -66,26 +67,26 @@ BOOST_AUTO_TEST_CASE (persistence_define_structure)
 
    BOOST_REQUIRE_EQUAL (ii, &find);
 
-   BOOST_REQUIRE_THROW(repository.createStorage(0, "already used", persistence::Storage::AccessMode::ReadOnly, NULL), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(repository.createStorage(0, "another 0", persistence::Storage::AccessMode::ReadOnly), adt::RuntimeException);
 
-   persistence::Storage* jj = repository.createStorage(1, "the 1", persistence::Storage::AccessMode::ReadOnly, NULL);
+   persistence::Storage* jj = repository.createStorage(1, "the 1", persistence::Storage::AccessMode::ReadOnly);
 
    BOOST_REQUIRE_NE (ii, jj);
 
-   BOOST_REQUIRE_THROW(repository.createStorage(333, "invalid access", persistence::Storage::AccessMode::None, NULL), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(repository.createStorage(333, "the 333", persistence::Storage::AccessMode::None), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE (persistence_repository_as)
 {
    persistence::Repository repository ("persistence_define_structure");
 
-   repository.createStorage(0, "the 0", persistence::Storage::AccessMode::ReadOnly, NULL);
-   repository.createStorage(1, "the 1", persistence::Storage::AccessMode::ReadWrite, NULL);
-   repository.createStorage(2, "the 2", persistence::Storage::AccessMode::ReadAlways, NULL);
+   repository.createStorage(0, "the 0", persistence::Storage::AccessMode::ReadOnly);
+   repository.createStorage(1, "the 1", persistence::Storage::AccessMode::ReadWrite);
+   repository.createStorage(2, "the 2", persistence::Storage::AccessMode::ReadAlways);
 
    adt::StreamString zz = repository.asString ();
 
-   BOOST_REQUIRE_EQUAL (zz, "persistence.Repository { adt::NamedObject { Name: persistence_define_structure } | N-Size=3 }");
+   BOOST_REQUIRE_EQUAL (zz, "persistence.Repository { adt.NamedObject { Name: persistence_define_structure } | N-Size=3 }");
 
    xml::Node myNode ("root");
 

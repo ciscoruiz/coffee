@@ -43,13 +43,18 @@
 namespace wepa {
 namespace persistence {
 
+class AccessorIf;
 class Storage;
 class Loader;
 class PrimaryKey;
+class Class;
 
 class Object {
 public:
    virtual ~Object () {m_primaryKey = NULL; }
+
+   Class& getClass () noexcept { return std::ref (m_class); }
+   const Class& getClass () const noexcept { return std::ref (m_class); }
 
    void setPrimaryKey (const PrimaryKey* primaryKey) noexcept { m_primaryKey = primaryKey; }
    const PrimaryKey* getPrimaryKey () const noexcept { return m_primaryKey; }
@@ -59,16 +64,17 @@ public:
    virtual adt::StreamString asString () const noexcept = 0;
 
 protected:
-   Object () : m_primaryKey (NULL) {;}
+   Class& m_class;
 
-   virtual void load (persistence::Loader& loader) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
-   virtual bool hasBeenChanged (persistence::Loader& loader) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
+   Object (Class& _class) : m_class (_class), m_primaryKey (NULL) {;}
+
    virtual void releaseDependences () noexcept = 0;
 
 private:
    const PrimaryKey* m_primaryKey;
 
    friend class Storage;
+   friend class AccesorIf;
 };
 
 } /* namespace persistence */

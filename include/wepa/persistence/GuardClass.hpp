@@ -32,21 +32,35 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_persistence_Loader_hpp
-#define __wepa_persistence_Loader_hpp
-
-#include <wepa/persistence/AccessorIf.hpp>
+#ifndef __wepa_persistence_GuardClass_hpp
+#define __wepa_persistence_GuardClass_hpp
 
 #include <wepa/adt/RuntimeException.hpp>
 
 namespace wepa {
+
+namespace dbms {
+   namespace datatype {
+      class Abstract;
+   }
+}
 namespace persistence {
 
-class Loader : public AccessorIf {
-public:
-   explicit Loader (const char* name, const int ident) : AccessorIf(name, ident) {;}
+class Class;
+class Object;
 
-   virtual bool hasToRefresh (GuardClass& _class, const Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
+class GuardClass {
+public:
+   GuardClass (Class& _class);
+   ~GuardClass ();
+
+   dbms::datatype::Abstract& getMember (const int columnNumber) throw (adt::RuntimeException);
+   const dbms::datatype::Abstract& getMember (const int columnNumber) const throw (adt::RuntimeException);
+
+   Object* createObject () noexcept;
+
+private:
+   Class& m_class;
 };
 
 } /* namespace persistence */

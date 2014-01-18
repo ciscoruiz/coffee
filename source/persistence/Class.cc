@@ -32,76 +32,70 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-
-#include <functional>
-
-#include <wepa/persistence/AccessorIf.hpp>
 #include <wepa/persistence/Class.hpp>
 
 #include <wepa/logger/Logger.hpp>
 
-#include <wepa/dbms/Statement.hpp>
+#include <wepa/xml/Node.hpp>
+#include <wepa/xml/Attribute.hpp>
+
 #include <wepa/dbms/datatype/Abstract.hpp>
 
 using namespace wepa;
 
-void persistence::AccessorIf::initialize (Class& _class, dbms::Statement* statement)
-   throw (adt::RuntimeException)
+persistence::Class::~Class ()
 {
-   m_statement = statement;
-
-   if (m_statement == NULL) {
-      WEPA_THROW_EXCEPTION(asString () << " | Statement can not be null");
-   }
-
-   if (m_inputValues.size() != 0 ||  m_outputValues.size() != 0) {
-      WEPA_THROW_EXCEPTION(asString () << " | " << m_statement->asString () << " | Accessor already initialized");
-   }
-
-   int pos = 0;
-   dbms::datatype::Abstract* dataType = NULL;
-
-   for (int ii = 0, maxii = _class.member_size(); ii != maxii; ++ ii) {
-      if (this->isInputValue(ii) == true) {
-         dbms::datatype::Abstract& member = _class.getMember(ii);
-
-         m_inputValues.push_back(&member);
-         m_statement->createBinderInput (member);
-
-         if (this->isPrimaryKeyComponent(ii) == true) {
-            m_primaryKey.addComponent(&member);
-         }
-      }
-
-      if (this->isOutputValue(ii) == true) {
-         dbms::datatype::Abstract& member = _class.getMember(ii);
-         m_outputValues.push_back(&member);
-         m_statement->createBinderOutput (member);
-      }
-   }
-
-   LOG_DEBUG (getName () << " | " << m_primaryKey);
-
-   LOG_DEBUG (_class << " | " << m_statement->asString ());
+   m_members.clear ();
 }
 
-const persistence::PrimaryKey& persistence::AccessorIf::getPrimaryKey () const
+void persistence::Class::createMembers ()
    throw (adt::RuntimeException)
 {
-   if (m_primaryKey.isDefined() == false) {
-      WEPA_THROW_EXCEPTION(this->asString () << " | Primary key is not defined");
+   dbms::datatype::Abstract* member;
+
+   int columnNumber = 0;
+   while ((member = do_createMember (columnNumber ++)) != NULL) {
+      m_members.push_back (member);
    }
 
-   return std::ref (m_primaryKey);
+   LOG_DEBUG (asString ());
+
+   if (m_members.size () == 0) {
+      WEPA_THROW_EXCEPTION(asString () << " does not define any member");
+   }
 }
 
-dbms::Statement& persistence::AccessorIf::getStatement ()
+dbms::datatype::Abstract& persistence::Class::getMember (const int columnNumber)
    throw (adt::RuntimeException)
 {
-   if (m_statement == NULL) {
-      WEPA_THROW_EXCEPTION("Accessor " << asString () << " does not have associated statement");
+   if (columnNumber >= m_members.size ()) {
+      WEPA_THROW_EXCEPTION(asString () << " | Column=" << columnNumber << " is out range");
    }
 
-   return std::ref (*m_statement);
+   return std::ref (m_members [columnNumber]);
+}
+
+const dbms::datatype::Abstract& persistence::Class::getMember (const int columnNumber) const
+   throw (adt::RuntimeException)
+{
+   if (columnNumber >= m_members.size ()) {
+      WEPA_THROW_EXCEPTION(asString () << " | Column=" << columnNumber << " is out range");
+   }
+
+   return std::ref (m_members [columnNumber]);
+}
+
+adt::StreamString persistence::Class::asString () const noexcept {
+   adt::StreamString result ("persistence.Class { ");
+   result << adt::NamedObject::asString();
+   result << " | N-members=" << m_members.size ();
+   return result << " }";
+}
+
+xml::Node& persistence::Class::asXML (xml::Node& parent) const noexcept
+{
+   xml::Node& result = parent.createChild("persistence.Class");
+   result.createAttribute("Name", this->getName ());
+   return result;
 }
 

@@ -32,23 +32,35 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_persistence_Loader_hpp
-#define __wepa_persistence_Loader_hpp
+#include <wepa/persistence/GuardClass.hpp>
+#include <wepa/persistence/Class.hpp>
 
-#include <wepa/persistence/AccessorIf.hpp>
+using namespace wepa;
 
-#include <wepa/adt/RuntimeException.hpp>
+persistence::GuardClass::GuardClass (Class& _class) :
+   m_class (_class)
+{
+   m_class.m_mutex.lock ();
+}
 
-namespace wepa {
-namespace persistence {
+persistence::GuardClass::~GuardClass ()
+{
+   m_class.m_mutex.unlock ();
+}
 
-class Loader : public AccessorIf {
-public:
-   explicit Loader (const char* name, const int ident) : AccessorIf(name, ident) {;}
+dbms::datatype::Abstract& persistence::GuardClass::getMember (const int columnNumber)
+   throw (adt::RuntimeException)
+{
+   return std::ref (m_class.getMember (columnNumber));
+}
 
-   virtual bool hasToRefresh (GuardClass& _class, const Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
-};
+const dbms::datatype::Abstract& persistence::GuardClass::getMember (const int columnNumber) const
+   throw (adt::RuntimeException)
+{
+   return std::ref (m_class.getMember (columnNumber));
+}
 
-} /* namespace persistence */
-} /* namespace wepa */
-#endif
+persistence::Object* persistence::GuardClass::createObject () noexcept
+{
+   return m_class.createObject();
+}

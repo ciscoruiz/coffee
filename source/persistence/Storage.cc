@@ -44,15 +44,15 @@
 #include <wepa/dbms/datatype/Abstract.hpp>
 
 #include <wepa/persistence/Storage.hpp>
+#include <wepa/persistence/GuardClass.hpp>
 
 using namespace wepa;
 
 auto_enum_assign(persistence::Storage::AccessMode) = { "ReadOnly", "ReadWrite", "ReadAlways", NULL };
 
-persistence::Storage::Storage (const char* name, const AccessMode::_v accessMode, ObjectFactory objectFactory) :
+persistence::Storage::Storage (const char* name, const AccessMode::_v accessMode) :
    adt::NamedObject (name),
-   m_accessMode(accessMode),
-   m_objectFactory (objectFactory)
+   m_accessMode(accessMode)
 {
    m_hitCounter = m_faultCounter = 0;
 }
@@ -68,8 +68,7 @@ persistence::Storage::~Storage ()
    m_objects.clear ();
 }
 
-
-persistence::Object& persistence::Storage::load (persistence::Loader& loader)
+persistence::Object& persistence::Storage::load (GuardClass& _class, persistence::Loader& loader)
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
    LOG_THIS_METHOD();
@@ -80,18 +79,19 @@ persistence::Object& persistence::Storage::load (persistence::Loader& loader)
 
    entry_iterator ii = m_objects.find (const_cast <PrimaryKey*> (&primaryKey));
 
-   if (ii != m_objects.end ()) {
+   if (ii == m_objects.end ()) {
       Entry entry;
       PrimaryKey* clonedPrimaryKey = primaryKey.clone ();
 
       try {
-         entry.m_object = m_objectFactory ();
+         entry.m_object = _class.createObject();
          entry.m_object->setPrimaryKey (clonedPrimaryKey);
-         entry.m_object->load (loader);
+         loader.apply (_class, std::ref (*entry.m_object));
          entry.m_useCounter = 1;
          m_objects [clonedPrimaryKey] = entry;
       }
       catch (adt::Exception& ex) {
+         delete entry.m_object;
          delete clonedPrimaryKey;
          throw;
       }
@@ -99,7 +99,7 @@ persistence::Object& persistence::Storage::load (persistence::Loader& loader)
    else {
       Entry& entry = Storage::entry(ii);
       try {
-         result = instanciateAccessMode(m_accessMode).run(loader, entry);
+         result = instanciateAccessMode(m_accessMode).run(_class, loader, entry);
          entry.m_useCounter ++;
       }
       catch (adt::Exception& ex) {
@@ -165,17 +165,19 @@ const persistence::Storage::AccessMode& persistence::Storage::instanciateAccessM
    return std::ref (*st_accessMode [accessMode]);
 }
 
-persistence::Object* persistence::Storage::AccessMode::reload (Loader& loader, Entry& entry) const
+persistence::Object* persistence::Storage::AccessMode::reload (GuardClass& _class, Loader& loader, Entry& entry) const
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
    LOG_THIS_METHOD();
 
-   if (entry.m_object->hasBeenChanged (loader) == true) {
+   Object& object = std::ref (*entry.m_object);
+
+   if (loader.hasToRefresh(_class, object) == true) {
       LOG_DEBUG ("Release dependences for " << entry.m_object->asString ());
-      entry.m_object->releaseDependences();
+      object.releaseDependences();
 
       LOG_DEBUG ("Reloading data for " << entry.m_object->asString ());
-      entry.m_object->load(loader);
+      loader.apply (_class, object);
    }
 
    LOG_DEBUG ("Result=" << entry.m_object->asString ());
@@ -183,24 +185,24 @@ persistence::Object* persistence::Storage::AccessMode::reload (Loader& loader, E
    return entry.m_object;
 }
 
-persistence::Object* persistence::Storage::AccessModeReadOnly::run(persistence::Loader& loader, Storage::Entry& entry) const
+persistence::Object* persistence::Storage::AccessModeReadOnly::run(GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
    return entry.m_object;
 }
 
-persistence::Object* persistence::Storage::AccessModeReadWrite::run(persistence::Loader& loader, Storage::Entry& entry) const
+persistence::Object* persistence::Storage::AccessModeReadWrite::run(GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
    if (entry.m_useCounter == 0) {
-      return this->reload (loader, entry);
+      return this->reload (_class, loader, entry);
    }
 
    return entry.m_object;
 }
 
-persistence::Object* persistence::Storage::AccessModeReadAlways::run(persistence::Loader& loader, Storage::Entry& entry) const
+persistence::Object* persistence::Storage::AccessModeReadAlways::run(GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
-   return this->reload (loader, entry);
+   return this->reload (_class, loader, entry);
 }

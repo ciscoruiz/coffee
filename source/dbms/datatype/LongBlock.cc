@@ -61,4 +61,5 @@ int datatype::LongBlock::do_compare (const datatype::Abstract& other) const
    throw (adt::RuntimeException)
 {
    WEPA_THROW_EXCEPTION(asString () << " | Can not apply");
+   return 0;
 }

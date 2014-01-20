@@ -242,6 +242,7 @@ protected:
 
    // These methods will be called from GuardStatement
    datatype::Abstract& getInputData (const int pos) throw (adt::RuntimeException);
+   datatype::Abstract& getOutputData (const int pos) throw (adt::RuntimeException);
    const datatype::Abstract& getOutputData (const int pos) const throw (adt::RuntimeException);
 
 private:

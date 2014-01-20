@@ -5,7 +5,7 @@ Import ('env')
 boost_library = { 'LIBS' : 'boost_unit_test_framework' }
 env.MergeFlags (boost_library)
 
-wepa_library = { 'LIBS' : [ 'wepa_logger', 'wepa_adt',  'wepa_config', 'wepa_app', 'wepa_xml', 'wepa_balance', 'wepa_dbms' ] }
+wepa_library = { 'LIBS' : [ 'wepa_logger', 'wepa_adt',  'wepa_config', 'wepa_app', 'wepa_xml', 'wepa_balance', 'wepa_dbms', 'wepa_mock' ] }
 env.MergeFlags (wepa_library)
 
 pwd = Dir ('.').abspath;

@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
-#ifndef _wepm_dbms_Connection_h
-#define _wepm_dbms_Connection_
+#ifndef _wepa_dbms_Connection_h
+#define _wepa_dbms_Connection_h
 
 #include <mutex>
 

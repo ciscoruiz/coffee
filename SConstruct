@@ -45,6 +45,14 @@ env.Default (libraries)
 unit_tests = []
 run_tests = []
 
+source_headers = os.path.join (current_directory, "test")
+env.Append (CPPPATH = [source_headers])
+
+libtest = os.path.join (current_directory, "test/mock")
+ss = str (libtest)
+ss += '/SConstruct'
+test_lib_mock = SConscript (ss, exports='env')   
+
 test = os.path.join (current_directory, "test")
 tests = Glob(test + '/*')
 for test in tests:
@@ -62,7 +70,7 @@ for test in tests:
          Depends (test_unit_result, test_unit_program)
       
 
-env.Alias ('test', run_tests)
+env.Alias ('test', [test_lib_mock, run_tests] )
 
 usr_local_lib = os.path.join (prefix, "lib")
 env.Install (usr_local_lib, libraries)

@@ -35,6 +35,8 @@
 
 #include <functional>
 
+#include <wepa/adt/AsString.hpp>
+
 #include <wepa/persistence/Accessor.hpp>
 #include <wepa/persistence/Class.hpp>
 
@@ -118,6 +120,8 @@ dbms::ResultCode persistence::Accessor::apply (dbms::Connection& connection, Gua
       WEPA_THROW_EXCEPTION(asString () << " | " << m_statement->asString () << " | Accessor was not initialized");
    }
 
+   LOG_DEBUG (getName () << " | " << m_primaryKey);
+
    dbms::GuardConnection gConnection (connection);
 
    dbms::GuardStatement gStatement (gConnection, *m_statement);
@@ -154,6 +158,7 @@ void persistence::Accessor::setMember (GuardClass& _class, const int columnNumbe
 {
    dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
    wepa_datatype_downcast(dbms::datatype::Integer, abstract).setValue (value);
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value=" << value);
 }
 
 void persistence::Accessor::setMember (GuardClass& _class, const int columnNumber, const char* value)
@@ -161,6 +166,7 @@ void persistence::Accessor::setMember (GuardClass& _class, const int columnNumbe
 {
    dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
    wepa_datatype_downcast(dbms::datatype::String, abstract).setValue (value);
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value='" << value << "'");
 }
 
 void persistence::Accessor::setMember (GuardClass& _class, const int columnNumber, const float value)
@@ -168,6 +174,7 @@ void persistence::Accessor::setMember (GuardClass& _class, const int columnNumbe
 {
    dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
    wepa_datatype_downcast(dbms::datatype::Float, abstract).setValue (value);
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value=" << value);
 }
 
 void persistence::Accessor::setMember (GuardClass& _class, const int columnNumber, const adt::DataBlock& value)
@@ -181,6 +188,8 @@ void persistence::Accessor::setMember (GuardClass& _class, const int columnNumbe
    else {
       wepa_datatype_downcast (dbms::datatype::ShortBlock, abstract).setValue (value);
    }
+
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value=" << adt::AsString::apply (value));
 }
 
 void persistence::Accessor::setMember (GuardClass& _class, const int columnNumber, const adt::Second& value)
@@ -188,6 +197,7 @@ void persistence::Accessor::setMember (GuardClass& _class, const int columnNumbe
 {
    dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
    wepa_datatype_downcast(dbms::datatype::Date, abstract).setValue (value);
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value=" << value.asString ());
 }
 
 int persistence::Accessor::readInteger (GuardClass& _class, const int columnNumber) const

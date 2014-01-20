@@ -51,7 +51,7 @@ datatype::Date::Date (const char* name, const Constraint::_v constraint) :
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
-   wepa_memset (&m_value, 0, sizeof (m_value));
+   m_value = 0;
 }
 
 datatype::Date::Date (const string& name, const Constraint::_v constraint) :
@@ -59,7 +59,7 @@ datatype::Date::Date (const string& name, const Constraint::_v constraint) :
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
-   wepa_memset (&m_value, 0, sizeof (m_value));
+   m_value = 0;
 }
 
 datatype::Date::Date (const char* name, const datatype::Abstract::Datatype::_v type,  const Constraint::_v constraint) :
@@ -67,7 +67,7 @@ datatype::Date::Date (const char* name, const datatype::Abstract::Datatype::_v t
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
-   wepa_memset (&m_value, 0, sizeof (m_value));
+   m_value = 0;
 }
 
 datatype::Date::Date (const string& name, const datatype::Abstract::Datatype::_v type,  const Constraint::_v constraint) :
@@ -75,11 +75,15 @@ datatype::Date::Date (const string& name, const datatype::Abstract::Datatype::_v
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
-   wepa_memset (&m_value, 0, sizeof (m_value));
+   m_value = 0;
 }
 
-datatype::Date::~Date ()
+datatype::Date::Date (const Date& other) :
+   datatype::Abstract (other),
+   m_value (other.m_value)
 {
+   datatype::Abstract::setBuffer (m_buffer);
+   m_buffer [0] = 0;
 }
 
 struct tm* datatype::Date::getLocalTime () const
@@ -135,7 +139,7 @@ adt::StreamString datatype::Date::asString () const
 {
    const char* cstring;
 
-   adt::StreamString result ("dbms::datatype::Date { ");
+   adt::StreamString result ("datatype.Date { ");
    result << dbms::datatype::Abstract::asString ();
    result += " | Value: ";
 

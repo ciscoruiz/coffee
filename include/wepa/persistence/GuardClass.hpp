@@ -54,6 +54,9 @@ public:
    GuardClass (Class& _class);
    ~GuardClass ();
 
+   Class* operator-> () noexcept { return &m_class; }
+   const Class* operator-> () const noexcept { return &m_class; }
+
    dbms::datatype::Abstract& getMember (const int columnNumber) throw (adt::RuntimeException);
    const dbms::datatype::Abstract& getMember (const int columnNumber) const throw (adt::RuntimeException);
 

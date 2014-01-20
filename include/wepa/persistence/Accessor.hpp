@@ -75,7 +75,7 @@ class Accessor : public adt::NamedObject {
 public:
    virtual ~Accessor () { m_statement = NULL; }
 
-   void initialize (Class& _class, dbms::Statement* statement) throw (adt::RuntimeException);
+   void initialize (GuardClass& _class, dbms::Statement* statement) throw (adt::RuntimeException);
 
    const PrimaryKey& getPrimaryKey () const throw (adt::RuntimeException);
    const int getIdent () const noexcept { return m_ident; }

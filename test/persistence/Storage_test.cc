@@ -36,6 +36,8 @@
 
 #include <thread>
 
+#include <wepa/logger/Logger.hpp>
+
 #include <wepa/adt/Second.hpp>
 
 #include <wepa/persistence/Repository.hpp>
@@ -87,13 +89,7 @@ class MyDatabase : public mock::MockDatabase {
 public:
    MyDatabase (app::Application& app) : mock::MockDatabase (app) {;}
 
-   void add (const mock::MockLowLevelRecord& record) noexcept {
-      m_container [record.m_id] = record;
-   }
-
 private:
-   mock::MockLowLevelContainer m_container;
-
    dbms::Statement* allocateStatement (const char* name, const std::string& expression, const dbms::ActionOnError::_v actionOnError)
       throw (adt::RuntimeException)
    {
@@ -173,13 +169,20 @@ dbms::ResultCode test_persistence::MyReadStatement::do_execute (dbms::Connection
       }
    }
 
-   return ResultCode (getDatabase(), (m_isValid == false) ? MyDatabase::NotFound: MyDatabase::Successful);
+   ResultCode result (getDatabase(), (m_isValid == false) ? MyDatabase::NotFound: MyDatabase::Successful);
+
+   LOG_DEBUG ("Searching ID=" << searchedId << " | n-size=" << _connection.getContainer().size () << " | Result =" << result);
+
+   return result;
 }
 
 bool test_persistence::MyReadStatement::do_fetch () throw (adt::RuntimeException, DatabaseException)
 {
    if (m_isValid == true) {
       m_isValid = false;
+
+      wepa_datatype_downcast(dbms::datatype::String, getOutputData(0)).setValue(m_selection.m_name);
+
       return true;
    }
 
@@ -250,17 +253,25 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readonly)
 
    test_persistence::MockCustomerLoader myLoader;
 
-   persistence::GuardClass guardCustomer (_class);
+   if (true) {
+      persistence::GuardClass guardCustomer (_class);
 
-   BOOST_REQUIRE_NO_THROW(myLoader.setMember(guardCustomer, 0, 6));
+      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
 
-   try{
-      myLoader.initialize(_class, stReader);
-      persistence::Object& object = ii->load(*conn0, guardCustomer, myLoader);
+      try{
+         BOOST_REQUIRE_NO_THROW(myLoader.setMember(guardCustomer, 0, 6));
+
+         persistence::Object& object = ii->load(*conn0, guardCustomer, myLoader);
+      }
+      catch (adt::Exception& ex) {
+         BOOST_REQUIRE_EQUAL (std::string ("no error"), ex.what ());
+         std::cout << ex.what() << std::endl;
+      }
    }
-   catch (adt::Exception& ex) {
-      BOOST_REQUIRE_EQUAL (std::string ("no error"), ex.what ());
-      std::cout << ex.what() << std::endl;
-   }
+
+   LOG_DEBUG ("Enables termination");
+   application.enableTermination();
+
+   tr.join ();
 }
 

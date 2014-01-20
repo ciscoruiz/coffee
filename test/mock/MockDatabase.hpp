@@ -53,6 +53,10 @@ public:
 
    MockDatabase (app::Application& app) : dbms::Database (app, "map", app.getTitle ().c_str ()) {;}
 
+   void add (const mock::MockLowLevelRecord& record) noexcept {
+      m_container [record.m_id] = record;
+   }
+
    int container_size () const noexcept { return m_container.size (); }
 
 private:

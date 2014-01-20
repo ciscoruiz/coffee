@@ -35,16 +35,33 @@
 #include <wepa/persistence/GuardClass.hpp>
 #include <wepa/persistence/Class.hpp>
 
+#include <wepa/logger/Logger.hpp>
+
 using namespace wepa;
 
 persistence::GuardClass::GuardClass (Class& _class) :
    m_class (_class)
 {
+   LOG_DEBUG ("Locking " << _class);
+
    m_class.m_mutex.lock ();
+
+   if (m_class.m_members.empty() == true) {
+      try {
+         m_class.createMembers();
+         if (m_class.m_members.empty() == true) {
+            WEPA_THROW_EXCEPTION(m_class << " method createMembers does not define any member");
+         }
+      }
+      catch (adt::RuntimeException& ex) {
+         logger::Logger::write(ex);
+      }
+   }
 }
 
 persistence::GuardClass::~GuardClass ()
 {
+   LOG_DEBUG ("Unlocking " << m_class);
    m_class.m_mutex.unlock ();
 }
 

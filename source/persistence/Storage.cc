@@ -93,6 +93,7 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
 
          entry.m_useCounter = 1;
          m_objects [clonedPrimaryKey] = entry;
+         result = entry.m_object;
       }
       catch (adt::Exception& ex) {
          delete entry.m_object;

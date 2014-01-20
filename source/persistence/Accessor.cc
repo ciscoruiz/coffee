@@ -59,7 +59,7 @@
 
 using namespace wepa;
 
-void persistence::Accessor::initialize (Class& _class, dbms::Statement* statement)
+void persistence::Accessor::initialize (GuardClass& _class, dbms::Statement* statement)
    throw (adt::RuntimeException)
 {
    LOG_THIS_METHOD();
@@ -74,10 +74,14 @@ void persistence::Accessor::initialize (Class& _class, dbms::Statement* statemen
       WEPA_THROW_EXCEPTION(asString () << " | " << m_statement->asString () << " | Accessor already initialized");
    }
 
+   if ( _class->member_size() == 0) {
+      WEPA_THROW_EXCEPTION(_class->asString () << " | This is a empty class");
+   }
+
    int pos = 0;
    dbms::datatype::Abstract* dataType = NULL;
 
-   for (int ii = 0, maxii = _class.member_size(); ii != maxii; ++ ii) {
+   for (int ii = 0, maxii = _class->member_size(); ii != maxii; ++ ii) {
       if (this->isInputValue(ii) == true) {
          dbms::datatype::Abstract& member = _class.getMember(ii);
 
@@ -98,7 +102,7 @@ void persistence::Accessor::initialize (Class& _class, dbms::Statement* statemen
 
    LOG_DEBUG (getName () << " | " << m_primaryKey);
 
-   LOG_DEBUG (_class << " | " << m_statement->asString ());
+   LOG_DEBUG (_class->asString () << " | " << m_statement->asString ());
 }
 
 dbms::ResultCode persistence::Accessor::apply (dbms::Connection& connection, GuardClass& _class, Object& object)

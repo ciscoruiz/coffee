@@ -34,6 +34,8 @@
 //
 #include <boost/test/unit_test.hpp>
 
+#include <thread>
+
 #include <wepa/adt/Second.hpp>
 
 #include <wepa/persistence/Repository.hpp>
@@ -43,6 +45,14 @@
 #include <wepa/persistence/Class.hpp>
 #include <wepa/persistence/GuardClass.hpp>
 
+#include <mock/MockApplication.hpp>
+#include <mock/MockLowLevelRecord.hpp>
+#include <mock/MockDatabase.hpp>
+
+#include <wepa/dbms/GuardConnection.hpp>
+#include <wepa/dbms/GuardStatement.hpp>
+#include <wepa/dbms/Statement.hpp>
+
 #include <wepa/dbms/datatype/Integer.hpp>
 #include <wepa/dbms/datatype/String.hpp>
 #include <wepa/dbms/datatype/Float.hpp>
@@ -50,39 +60,64 @@
 
 namespace wepa {
 
-namespace persistence {
+namespace test_persistence {
 
-namespace test {
+using namespace wepa::persistence;
 
-struct MyPhysicalRecord {
-   int m_id;
-   std::string m_name;
-   int m_integer;
-   float m_float;
-   adt::Second m_time;
+/******
+ * Low level data access
+ */
+class MyReadStatement : public dbms::Statement {
+public:
+   MyReadStatement (dbms::Database& database, const char* name, const char* expression, const dbms::ActionOnError::_v actionOnError) :
+      dbms::Statement (database, name, expression, actionOnError),
+      m_isValid (false)
+   {;}
+
+private:
+   bool m_isValid;
+   mock::MockLowLevelRecord m_selection;
+
+   void do_prepare (dbms::Connection* connection) throw (adt::RuntimeException, dbms::DatabaseException) {;}
+   dbms::ResultCode do_execute (dbms::Connection& connection) throw (adt::RuntimeException, dbms::DatabaseException);
+   bool do_fetch () throw (adt::RuntimeException, dbms::DatabaseException);
 };
 
-class MyObject : public Object {
+class MyDatabase : public mock::MockDatabase {
 public:
-   MyObject (Class& _class) : Object (_class) {
-      m_id = m_integer = 0;
-      m_float = 0.0;
+   MyDatabase (app::Application& app) : mock::MockDatabase (app) {;}
+
+   void add (const mock::MockLowLevelRecord& record) noexcept {
+      m_container [record.m_id] = record;
+   }
+
+private:
+   mock::MockLowLevelContainer m_container;
+
+   dbms::Statement* allocateStatement (const char* name, const std::string& expression, const dbms::ActionOnError::_v actionOnError)
+      throw (adt::RuntimeException)
+   {
+      if (expression == "read" || expression == "READ")
+         return new MyReadStatement (std::ref (*this), name, expression.c_str(), actionOnError);
+
+      return NULL;
+   }
+};
+
+class MockCustomerObject : public Object {
+public:
+   MockCustomerObject (Class& _class) : Object (_class) {
+      m_id = 0;
    }
 
    int getId () const noexcept { return m_id; }
    const std::string& getName() const noexcept { return m_name; }
-   int getInteger () const noexcept { return m_integer; }
-   float getFloat () const noexcept { return m_float; }
-   const adt::Second& getTime () const noexcept { return std::ref (m_time); }
 
    void setId (const int value) noexcept { m_id = value; }
    void setName (const std::string& value) noexcept { m_name = value; }
-   void setInteger (const int value) noexcept { m_integer = value; }
-   void setFloat (const float value) noexcept { m_float = value; }
-   void setTime (const adt::Second& value) noexcept { m_time = value; }
 
    adt::StreamString asString () const noexcept {
-      adt::StreamString result ("MyObject { ");
+      adt::StreamString result ("MockCustomerObject { ");
       result << m_id;
       return result += " }";
    }
@@ -90,29 +125,26 @@ public:
 private:
    int m_id;
    std::string m_name;
-   int m_integer;
-   float m_float;
-   adt::Second m_time;
 
    void releaseDependences () noexcept {;}
 };
 
-class MyClass : public Class  {
+class MockCustomerClass : public Class  {
 public:
-   MyClass () : Class ("MyClass") {;}
+   MockCustomerClass () : Class ("MockCustomer") {;}
 
 private:
    dbms::datatype::Abstract* do_createMember (const int columnNumber) const noexcept;
-   Object* createObject () noexcept { return new MyObject (*this); }
+   Object* createObject () noexcept { return new MockCustomerObject (*this); }
 };
 
-struct MyLoader : public Loader {
+struct MockCustomerLoader : public Loader {
 public:
-   MyLoader () : Loader ("MyLoader", 0) {;}
+   MockCustomerLoader () : Loader ("MockCustomerLoader", 0) {;}
 
 
 private:
-   void apply (GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
+   dbms::ResultCode do_apply (dbms::GuardStatement& statement, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
    bool hasToRefresh (GuardClass& _class, const Object& object) throw (adt::RuntimeException, dbms::DatabaseException) { return false; }
    bool isInputValue (const int columnNumber) const noexcept { return columnNumber == 0; }
    bool isPrimaryKeyComponent (const int columnNumber) const noexcept { return columnNumber == 0; }
@@ -121,51 +153,114 @@ private:
 
 }
 }
-}
 
 using namespace wepa;
 using namespace wepa::dbms;
 
-dbms::datatype::Abstract* persistence::test::MyClass::do_createMember (const int columnNumber) const noexcept
+dbms::ResultCode test_persistence::MyReadStatement::do_execute (dbms::Connection& connection)
+   throw (adt::RuntimeException, dbms::DatabaseException)
 {
-   dbms::datatype::Abstract* result = NULL;
+   m_isValid = false;
+
+   mock::MockConnection& _connection (static_cast <mock::MockConnection&> (connection));
+
+   int searchedId = wepa_datatype_downcast(dbms::datatype::Integer, getInputData(0)).getValue();
+
+   for (auto ii : _connection.getContainer()) {
+      if (ii.second.m_id == searchedId) {
+         m_selection = ii.second;
+         m_isValid = true;
+      }
+   }
+
+   return ResultCode (getDatabase(), (m_isValid == false) ? MyDatabase::NotFound: MyDatabase::Successful);
+}
+
+bool test_persistence::MyReadStatement::do_fetch () throw (adt::RuntimeException, DatabaseException)
+{
+   if (m_isValid == true) {
+      m_isValid = false;
+      return true;
+   }
+
+   return false;
+}
+
+datatype::Abstract* test_persistence::MockCustomerClass::do_createMember (const int columnNumber) const noexcept
+{
+   datatype::Abstract* result = NULL;
 
    switch (columnNumber) {
    case 0: result = new datatype::Integer ("id"); break;
    case 1: result = new datatype::String ("name", 64, dbms::datatype::Constraint::CanBeNull); break;
-   case 2: result = new datatype::Integer ("ii"); break;
-   case 3: result = new datatype::Float ("ff", dbms::datatype::Constraint::CanBeNull); break;
-   case 4: result = new datatype::Date ("dd", dbms::datatype::Constraint::CanBeNull); break;
    }
 
    return result;
 }
 
-void persistence::test::MyLoader::apply (GuardClass& _class, Object& object)
+dbms::ResultCode test_persistence::MockCustomerLoader::do_apply (dbms::GuardStatement& statement, GuardClass& _class, Object& object)
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
+   dbms::ResultCode result = statement.execute ();
 
+   if (result.successful() == true) {
+      if (statement.fetch ()) {
+         MockCustomerObject& customer = static_cast <MockCustomerObject&> (object);
+         customer.setId(this->readInteger(_class, 0));
+         customer.setName(this->readCString(_class, 1));
+      }
+   }
+
+   return result;
 }
+
+using namespace wepa;
+using namespace wepa::mock;
 
 BOOST_AUTO_TEST_CASE (persistence_storage_readonly)
 {
-   persistence::test::MyClass _class;
+   MockApplication application ("persistence_storage_readonly");
+
+   test_persistence::MyDatabase database (application);
+
+   application.disableTermination();
+
+   MockLowLevelRecord record;
+   for (int ii = 0; ii < 10; ++ ii) {
+      record.m_id = ii;
+      record.m_name = adt::StreamString ("the name ") << ii;
+      database.add (record);
+   }
+
+   dbms::Connection* conn0 = database.createConnection("0", "0", "0");
+   dbms::Statement* stReader = database.createStatement("the_read", "read");
+
+   std::thread tr (std::ref (application));
+   usleep (500);
+
+   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
 
    persistence::Repository repository ("persistence_storage_readonly");
    persistence::Storage* ii = repository.createStorage(0, "storage_readonly", persistence::Storage::AccessMode::ReadOnly);
 
+   test_persistence::MockCustomerClass _class;
+
    BOOST_REQUIRE_NE (ii, (void*) 0);
 
-   persistence::test::MyLoader myLoader;
+   test_persistence::MockCustomerLoader myLoader;
 
-   persistence::GuardClass myGuard (_class);
+   persistence::GuardClass guardCustomer (_class);
+
+   BOOST_REQUIRE_NO_THROW(myLoader.setMember(guardCustomer, 0, 6));
 
    try{
-      myLoader.initialize(_class, NULL);
-      persistence::Object& object = ii->load(myGuard, myLoader);
+      myLoader.initialize(_class, stReader);
+      persistence::Object& object = ii->load(*conn0, guardCustomer, myLoader);
    }
    catch (adt::Exception& ex) {
       BOOST_REQUIRE_EQUAL (std::string ("no error"), ex.what ());
       std::cout << ex.what() << std::endl;
    }
 }
+

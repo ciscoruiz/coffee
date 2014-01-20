@@ -35,24 +35,19 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <map>
 #include <functional>
 #include <mutex>
 #include <thread>
-#include <vector>
 
 #include <wepa/logger/Logger.hpp>
 #include <wepa/logger/TraceMethod.hpp>
 #include <wepa/logger/TtyWriter.hpp>
 
-//#include <wepa/app/Application.hpp>
 #include <mock/MockApplication.hpp>
 #include <mock/MockLowLevelRecord.hpp>
 #include <mock/MockDatabase.hpp>
 
-#include <wepa/dbms/Database.hpp>
 #include <wepa/dbms/Statement.hpp>
-#include <wepa/dbms/Connection.hpp>
 #include <wepa/dbms/GuardConnection.hpp>
 #include <wepa/dbms/GuardStatement.hpp>
 #include <wepa/dbms/StatementTranslator.hpp>
@@ -120,8 +115,6 @@ private:
 
 class MyDatabase : public mock::MockDatabase {
 public:
-   enum ErrorCode { NotFound, Successful, Lock, LostConnection };
-
    MyDatabase (app::Application& app) : mock::MockDatabase (app) {;}
 
 private:

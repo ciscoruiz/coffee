@@ -141,8 +141,10 @@ BOOST_AUTO_TEST_CASE (persistence_primary_key_sort)
    for (int ii = 1; ii < 10; ++ ii) {
       if ((keys [ii - 1] < keys [ii]) == false) {
          std::cout << "Unsorted Index=" << ii << std::endl;
-         std::cout << "\t" << keys [ii - 1].asString () << std::endl;
-         std::cout << "\t" << keys [ii].asString () << std::endl;
+         std::cout << "\t" << keys [ii - 1].asString ();
+         std::cout << std::endl;
+         std::cout << "\t" << keys [ii].asString ();
+         std::cout << std::endl;
          isSorted = false;
          break;
       }
@@ -156,8 +158,10 @@ BOOST_AUTO_TEST_CASE (persistence_primary_key_sort)
    for (int ii = 1; ii < 10; ++ ii) {
       if ((keys [ii - 1] < keys [ii]) == false) {
          std::cout << "Failed Index=" << ii << std::endl;
-         std::cout << "\t" << keys [ii - 1].asString () << std::endl;
-         std::cout << "\t" << keys [ii].asString () << std::endl;
+         std::cout << "\t" << keys [ii - 1].asString ();
+         std::cout << std::endl;
+         std::cout << "\t" << keys [ii].asString ();
+         std::cout << std::endl;
          isSorted = false;
          break;
       }

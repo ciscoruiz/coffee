@@ -47,6 +47,11 @@
 
 namespace wepa {
 
+namespace adt {
+   class DataBlock;
+   class Second;
+}
+
 namespace dbms {
    class Statement;
    class Connection;
@@ -75,6 +80,21 @@ public:
    const PrimaryKey& getPrimaryKey () const throw (adt::RuntimeException);
    const int getIdent () const noexcept { return m_ident; }
 
+   void setMember (GuardClass& _class, const int columnNumber, const int value) throw (adt::RuntimeException);
+   void setMember (GuardClass& _class, const int columnNumber, const char* value) throw (adt::RuntimeException);
+   void setMember (GuardClass& _class, const int columnNumber, const std::string& value) throw (adt::RuntimeException) {
+      setMember (_class, columnNumber, value.c_str ());
+   }
+   void setMember (GuardClass& _class, const int columnNumber, const float value) throw (adt::RuntimeException);
+   void setMember (GuardClass& _class, const int columnNumber, const adt::DataBlock& value) throw (adt::RuntimeException);
+   void setMember (GuardClass& _class, const int columnNumber, const adt::Second& value) throw (adt::RuntimeException);
+
+   int readInteger (GuardClass& _class, const int columnNumber) const throw (adt::RuntimeException);
+   const char* readCString (GuardClass& _class, const int columnNumber) const throw (adt::RuntimeException);
+   float readFloat (GuardClass& _class, const int columnNumber) const throw (adt::RuntimeException);
+   const adt::DataBlock& readDataBlock (GuardClass& _class, const int columnNumber) const throw (adt::RuntimeException);
+   const adt::Second& readDate (GuardClass& _class, const int columnNumber) const throw (adt::RuntimeException);
+
    dbms::ResultCode apply (dbms::Connection& connection, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
 
    Accessor (const Accessor&) = delete;
@@ -91,7 +111,6 @@ protected:
    virtual dbms::ResultCode do_apply (dbms::GuardStatement& statement, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
 
 private:
-   // Store pointers to remove when terminate the AccessoIf
    Values m_inputValues;
    Values m_outputValues;
    PrimaryKey m_primaryKey;

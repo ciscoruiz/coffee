@@ -39,18 +39,31 @@
 #include <wepa/persistence/Class.hpp>
 
 #include <wepa/logger/Logger.hpp>
+#include <wepa/logger/TraceMethod.hpp>
 
 #include <wepa/dbms/Connection.hpp>
 #include <wepa/dbms/GuardConnection.hpp>
 #include <wepa/dbms/Statement.hpp>
 #include <wepa/dbms/GuardStatement.hpp>
 #include <wepa/dbms/datatype/Abstract.hpp>
+#include <wepa/dbms/datatype/Abstract.hpp>
+
+#include <wepa/dbms/datatype/Date.hpp>
+#include <wepa/dbms/datatype/Float.hpp>
+#include <wepa/dbms/datatype/Integer.hpp>
+#include <wepa/dbms/datatype/LongBlock.hpp>
+#include <wepa/dbms/datatype/ShortBlock.hpp>
+#include <wepa/dbms/datatype/String.hpp>
+
+#include <wepa/persistence/GuardClass.hpp>
 
 using namespace wepa;
 
 void persistence::Accessor::initialize (Class& _class, dbms::Statement* statement)
    throw (adt::RuntimeException)
 {
+   LOG_THIS_METHOD();
+
    m_statement = statement;
 
    if (m_statement == NULL) {
@@ -91,6 +104,8 @@ void persistence::Accessor::initialize (Class& _class, dbms::Statement* statemen
 dbms::ResultCode persistence::Accessor::apply (dbms::Connection& connection, GuardClass& _class, Object& object)
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
+   LOG_THIS_METHOD();
+
    if (m_statement == NULL) {
       WEPA_THROW_EXCEPTION(asString () << " | Statement can not be null");
    }
@@ -130,3 +145,85 @@ dbms::Statement& persistence::Accessor::getStatement ()
    return std::ref (*m_statement);
 }
 
+void persistence::Accessor::setMember (GuardClass& _class, const int columnNumber, const int value)
+   throw (adt::RuntimeException)
+{
+   dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
+   wepa_datatype_downcast(dbms::datatype::Integer, abstract).setValue (value);
+}
+
+void persistence::Accessor::setMember (GuardClass& _class, const int columnNumber, const char* value)
+   throw (adt::RuntimeException)
+{
+   dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
+   wepa_datatype_downcast(dbms::datatype::String, abstract).setValue (value);
+}
+
+void persistence::Accessor::setMember (GuardClass& _class, const int columnNumber, const float value)
+   throw (adt::RuntimeException)
+{
+   dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
+   wepa_datatype_downcast(dbms::datatype::Float, abstract).setValue (value);
+}
+
+void persistence::Accessor::setMember (GuardClass& _class, const int columnNumber, const adt::DataBlock& value)
+   throw (adt::RuntimeException)
+{
+   dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
+
+   if (abstract.getType() == dbms::datatype::Abstract::Datatype::LongBlock) {
+      wepa_datatype_downcast (dbms::datatype::LongBlock, abstract).setValue (value);
+   }
+   else {
+      wepa_datatype_downcast (dbms::datatype::ShortBlock, abstract).setValue (value);
+   }
+}
+
+void persistence::Accessor::setMember (GuardClass& _class, const int columnNumber, const adt::Second& value)
+   throw (adt::RuntimeException)
+{
+   dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
+   wepa_datatype_downcast(dbms::datatype::Date, abstract).setValue (value);
+}
+
+int persistence::Accessor::readInteger (GuardClass& _class, const int columnNumber) const
+   throw (adt::RuntimeException)
+{
+   dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
+   return wepa_datatype_downcast(dbms::datatype::Integer, abstract).getValue();
+}
+
+const char* persistence::Accessor::readCString (GuardClass& _class, const int columnNumber) const
+   throw (adt::RuntimeException)
+{
+   dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
+   return wepa_datatype_downcast(dbms::datatype::String, abstract).getValue();
+}
+
+float persistence::Accessor::readFloat (GuardClass& _class, const int columnNumber) const
+   throw (adt::RuntimeException)
+{
+   dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
+   return wepa_datatype_downcast(dbms::datatype::Float, abstract).getValue();
+}
+
+const adt::DataBlock& persistence::Accessor::readDataBlock (GuardClass& _class, const int columnNumber) const
+   throw (adt::RuntimeException)
+{
+   dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
+
+
+   if (abstract.getType() == dbms::datatype::Abstract::Datatype::LongBlock) {
+      return wepa_datatype_downcast(dbms::datatype::LongBlock, abstract).getValue();
+   }
+   else {
+      return wepa_datatype_downcast(dbms::datatype::ShortBlock, abstract).getValue();
+   }
+}
+
+const adt::Second& persistence::Accessor::readDate (GuardClass& _class, const int columnNumber) const
+   throw (adt::RuntimeException)
+{
+   dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
+   return wepa_datatype_downcast(dbms::datatype::Date, abstract).getValue();
+}

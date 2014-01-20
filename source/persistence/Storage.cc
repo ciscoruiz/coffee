@@ -77,6 +77,8 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
 
    const PrimaryKey& primaryKey (loader.getPrimaryKey());
 
+   LOG_DEBUG (getName () << " | Loading=" << primaryKey);
+
    entry_iterator ii = m_objects.find (const_cast <PrimaryKey*> (&primaryKey));
 
    if (ii == m_objects.end ()) {

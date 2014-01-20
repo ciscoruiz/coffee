@@ -37,6 +37,26 @@
 using namespace wepa;
 using namespace wepa::dbms;
 
+datatype::LongBlock::LongBlock (const char* name, const Constraint::_v constraint) :
+   datatype::Abstract (name, Datatype::LongBlock, 0, constraint),
+   m_value ()
+{
+   datatype::Abstract::setBuffer ((void*) NULL);
+}
+datatype::LongBlock::LongBlock (const std::string& name, const Constraint::_v constraint) :
+   datatype::Abstract (name, Datatype::LongBlock, 0, constraint),
+   m_value ()
+{
+   datatype::Abstract::setBuffer ((void*) NULL);
+}
+
+datatype::LongBlock::LongBlock (const LongBlock& other) :
+   datatype::Abstract (other),
+   m_value ()
+{
+   m_value = other.m_value;
+}
+
 void datatype::LongBlock::setValue (const adt::DataBlock& value)
    throw (adt::RuntimeException)
 {
@@ -47,7 +67,7 @@ void datatype::LongBlock::setValue (const adt::DataBlock& value)
 adt::StreamString datatype::LongBlock::asString () const
    noexcept
 {
-   adt::StreamString result ("datatype::LongBlock { ");
+   adt::StreamString result ("datatype.LongBlock { ");
    result += datatype::Abstract::asString ();
    result += " | Size: ";
    if (this->hasValue () == true)

@@ -155,3 +155,38 @@ BOOST_AUTO_TEST_CASE (date_downcast)
 
    BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::Date, zzz), adt::RuntimeException);
 }
+
+BOOST_AUTO_TEST_CASE (date_clone)
+{
+   datatype::Date cannotBeNull ("cannotBeNull", datatype::Constraint::CanNotBeNull);
+   datatype::Date canBeNull ("canBeNull", datatype::Constraint::CanBeNull);
+
+   BOOST_REQUIRE_EQUAL (cannotBeNull.hasValue(), true);
+   BOOST_REQUIRE_EQUAL (canBeNull.hasValue(), false);
+
+   std::auto_ptr <datatype::Abstract> notnull (cannotBeNull.clone ());
+   std::auto_ptr <datatype::Abstract> null (canBeNull.clone ());
+
+   BOOST_REQUIRE_EQUAL (notnull->hasValue(), true);
+   BOOST_REQUIRE_EQUAL (null->hasValue(), false);
+
+   BOOST_REQUIRE_EQUAL (notnull->compare (cannotBeNull), 0);
+
+   cannotBeNull.setValue (adt::Second (5));
+
+   BOOST_REQUIRE_EQUAL (cannotBeNull.getValue (), adt::Second (5));
+
+   notnull.reset (cannotBeNull.clone ());
+   BOOST_REQUIRE_EQUAL (notnull->hasValue(), true);
+   BOOST_REQUIRE_EQUAL (notnull->compare (cannotBeNull), 0);
+
+   canBeNull.setValue (adt::Second (25));
+   null.reset (canBeNull.clone ());
+   BOOST_REQUIRE_EQUAL (null->hasValue(), true);
+   BOOST_REQUIRE_EQUAL (null->compare (canBeNull), 0);
+
+   BOOST_REQUIRE_EQUAL (null->compare (cannotBeNull), 20);
+
+   BOOST_REQUIRE_EQUAL (notnull->compare (canBeNull), -20);
+}
+

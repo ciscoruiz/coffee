@@ -57,19 +57,11 @@ public:
 
    virtual adt::StreamString asString () const noexcept;
 
+   virtual Abstract* clone () const noexcept = 0;
+
    static const char* className () noexcept { return "dbms.datatype.Abstract"; }
 
 protected:
-   /**
-      Constructor.
-      \param name Nombre l�gico del dato.
-      \param type Tipo de dato de esta instancia.
-      \param maxSize Tamao maximo que puede tener este dato. Deberia coincidir con el indicado
-      por la columna con la que vaya a corresponder en la sentencia.
-      \param constraint Indica si el dato puede tomar valores nulos.
-
-      \warning los tipos de datos complejos deberia reimplementar los metodos #code and #decode.
-   */
    explicit Abstract (const char* name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
       m_name (name),
       m_type (type),
@@ -79,16 +71,6 @@ protected:
       m_buffer (NULL)
    {;}
 
-   /**
-      Constructor.
-      \param name Nombre l�gico del dato.
-      \param type Tipo de dato de esta instancia.
-      \param maxSize Tamao maximo que puede tener este dato. Deberia coincidir con el indicado
-      por la columna con la que vaya a corresponder en la sentencia.
-      \param constraint Indica si el dato puede tomar valores nulos.
-
-      \warning los tipos de datos complejos deberia reimplementar los metodos #code and #decode.
-   */
    explicit Abstract (const std::string& name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
       m_name (name),
       m_type (type),
@@ -98,24 +80,15 @@ protected:
       m_buffer (NULL)
    {;}
 
-   /**
-      Constructor copia.
-      \param other Instancia de la que copiar.
-      \since NemesisRD.dbms 1.1.1
-   */
    Abstract (const Abstract& other) :
       m_name (other.m_name),
       m_type (other.m_type),
       m_maxSize (other.m_maxSize),
       m_constraint (other.m_constraint),
       m_isNull (other.m_isNull),
-      m_buffer (other.m_buffer)
+      m_buffer (NULL)
    {;}
 
-   /**
-      Establece el area de memoria asociada a esta variable.
-      \param buffer Direccion de memoria donde comienza el contenido esta variable.
-   */
    void setBuffer (void* buffer) noexcept { m_buffer = buffer; }
 
    void isNotNull () noexcept { m_isNull = false; }

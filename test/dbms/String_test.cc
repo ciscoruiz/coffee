@@ -115,3 +115,37 @@ BOOST_AUTO_TEST_CASE (string_downcast)
 
    BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::String, zzz), adt::RuntimeException);
 }
+
+BOOST_AUTO_TEST_CASE (string_clone)
+{
+   datatype::String cannotBeNull ("cannotBeNull", 16, datatype::Constraint::CanNotBeNull);
+   datatype::String canBeNull ("canBeNull", 16, datatype::Constraint::CanBeNull);
+
+   BOOST_REQUIRE_EQUAL (cannotBeNull.hasValue(), true);
+   BOOST_REQUIRE_EQUAL (canBeNull.hasValue(), false);
+
+   std::auto_ptr <datatype::Abstract> notnull (cannotBeNull.clone ());
+   std::auto_ptr <datatype::Abstract> null (canBeNull.clone ());
+
+   BOOST_REQUIRE_EQUAL (notnull->hasValue(), true);
+   BOOST_REQUIRE_EQUAL (null->hasValue(), false);
+
+   BOOST_REQUIRE_EQUAL (notnull->compare (cannotBeNull), 0);
+
+   cannotBeNull.setValue ("abcd");
+
+   BOOST_REQUIRE_EQUAL (cannotBeNull.getValue (), "abcd");
+
+   notnull.reset (cannotBeNull.clone ());
+   BOOST_REQUIRE_EQUAL (notnull->hasValue(), true);
+   BOOST_REQUIRE_EQUAL (notnull->compare (cannotBeNull), 0);
+
+   canBeNull.setValue ("xzy");
+   null.reset (canBeNull.clone ());
+   BOOST_REQUIRE_EQUAL (null->hasValue(), true);
+   BOOST_REQUIRE_EQUAL (null->compare (canBeNull), 0);
+
+   BOOST_REQUIRE_EQUAL (null->compare (cannotBeNull), 1);
+
+   BOOST_REQUIRE_EQUAL (notnull->compare (canBeNull), -1);
+}

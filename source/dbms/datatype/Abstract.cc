@@ -46,7 +46,7 @@ adt::StreamString datatype::Abstract::asString () const
 {
    adt::StreamString result;
 
-   result << "dbms::type::Abstract { Name: " << m_name;
+   result << "datatype.Abstract { Name: " << m_name;
    result << " | Buffer: " << adt::AsHexString::apply(wepa_ptrnumber_cast (m_buffer));
    result << " | MaxSize: " << m_maxSize;
    result << " | Null: " << m_isNull;

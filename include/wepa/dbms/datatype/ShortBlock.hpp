@@ -26,80 +26,21 @@ namespace datatype {
 */
 class ShortBlock : public datatype::Abstract {
 public:
-   /**
-      Constructor.
-      \param name Nombre l�gico de este miembro.
-      \param maxSize Tamao maximo que puede tener este bloque.
-      \param constraint Indica si el dato puede tomar valores nulos.
-   */
-   explicit ShortBlock (const char* name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull) :
-      datatype::Abstract (name, Datatype::ShortBlock, maxSize, constraint),
-      m_value ()
-   {
-      m_value.reserve(maxSize);
-      datatype::Abstract::setBuffer ((void*) m_value.data ());
-   }
-
-   /**
-      Constructor.
-      \param name Nombre l�gico de este miembro.
-      \param maxSize Tamao maximo que puede tener este bloque.
-      \param constraint Indica si el dato puede tomar valores nulos.
-
-      \since NemesisRD.dbms 2.10.06.3
-   */
-   explicit ShortBlock (const std::string& name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull) :
-      datatype::Abstract (name, Datatype::ShortBlock, maxSize, constraint),
-      m_value ()
-   {
-      m_value.reserve(maxSize);
-      datatype::Abstract::setBuffer ((void*) m_value.data ());
-   }
-
-   /**
-      Constructor copia.
-      \param other Instancia de la que copiar.
-      \since NemesisRD.dbms 1.1.1
-   */
-   ShortBlock (const ShortBlock& other) :
-      datatype::Abstract (other),
-      m_value ()
-   {
-      m_value = other.m_value;
-      datatype::Abstract::setBuffer ((void*) m_value.data ());
-   }
-
-   /**
-      Destructor.
-   */
+   explicit ShortBlock (const char* name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull);
+   explicit ShortBlock (const std::string& name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull);
+   ShortBlock (const ShortBlock& other);
    ~ShortBlock () {;}
 
-   /**
-      Devuelve el tamao actual de este dato.
-      \return El tamao actual de este dato.
-   */
    int getSize () const noexcept { return (hasValue () == true) ? m_value.size (): 0; }
 
-   /**
-      Devuelve el contenido de la este bloque de memoria.
-      \return  Devuelve el contenido de la este bloque de memoria.
-      \warning Si el metodo datatype::Abstract::isNull devolvio \em true el resultado de este metodo no esta definido.
-   */
    const adt::DataBlock& getValue () const throw (adt::RuntimeException) {  this->exceptionWhenIsNull();return m_value; }
 
-   /**
-      Operador de asignacin.
-      \param value Valor que queremos a asignar.
-      \return La instancia de esta cadena.
-   */
    void setValue (const adt::DataBlock& value) throw (adt::RuntimeException);
+
+   Abstract* clone () const noexcept { return new ShortBlock(*this); }
 
    operator adt::StreamString () const noexcept { return asString (); }
 
-   /**
-      Devuelve una cadena con la informacion referente a esta instancia.
-      \return Una cadena con la informacion referente a esta instancia.
-   */
    adt::StreamString asString () const noexcept;
 
    wepa_declare_datatype_downcast(ShortBlock)

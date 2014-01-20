@@ -62,8 +62,6 @@ class Class : public adt::NamedObject {
 public:
    virtual ~Class ();
 
-   void createMembers () throw (adt::RuntimeException);
-
    int member_size () const noexcept { return m_members.size (); }
 
    adt::StreamString asString () const noexcept;
@@ -81,6 +79,8 @@ protected:
 private:
    Members m_members;
    std::recursive_mutex m_mutex;
+
+   void createMembers () throw (adt::RuntimeException);
 
    virtual dbms::datatype::Abstract* do_createMember (const int columnNumber) const noexcept = 0;
    virtual Object* createObject () noexcept = 0;

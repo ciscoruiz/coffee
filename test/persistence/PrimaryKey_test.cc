@@ -43,6 +43,7 @@
 #include <wepa/dbms/datatype/String.hpp>
 
 #include <wepa/persistence/PrimaryKey.hpp>
+#include <wepa/persistence/Storage.hpp>
 
 using namespace wepa;
 
@@ -170,3 +171,65 @@ BOOST_AUTO_TEST_CASE (persistence_primary_key_sort)
    BOOST_REQUIRE_EQUAL (isSorted, true);
 }
 
+
+BOOST_AUTO_TEST_CASE (persistence_primary_key_map)
+{
+   // Duplicate private Storage::PtrLess
+   struct PtrLess {
+      bool operator () (const persistence::PrimaryKey* first, const persistence::PrimaryKey* second) throw (adt::RuntimeException) {
+         return *first < *second;
+      }
+   };
+
+   typedef std::map <persistence::PrimaryKey*, int, PtrLess> Entries;
+   typedef Entries::iterator entries_iterator;
+   Entries entries;
+
+   boost::ptr_vector <dbms::datatype::Abstract> garbageCollector;
+
+   for (int key = 100; key < 110; ++ key) {
+      std::cout << "Key=" << key << std::endl;
+      persistence::PrimaryKey* primaryKey = new persistence::PrimaryKey;
+
+      dbms::datatype::Integer* ivalue = new dbms::datatype::Integer ("ii");
+      BOOST_REQUIRE_NO_THROW(ivalue->setValue (key));
+      garbageCollector.push_back (ivalue);
+
+      primaryKey->addComponent(ivalue);
+
+      BOOST_REQUIRE_EQUAL (entries.find (primaryKey) == entries.end (), true);
+
+      entries [primaryKey] = key;
+   }
+
+   for (int key = 0; key < 10; ++ key) {
+      std::cout << "Key=" << key << std::endl;
+      persistence::PrimaryKey* primaryKey = new persistence::PrimaryKey;
+
+      dbms::datatype::Integer* ivalue = new dbms::datatype::Integer ("ii");
+      BOOST_REQUIRE_NO_THROW(ivalue->setValue (key));
+      garbageCollector.push_back (ivalue);
+
+      primaryKey->addComponent(ivalue);
+
+      BOOST_REQUIRE_EQUAL (entries.find (primaryKey) == entries.end (), true);
+
+      entries [primaryKey] = key;
+   }
+
+   for (int key = 100; key < 110; ++ key) {
+      persistence::PrimaryKey* primaryKey = new persistence::PrimaryKey;
+
+      dbms::datatype::Integer* ivalue = new dbms::datatype::Integer ("ii");
+      BOOST_REQUIRE_NO_THROW(ivalue->setValue (key));
+      garbageCollector.push_back (ivalue);
+      primaryKey->addComponent(ivalue);
+
+      entries_iterator ii = entries.find (primaryKey);
+
+      BOOST_REQUIRE_EQUAL (ii == entries.end (), false);
+
+      BOOST_REQUIRE_EQUAL (ii->second, key);
+   }
+
+}

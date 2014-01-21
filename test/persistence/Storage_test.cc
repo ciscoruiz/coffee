@@ -148,7 +148,7 @@ public:
 
 private:
    dbms::ResultCode do_apply (dbms::GuardStatement& statement, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
-   bool hasToRefresh (GuardClass& _class, const Object& object) throw (adt::RuntimeException, dbms::DatabaseException) { return false; }
+   bool hasToRefresh (GuardClass& _class, const Object& object) throw (adt::RuntimeException, dbms::DatabaseException) { return true; }
    bool isInputValue (const int columnNumber) const noexcept { return columnNumber == 0; }
    bool isPrimaryKeyComponent (const int columnNumber) const noexcept { return columnNumber == 0; }
    bool isOutputValue (const int columnNumber) const noexcept { return columnNumber >= 1; }
@@ -310,6 +310,92 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readonly)
    BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 3);
    BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 2);
    BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), myLoader.getApplyCounter ());
+
+   LOG_DEBUG ("Enables termination");
+   application.enableTermination();
+
+   tr.join ();
+}
+
+BOOST_AUTO_TEST_CASE (persistence_storage_readwrite)
+{
+   MockApplication application ("persistence_storage_readwrite");
+
+   test_persistence::MyDatabase database (application);
+
+   application.disableTermination();
+
+   dbms::Connection* conn0 = database.createConnection("0", "0", "0");
+   dbms::Statement* stReader = database.createStatement("read_only", "read");
+
+   std::thread tr (std::ref (application));
+   usleep (500);
+
+   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
+
+   persistence::Repository repository ("persistence_storage_readwrite");
+   persistence::Storage* rw_storage = repository.createStorage(0, "storage_readwrite", persistence::Storage::AccessMode::ReadWrite);
+
+   test_persistence::MockCustomerClass _class;
+
+   BOOST_REQUIRE_NE (rw_storage, (void*) 0);
+
+   test_persistence::MockCustomerLoader myLoader;
+
+   if (true) {
+      persistence::GuardClass guardCustomer (_class);
+
+      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setMember(guardCustomer, 0, 9));
+      test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (rw_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (customer.getId(), 9);
+      BOOST_REQUIRE_EQUAL (customer.getName(), "the name 9");
+
+      test_persistence::MockCustomerObject& customer2 = static_cast <test_persistence::MockCustomerObject&> (rw_storage->load(*conn0, guardCustomer, myLoader));
+      BOOST_REQUIRE_EQUAL (&customer, &customer2);
+
+      BOOST_REQUIRE_EQUAL (rw_storage->getFaultCounter(), 1);
+      BOOST_REQUIRE_EQUAL (rw_storage->getHitCounter(), 1);
+      BOOST_REQUIRE_EQUAL (myLoader.getApplyCounter (), 2);
+
+      BOOST_REQUIRE_EQUAL (rw_storage->release (guardCustomer, customer), false);
+      BOOST_REQUIRE_EQUAL (rw_storage->release (guardCustomer, customer2), true);
+
+      BOOST_REQUIRE_EQUAL (rw_storage->release (guardCustomer, customer), false);
+      BOOST_REQUIRE_EQUAL (rw_storage->release (guardCustomer, customer2), false);
+   }
+
+   if (true) {
+      LOG_DEBUG ("Reload record 9...");
+      persistence::GuardClass guardCustomer (_class);
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setMember(guardCustomer, 0, 9));
+      test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (rw_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (customer.getId(), 9);
+      BOOST_REQUIRE_EQUAL (customer.getName(), "the name 9");
+
+      mock::MockLowLevelRecord record;
+      record.m_id = 9;
+      record.m_name = "updated name 9";
+      database.update (record);
+
+      test_persistence::MockCustomerObject& customer2 = static_cast <test_persistence::MockCustomerObject&> (rw_storage->load(*conn0, guardCustomer, myLoader));
+      BOOST_REQUIRE_EQUAL (&customer, &customer2);
+
+      BOOST_REQUIRE_EQUAL (customer.getId(), 9);
+      BOOST_REQUIRE_EQUAL (customer.getName(), "updated name 9");
+
+      BOOST_REQUIRE_EQUAL (rw_storage->getFaultCounter(), 2);
+      BOOST_REQUIRE_EQUAL (rw_storage->getHitCounter(), 2);
+      BOOST_REQUIRE_EQUAL (myLoader.getApplyCounter (), 4);
+
+      BOOST_REQUIRE_EQUAL (rw_storage->release (guardCustomer, customer), false);
+      BOOST_REQUIRE_EQUAL (rw_storage->release (guardCustomer, customer2), true);
+   }
 
    LOG_DEBUG ("Enables termination");
    application.enableTermination();

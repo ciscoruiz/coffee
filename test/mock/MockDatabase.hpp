@@ -57,6 +57,10 @@ public:
       m_container [record.m_id] = record;
    }
 
+   void update (const mock::MockLowLevelRecord& record) noexcept {
+      m_container [record.m_id] = record;
+   }
+
    int container_size () const noexcept { return m_container.size (); }
 
 private:

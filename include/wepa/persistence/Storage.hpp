@@ -82,7 +82,7 @@ class Storage : public adt::NamedObject {
 public:
    class AccessMode {
    public:
-      enum _v { None = -1, ReadOnly, ReadWrite, ReadAlways };
+      enum _v { None = -1, ReadOnly, ReadWrite };
       auto_enum_declare (AccessMode);
 
    protected:
@@ -102,6 +102,7 @@ public:
    unsigned int getFaultCounter () const noexcept { return m_faultCounter; }
 
    Object& load (dbms::Connection& connection, GuardClass& _class, Loader& loader) throw (adt::RuntimeException, dbms::DatabaseException);
+   bool release (GuardClass& _class, Object& object) noexcept;
 
    operator adt::StreamString () const noexcept { return asString (); }
 
@@ -136,10 +137,6 @@ private:
    };
 
    class AccessModeReadWrite : public AccessMode {
-      Object* run (dbms::Connection& connection, GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
-   };
-
-   class AccessModeReadAlways : public AccessMode {
       Object* run (dbms::Connection& connection, GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
    };
 

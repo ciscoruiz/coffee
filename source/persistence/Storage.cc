@@ -50,7 +50,7 @@
 
 using namespace wepa;
 
-auto_enum_assign(persistence::Storage::AccessMode) = { "ReadOnly", "ReadWrite", "ReadAlways", NULL };
+auto_enum_assign(persistence::Storage::AccessMode) = { "ReadOnly", "ReadWrite", NULL };
 
 persistence::Storage::Storage (const char* name, const AccessMode::_v accessMode) :
    adt::NamedObject (name),
@@ -100,8 +100,6 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
 
          entry.m_object->setPrimaryKey(Storage::primaryKey (rr.first));
          result = entry.m_object;
-
-         LOG_DEBUG("Result=" << adt::AsHexString::apply (wepa_ptrnumber_cast(result)));
       }
       catch (adt::Exception& ex) {
          delete entry.m_object;
@@ -127,9 +125,40 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
       WEPA_THROW_EXCEPTION(loader << " | There is not any match for the loader");
    }
 
-   LOG_DEBUG (loader << " | Result= " << result->asString ());
+   LOG_DEBUG (loader << " | ObjectId=" << result->getInternalId() << " | Result=" << result->asString ());
 
    return std::ref (*result);
+}
+
+bool persistence::Storage::release (GuardClass& _class, Object& object) noexcept
+{
+   bool result = false;
+
+   try {
+      const PrimaryKey& primaryKey = object.getPrimaryKey();
+
+      LOG_DEBUG (getName () << " | Releasing=" << primaryKey);
+      entry_iterator ii = m_objects.find (primaryKey);
+
+      if (ii != m_objects.end ()) {
+         Entry& entry = Storage::entry(ii);
+
+         if (-- entry.m_useCounter <= 0) {
+            object.clearPrimaryKey();
+            LOG_DEBUG (getName () << " | ObjectId=" << entry.m_object->getInternalId());
+            delete entry.m_object;
+            m_objects.erase (ii);
+            result = true;
+         }
+      }
+   }
+   catch (adt::RuntimeException& ex) {
+      LOG_ERROR (ex.asString ());
+   }
+
+   LOG_DEBUG (getName () << " | Result=" << result);
+
+   return result;
 }
 
 adt::StreamString persistence::Storage::asString () const
@@ -168,9 +197,8 @@ const persistence::Storage::AccessMode& persistence::Storage::instanciateAccessM
 {
    static AccessModeReadOnly readOnly;
    static AccessModeReadWrite readWrite;
-   static AccessModeReadAlways readAlways;
 
-   static const AccessMode* st_accessMode [3] = { &readOnly, &readWrite, &readAlways };
+   static const AccessMode* st_accessMode [2] = { &readOnly, &readWrite };
 
    if (accessMode == AccessMode::None)
       WEPA_THROW_EXCEPTION("There is not define any AccessMode");
@@ -185,7 +213,11 @@ persistence::Object* persistence::Storage::AccessMode::reload (dbms::Connection&
 
    Object& object = std::ref (*entry.m_object);
 
-   if (loader.hasToRefresh(_class, object) == true) {
+   bool hasToRefresh = loader.hasToRefresh(_class, object);
+
+   LOG_DEBUG (object << " | HasToRefresh=" << hasToRefresh);
+
+   if (hasToRefresh == true) {
       LOG_DEBUG ("Release dependences for " << entry.m_object->asString ());
       object.releaseDependences();
 
@@ -194,7 +226,7 @@ persistence::Object* persistence::Storage::AccessMode::reload (dbms::Connection&
 
       if (resultCode.successful() == false)
          WEPA_THROW_NAME_DB_EXCEPTION(loader.getName(), resultCode);
- }
+   }
 
    LOG_DEBUG ("Result=" << entry.m_object->asString ());
 
@@ -204,27 +236,14 @@ persistence::Object* persistence::Storage::AccessMode::reload (dbms::Connection&
 persistence::Object* persistence::Storage::AccessModeReadOnly::run(dbms::Connection&, GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
-   LOG_DEBUG("Result=" << adt::AsHexString::apply (wepa_ptrnumber_cast(entry.m_object)));
+   LOG_DEBUG("Loader=" << loader.getName () << " | Result=" << adt::AsHexString::apply (wepa_ptrnumber_cast(entry.m_object)));
    return entry.m_object;
 }
 
 persistence::Object* persistence::Storage::AccessModeReadWrite::run(dbms::Connection& connection, GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
-   persistence::Object* result = entry.m_object;
-
-   if (entry.m_useCounter == 0) {
-      result = this->reload (connection, _class, loader, entry);
-   }
-
-   LOG_DEBUG("Result=" << adt::AsHexString::apply (wepa_ptrnumber_cast(result)));
-   return result;
-}
-
-persistence::Object* persistence::Storage::AccessModeReadAlways::run(dbms::Connection& connection, GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
-   throw (adt::RuntimeException, dbms::DatabaseException)
-{
    persistence::Object* result = this->reload (connection,_class, loader, entry);
-   LOG_DEBUG("Result=" << adt::AsHexString::apply (wepa_ptrnumber_cast(result)));
+   LOG_DEBUG("Loader=" << loader.getName () << " | Result=" << adt::AsHexString::apply (wepa_ptrnumber_cast(result)));
    return result;
 }

@@ -32,54 +32,26 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_persistence_Object_hpp
-#define __wepa_persistence_Object_hpp
+#include <wepa/persistence/Object.hpp>
 
-#include <functional>
+#include <wepa/adt/AsHexString.hpp>
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/RuntimeException.hpp>
+#include <wepa/persistence/Class.hpp>
 
-#include <wepa/dbms/DatabaseException.hpp>
+using namespace wepa;
 
-namespace wepa {
-namespace persistence {
+const persistence::PrimaryKey& persistence::Object::getPrimaryKey () const
+   throw (adt::RuntimeException)
+{
+   if (m_primaryKey == NULL) {
+      WEPA_THROW_EXCEPTION(m_class << " | ObjectId=" <<  getInternalId () << " | Object does not have primary key");
+   }
 
-class Storage;
-class PrimaryKey;
-class Class;
+   return *m_primaryKey;
+}
 
-class Object {
-public:
-   virtual ~Object () {m_primaryKey = NULL; }
 
-   const PrimaryKey& getPrimaryKey () const throw (adt::RuntimeException);
-
-   Class& getClass () noexcept { return std::ref (m_class); }
-   const Class& getClass () const noexcept { return std::ref (m_class); }
-
-   std::string getInternalId () const noexcept;
-
-   operator adt::StreamString () const noexcept { return asString (); }
-
-   virtual adt::StreamString asString () const noexcept = 0;
-
-protected:
-   Class& m_class;
-
-   Object (Class& _class) : m_class (_class), m_primaryKey (NULL) {;}
-
-   void setPrimaryKey (const PrimaryKey& primaryKey) noexcept { m_primaryKey = &primaryKey; }
-   void clearPrimaryKey () noexcept { m_primaryKey = NULL; }
-
-   virtual void releaseDependences () noexcept = 0;
-
-private:
-   const PrimaryKey* m_primaryKey;
-
-   friend class Storage;
-};
-
-} /* namespace persistence */
-} /* namespace wepa */
-#endif
+std::string persistence::Object::getInternalId () const noexcept
+{
+   return adt::AsHexString::apply (wepa_ptrnumber_cast(this));
+}

@@ -82,17 +82,16 @@ BOOST_AUTO_TEST_CASE (persistence_repository_as)
 
    repository.createStorage(0, "the 0", persistence::Storage::AccessMode::ReadOnly);
    repository.createStorage(1, "the 1", persistence::Storage::AccessMode::ReadWrite);
-   repository.createStorage(2, "the 2", persistence::Storage::AccessMode::ReadAlways);
 
    adt::StreamString zz = repository.asString ();
 
-   BOOST_REQUIRE_EQUAL (zz, "persistence.Repository { adt.NamedObject { Name: persistence_define_structure } | N-Size=3 }");
+   BOOST_REQUIRE_EQUAL (zz, "persistence.Repository { adt.NamedObject { Name: persistence_define_structure } | N-Size=2 }");
 
    xml::Node myNode ("root");
 
    xml::Node& info = repository.asXML(myNode);
 
-   BOOST_REQUIRE_EQUAL (info.children_size(), 3);
+   BOOST_REQUIRE_EQUAL (info.children_size(), 2);
 
    xml::Node& zero = info.childAt(0);
    BOOST_REQUIRE_EQUAL (zero.lookupAttribute("Name").getValue(), "the 0");
@@ -101,8 +100,4 @@ BOOST_AUTO_TEST_CASE (persistence_repository_as)
    xml::Node& one = info.childAt(1);
    BOOST_REQUIRE_EQUAL (one.lookupAttribute("Name").getValue(), "the 1");
    BOOST_REQUIRE_EQUAL (one.lookupAttribute("Mode").getValue(), "ReadWrite");
-
-   xml::Node& two = info.childAt(2);
-   BOOST_REQUIRE_EQUAL (two.lookupAttribute("Name").getValue(), "the 2");
-   BOOST_REQUIRE_EQUAL (two.lookupAttribute("Mode").getValue(), "ReadAlways");
 }

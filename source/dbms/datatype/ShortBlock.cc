@@ -39,6 +39,30 @@
 using namespace wepa;
 using namespace wepa::dbms;
 
+datatype::ShortBlock::ShortBlock (const char* name, const int maxSize, const Constraint::_v constraint) :
+   datatype::Abstract (name, Datatype::ShortBlock, maxSize, constraint),
+   m_value ()
+{
+   m_value.reserve(maxSize);
+   datatype::Abstract::setBuffer ((void*) m_value.data ());
+}
+
+datatype::ShortBlock::ShortBlock (const std::string& name, const int maxSize, const Constraint::_v constraint) :
+   datatype::Abstract (name, Datatype::ShortBlock, maxSize, constraint),
+   m_value ()
+{
+   m_value.reserve(maxSize);
+   datatype::Abstract::setBuffer ((void*) m_value.data ());
+}
+
+datatype::ShortBlock::ShortBlock (const ShortBlock& other) :
+   datatype::Abstract (other),
+   m_value ()
+{
+   m_value = other.m_value;
+   datatype::Abstract::setBuffer ((void*) m_value.data ());
+}
+
 void datatype::ShortBlock::setValue(const adt::DataBlock& value)
    throw (adt::RuntimeException)
 {
@@ -65,3 +89,9 @@ adt::StreamString datatype::ShortBlock::asString () const
    return result += " }";
 }
 
+int datatype::ShortBlock::do_compare (const datatype::Abstract& other) const
+   throw (adt::RuntimeException)
+{
+   WEPA_THROW_EXCEPTION(asString () << " | Can not apply");
+   return 0;
+}

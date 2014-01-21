@@ -1,0 +1,20 @@
+Import ('env')
+
+# See http://www.scons.org/doc/2.0.1/HTML/scons-user/c1809.html
+# about merging flags
+boost_library = { 'LIBS' : 'boost_unit_test_framework' }
+env.MergeFlags (boost_library)
+
+# Set wepa_dbms twice to avoid linker dependences
+wepa_library = { 'LIBS' : [  'wepa_config', 'wepa_adt', 'wepa_logger', 'wepa_xml', 'wepa_app', 'wepa_balance', 'wepa_dbms', 'wepa_mock', 'wepa_persistence', 'wepa_dbms'  ] }
+env.MergeFlags (wepa_library)
+
+pwd = Dir ('.').abspath;
+current_directory = str (pwd);
+
+libpath = current_directory.replace ('test/', 'source/');
+env.Append (LIBPATH = [libpath])
+
+result = env.Program ('wepa_persistence_test', Glob ('*.cc'))
+
+Return ('result')

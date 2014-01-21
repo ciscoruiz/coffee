@@ -28,50 +28,19 @@ public:
     */
    static const int MaxDateSize = 48;
 
-   /**
-      Constructor.
-      \param name Nombre l�gico de este campo
-      \param isNulleable Indica si el dato puede tomar valores nulos.
-   */
    explicit Date (const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) ;
 
-   /**
-       Constructor.
-       \param name Nombre l�gico de este campo
-       \param isNulleable Indica si el dato puede tomar valores nulos.
-
-       Para obtener m�s informacion sobre la espeficacion de formato \em man \em strftime (p.e.).
-
-       \since NemesisRD.dbms 2.10.06.3
-   */
    explicit Date (const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) ;
 
-   /**
-      Constructor copia.
-      \param other Instancia de la que copiar.
-   */
+   Date (const Date& other);
 
-   /**
-      Destructor.
-   */
-   ~Date ();
+   ~Date () { ; }
 
-   /**
-      Devuelve el contenido de esta fecha.
-      \return El contenido de esta fecha.
-      \warning Si el metodo type::Abstract::isNull devolvio \em true el contenido de la estructura no esta definido.
-   */
    const adt::Second& getValue () const throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
    struct tm* getLocalTime () const throw (adt::RuntimeException);
 
    /**
-      Interpreta la cadena recibida segun el formato indicado en el constructor y la asigna a esta instancia, pero requiere que al
-      invocar al constructor de esta fecha se indique el formato usado para traducir.
-      \param str Cadena de la que copiar.
-       \param format Formato usado para interpretar los datos de esta fecha, en los metodos Date::getCStringValue y
-       Date::setValue (const char*) y Date::setValue (const std::string&). Sigue la especificacion:
-
        \code
         %a     Replaced by the localeâs abbreviated weekday name. [ tm_wday]
 
@@ -168,36 +137,18 @@ public:
    */
    void setValue (const char* str, const char* format) throw (adt::RuntimeException);
 
-   /**
-      Interpreta la cadena recibida segun el formato indicado en el constructor y la asigna a esta instancia, pero requiere que al
-      invocar al constructor de esta fecha se indique el formato usado para traducir.
-      \param str Cadena de la que copiar.
-   */
    void setValue (const std::string& str, const char* format) throw (adt::RuntimeException) { setValue (str.c_str (), format); }
 
-   /**
-    * Establece esta fecha con los segundos transcurridos desde el 1/1/1970.
-    * \param second Numeros de segundos transcurridos desde el 1 de Enero de 1970.
-    * \see wepa::functions::second
-    */
    void setValue (const adt::Second& second) throw (adt::RuntimeException);
+
+   virtual Abstract* clone () const noexcept { return new Date (*this); }
 
    operator adt::StreamString () const noexcept { return asString (); }
 
-   /**
-      Devuelve una cadena con la informacion referente a esta instancia.
-      \return Una cadena con la informacion referente a esta instancia.
-   */
    virtual adt::StreamString asString () const noexcept;
 
-   /**
-    * Devuelve el nombre l�gico de esta clase
-    * \return el nombre l�gico de esta clase
-    * \since NemesisRD.dbms 2.10.16.04
-    */
    static const char* className () noexcept { return "dbms::type::Date"; }
 
-   Date (const Date& other) = delete;
    Date& operator= (const Date&) = delete;
 
    wepa_declare_datatype_downcast(Date)
@@ -206,27 +157,14 @@ protected:
    adt::Second m_value;
    char m_buffer  [MaxDateSize + 1];
 
-   /**
-    * Constructor invocado desde el constructor de TimeStamp.
-      \param name Nombre l�gico de este campo
-      \param type Sera type::Abstract::Type::TimeStamp.
-      \param isNulleable Indica si el dato puede tomar valores nulos.
-      \param format Formato usado para representar los datos de esta fecha.
-    */
    explicit Date (const char* name, const Datatype::_v type, const Constraint::_v constraint);
 
-   /**
-    * Constructor invocado desde el constructor de TimeStamp.
-      \param name Nombre l�gico de este campo
-      \param type Sera type::Abstract::Type::TimeStamp.
-      \param isNulleable Indica si el dato puede tomar valores nulos.
-      \param format Formato usado para representar los datos de esta fecha.
-
-      \since NemesisRD.dbms 2.10.06.3
-    */
    explicit Date (const std::string& name, const Datatype::_v type, const Constraint::_v constraint);
 
    void do_clear () noexcept { m_value = 0; }
+
+private:
+   int do_compare (const Abstract& other) const throw (adt::RuntimeException);
 };
 
 }

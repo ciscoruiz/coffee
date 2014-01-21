@@ -55,7 +55,9 @@ public:
 
   bool operator == (const NamedObject& other) const noexcept { return isEqual (other.m_name); }
 
-  virtual StreamString asString () const noexcept { StreamString result ("adt::NamedObject { Name: "); return result << m_name << " }"; }
+  operator StreamString () const noexcept { return asString (); }
+
+  virtual StreamString asString () const noexcept { StreamString result ("adt.NamedObject { Name: "); return result << m_name << " }"; }
 
 protected:
    NamedObject (const std::string& name) : m_name (name) {;}

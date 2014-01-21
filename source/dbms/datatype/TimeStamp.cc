@@ -43,3 +43,19 @@ using namespace std;
 using namespace wepa;
 using namespace wepa::dbms;
 
+datatype::TimeStamp::TimeStamp (const char* name, const Constraint::_v constraint)  :
+   Date (name, datatype::Abstract::Datatype::TimeStamp, constraint),
+   m_fractionalSecond (0)
+{;}
+
+datatype::TimeStamp::TimeStamp (const std::string& name, const Constraint::_v constraint, const char* format)  :
+   Date (name, datatype::Abstract::Datatype::TimeStamp, constraint),
+   m_fractionalSecond (0)
+{;}
+
+datatype::TimeStamp::TimeStamp (const datatype::TimeStamp& other) :
+   Date (other),
+   m_fractionalSecond (other.m_fractionalSecond)
+{
+}
+

@@ -35,84 +35,33 @@ public:
 
    virtual ~Abstract () {;}
 
-   /**
-    * Nombre l�gico del dato, indicado en el contructor.
-    * \return Nombre l�gico del dato, indicado en el contructor.
-    */
    const char* getName () const noexcept { return m_name.c_str (); }
 
-   /**
-      Devuelve el tamano maximo de este dato que coincidiria con el indicado en el constructor.
-      \return El tamano maximo de este dato que coincidiria con el indicado en el constructor.
-   */
    int getMaxSize () const noexcept { return m_maxSize; }
 
-   /**
-      Devuelve el tipo de dato.
-      \return El tipo de datos.
-   */
    Datatype::_v getType () const noexcept { return m_type; }
 
-   /**
-      Devuelve el area de memoria asociada a esta variable.
-   */
    void* getBuffer () noexcept { return m_buffer; }
 
-   /**
-      Devuelve el indicador de nulo de esta instancia.
-      \return El indicador de nulo de esta instancia.
-   */
    bool hasValue () const noexcept { return m_isNull == false; }
 
-   /**
-      Devuelve el valor que indica si este dato puede tomar valores nulos.
-      \return El valor que indica si este dato puede tomar valores nulos.
-   */
    bool canBeNull () const noexcept { return m_constraint == Constraint::CanBeNull; }
 
-   /**
-      Establece el indicador de nulo de esta instancia.
-      \param isNull Indicador de nulo de esta instancia.
-      \warning Slo tendr�efecto en caso de haber indicado en el constructor que
-      el dato puede tomar valores nulos.
-   */
    void isNull () throw (adt::RuntimeException);
 
-   /**
-      Incorpora el m�todo clear para todos tipos de datos con lo que podemos obtener informaci�n
-      del medio f�sico.
-
-      Si el dato est� definido como "nuleable" activar� el indicador que indica que el dato est� vac�o,
-      en otro caso se asignar� un valor adecuado dependiendo del tipo del dato, cero para los n�meros,
-      "" para las cadenas, etc.
-   */
    void clear () noexcept;
+
+   int compare (const Abstract& other) const throw (adt::RuntimeException);
 
    operator adt::StreamString () const noexcept { return asString (); }
 
-   /**
-      Devuelve una cadena con la informacion referente a esta instancia.
-      @return Una cadena con la informacion referente a esta instancia.
-   */
    virtual adt::StreamString asString () const noexcept;
 
-   /**
-    * Devuelve el nombre l�gico de esta clase
-    * \return el nombre l�gico de esta clase
-    */
-   static const char* className () noexcept { return "dbms::type::Abstract"; }
+   virtual Abstract* clone () const noexcept = 0;
+
+   static const char* className () noexcept { return "dbms.datatype.Abstract"; }
 
 protected:
-   /**
-      Constructor.
-      \param name Nombre l�gico del dato.
-      \param type Tipo de dato de esta instancia.
-      \param maxSize Tamao maximo que puede tener este dato. Deberia coincidir con el indicado
-      por la columna con la que vaya a corresponder en la sentencia.
-      \param constraint Indica si el dato puede tomar valores nulos.
-
-      \warning los tipos de datos complejos deberia reimplementar los metodos #code and #decode.
-   */
    explicit Abstract (const char* name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
       m_name (name),
       m_type (type),
@@ -122,16 +71,6 @@ protected:
       m_buffer (NULL)
    {;}
 
-   /**
-      Constructor.
-      \param name Nombre l�gico del dato.
-      \param type Tipo de dato de esta instancia.
-      \param maxSize Tamao maximo que puede tener este dato. Deberia coincidir con el indicado
-      por la columna con la que vaya a corresponder en la sentencia.
-      \param constraint Indica si el dato puede tomar valores nulos.
-
-      \warning los tipos de datos complejos deberia reimplementar los metodos #code and #decode.
-   */
    explicit Abstract (const std::string& name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
       m_name (name),
       m_type (type),
@@ -141,24 +80,15 @@ protected:
       m_buffer (NULL)
    {;}
 
-   /**
-      Constructor copia.
-      \param other Instancia de la que copiar.
-      \since NemesisRD.dbms 1.1.1
-   */
    Abstract (const Abstract& other) :
       m_name (other.m_name),
       m_type (other.m_type),
       m_maxSize (other.m_maxSize),
       m_constraint (other.m_constraint),
       m_isNull (other.m_isNull),
-      m_buffer (other.m_buffer)
+      m_buffer (NULL)
    {;}
 
-   /**
-      Establece el area de memoria asociada a esta variable.
-      \param buffer Direccion de memoria donde comienza el contenido esta variable.
-   */
    void setBuffer (void* buffer) noexcept { m_buffer = buffer; }
 
    void isNotNull () noexcept { m_isNull = false; }
@@ -174,6 +104,7 @@ private:
    bool m_isNull;
 
    virtual void do_clear () noexcept = 0;
+   virtual int do_compare (const Abstract& other) const throw (adt::RuntimeException) = 0;
 };
 
 #define wepa_declare_datatype_downcast(inherit) \

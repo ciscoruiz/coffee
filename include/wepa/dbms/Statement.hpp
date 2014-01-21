@@ -240,6 +240,11 @@ protected:
    int input_size () const noexcept { return m_inputBinds.size (); }
    int output_size () const noexcept { return m_outputBinds.size (); }
 
+   // These methods will be called from GuardStatement
+   datatype::Abstract& getInputData (const int pos) throw (adt::RuntimeException);
+   datatype::Abstract& getOutputData (const int pos) throw (adt::RuntimeException);
+   const datatype::Abstract& getOutputData (const int pos) const throw (adt::RuntimeException);
+
 private:
    Database& m_database;
    const std::string m_name;
@@ -256,9 +261,6 @@ private:
 
    void prepare (Connection* connection) throw (adt::RuntimeException, DatabaseException);
    virtual void do_prepare (Connection* connection) throw (adt::RuntimeException, DatabaseException) = 0;
-
-   datatype::Abstract& getInputData (const int pos) throw (adt::RuntimeException);
-   const datatype::Abstract& getOutputData (const int pos) const throw (adt::RuntimeException);
 
    ResultCode execute (Connection& connection) throw (adt::RuntimeException, DatabaseException);
    virtual ResultCode do_execute (Connection& connection) throw (adt::RuntimeException, DatabaseException) = 0;

@@ -39,7 +39,7 @@ datatype::Abstract& Statement::getInputData (const int pos)
    throw (adt::RuntimeException)
 {
    if (pos >= input_size ()) {
-      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << input_size() << "]");
+      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << input_size() << ")");
    }
 
    return std::ref (m_inputBinds [pos].getData ());
@@ -49,7 +49,17 @@ const datatype::Abstract& Statement::getOutputData (const int pos) const
    throw (adt::RuntimeException)
 {
    if (pos >= output_size ()) {
-      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << "]");
+      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << ")");
+   }
+
+   return std::ref (m_outputBinds [pos].getData ());
+}
+
+datatype::Abstract& Statement::getOutputData (const int pos)
+   throw (adt::RuntimeException)
+{
+   if (pos >= output_size ()) {
+      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << ")");
    }
 
    return std::ref (m_outputBinds [pos].getData ());
@@ -96,7 +106,7 @@ ResultCode Statement::execute (Connection& connection)
 
    ResultCode result = do_execute (connection);
 
-   LOG_DEBUG (result.asString ());
+   LOG_DEBUG (getName () << " | " << result.asString ());
 
    return result;
 }

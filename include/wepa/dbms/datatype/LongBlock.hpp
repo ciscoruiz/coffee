@@ -60,82 +60,23 @@ namespace datatype {
 */
 class LongBlock : public datatype::Abstract {
 public:
-   /**
-      Constructor.
-      \param name Nombre l�gico de este miembro.
-      \param constraint Indica si el dato puede tomar valores nulos.
-   */
-   explicit LongBlock (const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) :
-      datatype::Abstract (name, Datatype::LongBlock, 0, constraint),
-      m_value ()
-   {
-      datatype::Abstract::setBuffer ((void*) NULL);
-   }
+   explicit LongBlock (const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull);
+   explicit LongBlock (const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull);
+   LongBlock (const LongBlock& other);
+   ~LongBlock () {;}
 
-   /**
-      Constructor.
-      \param name Nombre l�gico de este miembro.
-      \param constraint Indica si el dato puede tomar valores nulos.
-
-      \since NemesisRD.dbms 2.10.06.3
-   */
-   explicit LongBlock (const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) :
-      datatype::Abstract (name, Datatype::LongBlock, 0, constraint),
-      m_value ()
-   {
-      datatype::Abstract::setBuffer ((void*) NULL);
-   }
-
-   /**
-      Constructor copia.
-      \param other Instancia de la que copiar.
-      \since NemesisRD.dbms 1.1.1
-   */
-   LongBlock (const LongBlock& other) :
-      datatype::Abstract (other),
-      m_value ()
-   {
-      m_value = other.m_value;
-   }
-
-   /**
-      Destructor.
-   */
-   virtual ~LongBlock () {;}
-
-   /**
-      Devuelve el tamao actual de este dato.
-      \return El tamao actual de este dato.
-   */
    int getSize () const noexcept { return (hasValue () == true) ? m_value.size (): 0; }
 
-   /**
-      Devuelve el contenido de la este bloque de memoria.
-      \return  Devuelve el contenido de la este bloque de memoria.
-      \warning Si el metodo datatype::Abstract::isNull devolvio \em true el resultado de este metodo no esta definido.
-   */
    const adt::DataBlock& getValue (adt::RuntimeException) const noexcept { this->exceptionWhenIsNull(); return m_value; }
 
-   /**
-      Devuelve el contenido de la este bloque de memoria.
-      \return  Devuelve el contenido de la este bloque de memoria.
-      \warning Si el metodo datatype::Abstract::isNull devolvio \em true el resultado de este metodo no esta definido.
-   */
    adt::DataBlock& getValue () throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
-   /**
-      Operador de asignacin.
-      \param value Valor que queremos a asignar.
-      \return La instancia de esta cadena.
-   */
    void setValue (const adt::DataBlock& value) throw (adt::RuntimeException);
+
+   Abstract* clone () const noexcept { return new LongBlock(*this); }
 
    operator adt::StreamString () const noexcept { return asString (); }
 
-   /**
-      Devuelve una cadena con la informacion referente a esta instancia.
-      \return Una cadena con la informacion referente a esta instancia.
-   */
    adt::StreamString asString () const noexcept;
 
    wepa_declare_datatype_downcast(LongBlock)
@@ -144,6 +85,7 @@ protected:
    adt::DataBlock m_value;
 
    void do_clear () noexcept { m_value.clear (); }
+   int do_compare (const Abstract& other) const throw (adt::RuntimeException);
 };
 
 }

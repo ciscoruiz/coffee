@@ -88,11 +88,16 @@ private:
    Logger (const Logger&);
 };
 
+#ifdef WEPA_LOG_LOCATION
+#undef WEPA_LOG_LOCATION
+#endif
+#define WEPA_LOG_LOCATION __func__,__FILE__,__LINE__
+
 #define LOG_CRITICAL(args)\
    do {\
    if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Critical)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::critical (msg << args, WEPA_FILE_LOCATION); \
+      wepa::logger::Logger::critical (msg << args, WEPA_LOG_LOCATION); \
    } \
    } while (false);
 
@@ -100,7 +105,7 @@ private:
    do {\
    if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Error)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::error (msg << args, WEPA_FILE_LOCATION); \
+      wepa::logger::Logger::error (msg << args, WEPA_LOG_LOCATION); \
    } \
    } while (false);
 
@@ -108,7 +113,7 @@ private:
    do {\
    if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Warning)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::warning (msg << args, WEPA_FILE_LOCATION); \
+      wepa::logger::Logger::warning (msg << args, WEPA_LOG_LOCATION); \
    } \
    } while (false);
 
@@ -116,7 +121,7 @@ private:
    do {\
    if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Notice)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::notice(msg << args, WEPA_FILE_LOCATION); \
+      wepa::logger::Logger::notice(msg << args, WEPA_LOG_LOCATION); \
    } \
    } while (false);
 
@@ -124,7 +129,7 @@ private:
    do {\
    if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Information)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::info (msg << args, WEPA_FILE_LOCATION); \
+      wepa::logger::Logger::info (msg << args, WEPA_LOG_LOCATION); \
    } \
    } while (false);
 
@@ -132,7 +137,7 @@ private:
    do {\
    if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Debug)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::debug (msg << args, WEPA_FILE_LOCATION); \
+      wepa::logger::Logger::debug (msg << args, WEPA_LOG_LOCATION); \
    } \
    } while (false);
 
@@ -140,7 +145,7 @@ private:
    do {\
    if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Local7)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::debug (msg << args, WEPA_FILE_LOCATION); \
+      wepa::logger::Logger::debug (msg << args, WEPA_LOG_LOCATION); \
    } \
    } while (false);
 

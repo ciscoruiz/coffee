@@ -143,9 +143,10 @@ bool persistence::Storage::release (GuardClass& _class, Object& object) noexcept
       if (ii != m_objects.end ()) {
          Entry& entry = Storage::entry(ii);
 
+         LOG_DEBUG (getName () << " | ObjectId=" << entry.m_object->getInternalId() << " | Uses=" << entry.m_useCounter);
+
          if (-- entry.m_useCounter <= 0) {
             object.clearPrimaryKey();
-            LOG_DEBUG (getName () << " | ObjectId=" << entry.m_object->getInternalId());
             delete entry.m_object;
             m_objects.erase (ii);
             result = true;
@@ -236,7 +237,7 @@ persistence::Object* persistence::Storage::AccessMode::reload (dbms::Connection&
 persistence::Object* persistence::Storage::AccessModeReadOnly::run(dbms::Connection&, GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
-   LOG_DEBUG("Loader=" << loader.getName () << " | Result=" << adt::AsHexString::apply (wepa_ptrnumber_cast(entry.m_object)));
+   LOG_DEBUG("Loader=" << loader.getName () << " | ObjectId=" << entry.m_object->getInternalId());
    return entry.m_object;
 }
 
@@ -244,6 +245,6 @@ persistence::Object* persistence::Storage::AccessModeReadWrite::run(dbms::Connec
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
    persistence::Object* result = this->reload (connection,_class, loader, entry);
-   LOG_DEBUG("Loader=" << loader.getName () << " | Result=" << adt::AsHexString::apply (wepa_ptrnumber_cast(result)));
+   LOG_DEBUG("Loader=" << loader.getName () << " | ObjectId=" << result->getInternalId());
    return result;
 }

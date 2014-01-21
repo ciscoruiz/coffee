@@ -363,9 +363,6 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readwrite)
 
       BOOST_REQUIRE_EQUAL (rw_storage->release (guardCustomer, customer), false);
       BOOST_REQUIRE_EQUAL (rw_storage->release (guardCustomer, customer2), true);
-
-      BOOST_REQUIRE_EQUAL (rw_storage->release (guardCustomer, customer), false);
-      BOOST_REQUIRE_EQUAL (rw_storage->release (guardCustomer, customer2), false);
    }
 
    if (true) {

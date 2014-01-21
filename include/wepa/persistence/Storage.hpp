@@ -60,6 +60,7 @@ class Repository;
 class Object;
 class Loader;
 class GuardClass;
+class Recorder;
 
 class Storage : public adt::NamedObject {
    struct Entry {
@@ -89,7 +90,8 @@ public:
       Object* reload (dbms::Connection& connection, GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
 
    private:
-      virtual Object* run (dbms::Connection& connection, GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException) = 0;
+      virtual bool canWrite () const noexcept = 0;
+      virtual Object* refresh (dbms::Connection& connection, GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException) = 0;
 
       friend class Storage;
    };
@@ -102,6 +104,7 @@ public:
    unsigned int getFaultCounter () const noexcept { return m_faultCounter; }
 
    Object& load (dbms::Connection& connection, GuardClass& _class, Loader& loader) throw (adt::RuntimeException, dbms::DatabaseException);
+   void save (dbms::Connection& connection, GuardClass& _class, Recorder& recorder) throw (adt::RuntimeException, dbms::DatabaseException);
    bool release (GuardClass& _class, Object& object) noexcept;
 
    operator adt::StreamString () const noexcept { return asString (); }
@@ -133,11 +136,13 @@ private:
    Storage (const char* name, const AccessMode::_v accessMode);
 
    class AccessModeReadOnly : public AccessMode {
-      Object* run (dbms::Connection& connection, GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
+      bool canWrite () const noexcept { return false; }
+      Object* refresh (dbms::Connection& connection, GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
    };
 
    class AccessModeReadWrite : public AccessMode {
-      Object* run (dbms::Connection& connection, GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
+      bool canWrite () const noexcept { return true; }
+      Object* refresh (dbms::Connection& connection, GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
    };
 
    static const AccessMode& instanciateAccessMode (const AccessMode::_v accessMode) throw (adt::RuntimeException);

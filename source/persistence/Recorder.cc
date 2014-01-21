@@ -32,70 +32,28 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_persistence_PrimaryKey_hpp
-#define __wepa_persistence_PrimaryKey_hpp
+#include <functional>
 
-#include <vector>
+#include <wepa/persistence/Recorder.hpp>
 
-#include <wepa/adt/RuntimeException.hpp>
+using namespace wepa;
 
-#include <wepa/adt/StreamString.hpp>
-
-namespace wepa {
-
-namespace dbms {
-   namespace datatype {
-      class Abstract;
+const persistence::Object& persistence::Recorder::getObject () const
+   throw (adt::RuntimeException)
+{
+   if (m_object == NULL) {
+      WEPA_THROW_EXCEPTION(getName () << " | Recorder does not have any associated object");
    }
+
+   return std::ref (*m_object);
 }
 
-namespace persistence {
-
-class Accessor;
-class Storage;
-
-class PrimaryKey {
-   typedef std::vector <dbms::datatype::Abstract*> Components;
-
-public:
-   PrimaryKey (const PrimaryKey& other);
-   PrimaryKey ();
-   ~PrimaryKey ();
-
-   PrimaryKey& operator= (const PrimaryKey& other) throw (adt::Exception);
-
-   int compareTo (const PrimaryKey& other) const throw (adt::RuntimeException);
-
-   bool isDefined () const noexcept { return m_components.size () > 0; }
-
-   bool operator== (const PrimaryKey& other) const throw (adt::RuntimeException) { return compareTo (other) == 0; }
-
-   bool operator < (const PrimaryKey& other) const throw (adt::RuntimeException){ return compareTo(other) < 0; }
-
-   const dbms::datatype::Abstract* getComponent (const int pos) const throw (adt::RuntimeException);
-
-   /**
-    * \warning This method will be public for Unit test purposes
-    * @param component
-    */
-   void addComponent (dbms::datatype::Abstract* component) noexcept {
-      m_components.push_back (component);
+persistence::Object& persistence::Recorder::getObject ()
+   throw (adt::RuntimeException)
+{
+   if (m_object == NULL) {
+      WEPA_THROW_EXCEPTION(getName () << " | Recorder does not have any associated object");
    }
 
-   operator adt::StreamString () const noexcept { return asString (); }
-
-   adt::StreamString asString () const noexcept;
-
-private:
-   const bool m_mustDeleteComponents;
-   Components m_components;
-
-   void clear () noexcept;
-
-   friend class Accessor;
-   friend class Storage;
-};
-
-} /* namespace persistence */
-} /* namespace wepa */
-#endif
+   return std::ref (*m_object);
+}

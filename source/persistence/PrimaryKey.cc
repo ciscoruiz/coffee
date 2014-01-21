@@ -54,6 +54,11 @@ persistence::PrimaryKey::PrimaryKey (const PrimaryKey& other) :
 
 persistence::PrimaryKey::~PrimaryKey ()
 {
+   clear ();
+}
+
+void persistence::PrimaryKey::clear () noexcept
+{
    if (m_mustDeleteComponents == true) {
       for (dbms::datatype::Abstract* ii : m_components) {
          delete ii;
@@ -147,3 +152,4 @@ adt::StreamString persistence::PrimaryKey::asString () const noexcept
 
    return result += "}";
 }
+

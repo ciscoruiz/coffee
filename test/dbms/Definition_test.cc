@@ -447,7 +447,7 @@ BOOST_AUTO_TEST_CASE (dbms_write_and_read_and_delete)
          wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
          resultCode = writer.execute ();
 
-         BOOST_REQUIRE_EQUAL (resultCode.getErrorCode(), test_dbms::MyDatabase::Successful);
+         BOOST_REQUIRE_EQUAL (resultCode.getNumericCode(), test_dbms::MyDatabase::Successful);
          BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
          BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
          BOOST_REQUIRE_EQUAL (database.container_size(), 0);
@@ -586,7 +586,7 @@ BOOST_AUTO_TEST_CASE (dbms_write_rollback)
       wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
       resultCode = writer.execute ();
 
-      BOOST_REQUIRE_EQUAL (resultCode.getErrorCode(), test_dbms::MyDatabase::Successful);
+      BOOST_REQUIRE_EQUAL (resultCode.getNumericCode(), test_dbms::MyDatabase::Successful);
       BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
       BOOST_REQUIRE_EQUAL (database.container_size(), 0);
@@ -718,7 +718,7 @@ BOOST_AUTO_TEST_CASE (dbms_erase_rollback)
       wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
       resultCode = writer.execute ();
 
-      BOOST_REQUIRE_EQUAL (resultCode.getErrorCode(), test_dbms::MyDatabase::Successful);
+      BOOST_REQUIRE_EQUAL (resultCode.getNumericCode(), test_dbms::MyDatabase::Successful);
       BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
       BOOST_REQUIRE_EQUAL (database.container_size(), 0);
@@ -1171,7 +1171,7 @@ BOOST_AUTO_TEST_CASE (dbms_dealing_with_nulls)
          BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
          BOOST_REQUIRE_EQUAL (database.container_size(), 0);
 
-         BOOST_REQUIRE_EQUAL (resultCode.getErrorCode(), test_dbms::MyDatabase::Successful);
+         BOOST_REQUIRE_EQUAL (resultCode.getNumericCode(), test_dbms::MyDatabase::Successful);
          BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
          BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
          BOOST_REQUIRE_EQUAL (database.container_size(), 0);

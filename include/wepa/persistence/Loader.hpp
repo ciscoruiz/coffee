@@ -42,11 +42,16 @@
 namespace wepa {
 namespace persistence {
 
+class Storage;
+
 class Loader : public Accessor {
 public:
-   explicit Loader (const char* name, const int ident) : Accessor(name, ident) {;}
+   virtual ~Loader () {;}
 
-   virtual bool hasToRefresh (GuardClass& _class, const Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
+   virtual bool hasToRefresh (dbms::Connection& connection, GuardClass& _class, const Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
+
+protected:
+   Loader (const char* name, const int ident) : Accessor(name, ident) {;}
 };
 
 } /* namespace persistence */

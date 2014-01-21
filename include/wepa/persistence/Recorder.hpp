@@ -32,68 +32,35 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_persistence_PrimaryKey_hpp
-#define __wepa_persistence_PrimaryKey_hpp
+#ifndef __wepa_persistence_Recorder_hpp
+#define __wepa_persistence_Recorder_hpp
 
-#include <vector>
+#include <wepa/persistence/Accessor.hpp>
 
 #include <wepa/adt/RuntimeException.hpp>
 
-#include <wepa/adt/StreamString.hpp>
-
 namespace wepa {
-
-namespace dbms {
-   namespace datatype {
-      class Abstract;
-   }
-}
-
 namespace persistence {
 
-class Accessor;
-class Storage;
+class Object;
 
-class PrimaryKey {
-   typedef std::vector <dbms::datatype::Abstract*> Components;
-
+class Recorder : public Accessor {
 public:
-   PrimaryKey (const PrimaryKey& other);
-   PrimaryKey ();
-   ~PrimaryKey ();
+   virtual ~Recorder () {;}
 
-   PrimaryKey& operator= (const PrimaryKey& other) throw (adt::Exception);
+   Object& getObject () throw (adt::RuntimeException);
+   const Object& getObject () const throw (adt::RuntimeException);
 
-   int compareTo (const PrimaryKey& other) const throw (adt::RuntimeException);
+   void setObject (Object& object) noexcept { m_object = &object; }
 
-   bool isDefined () const noexcept { return m_components.size () > 0; }
+   void clearObject () noexcept { m_object = NULL; }
 
-   bool operator== (const PrimaryKey& other) const throw (adt::RuntimeException) { return compareTo (other) == 0; }
-
-   bool operator < (const PrimaryKey& other) const throw (adt::RuntimeException){ return compareTo(other) < 0; }
-
-   const dbms::datatype::Abstract* getComponent (const int pos) const throw (adt::RuntimeException);
-
-   /**
-    * \warning This method will be public for Unit test purposes
-    * @param component
-    */
-   void addComponent (dbms::datatype::Abstract* component) noexcept {
-      m_components.push_back (component);
-   }
-
-   operator adt::StreamString () const noexcept { return asString (); }
-
-   adt::StreamString asString () const noexcept;
+protected:
+   Recorder (const char* name, const int ident) : Accessor(name, ident), m_object (NULL) {;}
 
 private:
-   const bool m_mustDeleteComponents;
-   Components m_components;
+   Object* m_object;
 
-   void clear () noexcept;
-
-   friend class Accessor;
-   friend class Storage;
 };
 
 } /* namespace persistence */

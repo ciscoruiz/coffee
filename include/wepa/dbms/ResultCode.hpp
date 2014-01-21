@@ -29,14 +29,14 @@ public:
       \warning Antes de usarse debe asignarse a algun otro ResultCode obtenido mediante la invocacion
       a wepa::dbms::Connection::execute.
    */
-   ResultCode () : m_errorText (NULL), m_database (NULL), m_errorCode (0) {;}
+   ResultCode () : m_errorText (NULL), m_database (NULL), m_numericCode (0) {;}
 
    /**
       Constructor vacio.
       \warning Antes de usarse debe asignarse a algun otro ResultCode obtenido mediante la invocacion
       a wepa::dbms::Connection::execute.
    */
-   explicit ResultCode (const Database& database, const int opCode) : m_errorText (NULL), m_database (&database), m_errorCode (opCode) {;}
+   explicit ResultCode (const Database& database, const int opCode) : m_errorText (NULL), m_database (&database), m_numericCode (opCode) {;}
 
    /**
       Constructor copia.      
@@ -46,7 +46,7 @@ public:
       m_errorText (NULL),
       m_database (other.m_database)
    {
-      initialize (other.m_errorCode, other.m_errorText);
+      initialize (other.m_numericCode, other.m_errorText);
    }   
    
    /**
@@ -54,10 +54,10 @@ public:
    */
    virtual ~ResultCode () { if (m_errorText != NULL) free (m_errorText); }
 
-   void initialize (const int errorCode, const char* errorText)
+   void initialize (const int numericCode, const char* errorText)
       noexcept
    {
-      m_errorCode = errorCode;
+      m_numericCode = numericCode;
       copy (errorText);
    }
 
@@ -65,7 +65,7 @@ public:
       Devuelve el codigo de error del ultimo comando ejecutado contra la base de datos.   
       @return El codigo de error del ultimo comando ejecutado contra la base de datos.
    */   
-   int getErrorCode () const noexcept { return m_errorCode; }
+   int getNumericCode () const noexcept { return m_numericCode; }
    
    /**
       Devuelve el texto del error del ultimo comando ejecutado contra la base de datos.
@@ -84,7 +84,7 @@ public:
    {
       if (this != &resultCode) {
          m_database = resultCode.m_database;
-         initialize (resultCode.m_errorCode, resultCode.m_errorText);
+         initialize (resultCode.m_numericCode, resultCode.m_errorText);
       }
    
       return *this;
@@ -136,27 +136,20 @@ protected:
    /**
       Constructor.
       
-      \param errorCode Codigo de error asociado a la ultima operacion realizada contra la base de datos.
+      \param numericCode Codigo de error asociado a la ultima operacion realizada contra la base de datos.
       \param errorText Texto asociado al error de ultima operacion realizada contra la base de datos. Puede ser
       NULL si no hay ningun texto de error asociado al codigo recibido.
       \param database Decofidicador de errores.
    */
-   ResultCode (const int errorCode, const char* errorText, const Database& database) :
+   ResultCode (const int numericCode, const char* errorText, const Database& database) :
       m_errorText (NULL),
       m_database (&database)
    {
-      initialize (errorCode, errorText);  
+      initialize (numericCode, errorText);
    }
 
-   /**
-      Establece el contenido de esta clase.
-   
-      \param errorCode Codigo de error asociado a la ultima operacion realizada contra la base de datos.   
-      \param errorText Texto asociado al error de ultima operacion realizada contra la base de datos.
-   */   
-
 private:
-   int m_errorCode;
+   int m_numericCode;
    char* m_errorText;
    const Database* m_database;
    

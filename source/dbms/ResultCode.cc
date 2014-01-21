@@ -45,7 +45,7 @@ bool dbms::ResultCode::notFound () const
    if (m_database == NULL)
       WEPA_THROW_EXCEPTION(asString () << " does not have associated database to decode error");
    
-   return m_database->notFound (m_errorCode);
+   return m_database->notFound (m_numericCode);
 }
 
 bool dbms::ResultCode::successful () const
@@ -54,7 +54,7 @@ bool dbms::ResultCode::successful () const
    if (m_database == NULL)
       WEPA_THROW_EXCEPTION(asString () << " does not have associated database to decode error");
    
-   return m_database->successful (m_errorCode);
+   return m_database->successful (m_numericCode);
 }
 
 bool dbms::ResultCode::locked () const
@@ -63,7 +63,7 @@ bool dbms::ResultCode::locked () const
    if (m_database == NULL)
       WEPA_THROW_EXCEPTION(asString () << " does not have associated database to decode error");
    
-   return m_database->locked (m_errorCode);
+   return m_database->locked (m_numericCode);
 }
 
 bool dbms::ResultCode::lostConnection () const
@@ -72,7 +72,7 @@ bool dbms::ResultCode::lostConnection () const
    if (m_database == NULL)
       WEPA_THROW_EXCEPTION(asString () << " does not have associated database to decode error");
    
-   return m_database->lostConnection (m_errorCode);
+   return m_database->lostConnection (m_numericCode);
 }
 
 //
@@ -109,10 +109,10 @@ void dbms::ResultCode::copy (const char* text)
 adt::StreamString dbms::ResultCode::asString () const
    noexcept
 {
-   adt::StreamString result ("dbms::ResultCode { Error: ");
-   result << m_errorCode;
-   result << " | Error: " << ((m_errorText == NULL) ? "(null)": m_errorText);
-   result << " | Success: ";
+   adt::StreamString result ("dbms.ResultCode { NumericCode=");
+   result << m_numericCode;
+   result << " | Comment=" << ((m_errorText == NULL) ? "(null)": m_errorText);
+   result << " | Success=";
 
    if (m_database != NULL)
       result << successful ();

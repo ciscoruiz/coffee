@@ -148,13 +148,6 @@ protected:
       initialize (numericCode, errorText);
    }
 
-   /**
-      Establece el contenido de esta clase.
-   
-      \param numericCode Codigo de error asociado a la ultima operacion realizada contra la base de datos.
-      \param errorText Texto asociado al error de ultima operacion realizada contra la base de datos.
-   */   
-
 private:
    int m_numericCode;
    char* m_errorText;

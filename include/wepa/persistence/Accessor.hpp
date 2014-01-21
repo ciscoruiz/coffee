@@ -82,6 +82,15 @@ public:
    const PrimaryKey& getPrimaryKey () const throw (adt::RuntimeException);
    const int getIdent () const noexcept { return m_ident; }
 
+   dbms::ResultCode apply (dbms::Connection& connection, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
+
+   Accessor (const Accessor&) = delete;
+
+protected:
+   Accessor (const char* name, const int ident) : adt::NamedObject (name), m_ident (ident), m_statement (NULL), m_applyCounter (0) {;}
+
+   dbms::Statement& getStatement () throw (adt::RuntimeException);
+
    void setMember (GuardClass& _class, const int columnNumber, const int value) throw (adt::RuntimeException);
    void setMember (GuardClass& _class, const int columnNumber, const char* value) throw (adt::RuntimeException);
    void setMember (GuardClass& _class, const int columnNumber, const std::string& value) throw (adt::RuntimeException) {
@@ -96,15 +105,6 @@ public:
    float readFloat (GuardClass& _class, const int columnNumber) const throw (adt::RuntimeException);
    const adt::DataBlock& readDataBlock (GuardClass& _class, const int columnNumber) const throw (adt::RuntimeException);
    const adt::Second& readDate (GuardClass& _class, const int columnNumber) const throw (adt::RuntimeException);
-
-   dbms::ResultCode apply (dbms::Connection& connection, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
-
-   Accessor (const Accessor&) = delete;
-
-protected:
-   Accessor (const char* name, const int ident) : adt::NamedObject (name), m_ident (ident), m_statement (NULL), m_applyCounter (0) {;}
-
-   dbms::Statement& getStatement () throw (adt::RuntimeException);
 
    virtual bool isInputValue (const int columnNumber) const noexcept = 0;
    virtual bool isPrimaryKeyComponent (const int columnNumber) const noexcept = 0;

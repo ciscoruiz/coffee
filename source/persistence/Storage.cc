@@ -40,11 +40,11 @@
 #include <wepa/logger/Logger.hpp>
 #include <wepa/logger/TraceMethod.hpp>
 
-#include <wepa/persistence/Object.hpp>
-#include <wepa/persistence/Loader.hpp>
-
 #include <wepa/dbms/datatype/Abstract.hpp>
 
+#include <wepa/persistence/Object.hpp>
+#include <wepa/persistence/Loader.hpp>
+#include <wepa/persistence/Recorder.hpp>
 #include <wepa/persistence/Storage.hpp>
 #include <wepa/persistence/GuardClass.hpp>
 
@@ -97,7 +97,6 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
          entry.m_useCounter = 1;
          m_objects [primaryKey] = entry;
          std::pair <entry_iterator, bool> rr = m_objects.insert (std::make_pair(primaryKey, entry));
-
          entry.m_object->setPrimaryKey(Storage::primaryKey (rr.first));
          result = entry.m_object;
       }
@@ -111,7 +110,7 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
 
       Entry& entry = Storage::entry(ii);
       try {
-         result = instanciateAccessMode(m_accessMode).run(connection, _class, loader, entry);
+         result = instanciateAccessMode(m_accessMode).refresh(connection, _class, loader, entry);
          entry.m_useCounter ++;
       }
       catch (adt::Exception& ex) {
@@ -128,6 +127,19 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
    LOG_DEBUG (loader << " | ObjectId=" << result->getInternalId() << " | Result=" << result->asString ());
 
    return std::ref (*result);
+}
+
+void persistence::Storage::save (dbms::Connection& connection, GuardClass& _class, Recorder& recorder)
+   throw (adt::RuntimeException, dbms::DatabaseException)
+{
+   if (instanciateAccessMode(m_accessMode).canWrite() == false) {
+      WEPA_THROW_EXCEPTION(asString () << " | A readonly storage can not apply a recorder");
+   }
+
+   dbms::ResultCode resultCode = recorder.apply (connection, _class, recorder.getObject());
+
+   if (resultCode.successful() == false)
+      WEPA_THROW_NAME_DB_EXCEPTION(recorder.getName (), resultCode);
 }
 
 bool persistence::Storage::release (GuardClass& _class, Object& object) noexcept
@@ -214,7 +226,7 @@ persistence::Object* persistence::Storage::AccessMode::reload (dbms::Connection&
 
    Object& object = std::ref (*entry.m_object);
 
-   bool hasToRefresh = loader.hasToRefresh(_class, object);
+   bool hasToRefresh = loader.hasToRefresh(connection, _class, object);
 
    LOG_DEBUG (object << " | HasToRefresh=" << hasToRefresh);
 
@@ -234,14 +246,14 @@ persistence::Object* persistence::Storage::AccessMode::reload (dbms::Connection&
    return entry.m_object;
 }
 
-persistence::Object* persistence::Storage::AccessModeReadOnly::run(dbms::Connection&, GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
+persistence::Object* persistence::Storage::AccessModeReadOnly::refresh(dbms::Connection&, GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
    LOG_DEBUG("Loader=" << loader.getName () << " | ObjectId=" << entry.m_object->getInternalId());
    return entry.m_object;
 }
 
-persistence::Object* persistence::Storage::AccessModeReadWrite::run(dbms::Connection& connection, GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
+persistence::Object* persistence::Storage::AccessModeReadWrite::refresh(dbms::Connection& connection, GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
    persistence::Object* result = this->reload (connection,_class, loader, entry);

@@ -55,12 +55,14 @@ class Accessor;
 class Storage;
 
 class PrimaryKey {
-   typedef std::vector <const dbms::datatype::Abstract*> Components;
+   typedef std::vector <dbms::datatype::Abstract*> Components;
 
 public:
-   PrimaryKey (const PrimaryKey& other) : m_components (other.m_components) {;}
-   PrimaryKey () {;}
-   ~PrimaryKey () { m_components.clear ();}
+   PrimaryKey (const PrimaryKey& other);
+   PrimaryKey ();
+   ~PrimaryKey ();
+
+   PrimaryKey& operator= (const PrimaryKey& other) throw (adt::Exception);
 
    int compareTo (const PrimaryKey& other) const throw (adt::RuntimeException);
 
@@ -76,7 +78,7 @@ public:
     * \warning This method will be public for Unit test purposes
     * @param component
     */
-   void addComponent (const dbms::datatype::Abstract* component) noexcept {
+   void addComponent (dbms::datatype::Abstract* component) noexcept {
       m_components.push_back (component);
    }
 
@@ -85,6 +87,7 @@ public:
    adt::StreamString asString () const noexcept;
 
 private:
+   const bool m_mustDeleteComponents;
    Components m_components;
 
    PrimaryKey* clone () const throw (adt::RuntimeException);

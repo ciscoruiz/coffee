@@ -105,21 +105,27 @@ BOOST_AUTO_TEST_CASE (persistence_primary_key_compare)
    BOOST_REQUIRE_EQUAL (pk1 < pk2, true);
 }
 
+namespace test_dbms_pk {
+
+typedef std::shared_ptr <persistence::PrimaryKey> PtrPrimaryKey;
+
 struct PrimaryKeyTestPtrLess {
-   bool operator () (const persistence::PrimaryKey& first, const persistence::PrimaryKey& second) throw (adt::RuntimeException) {
-      return first < second;
+   bool operator () (const PtrPrimaryKey& first, const PtrPrimaryKey& second) throw (adt::RuntimeException) {
+      return first.get() < second.get();
    }
 };
+
+}
 
 BOOST_AUTO_TEST_CASE (persistence_primary_key_sort)
 {
    boost::ptr_vector <dbms::datatype::Abstract> values;
-   boost::ptr_vector <persistence::PrimaryKey> keys;
+   std::vector <test_dbms_pk::PtrPrimaryKey> keys;
 
    char name [2];
 
    for (int key = 0; key < 10; ++ key) {
-      persistence::PrimaryKey* primaryKey = new persistence::PrimaryKey;
+      test_dbms_pk::PtrPrimaryKey primaryKey (new persistence::PrimaryKey);
 
       keys.push_back (primaryKey);
 
@@ -141,11 +147,6 @@ BOOST_AUTO_TEST_CASE (persistence_primary_key_sort)
 
    for (int ii = 1; ii < 10; ++ ii) {
       if ((keys [ii - 1] < keys [ii]) == false) {
-         std::cout << "Unsorted Index=" << ii << std::endl;
-         std::cout << "\t" << keys [ii - 1].asString ();
-         std::cout << std::endl;
-         std::cout << "\t" << keys [ii].asString ();
-         std::cout << std::endl;
          isSorted = false;
          break;
       }
@@ -153,15 +154,20 @@ BOOST_AUTO_TEST_CASE (persistence_primary_key_sort)
 
    BOOST_REQUIRE_EQUAL (isSorted, false);
 
-   std::sort (keys.begin (), keys.end (), PrimaryKeyTestPtrLess ());
+   try {
+      std::sort (keys.begin (), keys.end (), test_dbms_pk::PrimaryKeyTestPtrLess ());
+   }
+   catch (adt::Exception& ex) {
+      std::cout << ex.what () << std::endl;
+   }
 
    isSorted = true;
    for (int ii = 1; ii < 10; ++ ii) {
       if ((keys [ii - 1] < keys [ii]) == false) {
          std::cout << "Failed Index=" << ii << std::endl;
-         std::cout << "\t" << keys [ii - 1].asString ();
+         std::cout << "\t" << keys [ii - 1]->asString ();
          std::cout << std::endl;
-         std::cout << "\t" << keys [ii].asString ();
+         std::cout << "\t" << keys [ii]->asString ();
          std::cout << std::endl;
          isSorted = false;
          break;
@@ -176,41 +182,34 @@ BOOST_AUTO_TEST_CASE (persistence_primary_key_map)
 {
    // Duplicate private Storage::PtrLess
    struct PtrLess {
-      bool operator () (const persistence::PrimaryKey* first, const persistence::PrimaryKey* second) throw (adt::RuntimeException) {
-         return *first < *second;
+      bool operator () (const persistence::PrimaryKey& first, const persistence::PrimaryKey& second) throw (adt::RuntimeException) {
+         return first < second;
       }
    };
 
-   typedef std::map <persistence::PrimaryKey*, int, PtrLess> Entries;
+   typedef std::map <persistence::PrimaryKey, int, PtrLess> Entries;
    typedef Entries::iterator entries_iterator;
    Entries entries;
 
-   boost::ptr_vector <dbms::datatype::Abstract> garbageCollector;
+   persistence::PrimaryKey primaryKey;
+   std::auto_ptr <dbms::datatype::Integer> ivalue (new dbms::datatype::Integer ("ii"));
+
+   primaryKey.addComponent(ivalue.get());
 
    for (int key = 100; key < 110; ++ key) {
       std::cout << "Key=" << key << std::endl;
-      persistence::PrimaryKey* primaryKey = new persistence::PrimaryKey;
 
-      dbms::datatype::Integer* ivalue = new dbms::datatype::Integer ("ii");
       BOOST_REQUIRE_NO_THROW(ivalue->setValue (key));
-      garbageCollector.push_back (ivalue);
-
-      primaryKey->addComponent(ivalue);
 
       BOOST_REQUIRE_EQUAL (entries.find (primaryKey) == entries.end (), true);
 
       entries [primaryKey] = key;
    }
 
-   for (int key = 0; key < 10; ++ key) {
+   for (int key = 10; key < 0; -- key) {
       std::cout << "Key=" << key << std::endl;
-      persistence::PrimaryKey* primaryKey = new persistence::PrimaryKey;
 
-      dbms::datatype::Integer* ivalue = new dbms::datatype::Integer ("ii");
       BOOST_REQUIRE_NO_THROW(ivalue->setValue (key));
-      garbageCollector.push_back (ivalue);
-
-      primaryKey->addComponent(ivalue);
 
       BOOST_REQUIRE_EQUAL (entries.find (primaryKey) == entries.end (), true);
 
@@ -218,18 +217,11 @@ BOOST_AUTO_TEST_CASE (persistence_primary_key_map)
    }
 
    for (int key = 100; key < 110; ++ key) {
-      persistence::PrimaryKey* primaryKey = new persistence::PrimaryKey;
-
-      dbms::datatype::Integer* ivalue = new dbms::datatype::Integer ("ii");
       BOOST_REQUIRE_NO_THROW(ivalue->setValue (key));
-      garbageCollector.push_back (ivalue);
-      primaryKey->addComponent(ivalue);
-
       entries_iterator ii = entries.find (primaryKey);
 
       BOOST_REQUIRE_EQUAL (ii == entries.end (), false);
 
       BOOST_REQUIRE_EQUAL (ii->second, key);
    }
-
 }

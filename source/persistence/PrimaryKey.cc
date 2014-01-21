@@ -40,6 +40,28 @@
 
 using namespace wepa;
 
+persistence::PrimaryKey::PrimaryKey () :
+   m_mustDeleteComponents (false)
+{;}
+
+persistence::PrimaryKey::PrimaryKey (const PrimaryKey& other) :
+   m_mustDeleteComponents (true)
+{
+   for (dbms::datatype::Abstract* ii : other.m_components) {
+      m_components.push_back (ii->clone ());
+   }
+}
+
+persistence::PrimaryKey::~PrimaryKey ()
+{
+   if (m_mustDeleteComponents == true) {
+      for (dbms::datatype::Abstract* ii : m_components) {
+         delete ii;
+      }
+   }
+   m_components.clear ();
+}
+
 persistence::PrimaryKey* persistence::PrimaryKey::clone () const
    throw (adt::RuntimeException)
 {
@@ -90,6 +112,26 @@ const dbms::datatype::Abstract* persistence::PrimaryKey::getComponent (const int
    }
 
    return m_components [pos];
+}
+
+persistence::PrimaryKey& persistence::PrimaryKey::operator= (const PrimaryKey& other)
+   throw (adt::Exception)
+{
+   if (this == &other)
+      return std::ref (*this);
+
+   if (m_mustDeleteComponents == false)
+      WEPA_THROW_EXCEPTION("lvalue is a constant instance");
+
+   for (dbms::datatype::Abstract* ii : m_components) {
+      delete ii;
+   }
+
+   for (const dbms::datatype::Abstract* ii : other.m_components) {
+      m_components.push_back (ii->clone ());
+   }
+
+   return *this;
 }
 
 adt::StreamString persistence::PrimaryKey::asString () const noexcept

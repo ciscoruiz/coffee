@@ -56,7 +56,7 @@ public:
    Class& getClass () noexcept { return std::ref (m_class); }
    const Class& getClass () const noexcept { return std::ref (m_class); }
 
-   void setPrimaryKey (const PrimaryKey* primaryKey) noexcept { m_primaryKey = primaryKey; }
+   void setPrimaryKey (const PrimaryKey& primaryKey) noexcept { m_primaryKey = &primaryKey; }
    const PrimaryKey* getPrimaryKey () const noexcept { return m_primaryKey; }
 
    operator adt::StreamString () const noexcept { return asString (); }

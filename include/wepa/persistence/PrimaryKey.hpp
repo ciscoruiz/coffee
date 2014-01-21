@@ -90,7 +90,7 @@ private:
    const bool m_mustDeleteComponents;
    Components m_components;
 
-   PrimaryKey* clone () const throw (adt::RuntimeException);
+//   PrimaryKey& clone () const throw (adt::RuntimeException);
 
    friend class Accessor;
    friend class Storage;

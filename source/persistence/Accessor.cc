@@ -120,6 +120,8 @@ dbms::ResultCode persistence::Accessor::apply (dbms::Connection& connection, Gua
       WEPA_THROW_EXCEPTION(asString () << " | " << m_statement->asString () << " | Accessor was not initialized");
    }
 
+   ++ m_applyCounter;
+
    LOG_DEBUG (getName () << " | " << m_primaryKey);
 
    dbms::GuardConnection gConnection (connection);

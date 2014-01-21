@@ -62,15 +62,17 @@ persistence::PrimaryKey::~PrimaryKey ()
    m_components.clear ();
 }
 
-persistence::PrimaryKey* persistence::PrimaryKey::clone () const
-   throw (adt::RuntimeException)
-{
-   if (this->isDefined() == false) {
-      WEPA_THROW_EXCEPTION("lvalue was not initialized");
-   }
-
-   return new PrimaryKey (*this);
-}
+//persistence::PrimaryKey& persistence::PrimaryKey::clone () const
+//   throw (adt::RuntimeException)
+//{
+//   if (this->isDefined() == false) {
+//      WEPA_THROW_EXCEPTION("lvalue was not initialized");
+//   }
+//
+//   PrimaryKey* result = new PrimaryKey (*this);
+//
+//   return std::ref (*result);
+//}
 
 int persistence::PrimaryKey::compareTo (const PrimaryKey& other) const
    throw (adt::RuntimeException)

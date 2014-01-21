@@ -87,7 +87,14 @@ private:
 
 class MyDatabase : public mock::MockDatabase {
 public:
-   MyDatabase (app::Application& app) : mock::MockDatabase (app) {;}
+   MyDatabase (app::Application& app) : mock::MockDatabase (app) {
+      mock::MockLowLevelRecord record;
+      for (int ii = 0; ii < 10; ++ ii) {
+         record.m_id = ii;
+         record.m_name = adt::StreamString ("the name ") << ii;
+         add (record);
+      }
+   }
 
 private:
    dbms::Statement* allocateStatement (const char* name, const std::string& expression, const dbms::ActionOnError::_v actionOnError)
@@ -228,15 +235,8 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readonly)
 
    application.disableTermination();
 
-   MockLowLevelRecord record;
-   for (int ii = 0; ii < 10; ++ ii) {
-      record.m_id = ii;
-      record.m_name = adt::StreamString ("the name ") << ii;
-      database.add (record);
-   }
-
    dbms::Connection* conn0 = database.createConnection("0", "0", "0");
-   dbms::Statement* stReader = database.createStatement("the_read", "read");
+   dbms::Statement* stReader = database.createStatement("read_only", "read");
 
    std::thread tr (std::ref (application));
    usleep (500);
@@ -245,11 +245,11 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readonly)
    BOOST_REQUIRE_EQUAL (database.isRunning(), true);
 
    persistence::Repository repository ("persistence_storage_readonly");
-   persistence::Storage* ii = repository.createStorage(0, "storage_readonly", persistence::Storage::AccessMode::ReadOnly);
+   persistence::Storage* ro_storage = repository.createStorage(0, "storage_readonly", persistence::Storage::AccessMode::ReadOnly);
 
    test_persistence::MockCustomerClass _class;
 
-   BOOST_REQUIRE_NE (ii, (void*) 0);
+   BOOST_REQUIRE_NE (ro_storage, (void*) 0);
 
    test_persistence::MockCustomerLoader myLoader;
 
@@ -260,14 +260,56 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readonly)
 
       try{
          BOOST_REQUIRE_NO_THROW(myLoader.setMember(guardCustomer, 0, 6));
+         test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (ro_storage->load(*conn0, guardCustomer, myLoader));
 
-         persistence::Object& object = ii->load(*conn0, guardCustomer, myLoader);
+         BOOST_REQUIRE_EQUAL (customer.getId(), 6);
+         BOOST_REQUIRE_EQUAL (customer.getName(), "the name 6");
+
+         test_persistence::MockCustomerObject& customer2 = static_cast <test_persistence::MockCustomerObject&> (ro_storage->load(*conn0, guardCustomer, myLoader));
+
+         BOOST_REQUIRE_EQUAL (&customer, &customer2);
+
+         // columnNumber out of range
+         BOOST_REQUIRE_THROW(myLoader.setMember(guardCustomer, 3, 0), adt::RuntimeException);
       }
       catch (adt::Exception& ex) {
          BOOST_REQUIRE_EQUAL (std::string ("no error"), ex.what ());
          std::cout << ex.what() << std::endl;
       }
    }
+
+   if (true) {
+      LOG_DEBUG ("Next access to cache ...");
+      persistence::GuardClass guardCustomer (_class);
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setMember(guardCustomer, 0, 7));
+      test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (ro_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (customer.getId(), 7);
+      BOOST_REQUIRE_EQUAL (customer.getName(), "the name 7");
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setMember(guardCustomer, 0, 77));
+      BOOST_REQUIRE_THROW (ro_storage->load (*conn0, guardCustomer, myLoader), dbms::DatabaseException);
+   }
+
+   BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 3);
+   BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 1);
+   BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), myLoader.getApplyCounter ());
+
+   if (true) {
+      LOG_DEBUG ("Reload record 6...");
+      persistence::GuardClass guardCustomer (_class);
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setMember(guardCustomer, 0, 6));
+      test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (ro_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (customer.getId(), 6);
+      BOOST_REQUIRE_EQUAL (customer.getName(), "the name 6");
+   }
+
+   BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 3);
+   BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 2);
+   BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), myLoader.getApplyCounter ());
 
    LOG_DEBUG ("Enables termination");
    application.enableTermination();

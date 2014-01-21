@@ -72,12 +72,12 @@ class Storage : public adt::NamedObject {
    };
 
    struct PtrLess {
-      bool operator () (const PrimaryKey* first, const PrimaryKey* second) throw (adt::RuntimeException) {
-         return *first < *second;
+      bool operator () (const PrimaryKey& first, const PrimaryKey& second) throw (adt::RuntimeException) {
+         return first < second;
       }
    };
 
-   typedef std::map <PrimaryKey*, Entry, PtrLess> Entries;
+   typedef std::map <PrimaryKey, Entry, PtrLess> Entries;
 
 public:
    class AccessMode {
@@ -98,6 +98,9 @@ public:
 
    ~Storage ();
 
+   unsigned int getHitCounter () const noexcept { return m_hitCounter; }
+   unsigned int getFaultCounter () const noexcept { return m_faultCounter; }
+
    Object& load (dbms::Connection& connection, GuardClass& _class, Loader& loader) throw (adt::RuntimeException, dbms::DatabaseException);
 
    operator adt::StreamString () const noexcept { return asString (); }
@@ -113,11 +116,10 @@ protected:
    typedef Entries::iterator entry_iterator;
    typedef Entries::value_type entry_type;
 
-   static PrimaryKey* primaryKey (entry_type& ii) noexcept { return ii.first; }
    static Entry& entry (entry_type& ii) noexcept { return std::ref (ii.second); }
    static Object* object (entry_type& ii) noexcept { return ii.second.m_object; }
 
-   static PrimaryKey* primaryKey(entry_iterator ii) noexcept { return primaryKey (*ii); }
+   static const PrimaryKey& primaryKey(entry_iterator ii) noexcept { return ii->first; }
    static Entry& entry (entry_iterator ii) noexcept { return entry (*ii); }
    static Object* object(entry_iterator ii) noexcept { return object (*ii); }
 

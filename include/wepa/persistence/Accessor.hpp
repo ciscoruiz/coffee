@@ -77,6 +77,8 @@ public:
 
    void initialize (GuardClass& _class, dbms::Statement* statement) throw (adt::RuntimeException);
 
+   unsigned int getApplyCounter () const noexcept { return m_applyCounter; }
+
    const PrimaryKey& getPrimaryKey () const throw (adt::RuntimeException);
    const int getIdent () const noexcept { return m_ident; }
 
@@ -100,7 +102,7 @@ public:
    Accessor (const Accessor&) = delete;
 
 protected:
-   Accessor (const char* name, const int ident) : adt::NamedObject (name), m_ident (ident), m_statement (NULL) {;}
+   Accessor (const char* name, const int ident) : adt::NamedObject (name), m_ident (ident), m_statement (NULL), m_applyCounter (0) {;}
 
    dbms::Statement& getStatement () throw (adt::RuntimeException);
 
@@ -116,6 +118,7 @@ private:
    PrimaryKey m_primaryKey;
    const int m_ident;
    dbms::Statement* m_statement;
+   unsigned int m_applyCounter;
 };
 
 } /* namespace persistence */

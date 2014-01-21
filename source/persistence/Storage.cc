@@ -35,6 +35,8 @@
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Attribute.hpp>
 
+#include <wepa/adt/AsHexString.hpp>
+
 #include <wepa/logger/Logger.hpp>
 #include <wepa/logger/TraceMethod.hpp>
 
@@ -61,7 +63,6 @@ persistence::Storage::~Storage ()
 {
    for (entry_type ii : m_objects) {
       object (ii)->releaseDependences ();
-      delete primaryKey(ii);
       delete object(ii);
    }
 
@@ -79,31 +80,37 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
 
    LOG_DEBUG (getName () << " | Loading=" << primaryKey);
 
-   entry_iterator ii = m_objects.find (const_cast <PrimaryKey*> (&primaryKey));
+   entry_iterator ii = m_objects.find (primaryKey);
 
    if (ii == m_objects.end ()) {
       Entry entry;
-      PrimaryKey* clonedPrimaryKey = primaryKey.clone ();
+
+      m_faultCounter ++;
 
       try {
          entry.m_object = _class.createObject();
-         entry.m_object->setPrimaryKey (clonedPrimaryKey);
          dbms::ResultCode resultCode = loader.apply (connection, _class, std::ref (*entry.m_object));
 
          if (resultCode.successful() == false)
             WEPA_THROW_NAME_DB_EXCEPTION(loader.getName(), resultCode);
 
          entry.m_useCounter = 1;
-         m_objects [clonedPrimaryKey] = entry;
+         m_objects [primaryKey] = entry;
+         std::pair <entry_iterator, bool> rr = m_objects.insert (std::make_pair(primaryKey, entry));
+
+         entry.m_object->setPrimaryKey(Storage::primaryKey (rr.first));
          result = entry.m_object;
+
+         LOG_DEBUG("Result=" << adt::AsHexString::apply (wepa_ptrnumber_cast(result)));
       }
       catch (adt::Exception& ex) {
          delete entry.m_object;
-         delete clonedPrimaryKey;
          throw;
       }
    }
    else {
+      m_hitCounter ++;
+
       Entry& entry = Storage::entry(ii);
       try {
          result = instanciateAccessMode(m_accessMode).run(connection, _class, loader, entry);
@@ -111,7 +118,6 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
       }
       catch (adt::Exception& ex) {
          logger::Logger::write(ex);
-         delete Storage::primaryKey (ii);
          delete entry.m_object;
          m_objects.erase(ii);
       }
@@ -198,21 +204,27 @@ persistence::Object* persistence::Storage::AccessMode::reload (dbms::Connection&
 persistence::Object* persistence::Storage::AccessModeReadOnly::run(dbms::Connection&, GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
+   LOG_DEBUG("Result=" << adt::AsHexString::apply (wepa_ptrnumber_cast(entry.m_object)));
    return entry.m_object;
 }
 
 persistence::Object* persistence::Storage::AccessModeReadWrite::run(dbms::Connection& connection, GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
+   persistence::Object* result = entry.m_object;
+
    if (entry.m_useCounter == 0) {
-      return this->reload (connection, _class, loader, entry);
+      result = this->reload (connection, _class, loader, entry);
    }
 
-   return entry.m_object;
+   LOG_DEBUG("Result=" << adt::AsHexString::apply (wepa_ptrnumber_cast(result)));
+   return result;
 }
 
 persistence::Object* persistence::Storage::AccessModeReadAlways::run(dbms::Connection& connection, GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
-   return this->reload (connection,_class, loader, entry);
+   persistence::Object* result = this->reload (connection,_class, loader, entry);
+   LOG_DEBUG("Result=" << adt::AsHexString::apply (wepa_ptrnumber_cast(result)));
+   return result;
 }

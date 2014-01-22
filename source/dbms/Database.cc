@@ -54,10 +54,11 @@
 #include <wepa/dbms/StatementTranslator.hpp>
 #include <wepa/dbms/SCCS.hpp>
 
+#include <wepa/dbms/internal/DummyApplication.hpp>
+
 using namespace std;
 using namespace wepa;
 
-//typedef Guard <dbms::Database> MyGuard;
 
 dbms::Database::Database (app::Application& app, const char* className, const char* dbmsName) :
    app::EngineIf (app, className),
@@ -69,8 +70,38 @@ dbms::Database::Database (app::Application& app, const char* className, const ch
    dbms::SCCS::activate ();
 }
 
+dbms::Database::Database (const char* rdbmsName, const char* dbmsName) :
+   dbms::Database (internal::DummyApplication::getInstance (), rdbmsName, dbmsName)
+{;}
+
 dbms::Database::~Database ()
 {
+   stop ();
+}
+
+void dbms::Database::externalInitialize ()
+   throw (adt::RuntimeException)
+{
+   app::Application& application (getApplication());
+   app::Application& dummy = internal::DummyApplication::getInstance();
+
+   if (&dummy != &application) {
+      WEPA_THROW_EXCEPTION(asString () << " | This method can't be applied to a database with associated application");
+   }
+
+   initialize();
+}
+
+void dbms::Database::externalStop ()
+   throw (adt::RuntimeException)
+{
+   app::Application& application (getApplication());
+   app::Application& dummy = internal::DummyApplication::getInstance();
+
+   if (&dummy != &application) {
+      WEPA_THROW_EXCEPTION(asString () << " | This method can't be applied to a database with associated application");
+   }
+
    stop ();
 }
 

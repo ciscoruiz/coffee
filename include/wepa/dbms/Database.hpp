@@ -76,31 +76,13 @@ public:
    */
    const std::string& getName () const noexcept { return m_name; }
 
-   /**
-      Establece el manejador encargado de actuar cuando la recuperacion de la conexion falla.
-      El manejador por defecto no realiza ninguna activad.
-      \param failRecoveryHandler Manejador que seria invocado en caso de que no sea posible recuperar
-      una determina conexion.
-   */
+   void externalInitialize () throw (adt::RuntimeException);
+   void externalStop () throw (adt::RuntimeException);
+
    void setFailRecoveryHandler (FailRecoveryHandler* failRecoveryHandler) noexcept { m_failRecoveryHandler = failRecoveryHandler; }
 
-   /**
-    * Establece el traductor de sentencias SQL usado ajustar las sentencias SQL al
-    * motor de base de datos usados en la aplicaci�n.
-    */
    void setStatementTranslator (StatementTranslator* statementTranslator) noexcept { m_statementTranslator = statementTranslator; }
 
-   /**
-      Crea y registra una nueva conexion con esta base de datos.
-      La clase usada para conectar con esta base de datos dependeria de la implementacion particular, que
-      seria definida por el metodo #allocateConnection.
-
-      \param name Nombre logico de la conexion a crear.
-      @param user Nombre del usuario con el que realizamos la conexion.
-      @param password Codigo de acceso del usuario.
-
-      @return La instancia de la nueva conexion a la base de datos.
-   */
    Connection* createConnection (const char* name, const char* user, const char* password)
       throw (adt::RuntimeException, DatabaseException);
 
@@ -110,111 +92,33 @@ public:
       return createConnection(name.c_str (), user, password);
    }
 
-   /**
-      Devuelve la conexion asociada al nombre logico recibido como parametro.
-      \param name Nombre logico de la conexion que queremos obtener.
-      \return La conexion asociada al nombre logico recibido como parametro.
-      \warning Si la conexion logica no existe no puede ser usada se lanzara una excepcion.
-      \since NemesisRD.dbms 1.1.1
-   */
    Connection& findConnection (const char* name) throw (adt::RuntimeException);
 
-   /**
-      Devuelve un iterator al comienzo de la lista de conexiones establecidas con esta base de datos.
-      \return Un iterator al comienzo de la lista de conexiones establecidas con esta base de datos.
-   */
    const_connection_iterator connection_begin () const noexcept { return m_connections.begin (); }
 
-   /**
-      Devuelve un iterator al final de la lista de conexiones establecidas con esta base de datos.
-      \return Un iterator al final de la lista de conexiones establecidas con esta base de datos.
-   */
    const_connection_iterator connection_end () const noexcept { return m_connections.end (); }
 
-   /**
-      Devuelve el objeto sobre el que esta posicionado el iterator recibido como parametro.
-      \param ii Iterator que deberia estar comprendido entre #connection_begin y #connection_end.
-      \return El objeto sobre el que esta posicionado el iterator recibido como parametro.
-      \since NemesisRD.dbms 1.0.2
-   */
    static const Connection& connection (const_connection_iterator ii) noexcept { return std::ref (*ii); }
 
-   /**
-      Crea y registra una nueva sentencia SQL asociada a esta base de datos.
-      La clase usada para interpretar la sentencia SQL dependera de la implementacion particular definida
-      mediante el metodo #allocateStatement.
-
-      \param name Nombre logico de esta sentencia.
-      \param expression Expresion asociada a la sentencia.
-      \param isCritical Si vale \em true indica que si la ejecucion de esta sentencia falla al desbloquear
-      la conexion con la que ejecutamos esta sentencia se invocara a Connection::rollback, en otro caso
-      aunque falle se invocara a Connection::commit. Solo aplicara en sentencias que no sean de seleccion.
-
-      \return Una nueva instancia de una conexion a base de datos. No puede ser NULL.
-   */
    Statement* createStatement (const char* name, const char* expression, const ActionOnError::_v actionOnError = ActionOnError::Rollback)
       throw (adt::RuntimeException);
 
-   /**
-      Crea y registra una nueva sentencia SQL asociada a esta base de datos.
-      La clase usada para interpretar la sentencia SQL dependera de la implementacion particular definida
-      mediante el metodo #allocateStatement.
-
-      \param name Nombre logico de esta sentencia.
-      \param expression Expresion asociada a la sentencia.
-      \param isCritical Si vale \em true indica que si la ejecucion de esta sentencia falla al desbloquear
-      la conexion con la que ejecutamos esta sentencia se invocara a Connection::rollback, en otro caso
-      aunque falle se invocara a Connection::commit. Solo aplicara en sentencias que no sean de seleccion.
-
-      \return Una nueva instancia de una conexion a base de datos. No puede ser NULL.
-   */
    Statement* createStatement (const char* name, const std::string& expression, const ActionOnError::_v actionOnError = ActionOnError::Rollback)
       throw (adt::RuntimeException)
    {
       return createStatement (name, expression.c_str (), actionOnError);
    }
 
-   /**
-      Devuelve la instancia de la sentencia SQL asociada al nombre recibido como parametro.
-
-      @return La instancia de la sentencia SQL  asociada al nombre recibido.
-      Puede ser NULL si el nombre no fue registrado previamente con #createStatement.
-   */
    Statement& findStatement (const char* name) throw (adt::RuntimeException);
 
-   /**
-      Devuelve un iterator al comienzo de la lista de sentencias SQL creadas en esta base de datos.
-      \return Un iterator al comienzo de la lista de sentencias SQL creadas en esta base de datos.
-      \since NemesisRD.dbms 1.2.2
-   */
    const_statement_iterator statement_begin () const noexcept { return m_statements.begin (); }
 
-   /**
-      Devuelve un iterator al final de la lista de sentencias SQL creadas en esta base de datos.
-      \return Un iterator al final de la lista de sentencias SQL creadas en esta base de datos.
-      \since NemesisRD.dbms 1.2.2
-   */
    const_statement_iterator statement_end () const noexcept { return m_statements.end (); }
 
-   /**
-      Devuelve el objeto sobre el que esta posicionado el iterator recibido como parametro.
-      \param ii Iterator que deberia estar comprendido entre #statement_begin y #statement_end.
-      \return El objeto sobre el que esta posicionado el iterator recibido como parametro.
-      \since NemesisRD.dbms 1.2.2
-   */
    static const Statement& statement (const_statement_iterator ii) noexcept { return std::ref (*ii); }
 
-   /**
-      Devuelve una cadena con la informacion mas relevante de esta instancia.
-      \return Una cadena con la informacion mas relevante de esta instancia.
-   */
    virtual adt::StreamString  asString () const noexcept;
 
-   /**
-      Devuelve un documento XML con la informacion mas relevante de esta instancia.
-      \param parent Nodo XML del que colgar la informacion referente a esta instancia.
-      \return Un documento XML con la informacion mas relevante de esta instancia.
-   */
    virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
    Database& operator= (const Database&) = delete;
@@ -228,6 +132,8 @@ protected:
       \param dbmsName Nombre de la base de datos.
    */
    Database (app::Application& app, const char* rdbmsName, const char* dbmsName);
+
+   Database (const char* rdbmsName, const char* dbmsName);
 
    void notifyRecoveryFail (Connection& connection) throw (adt::RuntimeException);
 

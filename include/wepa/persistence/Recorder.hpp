@@ -48,18 +48,8 @@ class Recorder : public Accessor {
 public:
    virtual ~Recorder () {;}
 
-   Object& getObject () throw (adt::RuntimeException);
-   const Object& getObject () const throw (adt::RuntimeException);
-
-   void setObject (Object& object) noexcept { m_object = &object; }
-
-   void clearObject () noexcept { m_object = NULL; }
-
 protected:
-   Recorder (const char* name, const int ident) : Accessor(name, ident), m_object (NULL) {;}
-
-private:
-   Object* m_object;
+   Recorder (const char* name, const int ident) : Accessor(name, ident) {;}
 
 };
 

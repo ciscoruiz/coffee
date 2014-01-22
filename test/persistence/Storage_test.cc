@@ -44,6 +44,7 @@
 #include <wepa/persistence/Storage.hpp>
 #include <wepa/persistence/Loader.hpp>
 #include <wepa/persistence/Recorder.hpp>
+#include <wepa/persistence/Eraser.hpp>
 #include <wepa/persistence/Object.hpp>
 #include <wepa/persistence/Class.hpp>
 #include <wepa/persistence/GuardClass.hpp>
@@ -188,6 +189,17 @@ private:
    bool isOutputValue (const int columnNumber) const noexcept { return false; }
 };
 
+struct MockCustomerEraser : public Eraser {
+public:
+   MockCustomerEraser () : Eraser ("MockCustomerEraser", 2) {;}
+
+private:
+   dbms::ResultCode do_apply (dbms::GuardStatement& statement, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
+   bool isInputValue (const int columnNumber) const noexcept { return true; }
+   bool isPrimaryKeyComponent (const int columnNumber) const noexcept { return columnNumber == 0; }
+   bool isOutputValue (const int columnNumber) const noexcept { return false; }
+};
+
 }
 }
 
@@ -292,6 +304,16 @@ dbms::ResultCode test_persistence::MockCustomerRecorder::do_apply (dbms::GuardSt
 
    this->setMember(_class, 0, customer.getId ());
    this->setMember (_class, 1, customer.getName ());
+
+   return statement.execute ();
+}
+
+dbms::ResultCode test_persistence::MockCustomerEraser::do_apply (dbms::GuardStatement& statement, GuardClass& _class, Object& object)
+   throw (adt::RuntimeException, dbms::DatabaseException)
+{
+   test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (object);
+
+   this->setMember(_class, 0, customer.getId ());
 
    return statement.execute ();
 }
@@ -572,7 +594,7 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readonly_avoid_write)
       catch (adt::RuntimeException& ex) {
          std::cout << ex.asString () << std::endl;
          std::string error = ex.what ();
-         BOOST_REQUIRE_NE(error.find ("A readonly storage can not apply a recorder"), std::string::npos);
+         BOOST_REQUIRE_NE(error.find ("can not write on a read-only storage"), std::string::npos);
       }
    }
 
@@ -645,6 +667,89 @@ BOOST_AUTO_TEST_CASE (persistence_storage_write)
 
       BOOST_REQUIRE_EQUAL (customer.getId(), 2);
       BOOST_REQUIRE_EQUAL (customer.getName(), "updated name 2");
+   }
+
+   LOG_DEBUG ("Enables termination");
+   application.enableTermination();
+
+   tr.join ();
+}
+
+BOOST_AUTO_TEST_CASE (persistence_storage_erase)
+{
+   MockApplication application ("persistence_storage_erase");
+
+   test_persistence::MyDatabase database (application);
+
+   application.disableTermination();
+
+   mock::MockConnection* conn0 = static_cast <mock::MockConnection*> (database.createConnection("0", "0", "0"));
+   dbms::Statement* stReader = database.createStatement("read_only", "read");
+   dbms::Statement* stEraser = database.createStatement("eraser", "delete");
+
+   std::thread tr (std::ref (application));
+   usleep (500);
+
+   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
+
+   persistence::Repository repository ("persistence_storage_erase");
+   persistence::Storage* wr_storage = repository.createStorage(0, "storage_erase", persistence::Storage::AccessMode::ReadWrite);
+
+   test_persistence::MockCustomerClass _class;
+
+   BOOST_REQUIRE_NE (wr_storage, (void*) 0);
+
+   test_persistence::MockCustomerLoader myLoader;
+   test_persistence::MockCustomerEraser myEraser;
+
+   if (true) {
+      persistence::GuardClass guardCustomer (_class);
+
+      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 2));
+      test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (wr_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (customer.getId(), 2);
+      BOOST_REQUIRE_EQUAL (customer.getName(), "the name 2");
+
+      BOOST_REQUIRE_NO_THROW(myEraser.initialize(guardCustomer, stEraser));
+
+      BOOST_REQUIRE_THROW(myEraser.getObject(), adt::RuntimeException);
+
+      myEraser.setObject(customer);
+      BOOST_REQUIRE_NO_THROW (wr_storage->erase (*conn0, guardCustomer, myEraser));
+
+      BOOST_REQUIRE_EQUAL (conn0->getCommitCounter(), 1);
+      BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
+   }
+
+   BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL (database.container_size(), 9);
+
+   if (true) {
+      persistence::GuardClass guardCustomer (_class);
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 4));
+      test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (wr_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (customer.getId(), 4);
+      BOOST_REQUIRE_EQUAL (customer.getName(), "the name 4");
+
+      BOOST_REQUIRE_NO_THROW (wr_storage->load(*conn0, guardCustomer, myLoader));
+
+      try {
+         myEraser.setObject(customer);
+         wr_storage->erase (*conn0, guardCustomer, myEraser);
+         BOOST_REQUIRE_EQUAL (true, false);
+      }
+      catch (adt::RuntimeException& ex) {
+         std::cout << ex.asString () << std::endl;
+         std::string error = ex.what ();
+         BOOST_REQUIRE_NE(error.find ("due to multiple references"), std::string::npos);
+      }
+
    }
 
    LOG_DEBUG ("Enables termination");

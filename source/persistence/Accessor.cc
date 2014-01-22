@@ -114,6 +114,26 @@ void persistence::Accessor::initialize (GuardClass& _class, dbms::Statement* sta
    LOG_DEBUG (_class->asString () << " | " << m_statement->asString ());
 }
 
+const persistence::Object& persistence::Accessor::getObject () const
+   throw (adt::RuntimeException)
+{
+   if (m_object == NULL) {
+      WEPA_THROW_EXCEPTION(getName () << " | This accessor does not have any associated object");
+   }
+
+   return std::ref (*m_object);
+}
+
+persistence::Object& persistence::Accessor::getObject ()
+   throw (adt::RuntimeException)
+{
+   if (m_object == NULL) {
+      WEPA_THROW_EXCEPTION(getName () << " | This accessor does not have any associated object");
+   }
+
+   return std::ref (*m_object);
+}
+
 dbms::ResultCode persistence::Accessor::apply (dbms::Connection& connection, GuardClass& _class, Object& object)
    throw (adt::RuntimeException, dbms::DatabaseException)
 {

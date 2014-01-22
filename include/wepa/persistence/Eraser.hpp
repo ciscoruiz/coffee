@@ -32,9 +32,27 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <functional>
+#ifndef __wepa_persistence_Eraser_hpp
+#define __wepa_persistence_Eraser_hpp
 
-#include <wepa/persistence/Recorder.hpp>
+#include <wepa/persistence/Accessor.hpp>
 
-using namespace wepa;
+#include <wepa/adt/RuntimeException.hpp>
 
+namespace wepa {
+namespace persistence {
+
+class Object;
+
+class Eraser : public Accessor {
+public:
+   virtual ~Eraser () {;}
+
+protected:
+   Eraser (const char* name, const int ident) : Accessor(name, ident) {;}
+
+};
+
+} /* namespace persistence */
+} /* namespace wepa */
+#endif

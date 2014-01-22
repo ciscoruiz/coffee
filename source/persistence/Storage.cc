@@ -45,6 +45,7 @@
 #include <wepa/persistence/Object.hpp>
 #include <wepa/persistence/Loader.hpp>
 #include <wepa/persistence/Recorder.hpp>
+#include <wepa/persistence/Eraser.hpp>
 #include <wepa/persistence/Storage.hpp>
 #include <wepa/persistence/GuardClass.hpp>
 
@@ -132,14 +133,56 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
 void persistence::Storage::save (dbms::Connection& connection, GuardClass& _class, Recorder& recorder)
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
-   if (instanciateAccessMode(m_accessMode).canWrite() == false) {
-      WEPA_THROW_EXCEPTION(asString () << " | A readonly storage can not apply a recorder");
-   }
+   exceptionWhenReadOnly(recorder);
 
-   dbms::ResultCode resultCode = recorder.apply (connection, _class, recorder.getObject());
+   Object &object = recorder.getObject();
+
+   dbms::ResultCode resultCode = recorder.apply (connection, _class, object);
 
    if (resultCode.successful() == false)
       WEPA_THROW_NAME_DB_EXCEPTION(recorder.getName (), resultCode);
+
+   LOG_DEBUG (recorder << " | ObjectId=" << object.getInternalId() << " | " << resultCode);
+}
+
+void persistence::Storage::erase (dbms::Connection& connection, GuardClass& _class, Eraser& eraser)
+   throw (adt::RuntimeException, dbms::DatabaseException)
+{
+   exceptionWhenReadOnly(eraser);
+
+   Object& object = eraser.getObject();
+
+   const PrimaryKey& primaryKey = object.getPrimaryKey();
+
+   LOG_DEBUG (getName () << " | Erasing =" << primaryKey);
+
+   entry_iterator ii = m_objects.find (primaryKey);
+
+   if (ii == m_objects.end ()) {
+      LOG_WARN(primaryKey << " is not loaded in storage '" << getName () << "'");
+   }
+   else {
+      Entry& entry = Storage::entry(ii);
+
+      if (entry.hasMultipleReferences () == true) {
+         WEPA_THROW_EXCEPTION(eraser.getName () << " can not erase primary key " << primaryKey << " due to multiple references");
+      }
+   }
+
+   const std::string internalId = object.getInternalId();
+
+   dbms::ResultCode resultCode = eraser.apply (connection, _class, object);
+
+   if (resultCode.successful() == false)
+      WEPA_THROW_NAME_DB_EXCEPTION(eraser.getName (), resultCode);
+
+   if (ii != m_objects.end ()) {
+      Entry& entry = Storage::entry(ii);
+      entry.m_useCounter = 1;
+      release (_class, object);
+   }
+
+   LOG_DEBUG (eraser << " | ObjectId=" << internalId << " | " << resultCode);
 }
 
 bool persistence::Storage::release (GuardClass& _class, Object& object) noexcept
@@ -204,6 +247,14 @@ xml::Node& persistence::Storage::asXML (xml::Node& parent) const
    return std::ref (result);
 }
 
+void persistence::Storage::exceptionWhenReadOnly (const Accessor& accessor) const
+   throw (adt::RuntimeException)
+{
+   if (instanciateAccessMode(m_accessMode).canWrite() == false) {
+      WEPA_THROW_EXCEPTION("Accessor '" << accessor.getName () << "' can not write on a read-only storage '" << getName () << "'");
+   }
+}
+
 //static
 const persistence::Storage::AccessMode& persistence::Storage::instanciateAccessMode (const AccessMode::_v accessMode)
    throw (adt::RuntimeException)
@@ -246,6 +297,7 @@ persistence::Object* persistence::Storage::AccessMode::reload (dbms::Connection&
    return entry.m_object;
 }
 
+
 persistence::Object* persistence::Storage::AccessModeReadOnly::refresh(dbms::Connection&, GuardClass& _class, persistence::Loader& loader, Storage::Entry& entry) const
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
@@ -260,3 +312,4 @@ persistence::Object* persistence::Storage::AccessModeReadWrite::refresh(dbms::Co
    LOG_DEBUG("Loader=" << loader.getName () << " | ObjectId=" << result->getInternalId());
    return result;
 }
+

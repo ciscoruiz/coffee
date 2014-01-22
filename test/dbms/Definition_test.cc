@@ -116,6 +116,7 @@ private:
 class MyDatabase : public mock::MockDatabase {
 public:
    MyDatabase (app::Application& app) : mock::MockDatabase (app) {;}
+   MyDatabase (const char* name) : mock::MockDatabase (name) {;}
 
 private:
    mock::MockLowLevelContainer m_container;
@@ -299,6 +300,8 @@ BOOST_AUTO_TEST_CASE (dbms_define_structure)
 
    test_dbms::MyDatabase database (application);
 
+   BOOST_REQUIRE_THROW (database.externalInitialize(), adt::RuntimeException);
+
    dbms::Connection* conn0 = database.createConnection("0", "0", "0");
 
    BOOST_REQUIRE_THROW (database.createConnection("0", "bis0", "bis0"), adt::RuntimeException);
@@ -411,50 +414,49 @@ BOOST_AUTO_TEST_CASE (dbms_write_and_read_and_delete)
    BOOST_REQUIRE_EQUAL (application.isRunning(), true);
    BOOST_REQUIRE_EQUAL (database.isRunning(), true);
 
-   if (true) {
-      try {
-         dbms::GuardConnection guard (conn0);
-         dbms::GuardStatement writer (guard, stWriter);
+   try {
+      dbms::GuardConnection guard (conn0);
+      dbms::GuardStatement writer (guard, stWriter);
 
-         BOOST_REQUIRE_EQUAL (guard.getCountLinkedStatement(), 1);
+      BOOST_REQUIRE_EQUAL (guard.getCountLinkedStatement(), 1);
 
-         BOOST_REQUIRE_THROW(writer.getInputData(10), adt::RuntimeException);
+      BOOST_REQUIRE_THROW(writer.getInputData(10), adt::RuntimeException);
 
-         wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (2);
-         wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 2");
-         wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (2 * 2);
-         wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (2.2);
-         wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
-         writer.execute ();
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (2);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 2");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (2 * 2);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (2.2);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+      writer.execute ();
 
-         BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
-         BOOST_REQUIRE_EQUAL (database.container_size(), 0);
+      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL (database.container_size(), 0);
 
-         wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (5);
-         wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 5");
-         wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (5 * 5);
-         wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (5.5);
-         wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
-         writer.execute ();
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (5);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 5");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (5 * 5);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (5.5);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
+      writer.execute ();
 
-         BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
-         BOOST_REQUIRE_EQUAL (database.container_size(), 0);
+      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
+      BOOST_REQUIRE_EQUAL (database.container_size(), 0);
 
-         wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (6);
-         wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 6");
-         wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (6 * 6);
-         wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (6.6);
-         wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
-         resultCode = writer.execute ();
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (6);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 6");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (6 * 6);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (6.6);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
+      resultCode = writer.execute ();
 
-         BOOST_REQUIRE_EQUAL (resultCode.getNumericCode(), test_dbms::MyDatabase::Successful);
-         BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
-         BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
-         BOOST_REQUIRE_EQUAL (database.container_size(), 0);
-      }
-      catch (adt::Exception& ex) {
-         logger::Logger::write (ex);
-      }
+      BOOST_REQUIRE_EQUAL (resultCode.getNumericCode(), test_dbms::MyDatabase::Successful);
+      BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
+      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
+      BOOST_REQUIRE_EQUAL (database.container_size(), 0);
+   }
+   catch (adt::Exception& ex) {
+      BOOST_REQUIRE_EQUAL (true, false);
+      logger::Logger::write (ex);
    }
 
    BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
@@ -1221,5 +1223,60 @@ BOOST_AUTO_TEST_CASE (dbms_dealing_with_nulls)
    application.enableTermination();
 
    tr.join ();
+}
+
+BOOST_AUTO_TEST_CASE (dbms_without_app)
+{
+   test_dbms::MyDatabase database ("dbms_with_app");
+
+   BOOST_REQUIRE_NO_THROW(database.externalInitialize ());
+
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
+
+   mock::MockConnection* conn0 = static_cast <mock::MockConnection*> (database.createConnection("0", "0", "0"));
+   dbms::Statement* stWriter = database.createStatement("the_write", "write");
+   dbms::Statement* stReader = database.createStatement("the_read", "read");
+   ResultCode resultCode;
+
+   try {
+      dbms::GuardConnection guard (conn0);
+      dbms::GuardStatement writer (guard, stWriter);
+
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (20);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 20");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).isNull ();
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (20.20);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).setValue ("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+      writer.execute ();
+
+      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL (database.container_size(), 0);
+
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0)).setValue (25);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1)).setValue ("the 25");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2)).setValue (25 * 25);
+      wepa_datatype_downcast(datatype::Float, writer.getInputData(3)).setValue (25.25);
+      wepa_datatype_downcast(datatype::Date, writer.getInputData(4)).isNull ();
+      ResultCode resultCode = writer.execute ();
+
+      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
+      BOOST_REQUIRE_EQUAL (database.container_size(), 0);
+
+      BOOST_REQUIRE_EQUAL (resultCode.getNumericCode(), test_dbms::MyDatabase::Successful);
+      BOOST_REQUIRE_EQUAL (resultCode.successful(), true);
+      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
+      BOOST_REQUIRE_EQUAL (database.container_size(), 0);
+   }
+   catch (adt::Exception& ex) {
+      logger::Logger::write (ex);
+      BOOST_REQUIRE_EQUAL (std::string ("none"), ex.what ());
+   }
+
+   BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL (database.container_size(), 2);
+   BOOST_REQUIRE_EQUAL (conn0->getCommitCounter(), 1);
+
+   BOOST_REQUIRE_NO_THROW(database.externalStop ());
+   BOOST_REQUIRE_EQUAL (database.isRunning(), false);
 }
 

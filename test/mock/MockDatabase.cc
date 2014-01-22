@@ -35,3 +35,13 @@
 #include "MockDatabase.hpp"
 
 using namespace wepa;
+
+#include <wepa/logger/Logger.hpp>
+#include <wepa/logger/TtyWriter.hpp>
+
+mock::MockDatabase::MockDatabase (const char* name) :
+   dbms::Database ("map", name)
+{
+   logger::Logger::initialize(new logger::TtyWriter);
+}
+

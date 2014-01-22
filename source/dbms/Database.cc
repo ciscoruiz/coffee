@@ -76,7 +76,8 @@ dbms::Database::Database (const char* rdbmsName, const char* dbmsName) :
 
 dbms::Database::~Database ()
 {
-   stop ();
+   if (this->isStopped() == false)
+      stop ();
 }
 
 void dbms::Database::externalInitialize ()
@@ -136,18 +137,23 @@ void dbms::Database::do_stop ()
 {
    LOG_THIS_METHOD();
 
-   try {
-      for (connection_iterator iic = connection_begin (), maxiic = connection_end (); iic != maxiic; iic ++) {
-         Connection& _connection = connection (iic);
-         _connection.close ();
-      }
+   int counter = 0;
 
-      m_connections.clear ();
+   for (connection_iterator iic = connection_begin (), maxiic = connection_end (); iic != maxiic; ++ iic) {
+      Connection& _connection = connection (iic);
+      try {
+         _connection.close ();
+         ++ counter;
+      }
+      catch (adt::Exception& ex) {
+         logger::Logger::write(ex);
+      }
    }
-   catch (adt::Exception& ex) {
-      logger::Logger::write(ex);
-      m_connections.clear ();
-   }
+
+   LOG_DEBUG (asString () << " | Closed " << counter << " of " << m_connections.size ());
+
+   m_connections.clear ();
+   m_statements.clear ();
 }
 
 dbms::Connection* dbms::Database::createConnection (const char* name, const char* user, const char* password)

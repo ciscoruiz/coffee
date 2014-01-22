@@ -40,6 +40,11 @@
 #include <wepa/app/Application.hpp>
 
 namespace wepa {
+
+namespace app {
+class EngineIf;
+}
+
 namespace dbms {
 namespace internal {
 
@@ -53,6 +58,8 @@ private:
    static DummyApplication st_this;
 
    void run () throw (adt::RuntimeException) {;}
+   void attach (app::EngineIf*) throw (adt::RuntimeException) {;}
+
 };
 
 

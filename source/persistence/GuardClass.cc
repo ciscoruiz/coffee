@@ -39,10 +39,16 @@
 
 using namespace wepa;
 
-persistence::GuardClass::GuardClass (Class& _class) :
-   m_class (_class)
+persistence::GuardClass::GuardClass (Class& _class, const char* text) :
+   m_class (_class),
+   m_text (text)
 {
-   LOG_DEBUG ("Locking " << _class);
+   if (text == NULL) {
+      LOG_DEBUG ("+++ Locking " << _class);
+   }
+   else {
+      LOG_DEBUG ("+++ Locking " << _class << " for '" << m_text << "'");
+   }
 
    m_class.m_mutex.lock ();
 
@@ -61,7 +67,13 @@ persistence::GuardClass::GuardClass (Class& _class) :
 
 persistence::GuardClass::~GuardClass ()
 {
-   LOG_DEBUG ("Unlocking " << m_class);
+   if (m_text == NULL) {
+      LOG_DEBUG ("+++ Unlocking " << m_class);
+   }
+   else {
+      LOG_DEBUG ("+++ Unlocking " << m_class << " for '" << m_text << "'");
+   }
+
    m_class.m_mutex.unlock ();
 }
 

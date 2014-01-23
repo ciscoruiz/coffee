@@ -72,7 +72,7 @@ protected:
    void setPrimaryKey (const PrimaryKey& primaryKey) noexcept { m_primaryKey = &primaryKey; }
    void clearPrimaryKey () noexcept { m_primaryKey = NULL; }
 
-   virtual void releaseDependences () noexcept = 0;
+   virtual void clear () noexcept = 0;
 
 private:
    const PrimaryKey* m_primaryKey;

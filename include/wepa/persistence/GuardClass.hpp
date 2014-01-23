@@ -51,7 +51,7 @@ class Object;
 
 class GuardClass {
 public:
-   GuardClass (Class& _class);
+   GuardClass (Class& _class, const char* text = NULL);
    ~GuardClass ();
 
    Class* operator-> () noexcept { return &m_class; }
@@ -64,6 +64,7 @@ public:
 
 private:
    Class& m_class;
+   const char* m_text;
 };
 
 } /* namespace persistence */

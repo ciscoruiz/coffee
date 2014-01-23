@@ -879,7 +879,7 @@ BOOST_AUTO_TEST_CASE (persistence_storage_cache)
    test_persistence::MockCustomerLoader myLoader;
 
    if (true) {
-      persistence::GuardClass guardCustomer (_class);
+      persistence::GuardClass guardCustomer (_class, "Register 100 new records");
       test_persistence::MockCustomerCreator myCreator;
       test_persistence::MockCustomerRecorder myRecorder;
 
@@ -910,7 +910,7 @@ BOOST_AUTO_TEST_CASE (persistence_storage_cache)
    }
 
    if (true) {
-      persistence::GuardClass guardCustomer (_class);
+      persistence::GuardClass guardCustomer (_class, "Read object stored in cache");
 
       dbms::Statement* stReader = database.createStatement("read_only", "read");
 
@@ -928,5 +928,8 @@ BOOST_AUTO_TEST_CASE (persistence_storage_cache)
 
          BOOST_REQUIRE_EQUAL (wr_storage->release(guardCustomer, customer), true);
       }
+
+      BOOST_REQUIRE_EQUAL (wr_storage->getHitCounter(), 16);
+      BOOST_REQUIRE_EQUAL (wr_storage->getCacheSize(), 16);
    }
 }

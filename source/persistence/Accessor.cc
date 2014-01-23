@@ -134,22 +134,28 @@ persistence::Object& persistence::Accessor::getObject ()
    return std::ref (*m_object);
 }
 
+void persistence::Accessor::setObject (Object& object)
+   throw (adt::RuntimeException)
+{
+   m_object = &object;
+}
+
 dbms::ResultCode persistence::Accessor::apply (dbms::Connection& connection, GuardClass& _class, Object& object)
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
    LOG_THIS_METHOD();
+
+   LOG_DEBUG (getName () << " | " << m_primaryKey);
 
    if (m_statement == NULL) {
       WEPA_THROW_EXCEPTION(asString () << " | Statement can not be null");
    }
 
    if (m_inputValues.size() == 0 && m_outputValues.size() == 0) {
-      WEPA_THROW_EXCEPTION(asString () << " | " << m_statement->asString () << " | Accessor was not initialized");
+      LOG_WARN (asString () << " | " << m_statement->asString () << " | Accessor does not have either input values or output values");
    }
 
    ++ m_applyCounter;
-
-   LOG_DEBUG (getName () << " | " << m_primaryKey);
 
    dbms::GuardConnection gConnection (connection);
 
@@ -185,42 +191,47 @@ dbms::Statement& persistence::Accessor::getStatement ()
 void persistence::Accessor::setMember (GuardClass& _class, const int columnNumber, const int value)
    throw (adt::RuntimeException)
 {
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value=" << value);
+
    if (isOutputValue(columnNumber) == true) {
       WEPA_THROW_EXCEPTION(asString () << " | Can not use " << __func__ << " over an output value");
    }
 
    dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
    wepa_datatype_downcast(dbms::datatype::Integer, abstract).setValue (value);
-   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value=" << value);
 }
 
 void persistence::Accessor::setMember (GuardClass& _class, const int columnNumber, const char* value)
    throw (adt::RuntimeException)
 {
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value='" << value << "'");
+
    if (isOutputValue(columnNumber) == true) {
       WEPA_THROW_EXCEPTION(asString () << " | Can not use " << __func__ << " over an output value");
    }
 
    dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
    wepa_datatype_downcast(dbms::datatype::String, abstract).setValue (value);
-   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value='" << value << "'");
 }
 
 void persistence::Accessor::setMember (GuardClass& _class, const int columnNumber, const float value)
    throw (adt::RuntimeException)
 {
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value=" << value);
+
    if (isOutputValue(columnNumber) == true) {
       WEPA_THROW_EXCEPTION(asString () << " | Can not use " << __func__ << " over an output value");
    }
 
    dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
    wepa_datatype_downcast(dbms::datatype::Float, abstract).setValue (value);
-   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value=" << value);
 }
 
 void persistence::Accessor::setMember (GuardClass& _class, const int columnNumber, const adt::DataBlock& value)
    throw (adt::RuntimeException)
 {
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value=" << adt::AsString::apply (value));
+
    if (isOutputValue(columnNumber) == true) {
       WEPA_THROW_EXCEPTION(asString () << " | Can not use " << __func__ << " over an output value");
    }
@@ -233,48 +244,56 @@ void persistence::Accessor::setMember (GuardClass& _class, const int columnNumbe
    else {
       wepa_datatype_downcast (dbms::datatype::ShortBlock, abstract).setValue (value);
    }
-
-   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value=" << adt::AsString::apply (value));
 }
 
 void persistence::Accessor::setMember (GuardClass& _class, const int columnNumber, const adt::Second& value)
    throw (adt::RuntimeException)
 {
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value=" << value.asString ());
+
    if (isOutputValue(columnNumber) == true) {
       WEPA_THROW_EXCEPTION(asString () << " | Can not use " << __func__ << " over an output value");
    }
 
    dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
    wepa_datatype_downcast(dbms::datatype::Date, abstract).setValue (value);
-   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Value=" << value.asString ());
 }
 
 int persistence::Accessor::readInteger (GuardClass& _class, const int columnNumber) const
    throw (adt::RuntimeException)
 {
    dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
-   return wepa_datatype_downcast(dbms::datatype::Integer, abstract).getValue();
+   int result = wepa_datatype_downcast(dbms::datatype::Integer, abstract).getValue();
+
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Result=" << result);
+
+   return result;
 }
 
 const char* persistence::Accessor::readCString (GuardClass& _class, const int columnNumber) const
    throw (adt::RuntimeException)
 {
    dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
-   return wepa_datatype_downcast(dbms::datatype::String, abstract).getValue();
+   const char* result = wepa_datatype_downcast(dbms::datatype::String, abstract).getValue();
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Result=" << result);
+
+   return result;
 }
 
 float persistence::Accessor::readFloat (GuardClass& _class, const int columnNumber) const
    throw (adt::RuntimeException)
 {
    dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
-   return wepa_datatype_downcast(dbms::datatype::Float, abstract).getValue();
+   float result = wepa_datatype_downcast(dbms::datatype::Float, abstract).getValue();
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Result=" << result);
+
+   return result;
 }
 
 const adt::DataBlock& persistence::Accessor::readDataBlock (GuardClass& _class, const int columnNumber) const
    throw (adt::RuntimeException)
 {
    dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
-
 
    if (abstract.getType() == dbms::datatype::Abstract::Datatype::LongBlock) {
       return wepa_datatype_downcast(dbms::datatype::LongBlock, abstract).getValue();
@@ -288,5 +307,10 @@ const adt::Second& persistence::Accessor::readDate (GuardClass& _class, const in
    throw (adt::RuntimeException)
 {
    dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
-   return wepa_datatype_downcast(dbms::datatype::Date, abstract).getValue();
+   const adt::Second& result = wepa_datatype_downcast(dbms::datatype::Date, abstract).getValue();
+
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Result=" << result.asString ());
+
+   return result;
+
 }

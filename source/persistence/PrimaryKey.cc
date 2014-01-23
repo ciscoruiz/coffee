@@ -67,18 +67,6 @@ void persistence::PrimaryKey::clear () noexcept
    m_components.clear ();
 }
 
-//persistence::PrimaryKey& persistence::PrimaryKey::clone () const
-//   throw (adt::RuntimeException)
-//{
-//   if (this->isDefined() == false) {
-//      WEPA_THROW_EXCEPTION("lvalue was not initialized");
-//   }
-//
-//   PrimaryKey* result = new PrimaryKey (*this);
-//
-//   return std::ref (*result);
-//}
-
 int persistence::PrimaryKey::compareTo (const PrimaryKey& other) const
    throw (adt::RuntimeException)
 {
@@ -143,7 +131,7 @@ persistence::PrimaryKey& persistence::PrimaryKey::operator= (const PrimaryKey& o
 
 adt::StreamString persistence::PrimaryKey::asString () const noexcept
 {
-   adt::StreamString result ("persistence.PrimaryKey {");
+   adt::StreamString result ("persistence.PrimaryKey { ");
 
    for (const dbms::datatype::Abstract* component: m_components) {
       result += component->asString ();

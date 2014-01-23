@@ -376,25 +376,22 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readonly)
 
       BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
 
-      try{
-         BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 6));
-         test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (ro_storage->load(*conn0, guardCustomer, myLoader));
+      BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 6));
+      test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (ro_storage->load(*conn0, guardCustomer, myLoader));
 
-         BOOST_REQUIRE_EQUAL (customer.getId(), 6);
-         BOOST_REQUIRE_EQUAL (customer.getName(), "the name 6");
+      BOOST_REQUIRE_EQUAL (customer.getId(), 6);
+      BOOST_REQUIRE_EQUAL (customer.getName(), "the name 6");
 
-         test_persistence::MockCustomerObject& customer2 = static_cast <test_persistence::MockCustomerObject&> (ro_storage->load(*conn0, guardCustomer, myLoader));
+      test_persistence::MockCustomerObject& customer2 = static_cast <test_persistence::MockCustomerObject&> (ro_storage->load(*conn0, guardCustomer, myLoader));
 
-         BOOST_REQUIRE_EQUAL (&customer, &customer2);
-      }
-      catch (adt::Exception& ex) {
-         BOOST_REQUIRE_EQUAL (std::string ("no error"), ex.what ());
-         std::cout << ex.what() << std::endl;
-      }
+      BOOST_REQUIRE_EQUAL (&customer, &customer2);
    }
 
+   BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 1);
+   BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 1);
+   BOOST_REQUIRE_EQUAL (ro_storage->getCacheSize(), 0);
+
    if (true) {
-      LOG_DEBUG ("Next access to cache ...");
       persistence::GuardClass guardCustomer (_class);
 
       BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 7));
@@ -403,12 +400,31 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readonly)
       BOOST_REQUIRE_EQUAL (customer.getId(), 7);
       BOOST_REQUIRE_EQUAL (customer.getName(), "the name 7");
 
+      BOOST_REQUIRE_EQUAL (ro_storage->release(guardCustomer, customer), true);
+      BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 2);
+      BOOST_REQUIRE_EQUAL (ro_storage->getCacheSize(), 1);
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 7));
+      test_persistence::MockCustomerObject& customer2 = static_cast <test_persistence::MockCustomerObject&> (ro_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (ro_storage->getCacheSize(), 0);
+
+      BOOST_REQUIRE_EQUAL (customer2.getId(), 7);
+      BOOST_REQUIRE_EQUAL (customer2.getName(), "the name 7");
+      BOOST_REQUIRE_EQUAL (ro_storage->release(guardCustomer, customer2), true);
+      BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 2);
+
+      BOOST_REQUIRE_EQUAL (&customer, &customer2);
+   }
+
+   if (true) {
+      persistence::GuardClass guardCustomer (_class);
       BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 77));
       BOOST_REQUIRE_THROW (ro_storage->load (*conn0, guardCustomer, myLoader), dbms::DatabaseException);
    }
 
    BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 3);
-   BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 1);
+   BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 2);
    BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), myLoader.getApplyCounter ());
 
    if (true) {
@@ -423,7 +439,7 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readonly)
    }
 
    BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 3);
-   BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 2);
+   BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 3);
    BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), myLoader.getApplyCounter ());
 
    BOOST_REQUIRE_NO_THROW(database.externalStop ());
@@ -538,8 +554,8 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readwrite)
       BOOST_REQUIRE_EQUAL (customer.getId(), 9);
       BOOST_REQUIRE_EQUAL (customer.getName(), "updated name 9");
 
-      BOOST_REQUIRE_EQUAL (rw_storage->getFaultCounter(), 2);
-      BOOST_REQUIRE_EQUAL (rw_storage->getHitCounter(), 2);
+      BOOST_REQUIRE_EQUAL (rw_storage->getFaultCounter(), 1);
+      BOOST_REQUIRE_EQUAL (rw_storage->getHitCounter(), 3);
       BOOST_REQUIRE_EQUAL (myLoader.getApplyCounter (), 4);
 
       BOOST_REQUIRE_EQUAL (rw_storage->release (guardCustomer, customer), false);

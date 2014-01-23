@@ -37,6 +37,7 @@
 
 #include <map>
 #include <memory>
+#include <list>
 
 #include <auto_enum.h>
 
@@ -65,13 +66,17 @@ class Eraser;
 class Creator;
 
 class Storage : public adt::NamedObject {
+   typedef std::list <Object*> Cache;
+   typedef Cache::iterator cache_iterator;
+
    struct Entry {
       Object* m_object;
       unsigned int m_useCounter;
+      std::pair <bool, cache_iterator> m_cached;
 
-      Entry () : m_object (NULL), m_useCounter (0) {;}
+      Entry () : m_object (NULL), m_useCounter (0) { m_cached.first = false; }
       Entry (Object* object) : m_object (object), m_useCounter (1) {;}
-      Entry (const Entry& other) : m_object (other.m_object), m_useCounter (other.m_useCounter) {;}
+      Entry (const Entry& other) : m_object (other.m_object), m_useCounter (other.m_useCounter), m_cached (other.m_cached) {;}
       bool hasMultipleReferences () const noexcept { return m_useCounter > 1; }
    };
 
@@ -83,7 +88,12 @@ class Storage : public adt::NamedObject {
 
    typedef std::map <PrimaryKey, Entry, PtrLess> Entries;
 
+   static const int UpperLimitForMaxCacheSize = 4 * 1024;
+   static const int LowerLimitForMaxCacheSize = 16;
+
 public:
+   static const int DefaultMaxCacheSize = 128;
+
    class AccessMode {
    public:
       enum _v { None = -1, ReadOnly, ReadWrite };
@@ -102,6 +112,10 @@ public:
    typedef unsigned int Ident;
 
    ~Storage ();
+
+   void setMaxCacheSize (const int maxCacheSize) throw (adt::RuntimeException);
+   int getMaxCacheSize () const noexcept { return m_maxCacheSize; }
+   int getCacheSize () const noexcept { return m_cacheSize; }
 
    unsigned int getHitCounter () const noexcept { return m_hitCounter; }
    unsigned int getFaultCounter () const noexcept { return m_faultCounter; }
@@ -133,8 +147,11 @@ protected:
    static Object* object(entry_iterator ii) noexcept { return object (*ii); }
 
 private:
-   Entries m_objects;
+   Entries m_entries;
    const AccessMode::_v m_accessMode;
+   Cache m_cache;
+   int m_maxCacheSize;
+   int m_cacheSize;
    mutable unsigned int m_hitCounter;
    mutable unsigned int m_faultCounter;
 
@@ -150,8 +167,14 @@ private:
       Object* refresh (dbms::Connection& connection, GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
    };
 
-   Object* initializeEntry (dbms::Connection& connection, GuardClass& _class, Accessor& accessor) throw (adt::RuntimeException, dbms::DatabaseException);
+   Object* createEntry (dbms::Connection& connection, GuardClass& _class, Accessor& accessor) throw (adt::RuntimeException, dbms::DatabaseException);
+   void destroyEntry (entry_iterator ii) noexcept;
    void exceptionWhenReadOnly (const Accessor&) const throw (adt::RuntimeException);
+
+   void setCachedEntry (Entry& entry) noexcept;
+   void removeCachedEntry (Entry& entry) noexcept;
+   Object* reuseCachedObject () throw (adt::RuntimeException);
+   static Object* object (cache_iterator ii) noexcept { return *ii; }
 
    static const AccessMode& instanciateAccessMode (const AccessMode::_v accessMode) throw (adt::RuntimeException);
 

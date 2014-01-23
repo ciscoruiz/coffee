@@ -56,19 +56,33 @@ auto_enum_assign(persistence::Storage::AccessMode) = { "ReadOnly", "ReadWrite", 
 
 persistence::Storage::Storage (const char* name, const AccessMode::_v accessMode) :
    adt::NamedObject (name),
-   m_accessMode(accessMode)
+   m_accessMode(accessMode),
+   m_maxCacheSize (DefaultMaxCacheSize),
+   m_cacheSize (0)
 {
    m_hitCounter = m_faultCounter = 0;
 }
 
 persistence::Storage::~Storage ()
 {
-   for (entry_type ii : m_objects) {
-      object (ii)->releaseDependences ();
+   for (entry_type ii : m_entries) {
+      object (ii)->clear ();
       delete object(ii);
    }
 
-   m_objects.clear ();
+   m_entries.clear ();
+}
+
+void persistence::Storage::setMaxCacheSize (const int maxCacheSize)
+   throw (adt::RuntimeException)
+{
+   if (maxCacheSize > UpperLimitForMaxCacheSize || maxCacheSize < LowerLimitForMaxCacheSize) {
+      WEPA_THROW_EXCEPTION("Storage='" << getName () << "' max cache size " << maxCacheSize << " out of range [" << LowerLimitForMaxCacheSize << "," << UpperLimitForMaxCacheSize << "]");
+   }
+
+   m_maxCacheSize = maxCacheSize;
+
+   LOG_DEBUG ("Storage='" << getName () << "' | MaxCacheSize=" << maxCacheSize);
 }
 
 persistence::Object& persistence::Storage::load (dbms::Connection& connection, GuardClass& _class, persistence::Loader& loader)
@@ -82,11 +96,11 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
 
    LOG_DEBUG (getName () << " | Loading=" << primaryKey);
 
-   entry_iterator ii = m_objects.find (primaryKey);
+   entry_iterator ii = m_entries.find (primaryKey);
 
-   if (ii == m_objects.end ()) {
+   if (ii == m_entries.end ()) {
       m_faultCounter ++;
-      result = initializeEntry (connection, _class, loader);
+      result = createEntry (connection, _class, loader);
    }
    else {
       m_hitCounter ++;
@@ -94,12 +108,13 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
       Entry& entry = Storage::entry(ii);
       try {
          result = instanciateAccessMode(m_accessMode).refresh(connection, _class, loader, entry);
+         removeCachedEntry(entry);
          entry.m_useCounter ++;
       }
       catch (adt::Exception& ex) {
          logger::Logger::write(ex);
          delete entry.m_object;
-         m_objects.erase(ii);
+         m_entries.erase(ii);
       }
    }
 
@@ -121,45 +136,13 @@ persistence::Object& persistence::Storage::create (dbms::Connection& connection,
 
    LOG_DEBUG (getName () << " | Creating=" << primaryKey);
 
-   entry_iterator ii = m_objects.find (primaryKey);
+   entry_iterator ii = m_entries.find (primaryKey);
 
-   if (ii != m_objects.end ()) {
+   if (ii != m_entries.end ()) {
       WEPA_THROW_EXCEPTION(getName () << " | " << primaryKey << " | PrimaryKey is already registered");
    }
 
-   return std::ref (*initializeEntry(connection, _class, creator));
-}
-
-persistence::Object* persistence::Storage::initializeEntry (dbms::Connection& connection, GuardClass& _class, Accessor& accessor)
-   throw (adt::RuntimeException, dbms::DatabaseException)
-{
-   LOG_THIS_METHOD();
-
-   Entry entry;
-
-   const PrimaryKey& primaryKey = accessor.getPrimaryKey();
-
-   LOG_DEBUG ("Storage='" << getName () << "' | " << primaryKey);
-
-   try {
-      entry.m_object = _class.createObject();
-      dbms::ResultCode resultCode = accessor.apply (connection, _class, std::ref (*entry.m_object));
-
-      if (resultCode.successful() == false)
-         WEPA_THROW_NAME_DB_EXCEPTION(accessor.getName(), resultCode);
-
-      entry.m_useCounter = 1;
-      std::pair <entry_iterator, bool> rr = m_objects.insert (std::make_pair(primaryKey, entry));
-      entry.m_object->setPrimaryKey(Storage::primaryKey (rr.first));
-   }
-   catch (adt::Exception& ex) {
-      delete entry.m_object;
-      throw;
-   }
-
-   LOG_DEBUG ("Result (ObjectId)=" << entry.m_object->getInternalId());
-
-   return entry.m_object;
+   return std::ref (*createEntry(connection, _class, creator));
 }
 
 void persistence::Storage::save (dbms::Connection& connection, GuardClass& _class, Recorder& recorder)
@@ -188,10 +171,13 @@ void persistence::Storage::erase (dbms::Connection& connection, GuardClass& _cla
 
    LOG_DEBUG (getName () << " | Erasing =" << primaryKey);
 
-   entry_iterator ii = m_objects.find (primaryKey);
+   entry_iterator ii = m_entries.find (primaryKey);
 
-   if (ii == m_objects.end ()) {
+   bool objectHasBeenFound;
+
+   if (ii == m_entries.end ()) {
       LOG_WARN(primaryKey << " is not loaded in storage '" << getName () << "'");
+      objectHasBeenFound = false;
    }
    else {
       Entry& entry = Storage::entry(ii);
@@ -199,6 +185,8 @@ void persistence::Storage::erase (dbms::Connection& connection, GuardClass& _cla
       if (entry.hasMultipleReferences () == true) {
          WEPA_THROW_EXCEPTION(eraser.getName () << " can not erase primary key " << primaryKey << " due to multiple references");
       }
+
+      objectHasBeenFound = true;
    }
 
    const std::string internalId = object.getInternalId();
@@ -208,10 +196,8 @@ void persistence::Storage::erase (dbms::Connection& connection, GuardClass& _cla
    if (resultCode.successful() == false)
       WEPA_THROW_NAME_DB_EXCEPTION(eraser.getName (), resultCode);
 
-   if (ii != m_objects.end ()) {
-      Entry& entry = Storage::entry(ii);
-      entry.m_useCounter = 1;
-      release (_class, object);
+   if (objectHasBeenFound) {
+      destroyEntry(ii);
    }
 
    LOG_DEBUG (eraser << " | ObjectId=" << internalId << " | " << resultCode);
@@ -225,18 +211,21 @@ bool persistence::Storage::release (GuardClass& _class, Object& object) noexcept
       const PrimaryKey& primaryKey = object.getPrimaryKey();
 
       LOG_DEBUG (getName () << " | Releasing=" << primaryKey);
-      entry_iterator ii = m_objects.find (primaryKey);
+      entry_iterator ii = m_entries.find (primaryKey);
 
-      if (ii != m_objects.end ()) {
+      if (ii != m_entries.end ()) {
          Entry& entry = Storage::entry(ii);
 
-         LOG_DEBUG (getName () << " | ObjectId=" << entry.m_object->getInternalId() << " | Uses=" << entry.m_useCounter);
+         if (entry.m_useCounter == 0) {
+            LOG_WARN ("Storage='" << getName () << "' | ObjectId=" << entry.m_object->getInternalId() << " has already been released");
+         }
+         else {
+            LOG_DEBUG ("Storage='" << getName () << "' | ObjectId=" << entry.m_object->getInternalId() << " | Uses=" << entry.m_useCounter);
 
-         if (-- entry.m_useCounter <= 0) {
-            object.clearPrimaryKey();
-            delete entry.m_object;
-            m_objects.erase (ii);
-            result = true;
+            if (-- entry.m_useCounter == 0) {
+               setCachedEntry (entry);
+               result = true;
+            }
          }
       }
    }
@@ -245,6 +234,110 @@ bool persistence::Storage::release (GuardClass& _class, Object& object) noexcept
    }
 
    LOG_DEBUG (getName () << " | Result=" << result);
+
+   return result;
+}
+
+persistence::Object* persistence::Storage::createEntry (dbms::Connection& connection, GuardClass& _class, Accessor& accessor)
+   throw (adt::RuntimeException, dbms::DatabaseException)
+{
+   LOG_THIS_METHOD();
+
+   Entry entry;
+
+   const PrimaryKey& primaryKey = accessor.getPrimaryKey();
+
+   LOG_DEBUG ("Storage='" << getName () << "' | " << primaryKey);
+
+   try {
+      if (m_cacheSize < m_maxCacheSize) {
+         entry.m_object = _class.createObject();
+      }
+      else {
+         entry.m_object = reuseCachedObject ();
+      }
+
+      dbms::ResultCode resultCode = accessor.apply (connection, _class, std::ref (*entry.m_object));
+
+      if (resultCode.successful() == false)
+         WEPA_THROW_NAME_DB_EXCEPTION(accessor.getName(), resultCode);
+
+      entry.m_useCounter = 1;
+      std::pair <entry_iterator, bool> rr = m_entries.insert (std::make_pair(primaryKey, entry));
+      entry.m_object->setPrimaryKey(Storage::primaryKey (rr.first));
+   }
+   catch (adt::Exception& ex) {
+      delete entry.m_object;
+      throw;
+   }
+
+   LOG_DEBUG ("Result (ObjectId)=" << entry.m_object->getInternalId());
+
+   return entry.m_object;
+}
+
+void persistence::Storage::destroyEntry (entry_iterator ii)
+   noexcept
+{
+   Entry& entry = Storage::entry(ii);
+
+   LOG_DEBUG ("Storage='" << getName () << "' | ObjectId=" << entry.m_object->getInternalId());
+
+   entry.m_object->clear();
+
+   removeCachedEntry(entry);
+
+   delete entry.m_object;
+
+   m_entries.erase (ii);
+}
+
+void persistence::Storage::setCachedEntry (Entry& entry)
+   noexcept
+{
+   // Remember we must not call to m_cache.size () because it has O(n) efficiency
+   m_cacheSize ++;
+
+   entry.m_useCounter = 0;
+   entry.m_cached.first = true;
+   entry.m_cached.second = m_cache.insert (m_cache.end (), entry.m_object);
+
+   LOG_DEBUG ("Storage='" << getName () << "' | ObjectId=" << entry.m_object->getInternalId());
+}
+
+void persistence::Storage::removeCachedEntry (Entry& entry)
+   noexcept
+{
+   if (entry.m_cached.first == true) {
+      m_cache.erase(entry.m_cached.second);
+      m_cacheSize --;
+      entry.m_cached.first = false;
+
+      LOG_DEBUG ("Storage='" << getName () << "' | ObjectId=" << entry.m_object->getInternalId());
+   }
+}
+
+persistence::Object* persistence::Storage::reuseCachedObject ()
+   throw (adt::RuntimeException)
+{
+   persistence::Object* result = NULL;
+
+   // Removes from cache
+   result = Storage::object (m_cache.begin ());
+   m_cache.pop_front();
+   m_cacheSize --;
+
+   // Removes from main object container
+   entry_iterator ii = m_entries.find(result->getPrimaryKey());
+
+   assert (ii != m_entries.end ());
+
+   m_entries.erase (ii);
+
+   result->clear();
+   result->clearPrimaryKey();
+
+   LOG_DEBUG ("Storage='" << getName () << "' | ObjectId=" << result->getInternalId());
 
    return result;
 }
@@ -259,7 +352,8 @@ adt::StreamString persistence::Storage::asString () const
    result << " | Mode=" << AccessMode::enumName (m_accessMode);
    result << " | Hit=" << m_hitCounter;
    result << " | Fault=" << m_faultCounter;
-   result << " | N-size=" << m_objects.size ();
+   result << " | N-size=" << m_entries.size ();
+   result << " | CacheSize=" << m_cacheSize << "/" << m_maxCacheSize;
    return result += " }";
 }
 
@@ -270,11 +364,15 @@ xml::Node& persistence::Storage::asXML (xml::Node& parent) const
 
    result.createAttribute("Name", getName ());
    result.createAttribute ("Mode", AccessMode::enumName(m_accessMode));
-   result.createAttribute ("N-size", m_objects.size ());
+   result.createAttribute ("N-size", m_entries.size ());
 
    xml::Node& access = result.createChild ("Access");
    access.createAttribute ("Hit", m_hitCounter);
    access.createAttribute ("Fault", m_faultCounter);
+
+   xml::Node& cache = result.createChild ("Cache (LRU)");
+   access.createAttribute ("Size", m_cacheSize);
+   access.createAttribute ("MaxSize", m_maxCacheSize);
 
    return std::ref (result);
 }
@@ -315,7 +413,7 @@ persistence::Object* persistence::Storage::AccessMode::reload (dbms::Connection&
 
    if (hasToRefresh == true) {
       LOG_DEBUG ("Release dependences for " << entry.m_object->asString ());
-      object.releaseDependences();
+      object.clear();
 
       LOG_DEBUG ("Reloading data for " << entry.m_object->asString ());
       dbms::ResultCode resultCode = loader.apply (connection, _class, object);

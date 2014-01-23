@@ -155,7 +155,7 @@ private:
    int m_id;
    std::string m_name;
 
-   void releaseDependences () noexcept {;}
+   void clear () noexcept {;}
 };
 
 class MockCustomerClass : public Class  {

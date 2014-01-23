@@ -62,6 +62,7 @@ class Loader;
 class GuardClass;
 class Recorder;
 class Eraser;
+class Creator;
 
 class Storage : public adt::NamedObject {
    struct Entry {
@@ -106,6 +107,7 @@ public:
    unsigned int getFaultCounter () const noexcept { return m_faultCounter; }
 
    Object& load (dbms::Connection& connection, GuardClass& _class, Loader& loader) throw (adt::RuntimeException, dbms::DatabaseException);
+   Object& create (dbms::Connection& connection, GuardClass& _class, Creator& creator) throw (adt::RuntimeException, dbms::DatabaseException);
    void save (dbms::Connection& connection, GuardClass& _class, Recorder& recorder) throw (adt::RuntimeException, dbms::DatabaseException);
    void erase (dbms::Connection& connection, GuardClass& _class, Eraser& eraser) throw (adt::RuntimeException, dbms::DatabaseException);
    bool release (GuardClass& _class, Object& object) noexcept;
@@ -148,6 +150,7 @@ private:
       Object* refresh (dbms::Connection& connection, GuardClass& _class, Loader& loader, Entry& entry) const throw (adt::RuntimeException, dbms::DatabaseException);
    };
 
+   Object* initializeEntry (dbms::Connection& connection, GuardClass& _class, Accessor& accessor) throw (adt::RuntimeException, dbms::DatabaseException);
    void exceptionWhenReadOnly (const Accessor&) const throw (adt::RuntimeException);
 
    static const AccessMode& instanciateAccessMode (const AccessMode::_v accessMode) throw (adt::RuntimeException);

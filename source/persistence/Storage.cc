@@ -46,6 +46,7 @@
 #include <wepa/persistence/Loader.hpp>
 #include <wepa/persistence/Recorder.hpp>
 #include <wepa/persistence/Eraser.hpp>
+#include <wepa/persistence/Creator.hpp>
 #include <wepa/persistence/Storage.hpp>
 #include <wepa/persistence/GuardClass.hpp>
 
@@ -84,27 +85,8 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
    entry_iterator ii = m_objects.find (primaryKey);
 
    if (ii == m_objects.end ()) {
-      Entry entry;
-
       m_faultCounter ++;
-
-      try {
-         entry.m_object = _class.createObject();
-         dbms::ResultCode resultCode = loader.apply (connection, _class, std::ref (*entry.m_object));
-
-         if (resultCode.successful() == false)
-            WEPA_THROW_NAME_DB_EXCEPTION(loader.getName(), resultCode);
-
-         entry.m_useCounter = 1;
-         m_objects [primaryKey] = entry;
-         std::pair <entry_iterator, bool> rr = m_objects.insert (std::make_pair(primaryKey, entry));
-         entry.m_object->setPrimaryKey(Storage::primaryKey (rr.first));
-         result = entry.m_object;
-      }
-      catch (adt::Exception& ex) {
-         delete entry.m_object;
-         throw;
-      }
+      result = initializeEntry (connection, _class, loader);
    }
    else {
       m_hitCounter ++;
@@ -128,6 +110,56 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
    LOG_DEBUG (loader << " | ObjectId=" << result->getInternalId() << " | Result=" << result->asString ());
 
    return std::ref (*result);
+}
+
+persistence::Object& persistence::Storage::create (dbms::Connection& connection, GuardClass& _class, Creator& creator)
+   throw (adt::RuntimeException, dbms::DatabaseException)
+{
+   exceptionWhenReadOnly(creator);
+
+   const PrimaryKey& primaryKey (creator.getPrimaryKey());
+
+   LOG_DEBUG (getName () << " | Creating=" << primaryKey);
+
+   entry_iterator ii = m_objects.find (primaryKey);
+
+   if (ii != m_objects.end ()) {
+      WEPA_THROW_EXCEPTION(getName () << " | " << primaryKey << " | PrimaryKey is already registered");
+   }
+
+   return std::ref (*initializeEntry(connection, _class, creator));
+}
+
+persistence::Object* persistence::Storage::initializeEntry (dbms::Connection& connection, GuardClass& _class, Accessor& accessor)
+   throw (adt::RuntimeException, dbms::DatabaseException)
+{
+   LOG_THIS_METHOD();
+
+   Entry entry;
+
+   const PrimaryKey& primaryKey = accessor.getPrimaryKey();
+
+   LOG_DEBUG ("Storage='" << getName () << "' | " << primaryKey);
+
+   try {
+      entry.m_object = _class.createObject();
+      dbms::ResultCode resultCode = accessor.apply (connection, _class, std::ref (*entry.m_object));
+
+      if (resultCode.successful() == false)
+         WEPA_THROW_NAME_DB_EXCEPTION(accessor.getName(), resultCode);
+
+      entry.m_useCounter = 1;
+      std::pair <entry_iterator, bool> rr = m_objects.insert (std::make_pair(primaryKey, entry));
+      entry.m_object->setPrimaryKey(Storage::primaryKey (rr.first));
+   }
+   catch (adt::Exception& ex) {
+      delete entry.m_object;
+      throw;
+   }
+
+   LOG_DEBUG ("Result (ObjectId)=" << entry.m_object->getInternalId());
+
+   return entry.m_object;
 }
 
 void persistence::Storage::save (dbms::Connection& connection, GuardClass& _class, Recorder& recorder)

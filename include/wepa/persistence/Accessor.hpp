@@ -85,7 +85,7 @@ public:
    Object& getObject () throw (adt::RuntimeException);
    const Object& getObject () const throw (adt::RuntimeException);
 
-   void setObject (Object& object) noexcept { m_object = &object; }
+   void setObject (Object& object) throw (adt::RuntimeException);
 
    void clearObject () noexcept { m_object = NULL; }
 

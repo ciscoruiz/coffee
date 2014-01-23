@@ -275,7 +275,7 @@ const char* persistence::Accessor::readCString (GuardClass& _class, const int co
 {
    dbms::datatype::Abstract& abstract =_class.getMember(columnNumber);
    const char* result = wepa_datatype_downcast(dbms::datatype::String, abstract).getValue();
-   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Result=" << result);
+   LOG_DEBUG (getName () << " | ColumnNumber=" << columnNumber << " | Result='" << result << "'");
 
    return result;
 }

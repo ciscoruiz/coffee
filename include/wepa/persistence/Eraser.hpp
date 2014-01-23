@@ -50,7 +50,6 @@ public:
 
 protected:
    Eraser (const char* name, const int ident) : Accessor(name, ident) {;}
-
 };
 
 } /* namespace persistence */

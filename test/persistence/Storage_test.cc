@@ -36,19 +36,21 @@
 
 #include <thread>
 
-#include <wepa/logger/Logger.hpp>
-
 #include <wepa/adt/Second.hpp>
+
+#include <wepa/logger/TraceMethod.hpp>
+#include <wepa/logger/Logger.hpp>
 
 #include <wepa/persistence/Repository.hpp>
 #include <wepa/persistence/Storage.hpp>
 #include <wepa/persistence/Loader.hpp>
 #include <wepa/persistence/Recorder.hpp>
+#include <wepa/persistence/Eraser.hpp>
+#include <wepa/persistence/Creator.hpp>
 #include <wepa/persistence/Object.hpp>
 #include <wepa/persistence/Class.hpp>
 #include <wepa/persistence/GuardClass.hpp>
 
-#include <mock/MockApplication.hpp>
 #include <mock/MockLowLevelRecord.hpp>
 #include <mock/MockDatabase.hpp>
 #include <mock/MockConnection.hpp>
@@ -106,7 +108,11 @@ private:
 
 class MyDatabase : public mock::MockDatabase {
 public:
-   MyDatabase (app::Application& app) : mock::MockDatabase (app) {
+   MyDatabase (app::Application& app) : mock::MockDatabase (app) { fillup (); }
+   MyDatabase (const char* name) : mock::MockDatabase (name) { fillup (); }
+
+private:
+   void fillup () {
       mock::MockLowLevelRecord record;
       for (int ii = 0; ii < 10; ++ ii) {
          record.m_id = ii;
@@ -114,12 +120,10 @@ public:
          add (record);
       }
    }
-
-private:
    dbms::Statement* allocateStatement (const char* name, const std::string& expression, const dbms::ActionOnError::_v actionOnError)
       throw (adt::RuntimeException)
    {
-      if (expression == "read" || expression == "READ")
+      if (expression == "read" || expression == "READ" || expression == "none")
          return new MyReadStatement (std::ref (*this), name, expression.c_str(), actionOnError);
 
       if (expression == "write" || expression == "delete")
@@ -180,6 +184,31 @@ private:
 struct MockCustomerRecorder : public Recorder {
 public:
    MockCustomerRecorder () : Recorder ("MockCustomerRecorder", 1) {;}
+
+private:
+   dbms::ResultCode do_apply (dbms::GuardStatement& statement, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
+   bool isInputValue (const int columnNumber) const noexcept { return true; }
+   bool isPrimaryKeyComponent (const int columnNumber) const noexcept { return columnNumber == 0; }
+   bool isOutputValue (const int columnNumber) const noexcept { return false; }
+};
+
+struct MockCustomerEraser : public Eraser {
+public:
+   MockCustomerEraser () : Eraser ("MockCustomerEraser", 2) {;}
+
+private:
+   dbms::ResultCode do_apply (dbms::GuardStatement& statement, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
+   bool isInputValue (const int columnNumber) const noexcept { return columnNumber == 0; }
+   bool isPrimaryKeyComponent (const int columnNumber) const noexcept { return columnNumber == 0; }
+   bool isOutputValue (const int columnNumber) const noexcept { return false; }
+};
+
+struct MockCustomerCreator : public Creator {
+public:
+   MockCustomerCreator () : Creator ("MockCustomerCreator", 3) {;}
+
+   void setId (GuardClass& _class, const int id) throw (adt::RuntimeException) { this->setMember(_class, 0, id); }
+   void setName (GuardClass& _class, const std::string& name) throw (adt::RuntimeException) { this->setMember(_class, 1, name); }
 
 private:
    dbms::ResultCode do_apply (dbms::GuardStatement& statement, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
@@ -296,25 +325,42 @@ dbms::ResultCode test_persistence::MockCustomerRecorder::do_apply (dbms::GuardSt
    return statement.execute ();
 }
 
+dbms::ResultCode test_persistence::MockCustomerEraser::do_apply (dbms::GuardStatement& statement, GuardClass& _class, Object& object)
+   throw (adt::RuntimeException, dbms::DatabaseException)
+{
+   test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (object);
+
+   this->setMember(_class, 0, customer.getId ());
+
+   return statement.execute ();
+}
+
+dbms::ResultCode test_persistence::MockCustomerCreator::do_apply (dbms::GuardStatement& statement, GuardClass& _class, Object& object)
+   throw (adt::RuntimeException, dbms::DatabaseException)
+{
+   LOG_THIS_METHOD();
+
+   test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (object);
+
+   customer.setId (this->readInteger(_class, 0));
+   customer.setName(this->readCString(_class, 1));
+
+   return dbms::ResultCode (statement->getDatabase(), mock::MockDatabase::Successful);
+}
+
 using namespace wepa;
 using namespace wepa::mock;
 
 BOOST_AUTO_TEST_CASE (persistence_storage_readonly)
 {
-   MockApplication application ("persistence_storage_readonly");
+   test_persistence::MyDatabase database ("persistence_storage_readonly");
 
-   test_persistence::MyDatabase database (application);
+   BOOST_REQUIRE_NO_THROW(database.externalInitialize ());
 
-   application.disableTermination();
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
 
    dbms::Connection* conn0 = database.createConnection("0", "0", "0");
    dbms::Statement* stReader = database.createStatement("read_only", "read");
-
-   std::thread tr (std::ref (application));
-   usleep (500);
-
-   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
-   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
 
    persistence::Repository repository ("persistence_storage_readonly");
    persistence::Storage* ro_storage = repository.createStorage(0, "storage_readonly", persistence::Storage::AccessMode::ReadOnly);
@@ -380,28 +426,19 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readonly)
    BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 2);
    BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), myLoader.getApplyCounter ());
 
-   LOG_DEBUG ("Enables termination");
-   application.enableTermination();
-
-   tr.join ();
+   BOOST_REQUIRE_NO_THROW(database.externalStop ());
 }
 
 BOOST_AUTO_TEST_CASE (persistence_storage_readonly_ignore_issue)
 {
-   MockApplication application ("persistence_storage_readonly_ignore_issue");
+   test_persistence::MyDatabase database ("persistence_storage_readonly_ignore_issue");
 
-   test_persistence::MyDatabase database (application);
+   BOOST_REQUIRE_NO_THROW(database.externalInitialize ());
 
-   application.disableTermination();
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
 
    dbms::Connection* conn0 = database.createConnection("0", "0", "0");
    dbms::Statement* stReader = database.createStatement("read_only_ignore_issue", "read", dbms::ActionOnError::Ignore);
-
-   std::thread tr (std::ref (application));
-   usleep (500);
-
-   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
-   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
 
    persistence::Repository repository ("persistence_storage_readonly_ignore_issue");
    persistence::Storage* ro_storage = repository.createStorage(0, "storage_readonly", persistence::Storage::AccessMode::ReadOnly);
@@ -431,27 +468,22 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readonly_ignore_issue)
    BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 0);
    BOOST_REQUIRE_EQUAL (myLoader.getApplyCounter (), 2);
 
-   LOG_DEBUG ("Enables termination");
-   application.enableTermination();
-
-   tr.join ();
+   BOOST_REQUIRE_NO_THROW(database.externalStop ());
 }
 
 BOOST_AUTO_TEST_CASE (persistence_storage_readwrite)
 {
-   MockApplication application ("persistence_storage_readwrite");
+   test_persistence::MyDatabase database ("persistence_storage_readwrite");
 
-   test_persistence::MyDatabase database (application);
+   BOOST_REQUIRE_NO_THROW(database.externalInitialize ());
 
-   application.disableTermination();
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
 
    dbms::Connection* conn0 = database.createConnection("0", "0", "0");
    dbms::Statement* stReader = database.createStatement("read_only", "read");
 
-   std::thread tr (std::ref (application));
-   usleep (500);
+   BOOST_REQUIRE_NO_THROW(database.externalInitialize ());
 
-   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
    BOOST_REQUIRE_EQUAL (database.isRunning(), true);
 
    persistence::Repository repository ("persistence_storage_readwrite");
@@ -514,29 +546,20 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readwrite)
       BOOST_REQUIRE_EQUAL (rw_storage->release (guardCustomer, customer2), true);
    }
 
-   LOG_DEBUG ("Enables termination");
-   application.enableTermination();
-
-   tr.join ();
+   BOOST_REQUIRE_NO_THROW(database.externalStop ());
 }
 
 BOOST_AUTO_TEST_CASE (persistence_storage_readonly_avoid_write)
 {
-   MockApplication application ("persistence_storage_readonly_avoid_write");
+   test_persistence::MyDatabase database ("persistence_storage_readonly");
 
-   test_persistence::MyDatabase database (application);
+   BOOST_REQUIRE_NO_THROW(database.externalInitialize ());
 
-   application.disableTermination();
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
 
    dbms::Connection* conn0 = database.createConnection("0", "0", "0");
    dbms::Statement* stReader = database.createStatement("read_only", "read");
    dbms::Statement* stWriter = database.createStatement("writer", "write");
-
-   std::thread tr (std::ref (application));
-   usleep (500);
-
-   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
-   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
 
    persistence::Repository repository ("persistence_storage_readonly_avoid_write");
    persistence::Storage* ro_storage = repository.createStorage(0, "storage_readonly", persistence::Storage::AccessMode::ReadOnly);
@@ -572,32 +595,23 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readonly_avoid_write)
       catch (adt::RuntimeException& ex) {
          std::cout << ex.asString () << std::endl;
          std::string error = ex.what ();
-         BOOST_REQUIRE_NE(error.find ("A readonly storage can not apply a recorder"), std::string::npos);
+         BOOST_REQUIRE_NE(error.find ("can not write on a read-only storage"), std::string::npos);
       }
    }
 
-   LOG_DEBUG ("Enables termination");
-   application.enableTermination();
-
-   tr.join ();
+   BOOST_REQUIRE_NO_THROW(database.externalStop ());
 }
 
 BOOST_AUTO_TEST_CASE (persistence_storage_write)
 {
-   MockApplication application ("persistence_storage_write");
+   test_persistence::MyDatabase database ("persistence_storage_write");
 
-   test_persistence::MyDatabase database (application);
-
-   application.disableTermination();
+   BOOST_REQUIRE_NO_THROW(database.externalInitialize ());
 
    mock::MockConnection* conn0 = static_cast <mock::MockConnection*> (database.createConnection("0", "0", "0"));
    dbms::Statement* stReader = database.createStatement("read_only", "read");
    dbms::Statement* stWriter = database.createStatement("writer", "write");
 
-   std::thread tr (std::ref (application));
-   usleep (500);
-
-   BOOST_REQUIRE_EQUAL (application.isRunning(), true);
    BOOST_REQUIRE_EQUAL (database.isRunning(), true);
 
    persistence::Repository repository ("persistence_storage_write");
@@ -647,8 +661,179 @@ BOOST_AUTO_TEST_CASE (persistence_storage_write)
       BOOST_REQUIRE_EQUAL (customer.getName(), "updated name 2");
    }
 
-   LOG_DEBUG ("Enables termination");
-   application.enableTermination();
+   BOOST_REQUIRE_NO_THROW(database.externalStop ());
+}
 
-   tr.join ();
+BOOST_AUTO_TEST_CASE (persistence_storage_erase)
+{
+   test_persistence::MyDatabase database ("dbms_with_app");
+
+   BOOST_REQUIRE_NO_THROW(database.externalInitialize ());
+
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
+
+   mock::MockConnection* conn0 = static_cast <mock::MockConnection*> (database.createConnection("0", "0", "0"));
+   dbms::Statement* stReader = database.createStatement("read_only", "read");
+   dbms::Statement* stEraser = database.createStatement("eraser", "delete");
+
+   persistence::Repository repository ("persistence_storage_erase");
+   persistence::Storage* wr_storage = repository.createStorage(0, "storage_erase", persistence::Storage::AccessMode::ReadWrite);
+
+   test_persistence::MockCustomerClass _class;
+
+   BOOST_REQUIRE_NE (wr_storage, (void*) 0);
+
+   test_persistence::MockCustomerLoader myLoader;
+   test_persistence::MockCustomerEraser myEraser;
+
+   if (true) {
+      persistence::GuardClass guardCustomer (_class);
+
+      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 2));
+      test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (wr_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (customer.getId(), 2);
+      BOOST_REQUIRE_EQUAL (customer.getName(), "the name 2");
+
+      BOOST_REQUIRE_NO_THROW(myEraser.initialize(guardCustomer, stEraser));
+
+      BOOST_REQUIRE_THROW(myEraser.getObject(), adt::RuntimeException);
+
+      BOOST_REQUIRE_NO_THROW(customer.getPrimaryKey());
+
+      myEraser.setObject(customer);
+
+      BOOST_REQUIRE_NO_THROW (myEraser.getObject());
+      BOOST_REQUIRE_NO_THROW(myEraser.getObject().getPrimaryKey());
+
+      try {
+         wr_storage->erase (*conn0, guardCustomer, myEraser);
+      }
+      catch (adt::RuntimeException& ex) {
+         std::cout << ex.asString () << std::endl;
+         BOOST_REQUIRE_EQUAL (std::string ("none"), ex.what ());
+      }
+
+      BOOST_REQUIRE_EQUAL (conn0->getCommitCounter(), 1);
+      BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
+   }
+
+   BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL (database.container_size(), 9);
+
+   if (true) {
+      persistence::GuardClass guardCustomer (_class);
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 4));
+      test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (wr_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (customer.getId(), 4);
+      BOOST_REQUIRE_EQUAL (customer.getName(), "the name 4");
+
+      BOOST_REQUIRE_NO_THROW (wr_storage->load(*conn0, guardCustomer, myLoader));
+
+      try {
+         myEraser.setObject(customer);
+         wr_storage->erase (*conn0, guardCustomer, myEraser);
+         BOOST_REQUIRE_EQUAL (true, false);
+      }
+      catch (adt::RuntimeException& ex) {
+         std::cout << ex.asString () << std::endl;
+         std::string error = ex.what ();
+         BOOST_REQUIRE_NE(error.find ("due to multiple references"), std::string::npos);
+      }
+   }
+
+   BOOST_REQUIRE_NO_THROW(database.externalStop ());
+}
+
+BOOST_AUTO_TEST_CASE (persistence_storage_create)
+{
+   test_persistence::MyDatabase database ("persistence_storage_create");
+
+   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
+
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
+
+   mock::MockConnection* conn0 = static_cast <mock::MockConnection*> (database.createConnection("0", "0", "0"));
+
+   BOOST_REQUIRE_NE (conn0, (void*) 0);
+
+   dbms::Statement* stReader = database.createStatement("read_only", "read");
+
+   BOOST_REQUIRE_NE (stReader, (void*) 0);
+
+   dbms::Statement* stCreator = database.createStatement("creator", "none");
+
+   BOOST_REQUIRE_NE (stCreator, (void*) 0);
+
+   dbms::Statement* stWriter = database.createStatement("writer", "write");
+
+   persistence::Repository repository ("persistence_storage_create");
+   persistence::Storage* wr_storage = repository.createStorage(0, "storage_create", persistence::Storage::AccessMode::ReadWrite);
+
+   test_persistence::MockCustomerClass _class;
+
+   BOOST_REQUIRE_NE (wr_storage, (void*) 0);
+
+   test_persistence::MockCustomerRecorder myRecorder;
+   test_persistence::MockCustomerCreator myCreator;
+   test_persistence::MockCustomerLoader myLoader;
+
+   if (true) {
+      persistence::GuardClass guardCustomer (_class);
+
+      BOOST_CHECK_NO_THROW(myCreator.initialize(guardCustomer, stCreator));
+
+      myCreator.setId(guardCustomer, 1000);
+      myCreator.setName(guardCustomer, "the name 1000");
+      test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (wr_storage->create (*conn0, guardCustomer, myCreator));
+
+      LOG_DEBUG ("Customer has been created");
+
+      BOOST_REQUIRE_NO_THROW (myRecorder.initialize(guardCustomer, stWriter));
+      myRecorder.setObject (customer);
+
+      BOOST_REQUIRE_NO_THROW (wr_storage->save (*conn0, guardCustomer, myRecorder));
+
+      BOOST_REQUIRE_EQUAL (conn0->getCommitCounter(), 1);
+      BOOST_REQUIRE_EQUAL (conn0->operation_size(), 0);
+   }
+
+   BOOST_REQUIRE_EQUAL (database.container_size(), 11);
+
+   if (true) {
+      persistence::GuardClass guardCustomer (_class);
+
+      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 1000));
+      test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (wr_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (customer.getId(), 1000);
+      BOOST_REQUIRE_EQUAL (customer.getName(), "the name 1000");
+   }
+
+   if (true) {
+      persistence::GuardClass guardCustomer (_class);
+
+      // Accessor already initialized
+      BOOST_CHECK_THROW(myCreator.initialize(guardCustomer, stCreator), adt::RuntimeException);
+
+      myCreator.setId(guardCustomer, 1000);
+      myCreator.setName(guardCustomer, "the name 1000");
+
+      try {
+         wr_storage->create (*conn0, guardCustomer, myCreator);
+         BOOST_REQUIRE_EQUAL (false, true);
+      }
+      catch (adt::RuntimeException& ex) {
+         std::cout << ex.asString() << std::endl;
+         BOOST_REQUIRE_NE (ex.asString ().find ("PrimaryKey is already registered"), std::string::npos);
+      }
+   }
+
+   BOOST_REQUIRE_NO_THROW(database.externalStop());
 }

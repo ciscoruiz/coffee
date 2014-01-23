@@ -32,27 +32,38 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_persistence_Recorder_hpp
-#define __wepa_persistence_Recorder_hpp
+#ifndef __wepa_dbms_internal_DummyApplication_hpp
+#define __wepa_dbms_internal_DummyApplication_hpp
 
-#include <wepa/persistence/Accessor.hpp>
+#include <functional>
 
-#include <wepa/adt/RuntimeException.hpp>
+#include <wepa/app/Application.hpp>
 
 namespace wepa {
-namespace persistence {
 
-class Object;
+namespace app {
+class EngineIf;
+}
 
-class Recorder : public Accessor {
+namespace dbms {
+namespace internal {
+
+class DummyApplication : public app::Application {
 public:
-   virtual ~Recorder () {;}
+   DummyApplication () : app::Application ("dummy", "dummy", "1.0") {;}
 
-protected:
-   Recorder (const char* name, const int ident) : Accessor(name, ident) {;}
+   static app::Application& getInstance () noexcept { return std::ref (st_this); }
+
+private:
+   static DummyApplication st_this;
+
+   void run () throw (adt::RuntimeException) {;}
+   void attach (app::EngineIf*) throw (adt::RuntimeException) {;}
 
 };
 
-} /* namespace persistence */
+
+} /* namespace internal */
+} /* namespace dbms */
 } /* namespace wepa */
 #endif

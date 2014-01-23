@@ -82,12 +82,19 @@ public:
    const PrimaryKey& getPrimaryKey () const throw (adt::RuntimeException);
    const int getIdent () const noexcept { return m_ident; }
 
+   Object& getObject () throw (adt::RuntimeException);
+   const Object& getObject () const throw (adt::RuntimeException);
+
+   void setObject (Object& object) throw (adt::RuntimeException);
+
+   void clearObject () noexcept { m_object = NULL; }
+
    dbms::ResultCode apply (dbms::Connection& connection, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
 
    Accessor (const Accessor&) = delete;
 
 protected:
-   Accessor (const char* name, const int ident) : adt::NamedObject (name), m_ident (ident), m_statement (NULL), m_applyCounter (0) {;}
+   Accessor (const char* name, const int ident) : adt::NamedObject (name), m_ident (ident), m_statement (NULL), m_applyCounter (0), m_object (NULL) {;}
 
    dbms::Statement& getStatement () throw (adt::RuntimeException);
 
@@ -119,6 +126,8 @@ private:
    const int m_ident;
    dbms::Statement* m_statement;
    unsigned int m_applyCounter;
+   Object* m_object;
+
 };
 
 } /* namespace persistence */

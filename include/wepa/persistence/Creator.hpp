@@ -32,8 +32,8 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_persistence_Recorder_hpp
-#define __wepa_persistence_Recorder_hpp
+#ifndef __wepa_persistence_Creator_hpp
+#define __wepa_persistence_Creator_hpp
 
 #include <wepa/persistence/Accessor.hpp>
 
@@ -44,12 +44,12 @@ namespace persistence {
 
 class Object;
 
-class Recorder : public Accessor {
+class Creator : public Accessor {
 public:
-   virtual ~Recorder () {;}
+   virtual ~Creator () {;}
 
 protected:
-   Recorder (const char* name, const int ident) : Accessor(name, ident) {;}
+   Creator (const char* name, const int ident) : Accessor(name, ident) {;}
 
 };
 

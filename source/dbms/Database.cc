@@ -54,10 +54,11 @@
 #include <wepa/dbms/StatementTranslator.hpp>
 #include <wepa/dbms/SCCS.hpp>
 
+#include <wepa/dbms/internal/DummyApplication.hpp>
+
 using namespace std;
 using namespace wepa;
 
-//typedef Guard <dbms::Database> MyGuard;
 
 dbms::Database::Database (app::Application& app, const char* className, const char* dbmsName) :
    app::EngineIf (app, className),
@@ -69,8 +70,39 @@ dbms::Database::Database (app::Application& app, const char* className, const ch
    dbms::SCCS::activate ();
 }
 
+dbms::Database::Database (const char* rdbmsName, const char* dbmsName) :
+   dbms::Database (internal::DummyApplication::getInstance (), rdbmsName, dbmsName)
+{;}
+
 dbms::Database::~Database ()
 {
+   if (this->isStopped() == false)
+      stop ();
+}
+
+void dbms::Database::externalInitialize ()
+   throw (adt::RuntimeException)
+{
+   app::Application& application (getApplication());
+   app::Application& dummy = internal::DummyApplication::getInstance();
+
+   if (&dummy != &application) {
+      WEPA_THROW_EXCEPTION(asString () << " | This method can't be applied to a database with associated application");
+   }
+
+   initialize();
+}
+
+void dbms::Database::externalStop ()
+   throw (adt::RuntimeException)
+{
+   app::Application& application (getApplication());
+   app::Application& dummy = internal::DummyApplication::getInstance();
+
+   if (&dummy != &application) {
+      WEPA_THROW_EXCEPTION(asString () << " | This method can't be applied to a database with associated application");
+   }
+
    stop ();
 }
 
@@ -105,18 +137,23 @@ void dbms::Database::do_stop ()
 {
    LOG_THIS_METHOD();
 
-   try {
-      for (connection_iterator iic = connection_begin (), maxiic = connection_end (); iic != maxiic; iic ++) {
-         Connection& _connection = connection (iic);
-         _connection.close ();
-      }
+   int counter = 0;
 
-      m_connections.clear ();
+   for (connection_iterator iic = connection_begin (), maxiic = connection_end (); iic != maxiic; ++ iic) {
+      Connection& _connection = connection (iic);
+      try {
+         _connection.close ();
+         ++ counter;
+      }
+      catch (adt::Exception& ex) {
+         logger::Logger::write(ex);
+      }
    }
-   catch (adt::Exception& ex) {
-      logger::Logger::write(ex);
-      m_connections.clear ();
-   }
+
+   LOG_DEBUG (asString () << " | Closed " << counter << " of " << m_connections.size ());
+
+   m_connections.clear ();
+   m_statements.clear ();
 }
 
 dbms::Connection* dbms::Database::createConnection (const char* name, const char* user, const char* password)

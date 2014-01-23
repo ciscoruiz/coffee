@@ -52,6 +52,7 @@ public:
    enum ErrorCode { NotFound, Successful, Lock, LostConnection };
 
    MockDatabase (app::Application& app) : dbms::Database (app, "map", app.getTitle ().c_str ()) {;}
+   MockDatabase (const char* name);
 
    void add (const mock::MockLowLevelRecord& record) noexcept {
       m_container [record.m_id] = record;

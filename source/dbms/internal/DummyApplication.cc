@@ -32,27 +32,11 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_persistence_Recorder_hpp
-#define __wepa_persistence_Recorder_hpp
+#include <wepa/dbms/internal/DummyApplication.hpp>
 
-#include <wepa/persistence/Accessor.hpp>
+using namespace wepa;
 
-#include <wepa/adt/RuntimeException.hpp>
+// static
+dbms::internal::DummyApplication dbms::internal::DummyApplication::st_this;
 
-namespace wepa {
-namespace persistence {
 
-class Object;
-
-class Recorder : public Accessor {
-public:
-   virtual ~Recorder () {;}
-
-protected:
-   Recorder (const char* name, const int ident) : Accessor(name, ident) {;}
-
-};
-
-} /* namespace persistence */
-} /* namespace wepa */
-#endif

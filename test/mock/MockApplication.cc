@@ -64,6 +64,7 @@ void mock::MockApplication::run ()
 
    LOG_DEBUG ("Waiting for enabled termination");
    m_termination.lock ();
+   LOG_DEBUG (getTitle() << " will terminate now");
 
    // It will be block until something frees the mutex by calling enableTermination
 }

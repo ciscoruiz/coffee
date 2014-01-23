@@ -229,7 +229,7 @@ private:
    pid_t a_pid;
    bool a_enableGPL;
 
-   void attach (EngineIf*) throw (adt::RuntimeException);
+   virtual void attach (EngineIf*) throw (adt::RuntimeException);
 
    void startEngines () throw (adt::RuntimeException);
    void stopEngines () noexcept;

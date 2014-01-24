@@ -50,6 +50,7 @@
 #include <wepa/persistence/Object.hpp>
 #include <wepa/persistence/Class.hpp>
 #include <wepa/persistence/GuardClass.hpp>
+#include <wepa/persistence/AutoObject.hpp>
 
 #include <mock/MockLowLevelRecord.hpp>
 #include <mock/MockDatabase.hpp>
@@ -428,8 +429,7 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readonly)
    BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), myLoader.getApplyCounter ());
 
    if (true) {
-      LOG_DEBUG ("Reload record 6...");
-      persistence::GuardClass guardCustomer (_class);
+      persistence::GuardClass guardCustomer (_class, "Reload record 6");
 
       BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 6));
       test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (ro_storage->load(*conn0, guardCustomer, myLoader));
@@ -441,6 +441,29 @@ BOOST_AUTO_TEST_CASE (persistence_storage_readonly)
    BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 3);
    BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 3);
    BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), myLoader.getApplyCounter ());
+
+   if (true) {
+      persistence::GuardClass guardCustomer (_class, "Reload record 6");
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 8));
+      test_persistence::MockCustomerObject& customer = static_cast <test_persistence::MockCustomerObject&> (ro_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (customer.getId(), 8);
+
+      BOOST_REQUIRE_EQUAL (ro_storage->release (guardCustomer, customer), true);
+
+      BOOST_REQUIRE_EQUAL (ro_storage->getCacheSize(), 2);
+
+      test_persistence::MockCustomerObject& customer2 = static_cast <test_persistence::MockCustomerObject&> (ro_storage->clone(guardCustomer, customer));
+
+      BOOST_REQUIRE_EQUAL (ro_storage->getCacheSize(), 1);
+
+      BOOST_REQUIRE_EQUAL (customer.getId(), 8);
+
+      BOOST_REQUIRE_EQUAL (ro_storage->release (guardCustomer, customer), true);
+
+      BOOST_REQUIRE_EQUAL (ro_storage->getCacheSize(), 2);
+   }
 
    BOOST_REQUIRE_NO_THROW(database.externalStop ());
 }
@@ -890,6 +913,8 @@ BOOST_AUTO_TEST_CASE (persistence_storage_cache)
 
       int initSize = database.container_size ();
 
+      BOOST_REQUIRE_EQUAL (wr_storage->getSize (), 0);
+
       for (int ii = 100; ii < 200; ++ ii) {
          myCreator.setId(guardCustomer, ii);
          myCreator.setName (guardCustomer, adt::StreamString ("the name ") << ii);
@@ -907,6 +932,8 @@ BOOST_AUTO_TEST_CASE (persistence_storage_cache)
          if ((ii - 100) > 16)
             BOOST_REQUIRE_EQUAL (wr_storage->getCacheSize(), 16);
       }
+
+      BOOST_REQUIRE_EQUAL (wr_storage->getSize (), 0);
    }
 
    if (true) {
@@ -932,4 +959,105 @@ BOOST_AUTO_TEST_CASE (persistence_storage_cache)
       BOOST_REQUIRE_EQUAL (wr_storage->getHitCounter(), 16);
       BOOST_REQUIRE_EQUAL (wr_storage->getCacheSize(), 16);
    }
+}
+
+BOOST_AUTO_TEST_CASE (persistence_storage_using_auto)
+{
+   test_persistence::MyDatabase database ("persistence_storage_using_auto");
+
+   BOOST_REQUIRE_NO_THROW(database.externalInitialize ());
+
+   BOOST_REQUIRE_EQUAL (database.isRunning(), true);
+
+   dbms::Connection* conn0 = database.createConnection("0", "0", "0");
+   dbms::Statement* stReader = database.createStatement("read_only", "read");
+
+   persistence::Repository repository ("persistence_storage_using_auto");
+   persistence::Storage* ro_storage = repository.createStorage(0, "storage_using_auto", persistence::Storage::AccessMode::ReadOnly);
+
+   test_persistence::MockCustomerClass _class;
+
+   BOOST_REQUIRE_NE (ro_storage, (void*) 0);
+
+   test_persistence::MockCustomerLoader myLoader;
+
+   if (true) {
+      persistence::GuardClass guardCustomer (_class, "First load 6");
+
+      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 6));
+      persistence::AutoObject<test_persistence::MockCustomerObject> customer (ro_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (customer->getId(), 6);
+      BOOST_REQUIRE_EQUAL (customer->getName(), "the name 6");
+
+      persistence::AutoObject<test_persistence::MockCustomerObject> customer2 (ro_storage->load(*conn0, guardCustomer, myLoader));
+   }
+
+   BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 1);
+   BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 1);
+   BOOST_REQUIRE_EQUAL (ro_storage->getCacheSize(), 1);
+
+   if (true) {
+      persistence::GuardClass guardCustomer (_class, "Second load 7");
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 7));
+      persistence::AutoObject<test_persistence::MockCustomerObject> customer (ro_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (customer->getId(), 7);
+      BOOST_REQUIRE_EQUAL (customer->getName(), "the name 7");
+
+      BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 2);
+      BOOST_REQUIRE_EQUAL (ro_storage->getCacheSize(), 1);
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 7));
+      persistence::AutoObject<test_persistence::MockCustomerObject> customer2 (ro_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (ro_storage->getCacheSize(), 1);
+
+      BOOST_REQUIRE_EQUAL (customer2->getId(), 7);
+      BOOST_REQUIRE_EQUAL (customer2->getName(), "the name 7");
+
+      BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 2);
+      BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 2);
+
+      BOOST_REQUIRE_EQUAL (&customer.get (), &customer2.get ());
+   }
+
+   BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 2);
+   BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 2);
+   BOOST_REQUIRE_EQUAL (ro_storage->getCacheSize(), 2);
+
+   if (true) {
+      persistence::GuardClass guardCustomer (_class, "Reload records");
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 6));
+      persistence::AutoObject<test_persistence::MockCustomerObject> customer (ro_storage->load(*conn0, guardCustomer, myLoader));
+
+      BOOST_REQUIRE_EQUAL (customer->getId(), 6);
+      BOOST_REQUIRE_EQUAL (ro_storage->getCacheSize(), 1);
+      BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 2);
+      BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 3);
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 6));
+      customer = ro_storage->load(*conn0, guardCustomer, myLoader);
+
+      BOOST_REQUIRE_EQUAL (customer->getId(), 6);
+      BOOST_REQUIRE_EQUAL (ro_storage->getCacheSize(), 1);
+      BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 2);
+      BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 4);
+
+      BOOST_REQUIRE_NO_THROW(myLoader.setId (guardCustomer, 7));
+      customer = ro_storage->load(*conn0, guardCustomer, myLoader);
+
+      BOOST_REQUIRE_EQUAL (customer->getId(), 7);
+      BOOST_REQUIRE_EQUAL (ro_storage->getCacheSize(), 1);
+      BOOST_REQUIRE_EQUAL (ro_storage->getFaultCounter(), 2);
+      BOOST_REQUIRE_EQUAL (ro_storage->getHitCounter(), 5);
+   }
+
+   BOOST_REQUIRE_EQUAL (ro_storage->getCacheSize(), 2);
+
+   BOOST_REQUIRE_NO_THROW(database.externalStop ());
 }

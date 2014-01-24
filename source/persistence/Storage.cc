@@ -94,7 +94,7 @@ persistence::Object& persistence::Storage::load (dbms::Connection& connection, G
 
    const PrimaryKey& primaryKey (loader.getPrimaryKey());
 
-   LOG_DEBUG (getName () << " | Loading=" << primaryKey);
+   LOG_DEBUG (asString () << " | Loading=" << primaryKey);
 
    entry_iterator ii = m_entries.find (primaryKey);
 
@@ -134,7 +134,7 @@ persistence::Object& persistence::Storage::create (dbms::Connection& connection,
 
    const PrimaryKey& primaryKey (creator.getPrimaryKey());
 
-   LOG_DEBUG (getName () << " | Creating=" << primaryKey);
+   LOG_DEBUG (asString () << " | Creating=" << primaryKey);
 
    entry_iterator ii = m_entries.find (primaryKey);
 
@@ -169,7 +169,7 @@ void persistence::Storage::erase (dbms::Connection& connection, GuardClass& _cla
 
    const PrimaryKey& primaryKey = object.getPrimaryKey();
 
-   LOG_DEBUG (getName () << " | Erasing =" << primaryKey);
+   LOG_DEBUG (asString () << " | Erasing =" << primaryKey);
 
    entry_iterator ii = m_entries.find (primaryKey);
 
@@ -178,9 +178,11 @@ void persistence::Storage::erase (dbms::Connection& connection, GuardClass& _cla
    if (ii == m_entries.end ()) {
       LOG_WARN(primaryKey << " is not loaded in storage '" << getName () << "'");
       objectHasBeenFound = false;
+      m_faultCounter ++;
    }
    else {
       Entry& entry = Storage::entry(ii);
+      m_hitCounter ++;
 
       if (entry.hasMultipleReferences () == true) {
          WEPA_THROW_EXCEPTION(eraser.getName () << " can not erase primary key " << primaryKey << " due to multiple references");
@@ -203,6 +205,31 @@ void persistence::Storage::erase (dbms::Connection& connection, GuardClass& _cla
    LOG_DEBUG (eraser << " | ObjectId=" << internalId << " | " << resultCode);
 }
 
+persistence::Object& persistence::Storage::clone (GuardClass& _class, Object& object)
+   throw (adt::RuntimeException, dbms::DatabaseException)
+{
+   const PrimaryKey& primaryKey = object.getPrimaryKey();
+
+   LOG_DEBUG (asString () << " | Clone=" << primaryKey);
+
+   entry_iterator ii = m_entries.find (primaryKey);
+
+   if (ii == m_entries.end ()) {
+      m_faultCounter ++;
+      WEPA_THROW_EXCEPTION(asString () << " | " << primaryKey << " | PrimaryKey is not registered");
+   }
+
+   m_hitCounter ++;
+
+   Entry& entry = Storage::entry(ii);
+
+   removeCachedEntry(entry);
+
+   entry.m_useCounter ++;
+
+   return std::ref (object);
+}
+
 bool persistence::Storage::release (GuardClass& _class, Object& object) noexcept
 {
    bool result = false;
@@ -210,7 +237,7 @@ bool persistence::Storage::release (GuardClass& _class, Object& object) noexcept
    try {
       const PrimaryKey& primaryKey = object.getPrimaryKey();
 
-      LOG_DEBUG (getName () << " | Releasing=" << primaryKey);
+      LOG_DEBUG (asString () << " | Releasing=" << primaryKey);
       entry_iterator ii = m_entries.find (primaryKey);
 
       if (ii != m_entries.end ()) {
@@ -252,6 +279,7 @@ persistence::Object* persistence::Storage::createEntry (dbms::Connection& connec
    try {
       if (m_cacheSize < m_maxCacheSize) {
          entry.m_object = _class.createObject();
+         entry.m_object->setStorageOwner(this);
       }
       else {
          entry.m_object = reuseCachedObject ();

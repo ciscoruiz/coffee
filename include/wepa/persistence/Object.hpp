@@ -49,6 +49,9 @@ class Storage;
 class PrimaryKey;
 class Class;
 
+//// See http://stackoverflow.com/questions/1319876/weird-c-templating-issues
+//template <typename _T> class AutoObject;
+
 class Object {
 public:
    virtual ~Object () {m_primaryKey = NULL; }
@@ -60,6 +63,8 @@ public:
 
    std::string getInternalId () const noexcept;
 
+   Storage& getStorageOwner () noexcept { return std::ref (*m_storageOwner); }
+
    operator adt::StreamString () const noexcept { return asString (); }
 
    virtual adt::StreamString asString () const noexcept = 0;
@@ -67,15 +72,17 @@ public:
 protected:
    Class& m_class;
 
-   Object (Class& _class) : m_class (_class), m_primaryKey (NULL) {;}
+   Object (Class& _class) : m_class (_class), m_primaryKey (NULL), m_storageOwner (NULL) {;}
 
    void setPrimaryKey (const PrimaryKey& primaryKey) noexcept { m_primaryKey = &primaryKey; }
    void clearPrimaryKey () noexcept { m_primaryKey = NULL; }
 
+   void setStorageOwner (Storage* storageOwner) noexcept { m_storageOwner = storageOwner; }
    virtual void clear () noexcept = 0;
 
 private:
    const PrimaryKey* m_primaryKey;
+   Storage* m_storageOwner;
 
    friend class Storage;
 };

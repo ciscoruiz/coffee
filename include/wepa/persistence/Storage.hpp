@@ -116,6 +116,7 @@ public:
    void setMaxCacheSize (const int maxCacheSize) throw (adt::RuntimeException);
    int getMaxCacheSize () const noexcept { return m_maxCacheSize; }
    int getCacheSize () const noexcept { return m_cacheSize; }
+   int getSize () const noexcept { return m_entries.size (); }
 
    unsigned int getHitCounter () const noexcept { return m_hitCounter; }
    unsigned int getFaultCounter () const noexcept { return m_faultCounter; }
@@ -124,6 +125,7 @@ public:
    Object& create (dbms::Connection& connection, GuardClass& _class, Creator& creator) throw (adt::RuntimeException, dbms::DatabaseException);
    void save (dbms::Connection& connection, GuardClass& _class, Recorder& recorder) throw (adt::RuntimeException, dbms::DatabaseException);
    void erase (dbms::Connection& connection, GuardClass& _class, Eraser& eraser) throw (adt::RuntimeException, dbms::DatabaseException);
+   Object& clone (GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
    bool release (GuardClass& _class, Object& object) noexcept;
 
    operator adt::StreamString () const noexcept { return asString (); }

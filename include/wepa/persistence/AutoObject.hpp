@@ -32,59 +32,69 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_persistence_Object_hpp
-#define __wepa_persistence_Object_hpp
+#ifndef __wepa_persistence_AutoObject_hpp
+#define __wepa_persistence_AutoObject_hpp
 
-#include <functional>
+#include <wepa/adt/Exception.hpp>
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/RuntimeException.hpp>
-
-#include <wepa/dbms/DatabaseException.hpp>
+#include <wepa/persistence/Object.hpp>
+#include <wepa/persistence/Storage.hpp>
 
 namespace wepa {
 namespace persistence {
 
-class Storage;
-class PrimaryKey;
-class Class;
+class Object;
 
-//// See http://stackoverflow.com/questions/1319876/weird-c-templating-issues
-//template <typename _T> class AutoObject;
-
-class Object {
+template <typename _T> class AutoObject {
 public:
-   virtual ~Object () {m_primaryKey = NULL; }
+   AutoObject () : m_object (NULL) {;}
+   AutoObject (Object& object) throw (adt::RuntimeException) :
+      m_object (NULL)
+   {
+      set (object);
+   }
+   ~AutoObject () { release (); }
 
-   const PrimaryKey& getPrimaryKey () const throw (adt::RuntimeException);
+   bool hasValue () const noexcept { return m_object != NULL; }
 
-   Class& getClass () noexcept { return std::ref (m_class); }
-   const Class& getClass () const noexcept { return std::ref (m_class); }
+   bool isNull () const noexcept { return hasValue () == false; }
 
-   std::string getInternalId () const noexcept;
+   AutoObject& operator= (Object& object) throw (adt::RuntimeException) {
+      release ();
+      set (object);
+      return *this;
+   }
 
-   Storage& getStorageOwner () noexcept { return std::ref (*m_storageOwner); }
+   _T& get () throw (adt::RuntimeException) { return std::ref (*operator-> ()); }
 
-   operator adt::StreamString () const noexcept { return asString (); }
+   _T* operator-> () throw (adt::RuntimeException) {
+      if (isNull ())
+         WEPA_THROW_EXCEPTION(typeid (*this).name () << " does not have associated value");
 
-   virtual adt::StreamString asString () const noexcept = 0;
+      return static_cast <_T*> (m_object);
+   }
 
-protected:
-   Class& m_class;
-
-   Object (Class& _class) : m_class (_class), m_primaryKey (NULL), m_storageOwner (NULL) {;}
-
-   void setPrimaryKey (const PrimaryKey& primaryKey) noexcept { m_primaryKey = &primaryKey; }
-   void clearPrimaryKey () noexcept { m_primaryKey = NULL; }
-
-   void setStorageOwner (Storage* storageOwner) noexcept { m_storageOwner = storageOwner; }
-   virtual void clear () noexcept = 0;
+   AutoObject (const AutoObject <_T>&) = delete;
 
 private:
-   const PrimaryKey* m_primaryKey;
-   Storage* m_storageOwner;
+   Object* m_object;
 
-   friend class Storage;
+   void set (Object& object) throw (adt::RuntimeException) {
+      _T* result = dynamic_cast <_T*> (&object);
+
+      if (result == NULL) {
+         WEPA_THROW_EXCEPTION(object.asString () << " | This object can not be treated by " << typeid (*this).name ());
+      }
+
+      m_object = result;
+   }
+   void release () noexcept {
+      if (m_object != NULL) {
+         GuardClass guard (m_object->getClass ());
+         m_object->getStorageOwner ().release (guard, *m_object);
+         m_object = NULL;
+      }
+   }
 };
 
 } /* namespace persistence */

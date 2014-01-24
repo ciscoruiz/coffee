@@ -933,7 +933,7 @@ BOOST_AUTO_TEST_CASE (persistence_storage_cache)
             BOOST_REQUIRE_EQUAL (wr_storage->getCacheSize(), 16);
       }
 
-      BOOST_REQUIRE_EQUAL (wr_storage->getSize (), 0);
+      BOOST_REQUIRE_EQUAL (wr_storage->getSize (), 16);
    }
 
    if (true) {

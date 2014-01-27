@@ -91,38 +91,38 @@ public:
       Devuelve el nombre corto indicado en el constructor.
       \return El nombre corto indicado en el constructor.
    */
-   const char* getShortName () const throw () { return getName (); }
+   const char* getShortName () const noexcept { return getName (); }
 
    /**
       Devuelve la version indicado en el contructor de esta aplicacion.
       \return La version indicado en el contructor de esta aplicacion.
    */
-   const std::string& getVersion () const throw () { return a_version; }
+   const std::string& getVersion () const noexcept { return a_version; }
 
    /**
       Devuelve el titulo indicado en el contructor de esta aplicacion.
       \return el titulo indicado en el contructor de esta aplicacion.
    */
-   const std::string& getTitle () const throw () { return a_title; }
+   const std::string& getTitle () const noexcept { return a_title; }
 
    /**
       Devuelve el pid asignado por el sistema operativo a la aplicacion que estamos ejecutando.
       @return El pid asignado por el sistema operativo a la aplicacion que estamos ejecutando.
    */
-   pid_t getPid () const throw () { return a_pid; }
+   pid_t getPid () const noexcept { return a_pid; }
 
    /**
       Activa la salida por pantalla del mensaje referente a la licencia GPL 3.0.
       \warning Para que tenga efecto debe ser invocado antes de ejecutar el metodo Application::start.
    */
-   void activateGeneralPublicLicense () throw () { a_enableGPL = true; }
+   void activateGeneralPublicLicense () noexcept { a_enableGPL = true; }
 
    /**
       Devuelve la instancia del enginee que corresponde con el nombre recibido.
       \return La instancia del enginee que corresponde con el nombre recibido. Puede ser NULL si no
       hay ningun enginee asociado a la �ta aplicacion que corresponda con el nombre.
    */
-   EngineIf* engine_find (const char* className) throw ();
+   EngineIf* engine_find (const char* className) noexcept;
 
    /**
       Inicializa los elementos propios de nuestra aplicacio, invoca al metodo #initialize
@@ -139,45 +139,45 @@ public:
     * no muy estable por lo que se deber�an minizar las operaciones a realizar para evitar
     * bloquear la aplicaci�n.
     */
-   virtual void eventAbnormalTermination (const char* className) throw () { ; }
+   virtual void eventAbnormalTermination (const char* className) noexcept { ; }
 
    /**
       Devuelve un iterador al primer enginee definido en la aplicacion.
       \return un iterador al primer enginee definido en la aplicacion.
    */
-   engine_iterator engine_begin () throw () { return a_engines.begin (); }
+   engine_iterator engine_begin () noexcept { return a_engines.begin (); }
 
    /**
       Devuelve un iterador al ultimo enginee definido en la aplicacion.
       \return un iterador al ultimo enginee definido en la aplicacion.
    */
-   const_engine_iterator engine_end () const throw () { return a_engines.end (); }
+   const_engine_iterator engine_end () const noexcept { return a_engines.end (); }
 
    /**
       Devuelve el objeto sobre el que esta posicionado el iterator recibido como parametro.
       \param ii Iterator que deberia estar comprendido entre #begin y #end.
       \return El objeto sobre el que esta posicionado el iterator recibido como parametro.
    */
-   static EngineIf* engine (engine_iterator ii) throw () { return *ii; }
+   static EngineIf* engine (engine_iterator ii) noexcept { return *ii; }
 
    /**
       Devuelve un iterador al primer enginee definido en la aplicacion.
       \return un iterador al primer enginee definido en la aplicacion.
    */
-   const_engine_iterator engine_begin () const throw () { return a_engines.begin (); }
+   const_engine_iterator engine_begin () const noexcept { return a_engines.begin (); }
 
    /**
       Devuelve un iterador al ultimo enginee definido en la aplicacion.
       \return un iterador al ultimo enginee definido en la aplicacion.
    */
-   engine_iterator engine_end () throw () { return a_engines.end (); }
+   engine_iterator engine_end () noexcept { return a_engines.end (); }
 
    /**
       Devuelve el objeto sobre el que esta posicionado el iterator recibido como parametro.
       \param ii Iterator que deberia estar comprendido entre #begin y #end.
       \return El objeto sobre el que esta posicionado el iterator recibido como parametro.
    */
-   static const EngineIf* engine (const_engine_iterator ii) throw () { return *ii; }
+   static const EngineIf* engine (const_engine_iterator ii) noexcept { return *ii; }
 
    /**
       Vuelva un documento XML con el contexto de la aplicacion.
@@ -199,7 +199,7 @@ public:
       \param parent Nodo XML del que dependende la informacion.
       @return Una cadena con la informacion referente a esta instancia.
    */
-   virtual xml::Node& asXML (xml::Node& parent) const throw ();
+   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
 protected:
    /**
@@ -229,15 +229,15 @@ private:
    pid_t a_pid;
    bool a_enableGPL;
 
-   void attach (EngineIf*) throw (adt::RuntimeException);
+   virtual void attach (EngineIf*) throw (adt::RuntimeException);
 
    void startEngines () throw (adt::RuntimeException);
-   void stopEngines () throw ();
-   void sendSignalToChilds (const int signal) throw ();
+   void stopEngines () noexcept;
+   void sendSignalToChilds (const int signal) noexcept;
 
-   static void handlerUserSignal (int) throw ();
-   static void handlerSignalTerminate (int) throw ();
-   static void handlerChildTerminate (int sig) throw ();
+   static void handlerUserSignal (int) noexcept;
+   static void handlerSignalTerminate (int) noexcept;
+   static void handlerChildTerminate (int sig) noexcept;
 
    friend class EngineIf;  
    friend struct functions;

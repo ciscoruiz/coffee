@@ -67,26 +67,26 @@ public:
       Devuelve el nombre l�gico de esta instancia.
       @return El nombre l�gico de esta instancia.
    */
-   const char* getName() const throw () { return (m_name == NULL) ? NULL: m_name->c_str (); }
+   const char* getName() const noexcept { return (m_name == NULL) ? NULL: m_name->c_str (); }
 
    /**
     * Devuelve \em true si est� instancia est� parada o \em false en otro caso.
     */
-   bool isStopped () const throw () { return m_statusFlags == StatusFlags::Stopped; }
+   bool isStopped () const noexcept { return m_statusFlags == StatusFlags::Stopped; }
 
    /**
       Devuelve \em true si la instancia esta comenzando su ejecucion o \em false en otro caso.
       \return \em true si la instancia esta comenzando su ejecucion o \em false en otro caso.
       \since NemesisRD.core 1.2.30
    */
-   bool isStarting () const throw () { return (m_statusFlags & StatusFlags::Starting) != 0; }
+   bool isStarting () const noexcept { return (m_statusFlags & StatusFlags::Starting) != 0; }
 
    /**
       Devuelve \em true si la instancia esta en ejecucion o \em false en otro caso.
       \return \em true si la instancia esta en ejecucion o \em false en otro caso.
       \since NemesisRD.core 1.2.30
    */
-   bool isRunning () const throw () { return (m_statusFlags & StatusFlags::Running) != 0; }
+   bool isRunning () const noexcept { return (m_statusFlags & StatusFlags::Running) != 0; }
 
    /**
       Devuelve el valor del indicador de parada.
@@ -94,7 +94,7 @@ public:
       \warning La implementacion particular del metodo run deberia comprobar este valor
       periodicamente.
    */
-   bool isWaitingStop () const throw () { return (m_statusFlags & StatusFlags::WaitingStop) != 0; }
+   bool isWaitingStop () const noexcept { return (m_statusFlags & StatusFlags::WaitingStop) != 0; }
 
    /**
     * Solicita la parada de esta instancia. Invocar� al m�todo virtual puro \em do_requestStop.
@@ -105,14 +105,14 @@ public:
       Devuelve una cadena con la informacion relevante de este objeto.
       \return Una cadena con la informacion relevante de este objeto.
    */
-   virtual adt::StreamString asString () const throw ();
+   virtual adt::StreamString asString () const noexcept;
 
    /**
       Devuelve un documento XML con la informacion mas relevante de esta instancia.
       \param parent Nodo XML del que colgar la informacion referente a esta instancia.
       \return Un documento XML con la informacion mas relevante de esta instancia.
    */
-   virtual xml::Node& asXML (xml::Node& parent) const throw ();
+   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
 protected:
    /**
@@ -135,34 +135,34 @@ protected:
    /**
     * Activa el flag de estado recibido como par�metro
     */
-   void activate (const StatusFlags::_v statusFlag) throw () { m_statusFlags |= statusFlag; }
+   void activate (const StatusFlags::_v statusFlag) noexcept { m_statusFlags |= statusFlag; }
 
    /**
     * Activa el flag de estado recibido como par�metro
     */
-   void deactivate (const StatusFlags::_v statusFlag) throw () { m_statusFlags &= ~statusFlag; }
+   void deactivate (const StatusFlags::_v statusFlag) noexcept { m_statusFlags &= ~statusFlag; }
 
    /**
     * Establece directamente el estado de esta instancia.
     * \internal.
     */
-//   void setStatusFlags (const int status) throw () { a_statusFlags = status; }
+//   void setStatusFlags (const int status) noexcept { a_statusFlags = status; }
 
    /**
     * Establece los flags que indica que esta instancia est� arrancando.
     */
-   void statusStarting () throw () { m_statusFlags = StatusFlags::Starting; }
+   void statusStarting () noexcept { m_statusFlags = StatusFlags::Starting; }
 
    /**
     * Establece los flags que indica que ha recibido una solicitud de parada y
     * est� a la espera de realizar las operaciones necesarias.
     */
-   void statusWaitingStop () throw () { m_statusFlags |= StatusFlags::WaitingStop;  }
+   void statusWaitingStop () noexcept { m_statusFlags |= StatusFlags::WaitingStop;  }
 
    /**
     * Establece los flags que indica que esta instancia est� en ejecuci�n.
     */
-   void statusRunning () throw () {
+   void statusRunning () noexcept {
       deactivate (StatusFlags::Starting);
       activate (StatusFlags::Running);
    }
@@ -170,13 +170,13 @@ protected:
    /**
     * Establece los flags que indica que esta instancia ha terminado su ejecuci�n.
     */
-   void statusStopped () throw () { m_statusFlags = StatusFlags::Stopped; }
+   void statusStopped () noexcept { m_statusFlags = StatusFlags::Stopped; }
 
    /**
     * Inicializa el estado de esta instancia.
     * \internal.
     */
-   void clearStatusFlags () throw () { m_statusFlags = StatusFlags::Stopped; }
+   void clearStatusFlags () noexcept { m_statusFlags = StatusFlags::Stopped; }
 
    /**
     * M�todo virtual que pueden usar las clases heredadas para particular su proceso de solicitud de parada.
@@ -187,7 +187,7 @@ private:
    const std::string* m_name;
    int m_statusFlags;
 
-   std::string flagsAsString () const throw ();
+   std::string flagsAsString () const noexcept;
 };
 
 }

@@ -64,15 +64,15 @@ public:
          registerEvent(ii);
    }
 
-   const observer::Event& getEvent (const Events::_v nn) const throw () { return m_events [nn]; }
+   const observer::Event& getEvent (const Events::_v nn) const noexcept { return m_events [nn]; }
 
-   void setII (const int ii) throw () { m_ii = ii; notify(m_events [Events::ChangeII]); }
+   void setII (const int ii) noexcept { m_ii = ii; notify(m_events [Events::ChangeII]); }
    void setSS (const std::string& ss) { m_ss = ss; notify(Events::ChangeSS); }
-   void setUU (const unsigned int uu) throw () { m_uu = uu; notify(m_events [Events::ChangeUU]); }
+   void setUU (const unsigned int uu) noexcept { m_uu = uu; notify(m_events [Events::ChangeUU]); }
 
-   int getII () const throw () { return m_ii; }
-   const std::string& getSS () const throw () { return m_ss; }
-   unsigned int getUU () const throw () { return m_uu; }
+   int getII () const noexcept { return m_ii; }
+   const std::string& getSS () const noexcept { return m_ss; }
+   unsigned int getUU () const noexcept { return m_uu; }
 
    void clear () {
       m_ii = -1;
@@ -96,13 +96,13 @@ public:
       subject.subscribeObserver(this, subject.getEvent(TheSubject::Events::ChangeII));
    }
 
-   int getValue () const throw () { return m_value; }
+   int getValue () const noexcept { return m_value; }
 
 private:
    const TheSubject& m_mySubject;
    int m_value;
 
-   void update (const observer::Event& event) throw () {
+   void update (const observer::Event& event) noexcept {
       m_value = m_mySubject.getII ();
    }
 };
@@ -115,13 +115,13 @@ public:
       subject.subscribeObserver(this, TheSubject::Events::ChangeSS);
    }
 
-   const std::string& getValue () const throw () { return m_value; }
+   const std::string& getValue () const noexcept { return m_value; }
 
 private:
    const TheSubject& m_mySubject;
    std::string m_value;
 
-   void update (const observer::Event& event) throw () {
+   void update (const observer::Event& event) noexcept {
       m_value = m_mySubject.getSS ();
    }
 };
@@ -134,14 +134,14 @@ public:
       subject.subscribeObserver (this);
    }
 
-   unsigned int getValue () const throw () { return m_uu + m_ii; }
+   unsigned int getValue () const noexcept { return m_uu + m_ii; }
 
 private:
    const TheSubject& m_mySubject;
    int m_ii;
    unsigned m_uu;
 
-   void update (const observer::Event& event) throw () {
+   void update (const observer::Event& event) noexcept {
       m_uu =  m_mySubject.getUU ();
       m_ii = m_mySubject.getII ();
    }
@@ -157,15 +157,15 @@ public:
       subject.subscribeObserver (this);
    }
 
-   int getII () const throw () { return m_ii; }
-   unsigned int getUU () const throw () { return m_uu; }
+   int getII () const noexcept { return m_ii; }
+   unsigned int getUU () const noexcept { return m_uu; }
 
 private:
    const TheSubject& m_mySubject;
    int m_ii;
    unsigned m_uu;
 
-   void update (const observer::Event& event) throw () {
+   void update (const observer::Event& event) noexcept {
       m_uu =  m_mySubject.getUU ();
       m_ii = m_mySubject.getII ();
    }
@@ -175,7 +175,7 @@ class DullObserver : public observer::Observer {
 public:
    DullObserver () : observer::Observer ("DullObserver") {;}
 private:
-   void update (const observer::Event& event) throw () {
+   void update (const observer::Event& event) noexcept {
    }
 };
 

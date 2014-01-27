@@ -39,6 +39,29 @@
 using namespace wepa;
 using namespace wepa::dbms;
 
+datatype::String::String (const char* name, const int maxSize, const Constraint::_v constraint) :
+   datatype::Abstract (name, Datatype::String, maxSize, constraint)
+{
+   datatype::Abstract::setBuffer (m_value = new char [maxSize + 1]);
+   wepa_memset (m_value, 0, maxSize + 1);
+}
+
+datatype::String::String (const std::string& name, const int maxSize, const Constraint::_v constraint) :
+   datatype::Abstract (name, Datatype::String, maxSize, constraint)
+{
+   datatype::Abstract::setBuffer (m_value = new char [maxSize + 1]);
+   wepa_memset (m_value, 0, maxSize + 1);
+}
+
+datatype::String::String (const String& other) :
+   datatype::Abstract (other)
+{
+   const int maxSize = getMaxSize ();
+   datatype::Abstract::setBuffer (m_value = new char [maxSize + 1]);
+
+   wepa_memcpy (m_value, other.m_value, maxSize);
+}
+
 void datatype::String::setValue (const char* str)
    throw (adt::RuntimeException)
 {
@@ -60,7 +83,7 @@ void datatype::String::setValue (const char* str)
 }
 
 char* datatype::String::strip (char *str)
-   throw ()
+   noexcept
 {
    int len;
 
@@ -78,7 +101,7 @@ char* datatype::String::strip (char *str)
 }
 
 adt::StreamString datatype::String::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("dbms::datatype::String { ");
    result += datatype::Abstract::asString ();
@@ -90,5 +113,13 @@ adt::StreamString datatype::String::asString () const
       result += "<null>";
 
    return result += " }";
+}
+
+int datatype::String::do_compare (const datatype::Abstract& other) const
+   throw (adt::RuntimeException)
+{
+   const String& _other = wepa_datatype_downcast(String, other);
+
+   return wepa_strcmp (this->m_value,_other.m_value);
 }
 

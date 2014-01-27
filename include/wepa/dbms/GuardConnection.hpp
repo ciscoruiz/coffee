@@ -42,6 +42,7 @@ namespace wepa {
 namespace dbms {
 
 class Connection;
+class GuardStatement;
 
 class GuardConnection {
 public:
@@ -49,13 +50,23 @@ public:
    GuardConnection (Connection*) throw (adt::RuntimeException);
    ~GuardConnection ();
 
-   ResultCode execute (Statement* statement) throw (adt::RuntimeException, DatabaseException);
-   ResultCode execute (Statement& statement) throw (adt::RuntimeException, DatabaseException) {
-      return execute (&statement);
-   }
+   Connection* operator-> () noexcept { return &m_connection; }
+
+   int setMaxCommitPending (const int maxCommitPending) noexcept;
+   void clearMaxCommitPending () noexcept;
+
+   int getCountLinkedStatement () const noexcept { return m_countLinkedStatement; }
 
 private:
    Connection& m_connection;
+   int m_countLinkedStatement;
+
+   void linkStatement () noexcept { m_countLinkedStatement ++; }
+   void unlinkStatement () noexcept { m_countLinkedStatement --; }
+
+   ResultCode execute (Statement& statement) throw (adt::RuntimeException, DatabaseException);
+
+   friend class GuardStatement;
 };
 }
 }

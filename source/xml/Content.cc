@@ -40,7 +40,7 @@
 using namespace wepa;
 
 void xml::Content::setValue (const char* value)
-   throw ()
+   noexcept
 {
    unsigned char* utf8Text = NULL;
    const unsigned char* source = reinterpret_cast <const unsigned char*> (value);

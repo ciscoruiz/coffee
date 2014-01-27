@@ -73,7 +73,7 @@ public:
     * @param problem
     * @return Solutions for the received problem. It will erased when the Solver goes out of scope.
     */
-   bool apply () throw () {
+   bool apply () noexcept {
       this->clear ();
 
       Solution* solution = NULL;
@@ -93,18 +93,18 @@ public:
    const Solution* getSolution (const int index) const throw (RuntimeException) { return this->getNextStep(index); }
 
 protected:
-   virtual _T getStartingPoint () const throw () = 0;
+   virtual _T getStartingPoint () const noexcept = 0;
 
-   virtual _T first (const int depth, _T value) const throw () = 0;
-   virtual bool stop (const int depth, _T value) const throw () = 0;
-   virtual _T next (const int depth, _T value) const throw () = 0;
+   virtual _T first (const int depth, _T value) const noexcept = 0;
+   virtual bool stop (const int depth, _T value) const noexcept = 0;
+   virtual _T next (const int depth, _T value) const noexcept = 0;
 
-   virtual bool reject (const Solution* solution, const _T candidate) const throw () = 0;
-   virtual bool accept (const Solution* solution, const _T candidate) const throw () = 0;
+   virtual bool reject (const Solution* solution, const _T candidate) const noexcept = 0;
+   virtual bool accept (const Solution* solution, const _T candidate) const noexcept = 0;
 
 private:
 
-   bool backtracking (const int depth, Solution* onTestSolution, const _T candidate) throw () {
+   bool backtracking (const int depth, Solution* onTestSolution, const _T candidate) noexcept {
       if (reject (onTestSolution, candidate) == true) return false;
 
       // onTestSolution + candidate become to a real Solution

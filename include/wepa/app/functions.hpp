@@ -81,7 +81,7 @@ struct functions {
       @author frr@tid.es cisco.tierra@gmail.com.
       \warning La clase T de implementar un metodo de la forma:
       \code
-          static const char* getClassName () throw ();
+          static const char* getClassName () noexcept;
       \endcode
       \see AbstractEngine
    */
@@ -117,7 +117,7 @@ struct functions {
 private:
    static Application* st_application;
 
-   static void setApplication (Application* application) throw () { st_application = application; }
+   static void setApplication (Application* application) noexcept { st_application = application; }
 
    friend class Application;
 };

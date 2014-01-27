@@ -38,7 +38,7 @@
 using namespace std;
 using namespace wepa;
 
-string dbms::DatabaseException::asString() const throw ()
+string dbms::DatabaseException::asString() const noexcept
 {
    adt::StreamString str (this->filePosition ());
 

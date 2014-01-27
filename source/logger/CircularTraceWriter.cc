@@ -74,7 +74,7 @@ void logger::CircularTraceWriter::do_initialize() throw (adt::RuntimeException)
 }
 
 void logger::CircularTraceWriter::apply(const Level::_v level, const std::string& line)
-   throw ()
+   noexcept
 {
    if (m_stream == NullStream) {
       if (level <= Level::Error) {
@@ -105,7 +105,7 @@ void logger::CircularTraceWriter::apply(const Level::_v level, const std::string
 
 // When there is some kind of error over the stream, it will only trace error's
 bool logger::CircularTraceWriter::wantsToProcess (const logger::Level::_v level) const
-   throw ()
+   noexcept
 {
    return (m_stream != NullStream) ? logger::Writer::wantsToProcess(level): level <= Level::Error;
 }
@@ -139,7 +139,7 @@ bool wepa::logger::CircularTraceWriter::oversizedStream()
 }
 
 void logger::CircularTraceWriter::closeStream()
-   throw ()
+   noexcept
 {
    if (m_stream != NullStream)
       ::close (m_stream);

@@ -64,7 +64,7 @@ void observer::Subject::subscribeObserver (Observer* observer, const Event& even
 }
 
 bool observer::Subject::unsubscribeObserver (Observer* _observer)
-   throw ()
+   noexcept
 {
    const std::string& name = _observer->getName();
 
@@ -115,7 +115,7 @@ throw (RuntimeException)
 }
 
 void observer::Subject::notify (const Event& event)
-   throw ()
+   noexcept
 {
    for (auto ii = observer_begin (), maxii = observer_end (); ii != maxii; ++ ii) {
       Event::BitMask bitmask = Subject::bitmask(ii);

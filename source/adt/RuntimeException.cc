@@ -38,7 +38,7 @@
 using namespace std;
 using namespace wepa;
 
-string adt::RuntimeException::asString() const throw ()
+string adt::RuntimeException::asString() const noexcept
 {
    StreamString str (this->filePosition());
 

@@ -47,7 +47,7 @@ wepa_sccs_define_tag (balance, 0)
 using namespace wepa;
 
 void balance::SCCS::activate()
-   throw ()
+   noexcept
 {
    config::SCCS::activate ();
    adt::SCCS::activate ();

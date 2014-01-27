@@ -57,14 +57,14 @@ public:
       m_key (key),
       m_available (false) {;}
 
-   void setAvailable (const bool available) throw () { m_available = available; }
-   int getKey () const throw () { return m_key; }
+   void setAvailable (const bool available) noexcept { m_available = available; }
+   int getKey () const noexcept { return m_key; }
 
 private:
    const int m_key;
    bool m_available;
 
-   bool isAvailable () const throw () { return m_available; }
+   bool isAvailable () const noexcept { return m_available; }
    void initialize () throw (adt::RuntimeException) { m_available = true; }
 };
 
@@ -73,7 +73,7 @@ public:
    MyBaseBalance (const Requires::_v requires);
    ~MyBaseBalance () { m_resources.clear (); }
 
-   MyResource* get (const int index) throw () { return &m_resources [index]; }
+   MyResource* get (const int index) noexcept { return &m_resources [index]; }
 
 private:
    boost::ptr_vector<MyResource> m_resources;
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE (as_string)
 
    myBalance.get (MaxResources / 2)->setAvailable(false);
 
-   BOOST_REQUIRE_EQUAL (myBalance.asString (), "balance::BalanceIf {adt::NamedObject { Name: MyBalance } | Requires=Key } | Available = 9 of 10}");
+   BOOST_REQUIRE_EQUAL (myBalance.asString (), "balance.BalanceIf { adt.NamedObject { Name: MyBalance } | Requires=Key } | Available = 9 of 10 }");
 }
 
 BOOST_AUTO_TEST_CASE (as_xml)

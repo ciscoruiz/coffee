@@ -63,11 +63,11 @@ public:
    void subscribeObserver (Observer* observer, const Event::Id eventId) throw (RuntimeException) {
       subscribeObserver(observer, lookupEvent(eventId));
    }
-   bool unsubscribeObserver (Observer* observer) throw ();
+   bool unsubscribeObserver (Observer* observer) noexcept;
 
-   size_t countObservers () const throw () { return m_observers.size (); }
+   size_t countObservers () const noexcept { return m_observers.size (); }
 
-   virtual StreamString asString () const throw () {
+   virtual StreamString asString () const noexcept {
       StreamString result ("pattern::observer::Subject {");
       return result << NamedObject::asString() << "}";
    }
@@ -81,15 +81,15 @@ protected:
    void notify (const Event::Id eventId) throw (RuntimeException) {
       notify (lookupEvent(eventId));
    }
-   void notify (const Event& event = nullEvent) throw ();
+   void notify (const Event& event = nullEvent) noexcept;
 
    typedef std::pair <Observer*, Event::BitMask> Subscription;
    typedef std::vector <Subscription> Observers;
    typedef Observers::iterator observer_iterator;
    Observers m_observers;
 
-   observer_iterator observer_begin () throw () { return m_observers.begin (); }
-   observer_iterator observer_end () throw () { return m_observers.end (); }
+   observer_iterator observer_begin () noexcept { return m_observers.begin (); }
+   observer_iterator observer_end () noexcept { return m_observers.end (); }
    static Observer* get_observer (observer_iterator ii) { return ii->first; }
    static Event::BitMask bitmask (observer_iterator ii) { return ii->second; }
 
@@ -97,8 +97,8 @@ protected:
    typedef Events::iterator event_iterator;
    Events m_events;
 
-   event_iterator event_begin () throw () { return m_events.begin (); }
-   event_iterator event_end () throw () { return m_events.end (); }
+   event_iterator event_begin () noexcept { return m_events.begin (); }
+   event_iterator event_end () noexcept { return m_events.end (); }
    static const Event& event (event_iterator ii) { return *ii; }
 };
 

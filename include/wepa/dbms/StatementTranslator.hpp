@@ -67,8 +67,7 @@ class Database;
  * 
  * \see wepa::dbms::Database::setStatementTranslator
  *
- * @author frr@tid.es cisco.tierra@gmail.com
- * \since NemesisRD 1.7.4
+ * @author cisco.tierra@gmail.com
  */
 class StatementTranslator {
 public:
@@ -78,7 +77,7 @@ public:
     * Devuelve el nombre l�gico de este traductor.
     * \return el nombre l�gico de este traductor.
     */
-   const char* getName () const throw () { return a_name; }
+   const char* getName () const noexcept { return a_name; }
    
 protected:
    /**

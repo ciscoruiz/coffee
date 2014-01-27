@@ -52,10 +52,12 @@ public:
 
    virtual void initialize () throw (adt::RuntimeException) {;}
 
-   virtual bool isAvailable () const throw () = 0;
+   virtual bool isAvailable () const noexcept = 0;
 
-   virtual adt::StreamString asString () const throw ();
-   virtual xml::Node& asXML (xml::Node& parent) const throw ();
+   operator adt::StreamString () const noexcept { return asString (); }
+
+   virtual adt::StreamString asString () const noexcept;
+   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
 protected:
    Resource(const std::string& name) : adt::NamedObject(name) {;}

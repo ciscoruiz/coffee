@@ -51,7 +51,7 @@ public:
       m_ok (false)
    {
       if ((m_ok = Logger::wantsToProcess (m_level)) == true)
-         Logger::write (m_level, "begin", methodName, fromFile, fromLine);
+         Logger::write (m_level, "+++ begin +++", methodName, fromFile, fromLine);
    }
 
    TraceMethod (const Level::_v level, const char* methodName, const char* fromFile, const int fromLine) :
@@ -61,7 +61,7 @@ public:
       m_ok (false)
    {
       if ((m_ok = Logger::wantsToProcess (m_level)) == true)
-         Logger::write (m_level, "begin", methodName, fromFile, fromLine);
+         Logger::write (m_level, "+++ begin +++", methodName, fromFile, fromLine);
    }
 
    /**
@@ -69,7 +69,7 @@ public:
    */
    ~TraceMethod () {
       if (m_ok == true && Logger::wantsToProcess(m_level) == true) {
-         Logger::write (m_level, "end", m_methodName, m_fromFile, 0);
+         Logger::write (m_level, "+++ end +++", m_methodName, m_fromFile, 0);
       }
    }
 
@@ -83,6 +83,6 @@ private:
 }
 }
 
-#define LOG_THIS_METHOD() wepa::logger::TraceMethod __traceMethod__ (WEPA_FILE_LOCATION)
+#define LOG_THIS_METHOD() wepa::logger::TraceMethod __traceMethod__ (WEPA_LOG_LOCATION)
 
 #endif

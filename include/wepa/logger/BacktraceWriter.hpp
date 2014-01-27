@@ -48,7 +48,7 @@ public:
 
    BacktraceWriter (const std::string& path, const size_t maxSize, const int backtrackingLength);
 
-   void setLowestLeveL (const Level::_v lowestLeveL) throw () { if (lowestLeveL > Level::Error) m_lowestLevel = lowestLeveL; }
+   void setLowestLeveL (const Level::_v lowestLeveL) noexcept { if (lowestLeveL > Level::Error) m_lowestLevel = lowestLeveL; }
 
 private:
    typedef std::pair <Level::_v, std::string> Line;
@@ -59,9 +59,9 @@ private:
    int m_lineCounter;
    Level::_v m_lowestLevel;
 
-   void apply (const Level::_v level, const std::string& line) throw ();
-   bool wantsToProcess (const Level::_v level) const throw () { return level <= m_lowestLevel; }
-   void backtrace () throw ();
+   void apply (const Level::_v level, const std::string& line) noexcept;
+   bool wantsToProcess (const Level::_v level) const noexcept { return level <= m_lowestLevel; }
+   void backtrace () noexcept;
 };
 
 } /* namespace logger */

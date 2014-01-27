@@ -60,7 +60,7 @@ public:
    const char* encode (const char* text) throw (adt::RuntimeException);
    const char* encode (const std::string& text) throw (adt::RuntimeException) { return encode (text.c_str ()); }
 
-   void setEncoding (const char* encoding) throw () { m_encoding = encoding; }
+   void setEncoding (const char* encoding) noexcept { m_encoding = encoding; }
 
 private:
    const char* m_encoding;
@@ -73,7 +73,7 @@ private:
    public:
       Buffer ();
       ~Buffer () {;}
-      const char* getValue () const throw ();
+      const char* getValue () const noexcept;
    };
 };
 

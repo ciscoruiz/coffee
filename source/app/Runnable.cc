@@ -60,7 +60,7 @@ void app::Runnable::requestStop ()
 
 //virtual
 adt::StreamString app::Runnable::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("wepa::app::Runnable { Reference: ");
 
@@ -77,7 +77,7 @@ adt::StreamString app::Runnable::asString () const
 
 // virtual
 xml::Node& app::Runnable::asXML (xml::Node& parent) const
-   throw ()
+   noexcept
 {
    xml::Node& result = parent.createChild("Runnable");
 
@@ -92,7 +92,7 @@ xml::Node& app::Runnable::asXML (xml::Node& parent) const
 }
 
 std::string app::Runnable::flagsAsString () const
-   throw ()
+   noexcept
 {
    string result;
 

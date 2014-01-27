@@ -54,10 +54,11 @@
 #include <wepa/dbms/StatementTranslator.hpp>
 #include <wepa/dbms/SCCS.hpp>
 
+#include <wepa/dbms/internal/DummyApplication.hpp>
+
 using namespace std;
 using namespace wepa;
 
-//typedef Guard <dbms::Database> MyGuard;
 
 dbms::Database::Database (app::Application& app, const char* className, const char* dbmsName) :
    app::EngineIf (app, className),
@@ -69,8 +70,39 @@ dbms::Database::Database (app::Application& app, const char* className, const ch
    dbms::SCCS::activate ();
 }
 
+dbms::Database::Database (const char* rdbmsName, const char* dbmsName) :
+   dbms::Database (internal::DummyApplication::getInstance (), rdbmsName, dbmsName)
+{;}
+
 dbms::Database::~Database ()
 {
+   if (this->isStopped() == false)
+      stop ();
+}
+
+void dbms::Database::externalInitialize ()
+   throw (adt::RuntimeException)
+{
+   app::Application& application (getApplication());
+   app::Application& dummy = internal::DummyApplication::getInstance();
+
+   if (&dummy != &application) {
+      WEPA_THROW_EXCEPTION(asString () << " | This method can't be applied to a database with associated application");
+   }
+
+   initialize();
+}
+
+void dbms::Database::externalStop ()
+   throw (adt::RuntimeException)
+{
+   app::Application& application (getApplication());
+   app::Application& dummy = internal::DummyApplication::getInstance();
+
+   if (&dummy != &application) {
+      WEPA_THROW_EXCEPTION(asString () << " | This method can't be applied to a database with associated application");
+   }
+
    stop ();
 }
 
@@ -101,22 +133,27 @@ void dbms::Database::do_initialize ()
 }
 
 void dbms::Database::do_stop ()
-   throw ()
+   noexcept
 {
    LOG_THIS_METHOD();
 
-   try {
-      for (connection_iterator iic = connection_begin (), maxiic = connection_end (); iic != maxiic; iic ++) {
-         Connection& _connection = connection (iic);
-         _connection.close ();
-      }
+   int counter = 0;
 
-      m_connections.clear ();
+   for (connection_iterator iic = connection_begin (), maxiic = connection_end (); iic != maxiic; ++ iic) {
+      Connection& _connection = connection (iic);
+      try {
+         _connection.close ();
+         ++ counter;
+      }
+      catch (adt::Exception& ex) {
+         logger::Logger::write(ex);
+      }
    }
-   catch (adt::Exception& ex) {
-      logger::Logger::write(ex);
-      m_connections.clear ();
-   }
+
+   LOG_DEBUG (asString () << " | Closed " << counter << " of " << m_connections.size ());
+
+   m_connections.clear ();
+   m_statements.clear ();
 }
 
 dbms::Connection* dbms::Database::createConnection (const char* name, const char* user, const char* password)
@@ -206,7 +243,7 @@ dbms::Statement* dbms::Database::createStatement (const char* name, const char* 
    Statement* result = allocateStatement (name, expression, actionOnError);
 
    if (result == NULL) {
-      WEPA_THROW_EXCEPTION(asString () << " could not create connection");
+      WEPA_THROW_EXCEPTION(asString () << " could not create statement '" << name << "'");
    }
 
    LOG_DEBUG(result->asString ());
@@ -240,26 +277,17 @@ dbms::Statement& dbms::Database::findStatement (const char* name)
    return std::ref (*result);
 }
 
-void dbms::Database::breakConnection (dbms::Connection& connection)
+void dbms::Database::notifyRecoveryFail (dbms::Connection& connection)
    throw (adt::RuntimeException)
 {
    LOG_WARN(connection.asString ());
 
-   try {
-      connection.close ();
-      connection.open ();
-
-      LOG_WARN(connection.asString ());
-   }
-   catch (DatabaseException& edbms) {
-      logger::Logger::write (edbms);
-      if (m_failRecoveryHandler != NULL)
-         m_failRecoveryHandler->apply (connection);
-   }
+   if (m_failRecoveryHandler != NULL)
+      m_failRecoveryHandler->apply (connection);
 }
 
 adt::StreamString dbms::Database::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("dbms::Database { ");
 
@@ -279,7 +307,7 @@ adt::StreamString dbms::Database::asString () const
 }
 
 xml::Node& dbms::Database::asXML (xml::Node& parent) const
-   throw ()
+   noexcept
 {
    xml::Node& result = parent.createChild ("dbms.Database");
 

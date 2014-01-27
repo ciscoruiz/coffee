@@ -51,8 +51,10 @@ class Connection;
    @author cisco.tierra@gmail.com.
 */
 class FailRecoveryHandler {
+public:
    virtual ~FailRecoveryHandler () {;}
 
+private:
    /**
       Este metodo debe ser reimplementado para describir las operaciones que vamos a realizar en caso
       de no poder recuperar la conexion recibida como parametro.

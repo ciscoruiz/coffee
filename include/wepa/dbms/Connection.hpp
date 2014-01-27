@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
-#ifndef _wepm_dbms_Connection_h
-#define _wepm_dbms_Connection_
+#ifndef _wepa_dbms_Connection_h
+#define _wepa_dbms_Connection_h
 
 #include <mutex>
 
@@ -34,79 +34,30 @@ class GuardConnection;
    Antes de pasar a usar cada uno de las instancias de esta clase debe establecerse una secci�n cr�tica mediante
    GuardConnection, que deber� estar activa durante todo el proceso de uso.
 
-   @author frr@tid.es cisco.tierra@gmail.com.
+   @author cisco.tierra@gmail.com.
 */
 class Connection : public balance::Resource {
 public:
-   /**
-      Devuelve la instancia de la base de datos asociada a esta conexion.
-   */
-   Database& getDatabase () const throw () { return m_dbmsDatabase; }
+   Database& getDatabase () const noexcept { return m_dbmsDatabase; }
 
-   /**
-    * Devuelve el usuario con el que fu� realizada esta conexi�n.
-    * \return el usuario con el que fu� realizada esta conexi�n.
-    * \since NemesisRD.dbms 1.9.1
-    */
-   const std::string& getUser () const throw () { return m_user; }
+   const std::string& getUser () const noexcept { return m_user; }
 
-   /**
-    * Devuelve el password del usuario con el que fu� realizada esta conexi�n.
-    * \return el password del usuario con el que fu� realizada esta conexi�n.
-    * \since NemesisRD.dbms 1.9.1
-    */
-   const std::string& getPassword () const throw () { return m_password; }
+   const std::string& getPassword () const noexcept { return m_password; }
 
-   /**
-      Establece el periodo de grabacion de esta conexion. Damos la posibilidad de que la conexion confirme
-      cambios realizados hasta el momento sin que termine la seccion critica que debemos establecer antes
-      de usar la conexion.
-      \param maxCommitPending Numero de transacciones que pueden estar pedientes de confirmacion antes
-      de invocar a #commit. Un valor 0, desactiva el periodo.
-      \return El periodo de grabacion que habia antes de invocar a este metodo.
-      \warning La invocacion a este metodo debera hacerse con una seccion critica activada sobre la
-      esta conexion.
-      \since NemesisRD.dbms 1.1.12
-   */
-   int setMaxCommitPending (const int maxCommitPending) throw () {
-      const int result = m_maxCommitPending;
-      m_maxCommitPending = maxCommitPending;
-      return result;
-   }
+   operator adt::StreamString () const noexcept { return asString (); }
 
-   /**
-      Devuelve una cadena con la informacion referente a esta instancia.
-      @return Una cadena con la informacion referente a esta instancia.
-   */
-   virtual adt::StreamString asString () const throw ();
+   virtual adt::StreamString asString () const noexcept;
 
-   /**
-      Devuelve un documento XML con la informacion referente a esta instancia.
-      \param parent Nodo XML del que debe colgar la informacion.
-      @return un documento XML con la informacion referente a esta instancia.
-   */
-   virtual xml::Node& asXML (xml::Node& parent) const throw ();
+   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
    Connection (const Connection&) = delete;
    Connection& operator= (const Connection&) = delete;
 
 protected:
-   /**
-     Instancia de la base de datos asociada a esta conexion.
-     Coincidiria con la indicada en el constructor.
-   */
    Database& m_dbmsDatabase;
    std::string m_user; /**< Nombre del usuario */
    std::string m_password; /**< Clave de acceso del usuario. */
 
-   /**
-      Contructor.
-
-      @param dbmsDatabase Instancia de la base de datos asociada a esta conexion.
-      @param name Nombre logico de la conexion.
-      @param user Nombre del usuario con el que realizamos la conexion.
-      @param password Codigo de acceso del usuario.
-   */
    Connection (Database& dbmsDatabase, const std::string& name, const char* user, const char* password) :
       balance::Resource (name),
       m_dbmsDatabase (dbmsDatabase),
@@ -119,98 +70,44 @@ protected:
       m_accesingCounter (0)
    {}
 
-   /**
-      Desactiva el indicador de que la conexion requiere una invocacion a #rollback.
-      \warning La invocacion a este metodo debera hacerse con una seccion critica activada sobre la
-      esta conexion.
-      \since NemesisRD.dbms 1.1.12
-   */
-   void resetRollbackPending () throw () { m_rollbackPending =  false; }
+   int setMaxCommitPending (const int maxCommitPending) noexcept {
+      const int result = m_maxCommitPending;
+      m_maxCommitPending = maxCommitPending;
+      return result;
+   }
 
-   /**
-      Activa de forma externa el indicador de que la conexion requiere una invocacion a #rollback.
-      \warning La invocacion a este metodo debera hacerse con una seccion critica activada sobre la
-      esta conexion.
-      \since NemesisRD.dbms 1.2.11
-   */
-   void activateRollbackPending () throw () { m_rollbackPending = true; }
+   void clearMaxCommitPending () noexcept { m_maxCommitPending = 0;}
 
-   /**
-      Ejecuta la sentencia recibida como parametro. Si la sentencia no tiene variables de salida consideraria
-      que es un comando \em update, \em insert o \em delete, lo cual, implica la invocacion automatica a los
-      #commit o #rollback cuando termine la seccion critica de esta conexion.
+   void resetRollbackPending () noexcept { m_rollbackPending =  false; }
 
-      \param statement Sentencia que vamos a ejecuta
+   void activateRollbackPending () noexcept { m_rollbackPending = true; }
 
-      \return La estructura con el resultado de la ejecucion de la sentencia.
+   ResultCode execute (Statement& statement) throw (adt::RuntimeException, DatabaseException);
 
-      \warning La invocacion a este metodo debera hacerse con una seccion critica activada sobre la
-      esta conexion, por ejemplo:
-      \code
-            Guard guard (connection);
-            connection.execute (someStatement);
-      \endcode
-   */
-   ResultCode execute (Statement* statement) throw (adt::RuntimeException, DatabaseException);
-
-   /**
-      Ejecuta la sentencia recibida como parametro. Si la sentencia no tiene variables de salida consideraria
-      que es un comando \em update, \em insert o \em delete, lo cual, implica la invocacion automatica a los
-      #commit o #rollback cuando termine la seccion critica de esta conexion.
-
-      \param statement Sentencia que vamos a ejecuta
-
-      \return La estructura con el resultado de la ejecucion de la sentencia.
-
-      \warning La invocacion a este metodo debera hacerse con una seccion critica activada sobre la
-      esta conexion, por ejemplo:
-      \code
-            Guard guard (connection);
-            connection.execute (someStatement);
-      \endcode
-   */
-   ResultCode execute (Statement& statement) throw (adt::RuntimeException, DatabaseException) { return execute (&statement); }
-
-   /**
-      Metodo que fija los cambios realizados en la ejecucion de los comandos SQL.
-   */
    void commit () throw (adt::RuntimeException, DatabaseException);
 
-   /**
-      Metodo que debemos re-escribir para descartar los cambios realizados sobre las tablas mediante
-      esta conexion.
-   */
-   void rollback () throw ();
-
-   /**
-      Metodo que debemos re-escribir para hacer efectiva esta conexion.
-   */
-   virtual void open () throw (DatabaseException) = 0;
-
-   /**
-      Metodo que debemos re-escribir para cerrar la conexion.
-   */
-   virtual void close () throw () = 0;
+   void rollback () noexcept;
 
 private:
    int m_commitPending; // Numero de sentencias a las que no se han fijado cambios.
    bool m_rollbackPending;
    int m_maxCommitPending;
    int m_lockingCounter;
-   unsigned int m_accesingCounter;  // N� de veces que se ha usado esta conexi�n
+   unsigned int m_accesingCounter;
    std::mutex m_mutex;
 
    void lock () throw (adt::RuntimeException);
-   void unlock () throw ();
+   void unlock () noexcept;
+   bool recover () noexcept;
 
    virtual bool do_beginTransaction () throw (adt::RuntimeException, DatabaseException) { return false;}
    virtual void do_commit () throw (adt::RuntimeException, DatabaseException) = 0;
-   virtual void do_rollback () throw () = 0;
+   virtual void do_rollback () noexcept = 0;
+   virtual void open () throw (DatabaseException) = 0;
+   virtual void close () noexcept = 0;
 
    friend class Database;
-
    friend class GuardConnection;
-      // lock, unlock. execute, commit, rollback and so on
 };
 
 }

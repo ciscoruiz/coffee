@@ -35,6 +35,8 @@
 #ifndef _wepm_dbms_Statement_h
 #define _wepm_dbms_Statement_h
 
+#include <mutex>
+
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <wepa/adt/RuntimeException.hpp>
@@ -59,6 +61,7 @@ namespace dbms {
 
 class Database;
 class Connection;
+class GuardStatement;
 
 namespace binder {
 class Input;
@@ -95,13 +98,13 @@ public:
       Devuelve el nombre logico de esta sentencia.
       \return El nombre logico de esta sentencia.
    */
-   const std::string& getName () const throw () { return m_name; }
+   const std::string& getName () const noexcept { return m_name; }
 
    /**
       Devuelve la expresion SQL recibida en el constructor.
       \return La expresion SQL recibida en el constructor.
    */
-   const std::string& getExpression () const throw () { return m_expression; }
+   const std::string& getExpression () const noexcept { return m_expression; }
 
    /**
       Devuelve el indicador de criticidad, si vale \em true indica que si la ejecucion de esta sentencia
@@ -110,20 +113,13 @@ public:
       Solo aplicara en sentencias que no sean de seleccion.
       \return El indicador de criticidad de esta sentencia.
    */
-   ActionOnError::_v actionOnError () const throw () { return m_actionOnError; }
+   ActionOnError::_v actionOnError () const noexcept { return m_actionOnError; }
 
    /**
       Devuelve la instancia de la base de datos asociada a esta sentencia.
       \return La instancia de la base de datos asociada a la sentencia.
    */
-   Database& getDatabase () const throw () { return m_database; }
-
-   /**
-      Establece el valor del indicador que activa/desactiva la necesidad de invocar al
-      \em commit y/o \em rollback despues de ejecutar esta sentencia.
-      \since NemesisRD.dbms 1.5.2.
-   */
-   void setRequiresCommit (const bool requiresCommit) throw () { m_requiresCommit = requiresCommit; }
+   Database& getDatabase () const noexcept { return m_database; }
 
    /**
       Devuelve \em true si la sentencia requiere la invocacion a \em commit o \em rollback
@@ -132,7 +128,7 @@ public:
       mediante la llamada #setRequiresCommit
       \since NemesisRD.dbms 1.5.2.
    */
-   bool requiresCommit () const throw () { return (m_requiresCommit == true) || (m_outputBinds.empty () == true); }
+   bool requiresCommit () const noexcept { return (m_requiresCommit == true) || (m_outputBinds.empty () == true); }
 
    /**
       Establece el parametro de entrada de la sentencia SQL.Cada una de las variables de entrada indicadas
@@ -152,9 +148,7 @@ public:
       \param data Variable que deseamos asociar como variable de entrada. La correspondencia entre esta
       y la sentencia SQL vendra dada por el orden de declaracion.
    */
-   binder::Input* createBinderInput (datatype::Abstract& data) throw (adt::RuntimeException);
-
-   datatype::Abstract& getInputData (const int pos) throw (adt::RuntimeException);
+   void createBinderInput (datatype::Abstract& data) throw (adt::RuntimeException);
 
    /**
       Establece el parametro de salida de la sentencia SQL.Cada una de las variables de salida indicadas
@@ -179,31 +173,22 @@ public:
 
       \warning Solo las sentencias SQL del tipo \em select usan las variables de salida.
    */
-   dbms::binder::Output* createBinderOutput (datatype::Abstract& data) throw (adt::RuntimeException);
-
-   const datatype::Abstract& getOutputData (const int pos) const throw (adt::RuntimeException);
-
-   /**
-      Transfiere la informacion de una fila de la sentencia SQL de seleccion a las
-      variables de salida asociadas a la sentencia.
-
-      \return \em true si el registro ha sido transferido a las variables de salida o \em false si habiamos llegado
-      al ultimo registro de la seleccion.
-   */
-   bool fetch () throw (adt::RuntimeException, DatabaseException);
+   void createBinderOutput (datatype::Abstract& data) throw (adt::RuntimeException);
 
    /**
       Devuelve un documento XML con la informacion referente a esta instancia.
       \param parent Nodo XML del que debe colgar la informacion.
       @return un documento XML con la informacion referente a esta instancia.
    */
-   virtual xml::Node& asXML (xml::Node& parent) const throw ();
+   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
+
+   operator adt::StreamString () const noexcept { return asString (); }
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.
       @return Una cadena con la informacion referente a esta instancia.
    */
-   virtual adt::StreamString asString () const throw ();
+   virtual adt::StreamString asString () const noexcept;
 
    Statement (const Statement&) = delete;
    Statement& operator= (const Statement&) = delete;
@@ -252,8 +237,13 @@ protected:
    {
    }
 
-   int input_size () const throw () { return m_inputBinds.size (); }
-   int output_size () const throw () { return m_outputBinds.size (); }
+   int input_size () const noexcept { return m_inputBinds.size (); }
+   int output_size () const noexcept { return m_outputBinds.size (); }
+
+   // These methods will be called from GuardStatement
+   datatype::Abstract& getInputData (const int pos) throw (adt::RuntimeException);
+   datatype::Abstract& getOutputData (const int pos) throw (adt::RuntimeException);
+   const datatype::Abstract& getOutputData (const int pos) const throw (adt::RuntimeException);
 
 private:
    Database& m_database;
@@ -265,19 +255,27 @@ private:
    const ActionOnError::_v m_actionOnError;
    adt::Average <adt::Microsecond> m_measureTiming;
    bool m_requiresCommit;
+   std::mutex m_mutex;
 
-   void measureTiming (const adt::DelayMeter <adt::Microsecond>& delay) throw () { m_measureTiming += delay.getValue(); }
+   void measureTiming (const adt::DelayMeter <adt::Microsecond>& delay) noexcept { m_measureTiming += delay.getValue(); }
 
    void prepare (Connection* connection) throw (adt::RuntimeException, DatabaseException);
    virtual void do_prepare (Connection* connection) throw (adt::RuntimeException, DatabaseException) = 0;
 
-   ResultCode execute (Connection* connection) throw (adt::RuntimeException, DatabaseException);
-   virtual ResultCode do_execute (Connection* connection) throw (adt::RuntimeException, DatabaseException) = 0;
+   ResultCode execute (Connection& connection) throw (adt::RuntimeException, DatabaseException);
+   virtual ResultCode do_execute (Connection& connection) throw (adt::RuntimeException, DatabaseException) = 0;
 
+   void setRequiresCommit (const bool requiresCommit) noexcept { m_requiresCommit = requiresCommit; }
+
+   bool fetch () throw (adt::RuntimeException, DatabaseException);
    virtual bool do_fetch () throw (adt::RuntimeException, DatabaseException) = 0;
+
+   void lock () noexcept { m_mutex.lock (); }
+   void unlock () noexcept { m_mutex.unlock (); }
 
    friend class Connection;
    friend class Database;
+   friend class GuardStatement;
 };
 
 }

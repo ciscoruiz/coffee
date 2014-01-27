@@ -24,23 +24,22 @@ Statement::~Statement ()
 }
 
 
-binder::Input* Statement::createBinderInput (datatype::Abstract& data)
+void Statement::createBinderInput (datatype::Abstract& data)
    throw (adt::RuntimeException)
 {
    binder::Input* result = m_database.allocateInputBind (data);
 
    if (result == NULL)
-      WEPA_THROW_EXCEPTION(data.asString () << " | Data returned a null binder");
+      WEPA_THROW_EXCEPTION(data << " | Data returned a null binder");
 
    m_inputBinds.push_back (result);
-   return result;
 }
 
 datatype::Abstract& Statement::getInputData (const int pos)
    throw (adt::RuntimeException)
 {
    if (pos >= input_size ()) {
-      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << input_size() << "]");
+      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << input_size() << ")");
    }
 
    return std::ref (m_inputBinds [pos].getData ());
@@ -50,22 +49,31 @@ const datatype::Abstract& Statement::getOutputData (const int pos) const
    throw (adt::RuntimeException)
 {
    if (pos >= output_size ()) {
-      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << "]");
+      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << ")");
    }
 
    return std::ref (m_outputBinds [pos].getData ());
 }
 
-binder::Output* Statement::createBinderOutput (datatype::Abstract& data)
+datatype::Abstract& Statement::getOutputData (const int pos)
+   throw (adt::RuntimeException)
+{
+   if (pos >= output_size ()) {
+      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << ")");
+   }
+
+   return std::ref (m_outputBinds [pos].getData ());
+}
+
+void Statement::createBinderOutput (datatype::Abstract& data)
    throw (adt::RuntimeException)
 {
    binder::Output* result = m_database.allocateOutputBind (data);
 
    if (result == NULL)
-      WEPA_THROW_EXCEPTION(data.asString () << " | Data returned a null binder");
+      WEPA_THROW_EXCEPTION(data << " | Data returned a null binder");
 
    m_outputBinds.push_back (result);
-   return result;
 }
 
 void Statement::prepare (Connection* connection)
@@ -86,7 +94,7 @@ void Statement::prepare (Connection* connection)
    }
 }
 
-ResultCode Statement::execute (Connection* connection)
+ResultCode Statement::execute (Connection& connection)
    throw (adt::RuntimeException, DatabaseException)
 {
    LOG_THIS_METHOD();
@@ -98,7 +106,7 @@ ResultCode Statement::execute (Connection* connection)
 
    ResultCode result = do_execute (connection);
 
-   LOG_DEBUG (result.asString ());
+   LOG_DEBUG (getName () << " | " << result.asString ());
 
    return result;
 }
@@ -121,7 +129,7 @@ bool Statement::fetch()
 }
 
 adt::StreamString  Statement::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString  result ("dbms::Statement { Name: ");
    result += m_name;
@@ -133,7 +141,7 @@ adt::StreamString  Statement::asString () const
 }
 
 xml::Node& dbms::Statement::asXML (xml::Node& parent) const
-   throw ()
+   noexcept
 {
    xml::Node& result = parent.createChild ("dbms.Statement");
 

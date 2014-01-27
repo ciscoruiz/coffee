@@ -73,7 +73,7 @@ public:
    MyIndexedBalance ();
    ~MyIndexedBalance () { m_resources.clear (); }
 
-   TestResource* get (const int index) throw () { return &m_resources [index]; }
+   TestResource* get (const int index) noexcept { return &m_resources [index]; }
 
 private:
    boost::ptr_vector<TestResource> m_resources;

@@ -13,13 +13,13 @@ public:
     * @brief getVersion
     * @return The version of this compilation
     */
-   static std::string getVersion () throw ();
+   static std::string getVersion () noexcept;
 
    /**
     * @brief getArchitecture
     * @return The literal which contains information about this release.
     */
-   static std::string getArchitecture () throw ();
+   static std::string getArchitecture () noexcept;
 };
 
 }

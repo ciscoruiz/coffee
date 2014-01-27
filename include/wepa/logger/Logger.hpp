@@ -60,20 +60,20 @@ public:
    static void initialize (Writer* writer, Formatter* formatter) throw (adt::RuntimeException);
    static void initialize (Writer* writer) throw (adt::RuntimeException);
 
-   static void write (const Level::_v level, const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw ();
+   static void write (const Level::_v level, const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept;
 
-   static void setLevel (const Level::_v level) throw () { m_level = level; }
-   static Level::_v getLevel () throw () { return m_level; }
+   static void setLevel (const Level::_v level) noexcept { m_level = level; }
+   static Level::_v getLevel () noexcept { return m_level; }
 
-   static bool isActive (const Level::_v level) throw () { return (level <= Level::Error) ? true: (level <= m_level); }
-   static bool wantsToProcess (const Level::_v level) throw ();
+   static bool isActive (const Level::_v level) noexcept { return (level <= Level::Error) ? true: (level <= m_level); }
+   static bool wantsToProcess (const Level::_v level) noexcept;
 
-   static void critical (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Critical, streamString, function, file, line); }
-   static void error (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Error, streamString, function, file, line); }
-   static void warning (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Warning, streamString, function, file, line); }
-   static void notice (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Notice, streamString, function, file, line); }
-   static void info (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Information, streamString, function, file, line); }
-   static void debug (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) throw () { write (Level::Debug, streamString, function, file, line); }
+   static void critical (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Critical, streamString, function, file, line); }
+   static void error (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Error, streamString, function, file, line); }
+   static void warning (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Warning, streamString, function, file, line); }
+   static void notice (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Notice, streamString, function, file, line); }
+   static void info (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Information, streamString, function, file, line); }
+   static void debug (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Debug, streamString, function, file, line); }
 
    static void write (const adt::Exception& ex) {
       error (ex.what (), ex.getMethod(), ex.getFile(), ex.getLine());
@@ -88,11 +88,16 @@ private:
    Logger (const Logger&);
 };
 
+#ifdef WEPA_LOG_LOCATION
+#undef WEPA_LOG_LOCATION
+#endif
+#define WEPA_LOG_LOCATION __func__,__FILE__,__LINE__
+
 #define LOG_CRITICAL(args)\
    do {\
    if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Critical)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::critical (msg << args, WEPA_FILE_LOCATION); \
+      wepa::logger::Logger::critical (msg << args, WEPA_LOG_LOCATION); \
    } \
    } while (false);
 
@@ -100,7 +105,7 @@ private:
    do {\
    if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Error)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::error (msg << args, WEPA_FILE_LOCATION); \
+      wepa::logger::Logger::error (msg << args, WEPA_LOG_LOCATION); \
    } \
    } while (false);
 
@@ -108,7 +113,7 @@ private:
    do {\
    if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Warning)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::warning (msg << args, WEPA_FILE_LOCATION); \
+      wepa::logger::Logger::warning (msg << args, WEPA_LOG_LOCATION); \
    } \
    } while (false);
 
@@ -116,7 +121,7 @@ private:
    do {\
    if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Notice)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::notice(msg << args, WEPA_FILE_LOCATION); \
+      wepa::logger::Logger::notice(msg << args, WEPA_LOG_LOCATION); \
    } \
    } while (false);
 
@@ -124,7 +129,7 @@ private:
    do {\
    if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Information)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::info (msg << args, WEPA_FILE_LOCATION); \
+      wepa::logger::Logger::info (msg << args, WEPA_LOG_LOCATION); \
    } \
    } while (false);
 
@@ -132,7 +137,7 @@ private:
    do {\
    if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Debug)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::debug (msg << args, WEPA_FILE_LOCATION); \
+      wepa::logger::Logger::debug (msg << args, WEPA_LOG_LOCATION); \
    } \
    } while (false);
 
@@ -140,7 +145,7 @@ private:
    do {\
    if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Local7)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::debug (msg << args, WEPA_FILE_LOCATION); \
+      wepa::logger::Logger::debug (msg << args, WEPA_LOG_LOCATION); \
    } \
    } while (false);
 

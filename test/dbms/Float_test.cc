@@ -46,7 +46,7 @@ using namespace wepa::dbms;
 
 BOOST_AUTO_TEST_CASE (float_is_nulleable)
 {
-   datatype::Float column ("nulleable", true);
+   datatype::Float column ("nulleable", datatype::Constraint::CanBeNull);
 
    BOOST_REQUIRE_EQUAL (column.hasValue (), false);
 
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE (float_is_nulleable)
 
 BOOST_AUTO_TEST_CASE (float_is_not_nulleable)
 {
-   datatype::Float column ("not_nulleable", false);
+   datatype::Float column ("not_nulleable", datatype::Constraint::CanNotBeNull);
 
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 
@@ -93,4 +93,38 @@ BOOST_AUTO_TEST_CASE (float_downcast)
    datatype::Integer zzz ("zzz");
 
    BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::Float, zzz), adt::RuntimeException);
+}
+
+BOOST_AUTO_TEST_CASE (float_clone)
+{
+   datatype::Float cannotBeNull ("cannotBeNull", datatype::Constraint::CanNotBeNull);
+   datatype::Float canBeNull ("canBeNull", datatype::Constraint::CanBeNull);
+
+   BOOST_REQUIRE_EQUAL (cannotBeNull.hasValue(), true);
+   BOOST_REQUIRE_EQUAL (canBeNull.hasValue(), false);
+
+   std::auto_ptr <datatype::Abstract> notnull (cannotBeNull.clone ());
+   std::auto_ptr <datatype::Abstract> null (canBeNull.clone ());
+
+   BOOST_REQUIRE_EQUAL (notnull->hasValue(), true);
+   BOOST_REQUIRE_EQUAL (null->hasValue(), false);
+
+   BOOST_REQUIRE_EQUAL (notnull->compare (cannotBeNull), 0);
+
+   cannotBeNull.setValue (5.0);
+
+   BOOST_REQUIRE_EQUAL (cannotBeNull.getValue (), 5.0);
+
+   notnull.reset (cannotBeNull.clone ());
+   BOOST_REQUIRE_EQUAL (notnull->hasValue(), true);
+   BOOST_REQUIRE_EQUAL (notnull->compare (cannotBeNull), 0);
+
+   canBeNull.setValue (25);
+   null.reset (canBeNull.clone ());
+   BOOST_REQUIRE_EQUAL (null->hasValue(), true);
+   BOOST_REQUIRE_EQUAL (null->compare (canBeNull), 0);
+
+   BOOST_REQUIRE_EQUAL (null->compare (cannotBeNull), 1);
+
+   BOOST_REQUIRE_EQUAL (notnull->compare (canBeNull), -1);
 }

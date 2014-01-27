@@ -42,15 +42,15 @@ using namespace wepa;
 using namespace wepa::dbms;
 
 adt::StreamString datatype::Abstract::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result;
 
-   result << "dbms::type::Abstract { Name: " << m_name;
+   result << "datatype.Abstract { Name: " << m_name;
    result << " | Buffer: " << adt::AsHexString::apply(wepa_ptrnumber_cast (m_buffer));
    result << " | MaxSize: " << m_maxSize;
    result << " | Null: " << m_isNull;
-   result << " | Nulleable: " << m_isNulleable;
+   result << " | Constraint: " << ((m_constraint == Constraint::CanBeNull) ? "CanBeNull": "CanNotBeNull");
 
    return result += " }";
 }
@@ -58,7 +58,7 @@ adt::StreamString datatype::Abstract::asString () const
 void datatype::Abstract::isNull ()
    throw (adt::RuntimeException)
 {
-   if (m_isNulleable == false) {
+   if (m_constraint == Constraint::CanNotBeNull) {
       WEPA_THROW_EXCEPTION(asString () << " | Data can not be NULL");
    }
 
@@ -66,9 +66,9 @@ void datatype::Abstract::isNull ()
 }
 
 void datatype::Abstract::clear ()
-   throw ()
+   noexcept
 {
-   if (m_isNulleable)
+   if (m_constraint == Constraint::CanBeNull)
       m_isNull = true;
 
    do_clear ();
@@ -80,4 +80,24 @@ void datatype::Abstract::exceptionWhenIsNull () const
    if (m_isNull == true) {
       WEPA_THROW_EXCEPTION("Data '" << m_name << "' is null and it can not return any value");
    }
+}
+
+// this - other
+int datatype::Abstract::compare (const Abstract& other) const
+   throw (adt::RuntimeException)
+{
+   if (this->hasValue() == false && other.hasValue () == false)
+      return 0;
+
+   if (this->hasValue () == true && other.hasValue () == false)
+      return 1;
+
+   if (this->hasValue () == false && other.hasValue () == true)
+      return -1;
+
+   if (this->getType () != other.getType()) {
+      WEPA_THROW_EXCEPTION(this->asString () << " type does not matches with " << other);
+   }
+
+   return this->do_compare (other);
 }

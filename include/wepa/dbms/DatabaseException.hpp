@@ -40,7 +40,7 @@ public:
       @param fromLine Linea del fichero en la que se provoco la situacion de error.
    */
    DatabaseException (const std::string& logicalName, const ResultCode& resultCode, const char* fromMethod, const char* fromFile, const int fromLine) :
-      adt::Exception (std::string (logicalName).append (": ").append (resultCode.getErrorText()), fromMethod, fromFile, fromLine),
+      adt::Exception (std::string (logicalName).append (": ").append (resultCode.asString ()), fromMethod, fromFile, fromLine),
       m_resultCode (resultCode)
    {}
 
@@ -52,16 +52,16 @@ public:
    /**
       Destructor.
    */
-   ~DatabaseException () throw () {;}
+   ~DatabaseException () noexcept {;}
    
    /**
       Devuelve el resultado de base de datos asociado a la excepcion   
    
       @return El resultado de base de datos asociado a la excepcion   
    */   
-   const ResultCode& getResultCode () const throw () { return m_resultCode; }
+   const ResultCode& getResultCode () const noexcept { return m_resultCode; }
    
-   std::string asString () const throw ();
+   std::string asString () const noexcept;
 
 private:
    const ResultCode m_resultCode;

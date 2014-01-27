@@ -81,35 +81,37 @@ public:
 
    Resource* apply (const int key = NullKey) throw (adt::RuntimeException);
 
-   bool contains (const Resource* resource) const throw ();
+   bool contains (const Resource* resource) const noexcept;
 
-   resource_iterator resource_begin () throw () { return m_resources.begin (); }
-   resource_iterator resource_end () throw () { return m_resources.end (); }
-   static Resource* resource (resource_iterator ii) throw () { return *ii; }
+   resource_iterator resource_begin () noexcept { return m_resources.begin (); }
+   resource_iterator resource_end () noexcept { return m_resources.end (); }
+   static Resource* resource (resource_iterator ii) noexcept { return *ii; }
 
-   size_t size () const throw () { return m_resources.size (); }
-   size_t countAvailableResources () const throw ();
+   size_t size () const noexcept { return m_resources.size (); }
+   size_t countAvailableResources () const noexcept;
 
-   const_resource_iterator resource_begin () const throw () { return m_resources.begin (); }
-   const_resource_iterator resource_end () const throw () { return m_resources.end (); }
-   static const Resource* resource (const_resource_iterator ii) throw () { return *ii; }
+   const_resource_iterator resource_begin () const noexcept { return m_resources.begin (); }
+   const_resource_iterator resource_end () const noexcept { return m_resources.end (); }
+   static const Resource* resource (const_resource_iterator ii) noexcept { return *ii; }
 
-   virtual adt::StreamString asString () const throw ();
-   virtual xml::Node& asXML (xml::Node& parent) const throw ();
+   operator adt::StreamString () const noexcept { return asString (); }
+
+   virtual adt::StreamString asString () const noexcept;
+   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
 protected:
    BalanceIf (const char* name, const Requires::_v requires) : adt::NamedObject (name), m_requires (requires) {;}
 
    virtual void do_initialize () throw (adt::RuntimeException) {;}
    virtual void do_initializer (Resource* resource) throw (adt::RuntimeException);
-   virtual bool do_contains (const Resource* resource) const throw ();
+   virtual bool do_contains (const Resource* resource) const noexcept;
 
    virtual Resource* do_apply (const int key) throw (adt::RuntimeException) = 0;
 
-   bool requiresKey () const throw () { return m_requires != Requires::None; }
-   bool requiresPositiveKey () const throw () { return m_requires == Requires::PositiveKey; }
+   bool requiresKey () const noexcept { return m_requires != Requires::None; }
+   bool requiresPositiveKey () const noexcept { return m_requires == Requires::PositiveKey; }
 
-   resource_iterator next (resource_iterator ii) throw ();
+   resource_iterator next (resource_iterator ii) noexcept;
 
 private:
    mutable std::recursive_mutex m_mutex;

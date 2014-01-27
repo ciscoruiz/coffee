@@ -43,7 +43,7 @@ using namespace wepa;
 using namespace wepa::dbms;
 
 adt::StreamString binder::Output::asString() const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("binder.Output {");
 

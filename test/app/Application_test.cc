@@ -60,10 +60,10 @@ class MyEngine : public app::EngineIf {
 public:
    MyEngine (app::Application& application, const char* name) : EngineIf (application, name), m_initilized (0), m_stopped (0) {;}
 
-   int getInitializedCounter () const throw () { return m_initilized; }
-   int getStoppedCounter () const throw () { return m_stopped; }
+   int getInitializedCounter () const noexcept { return m_initilized; }
+   int getStoppedCounter () const noexcept { return m_stopped; }
 
-   void setPredecessor (const char* predecessor) throw () { this->addPredecessor(predecessor); }
+   void setPredecessor (const char* predecessor) noexcept { this->addPredecessor(predecessor); }
 
 private:
    int m_initilized;

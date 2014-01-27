@@ -52,61 +52,51 @@ using namespace wepa;
 //-----------------------------------------------------------------------------------------------------------
 // (1) Si no tiene variables de salida => consideramos que es un update, insert o delete.
 //-----------------------------------------------------------------------------------------------------------
-dbms::ResultCode dbms::Connection::execute (Statement* statement)
+dbms::ResultCode dbms::Connection::execute (Statement& statement)
    throw (adt::RuntimeException, dbms::DatabaseException)
 {
-   if (statement == NULL) {
-      WEPA_THROW_EXCEPTION(asString () << " | Can not execute a NULL statement");
-   }
-
    LOG_THIS_METHOD();
 
    adt::DelayMeter <adt::Microsecond> delay;
 
-   if (statement->m_prepared == false) {
-      statement->prepare (this);
-      statement->m_prepared = true;
+   if (statement.m_prepared == false) {
+      statement.prepare (this);
+      statement.m_prepared = true;
    }
 
-   LOG_DEBUG("Using " << asString () << " to run " << statement->asString());
+   LOG_DEBUG("Using " << asString () << " to run " << statement);
 
-   if (statement->requiresCommit () == true && m_rollbackPending == true) {      // (1)
+   if (statement.requiresCommit () == true && m_rollbackPending == true) {      // (1)
       WEPA_THROW_EXCEPTION(asString () << " | This connection must execute a previous ROLLBACK's");
    }
 
-   ResultCode result;
-   bool stop = false;
+   ResultCode result = statement.execute (*this);
 
-   while (stop == false) {
-      result = statement->execute (this);
-
-      if (result.lostConnection () == false)
-         break;
-
-      LOG_CRITICAL (asString () << " | " << statement->asString () << " | " << result.asString ());
-
-      m_dbmsDatabase.breakConnection (*this);
-      stop = true;
+   if (result.lostConnection () == true) {
+      LOG_CRITICAL ("Detected lost connection " << asString () << " while running '" << statement.getName ()  << "' | " << result);
+      recover ();
+      WEPA_THROW_NAME_DB_EXCEPTION(statement.getName (), result);
    }
 
-   statement->measureTiming (delay);
+   statement.measureTiming (delay);
 
    if (result.successful () == false && result.notFound () == false) {
-      LOG_ERROR (asString () << " | " << statement->asString () << " | " << result.asString ());
+      LOG_ERROR (asString () << " | " << statement << " | " << result);
    }
 
-   if (statement->requiresCommit () == true) {  // (1)
-      if (result.successful () == false) {
-         if (statement->actionOnError() == ActionOnError::Rollback) {
-            m_rollbackPending = true;
-            WEPA_THROW_NAME_DB_EXCEPTION(statement->getName (), result);
-         }
+   if (statement.requiresCommit () == false)
+      return result;
+
+   if (result.successful () == false) {
+      if (statement.actionOnError() == ActionOnError::Rollback) {
+         m_rollbackPending = true;
+         WEPA_THROW_NAME_DB_EXCEPTION(statement.getName (), result);
       }
-      else {
-         m_commitPending ++;
-         if (m_maxCommitPending > 0 && m_commitPending > m_maxCommitPending)  {
-            commit ();
-         }
+   }
+   else {
+      m_commitPending ++;
+      if (m_maxCommitPending > 0 && m_commitPending >= m_maxCommitPending)  {
+         commit ();
       }
    }
 
@@ -130,9 +120,9 @@ void dbms::Connection::commit ()
 }
 
 void dbms::Connection::rollback () 
-   throw ()
+   noexcept
 {
-   LOG_WARN (asString ());
+   LOG_WARN (asString () << " | State before rollback");
 
    if (isAvailable () == false) {
       LOG_WARN (asString () << " | Connection is not available");
@@ -149,7 +139,9 @@ void dbms::Connection::lock ()
    throw (adt::RuntimeException)
 {
    if (isAvailable () == false) {
-      WEPA_THROW_EXCEPTION(asString () << " | Connection is not available");
+      if (recover () == false) {
+         WEPA_THROW_EXCEPTION(asString () << " | Connection is not available");
+      }
    }   
    
    m_mutex.lock();
@@ -171,7 +163,7 @@ void dbms::Connection::lock ()
 }
 
 void dbms::Connection::unlock ()
-   throw ()
+   noexcept
 {
    LOG_DEBUG (asString ());
 
@@ -191,8 +183,30 @@ void dbms::Connection::unlock ()
    m_mutex.unlock();
 }
 
+bool dbms::Connection::recover ()
+   noexcept
+{
+   LOG_THIS_METHOD();
+
+   bool result = false;
+
+   try {
+      close ();
+      open ();
+      result = true;
+   }
+   catch (DatabaseException& edbms) {
+      logger::Logger::write (edbms);
+      m_dbmsDatabase.notifyRecoveryFail (*this);
+   }
+
+   LOG_WARN(asString () << " | Result=" << result);
+
+   return result;
+}
+
 adt::StreamString dbms::Connection::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("dbms::Connection { ");
    result += balance::Resource::asString ();
@@ -205,7 +219,7 @@ adt::StreamString dbms::Connection::asString () const
 }
 
 xml::Node& dbms::Connection::asXML (xml::Node& parent) const
-   throw ()
+   noexcept
 {
    xml::Node& result = parent.createChild ("dbms.Connection");
 

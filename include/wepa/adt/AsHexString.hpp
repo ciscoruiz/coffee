@@ -52,22 +52,22 @@ public:
    /**
       @return A string with the number.
    */
-   static std::string apply (const int number) throw ();
+   static std::string apply (const int number) noexcept;
 
    /**
       @return A string with the number.
    */
-   static std::string apply (const unsigned int number) throw ();
+   static std::string apply (const unsigned int number) noexcept;
 
    /**
       @return A string with the number.
    */
-   static std::string apply (const Integer64 number) throw ();
+   static std::string apply (const Integer64 number) noexcept;
 
    /**
       @return A string with the number.
    */
-   static std::string apply (const Unsigned64 number) throw ();
+   static std::string apply (const Unsigned64 number) noexcept;
 
 private:
    AsHexString ();

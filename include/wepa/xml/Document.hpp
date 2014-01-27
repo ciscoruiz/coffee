@@ -74,8 +74,8 @@ public:
    void parse (const adt::DataBlock& buffer, const DTD& dtd) throw (adt::RuntimeException);
    void parse (const char* buffer, const size_t size, const DTD& dtd) throw (adt::RuntimeException);
 
-   const Node* getRoot() const throw () { return m_root.get(); }
-   Node* getRoot () throw () { return m_root.get(); }
+   const Node* getRoot() const noexcept { return m_root.get(); }
+   Node* getRoot () noexcept { return m_root.get(); }
 
 private:
    std::shared_ptr <Node> m_root;
@@ -85,7 +85,7 @@ private:
 
    void extractNodes (_xmlDoc* handler) throw (adt::RuntimeException);
 
-   static const char* nameExtractor(const Handler handler) throw ();
+   static const char* nameExtractor(const Handler handler) noexcept;
 
    static void extractNodes (xml::Node& node) throw (adt::RuntimeException);
    static void extractAttributes (xml::Node& node) throw (adt::RuntimeException);

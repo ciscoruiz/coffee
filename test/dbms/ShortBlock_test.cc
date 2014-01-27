@@ -46,7 +46,7 @@ using namespace wepa::dbms;
 
 BOOST_AUTO_TEST_CASE (shortblock_is_nulleable)
 {
-   datatype::ShortBlock column ("nulleable", 128, true);
+   datatype::ShortBlock column ("nulleable", 128, datatype::Constraint::CanBeNull);
 
    void* init = column.getBuffer();
 
@@ -58,7 +58,6 @@ BOOST_AUTO_TEST_CASE (shortblock_is_nulleable)
 
    adt::DataBlock other;
    BOOST_REQUIRE_THROW (column.getValue (), adt::RuntimeException);
-   BOOST_REQUIRE_THROW (other = column, adt::RuntimeException);
 
    other.assign ("hello world", 7);
 
@@ -78,7 +77,7 @@ BOOST_AUTO_TEST_CASE (shortblock_is_nulleable)
 
 BOOST_AUTO_TEST_CASE (shortblock_is_not_nulleable)
 {
-   datatype::ShortBlock column ("not_nulleable", 4, false);
+   datatype::ShortBlock column ("not_nulleable", 4, datatype::Constraint::CanNotBeNull);
 
    void* init = column.getBuffer();
 
@@ -106,7 +105,7 @@ BOOST_AUTO_TEST_CASE (shortblock_is_not_nulleable)
 
 BOOST_AUTO_TEST_CASE (shortblock_downcast)
 {
-   datatype::ShortBlock column ("not_nulleable", 4, false);
+   datatype::ShortBlock column ("not_nulleable", 4);
 
    datatype::Abstract& abs = column;
 

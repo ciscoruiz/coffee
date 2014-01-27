@@ -75,13 +75,13 @@ public:
      @param buffer Address to the memory buffer.
      @param size Copy the first size bytes from the buffer pointed by \em buffer
    */
-   DataBlock (const char* buffer, const size_t size) throw () : std::string (buffer, size) {;}
+   DataBlock (const char* buffer, const size_t size) noexcept : std::string (buffer, size) {;}
 
    /**
      Copy Constructor.
      @param other Datablock to copy.
    */
-   DataBlock (const DataBlock& other) throw () : std::string (other) {;}
+   DataBlock (const DataBlock& other) noexcept : std::string (other) {;}
 
    /**
       Destructor.
@@ -93,7 +93,7 @@ public:
     * @param character Character to append to the buffer
     * @return The reference of itself.
     */
-   DataBlock& append (const char character) throw () { std::string::append (1, character); return *this;}
+   DataBlock& append (const char character) noexcept { std::string::append (1, character); return *this;}
 
    char at (const size_t index) const throw (RuntimeException);
 

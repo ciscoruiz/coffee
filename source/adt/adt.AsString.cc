@@ -44,7 +44,7 @@ using namespace std;
 using namespace wepa;
 
 string adt::AsString::apply (const int number, const char* format)
-   throw ()
+   noexcept
 {
    char aux [16];
    sprintf (aux, format, number);
@@ -52,7 +52,7 @@ string adt::AsString::apply (const int number, const char* format)
 }
 
 string adt::AsString::apply (const unsigned int number)
-   throw ()
+   noexcept
 {
    char aux [16];
    sprintf (aux, "%u", number);
@@ -60,7 +60,7 @@ string adt::AsString::apply (const unsigned int number)
 }
 
 string adt::AsString::apply (const long number)
-   throw ()
+   noexcept
 {
    char aux [32];
    sprintf (aux, "%ld", number);
@@ -68,7 +68,7 @@ string adt::AsString::apply (const long number)
 }
 
 string adt::AsString::apply (const Integer64 number)
-   throw ()
+   noexcept
 {
    char aux [24];
 #ifdef __wepa64__
@@ -81,7 +81,7 @@ string adt::AsString::apply (const Integer64 number)
 }
 
 string adt::AsString::apply (const Unsigned64 number)
-   throw ()
+   noexcept
 {
    char aux [32];
 #ifdef __wepa64__
@@ -93,7 +93,7 @@ string adt::AsString::apply (const Unsigned64 number)
 }
 
 string adt::AsString::apply (const float number, const char* format)
-   throw ()
+   noexcept
 {
    char aux [64];
    sprintf (aux, format, number);
@@ -101,7 +101,7 @@ string adt::AsString::apply (const float number, const char* format)
 }
 
 string adt::AsString::apply (const double number, const char* format)
-   throw ()
+   noexcept
 {
    char aux [64];
    sprintf (aux, format, number);
@@ -109,7 +109,7 @@ string adt::AsString::apply (const double number, const char* format)
 }
 
 std::string adt::AsString::apply (const DataBlock& dataBlock, const int characterByLine)
-   throw ()
+   noexcept
 {
    char aux [8];
    std::string numbers;

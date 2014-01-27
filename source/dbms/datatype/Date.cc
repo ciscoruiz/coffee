@@ -46,40 +46,44 @@ using namespace std;
 using namespace wepa;
 using namespace wepa::dbms;
 
-datatype::Date::Date (const char* name, const bool isNulleable) :
-   datatype::Abstract (name, Datatype::Date, MaxDateSize, isNulleable)
+datatype::Date::Date (const char* name, const Constraint::_v constraint) :
+   datatype::Abstract (name, Datatype::Date, MaxDateSize, constraint)
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
-   wepa_memset (&m_value, 0, sizeof (m_value));
+   m_value = 0;
 }
 
-datatype::Date::Date (const string& name, const bool isNulleable) :
-   datatype::Abstract (name, Datatype::Date, MaxDateSize, isNulleable)
+datatype::Date::Date (const string& name, const Constraint::_v constraint) :
+   datatype::Abstract (name, Datatype::Date, MaxDateSize, constraint)
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
-   wepa_memset (&m_value, 0, sizeof (m_value));
+   m_value = 0;
 }
 
-datatype::Date::Date (const char* name, const datatype::Abstract::Datatype::_v type,  const bool isNulleable) :
-   datatype::Abstract (name, type, MaxDateSize, isNulleable)
+datatype::Date::Date (const char* name, const datatype::Abstract::Datatype::_v type,  const Constraint::_v constraint) :
+   datatype::Abstract (name, type, MaxDateSize, constraint)
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
-   wepa_memset (&m_value, 0, sizeof (m_value));
+   m_value = 0;
 }
 
-datatype::Date::Date (const string& name, const datatype::Abstract::Datatype::_v type,  const bool isNulleable) :
-   datatype::Abstract (name, type, MaxDateSize, isNulleable)
+datatype::Date::Date (const string& name, const datatype::Abstract::Datatype::_v type,  const Constraint::_v constraint) :
+   datatype::Abstract (name, type, MaxDateSize, constraint)
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
-   wepa_memset (&m_value, 0, sizeof (m_value));
+   m_value = 0;
 }
 
-datatype::Date::~Date ()
+datatype::Date::Date (const Date& other) :
+   datatype::Abstract (other),
+   m_value (other.m_value)
 {
+   datatype::Abstract::setBuffer (m_buffer);
+   m_buffer [0] = 0;
 }
 
 struct tm* datatype::Date::getLocalTime () const
@@ -131,19 +135,26 @@ void datatype::Date::setValue (const adt::Second& value)
 }
 
 adt::StreamString datatype::Date::asString () const
-   throw ()
+   noexcept
 {
    const char* cstring;
 
-   adt::StreamString result ("dbms::datatype::Date { ");
+   adt::StreamString result ("datatype.Date { ");
    result << dbms::datatype::Abstract::asString ();
-   result += "' | Value: ";
+   result += " | Value: ";
 
    if (this->hasValue () == true)
-      result << m_value.asString ();
+      result << "'" << m_value.asString () << "'";
    else
       result += "<null>";
 
    return result += " }";
 }
 
+int datatype::Date::do_compare (const datatype::Abstract& other) const
+   throw (adt::RuntimeException)
+{
+   const Date& _other = wepa_datatype_downcast(Date, other);
+
+   return this->m_value - _other.m_value;
+}

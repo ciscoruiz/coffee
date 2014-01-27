@@ -48,7 +48,7 @@ wepa_sccs_define_tag (dbms, 0)
 using namespace wepa;
 
 void dbms::SCCS::activate()
-   throw ()
+   noexcept
 {
    config::SCCS::activate ();
    adt::SCCS::activate ();

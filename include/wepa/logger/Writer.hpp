@@ -51,7 +51,7 @@ public:
 protected:
    Writer (const std::string& name) : adt::pattern::observer::Subject (name) {;}
 
-   virtual bool wantsToProcess (const Level::_v level) const throw ();
+   virtual bool wantsToProcess (const Level::_v level) const noexcept;
 
 private:
    Writer (const Writer&);
@@ -62,7 +62,7 @@ private:
    }
 
    virtual void do_initialize () throw (adt::RuntimeException) = 0;
-   virtual void apply (const Level::_v level, const std::string& line) throw () = 0;
+   virtual void apply (const Level::_v level, const std::string& line) noexcept = 0;
 
    friend class Logger;
 };

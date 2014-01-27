@@ -65,7 +65,7 @@ app::EngineIf::EngineIf (Application& app, const char* className) :
 }
 
 void app::EngineIf::addPredecessor (const char* engineName)
-   throw ()
+   noexcept
 {
    const std::string name (engineName);
 
@@ -114,7 +114,7 @@ void app::EngineIf::initialize ()
 }
 
 adt::StreamString  app::EngineIf::asString () const
-   throw ()
+   noexcept
 {
    adt::StreamString result ("app::EngineIf { ");
    result += Runnable::asString ();
@@ -122,7 +122,7 @@ adt::StreamString  app::EngineIf::asString () const
 }
 
 xml::Node& app::EngineIf::asXML (xml::Node& parent) const
-   throw ()
+   noexcept
 {
    xml::Node& result = parent.createChild ("app.Engine");
 

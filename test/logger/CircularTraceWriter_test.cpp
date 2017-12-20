@@ -41,6 +41,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <iostream>
+
 #include <wepa/adt/Microsecond.hpp>
 
 #include <wepa/logger/CircularTraceWriter.hpp>

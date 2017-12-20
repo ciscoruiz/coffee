@@ -32,23 +32,12 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/adt/RuntimeException.hpp>
+#include <wepa/adt/Exception.hpp>
 #include <wepa/adt/StreamString.hpp>
 
 using namespace std;
 using namespace wepa;
-/*
-string adt::Exception::asString() const noexcept
-{
-   StreamString str;
 
-   str << "[" << m_fromFile << "(" << m_fromLine << "): " << m_fromMethod << "] ";
-
-   str << what ();
-
-   return str;
-}
-*/
 std::string adt::Exception::filePosition () const
    noexcept
 {

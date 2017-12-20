@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE (persistence_primary_key_map)
    Entries entries;
 
    persistence::PrimaryKey primaryKey;
-   std::auto_ptr <dbms::datatype::Integer> ivalue (new dbms::datatype::Integer ("ii"));
+   std::unique_ptr <dbms::datatype::Integer> ivalue (new dbms::datatype::Integer ("ii"));
 
    primaryKey.addComponent(ivalue.get());
 

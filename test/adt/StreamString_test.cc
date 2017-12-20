@@ -155,8 +155,8 @@ BOOST_AUTO_TEST_CASE( StreamString_string_int64 )
 {
    adt::StreamString result;
 
-   result << "max_int:" << ULLONG_MAX;
+   result << "max_long:" << ULONG_MAX;
    result.toUpper();
-   BOOST_REQUIRE_EQUAL(result, "MAX_INT:18446744073709551615");
+   BOOST_REQUIRE_EQUAL(result, "MAX_LONG:18446744073709551615");
 }
 

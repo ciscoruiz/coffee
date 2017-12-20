@@ -113,10 +113,11 @@ void datatype::Date::setValue (const char* str, const char* format)
    tm aux;
    char* r = strptime (str, format, &aux);
 
-   if (r == NULL) {
+   if (r == NULL ) {
       WEPA_THROW_EXCEPTION("'" << str << "' is not a valid date using format '" << format << "'");
    }
 
+   aux.tm_isdst = 0;
    time_t newValue = mktime (&aux);
 
    if (newValue == -1) {

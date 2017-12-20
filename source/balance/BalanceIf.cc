@@ -37,7 +37,8 @@
 
 using namespace wepa;
 
-#include <wepa/adt/StreamString.hpp>
+#include <mutex>
+
 #include <wepa/adt/AsString.hpp>
 
 #include <wepa/logger/Logger.hpp>

@@ -43,7 +43,6 @@
 using namespace wepa;
 using namespace wepa::dbms;
 
-
 BOOST_AUTO_TEST_CASE (string_is_nulleable)
 {
    datatype::String column ("nulleable", 16, datatype::Constraint::CanBeNull);
@@ -124,8 +123,8 @@ BOOST_AUTO_TEST_CASE (string_clone)
    BOOST_REQUIRE_EQUAL (cannotBeNull.hasValue(), true);
    BOOST_REQUIRE_EQUAL (canBeNull.hasValue(), false);
 
-   std::auto_ptr <datatype::Abstract> notnull (cannotBeNull.clone ());
-   std::auto_ptr <datatype::Abstract> null (canBeNull.clone ());
+   std::unique_ptr <datatype::Abstract> notnull (cannotBeNull.clone ());
+   std::unique_ptr <datatype::Abstract> null (canBeNull.clone ());
 
    BOOST_REQUIRE_EQUAL (notnull->hasValue(), true);
    BOOST_REQUIRE_EQUAL (null->hasValue(), false);
@@ -144,8 +143,7 @@ BOOST_AUTO_TEST_CASE (string_clone)
    null.reset (canBeNull.clone ());
    BOOST_REQUIRE_EQUAL (null->hasValue(), true);
    BOOST_REQUIRE_EQUAL (null->compare (canBeNull), 0);
+   BOOST_REQUIRE_GT(null->compare (cannotBeNull), 0);
 
-   BOOST_REQUIRE_EQUAL (null->compare (cannotBeNull), 1);
-
-   BOOST_REQUIRE_EQUAL (notnull->compare (canBeNull), -1);
+   BOOST_REQUIRE_LT(notnull->compare (canBeNull), 0);
 }

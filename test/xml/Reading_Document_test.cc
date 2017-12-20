@@ -32,6 +32,8 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+#include <iostream>
+
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 

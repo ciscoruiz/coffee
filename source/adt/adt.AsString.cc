@@ -59,6 +59,7 @@ string adt::AsString::apply (const unsigned int number)
    return string (aux);
 }
 
+#ifndef __wepa64__
 string adt::AsString::apply (const long number)
    noexcept
 {
@@ -66,6 +67,7 @@ string adt::AsString::apply (const long number)
    sprintf (aux, "%ld", number);
    return string (aux);
 }
+#endif
 
 string adt::AsString::apply (const Integer64 number)
    noexcept
@@ -134,7 +136,7 @@ std::string adt::AsString::apply (const DataBlock& dataBlock, const int characte
             result.append ("\n").append (numbers).append (" ").append (characters);
             characters.clear ();
          }
-         sprintf (aux, "%4d: ", i);
+         sprintf (aux, "%4zd: ", i);
          numbers = aux;
       }
 

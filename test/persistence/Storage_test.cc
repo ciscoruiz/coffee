@@ -35,6 +35,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <thread>
+#include <iostream>
 
 #include <wepa/adt/Second.hpp>
 

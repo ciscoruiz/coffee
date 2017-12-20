@@ -15,7 +15,7 @@ current_directory = Dir ('.').abspath;
 # CPPPATH will be relative to src/<target>
 source_headers = os.path.join (current_directory, "include")
 env.Append (CPPPATH = [source_headers, usr_local_headers])
-env.Append (CCFLAGS = '-D__GXX_EXPERIMENTAL_CXX0X__ -std=c++0x')
+env.Append (CCFLAGS = '-D__GXX_EXPERIMENTAL_CXX0X__ -std=c++11')
 env.Append (LIBS = [''])
 
 if int(release):

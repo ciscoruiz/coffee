@@ -100,9 +100,9 @@ BOOST_AUTO_TEST_CASE (date_is_nulleable)
    column.clear ();
    BOOST_REQUIRE_EQUAL (column.hasValue(), false);
 
-   std::string str_date ("01/01/1900T00:00:00");
-   BOOST_REQUIRE_THROW(column.setValue (str_date, format), adt::RuntimeException);
-   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
+   std::string str_date ("01/01/1800T12:30:50");
+   column.setValue (str_date, format);
+   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 
    BOOST_REQUIRE_NO_THROW(column.setValue ("01/01/2000T00:00:00", format));
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE (date_is_nulleable)
    BOOST_REQUIRE_EQUAL (time_t->tm_mon, 9);
    BOOST_REQUIRE_EQUAL (time_t->tm_mday, 25);
 
-   BOOST_REQUIRE_EQUAL (column.getValue(), adt::Second (1382659210));
+   BOOST_REQUIRE_EQUAL (column.getValue(), adt::Second (1382662810));
 
    column.clear ();
    BOOST_REQUIRE_EQUAL (column.hasValue (), false);

@@ -81,23 +81,23 @@ implement_operator (>)
 implement_operator (<)
 
 string adt::Second::asDateTime (const char* format) const
-   noexcept
+   throw (RuntimeException)
 {
    char aux [DateTimeSizeString];
 
-   return string (asDateTime (aux, format));
-}
+   time_t time = m_value;
 
-const char* adt::Second::asDateTime (char* result, const char* format) const
-   noexcept
-{
-   struct tm* tt = localtime ((time_t*) &m_value);
-   char aux [256];
+   struct tm* tt = localtime (&time);
 
-   if (strftime (aux, sizeof (aux), format, tt) == 0)
-      wepa_strcpy (aux, "Bad date");
+   if (tt == nullptr) {
+	   WEPA_THROW_EXCEPTION(m_value << " is a bad time");
+   }
 
-   return wepa_strcpy (result, aux);
+   if (strftime (aux, sizeof (aux), format, tt) == 0) {
+	   WEPA_THROW_EXCEPTION(m_value << "is a bad date");
+   }
+
+   return string(aux);
 }
 
 //static

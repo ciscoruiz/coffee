@@ -34,7 +34,6 @@
 //
 
 #include <wepa/adt/DataBlock.hpp>
-#include <wepa/adt/StreamString.hpp>
 
 using namespace std;
 using namespace wepa;

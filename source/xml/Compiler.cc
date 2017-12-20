@@ -156,7 +156,5 @@ const char* xml::Compiler::encode (const char* text)
 //   m_encodedBuffer = (char*) xmlRealloc (m_encodedBuffer, outputSize + 1);
    m_encodedBuffer [outputSize] = 0;
 
-   std::cout << text << "='" << m_encodedBuffer << "'" << std::endl;
-
    return m_encodedBuffer;
 }

@@ -35,6 +35,8 @@
 #ifndef __wepa_logger_TtyWriter_hpp
 #define __wepa_logger_TtyWriter_hpp
 
+#include <iostream>
+
 #include <wepa/logger/Writer.hpp>
 
 namespace wepa {

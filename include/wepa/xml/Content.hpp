@@ -52,7 +52,7 @@ public:
    void clear () { m_value.reset (NULL); }
 
 private:
-   std::auto_ptr <std::string> m_value;
+   std::unique_ptr <std::string> m_value;
 };
 
 } /* namespace xml */

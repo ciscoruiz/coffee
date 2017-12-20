@@ -149,9 +149,7 @@ public:
 
       \see man strftime
    */
-   std::string asDateTime (const char* format = "%d/%0m/%Y %T") const noexcept;
-
-   const char* asDateTime (char* result, const char* format = "%d/%0m/%Y %T") const noexcept;
+   std::string asDateTime (const char* format = "%d/%0m/%Y %T") const throw (RuntimeException);
 
    /**
     * Devuelve una cadena con el valor de esta instancia y las unidades "sec".

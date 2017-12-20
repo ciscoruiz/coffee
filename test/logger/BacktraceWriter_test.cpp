@@ -34,6 +34,8 @@
 //
 #include <boost/test/unit_test.hpp>
 
+#include <iostream>
+
 #include <wepa/adt/Microsecond.hpp>
 
 #include <wepa/logger/Logger.hpp>

@@ -61,10 +61,12 @@ public:
    */
    static std::string apply (const unsigned int number) noexcept;
 
+#ifndef __wepa64__
    /**
       @return A string with the number.
    */
    static std::string apply (const long number) noexcept;
+#endif
 
    /**
       @return A string with the number.

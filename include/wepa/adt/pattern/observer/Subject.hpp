@@ -77,7 +77,7 @@ protected:
    Subject(const std::string& name) : NamedObject(name) {;}
 
    Event registerEvent(const Event::Id id) throw(RuntimeException);
-   Event lookupEvent(const Event::Id id) throw(RuntimeException);
+   Event lookupEvent(const Event::Id id) const throw(RuntimeException);
 
    void notify(const Event::Id eventId) throw(RuntimeException) {
       notify(lookupEvent(eventId));
@@ -96,10 +96,12 @@ protected:
 
    typedef std::set <Event> Events;
    typedef Events::iterator event_iterator;
+   typedef Events::const_iterator const_event_iterator;
    Events m_events;
 
    event_iterator event_begin() noexcept { return m_events.begin(); }
    event_iterator event_end() noexcept { return m_events.end(); }
+   const_event_iterator event_end() const noexcept { return m_events.end(); }
    static const Event& event(event_iterator ii) { return *ii; }
 };
 

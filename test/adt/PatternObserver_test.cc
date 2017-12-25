@@ -142,7 +142,7 @@ public:
    const Millisecond& getIITime() { return m_ii.second; }
 
    unsigned int getUU() const noexcept { return m_uu.first; }
-   const Millisecond& getUUTime() { return m_ii.second; }
+   const Millisecond& getUUTime() { return m_uu.second; }
 
 private:
    pair<int, Millisecond> m_ii;
@@ -226,12 +226,12 @@ BOOST_AUTO_TEST_CASE(nosy_subscription)
 
    subject.setII(100);
 
-   BOOST_REQUIRE_EQUAL(iiObserver->getValue(), 100);
+   BOOST_REQUIRE_EQUAL(iiObserver->getValue(), 0);
    BOOST_REQUIRE_EQUAL(nosyObserver->getValue(), 100);
 
    subject.setUU(10);
 
-   BOOST_REQUIRE_EQUAL(iiObserver->getValue(), 100);
+   BOOST_REQUIRE_EQUAL(iiObserver->getValue(), 0);
    BOOST_REQUIRE_EQUAL(nosyObserver->getValue(), 110);
 }
 

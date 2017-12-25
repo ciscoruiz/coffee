@@ -56,7 +56,6 @@ void observer::Subject::subscribeObserver(std::shared_ptr<Observer>& observer, c
    const std::string& observerName = observer->getName();
 
    if (m_observers.find(observerName) != observer_end()) {
-      LOG_WARN(observer->getName() << " already connected to " << getName());
       return;
    }
 
@@ -104,11 +103,11 @@ observer::Event observer::Subject::registerEvent(const Event::Id id)
    return newEvent;
 }
 
-observer::Event observer::Subject::lookupEvent(const Event::Id id)
+observer::Event observer::Subject::lookupEvent(const Event::Id id) const
    throw(RuntimeException)
 {
    Event search(id, 0);
-   event_iterator ii;
+   const_event_iterator ii;
 
    if ((ii = m_events.find(search)) != event_end())
       return event(ii);

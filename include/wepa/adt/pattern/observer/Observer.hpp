@@ -57,7 +57,7 @@ public:
    bool isSubscribed() const noexcept { return m_isSubscribed; }
 
 protected:
-   Observer(const std::string& name) : NamedObject(name) {;}
+   Observer(const std::string& name) : NamedObject(name), m_isSubscribed(false) {;}
    virtual ~Observer() {;}
 
    virtual void update(const Subject& subject, const Event&) noexcept = 0 ;

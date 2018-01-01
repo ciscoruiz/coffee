@@ -35,12 +35,12 @@
 #ifndef __wepa_balance_Indexed_hpp
 #define __wepa_balance_Indexed_hpp
 
-#include <wepa/balance/BalanceIf.hpp>
+#include "Balance.hpp"
 
 namespace wepa {
 namespace balance {
 
-class Indexed : public BalanceIf {
+class Indexed : public Balance {
 public:
    Indexed ();
 

@@ -63,7 +63,7 @@ namespace ByRangeTest {
    typedef CounterContainer::iterator counter_iterator;
 
    void incrementUse (CounterContainer& container, const Resource* resource);
-   void do_work (std::mutex& mutexContainer, CounterContainer& container, balance::BalanceIf& theBalance);
+   void do_work (std::mutex& mutexContainer, CounterContainer& container, balance::Balance& theBalance);
 }
 
 void ByRangeTest::incrementUse (CounterContainer& counterContainer, const Resource* resource)
@@ -78,7 +78,7 @@ void ByRangeTest::incrementUse (CounterContainer& counterContainer, const Resour
    }
 }
 
-void ByRangeTest::do_work(std::mutex& mutex, CounterContainer& counterContainer, BalanceIf& theBalance)
+void ByRangeTest::do_work(std::mutex& mutex, CounterContainer& counterContainer, Balance& theBalance)
 {
    for (int ii = 100; ii < 100 + 10; ++ ii) {
       Resource* resource = theBalance.apply (ii);

@@ -41,7 +41,7 @@
 using namespace wepa;
 
 balance::RoundRobin::RoundRobin() :
-   balance::BalanceIf("balance::RoundRobin", Requires::None)
+   balance::Balance("balance::RoundRobin", Requires::None)
 {
    m_position = this->resource_begin();
 }

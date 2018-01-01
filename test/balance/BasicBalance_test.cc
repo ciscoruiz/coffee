@@ -42,10 +42,9 @@
 #include <wepa/logger/TtyWriter.hpp>
 
 #include <wepa/balance/Resource.hpp>
-#include <wepa/balance/BalanceIf.hpp>
-
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Compiler.hpp>
+#include "../../include/wepa/balance/Balance.hpp"
 
 using namespace wepa;
 using namespace wepa::balance;
@@ -68,7 +67,7 @@ private:
    void initialize () throw (adt::RuntimeException) { m_available = true; }
 };
 
-class MyBaseBalance : public BalanceIf {
+class MyBaseBalance : public Balance {
 public:
    MyBaseBalance (const Requires::_v requires);
    ~MyBaseBalance () { m_resources.clear (); }
@@ -98,7 +97,7 @@ private:
 int MaxResources = 10;
 
 MyBaseBalance::MyBaseBalance (const Requires::_v requires) :
-   BalanceIf ("MyBalance", requires)
+   Balance ("MyBalance", requires)
 {
    logger::Logger::initialize(new logger::TtyWriter);
 
@@ -114,7 +113,7 @@ Resource* MyBasicBalance::do_apply (const int key)
    throw (adt::RuntimeException)
 {
    for (resource_iterator ii = this->resource_begin(), maxii = this->resource_end(); ii != maxii; ++ ii) {
-      Resource* resource = BalanceIf::resource (ii);
+      Resource* resource = Balance::resource (ii);
 
       if (resource->isAvailable() == false)
          continue;
@@ -129,7 +128,7 @@ Resource* MyKeyBalance::do_apply (const int key)
    throw (adt::RuntimeException)
 {
    for (resource_iterator ii = this->resource_begin(), maxii = this->resource_end(); ii != maxii; ++ ii) {
-      Resource* resource = BalanceIf::resource (ii);
+      Resource* resource = Balance::resource (ii);
 
       MyResource* myResource = static_cast <MyResource*> (resource);
 

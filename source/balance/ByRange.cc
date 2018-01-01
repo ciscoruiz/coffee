@@ -41,7 +41,7 @@
 using namespace wepa;
 
 balance::ByRange::ByRange() :
-   balance::BalanceIf("balance::ByRange", Requires::Key)
+   balance::Balance("balance::ByRange", Requires::Key)
 {
 }
 
@@ -58,7 +58,7 @@ void balance::ByRange::initialize ()
    }
 }
 
-void balance::ByRange::addRange (const int bottom, const int top, BalanceIf* balanceIf)
+void balance::ByRange::addRange (const int bottom, const int top, Balance* balanceIf)
    throw (adt::RuntimeException)
 {
    if (balanceIf == NULL)
@@ -73,7 +73,7 @@ void balance::ByRange::addRange (const int bottom, const int top, BalanceIf* bal
    if (bottom > top)
       WEPA_THROW_EXCEPTION(asString () << " | invalid range (bottom > top)");
 
-   BalanceIf* aux;
+   Balance* aux;
 
    if ((aux = find_range (bottom)) != NULL)
       WEPA_THROW_EXCEPTION(aux->asString () << " has overlapping with " << balanceIf->asString());
@@ -86,11 +86,11 @@ void balance::ByRange::addRange (const int bottom, const int top, BalanceIf* bal
 
    LOG_DEBUG ("Range (" <<  bottom << "," << top << "): " << balanceIf->asString () << " has been created");
 
-   for (BalanceIf::resource_iterator ii = balanceIf->resource_begin(), maxii = balanceIf->resource_end(); ii != maxii; ++ ii)
-      BalanceIf::add (BalanceIf::resource (ii));
+   for (Balance::resource_iterator ii = balanceIf->resource_begin(), maxii = balanceIf->resource_end(); ii != maxii; ++ ii)
+      Balance::add (Balance::resource (ii));
 }
 
-balance::BalanceIf* balance::ByRange::find_range (const int key)
+balance::Balance* balance::ByRange::find_range (const int key)
 noexcept
 {
    for (auto& range : m_ranges) {
@@ -108,7 +108,7 @@ balance::Resource* balance::ByRange::do_apply (const int key)
 
    balance::Resource* result = NULL;
 
-   BalanceIf* balanceIf = find_range (key);
+   Balance* balanceIf = find_range (key);
 
    if (balanceIf == NULL)
       WEPA_THROW_EXCEPTION("Key=" << key << " does not have a defined range");

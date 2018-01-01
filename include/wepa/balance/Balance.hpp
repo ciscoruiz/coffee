@@ -32,8 +32,8 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_balance_BalanceIf_hpp
-#define __wepa_balance_BalanceIf_hpp
+#ifndef __wepa_balance_Balance_hpp
+#define __wepa_balance_Balance_hpp
 
 #include <vector>
 #include <mutex>
@@ -53,7 +53,7 @@ namespace balance {
 
 class Resource;
 
-class BalanceIf : public adt::NamedObject  {
+class Balance : public adt::NamedObject  {
    typedef std::vector <Resource*> resource_container;
 
    static const int NullKey;
@@ -68,7 +68,7 @@ public:
       auto_enum_declare (Requires);
    };
 
-   virtual ~BalanceIf () { m_resources.clear (); }
+   virtual ~Balance () { m_resources.clear (); }
 
    bool add (Resource* resource) throw (adt::RuntimeException);
 
@@ -100,7 +100,7 @@ public:
    virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
 protected:
-   BalanceIf (const char* name, const Requires::_v requires) : adt::NamedObject (name), m_requires (requires) {;}
+   Balance (const char* name, const Requires::_v requires) : adt::NamedObject (name), m_requires (requires) {;}
 
    virtual void do_initialize () throw (adt::RuntimeException) {;}
    virtual void do_initializer (Resource* resource) throw (adt::RuntimeException);
@@ -118,7 +118,7 @@ private:
    const Requires::_v m_requires;
    resource_container m_resources;
 
-   BalanceIf (const BalanceIf&);
+   Balance (const Balance&);
 };
 
 } /* namespace balance */

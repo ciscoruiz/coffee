@@ -32,7 +32,8 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/balance/BalanceIf.hpp>
+#include "../../include/wepa/balance/Balance.hpp"
+
 #include <wepa/balance/Resource.hpp>
 
 using namespace wepa;
@@ -51,12 +52,12 @@ using namespace wepa;
 
 using namespace wepa;
 
-auto_enum_assign (balance::BalanceIf::Requires) = { "Key", "PositiveKey", NULL };
+auto_enum_assign (balance::Balance::Requires) = { "Key", "PositiveKey", NULL };
 
 //static
-const int balance::BalanceIf::NullKey = INT_MIN;
+const int balance::Balance::NullKey = INT_MIN;
 
-void balance::BalanceIf::initialize ()
+void balance::Balance::initialize ()
    throw (adt::RuntimeException)
 {
    LOG_THIS_METHOD();
@@ -82,7 +83,7 @@ void balance::BalanceIf::initialize ()
 }
 
 //virtual
-void balance::BalanceIf::do_initializer (Resource* resource)
+void balance::Balance::do_initializer (Resource* resource)
    throw (adt::RuntimeException)
 {
    logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
@@ -90,7 +91,7 @@ void balance::BalanceIf::do_initializer (Resource* resource)
    LOG_DEBUG (resource->asString ());
 }
 
-balance::Resource* balance::BalanceIf::apply (const int key)
+balance::Resource* balance::Balance::apply (const int key)
    throw (adt::RuntimeException)
 {
    logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
@@ -127,7 +128,7 @@ balance::Resource* balance::BalanceIf::apply (const int key)
    return result;
 }
 
-bool balance::BalanceIf::add (Resource* resource)
+bool balance::Balance::add (Resource* resource)
    throw (adt::RuntimeException)
 {
     logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
@@ -153,7 +154,7 @@ bool balance::BalanceIf::add (Resource* resource)
    return result;
 }
 
-bool balance::BalanceIf::contains (const balance::Resource* resource) const
+bool balance::Balance::contains (const balance::Resource* resource) const
    noexcept
 {
    if (resource == NULL)
@@ -167,7 +168,7 @@ bool balance::BalanceIf::contains (const balance::Resource* resource) const
 }
 
 // virtual
-bool balance::BalanceIf::do_contains (const balance::Resource* resource) const
+bool balance::Balance::do_contains (const balance::Resource* resource) const
    noexcept
 {
    const_resource_iterator end = resource_end ();
@@ -176,7 +177,7 @@ bool balance::BalanceIf::do_contains (const balance::Resource* resource) const
 }
 
 
-size_t balance::BalanceIf::countAvailableResources () const
+size_t balance::Balance::countAvailableResources () const
    noexcept
 {
    size_t result = 0;
@@ -189,7 +190,7 @@ size_t balance::BalanceIf::countAvailableResources () const
    return result;
 }
 
-balance::BalanceIf::resource_iterator balance::BalanceIf::next (balance::BalanceIf::resource_iterator ii)
+balance::Balance::resource_iterator balance::Balance::next (balance::Balance::resource_iterator ii)
    noexcept
 {
    ii ++;
@@ -201,7 +202,7 @@ balance::BalanceIf::resource_iterator balance::BalanceIf::next (balance::Balance
 }
 
 //virtual
-adt::StreamString balance::BalanceIf::asString () const
+adt::StreamString balance::Balance::asString () const
    noexcept
 {
    adt::StreamString result ("balance.BalanceIf { ");
@@ -220,7 +221,7 @@ adt::StreamString balance::BalanceIf::asString () const
 }
 
 //virtual
-xml::Node& balance::BalanceIf::asXML (xml::Node& parent) const
+xml::Node& balance::Balance::asXML (xml::Node& parent) const
    noexcept
 {
    xml::Node& result = parent.createChild (this->getName());

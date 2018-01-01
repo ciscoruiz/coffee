@@ -62,7 +62,7 @@ namespace IndexedTest {
    typedef CounterContainer::iterator counter_iterator;
 
    void incrementUse (CounterContainer& container, const Resource* resource);
-   void do_work (std::mutex& mutexContainer, CounterContainer& container, balance::BalanceIf& theBalance);
+   void do_work (std::mutex& mutexContainer, CounterContainer& container, balance::Balance& theBalance);
 }
 
 class MyIndexedBalance : public Indexed {
@@ -107,7 +107,7 @@ void IndexedTest::incrementUse (CounterContainer& counterContainer, const Resour
    }
 }
 
-void IndexedTest::do_work(std::mutex& mutex, CounterContainer& counterContainer, BalanceIf& theBalance)
+void IndexedTest::do_work(std::mutex& mutex, CounterContainer& counterContainer, Balance& theBalance)
 {
    for (int ii = 100; ii < 100 + MyIndexedBalance::MaxResources; ++ ii) {
       Resource* resource = theBalance.apply (ii);

@@ -41,7 +41,7 @@
 using namespace wepa;
 
 balance::Indexed::Indexed() :
-   balance::BalanceIf("balance::Indexed", Requires::Key)
+   balance::Balance("balance::Indexed", Requires::Key)
 {
 }
 

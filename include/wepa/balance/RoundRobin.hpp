@@ -35,12 +35,12 @@
 #ifndef __wepa_balance_RoundRobin_hpp
 #define __wepa_balance_RoundRobin_hpp
 
-#include <wepa/balance/BalanceIf.hpp>
+#include "Balance.hpp"
 
 namespace wepa {
 namespace balance {
 
-class RoundRobin : public BalanceIf {
+class RoundRobin : public Balance {
 public:
    RoundRobin ();
 

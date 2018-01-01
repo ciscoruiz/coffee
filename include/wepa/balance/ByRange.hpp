@@ -37,14 +37,14 @@
 
 #include <map>
 
-#include <wepa/balance/BalanceIf.hpp>
+#include "Balance.hpp"
 
 namespace wepa {
 namespace balance {
 
-class ByRange : public BalanceIf {
+class ByRange : public Balance {
    typedef std::pair <int, int> Range;
-   typedef std::map <Range, BalanceIf*> Ranges;
+   typedef std::map <Range, Balance*> Ranges;
    typedef Ranges::iterator range_iterator;
 
 public:
@@ -66,12 +66,12 @@ public:
     * @param top Maximal value for this range
     * @param balanceIf Load balancing algorithm used under this range.
     */
-   void addRange (const int bottom, const int top, BalanceIf* balanceIf) throw (adt::RuntimeException);
+   void addRange (const int bottom, const int top, Balance* balanceIf) throw (adt::RuntimeException);
 
 private:
    Ranges m_ranges;
 
-   BalanceIf* find_range (const int key) noexcept;
+   Balance* find_range (const int key) noexcept;
 
    Resource* do_apply (const int key) throw (adt::RuntimeException);
 };

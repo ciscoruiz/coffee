@@ -34,15 +34,14 @@
 //
 #include <wepa/balance/ByRange.hpp>
 #include <wepa/balance/Resource.hpp>
-#include <wepa/balance/Balance.hpp>
-
+#include <wepa/balance/ResourceList.hpp>
 #include <wepa/logger/Logger.hpp>
 #include <wepa/logger/TraceMethod.hpp>
 
 using namespace wepa;
 
 balance::ByRange::ByRange() :
-   balance::Strategy("balance::ByRange", m_unusedBalance),
+   balance::Strategy("balance::ByRange", m_unusedList),
    m_key(0)
 {
 }
@@ -50,7 +49,7 @@ balance::ByRange::ByRange() :
 void balance::ByRange::addRange (const int bottom, const int top, std::shared_ptr<Strategy>& strategy)
    throw (adt::RuntimeException)
 {
-   auto guard(m_unusedBalance->getLockGuard());
+   ResourceList::LockGuard guard(m_unusedList);
 
    if (!strategy)
       WEPA_THROW_EXCEPTION(asString () << " can not associate a null Stragegy");
@@ -61,7 +60,7 @@ void balance::ByRange::addRange (const int bottom, const int top, std::shared_pt
    if (bottom > top)
       WEPA_THROW_EXCEPTION(asString () << " | invalid range (bottom > top)");
 
-   std::shared_ptr<balance::Balance> aux;
+   std::shared_ptr<balance::Strategy> aux;
 
    if ((aux = findRange(guard, bottom)))
       WEPA_THROW_EXCEPTION(aux->asString () << " has overlapping with " << strategy->asString());
@@ -76,27 +75,29 @@ void balance::ByRange::addRange (const int bottom, const int top, std::shared_pt
    m_ranges.push_back(range);
 }
 
-std::shared_ptr<balance::Strategy>&  balance::ByRange::findRange (Balance::lock_guard&, const int key)
+std::shared_ptr<balance::Strategy>& balance::ByRange::findRange (ResourceList::LockGuard&, const int key)
    noexcept
 {
+   static std::shared_ptr<balance::Strategy> empty;
+
    // See http://en.cppreference.com/w/cpp/utility/tuple/get
    for (auto range : m_ranges) {
       if (std::get<0>(range) >= key && std::get<1>(range) <= key)
          return std::get<2>(range);
    }
 
-   return std::shared_ptr<balance::Strategy>();
+   return empty;
 }
 
-std::shared_ptr<balance::Resource> balance::ByRange::apply(Balance::lock_guard& guard)
-   throw (adt::RuntimeException)
+std::shared_ptr<balance::Resource> balance::ByRange::apply(ResourceList::LockGuard& guard)
+   throw (balance::ResourceUnavailableException)
 {
    logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
 
    std::shared_ptr<balance::Strategy> strategy;
 
    if (true) {
-      auto guard(m_unusedBalance->getLockGuard());
+	  ResourceList::LockGuard guard(m_unusedList);
       strategy = findRange (guard, m_key);
    }
 
@@ -104,7 +105,7 @@ std::shared_ptr<balance::Resource> balance::ByRange::apply(Balance::lock_guard& 
       WEPA_THROW_EXCEPTION("Key=" << m_key << " does not have a defined range");
    }
 
-   auto guard2(strategy->getBalance()->getLockGuard());
+   ResourceList::LockGuard guard2(strategy->getBalance());
 
    return strategy->apply(guard2);
 }

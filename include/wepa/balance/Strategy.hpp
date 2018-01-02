@@ -38,8 +38,8 @@
 #include <memory>
 
 #include <wepa/adt/NamedObject.hpp>
-#include <wepa/balance/Balance.hpp>
 #include <wepa/balance/ResourceUnavailableException.hpp>
+#include "ResourceList.hpp"
 
 namespace wepa {
 
@@ -53,17 +53,17 @@ class Resource;
 
 class Strategy : public adt::NamedObject {
 public:
-   virtual std::shared_ptr<Resource> apply(Balance::lock_guard& guard) throw (ResourceUnavailableException) = 0;
+   virtual std::shared_ptr<Resource> apply(ResourceList::LockGuard& guard) throw (ResourceUnavailableException) = 0;
 
    virtual adt::StreamString asString () const noexcept;
    virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
-   std::shared_ptr<Balance>& getBalance() { return m_balance; }
+   std::shared_ptr<ResourceList>& getBalance() { return m_resources; }
 
 protected:
-   std::shared_ptr<Balance> m_balance;
+   std::shared_ptr<ResourceList> m_resources;
 
-   Strategy(const std::string& name, std::shared_ptr<Balance>& balance) : adt::NamedObject(name), m_balance(balance) {;}
+   Strategy(const std::string& name, std::shared_ptr<ResourceList>& resources) : adt::NamedObject(name), m_resources(resources) {;}
 };
 
 }

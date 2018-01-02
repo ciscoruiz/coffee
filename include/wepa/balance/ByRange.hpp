@@ -69,19 +69,19 @@ public:
    void addRange (const int bottom, const int top, std::shared_ptr<Strategy>& strategy) throw (adt::RuntimeException);
 
    std::shared_ptr<Resource> apply(const int key) throw (ResourceUnavailableException) {
-      auto guard = m_unusedBalance->getLockGuard();
+      ResourceList::LockGuard guard(m_unusedList);
       m_key = key;
       return apply(guard);
    }
 
 private:
-   std::shared_ptr<Balance> m_unusedBalance;
+   std::shared_ptr<ResourceList> m_unusedList;
    Ranges m_ranges;
    int m_key;
 
-   std::shared_ptr<Strategy>& findRange (Balance::lock_guard&, const int key) noexcept;
+   std::shared_ptr<Strategy>& findRange (ResourceList::LockGuard&, const int key) noexcept;
 
-   std::shared_ptr<Resource> apply(Balance::lock_guard& guard) throw (ResourceUnavailableException);
+   std::shared_ptr<Resource> apply(ResourceList::LockGuard& guard) throw (ResourceUnavailableException);
 };
 
 } /* namespace balance */

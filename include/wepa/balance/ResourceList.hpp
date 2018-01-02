@@ -52,15 +52,31 @@ namespace balance {
 
 class Resource;
 
-class Balance : public adt::NamedObject  {
+class ResourceList : public adt::NamedObject  {
    typedef std::vector <std::shared_ptr<Resource> > resource_container;
 
 public:
+   class LockGuard {
+   public:
+	   LockGuard(const ResourceList& balance) {
+		   m_lock = std::make_shared<std::lock_guard<std::mutex> >(balance.m_mutex);
+	   }
+	   LockGuard(std::shared_ptr<ResourceList>& balance) {
+		   m_lock = std::make_shared<std::lock_guard<std::mutex> >(balance->m_mutex);
+	   }
+	   ~LockGuard() {
+		   m_lock.reset();
+	   }
+
+   private:
+	   std::shared_ptr<std::lock_guard<std::mutex> > m_lock;
+   };
+
    typedef resource_container::iterator resource_iterator;
    typedef resource_container::const_iterator const_resource_iterator;
-   typedef std::lock_guard<std::mutex> lock_guard;
 
-   virtual ~Balance () { m_resources.clear (); }
+   ResourceList (const char* name) : adt::NamedObject (name) {;}
+   virtual ~ResourceList () { m_resources.clear (); }
 
    bool add (const std::shared_ptr<Resource>& resource) throw (adt::RuntimeException);
 
@@ -69,33 +85,32 @@ public:
     */
    virtual void initialize () throw (adt::RuntimeException);
 
-   resource_iterator resource_begin(lock_guard&) noexcept { return m_resources.begin (); }
-   resource_iterator resource_end(lock_guard&) noexcept { return m_resources.end (); }
-   resource_iterator next (lock_guard&, resource_iterator ii) noexcept;
+   resource_iterator resource_begin(LockGuard&) noexcept { return m_resources.begin (); }
+   resource_iterator resource_end(LockGuard&) noexcept { return m_resources.end (); }
+   resource_iterator next (LockGuard&, resource_iterator ii) noexcept;
    static std::shared_ptr<Resource>& resource(resource_iterator ii) noexcept { return *ii; }
 
-   size_t size (lock_guard&) const noexcept { return m_resources.size (); }
-   size_t countAvailableResources (lock_guard&) const noexcept;
+   size_t size (LockGuard&) const noexcept { return m_resources.size (); }
+   size_t countAvailableResources (LockGuard&) const noexcept;
+   std::shared_ptr<Resource>& at(LockGuard&, const resource_container::size_type index) { return m_resources.at(index); }
 
-   const_resource_iterator resource_begin (lock_guard&) const noexcept { return m_resources.begin (); }
-   const_resource_iterator resource_end (lock_guard&) const noexcept { return m_resources.end (); }
+   const_resource_iterator resource_begin (LockGuard&) const noexcept { return m_resources.begin (); }
+   const_resource_iterator resource_end (LockGuard&) const noexcept { return m_resources.end (); }
    static const std::shared_ptr<Resource>& resource(const_resource_iterator ii) noexcept { return *ii; }
-
-   lock_guard getLockGuard() const noexcept { return lock_guard(m_mutex); }
+   const std::shared_ptr<Resource>& at(LockGuard&, const resource_container::size_type index) const { return m_resources.at(index); }
 
    operator adt::StreamString () const noexcept { return asString (); }
 
    virtual adt::StreamString asString () const noexcept;
    virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
-protected:
-   Balance (const char* name) : adt::NamedObject (name) {;}
-
 private:
-   mutable std::recursive_mutex m_mutex;
+   mutable std::mutex m_mutex;
    resource_container m_resources;
 
-   Balance (const Balance&);
+   ResourceList (const ResourceList&);
+
+   friend class LockGuard;
 };
 
 } /* namespace balance */

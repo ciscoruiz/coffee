@@ -40,41 +40,41 @@
 
 using namespace wepa;
 
-std::shared_ptr<balance::Resource> balance::RoundRobin::apply (Balance::lock_guard& guard)
+std::shared_ptr<balance::Resource> balance::RoundRobin::apply (ResourceList::LockGuard& guard)
    throw (ResourceUnavailableException)
 {
    logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
 
    if (!m_position) {
-      m_position = m_balance->resource_begin(guard);
+      m_position = m_resources->resource_begin(guard);
    }
 
-   if (m_position.value() == m_balance->resource_end(guard)) {
-      WEPA_THROW_NAMED_EXCEPTION(ResourceUnavailableException, m_balance->getName() << " is empty");
+   if (m_position.value() == m_resources->resource_end(guard)) {
+      WEPA_THROW_NAMED_EXCEPTION(ResourceUnavailableException, m_resources->getName() << " is empty");
    }
 
    std::shared_ptr<Resource> result;
-   Balance::resource_iterator ww;
-   Balance::resource_iterator end;
+   ResourceList::resource_iterator ww;
+   ResourceList::resource_iterator end;
 
-   ww = end = m_position;
+   ww = end = *m_position;
 
    do {
-      std::shared_ptr<Resource>& w = Balance::resource(ww);
+      std::shared_ptr<Resource>& w = ResourceList::resource(ww);
 
       if (w->isAvailable () == true) {
          // prepare the next call to this method
-         m_position = m_balance->next(guard, ww);
+         m_position = m_resources->next(guard, ww);
          result = w;
          break;
       }
-   } while ((ww = m_balance->next(guard, ww)) != end);
+   } while ((ww = m_resources->next(guard, ww)) != end);
 
    if (!result) {
       WEPA_THROW_NAMED_EXCEPTION(ResourceUnavailableException, this->asString() << " there is not any available resource");
    }
 
-   LOG_LOCAL7("Result=" << result);
+   LOG_LOCAL7("Result=" << result->asString());
 
    return result;
 }

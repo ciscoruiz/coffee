@@ -42,10 +42,14 @@ namespace balance {
 
 class Indexed : public Strategy {
 public:
-   Indexed (std::shared_ptr<Balance>& balance);
+   Indexed (std::shared_ptr<ResourceList>& resources) :
+      balance::Strategy("balance::Indexed", resources),
+      m_key(0)
+   {
+   }
 
    std::shared_ptr<Resource> apply(const int key) throw (ResourceUnavailableException) {
-      auto guard = m_balance->getLockGuard();
+	   ResourceList::LockGuard guard(m_resources);
       m_key = key;
       return apply(guard);
    }
@@ -53,7 +57,7 @@ public:
 private:
    int m_key;
 
-   std::shared_ptr<Resource> apply(Balance::lock_guard& guard) throw (ResourceUnavailableException);
+   std::shared_ptr<Resource> apply(ResourceList::LockGuard& guard) throw (ResourceUnavailableException);
 };
 
 } /* namespace balance */

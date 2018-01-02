@@ -32,23 +32,23 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+#include <wepa/balance/ResourceList.hpp>
 #include <functional>
 
 #include <wepa/xml/Node.hpp>
 
 #include <wepa/balance/Strategy.hpp>
-#include <wepa/balance/Balance.hpp>
 
 using namespace wepa;
 
 //virtual
 adt::StreamString balance::Strategy::asString () const noexcept
 {
-   adt::StreamString result ("balance.Strategy{ ");
+   adt::StreamString result ("balance.Strategy { ");
    result += adt::NamedObject::asString();
    result += "|";
-   result += m_balance;
-   return result += "}";
+   result += m_resources->asString();
+   return result += " }";
 
 }
 
@@ -56,6 +56,6 @@ adt::StreamString balance::Strategy::asString () const noexcept
 xml::Node& balance::Strategy::asXML (xml::Node& parent) const noexcept
 {
    xml::Node& result = parent.createChild (this->getName());
-   m_balance->asXML(result);
+   m_resources->asXML(result);
    return std::ref (result);
 }

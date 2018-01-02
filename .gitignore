@@ -17,3 +17,4 @@ release
 .sconsign.dblite
 *.log
 *.old
+/Default/

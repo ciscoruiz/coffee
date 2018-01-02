@@ -59,62 +59,47 @@ using namespace wepa::balance;
 using namespace wepa::test::balance;
 
 namespace ByRangeTest {
-   typedef std::map <const Resource*, int> CounterContainer;
+   typedef std::map <int, int> CounterContainer;
    typedef CounterContainer::iterator counter_iterator;
 
-   void incrementUse (CounterContainer& container, const Resource* resource);
-   void do_work (std::mutex& mutexContainer, CounterContainer& container, balance::Balance& theBalance);
-}
+   static int MaxResources = 13;
+   static int MaxLoop = 5;
 
-void ByRangeTest::incrementUse (CounterContainer& counterContainer, const Resource* resource)
-{
-   counter_iterator cc = counterContainer.find (resource);
+   void incrementUse (CounterContainer& counterContainer, const std::shared_ptr<Resource>& resource)
+   {
+      std::shared_ptr<TestResource> myResource = TestResource::cast(resource);
 
-   if (cc == counterContainer.end ()) {
-      counterContainer [resource] = 1;
+      counter_iterator cc = counterContainer.find (myResource->getKey());
+
+      if (cc == counterContainer.end ()) {
+         counterContainer [myResource->getKey()] = 1;
+      }
+      else {
+         cc->second ++;
+      }
    }
-   else {
-      cc->second ++;
-   }
-}
 
-void ByRangeTest::do_work(std::mutex& mutex, CounterContainer& counterContainer, Balance& theBalance)
-{
-   for (int ii = 100; ii < 100 + 10; ++ ii) {
-      Resource* resource = theBalance.apply (ii);
+   void parallel_work(std::mutex& mutexContainer, CounterContainer& counterContainer, balance::ByRange& strategy)
+   {
+      for (int ii = 0; ii < 1000; ++ ii) {
+         auto resource = strategy.apply (ii);
 
-      if (true) {
-         std::lock_guard <std::mutex> guard (mutex);
-         incrementUse (counterContainer, resource);
+         if (true) {
+            std::lock_guard <std::mutex> guard (mutexContainer);
+            incrementUse (counterContainer, resource);
+         }
       }
    }
 }
 
-BOOST_AUTO_TEST_CASE(byrange_requires_key)
-{
-   using namespace ByRangeTest;
-
-   balance::ByRange myBalance;
-
-   myBalance.initialize();
-
-   BOOST_REQUIRE_THROW (myBalance.apply (), adt::RuntimeException);
-}
-
 BOOST_AUTO_TEST_CASE(byrange_preconditions)
 {
-   using namespace ByRangeTest;
+   auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources);
 
-   balance::ByRange myBalance;
+   balance::ByRange mainStrategy;
 
-   myBalance.initialize();
-
-   BOOST_REQUIRE_THROW (myBalance.addRange (0, 10, NULL), adt::RuntimeException);
-
-   balance::RoundRobin empty;
-   BOOST_REQUIRE_THROW (myBalance.addRange (0, 10, &empty), adt::RuntimeException);
-
-   BOOST_REQUIRE_THROW (myBalance.addRange (0, 10, &myBalance), adt::RuntimeException);
+   std::shared_ptr <balance::ByRange> empty;
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (0, 10, std::dynamic_pointer_cast<balance::Strategy>(empty)), adt::RuntimeException);
 
    TestResource resource (100);
    balance::RoundRobin aux;

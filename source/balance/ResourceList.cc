@@ -32,9 +32,8 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include "../../include/wepa/balance/Balance.hpp"
-
 #include <wepa/balance/Resource.hpp>
+#include <wepa/balance/ResourceList.hpp>
 
 using namespace wepa;
 
@@ -52,14 +51,14 @@ using namespace wepa;
 
 using namespace wepa;
 
-void balance::Balance::initialize ()
+void balance::ResourceList::initialize ()
    throw (adt::RuntimeException)
 {
    LOG_THIS_METHOD();
 
    SCCS::activate();
 
-   auto guard(getLockGuard());
+   LockGuard guard(*this);
 
    for (resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
       try {
@@ -78,7 +77,7 @@ void balance::Balance::initialize ()
       LOG_WARN (asString () << " does not have any available resource");
 }
 
-bool balance::Balance::add (const std::shared_ptr<Resource>& resource)
+bool balance::ResourceList::add (const std::shared_ptr<Resource>& resource)
    throw (adt::RuntimeException)
 {
     logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
@@ -89,10 +88,10 @@ bool balance::Balance::add (const std::shared_ptr<Resource>& resource)
    bool result = true;
 
    if (true) { // Minimize critical section
-      lock_guard guard(getLockGuard());
+	   LockGuard guard(*this);
 
       for (const_resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
-         if (Balance::resource(ii)->getName() == resource->getName()) {
+         if (ResourceList::resource(ii)->getName() == resource->getName()) {
             result = false;
             break;
          }
@@ -108,7 +107,7 @@ bool balance::Balance::add (const std::shared_ptr<Resource>& resource)
    return result;
 }
 
-size_t balance::Balance::countAvailableResources (balance::Balance::lock_guard& guard) const
+size_t balance::ResourceList::countAvailableResources (balance::ResourceList::LockGuard& guard) const
    noexcept
 {
    size_t result = 0;
@@ -121,7 +120,7 @@ size_t balance::Balance::countAvailableResources (balance::Balance::lock_guard& 
    return result;
 }
 
-balance::Balance::resource_iterator balance::Balance::next(balance::Balance::lock_guard& guard, balance::Balance::resource_iterator ii)
+balance::ResourceList::resource_iterator balance::ResourceList::next(balance::ResourceList::LockGuard& guard, balance::ResourceList::resource_iterator ii)
    noexcept
 {
    ii ++;
@@ -133,26 +132,26 @@ balance::Balance::resource_iterator balance::Balance::next(balance::Balance::loc
 }
 
 //virtual
-adt::StreamString balance::Balance::asString () const
+adt::StreamString balance::ResourceList::asString () const
    noexcept
 {
-   adt::StreamString result ("balance.Balance{ ");
+   adt::StreamString result ("balance.ResourceList { ");
    result += adt::NamedObject::asString();
-   result += "|Available = ";
+   result += " | Available = ";
 
-   auto guard = getLockGuard();
+   LockGuard guard(*this);
    result += adt::AsString::apply(countAvailableResources(guard));
    result.append (" of ").append (adt::AsString::apply (size (guard)));
    return result.append ("}");
 }
 
 //virtual
-xml::Node& balance::Balance::asXML (xml::Node& parent) const
+xml::Node& balance::ResourceList::asXML (xml::Node& parent) const
    noexcept
 {
    xml::Node& result = parent.createChild (this->getName());
 
-   auto guard = getLockGuard();
+   LockGuard guard(*this);
    for (const_resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
       resource(ii)->asXML(result);
    }

@@ -45,17 +45,17 @@ namespace balance {
 
 class RoundRobin : public Strategy {
 public:
-   RoundRobin (std::shared_ptr<Balance>& balance) : Strategy("balance::RoundRobin", balance) {;}
+   RoundRobin (std::shared_ptr<ResourceList>& resources) : Strategy("balance::RoundRobin", resources) {;}
 
    std::shared_ptr<Resource> apply() throw (ResourceUnavailableException) {
-      auto guard(m_balance->getLockGuard());
+      ResourceList::LockGuard guard(m_resources);
       return apply(guard);
    }
 
 private:
-   boost::optional<Balance::resource_iterator> m_position;
+   boost::optional<ResourceList::resource_iterator> m_position;
 
-   std::shared_ptr<Resource> apply(Balance::lock_guard& guard) throw (ResourceUnavailableException);
+   std::shared_ptr<Resource> apply(ResourceList::LockGuard& guard) throw (ResourceUnavailableException);
 };
 
 } /* namespace balance */

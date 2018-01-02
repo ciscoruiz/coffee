@@ -32,32 +32,30 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_balance_RoundRobin_hpp
-#define __wepa_balance_RoundRobin_hpp
+#include <functional>
 
-// It will not be available into std until c++17
-#include <boost/optional.hpp>
+#include <wepa/xml/Node.hpp>
 
-#include "Strategy.hpp"
+#include <wepa/balance/Strategy.hpp>
+#include <wepa/balance/Balance.hpp>
 
-namespace wepa {
-namespace balance {
+using namespace wepa;
 
-class RoundRobin : public Strategy {
-public:
-   RoundRobin (std::shared_ptr<Balance>& balance) : Strategy("balance::RoundRobin", balance) {;}
+//virtual
+adt::StreamString balance::Strategy::asString () const noexcept
+{
+   adt::StreamString result ("balance.Strategy{ ");
+   result += adt::NamedObject::asString();
+   result += "|";
+   result += m_balance;
+   return result += "}";
 
-   std::shared_ptr<Resource> apply() throw (ResourceUnavailableException) {
-      auto guard(m_balance->getLockGuard());
-      return apply(guard);
-   }
+}
 
-private:
-   boost::optional<Balance::resource_iterator> m_position;
-
-   std::shared_ptr<Resource> apply(Balance::lock_guard& guard) throw (ResourceUnavailableException);
-};
-
-} /* namespace balance */
-} /* namespace wepa */
-#endif
+//virtual
+xml::Node& balance::Strategy::asXML (xml::Node& parent) const noexcept
+{
+   xml::Node& result = parent.createChild (this->getName());
+   m_balance->asXML(result);
+   return std::ref (result);
+}

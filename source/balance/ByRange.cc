@@ -34,6 +34,7 @@
 //
 #include <wepa/balance/ByRange.hpp>
 #include <wepa/balance/Resource.hpp>
+#include <wepa/balance/Balance.hpp>
 
 #include <wepa/logger/Logger.hpp>
 #include <wepa/logger/TraceMethod.hpp>
@@ -41,83 +42,71 @@
 using namespace wepa;
 
 balance::ByRange::ByRange() :
-   balance::Balance("balance::ByRange", Requires::Key)
+   balance::Strategy("balance::ByRange", m_unusedBalance),
+   m_key(0)
 {
 }
 
-void balance::ByRange::initialize ()
+void balance::ByRange::addRange (const int bottom, const int top, std::shared_ptr<Strategy>& strategy)
    throw (adt::RuntimeException)
 {
-   for (auto& range : m_ranges) {
-      try {
-         range.second->initialize ();
-      }
-      catch (adt::RuntimeException& ex) {
-         LOG_ERROR (range.second->asString () << ex.asString());
-      }
-   }
-}
+   auto guard(m_unusedBalance->getLockGuard());
 
-void balance::ByRange::addRange (const int bottom, const int top, Balance* balanceIf)
-   throw (adt::RuntimeException)
-{
-   if (balanceIf == NULL)
-      WEPA_THROW_EXCEPTION(asString () << " can not associate a null BalanceIf");
+   if (!strategy)
+      WEPA_THROW_EXCEPTION(asString () << " can not associate a null Stragegy");
 
-   if (balanceIf == this)
+   if (strategy.get() == this)
       WEPA_THROW_EXCEPTION(asString () << " can not generate a recursive association");
-
-   if (balanceIf->size() == 0)
-      WEPA_THROW_EXCEPTION(asString () << " can not associate an empty BalanceIf " << balanceIf->asString());
 
    if (bottom > top)
       WEPA_THROW_EXCEPTION(asString () << " | invalid range (bottom > top)");
 
-   Balance* aux;
+   std::shared_ptr<balance::Balance> aux;
 
-   if ((aux = find_range (bottom)) != NULL)
-      WEPA_THROW_EXCEPTION(aux->asString () << " has overlapping with " << balanceIf->asString());
+   if ((aux = findRange(guard, bottom)))
+      WEPA_THROW_EXCEPTION(aux->asString () << " has overlapping with " << strategy->asString());
 
-   if ((aux = find_range (top)) != NULL)
-      WEPA_THROW_EXCEPTION(aux->asString () << " has overlapping with " << balanceIf->asString());
+   if ((aux = findRange(guard, top)))
+      WEPA_THROW_EXCEPTION(aux->asString () << " has overlapping with " << strategy->asString());
 
-   Range range (top, bottom);
-   m_ranges [range] = balanceIf;
+   auto range = std::make_tuple(top, bottom, strategy);
 
-   LOG_DEBUG ("Range (" <<  bottom << "," << top << "): " << balanceIf->asString () << " has been created");
+   LOG_DEBUG ("Range (" <<  bottom << "," << top << "): " << strategy->asString () << " has been created");
 
-   for (Balance::resource_iterator ii = balanceIf->resource_begin(), maxii = balanceIf->resource_end(); ii != maxii; ++ ii)
-      Balance::add (Balance::resource (ii));
+   m_ranges.push_back(range);
 }
 
-balance::Balance* balance::ByRange::find_range (const int key)
-noexcept
+std::shared_ptr<balance::Strategy>&  balance::ByRange::findRange (Balance::lock_guard&, const int key)
+   noexcept
 {
-   for (auto& range : m_ranges) {
-      if (range.first.first >= key && range.first.second <= key)
-         return range.second;
+   // See http://en.cppreference.com/w/cpp/utility/tuple/get
+   for (auto range : m_ranges) {
+      if (std::get<0>(range) >= key && std::get<1>(range) <= key)
+         return std::get<2>(range);
    }
 
-   return NULL;
+   return std::shared_ptr<balance::Strategy>();
 }
 
-balance::Resource* balance::ByRange::do_apply (const int key)
+std::shared_ptr<balance::Resource> balance::ByRange::apply(Balance::lock_guard& guard)
    throw (adt::RuntimeException)
 {
    logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
 
-   balance::Resource* result = NULL;
+   std::shared_ptr<balance::Strategy> strategy;
 
-   Balance* balanceIf = find_range (key);
+   if (true) {
+      auto guard(m_unusedBalance->getLockGuard());
+      strategy = findRange (guard, m_key);
+   }
 
-   if (balanceIf == NULL)
-      WEPA_THROW_EXCEPTION("Key=" << key << " does not have a defined range");
+   if (!strategy) {
+      WEPA_THROW_EXCEPTION("Key=" << m_key << " does not have a defined range");
+   }
 
-   result = balanceIf->apply(key);
+   auto guard2(strategy->getBalance()->getLockGuard());
 
-   if (result != NULL)
-      LOG_LOCAL7("Result=" << result);
-
-   return result;
+   return strategy->apply(guard2);
 }
+
 

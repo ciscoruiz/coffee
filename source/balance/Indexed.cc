@@ -32,7 +32,10 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+#include <mutex>
+
 #include <wepa/balance/Indexed.hpp>
+#include <wepa/balance/Balance.hpp>
 #include <wepa/balance/Resource.hpp>
 
 #include <wepa/logger/Logger.hpp>
@@ -40,36 +43,41 @@
 
 using namespace wepa;
 
-balance::Indexed::Indexed() :
-   balance::Balance("balance::Indexed", Requires::Key)
+balance::Indexed::Indexed(std::shared_ptr<Balance>& balance) :
+   balance::Strategy("balance::Indexed", balance),
+   m_key(0)
 {
 }
 
-balance::Resource* balance::Indexed::do_apply (const int key)
-   throw (adt::RuntimeException)
+std::shared_ptr<balance::Resource> balance::Indexed::apply(Balance::lock_guard& guard)
+   throw (ResourceUnavailableException)
 {
    logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
 
-   if (this->size () == 0)
-      return NULL;
+   if (m_balance->size(guard) == 0) {
+      WEPA_THROW_NAMED_EXCEPTION(ResourceUnavailableException, m_balance->getName() << " is empty");
+   }
 
-   resource_iterator ww, end;
-   Resource* w;
-   balance::Resource* result = NULL;
+   std::shared_ptr<Resource> result;
+   Balance::resource_iterator ww;
+   Balance::resource_iterator end;
 
-   ww = end = this->resource_begin () + (key % this->size ());
+   ww = end = m_balance->resource_begin(guard) + (m_key % m_balance->size(guard));
 
    do {
-      w = resource (ww);
+      std::shared_ptr<Resource>& w = Balance::resource(ww);
 
-      if (w->isAvailable () == true) {
+      if (w->isAvailable() == true) {
          result = w;
          break;
       }
-   } while ((ww = this->next (ww)) != end);
+   } while ((ww = m_balance->next(guard, ww)) != end);
 
-   if (result != NULL)
-      LOG_LOCAL7("Result=" << result);
+   if (!result) {
+      WEPA_THROW_NAMED_EXCEPTION(ResourceUnavailableException, this->asString() << " there is not any available resource");
+   }
+
+   LOG_LOCAL7("Result=" << result);
 
    return result;
 }

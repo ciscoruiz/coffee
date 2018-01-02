@@ -32,32 +32,38 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_balance_RoundRobin_hpp
-#define __wepa_balance_RoundRobin_hpp
+#ifndef _wepa_balance_ResourceUnavailableException_hpp
+#define _wepa_balance_ResourceUnavailableException_hpp
 
-// It will not be available into std until c++17
-#include <boost/optional.hpp>
-
-#include "Strategy.hpp"
+#include <wepa/adt/Exception.hpp>
 
 namespace wepa {
+
 namespace balance {
 
-class RoundRobin : public Strategy {
+/**
+ * Defines exception used for this library.
+ *
+ * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
+ */
+class ResourceUnavailableException : public adt::Exception {
 public:
-   RoundRobin (std::shared_ptr<Balance>& balance) : Strategy("balance::RoundRobin", balance) {;}
+   ResourceUnavailableException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
+      adt::Exception (str, fromMethod, fromFile, fromLine)
+   {;}
 
-   std::shared_ptr<Resource> apply() throw (ResourceUnavailableException) {
-      auto guard(m_balance->getLockGuard());
-      return apply(guard);
+   ResourceUnavailableException (const ResourceUnavailableException& other) : adt::Exception (other) {;}
+
+   std::string asString () const noexcept {
+      adt::StreamString str (this->filePosition());
+      str << what ();
+      return str;
    }
-
-private:
-   boost::optional<Balance::resource_iterator> m_position;
-
-   std::shared_ptr<Resource> apply(Balance::lock_guard& guard) throw (ResourceUnavailableException);
 };
 
-} /* namespace balance */
-} /* namespace wepa */
+}
+}
+
+
 #endif
+

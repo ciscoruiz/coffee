@@ -52,11 +52,6 @@ using namespace wepa;
 
 using namespace wepa;
 
-auto_enum_assign (balance::Balance::Requires) = { "Key", "PositiveKey", NULL };
-
-//static
-const int balance::Balance::NullKey = INT_MIN;
-
 void balance::Balance::initialize ()
    throw (adt::RuntimeException)
 {
@@ -64,88 +59,47 @@ void balance::Balance::initialize ()
 
    SCCS::activate();
 
-   do_initialize ();
+   auto guard(getLockGuard());
 
-   for (resource_iterator ii = resource_begin(), maxii = resource_end(); ii != maxii; ++ ii) {
+   for (resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
       try {
-         do_initializer (resource (ii));
+         resource(ii)->initialize();
+         LOG_DEBUG(resource(ii)->asString ());
       }
       catch (adt::RuntimeException& ex) {
-         LOG_ERROR (resource (ii)->getName () << " | " << ex.asString());
+         LOG_ERROR(resource (ii)->getName () << " | " << ex.asString());
       }
    }
 
    if (m_resources.empty ())
       LOG_WARN (asString () << " does not have any resource");
 
-   if (countAvailableResources() == 0)
+   if (countAvailableResources(guard) == 0)
       LOG_WARN (asString () << " does not have any available resource");
 }
 
-//virtual
-void balance::Balance::do_initializer (Resource* resource)
-   throw (adt::RuntimeException)
-{
-   logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
-   resource->initialize();
-   LOG_DEBUG (resource->asString ());
-}
-
-balance::Resource* balance::Balance::apply (const int key)
-   throw (adt::RuntimeException)
-{
-   logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
-
-   if (requiresKey () == true) {
-      if (key == NullKey)
-         WEPA_THROW_EXCEPTION(asString () << " requires a key-value");
-
-      if (key < 0 && requiresPositiveKey() == true)
-         WEPA_THROW_EXCEPTION(asString () << " requires a positive key-value");
-   }
-
-   Resource* result = NULL;
-
-   if (true) { // Minimize critical section
-      std::lock_guard <std::recursive_mutex> guard (m_mutex);
-
-      result = do_apply (key);
-
-      if (result == NULL)
-         WEPA_THROW_EXCEPTION(asString () << " does not have available any resources");
-
-      if (result->isAvailable() == false)
-         WEPA_THROW_EXCEPTION(asString () << " can not choose an unavailable resource " << result->asString ());
-   }
-
-   if (requiresKey () == true) {
-      LOG_DEBUG ("Key=" << key << " | " << asString () << " | Result=" << result->asString ());
-   }
-   else {
-      LOG_DEBUG (asString () << " | Result=" << result->asString ());
-   }
-
-   return result;
-}
-
-bool balance::Balance::add (Resource* resource)
+bool balance::Balance::add (const std::shared_ptr<Resource>& resource)
    throw (adt::RuntimeException)
 {
     logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
 
-   if (resource == NULL)
-      WEPA_THROW_EXCEPTION(asString () << " can not add a NULL resource");
+   if (!resource)
+      WEPA_THROW_EXCEPTION(asString () << " can not add an empty resource");
 
-   bool result;
+   bool result = true;
 
    if (true) { // Minimize critical section
-      std::lock_guard <std::recursive_mutex> guard (m_mutex);
+      lock_guard guard(getLockGuard());
 
-      if (do_contains (resource) == true)
-         result = false;
-      else {
+      for (const_resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
+         if (Balance::resource(ii)->getName() == resource->getName()) {
+            result = false;
+            break;
+         }
+      }
+
+      if (result == true) {
          m_resources.push_back (resource);
-         result = true;
       }
    }
 
@@ -154,49 +108,26 @@ bool balance::Balance::add (Resource* resource)
    return result;
 }
 
-bool balance::Balance::contains (const balance::Resource* resource) const
-   noexcept
-{
-   if (resource == NULL)
-      return false;
-
-   logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
-
-   std::lock_guard <std::recursive_mutex> guard (m_mutex);
-
-   return do_contains (resource);
-}
-
-// virtual
-bool balance::Balance::do_contains (const balance::Resource* resource) const
-   noexcept
-{
-   const_resource_iterator end = resource_end ();
-
-   return (std::find (resource_begin (), end, resource) != end);
-}
-
-
-size_t balance::Balance::countAvailableResources () const
+size_t balance::Balance::countAvailableResources (balance::Balance::lock_guard& guard) const
    noexcept
 {
    size_t result = 0;
 
-   for (const_resource_iterator ii = resource_begin(), maxii = resource_end(); ii != maxii; ++ ii) {
-      if (resource (ii)->isAvailable())
+   for (const_resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
+      if (resource(ii)->isAvailable())
          result ++;
    }
 
    return result;
 }
 
-balance::Balance::resource_iterator balance::Balance::next (balance::Balance::resource_iterator ii)
+balance::Balance::resource_iterator balance::Balance::next(balance::Balance::lock_guard& guard, balance::Balance::resource_iterator ii)
    noexcept
 {
    ii ++;
 
-   if (ii == this->resource_end ())
-      ii = this->resource_begin ();
+   if (ii == this->resource_end(guard))
+      ii = this->resource_begin(guard);
 
    return ii;
 }
@@ -205,19 +136,14 @@ balance::Balance::resource_iterator balance::Balance::next (balance::Balance::re
 adt::StreamString balance::Balance::asString () const
    noexcept
 {
-   adt::StreamString result ("balance.BalanceIf { ");
-
+   adt::StreamString result ("balance.Balance{ ");
    result += adt::NamedObject::asString();
+   result += "|Available = ";
 
-   const char* requires = Requires::enumName(m_requires);
-
-   if (requires != NULL)
-      result.append (" | Requires=").append (requires);
-
-   result += " } | Available = ";
-   result += adt::AsString::apply(countAvailableResources());
-   result.append (" of ").append (adt::AsString::apply (size ()));
-   return result.append (" }");
+   auto guard = getLockGuard();
+   result += adt::AsString::apply(countAvailableResources(guard));
+   result.append (" of ").append (adt::AsString::apply (size (guard)));
+   return result.append ("}");
 }
 
 //virtual
@@ -226,13 +152,9 @@ xml::Node& balance::Balance::asXML (xml::Node& parent) const
 {
    xml::Node& result = parent.createChild (this->getName());
 
-   const char* requires = Requires::enumName(m_requires);
-
-   if (requires != NULL)
-      result.createAttribute("Requires", requires);
-
-   for (const_resource_iterator ii = resource_begin(), maxii = resource_end(); ii != maxii; ++ ii) {
-      resource (ii)->asXML(result);
+   auto guard = getLockGuard();
+   for (const_resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
+      resource(ii)->asXML(result);
    }
 
    return std::ref (result);

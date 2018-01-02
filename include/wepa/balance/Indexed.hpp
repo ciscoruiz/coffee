@@ -35,17 +35,25 @@
 #ifndef __wepa_balance_Indexed_hpp
 #define __wepa_balance_Indexed_hpp
 
-#include "Balance.hpp"
+#include "Strategy.hpp"
 
 namespace wepa {
 namespace balance {
 
-class Indexed : public Balance {
+class Indexed : public Strategy {
 public:
-   Indexed ();
+   Indexed (std::shared_ptr<Balance>& balance);
+
+   std::shared_ptr<Resource> apply(const int key) throw (ResourceUnavailableException) {
+      auto guard = m_balance->getLockGuard();
+      m_key = key;
+      return apply(guard);
+   }
 
 private:
-   Resource* do_apply (const int key) throw (adt::RuntimeException);
+   int m_key;
+
+   std::shared_ptr<Resource> apply(Balance::lock_guard& guard) throw (ResourceUnavailableException);
 };
 
 } /* namespace balance */

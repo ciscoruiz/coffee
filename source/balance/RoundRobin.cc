@@ -40,39 +40,41 @@
 
 using namespace wepa;
 
-balance::RoundRobin::RoundRobin() :
-   balance::Balance("balance::RoundRobin", Requires::None)
-{
-   m_position = this->resource_begin();
-}
-
-balance::Resource* balance::RoundRobin::do_apply (const int key)
-   throw (adt::RuntimeException)
+std::shared_ptr<balance::Resource> balance::RoundRobin::apply (Balance::lock_guard& guard)
+   throw (ResourceUnavailableException)
 {
    logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
 
-   if (m_position == this->resource_end ())
-      return NULL;
+   if (!m_position) {
+      m_position = m_balance->resource_begin(guard);
+   }
 
-   resource_iterator ww, end;
-   Resource* w;
-   balance::Resource* result = NULL;
+   if (m_position.value() == m_balance->resource_end(guard)) {
+      WEPA_THROW_NAMED_EXCEPTION(ResourceUnavailableException, m_balance->getName() << " is empty");
+   }
+
+   std::shared_ptr<Resource> result;
+   Balance::resource_iterator ww;
+   Balance::resource_iterator end;
 
    ww = end = m_position;
 
    do {
-      w = resource (ww);
+      std::shared_ptr<Resource>& w = Balance::resource(ww);
 
       if (w->isAvailable () == true) {
          // prepare the next call to this method
-         m_position = this->next (ww);
+         m_position = m_balance->next(guard, ww);
          result = w;
          break;
       }
-   } while ((ww = this->next (ww)) != end);
+   } while ((ww = m_balance->next(guard, ww)) != end);
 
-   if (result != NULL)
-      LOG_LOCAL7("Result=" << result);
+   if (!result) {
+      WEPA_THROW_NAMED_EXCEPTION(ResourceUnavailableException, this->asString() << " there is not any available resource");
+   }
+
+   LOG_LOCAL7("Result=" << result);
 
    return result;
 }

@@ -32,32 +32,41 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_balance_RoundRobin_hpp
-#define __wepa_balance_RoundRobin_hpp
+#ifndef __wepa_balance_Strategy_hpp
+#define __wepa_balance_Strategy_hpp
 
-// It will not be available into std until c++17
-#include <boost/optional.hpp>
+#include <memory>
 
-#include "Strategy.hpp"
+#include <wepa/adt/NamedObject.hpp>
+#include <wepa/balance/Balance.hpp>
+#include <wepa/balance/ResourceUnavailableException.hpp>
 
 namespace wepa {
+
+namespace xml {
+   class Node;
+}
+
 namespace balance {
 
-class RoundRobin : public Strategy {
+class Resource;
+
+class Strategy : public adt::NamedObject {
 public:
-   RoundRobin (std::shared_ptr<Balance>& balance) : Strategy("balance::RoundRobin", balance) {;}
+   virtual std::shared_ptr<Resource> apply(Balance::lock_guard& guard) throw (ResourceUnavailableException) = 0;
 
-   std::shared_ptr<Resource> apply() throw (ResourceUnavailableException) {
-      auto guard(m_balance->getLockGuard());
-      return apply(guard);
-   }
+   virtual adt::StreamString asString () const noexcept;
+   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
-private:
-   boost::optional<Balance::resource_iterator> m_position;
+   std::shared_ptr<Balance>& getBalance() { return m_balance; }
 
-   std::shared_ptr<Resource> apply(Balance::lock_guard& guard) throw (ResourceUnavailableException);
+protected:
+   std::shared_ptr<Balance> m_balance;
+
+   Strategy(const std::string& name, std::shared_ptr<Balance>& balance) : adt::NamedObject(name), m_balance(balance) {;}
 };
 
-} /* namespace balance */
-} /* namespace wepa */
-#endif
+}
+}
+
+#endif /* __wepa_balance_Strategy_hpp */

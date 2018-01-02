@@ -35,16 +35,18 @@
 #ifndef __wepa_balance_ByRange_hpp
 #define __wepa_balance_ByRange_hpp
 
-#include <map>
+#include <vector>
+#include <memory>
+#include <tuple>
 
-#include "Balance.hpp"
+#include "Strategy.hpp"
 
 namespace wepa {
 namespace balance {
 
-class ByRange : public Balance {
-   typedef std::pair <int, int> Range;
-   typedef std::map <Range, Balance*> Ranges;
+class ByRange : public Strategy {
+   typedef std::tuple<int, int, std::shared_ptr<Strategy> > Range;
+   typedef std::vector<Range> Ranges;
    typedef Ranges::iterator range_iterator;
 
 public:
@@ -58,22 +60,28 @@ public:
     */
    ~ByRange () { m_ranges.clear (); }
 
-   void initialize () throw (adt::RuntimeException);
-
    /**
     * \warning Once you call this method you can not append more resources to this \em balanceIf
     * @param bottom Minimal value for this range
     * @param top Maximal value for this range
-    * @param balanceIf Load balancing algorithm used under this range.
+    * @param balance Load balancing algorithm used under this range.
     */
-   void addRange (const int bottom, const int top, Balance* balanceIf) throw (adt::RuntimeException);
+   void addRange (const int bottom, const int top, std::shared_ptr<Strategy>& strategy) throw (adt::RuntimeException);
+
+   std::shared_ptr<Resource> apply(const int key) throw (ResourceUnavailableException) {
+      auto guard = m_unusedBalance->getLockGuard();
+      m_key = key;
+      return apply(guard);
+   }
 
 private:
+   std::shared_ptr<Balance> m_unusedBalance;
    Ranges m_ranges;
+   int m_key;
 
-   Balance* find_range (const int key) noexcept;
+   std::shared_ptr<Strategy>& findRange (Balance::lock_guard&, const int key) noexcept;
 
-   Resource* do_apply (const int key) throw (adt::RuntimeException);
+   std::shared_ptr<Resource> apply(Balance::lock_guard& guard) throw (ResourceUnavailableException);
 };
 
 } /* namespace balance */

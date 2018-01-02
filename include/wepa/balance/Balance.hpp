@@ -37,8 +37,7 @@
 
 #include <vector>
 #include <mutex>
-
-#include <auto_enum.h>
+#include <memory>
 
 #include <wepa/adt/RuntimeException.hpp>
 #include <wepa/adt/NamedObject.hpp>
@@ -54,45 +53,35 @@ namespace balance {
 class Resource;
 
 class Balance : public adt::NamedObject  {
-   typedef std::vector <Resource*> resource_container;
-
-   static const int NullKey;
+   typedef std::vector <std::shared_ptr<Resource> > resource_container;
 
 public:
    typedef resource_container::iterator resource_iterator;
    typedef resource_container::const_iterator const_resource_iterator;
-
-   struct Requires{
-      enum _v { None = -1, Key, PositiveKey  };
-
-      auto_enum_declare (Requires);
-   };
+   typedef std::lock_guard<std::mutex> lock_guard;
 
    virtual ~Balance () { m_resources.clear (); }
 
-   bool add (Resource* resource) throw (adt::RuntimeException);
-
-   virtual void populate () throw (adt::RuntimeException) {;}
+   bool add (const std::shared_ptr<Resource>& resource) throw (adt::RuntimeException);
 
    /**
     * It will call to pure virtual method \em do_initialize and do_initializer for every one of the associated resources.
     */
    virtual void initialize () throw (adt::RuntimeException);
 
-   Resource* apply (const int key = NullKey) throw (adt::RuntimeException);
+   resource_iterator resource_begin(lock_guard&) noexcept { return m_resources.begin (); }
+   resource_iterator resource_end(lock_guard&) noexcept { return m_resources.end (); }
+   resource_iterator next (lock_guard&, resource_iterator ii) noexcept;
+   static std::shared_ptr<Resource>& resource(resource_iterator ii) noexcept { return *ii; }
 
-   bool contains (const Resource* resource) const noexcept;
+   size_t size (lock_guard&) const noexcept { return m_resources.size (); }
+   size_t countAvailableResources (lock_guard&) const noexcept;
 
-   resource_iterator resource_begin () noexcept { return m_resources.begin (); }
-   resource_iterator resource_end () noexcept { return m_resources.end (); }
-   static Resource* resource (resource_iterator ii) noexcept { return *ii; }
+   const_resource_iterator resource_begin (lock_guard&) const noexcept { return m_resources.begin (); }
+   const_resource_iterator resource_end (lock_guard&) const noexcept { return m_resources.end (); }
+   static const std::shared_ptr<Resource>& resource(const_resource_iterator ii) noexcept { return *ii; }
 
-   size_t size () const noexcept { return m_resources.size (); }
-   size_t countAvailableResources () const noexcept;
-
-   const_resource_iterator resource_begin () const noexcept { return m_resources.begin (); }
-   const_resource_iterator resource_end () const noexcept { return m_resources.end (); }
-   static const Resource* resource (const_resource_iterator ii) noexcept { return *ii; }
+   lock_guard getLockGuard() const noexcept { return lock_guard(m_mutex); }
 
    operator adt::StreamString () const noexcept { return asString (); }
 
@@ -100,22 +89,10 @@ public:
    virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
 protected:
-   Balance (const char* name, const Requires::_v requires) : adt::NamedObject (name), m_requires (requires) {;}
-
-   virtual void do_initialize () throw (adt::RuntimeException) {;}
-   virtual void do_initializer (Resource* resource) throw (adt::RuntimeException);
-   virtual bool do_contains (const Resource* resource) const noexcept;
-
-   virtual Resource* do_apply (const int key) throw (adt::RuntimeException) = 0;
-
-   bool requiresKey () const noexcept { return m_requires != Requires::None; }
-   bool requiresPositiveKey () const noexcept { return m_requires == Requires::PositiveKey; }
-
-   resource_iterator next (resource_iterator ii) noexcept;
+   Balance (const char* name) : adt::NamedObject (name) {;}
 
 private:
    mutable std::recursive_mutex m_mutex;
-   const Requires::_v m_requires;
    resource_container m_resources;
 
    Balance (const Balance&);

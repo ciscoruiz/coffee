@@ -2,6 +2,8 @@
 default:    all
 all:    
 	scons --jobs=4 test
+compile:    
+	scons test
 clean:
 	scons -c
 install:

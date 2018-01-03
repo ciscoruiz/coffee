@@ -66,14 +66,15 @@ private:
    void initialize () throw (adt::RuntimeException) { m_available = true; }
 };
 
-std::shared_ptr<wepa::balance::ResourceList> setup(const int maxResource)
+inline std::shared_ptr<wepa::balance::ResourceList> setup(const int maxResource, const int firstId = 0)
 {
    std::shared_ptr<wepa::balance::ResourceList> result = std::make_shared<wepa::balance::ResourceList>("TestResources");
 
    logger::Logger::initialize(new logger::TtyWriter);
 
+   int id = firstId;
    for (int ii = 0; ii < maxResource; ++ ii) {
-      result->add(std::make_shared<TestResource>(ii));
+      result->add(std::make_shared<TestResource>(id ++));
    }
 
    result->initialize();

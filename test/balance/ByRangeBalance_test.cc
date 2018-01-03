@@ -92,69 +92,80 @@ namespace ByRangeTest {
    }
 }
 
-BOOST_AUTO_TEST_CASE(byrange_preconditions)
+BOOST_AUTO_TEST_CASE(byrange_empty_strategy)
 {
-   auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources);
+   balance::ByRange mainStrategy;
+   std::shared_ptr<balance::Strategy> foo;
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (0, 10, foo), adt::RuntimeException);
+}
 
+BOOST_AUTO_TEST_CASE(byrange_recursive)
+{
+   std::shared_ptr<balance::ByRange> mainStrategy = std::make_shared<balance::ByRange>();
+   std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(mainStrategy);
+   BOOST_REQUIRE_THROW (mainStrategy->addRange (0, 10, foo), adt::RuntimeException);
+}
+
+BOOST_AUTO_TEST_CASE(byrange_bad_limits)
+{
    balance::ByRange mainStrategy;
 
-   std::shared_ptr <balance::ByRange> empty;
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (0, 10, std::dynamic_pointer_cast<balance::Strategy>(empty)), adt::RuntimeException);
+   auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources);
+   std::shared_ptr<balance::RoundRobin> strategy = std::make_shared<balance::RoundRobin>(resourceList);
+   std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (10, 0, foo), adt::RuntimeException);
+}
 
-   TestResource resource (100);
-   balance::RoundRobin aux;
-   aux.add (&resource);
-   BOOST_REQUIRE_THROW (myBalance.addRange (10, 0, &aux), adt::RuntimeException);
+BOOST_AUTO_TEST_CASE(byrange_overlapping)
+{
+   balance::ByRange mainStrategy;
 
-   myBalance.addRange (10, 20, &aux);
-   BOOST_REQUIRE_THROW (myBalance.addRange (15, 25, &aux), adt::RuntimeException);
-   BOOST_REQUIRE_THROW (myBalance.addRange (5, 14, &aux), adt::RuntimeException);
+   auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources);
+   std::shared_ptr<balance::RoundRobin> strategy = std::make_shared<balance::RoundRobin>(resourceList);
+   std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
+
+   mainStrategy.addRange (10, 20, foo);
+
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (5, 14, foo), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (5, 25, foo), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (15, 25, foo), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(byrange_sharing)
 {
-   boost::ptr_vector <TestResource> resources;
+   balance::ByRange mainStrategy;
 
-   for (int ii = 0; ii < 5; ++ ii)
-      resources.push_back (new TestResource (ii));
+   {
+      auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources);
+      std::shared_ptr<balance::RoundRobin> strategy = std::make_shared<balance::RoundRobin>(resourceList);
+      std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
+      mainStrategy.addRange(100, 200, foo);
+   }
 
-   balance::ByRange myBalance;
+   {
+      auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources, 100);
+      std::shared_ptr<balance::RoundRobin> strategy = std::make_shared<balance::RoundRobin>(resourceList);
+      std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
+      mainStrategy.addRange(205, 350, foo);
+   }
 
-   balance::RoundRobin rr0;
-   rr0.add (&resources [0]);
-   rr0.add (&resources [1]);
-   rr0.add (&resources [2]);
-   myBalance.addRange(100, 200, &rr0);
+   {
+      auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources, 1000);
+      std::shared_ptr<balance::RoundRobin> strategy = std::make_shared<balance::RoundRobin>(resourceList);
+      std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
+      mainStrategy.addRange(351, 450, foo);
+   }
 
-   balance::RoundRobin rr1;
-   rr1.add (&resources [2]);
-   rr1.add (&resources [3]);
-   myBalance.addRange(205, 350, &rr1);
+   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(120))->getKey(), 0);
+   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(220))->getKey(), 100);
+   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(420))->getKey(), 1000);
 
-   balance::RoundRobin rr2;
-   rr2.add (&resources [3]);
-   rr2.add (&resources [4]);
-   myBalance.addRange(351, 450, &rr2);
+   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(190))->getKey(), 1);
+   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(300))->getKey(), 101);
+   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(440))->getKey(), 1001);
 
-   myBalance.initialize();
 
-   BOOST_REQUIRE_EQUAL(myBalance.size (), 5);
-   BOOST_REQUIRE_EQUAL(myBalance.countAvailableResources(), 5);
-
-   BOOST_REQUIRE_EQUAL (myBalance.apply (120), &resources [0]);
-   BOOST_REQUIRE_EQUAL (myBalance.apply (220), &resources [2]);
-   BOOST_REQUIRE_EQUAL (myBalance.apply (420), &resources [3]);
-
-   BOOST_REQUIRE_EQUAL (myBalance.apply (125), &resources [1]);
-   BOOST_REQUIRE_EQUAL (myBalance.apply (225), &resources [3]);
-   BOOST_REQUIRE_EQUAL (myBalance.apply (425), &resources [4]);
-
-   BOOST_REQUIRE_EQUAL (myBalance.apply (127), &resources [2]);
-   BOOST_REQUIRE_EQUAL (myBalance.apply (227), &resources [2]);
-   BOOST_REQUIRE_EQUAL (myBalance.apply (427), &resources [3]);
-
-   BOOST_REQUIRE_THROW (myBalance.apply (), adt::RuntimeException);
-   BOOST_REQUIRE_THROW (myBalance.apply (2000), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (mainStrategy.apply (2000), adt::RuntimeException);
 }
 
 /*

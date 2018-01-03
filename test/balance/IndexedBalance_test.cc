@@ -91,7 +91,7 @@ namespace IndexedTest {
    }
 }
 
-BOOST_AUTO_TEST_CASE( dont_use_unavailables )
+BOOST_AUTO_TEST_CASE( inx_dont_use_unavailables )
 {
    auto resourceList = wepa::test::balance::setup(IndexedTest::MaxResources);
 

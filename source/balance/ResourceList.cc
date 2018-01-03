@@ -63,7 +63,7 @@ void balance::ResourceList::initialize ()
    for (resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
       try {
          resource(ii)->initialize();
-         LOG_DEBUG(resource(ii)->asString ());
+         LOG_DEBUG(resource(ii)->asString());
       }
       catch (adt::RuntimeException& ex) {
          LOG_ERROR(resource (ii)->getName () << " | " << ex.asString());
@@ -71,10 +71,10 @@ void balance::ResourceList::initialize ()
    }
 
    if (m_resources.empty ())
-      LOG_WARN (asString () << " does not have any resource");
+      LOG_WARN (asString() << " does not have any resource");
 
    if (countAvailableResources(guard) == 0)
-      LOG_WARN (asString () << " does not have any available resource");
+      LOG_WARN (asString() << " does not have any available resource");
 }
 
 bool balance::ResourceList::add (const std::shared_ptr<Resource>& resource)
@@ -82,8 +82,9 @@ bool balance::ResourceList::add (const std::shared_ptr<Resource>& resource)
 {
     logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
 
-   if (!resource)
-      WEPA_THROW_EXCEPTION(asString () << " can not add an empty resource");
+   if (!resource) {
+      WEPA_THROW_EXCEPTION(asString() << " can not add an empty resource");
+   }
 
    bool result = true;
 
@@ -102,7 +103,7 @@ bool balance::ResourceList::add (const std::shared_ptr<Resource>& resource)
       }
    }
 
-   LOG_INFO (asString () << " | Add: " << resource->asString () << " | Result=" << adt::AsString::apply (result));
+   LOG_INFO (asString() << " | Add: " << resource->asString() << " | Result=" << adt::AsString::apply (result));
 
    return result;
 }
@@ -139,10 +140,10 @@ adt::StreamString balance::ResourceList::asString () const
    result += adt::NamedObject::asString();
    result += " | Available = ";
 
-   LockGuard guard(*this);
-   result += adt::AsString::apply(countAvailableResources(guard));
-   result.append (" of ").append (adt::AsString::apply (size (guard)));
-   return result.append ("}");
+   LockGuard fakeGuard(*this);
+   result += adt::AsString::apply(countAvailableResources(fakeGuard));
+   result.append (" of ").append (adt::AsString::apply (size (fakeGuard)));
+   return result.append (" }");
 }
 
 //virtual
@@ -151,8 +152,8 @@ xml::Node& balance::ResourceList::asXML (xml::Node& parent) const
 {
    xml::Node& result = parent.createChild (this->getName());
 
-   LockGuard guard(*this);
-   for (const_resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
+   LockGuard fakeGuard(*this);
+   for (const_resource_iterator ii = resource_begin(fakeGuard), maxii = resource_end(fakeGuard); ii != maxii; ++ ii) {
       resource(ii)->asXML(result);
    }
 

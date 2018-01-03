@@ -58,12 +58,14 @@ public:
    virtual adt::StreamString asString () const noexcept;
    virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
-   std::shared_ptr<ResourceList>& getBalance() { return m_resources; }
+   std::shared_ptr<ResourceList>& getResourceList() { return m_resources; }
 
 protected:
    std::shared_ptr<ResourceList> m_resources;
 
    Strategy(const std::string& name, std::shared_ptr<ResourceList>& resources) : adt::NamedObject(name), m_resources(resources) {;}
+   Strategy(const std::string& name) : adt::NamedObject(name) {;}
+   void setResourceList(std::shared_ptr<ResourceList>& resources) { m_resources = resources; }
 };
 
 }

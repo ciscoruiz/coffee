@@ -79,7 +79,10 @@ private:
    Ranges m_ranges;
    int m_key;
 
-   std::shared_ptr<Strategy>& findRange (ResourceList::LockGuard&, const int key) noexcept;
+   range_iterator findRange (ResourceList::LockGuard&, const int key) noexcept;
+   range_iterator range_begin() noexcept { return m_ranges.begin (); }
+   range_iterator range_end() noexcept { return m_ranges.end (); }
+   static Range& range(range_iterator ii) noexcept { return *ii; }
 
    std::shared_ptr<Resource> apply(ResourceList::LockGuard& guard) throw (ResourceUnavailableException);
 };

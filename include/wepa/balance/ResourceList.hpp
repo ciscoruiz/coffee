@@ -32,8 +32,8 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_balance_Balance_hpp
-#define __wepa_balance_Balance_hpp
+#ifndef __wepa_balance_ResourceList_hpp
+#define __wepa_balance_ResourceList_hpp
 
 #include <vector>
 #include <mutex>
@@ -58,18 +58,22 @@ class ResourceList : public adt::NamedObject  {
 public:
    class LockGuard {
    public:
-	   LockGuard(const ResourceList& balance) {
-		   m_lock = std::make_shared<std::lock_guard<std::mutex> >(balance.m_mutex);
-	   }
-	   LockGuard(std::shared_ptr<ResourceList>& balance) {
-		   m_lock = std::make_shared<std::lock_guard<std::mutex> >(balance->m_mutex);
-	   }
-	   ~LockGuard() {
-		   m_lock.reset();
-	   }
+      typedef std::mutex mutex_type;
+      typedef std::lock_guard<mutex_type> lock_guard;
+
+      LockGuard(std::shared_ptr<ResourceList>& resourceList) {
+         m_lock = std::make_shared<lock_guard>(resourceList->m_mutex);
+      }
+      ~LockGuard() {
+         m_lock.reset();
+      }
 
    private:
-	   std::shared_ptr<std::lock_guard<std::mutex> > m_lock;
+	   std::shared_ptr<lock_guard> m_lock;
+
+      LockGuard(const ResourceList& resourceList) {}
+
+      friend class ResourceList;
    };
 
    typedef resource_container::iterator resource_iterator;
@@ -105,7 +109,7 @@ public:
    virtual xml::Node& asXML (xml::Node& parent) const noexcept;
 
 private:
-   mutable std::mutex m_mutex;
+   mutable LockGuard::mutex_type m_mutex;
    resource_container m_resources;
 
    ResourceList (const ResourceList&);

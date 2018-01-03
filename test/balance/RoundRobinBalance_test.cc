@@ -88,7 +88,7 @@ namespace RoundRobinTest {
    }
 }
 
-BOOST_AUTO_TEST_CASE( dont_use_unavailables )
+BOOST_AUTO_TEST_CASE( rr_dont_use_unavailables )
 {
    auto resourceList = wepa::test::balance::setup(RoundRobinTest::MaxResources);
 

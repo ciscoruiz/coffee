@@ -39,7 +39,6 @@
 
 #include <wepa/adt/NamedObject.hpp>
 #include <wepa/balance/ResourceUnavailableException.hpp>
-#include "ResourceList.hpp"
 
 namespace wepa {
 
@@ -50,10 +49,12 @@ namespace xml {
 namespace balance {
 
 class Resource;
+class GuardResourceList;
+class ResourceList;
 
 class Strategy : public adt::NamedObject {
 public:
-   virtual std::shared_ptr<Resource> apply(ResourceList::LockGuard& guard) throw (ResourceUnavailableException) = 0;
+   virtual std::shared_ptr<Resource> apply(GuardResourceList& guard) throw (ResourceUnavailableException) = 0;
 
    virtual adt::StreamString asString () const noexcept;
    virtual xml::Node& asXML (xml::Node& parent) const noexcept;

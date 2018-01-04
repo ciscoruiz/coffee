@@ -37,13 +37,22 @@
 #include <wepa/balance/Resource.hpp>
 #include <wepa/balance/ResourceList.hpp>
 #include <wepa/balance/StrategyIndexed.hpp>
+#include <wepa/balance/GuardResourceList.hpp>
 
 #include <wepa/logger/Logger.hpp>
 #include <wepa/logger/TraceMethod.hpp>
 
 using namespace wepa;
 
-std::shared_ptr<balance::Resource> balance::StrategyIndexed::apply(ResourceList::LockGuard& guard)
+std::shared_ptr<balance::Resource> balance::StrategyIndexed::apply(const int key)
+   throw (ResourceUnavailableException)
+{
+   GuardResourceList guard(m_resources);
+   m_key = key;
+   return apply(guard);
+}
+
+std::shared_ptr<balance::Resource> balance::StrategyIndexed::apply(GuardResourceList& guard)
    throw (ResourceUnavailableException)
 {
    logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);

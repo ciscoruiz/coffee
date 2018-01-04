@@ -45,7 +45,9 @@
 
 #include <wepa/balance/Resource.hpp>
 #include <wepa/balance/ResourceList.hpp>
+#include <wepa/balance/GuardResourceList.hpp>
 #include <wepa/balance/StrategyRoundRobin.hpp>
+
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Compiler.hpp>
 
@@ -68,7 +70,7 @@ BOOST_AUTO_TEST_CASE( count_availables )
 {
    auto resourceList = wepa::test::balance::setup(MaxResources);
 
-   ResourceList::LockGuard guard(resourceList);
+   GuardResourceList guard(resourceList);
 
    BOOST_REQUIRE_EQUAL(resourceList->size(guard), MaxResources);
    BOOST_REQUIRE_EQUAL(resourceList->countAvailableResources(guard), MaxResources);
@@ -90,7 +92,7 @@ BOOST_AUTO_TEST_CASE( dont_use_unavailables )
    balance::StrategyRoundRobin strategy(resourceList);
 
    if (true) {
-      ResourceList::LockGuard guard(resourceList);
+      GuardResourceList guard(resourceList);
       std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, 0));
       myResource->setAvailable(false);
    }
@@ -99,7 +101,7 @@ BOOST_AUTO_TEST_CASE( dont_use_unavailables )
    BOOST_REQUIRE_EQUAL (myResource->getKey(), 1);
 
    if (true) {
-      ResourceList::LockGuard guard(resourceList);
+      GuardResourceList guard(resourceList);
       for (auto ii = resourceList->resource_begin(guard), maxii = resourceList->resource_end(guard); ii != maxii; ++ ii) {
          std::shared_ptr<TestResource> myResource = TestResource::cast(ResourceList::resource(ii));
          myResource->setAvailable(false);
@@ -114,7 +116,7 @@ BOOST_AUTO_TEST_CASE (as_string)
    auto resourceList = wepa::test::balance::setup(MaxResources);
 
    if (true) {
-      ResourceList::LockGuard guard(resourceList);
+      GuardResourceList guard(resourceList);
       std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, 0));
       myResource->setAvailable(false);
    }
@@ -127,7 +129,7 @@ BOOST_AUTO_TEST_CASE (as_xml)
    auto resourceList = wepa::test::balance::setup(MaxResources);
 
    if (true) {
-      ResourceList::LockGuard guard(resourceList);
+      GuardResourceList guard(resourceList);
       std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, MaxResources / 2));
       myResource->setAvailable(false);
    }

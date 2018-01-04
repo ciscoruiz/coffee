@@ -44,6 +44,8 @@
 namespace wepa {
 namespace balance {
 
+class GuardResourceList;
+
 class StrategyByRange : public Strategy {
    typedef std::tuple<int, int, std::shared_ptr<Strategy> > Range;
    typedef std::vector<Range> Ranges;
@@ -68,23 +70,19 @@ public:
     */
    void addRange (const int bottom, const int top, std::shared_ptr<Strategy>& strategy) throw (adt::RuntimeException);
 
-   std::shared_ptr<Resource> apply(const int key) throw (ResourceUnavailableException) {
-      ResourceList::LockGuard guard(m_unusedList);
-      m_key = key;
-      return apply(guard);
-   }
+   std::shared_ptr<Resource> apply(const int key) throw (ResourceUnavailableException);
 
 private:
    std::shared_ptr<ResourceList> m_unusedList;
    Ranges m_ranges;
    int m_key;
 
-   range_iterator findRange (ResourceList::LockGuard&, const int key) noexcept;
+   range_iterator findRange (GuardResourceList&, const int key) noexcept;
    range_iterator range_begin() noexcept { return m_ranges.begin (); }
    range_iterator range_end() noexcept { return m_ranges.end (); }
    static Range& range(range_iterator ii) noexcept { return *ii; }
 
-   std::shared_ptr<Resource> apply(ResourceList::LockGuard& guard) throw (ResourceUnavailableException);
+   std::shared_ptr<Resource> apply(GuardResourceList& guard) throw (ResourceUnavailableException);
 };
 
 } /* namespace balance */

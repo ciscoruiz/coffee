@@ -32,32 +32,36 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_balance_StrategyRoundRobin_hpp
-#define __wepa_balance_StrategyRoundRobin_hpp
+#ifndef __wepa_balance_GuardResourceList_hpp
+#define __wepa_balance_GuardResourceList_hpp
 
-// It will not be available into std until c++17
-#include <boost/optional.hpp>
-
-#include "Strategy.hpp"
-#include "ResourceList.hpp"
+#include <memory>
+#include <mutex>
 
 namespace wepa {
+
 namespace balance {
 
-class GuardResourceList;
+class ResourceList;
 
-class StrategyRoundRobin : public Strategy {
+class GuardResourceList {
+   typedef std::lock_guard<std::mutex> lock_guard;
+
 public:
-   StrategyRoundRobin (std::shared_ptr<ResourceList>& resources) : Strategy("balance::RoundRobin", resources) {;}
-
-   std::shared_ptr<Resource> apply() throw (ResourceUnavailableException);
+   GuardResourceList(std::shared_ptr<ResourceList>& resourceList);
+   GuardResourceList(std::mutex& mutex) : m_lock(new lock_guard(mutex)) {}
+   ~GuardResourceList() { m_lock.reset(); }
 
 private:
-   boost::optional<ResourceList::resource_iterator> m_position;
+   std::unique_ptr<lock_guard> m_lock;
 
-   std::shared_ptr<Resource> apply(GuardResourceList& guard) throw (ResourceUnavailableException);
+   // Need it for Fake-Guard
+   GuardResourceList(const ResourceList& resourceList) {}
+
+   friend class ResourceList;
 };
 
-} /* namespace balance */
-} /* namespace wepa */
+}
+}
+
 #endif

@@ -37,6 +37,7 @@
 #include <wepa/balance/StrategyByRange.hpp>
 #include <wepa/logger/Logger.hpp>
 #include <wepa/logger/TraceMethod.hpp>
+#include <wepa/balance/GuardResourceList.hpp>
 
 using namespace wepa;
 
@@ -51,7 +52,7 @@ balance::StrategyByRange::StrategyByRange() :
 void balance::StrategyByRange::addRange (const int bottom, const int top, std::shared_ptr<Strategy>& strategy)
    throw (adt::RuntimeException)
 {
-   ResourceList::LockGuard guard(m_unusedList);
+   GuardResourceList guard(m_unusedList);
 
    if (!strategy)
       WEPA_THROW_EXCEPTION(asString () << " can not associate a null Strategy");
@@ -86,7 +87,7 @@ void balance::StrategyByRange::addRange (const int bottom, const int top, std::s
    m_ranges.push_back(range);
 }
 
-balance::StrategyByRange::range_iterator balance::StrategyByRange::findRange (ResourceList::LockGuard&, const int key)
+balance::StrategyByRange::range_iterator balance::StrategyByRange::findRange (GuardResourceList&, const int key)
    noexcept
 {
    static std::shared_ptr<balance::Strategy> empty;
@@ -101,7 +102,15 @@ balance::StrategyByRange::range_iterator balance::StrategyByRange::findRange (Re
    return range_end();
 }
 
-std::shared_ptr<balance::Resource> balance::StrategyByRange::apply(ResourceList::LockGuard& guard)
+std::shared_ptr<balance::Resource> balance::StrategyByRange::apply(const int key)
+   throw (ResourceUnavailableException)
+{
+   GuardResourceList guard(m_unusedList);
+   m_key = key;
+   return apply(guard);
+}
+
+std::shared_ptr<balance::Resource> balance::StrategyByRange::apply(GuardResourceList& guard)
    throw (balance::ResourceUnavailableException)
 {
    logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
@@ -118,7 +127,7 @@ std::shared_ptr<balance::Resource> balance::StrategyByRange::apply(ResourceList:
       strategy = std::get<2>(range(ii));
    }
 
-   ResourceList::LockGuard guard2(strategy->getResourceList());
+   GuardResourceList guard2(strategy->getResourceList());
 
    return strategy->apply(guard2);
 }

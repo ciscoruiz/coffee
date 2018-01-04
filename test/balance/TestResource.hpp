@@ -38,6 +38,8 @@
 #include <wepa/balance/Resource.hpp>
 #include <wepa/adt/AsString.hpp>
 
+#include <wepa/balance/ResourceList.hpp>
+
 namespace wepa {
 
 namespace test {

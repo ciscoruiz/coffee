@@ -47,6 +47,8 @@
 
 #include <wepa/balance/Resource.hpp>
 #include <wepa/balance/StrategyRoundRobin.hpp>
+#include <wepa/balance/GuardResourceList.hpp>
+
 #include "TestResource.hpp"
 
 using namespace wepa;
@@ -94,7 +96,7 @@ BOOST_AUTO_TEST_CASE( rr_dont_use_unavailables )
    balance::StrategyRoundRobin strategy(resourceList);
 
    if (true) {
-      ResourceList::LockGuard guard(resourceList);
+      balance::GuardResourceList guard(resourceList);
       std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, 0));
       myResource->setAvailable(false);
    }
@@ -103,7 +105,7 @@ BOOST_AUTO_TEST_CASE( rr_dont_use_unavailables )
    BOOST_REQUIRE_EQUAL (myResource->getKey(), 1);
 
    if (true) {
-      ResourceList::LockGuard guard(resourceList);
+      balance::GuardResourceList guard(resourceList);
       for (auto ii = resourceList->resource_begin(guard), maxii = resourceList->resource_end(guard); ii != maxii; ++ ii) {
          std::shared_ptr<TestResource> myResource = TestResource::cast(ResourceList::resource(ii));
          myResource->setAvailable(false);

@@ -46,11 +46,12 @@
 #include <wepa/logger/TtyWriter.hpp>
 
 #include <wepa/balance/Resource.hpp>
+#include <wepa/balance/GuardResourceList.hpp>
 #include <wepa/balance/StrategyByRange.hpp>
+#include <wepa/balance/StrategyRoundRobin.hpp>
 
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Compiler.hpp>
-#include "../../include/wepa/balance/StrategyRoundRobin.hpp"
 
 #include "TestResource.hpp"
 

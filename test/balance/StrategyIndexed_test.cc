@@ -47,6 +47,9 @@
 
 #include <wepa/balance/Resource.hpp>
 #include <wepa/balance/StrategyIndexed.hpp>
+#include <wepa/balance/GuardResourceList.hpp>
+#include <wepa/balance/ResourceList.hpp>
+
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Compiler.hpp>
 
@@ -100,7 +103,7 @@ BOOST_AUTO_TEST_CASE( inx_dont_use_unavailables )
    BOOST_REQUIRE_EQUAL (myResource->getKey(), 0);
 
    if (true) {
-      ResourceList::LockGuard guard(resourceList);
+      balance::GuardResourceList guard(resourceList);
       std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, 0));
       myResource->setAvailable(false);
    }
@@ -109,7 +112,7 @@ BOOST_AUTO_TEST_CASE( inx_dont_use_unavailables )
    BOOST_REQUIRE_EQUAL (myResource->getKey(), 1);
 
    if (true) {
-      ResourceList::LockGuard guard(resourceList);
+      balance::GuardResourceList guard(resourceList);
       for (auto ii = resourceList->resource_begin(guard), maxii = resourceList->resource_end(guard); ii != maxii; ++ ii) {
          std::shared_ptr<TestResource> myResource = TestResource::cast(ResourceList::resource(ii));
          myResource->setAvailable(false);

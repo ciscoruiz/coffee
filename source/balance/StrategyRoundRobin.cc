@@ -34,13 +34,21 @@
 //
 #include <wepa/balance/Resource.hpp>
 #include <wepa/balance/StrategyRoundRobin.hpp>
+#include <wepa/balance/GuardResourceList.hpp>
 
 #include <wepa/logger/Logger.hpp>
 #include <wepa/logger/TraceMethod.hpp>
 
 using namespace wepa;
 
-std::shared_ptr<balance::Resource> balance::StrategyRoundRobin::apply (ResourceList::LockGuard& guard)
+std::shared_ptr<balance::Resource> balance::StrategyRoundRobin::apply()
+   throw (ResourceUnavailableException)
+{
+   GuardResourceList guard(m_resources);
+   return apply(guard);
+}
+
+std::shared_ptr<balance::Resource> balance::StrategyRoundRobin::apply (GuardResourceList& guard)
    throw (ResourceUnavailableException)
 {
    logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);

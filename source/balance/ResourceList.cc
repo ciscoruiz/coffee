@@ -34,8 +34,7 @@
 //
 #include <wepa/balance/Resource.hpp>
 #include <wepa/balance/ResourceList.hpp>
-
-using namespace wepa;
+#include <wepa/balance/GuardResourceList.hpp>
 
 #include <mutex>
 
@@ -58,7 +57,7 @@ void balance::ResourceList::initialize ()
 
    SCCS::activate();
 
-   LockGuard guard(*this);
+   GuardResourceList guard(m_mutex);
 
    for (resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
       try {
@@ -88,8 +87,8 @@ bool balance::ResourceList::add (const std::shared_ptr<Resource>& resource)
 
    bool result = true;
 
-   if (true) { // Minimize critical section
-	   LockGuard guard(*this);
+   if (true) {
+      GuardResourceList guard(m_mutex);
 
       for (const_resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
          if (ResourceList::resource(ii)->getName() == resource->getName()) {
@@ -108,7 +107,7 @@ bool balance::ResourceList::add (const std::shared_ptr<Resource>& resource)
    return result;
 }
 
-size_t balance::ResourceList::countAvailableResources (balance::ResourceList::LockGuard& guard) const
+size_t balance::ResourceList::countAvailableResources (balance::GuardResourceList& guard) const
    noexcept
 {
    size_t result = 0;
@@ -121,13 +120,13 @@ size_t balance::ResourceList::countAvailableResources (balance::ResourceList::Lo
    return result;
 }
 
-balance::ResourceList::resource_iterator balance::ResourceList::next(balance::ResourceList::LockGuard& guard, balance::ResourceList::resource_iterator ii)
+balance::ResourceList::resource_iterator balance::ResourceList::next(balance::GuardResourceList& guard, resource_iterator ii)
    noexcept
 {
    ii ++;
 
-   if (ii == this->resource_end(guard))
-      ii = this->resource_begin(guard);
+   if (ii == resource_end(guard))
+      ii = resource_begin(guard);
 
    return ii;
 }
@@ -140,7 +139,7 @@ adt::StreamString balance::ResourceList::asString () const
    result += adt::NamedObject::asString();
    result += " | Available = ";
 
-   LockGuard fakeGuard(*this);
+   GuardResourceList fakeGuard(*this);
    result += adt::AsString::apply(countAvailableResources(fakeGuard));
    result.append (" of ").append (adt::AsString::apply (size (fakeGuard)));
    return result.append (" }");
@@ -152,7 +151,7 @@ xml::Node& balance::ResourceList::asXML (xml::Node& parent) const
 {
    xml::Node& result = parent.createChild (this->getName());
 
-   LockGuard fakeGuard(*this);
+   GuardResourceList fakeGuard(*this);
    for (const_resource_iterator ii = resource_begin(fakeGuard), maxii = resource_end(fakeGuard); ii != maxii; ++ ii) {
       resource(ii)->asXML(result);
    }

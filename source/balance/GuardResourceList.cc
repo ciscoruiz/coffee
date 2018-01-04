@@ -32,32 +32,13 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_balance_StrategyRoundRobin_hpp
-#define __wepa_balance_StrategyRoundRobin_hpp
+#include <wepa/balance/GuardResourceList.hpp>
+#include <wepa/balance/ResourceList.hpp>
 
-// It will not be available into std until c++17
-#include <boost/optional.hpp>
+using namespace wepa;
 
-#include "Strategy.hpp"
-#include "ResourceList.hpp"
+balance::GuardResourceList::GuardResourceList(std::shared_ptr<ResourceList>& resourceList) :
+      m_lock(new lock_guard(resourceList->m_mutex))
+{}
 
-namespace wepa {
-namespace balance {
 
-class GuardResourceList;
-
-class StrategyRoundRobin : public Strategy {
-public:
-   StrategyRoundRobin (std::shared_ptr<ResourceList>& resources) : Strategy("balance::RoundRobin", resources) {;}
-
-   std::shared_ptr<Resource> apply() throw (ResourceUnavailableException);
-
-private:
-   boost::optional<ResourceList::resource_iterator> m_position;
-
-   std::shared_ptr<Resource> apply(GuardResourceList& guard) throw (ResourceUnavailableException);
-};
-
-} /* namespace balance */
-} /* namespace wepa */
-#endif

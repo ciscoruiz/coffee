@@ -40,6 +40,8 @@
 namespace wepa {
 namespace balance {
 
+class GuardResourceList;
+
 class StrategyIndexed : public Strategy {
 public:
    StrategyIndexed (std::shared_ptr<ResourceList>& resources) :
@@ -48,16 +50,12 @@ public:
    {
    }
 
-   std::shared_ptr<Resource> apply(const int key) throw (ResourceUnavailableException) {
-	   ResourceList::LockGuard guard(m_resources);
-      m_key = key;
-      return apply(guard);
-   }
+   std::shared_ptr<Resource> apply(const int key) throw (ResourceUnavailableException);
 
 private:
    int m_key;
 
-   std::shared_ptr<Resource> apply(ResourceList::LockGuard& guard) throw (ResourceUnavailableException);
+   std::shared_ptr<Resource> apply(GuardResourceList& guard) throw (ResourceUnavailableException);
 };
 
 } /* namespace balance */

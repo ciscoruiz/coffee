@@ -32,12 +32,12 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/balance/ResourceList.hpp>
 #include <functional>
 
 #include <wepa/xml/Node.hpp>
 
 #include <wepa/balance/Strategy.hpp>
+#include <wepa/balance/ResourceList.hpp>
 
 using namespace wepa;
 

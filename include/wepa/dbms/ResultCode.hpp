@@ -3,6 +3,7 @@
 #define _wepm_dbms_ResultCode_h
 
 #include <string>
+#include <memory>
 
 #include <string.h>
 
@@ -36,7 +37,9 @@ public:
       \warning Antes de usarse debe asignarse a algun otro ResultCode obtenido mediante la invocacion
       a wepa::dbms::Connection::execute.
    */
-   explicit ResultCode (const Database& database, const int opCode) : m_errorText (NULL), m_database (&database), m_numericCode (opCode) {;}
+   explicit ResultCode (std::shared_ptr<Database>& database, const int opCode) :
+         m_errorText (NULL), m_database (database), m_numericCode (opCode)
+   {;}
 
    /**
       Constructor copia.      
@@ -141,9 +144,9 @@ protected:
       NULL si no hay ningun texto de error asociado al codigo recibido.
       \param database Decofidicador de errores.
    */
-   ResultCode (const int numericCode, const char* errorText, const Database& database) :
+   ResultCode (const int numericCode, const char* errorText, const std::shared_ptr<Database>& database) :
       m_errorText (NULL),
-      m_database (&database)
+      m_database (database)
    {
       initialize (numericCode, errorText);
    }
@@ -151,7 +154,7 @@ protected:
 private:
    int m_numericCode;
    char* m_errorText;
-   const Database* m_database;
+   std::shared_ptr<Database> m_database;
    
    void copy (const char* text) noexcept;
 };

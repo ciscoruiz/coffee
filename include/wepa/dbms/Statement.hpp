@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2013 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -35,9 +35,9 @@
 #ifndef _wepm_dbms_Statement_h
 #define _wepm_dbms_Statement_h
 
+#include <vector>
 #include <mutex>
-
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <memory>
 
 #include <wepa/adt/RuntimeException.hpp>
 #include <wepa/adt/Average.hpp>
@@ -83,8 +83,8 @@ class Abstract;
 */
 class Statement {
 public:
-   typedef boost::ptr_vector <binder::Input> input_container;
-   typedef boost::ptr_vector <binder::Output> output_container;
+   typedef std::vector<std::shared_ptr<binder::Input> > input_container;
+   typedef std::vector<std::shared_ptr<binder::Output> > output_container;
 
    typedef input_container::iterator input_iterator;
    typedef output_container::iterator output_iterator;
@@ -92,19 +92,19 @@ public:
    /**
       Destructor.
    */
-   virtual ~Statement ();
+   virtual ~Statement();
 
    /**
       Devuelve el nombre logico de esta sentencia.
       \return El nombre logico de esta sentencia.
    */
-   const std::string& getName () const noexcept { return m_name; }
+   const std::string& getName() const noexcept { return m_name; }
 
    /**
       Devuelve la expresion SQL recibida en el constructor.
       \return La expresion SQL recibida en el constructor.
    */
-   const std::string& getExpression () const noexcept { return m_expression; }
+   const std::string& getExpression() const noexcept { return m_expression; }
 
    /**
       Devuelve el indicador de criticidad, si vale \em true indica que si la ejecucion de esta sentencia
@@ -113,22 +113,22 @@ public:
       Solo aplicara en sentencias que no sean de seleccion.
       \return El indicador de criticidad de esta sentencia.
    */
-   ActionOnError::_v actionOnError () const noexcept { return m_actionOnError; }
+   ActionOnError::_v actionOnError() const noexcept { return m_actionOnError; }
 
    /**
       Devuelve la instancia de la base de datos asociada a esta sentencia.
       \return La instancia de la base de datos asociada a la sentencia.
    */
-   Database& getDatabase () const noexcept { return m_database; }
+   const std::shared_ptr<Database>& getDatabase() const noexcept { return m_database; }
 
    /**
       Devuelve \em true si la sentencia requiere la invocacion a \em commit o \em rollback
       tras su ejecucion. Puede devolver \em true por tratarse de una sentencia que no tiene variables
-      de salida (insert, update o delete) o bien porque se haya activado el indicador correspondiente
+      de salida(insert, update o delete) o bien porque se haya activado el indicador correspondiente
       mediante la llamada #setRequiresCommit
       \since NemesisRD.dbms 1.5.2.
    */
-   bool requiresCommit () const noexcept { return (m_requiresCommit == true) || (m_outputBinds.empty () == true); }
+   bool requiresCommit() const noexcept { return(m_requiresCommit == true) ||(m_outputBinds.empty() == true); }
 
    /**
       Establece el parametro de entrada de la sentencia SQL.Cada una de las variables de entrada indicadas
@@ -148,7 +148,7 @@ public:
       \param data Variable que deseamos asociar como variable de entrada. La correspondencia entre esta
       y la sentencia SQL vendra dada por el orden de declaracion.
    */
-   void createBinderInput (datatype::Abstract& data) throw (adt::RuntimeException);
+   void createBinderInput(datatype::Abstract& data) throw(adt::RuntimeException);
 
    /**
       Establece el parametro de salida de la sentencia SQL.Cada una de las variables de salida indicadas
@@ -173,25 +173,25 @@ public:
 
       \warning Solo las sentencias SQL del tipo \em select usan las variables de salida.
    */
-   void createBinderOutput (datatype::Abstract& data) throw (adt::RuntimeException);
+   void createBinderOutput(datatype::Abstract& data) throw(adt::RuntimeException);
 
    /**
       Devuelve un documento XML con la informacion referente a esta instancia.
       \param parent Nodo XML del que debe colgar la informacion.
       @return un documento XML con la informacion referente a esta instancia.
    */
-   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
+   virtual xml::Node& asXML(xml::Node& parent) const noexcept;
 
-   operator adt::StreamString () const noexcept { return asString (); }
+   operator adt::StreamString() const noexcept { return asString(); }
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.
       @return Una cadena con la informacion referente a esta instancia.
    */
-   virtual adt::StreamString asString () const noexcept;
+   virtual adt::StreamString asString() const noexcept;
 
-   Statement (const Statement&) = delete;
-   Statement& operator= (const Statement&) = delete;
+   Statement(const Statement&) = delete;
+   Statement& operator=(const Statement&) = delete;
 
 protected:
    /**
@@ -204,14 +204,14 @@ protected:
       la conexion con la que ejecutamos esta sentencia se invocara a Connection::rollback, en otro caso
       aunque falle se invocara a Connection::commit. Solo aplicara en sentencias que no sean de seleccion.
    */
-   Statement (Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
-      m_database (database),
-      m_name (name),
-      m_expression (expression),
-      m_prepared (false),
-      m_actionOnError (actionOnError),
-      m_measureTiming ("Timing", "us"),
-      m_requiresCommit (false)
+   Statement(std::shared_ptr<Database>& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
+      m_database(database),
+      m_name(name),
+      m_expression(expression),
+      m_prepared(false),
+      m_actionOnError(actionOnError),
+      m_measureTiming("Timing", "us"),
+      m_requiresCommit(false)
    {
    }
 
@@ -226,27 +226,27 @@ protected:
       aunque falle se invocara a Connection::commit. Solo aplicara en cuenta en sentencias que no
       sean de seleccion.
    */
-   Statement (Database& database, const char* name, const std::string& expression, const ActionOnError::_v actionOnError) :
-      m_database (database),
-      m_name (name),
-      m_expression (expression),
-      m_prepared (false),
-      m_actionOnError (actionOnError),
-      m_measureTiming ("Timing", "us"),
-      m_requiresCommit (false)
+   Statement(std::shared_ptr<Database>& database, const char* name, const std::string& expression, const ActionOnError::_v actionOnError) :
+      m_database(database),
+      m_name(name),
+      m_expression(expression),
+      m_prepared(false),
+      m_actionOnError(actionOnError),
+      m_measureTiming("Timing", "us"),
+      m_requiresCommit(false)
    {
    }
 
-   int input_size () const noexcept { return m_inputBinds.size (); }
-   int output_size () const noexcept { return m_outputBinds.size (); }
+   int input_size() const noexcept { return m_inputBinds.size(); }
+   int output_size() const noexcept { return m_outputBinds.size(); }
 
    // These methods will be called from GuardStatement
-   datatype::Abstract& getInputData (const int pos) throw (adt::RuntimeException);
-   datatype::Abstract& getOutputData (const int pos) throw (adt::RuntimeException);
-   const datatype::Abstract& getOutputData (const int pos) const throw (adt::RuntimeException);
+   std::shared_ptr<datatype::Abstract>& getInputData(const int pos) throw(adt::RuntimeException);
+   std::shared_ptr<datatype::Abstract>& getOutputData(const int pos) throw(adt::RuntimeException);
+   const std::shared_ptr<datatype::Abstract>& getOutputData(const int pos) const throw(adt::RuntimeException);
 
 private:
-   Database& m_database;
+   std::shared_ptr<Database> m_database;
    const std::string m_name;
    std::string m_expression;
    input_container m_inputBinds;  /**< Lista de variables de entrada */
@@ -257,24 +257,24 @@ private:
    bool m_requiresCommit;
    std::mutex m_mutex;
 
-   void measureTiming (const adt::DelayMeter <adt::Microsecond>& delay) noexcept { m_measureTiming += delay.getValue(); }
+   void measureTiming(const adt::DelayMeter <adt::Microsecond>& delay) noexcept { m_measureTiming += delay.getValue(); }
 
-   void prepare (Connection* connection) throw (adt::RuntimeException, DatabaseException);
-   virtual void do_prepare (Connection* connection) throw (adt::RuntimeException, DatabaseException) = 0;
+   void prepare() throw(adt::RuntimeException, DatabaseException);
+   virtual void do_prepare() throw(adt::RuntimeException, DatabaseException) = 0;
 
-   ResultCode execute (Connection& connection) throw (adt::RuntimeException, DatabaseException);
-   virtual ResultCode do_execute (Connection& connection) throw (adt::RuntimeException, DatabaseException) = 0;
+   ResultCode execute(Connection& connection) throw(adt::RuntimeException, DatabaseException);
+   virtual ResultCode do_execute(Connection& connection) throw(adt::RuntimeException, DatabaseException) = 0;
 
-   void setRequiresCommit (const bool requiresCommit) noexcept { m_requiresCommit = requiresCommit; }
+   void setRequiresCommit(const bool requiresCommit) noexcept { m_requiresCommit = requiresCommit; }
 
-   bool fetch () throw (adt::RuntimeException, DatabaseException);
-   virtual bool do_fetch () throw (adt::RuntimeException, DatabaseException) = 0;
+   bool fetch() throw(adt::RuntimeException, DatabaseException);
+   virtual bool do_fetch() throw(adt::RuntimeException, DatabaseException) = 0;
 
-   void lock () noexcept { m_mutex.lock (); }
-   void unlock () noexcept { m_mutex.unlock (); }
+   void lock() noexcept { m_mutex.lock(); }
+   void unlock() noexcept { m_mutex.unlock(); }
 
    friend class Connection;
-   friend class Database;
+   friend class std::shared_ptr<Database>;
    friend class GuardStatement;
 };
 

@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2013 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -36,7 +36,6 @@
 #define __wepa_mock_MockDatabase_hpp
 
 #include <wepa/app/Application.hpp>
-
 #include <wepa/dbms/Database.hpp>
 
 #include <mock/MockInput.hpp>
@@ -51,39 +50,39 @@ class MockDatabase : public dbms::Database {
 public:
    enum ErrorCode { NotFound, Successful, Lock, LostConnection };
 
-   MockDatabase (app::Application& app) : dbms::Database (app, "map", app.getTitle ().c_str ()) {;}
-   MockDatabase (const char* name);
+   MockDatabase(app::Application& app) : dbms::Database(app, "map", app.getTitle().c_str()) {;}
+   MockDatabase(const char* name);
 
-   void add (const mock::MockLowLevelRecord& record) noexcept {
+   void add(const mock::MockLowLevelRecord& record) noexcept {
       m_container [record.m_id] = record;
    }
 
-   void update (const mock::MockLowLevelRecord& record) noexcept {
+   void update(const mock::MockLowLevelRecord& record) noexcept {
       m_container [record.m_id] = record;
    }
 
-   int container_size () const noexcept { return m_container.size (); }
+   int container_size() const noexcept { return m_container.size(); }
 
 private:
    mock::MockLowLevelContainer m_container;
 
-   bool notFound (const int errorCode) const noexcept { return errorCode == NotFound; }
-   bool successful (const int errorCode) const noexcept { return errorCode == Successful; }
-   bool locked (const int errorCode) const noexcept { return errorCode == Lock; }
-   bool lostConnection (const int errorCode) const noexcept { return errorCode == LostConnection; }
+   bool notFound(const int errorCode) const noexcept { return errorCode == NotFound; }
+   bool successful(const int errorCode) const noexcept { return errorCode == Successful; }
+   bool locked(const int errorCode) const noexcept { return errorCode == Lock; }
+   bool lostConnection(const int errorCode) const noexcept { return errorCode == LostConnection; }
 
-   dbms::Connection* allocateConnection (const std::string& name, const char* user, const char* password)
-      throw (adt::RuntimeException)
+   dbms::Connection* allocateConnection(const std::string& name, const char* user, const char* password)
+      throw(adt::RuntimeException)
    {
-      return new mock::MockConnection (std::ref (*this), name, user, password);
+      return new mock::MockConnection(std::ref(*this), name, user, password);
    }
 
-   dbms::binder::Input* allocateInputBind (dbms::datatype::Abstract& data) throw (adt::RuntimeException) {
-      return new MockInput (data);
+   std::shared_ptr<dbms::binder::Input> allocateInputBind(dbms::datatype::Abstract& data) throw(adt::RuntimeException) {
+      return std::make_shared<dbms::binder::Input>(new MockInput(data));
    }
 
-   dbms::binder::Output* allocateOutputBind (dbms::datatype::Abstract& data) throw (adt::RuntimeException) {
-      return new MockOutput (data);
+   std::shared_ptr<dbms::binder::Output> allocateOutputBind(dbms::datatype::Abstract& data) throw(adt::RuntimeException) {
+      return std::make_shared<dbms::binder::Input>(new MockOutput(data));
    }
 
    friend class MockConnection;

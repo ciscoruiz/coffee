@@ -2,6 +2,7 @@
 #ifndef _wepa_dbms_Connection_h
 #define _wepa_dbms_Connection_h
 
+#include <memory>
 #include <mutex>
 
 #include <wepa/balance/Resource.hpp>
@@ -38,7 +39,7 @@ class GuardConnection;
 */
 class Connection : public balance::Resource {
 public:
-   Database& getDatabase () const noexcept { return m_dbmsDatabase; }
+   const std::shared_ptr<Database>& getDatabase () const noexcept { return m_dbmsDatabase; }
 
    const std::string& getUser () const noexcept { return m_user; }
 
@@ -54,11 +55,11 @@ public:
    Connection& operator= (const Connection&) = delete;
 
 protected:
-   Database& m_dbmsDatabase;
+   std::shared_ptr<Database> m_dbmsDatabase;
    std::string m_user; /**< Nombre del usuario */
    std::string m_password; /**< Clave de acceso del usuario. */
 
-   Connection (Database& dbmsDatabase, const std::string& name, const char* user, const char* password) :
+   Connection (std::shared_ptr<Database>& dbmsDatabase, const std::string& name, const char* user, const char* password) :
       balance::Resource (name),
       m_dbmsDatabase (dbmsDatabase),
       m_user (user),
@@ -82,7 +83,7 @@ protected:
 
    void activateRollbackPending () noexcept { m_rollbackPending = true; }
 
-   ResultCode execute (Statement& statement) throw (adt::RuntimeException, DatabaseException);
+   ResultCode execute (std::shared_ptr<Statement>& statement) throw (adt::RuntimeException, DatabaseException);
 
    void commit () throw (adt::RuntimeException, DatabaseException);
 

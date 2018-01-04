@@ -2,14 +2,14 @@
 #ifndef _wepa_dbms_binder_Output_h
 #define _wepa_dbms_binder_Output_h
 
-#include <wepa/dbms/binder/BinderIf.hpp>
+#include "Binder.hpp"
 
 namespace wepa {
 
 namespace dbms {
 
 namespace datatype {
-class LongBlock;
+   class LongBlock;
 }
 
 namespace binder {
@@ -24,9 +24,9 @@ namespace binder {
    A continuacion presentamos un ejemplo de uso detallado.
    \include dbms.ss/oracle.ss/db_null.p/db_null.cc
 */
-class Output : public BinderIf {
+class Output : public Binder {
 public:
-   adt::StreamString asString () const noexcept;
+   adt::StreamString asString() const noexcept;
 
    /**
       Graba el valor de la variable wepa::dbms::LongBlock asociada a esta Output. Cualquier
@@ -36,15 +36,15 @@ public:
       \warning Este metodo solo puede ser usado para variables de tipo dbms::Data::Type::LongBlock y
       siempre y cuando hayamos abierto el BLOB con una sentencia SQL de seleccion.
    */
-   void write () throw (adt::RuntimeException, dbms::DatabaseException);
+   void write() throw(adt::RuntimeException, dbms::DatabaseException);
 
 protected:
-   Output (datatype::Abstract& value) : BinderIf (value) {;}
+   Output(std::shared_ptr<datatype::Abstract>& value) : Binder(value) {;}
 
 private:
-   void do_encode () throw (adt::RuntimeException) {;}
+   void do_encode() throw(adt::RuntimeException) {;}
 
-   virtual void do_write (const datatype::LongBlock&) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
+   virtual void do_write(const std::shared_ptr<datatype::LongBlock>&) throw(adt::RuntimeException, dbms::DatabaseException) = 0;
 };
 
 }

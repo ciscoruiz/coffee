@@ -33,8 +33,8 @@
 // Author: cisco.tierra@gmail.com
 //
 
-#include <wepa/dbms/ResultCode.hpp>
 #include <wepa/dbms/Database.hpp>
+#include <wepa/dbms/ResultCode.hpp>
 
 using namespace std;
 using namespace wepa;

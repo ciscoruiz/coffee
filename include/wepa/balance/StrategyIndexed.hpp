@@ -32,50 +32,34 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/balance/RoundRobin.hpp>
-#include <wepa/balance/Resource.hpp>
+#ifndef __wepa_balance_StrategyIndexed_hpp
+#define __wepa_balance_StrategyIndexed_hpp
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TraceMethod.hpp>
+#include "Strategy.hpp"
 
-using namespace wepa;
+namespace wepa {
+namespace balance {
 
-std::shared_ptr<balance::Resource> balance::RoundRobin::apply (ResourceList::LockGuard& guard)
-   throw (ResourceUnavailableException)
-{
-   logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
-
-   if (!m_position) {
-      m_position = m_resources->resource_begin(guard);
+class StrategyIndexed : public Strategy {
+public:
+   StrategyIndexed (std::shared_ptr<ResourceList>& resources) :
+      balance::Strategy("balance::Indexed", resources),
+      m_key(0)
+   {
    }
 
-   if (m_position.value() == m_resources->resource_end(guard)) {
-      WEPA_THROW_NAMED_EXCEPTION(ResourceUnavailableException, m_resources->getName() << " is empty");
+   std::shared_ptr<Resource> apply(const int key) throw (ResourceUnavailableException) {
+	   ResourceList::LockGuard guard(m_resources);
+      m_key = key;
+      return apply(guard);
    }
 
-   std::shared_ptr<Resource> result;
-   ResourceList::resource_iterator ww;
-   ResourceList::resource_iterator end;
+private:
+   int m_key;
 
-   ww = end = *m_position;
+   std::shared_ptr<Resource> apply(ResourceList::LockGuard& guard) throw (ResourceUnavailableException);
+};
 
-   do {
-      std::shared_ptr<Resource>& w = ResourceList::resource(ww);
-
-      if (w->isAvailable () == true) {
-         // prepare the next call to this method
-         m_position = m_resources->next(guard, ww);
-         result = w;
-         break;
-      }
-   } while ((ww = m_resources->next(guard, ww)) != end);
-
-   if (!result) {
-      WEPA_THROW_NAMED_EXCEPTION(ResourceUnavailableException, this->asString() << " there is not any available resource");
-   }
-
-   LOG_LOCAL7("Result=" << result->asString());
-
-   return result;
-}
-
+} /* namespace balance */
+} /* namespace wepa */
+#endif

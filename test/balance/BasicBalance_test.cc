@@ -45,8 +45,7 @@
 
 #include <wepa/balance/Resource.hpp>
 #include <wepa/balance/ResourceList.hpp>
-#include <wepa/balance/RoundRobin.hpp>
-
+#include <wepa/balance/StrategyRoundRobin.hpp>
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Compiler.hpp>
 
@@ -88,7 +87,7 @@ BOOST_AUTO_TEST_CASE( dont_use_unavailables )
 {
    auto resourceList = wepa::test::balance::setup(MaxResources);
 
-   balance::RoundRobin strategy(resourceList);
+   balance::StrategyRoundRobin strategy(resourceList);
 
    if (true) {
       ResourceList::LockGuard guard(resourceList);

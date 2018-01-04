@@ -46,8 +46,7 @@
 #include <wepa/logger/TtyWriter.hpp>
 
 #include <wepa/balance/Resource.hpp>
-#include <wepa/balance/Indexed.hpp>
-
+#include <wepa/balance/StrategyIndexed.hpp>
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Compiler.hpp>
 
@@ -78,7 +77,7 @@ namespace IndexedTest {
       }
    }
 
-   void parallel_work(std::mutex& mutexContainer, CounterContainer& counterContainer, balance::Indexed& strategy)
+   void parallel_work(std::mutex& mutexContainer, CounterContainer& counterContainer, balance::StrategyIndexed& strategy)
    {
       for (int ii = 0; ii < MaxResources; ++ ii) {
          auto resource = strategy.apply (ii);
@@ -95,7 +94,7 @@ BOOST_AUTO_TEST_CASE( inx_dont_use_unavailables )
 {
    auto resourceList = wepa::test::balance::setup(IndexedTest::MaxResources);
 
-   balance::Indexed strategy(resourceList);
+   balance::StrategyIndexed strategy(resourceList);
 
    std::shared_ptr<TestResource> myResource = TestResource::cast_copy(strategy.apply(0));
    BOOST_REQUIRE_EQUAL (myResource->getKey(), 0);
@@ -125,7 +124,7 @@ BOOST_AUTO_TEST_CASE( inx_balance_quality)
 {
    auto resourceList = wepa::test::balance::setup(IndexedTest::MaxResources);
 
-   balance::Indexed strategy(resourceList);
+   balance::StrategyIndexed strategy(resourceList);
    IndexedTest::CounterContainer counterContainer;
 
    for (int ii = 0; ii < IndexedTest::MaxResources * IndexedTest::MaxLoop; ++ ii){
@@ -143,7 +142,7 @@ BOOST_AUTO_TEST_CASE( inx_balance_multithread )
 {
    auto resourceList = wepa::test::balance::setup(IndexedTest::MaxResources);
 
-   balance::Indexed strategy(resourceList);
+   balance::StrategyIndexed strategy(resourceList);
    IndexedTest::CounterContainer counterContainer;
    std::mutex mutexContainer;
 

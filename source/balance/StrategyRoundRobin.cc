@@ -32,23 +32,24 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <mutex>
-
-#include <wepa/balance/Indexed.hpp>
 #include <wepa/balance/Resource.hpp>
-#include <wepa/balance/ResourceList.hpp>
+#include <wepa/balance/StrategyRoundRobin.hpp>
 
 #include <wepa/logger/Logger.hpp>
 #include <wepa/logger/TraceMethod.hpp>
 
 using namespace wepa;
 
-std::shared_ptr<balance::Resource> balance::Indexed::apply(ResourceList::LockGuard& guard)
+std::shared_ptr<balance::Resource> balance::StrategyRoundRobin::apply (ResourceList::LockGuard& guard)
    throw (ResourceUnavailableException)
 {
    logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
 
-   if (m_resources->size(guard) == 0) {
+   if (!m_position) {
+      m_position = m_resources->resource_begin(guard);
+   }
+
+   if (m_position.value() == m_resources->resource_end(guard)) {
       WEPA_THROW_NAMED_EXCEPTION(ResourceUnavailableException, m_resources->getName() << " is empty");
    }
 
@@ -56,12 +57,14 @@ std::shared_ptr<balance::Resource> balance::Indexed::apply(ResourceList::LockGua
    ResourceList::resource_iterator ww;
    ResourceList::resource_iterator end;
 
-   ww = end = m_resources->resource_begin(guard) + (m_key % m_resources->size(guard));
+   ww = end = *m_position;
 
    do {
       std::shared_ptr<Resource>& w = ResourceList::resource(ww);
 
-      if (w->isAvailable() == true) {
+      if (w->isAvailable () == true) {
+         // prepare the next call to this method
+         m_position = m_resources->next(guard, ww);
          result = w;
          break;
       }

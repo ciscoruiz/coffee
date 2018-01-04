@@ -46,8 +46,7 @@
 #include <wepa/logger/TtyWriter.hpp>
 
 #include <wepa/balance/Resource.hpp>
-#include <wepa/balance/RoundRobin.hpp>
-
+#include <wepa/balance/StrategyRoundRobin.hpp>
 #include "TestResource.hpp"
 
 using namespace wepa;
@@ -75,7 +74,7 @@ namespace RoundRobinTest {
       }
    }
 
-   void parallel_work(std::mutex& mutexContainer, CounterContainer& counterContainer, balance::RoundRobin& strategy)
+   void parallel_work(std::mutex& mutexContainer, CounterContainer& counterContainer, balance::StrategyRoundRobin& strategy)
    {
       for (int ii = 0; ii < MaxResources; ++ ii) {
          auto resource = strategy.apply ();
@@ -92,7 +91,7 @@ BOOST_AUTO_TEST_CASE( rr_dont_use_unavailables )
 {
    auto resourceList = wepa::test::balance::setup(RoundRobinTest::MaxResources);
 
-   balance::RoundRobin strategy(resourceList);
+   balance::StrategyRoundRobin strategy(resourceList);
 
    if (true) {
       ResourceList::LockGuard guard(resourceList);
@@ -118,7 +117,7 @@ BOOST_AUTO_TEST_CASE( rr_balance_quality)
 {
    auto resourceList = wepa::test::balance::setup(RoundRobinTest::MaxResources);
 
-   balance::RoundRobin strategy(resourceList);
+   balance::StrategyRoundRobin strategy(resourceList);
    RoundRobinTest::CounterContainer counterContainer;
 
    for (int ii = 0; ii < RoundRobinTest::MaxResources * RoundRobinTest::MaxLoop; ++ ii){
@@ -136,20 +135,20 @@ BOOST_AUTO_TEST_CASE( rr_balance_multithread )
 {
    auto resourceList = wepa::test::balance::setup(RoundRobinTest::MaxResources);
 
-   balance::RoundRobin strategy(resourceList);
+   balance::StrategyRoundRobin strategy(resourceList);
    RoundRobinTest::CounterContainer counterContainer;
    std::mutex mutexContainer;
+   std::vector<std::shared_ptr<std::thread> > threads;
 
-   std::thread t1(RoundRobinTest::parallel_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (strategy));
-   std::thread t2(RoundRobinTest::parallel_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (strategy));
-   std::thread t3(RoundRobinTest::parallel_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (strategy));
+   for (int ii = 0; ii < RoundRobinTest::MaxLoop; ++ ii) {
+      threads.push_back(std::make_shared<std::thread>(RoundRobinTest::parallel_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (strategy)));
+   }
 
-   t1.join ();
-   t2.join ();
-   t3.join ();
+   for(auto ii = threads.begin(), maxii = threads.end(); ii != maxii; ++ ii) {
+      (*ii)->join();
+   }
 
    int sumUse = 0;
-
    for (auto& useCounter : counterContainer) {
       BOOST_REQUIRE_GT (useCounter.second, 0);
       sumUse += useCounter.second;

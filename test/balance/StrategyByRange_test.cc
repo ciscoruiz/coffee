@@ -46,11 +46,11 @@
 #include <wepa/logger/TtyWriter.hpp>
 
 #include <wepa/balance/Resource.hpp>
-#include <wepa/balance/ByRange.hpp>
-#include <wepa/balance/RoundRobin.hpp>
+#include <wepa/balance/StrategyByRange.hpp>
 
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Compiler.hpp>
+#include "../../include/wepa/balance/StrategyRoundRobin.hpp"
 
 #include "TestResource.hpp"
 
@@ -79,7 +79,7 @@ namespace ByRangeTest {
       }
    }
 
-   void parallel_work(std::mutex& mutexContainer, CounterContainer& counterContainer, balance::ByRange& strategy)
+   void parallel_work(std::mutex& mutexContainer, CounterContainer& counterContainer, balance::StrategyByRange& strategy)
    {
       for (int ii = 0; ii < 1000; ++ ii) {
          auto resource = strategy.apply (ii);
@@ -94,34 +94,34 @@ namespace ByRangeTest {
 
 BOOST_AUTO_TEST_CASE(byrange_empty_strategy)
 {
-   balance::ByRange mainStrategy;
+   balance::StrategyByRange mainStrategy;
    std::shared_ptr<balance::Strategy> foo;
    BOOST_REQUIRE_THROW (mainStrategy.addRange (0, 10, foo), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(byrange_recursive)
 {
-   std::shared_ptr<balance::ByRange> mainStrategy = std::make_shared<balance::ByRange>();
+   std::shared_ptr<balance::StrategyByRange> mainStrategy = std::make_shared<balance::StrategyByRange>();
    std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(mainStrategy);
    BOOST_REQUIRE_THROW (mainStrategy->addRange (0, 10, foo), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(byrange_bad_limits)
 {
-   balance::ByRange mainStrategy;
+   balance::StrategyByRange mainStrategy;
 
    auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources);
-   std::shared_ptr<balance::RoundRobin> strategy = std::make_shared<balance::RoundRobin>(resourceList);
+   std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
    std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
    BOOST_REQUIRE_THROW (mainStrategy.addRange (10, 0, foo), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(byrange_overlapping)
 {
-   balance::ByRange mainStrategy;
+   balance::StrategyByRange mainStrategy;
 
    auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources);
-   std::shared_ptr<balance::RoundRobin> strategy = std::make_shared<balance::RoundRobin>(resourceList);
+   std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
    std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
 
    mainStrategy.addRange (10, 20, foo);
@@ -133,25 +133,25 @@ BOOST_AUTO_TEST_CASE(byrange_overlapping)
 
 BOOST_AUTO_TEST_CASE(byrange_sharing)
 {
-   balance::ByRange mainStrategy;
+   balance::StrategyByRange mainStrategy;
 
    {
       auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources);
-      std::shared_ptr<balance::RoundRobin> strategy = std::make_shared<balance::RoundRobin>(resourceList);
+      std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
       std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
       mainStrategy.addRange(100, 200, foo);
    }
 
    {
       auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources, 100);
-      std::shared_ptr<balance::RoundRobin> strategy = std::make_shared<balance::RoundRobin>(resourceList);
+      std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
       std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
       mainStrategy.addRange(205, 350, foo);
    }
 
    {
       auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources, 1000);
-      std::shared_ptr<balance::RoundRobin> strategy = std::make_shared<balance::RoundRobin>(resourceList);
+      std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
       std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
       mainStrategy.addRange(351, 450, foo);
    }
@@ -164,8 +164,7 @@ BOOST_AUTO_TEST_CASE(byrange_sharing)
    BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(300))->getKey(), 101);
    BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(440))->getKey(), 1001);
 
-
-   BOOST_REQUIRE_THROW (mainStrategy.apply (2000), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(mainStrategy.apply (2000), balance::ResourceUnavailableException);
 }
 
 /*

@@ -32,15 +32,15 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/balance/ByRange.hpp>
 #include <wepa/balance/Resource.hpp>
 #include <wepa/balance/ResourceList.hpp>
+#include <wepa/balance/StrategyByRange.hpp>
 #include <wepa/logger/Logger.hpp>
 #include <wepa/logger/TraceMethod.hpp>
 
 using namespace wepa;
 
-balance::ByRange::ByRange() :
+balance::StrategyByRange::StrategyByRange() :
    balance::Strategy("balance::ByRange"),
    m_unusedList(std::make_shared<ResourceList>("balance::ByRange::unused")),
    m_key(0)
@@ -48,7 +48,7 @@ balance::ByRange::ByRange() :
    setResourceList(m_unusedList);
 }
 
-void balance::ByRange::addRange (const int bottom, const int top, std::shared_ptr<Strategy>& strategy)
+void balance::StrategyByRange::addRange (const int bottom, const int top, std::shared_ptr<Strategy>& strategy)
    throw (adt::RuntimeException)
 {
    ResourceList::LockGuard guard(m_unusedList);
@@ -61,6 +61,13 @@ void balance::ByRange::addRange (const int bottom, const int top, std::shared_pt
 
    if (bottom > top)
       WEPA_THROW_EXCEPTION(asString () << " | invalid range (bottom > top)");
+
+   for (range_iterator ii = range_begin(), maxii = range_end(); ii != maxii; ++ ii) {
+      Range& range = StrategyByRange::range(ii);
+      if (std::get<0>(range) >= bottom && std::get<1>(range) <= top) {
+         WEPA_THROW_EXCEPTION(std::get<2>(range)->asString () << " would be hidden by " << strategy->asString());
+      }
+   }
 
    range_iterator ii;
 
@@ -79,32 +86,22 @@ void balance::ByRange::addRange (const int bottom, const int top, std::shared_pt
    m_ranges.push_back(range);
 }
 
-balance::ByRange::range_iterator balance::ByRange::findRange (ResourceList::LockGuard&, const int key)
+balance::StrategyByRange::range_iterator balance::StrategyByRange::findRange (ResourceList::LockGuard&, const int key)
    noexcept
 {
    static std::shared_ptr<balance::Strategy> empty;
 
    for (range_iterator ii = range_begin(), maxii = range_end(); ii != maxii; ++ ii) {
-      Range& range = ByRange::range(ii);
+      Range& range = StrategyByRange::range(ii);
       if (std::get<0>(range) >= key && std::get<1>(range) <= key) {
          return ii;
       }
    }
 
    return range_end();
-
-
-
-   // See http://en.cppreference.com/w/cpp/utility/tuple/get
-//   for (auto range : m_ranges) {
-//      if (std::get<0>(range) >= key && std::get<1>(range) <= key)
-//         return std::get<2>(range);
-//   }
-
-//   return empty;
 }
 
-std::shared_ptr<balance::Resource> balance::ByRange::apply(ResourceList::LockGuard& guard)
+std::shared_ptr<balance::Resource> balance::StrategyByRange::apply(ResourceList::LockGuard& guard)
    throw (balance::ResourceUnavailableException)
 {
    logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
@@ -112,16 +109,14 @@ std::shared_ptr<balance::Resource> balance::ByRange::apply(ResourceList::LockGua
    std::shared_ptr<balance::Strategy> strategy;
 
    if (true) {
-      ResourceList::LockGuard guard(m_unusedList);
       range_iterator ii = findRange (guard, m_key);
 
       if (ii == range_end()) {
-         WEPA_THROW_EXCEPTION("Key=" << m_key << " does not have a defined range");
+         WEPA_THROW_NAMED_EXCEPTION(balance::ResourceUnavailableException, "Key=" << m_key << " does not have a defined range");
       }
 
       strategy = std::get<2>(range(ii));
    }
-
 
    ResourceList::LockGuard guard2(strategy->getResourceList());
 

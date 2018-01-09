@@ -37,11 +37,13 @@ public:
 
    void setValue (const adt::DataBlock& value) throw (adt::RuntimeException);
 
-   Abstract* clone () const noexcept { return new ShortBlock(*this); }
+   std::shared_ptr<Abstract> clone() const noexcept { return std::make_shared<ShortBlock>(*this); }
 
    operator adt::StreamString () const noexcept { return asString (); }
 
    adt::StreamString asString () const noexcept;
+
+   const char* className() noexcept { return "dbms::datatype::ShortBlock"; }
 
    wepa_declare_datatype_downcast(ShortBlock)
 

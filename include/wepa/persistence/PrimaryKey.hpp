@@ -36,6 +36,7 @@
 #define __wepa_persistence_PrimaryKey_hpp
 
 #include <vector>
+#include <memory>
 
 #include <wepa/adt/RuntimeException.hpp>
 
@@ -51,49 +52,30 @@ namespace dbms {
 
 namespace persistence {
 
-class Accessor;
-class Storage;
+class PrimaryKeyBuilder;
 
 class PrimaryKey {
-   typedef std::vector <dbms::datatype::Abstract*> Components;
-
 public:
-   PrimaryKey (const PrimaryKey& other);
-   PrimaryKey ();
-   ~PrimaryKey ();
+   typedef std::shared_ptr<dbms::datatype::Abstract> Component;
+   typedef std::vector<Component> Components;
+
+   PrimaryKey(const PrimaryKeyBuilder& builder);
+   ~PrimaryKey () { m_components.clear(); }
 
    PrimaryKey& operator= (const PrimaryKey& other) throw (adt::Exception);
-
    int compareTo (const PrimaryKey& other) const throw (adt::RuntimeException);
-
-   bool isDefined () const noexcept { return m_components.size () > 0; }
-
    bool operator== (const PrimaryKey& other) const throw (adt::RuntimeException) { return compareTo (other) == 0; }
-
-   bool operator < (const PrimaryKey& other) const throw (adt::RuntimeException){ return compareTo(other) < 0; }
-
-   const dbms::datatype::Abstract* getComponent (const int pos) const throw (adt::RuntimeException);
-
-   /**
-    * \warning This method will be public for Unit test purposes
-    * @param component
-    */
-   void addComponent (dbms::datatype::Abstract* component) noexcept {
-      m_components.push_back (component);
-   }
+   bool operator< (const PrimaryKey& other) const throw (adt::RuntimeException){ return compareTo(other) < 0; }
 
    operator adt::StreamString () const noexcept { return asString (); }
-
    adt::StreamString asString () const noexcept;
 
 private:
-   const bool m_mustDeleteComponents;
    Components m_components;
 
-   void clear () noexcept;
-
-   friend class Accessor;
-   friend class Storage;
+   PrimaryKey (const PrimaryKey& other) = delete;
+   
+   const Component& getComponent(const int pos) const throw(adt::RuntimeException);   
 };
 
 } /* namespace persistence */

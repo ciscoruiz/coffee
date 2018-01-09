@@ -54,7 +54,6 @@
 #include <wepa/persistence/AutoObject.hpp>
 
 #include <mock/MockLowLevelRecord.hpp>
-#include <mock/MockDatabase.hpp>
 #include <mock/MockConnection.hpp>
 
 #include <wepa/dbms/GuardConnection.hpp>
@@ -65,6 +64,7 @@
 #include <wepa/dbms/datatype/String.hpp>
 #include <wepa/dbms/datatype/Float.hpp>
 #include <wepa/dbms/datatype/Date.hpp>
+#include "../mock/MockDatabase.hpp"
 
 namespace wepa {
 
@@ -77,7 +77,7 @@ using namespace wepa::persistence;
  */
 class MyReadStatement : public dbms::Statement {
 public:
-   MyReadStatement (dbms::Database& database, const char* name, const char* expression, const dbms::ActionOnError::_v actionOnError) :
+   MyReadStatement (dbms::std::shared_ptr<Database>& database, const char* name, const char* expression, const dbms::ActionOnError::_v actionOnError) :
       dbms::Statement (database, name, expression, actionOnError),
       m_isValid (false)
    {;}
@@ -93,7 +93,7 @@ private:
 
 class MyWriteStatement : public dbms::Statement {
 public:
-   MyWriteStatement (dbms::Database& database, const char* name, const char* expression, const dbms::ActionOnError::_v actionOnError) :
+   MyWriteStatement (dbms::std::shared_ptr<Database>& database, const char* name, const char* expression, const dbms::ActionOnError::_v actionOnError) :
       dbms::Statement (database, name, expression, actionOnError),
       m_isValid (false)
    {;}

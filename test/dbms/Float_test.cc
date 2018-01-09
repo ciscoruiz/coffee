@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2013 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -44,87 +44,87 @@ using namespace wepa;
 using namespace wepa::dbms;
 
 
-BOOST_AUTO_TEST_CASE (float_is_nulleable)
+BOOST_AUTO_TEST_CASE(float_is_nulleable)
 {
-   datatype::Float column ("nulleable", datatype::Constraint::CanBeNull);
+   datatype::Float column("nulleable", datatype::Constraint::CanBeNull);
 
-   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
-
-   column.clear ();
-
-   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
-
-   BOOST_REQUIRE_THROW (column.getValue (), adt::RuntimeException);
-   BOOST_REQUIRE_THROW (column.getFloatValue(), adt::RuntimeException);
-
-   column.setValue (10.12);
-
-   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
-   BOOST_REQUIRE_CLOSE (column.getValue(),10.12, 0.1);
-
-   column.clear ();
-   BOOST_REQUIRE_EQUAL (column.hasValue (), false);;
-}
-
-BOOST_AUTO_TEST_CASE (float_is_not_nulleable)
-{
-   datatype::Float column ("not_nulleable", datatype::Constraint::CanNotBeNull);
-
-   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
-
-   column.setValue (0.0);
-   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
-   BOOST_REQUIRE_EQUAL (column.getValue(), 0.0);
+   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
 
    column.clear();
-   BOOST_REQUIRE_EQUAL (column.hasValue(), true);
+
+   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
+
+   BOOST_REQUIRE_THROW(column.getValue(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(column.getFloatValue(), adt::RuntimeException);
+
+   column.setValue(10.12);
+
+   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+   BOOST_REQUIRE_CLOSE(column.getValue(),10.12, 0.1);
+
+   column.clear();
+   BOOST_REQUIRE_EQUAL(column.hasValue(), false);;
 }
 
-BOOST_AUTO_TEST_CASE (float_downcast)
+BOOST_AUTO_TEST_CASE(float_is_not_nulleable)
 {
-   datatype::Float column ("not_nulleable");
+   datatype::Float column("not_nulleable", datatype::Constraint::CanNotBeNull);
+
+   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+
+   column.setValue(0.0);
+   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+   BOOST_REQUIRE_EQUAL(column.getValue(), 0.0);
+
+   column.clear();
+   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+}
+
+BOOST_AUTO_TEST_CASE(float_downcast)
+{
+   datatype::Float column("not_nulleable");
 
    datatype::Abstract& abs = column;
 
-   datatype::Float& other = wepa_datatype_downcast(datatype::Float, abs);
+   auto other = wepa_datatype_downcast(datatype::Float, abs);
 
-   BOOST_REQUIRE_EQUAL (&other, &column);
+   BOOST_REQUIRE_EQUAL(&other, &column);
 
-   datatype::Integer zzz ("zzz");
+   datatype::Integer zzz("zzz");
 
    BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::Float, zzz), adt::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE (float_clone)
+BOOST_AUTO_TEST_CASE(float_clone)
 {
-   datatype::Float cannotBeNull ("cannotBeNull", datatype::Constraint::CanNotBeNull);
-   datatype::Float canBeNull ("canBeNull", datatype::Constraint::CanBeNull);
+   datatype::Float cannotBeNull("cannotBeNull", datatype::Constraint::CanNotBeNull);
+   datatype::Float canBeNull("canBeNull", datatype::Constraint::CanBeNull);
 
-   BOOST_REQUIRE_EQUAL (cannotBeNull.hasValue(), true);
-   BOOST_REQUIRE_EQUAL (canBeNull.hasValue(), false);
+   BOOST_REQUIRE_EQUAL(cannotBeNull.hasValue(), true);
+   BOOST_REQUIRE_EQUAL(canBeNull.hasValue(), false);
 
-   std::auto_ptr <datatype::Abstract> notnull (cannotBeNull.clone ());
-   std::auto_ptr <datatype::Abstract> null (canBeNull.clone ());
+   auto notnull(cannotBeNull.clone());
+   auto null(canBeNull.clone());
 
-   BOOST_REQUIRE_EQUAL (notnull->hasValue(), true);
-   BOOST_REQUIRE_EQUAL (null->hasValue(), false);
+   BOOST_REQUIRE_EQUAL(notnull->hasValue(), true);
+   BOOST_REQUIRE_EQUAL(null->hasValue(), false);
 
-   BOOST_REQUIRE_EQUAL (notnull->compare (cannotBeNull), 0);
+   BOOST_REQUIRE_EQUAL(notnull->compare(cannotBeNull), 0);
 
-   cannotBeNull.setValue (5.0);
+   cannotBeNull.setValue(5.0);
 
-   BOOST_REQUIRE_EQUAL (cannotBeNull.getValue (), 5.0);
+   BOOST_REQUIRE_EQUAL(cannotBeNull.getValue(), 5.0);
 
-   notnull.reset (cannotBeNull.clone ());
-   BOOST_REQUIRE_EQUAL (notnull->hasValue(), true);
-   BOOST_REQUIRE_EQUAL (notnull->compare (cannotBeNull), 0);
+   notnull = cannotBeNull.clone();
+   BOOST_REQUIRE_EQUAL(notnull->hasValue(), true);
+   BOOST_REQUIRE_EQUAL(notnull->compare(cannotBeNull), 0);
 
-   canBeNull.setValue (25);
-   null.reset (canBeNull.clone ());
-   BOOST_REQUIRE_EQUAL (null->hasValue(), true);
-   BOOST_REQUIRE_EQUAL (null->compare (canBeNull), 0);
+   canBeNull.setValue(25);
+   null = canBeNull.clone();
+   BOOST_REQUIRE_EQUAL(null->hasValue(), true);
+   BOOST_REQUIRE_EQUAL(null->compare(canBeNull), 0);
 
-   BOOST_REQUIRE_EQUAL (null->compare (cannotBeNull), 1);
+   BOOST_REQUIRE_EQUAL(null->compare(cannotBeNull), 1);
 
-   BOOST_REQUIRE_EQUAL (notnull->compare (canBeNull), -1);
+   BOOST_REQUIRE_EQUAL(notnull->compare(canBeNull), -1);
 }

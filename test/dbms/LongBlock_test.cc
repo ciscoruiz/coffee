@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE (longblock_downcast)
 
    datatype::Abstract& abs = column;
 
-   datatype::LongBlock& other = wepa_datatype_downcast(datatype::LongBlock, abs);
+   auto other = wepa_datatype_downcast(datatype::LongBlock, abs);
 
    BOOST_REQUIRE_EQUAL (&other, &column);
 

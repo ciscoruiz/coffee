@@ -32,71 +32,43 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_persistence_AutoObject_hpp
-#define __wepa_persistence_AutoObject_hpp
+#ifndef __wepa_persistence_ClassBuilder_hpp
+#define __wepa_persistence_ClassBuilder_hpp
 
-#include <wepa/adt/Exception.hpp>
+#include <memory>
 
-#include <wepa/persistence/Object.hpp>
-#include <wepa/persistence/Storage.hpp>
+#include <wepa/adt/RuntimeException.hpp>
+
+#include <wepa/persistence/Class.hpp>
 
 namespace wepa {
+
 namespace persistence {
 
-class Object;
-
-template <typename _T> class AutoObject {
+class ClassBuilder {
 public:
-   AutoObject () : m_object (NULL) {;}
-   AutoObject (Object& object) throw (adt::RuntimeException) :
-      m_object (NULL)
-   {
-      set (object);
+   ClassBuilder(const std::string& className) : m_className (className) {;}
+   
+   ClassBuilder& addPrimaryKeyCompoment(Class::Data& data) noexcept {
+      m_members.push_back(Class::Member(data, true));
+      return *this;
    }
-   ~AutoObject () { release (); }
-
-   bool hasValue () const noexcept { return m_object != NULL; }
-
-   bool isNull () const noexcept { return hasValue () == false; }
-
-   AutoObject& operator= (Object& object) throw (adt::RuntimeException) {
-      release ();
-      set (object);
+   
+   ClassBuilder& addMember(Class::Data& data) noexcept {
+      m_members.push_back(Class::Member(data, false));
       return *this;
    }
 
-   _T& get () throw (adt::RuntimeException) { return std::ref (*operator-> ()); }
+   const std::string& getClassName() const noexcept { return m_className; }
+   const Class::Members& getMembers() const noexcept { return m_members; }
 
-   _T* operator-> () throw (adt::RuntimeException) {
-      if (isNull ())
-         WEPA_THROW_EXCEPTION(typeid (*this).name () << " does not have associated value");
-
-      return static_cast <_T*> (m_object);
-   }
-
-   AutoObject (const AutoObject <_T>&) = delete;
-
+   std::shared_ptr<Class> build() const throw (adt::RuntimeException);
+   
 private:
-   Object* m_object;
-
-   void set (Object& object) throw (adt::RuntimeException) {
-      _T* result = dynamic_cast <_T*> (&object);
-
-      if (result == NULL) {
-         WEPA_THROW_EXCEPTION(object.asString () << " | This object can not be treated by " << typeid (*this).name ());
-      }
-
-      m_object = result;
-   }
-   void release () noexcept {
-      if (m_object != NULL) {
-         GuardClass guard (m_object->getClass ());
-         m_object->getStorageOwner ().release (guard, *m_object);
-         m_object = NULL;
-      }
-   }
+   const std::string m_className;
+   Class::Members m_members;
 };
 
-} /* namespace persistence */
-} /* namespace wepa */
+}
+}
 #endif

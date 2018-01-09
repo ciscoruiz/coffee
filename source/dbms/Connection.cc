@@ -197,7 +197,7 @@ bool dbms::Connection::recover()
    }
    catch(DatabaseException& edbms) {
       logger::Logger::write(edbms);
-      m_dbmsDatabase->notifyRecoveryFail(*this);
+      m_dbmsDatabase.notifyRecoveryFail(*this);
    }
 
    LOG_WARN(asString() << " | Result=" << result);
@@ -210,7 +210,7 @@ adt::StreamString dbms::Connection::asString() const
 {
    adt::StreamString result("dbms::Connection { ");
    result += balance::Resource::asString();
-   result << " | Database: " << m_dbmsDatabase->getName();
+   result << " | Database: " << m_dbmsDatabase.getName();
    result << " | User: " << m_user;
    result << " | LockingCounter: " << m_lockingCounter << " | password: ****";
    result << " | CommitPending: " << m_commitPending;

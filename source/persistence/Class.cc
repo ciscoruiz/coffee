@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2013 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,16 +23,19 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
 //
 #include <wepa/persistence/Class.hpp>
+#include <wepa/persistence/ClassBuilder.hpp>
+#include <wepa/persistence/PrimaryKeyBuilder.hpp>
+#include <wepa/persistence/Object.hpp>
 
 #include <wepa/logger/Logger.hpp>
 
@@ -43,59 +46,41 @@
 
 using namespace wepa;
 
-persistence::Class::~Class ()
+persistence::Class::Class(const ClassBuilder& classBuilder) :
+     adt::NamedObject(classBuilder.getClassName())
 {
-   m_members.clear ();
+   m_members = classBuilder.getMembers();
 }
 
-void persistence::Class::createMembers ()
+persistence::Class::~Class()
+{
+   m_members.clear();
+}
+
+std::shared_ptr<persistence::Object> persistence::Class::createObject(const std::shared_ptr<PrimaryKey>& primaryKey) const
    throw (adt::RuntimeException)
 {
-   dbms::datatype::Abstract* member;
+    Members members;
 
-   int columnNumber = 0;
-   while ((member = do_createMember (columnNumber ++)) != NULL) {
-      m_members.push_back (member);
-   }
+    for(const auto& member : m_members) {
+       Member objectMember = Member(member.first->clone(), member.second);
+       members.push_back(objectMember);
+    }
 
-   LOG_DEBUG (asString ());
-
-   if (m_members.size () == 0) {
-      WEPA_THROW_EXCEPTION(asString () << " does not define any member");
-   }
+    return std::make_shared<Object>(*this, primaryKey, members);
 }
 
-dbms::datatype::Abstract& persistence::Class::getMember (const int columnNumber)
-   throw (adt::RuntimeException)
-{
-   if (columnNumber >= m_members.size ()) {
-      WEPA_THROW_EXCEPTION(asString () << " | Column=" << columnNumber << " is out range");
-   }
-
-   return std::ref (m_members [columnNumber]);
-}
-
-const dbms::datatype::Abstract& persistence::Class::getMember (const int columnNumber) const
-   throw (adt::RuntimeException)
-{
-   if (columnNumber >= m_members.size ()) {
-      WEPA_THROW_EXCEPTION(asString () << " | Column=" << columnNumber << " is out range");
-   }
-
-   return std::ref (m_members [columnNumber]);
-}
-
-adt::StreamString persistence::Class::asString () const noexcept {
-   adt::StreamString result ("persistence.Class { ");
+adt::StreamString persistence::Class::asString() const noexcept {
+   adt::StreamString result("persistence.Class { ");
    result << adt::NamedObject::asString();
-   result << " | N-members=" << m_members.size ();
+   result << " | N-members=" << m_members.size();
    return result << " }";
 }
 
-xml::Node& persistence::Class::asXML (xml::Node& parent) const noexcept
+xml::Node& persistence::Class::asXML(xml::Node& parent) const noexcept
 {
    xml::Node& result = parent.createChild("persistence.Class");
-   result.createAttribute("Name", this->getName ());
+   result.createAttribute("Name", this->getName());
    return result;
 }
 

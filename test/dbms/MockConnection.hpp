@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2013 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -41,7 +41,7 @@
 
 #include <wepa/dbms/Connection.hpp>
 
-#include <mock/MockLowLevelRecord.hpp>
+#include "MockLowLevelRecord.hpp"
 
 namespace wepa {
 
@@ -50,42 +50,38 @@ namespace dbms {
 }
 namespace mock {
 
+class MockDatabase;
+
 class MockConnection : public dbms::Connection {
 public:
    enum OpCode {  Write, Delete };
 
-   MockConnection (dbms::Database& database, const std::string& name, const char* user, const char* password) :
-      dbms::Connection (database, name, user, password),
-      m_container (NULL)
-   {
-      m_commitCounter = m_rollbackCounter = m_openCounter = m_closeCounter = 0;
-      m_avoidRecovery = false;
-   }
+   MockConnection(MockDatabase& database, const std::string& name, const char* user, const char* password);
 
-   int operation_size () const noexcept { return m_operations.size (); }
+   int operation_size() const noexcept { return m_operations.size(); }
 
-   void manualBreak () noexcept { m_container = NULL; }
-   bool isAvailable () const noexcept { return m_container != NULL; }
-   void avoidRecovery () noexcept { m_avoidRecovery = true; }
-   void clearAvoidRecovery () noexcept { m_avoidRecovery = false; }
+   void manualBreak() noexcept { m_container = nullptr; }
+   bool isAvailable() const noexcept { return m_container != nullptr; }
+   void avoidRecovery() noexcept { m_avoidRecovery = true; }
+   void clearAvoidRecovery() noexcept { m_avoidRecovery = false; }
 
-   unsigned int getCommitCounter () const noexcept { return m_commitCounter; }
-   unsigned int getRollbackCounter () const noexcept { return m_rollbackCounter; }
-   unsigned int getOpenCounter () const noexcept { return m_openCounter; }
-   unsigned int getCloseCounter () const noexcept { return m_closeCounter; }
+   unsigned int getCommitCounter() const noexcept { return m_commitCounter; }
+   unsigned int getRollbackCounter() const noexcept { return m_rollbackCounter; }
+   unsigned int getOpenCounter() const noexcept { return m_openCounter; }
+   unsigned int getCloseCounter() const noexcept { return m_closeCounter; }
 
-   adt::StreamString asString () const noexcept {
-      adt::StreamString result ("MockConnection {");
-      result << dbms::Connection::asString ();
+   adt::StreamString asString() const noexcept {
+      adt::StreamString result("MockConnection {");
+      result << dbms::Connection::asString();
       result << " | CommitCounter=" << m_commitCounter;
       result << " | RollbackCounter=" << m_rollbackCounter;
       return result << " }";
    }
 
-   mock::MockLowLevelContainer& getContainer () throw (adt::RuntimeException);
+   mock::MockLowLevelContainer& getContainer() throw(adt::RuntimeException);
 
-   void addOperation (const OpCode opCode, const MockLowLevelRecord& record) noexcept {
-      m_operations.push_back (Operation (opCode, record));
+   void addOperation(const OpCode opCode, const MockLowLevelRecord& record) noexcept {
+      m_operations.push_back(Operation(opCode, record));
    }
 
 private:
@@ -97,14 +93,15 @@ private:
    unsigned int m_openCounter;
    unsigned int m_closeCounter;
 
+   mock::MockLowLevelContainer& m_refContainer;
    mock::MockLowLevelContainer* m_container;
    Operations m_operations;
    bool m_avoidRecovery;
 
-   void open () throw (dbms::DatabaseException);
-   void close () noexcept;
-   void do_commit () noexcept ;
-   void do_rollback () noexcept;
+   void open() throw(dbms::DatabaseException);
+   void close() noexcept;
+   void do_commit() noexcept ;
+   void do_rollback() noexcept;
 
    friend class MyReadStatement;
    friend class MyWriteStatement;

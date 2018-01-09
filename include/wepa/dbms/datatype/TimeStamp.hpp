@@ -22,15 +22,17 @@ namespace datatype {
 */
 class TimeStamp : public Date {
 public:
-   explicit TimeStamp (const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull);
-   explicit TimeStamp (const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull, const char* format=NULL);
-   TimeStamp (const datatype::TimeStamp& other);
+   explicit TimeStamp(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull);
+   explicit TimeStamp(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull, const char* format=NULL);
+   TimeStamp(const datatype::TimeStamp& other);
 
-   int getFractionalSecond () const noexcept { return m_fractionalSecond; }
+   int getFractionalSecond() const noexcept { return m_fractionalSecond; }
 
-   void setFractionalSecond (const int fsec) noexcept { m_fractionalSecond = fsec; }
+   void setFractionalSecond(const int fsec) noexcept { m_fractionalSecond = fsec; }
 
-   Abstract* clone () const noexcept { return new TimeStamp (*this); }
+   std::shared_ptr<Abstract> clone() const noexcept { return std::make_shared<TimeStamp>(*this); }
+
+   const char* className() noexcept { return "dbms::datatype::TimeStamp"; }
 
    wepa_declare_datatype_downcast(TimeStamp)
 
@@ -38,7 +40,7 @@ private:
    char m_anotherBuffer [MaxDateSize + 1];
    int m_fractionalSecond;
 
-   void do_clear () noexcept { Date::do_clear (); m_fractionalSecond = 0; m_anotherBuffer [0] = 0; }
+   void do_clear() noexcept { Date::do_clear(); m_fractionalSecond = 0; m_anotherBuffer [0] = 0; }
 
 };
 

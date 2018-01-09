@@ -49,7 +49,7 @@ class GuardStatement;
 
 class GuardConnection {
 public:
-   GuardConnection (std::shared_ptr<Connection>& connection) throw (adt::RuntimeException);
+   GuardConnection (std::shared_ptr<Connection> connection) throw (adt::RuntimeException);
    ~GuardConnection ();
 
    std::shared_ptr<Connection>& operator-> () noexcept { return std::ref(m_connection); }

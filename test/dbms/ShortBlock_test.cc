@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE (shortblock_downcast)
 
    datatype::Abstract& abs = column;
 
-   datatype::ShortBlock& other = wepa_datatype_downcast(datatype::ShortBlock, abs);
+   auto other = wepa_datatype_downcast(datatype::ShortBlock, abs);
 
    BOOST_REQUIRE_EQUAL (&other, &column);
 

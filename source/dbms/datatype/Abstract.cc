@@ -86,6 +86,10 @@ void datatype::Abstract::exceptionWhenIsNull () const
 int datatype::Abstract::compare (const Abstract& other) const
    throw (adt::RuntimeException)
 {
+   if (this->getType () != other.getType()) {
+      WEPA_THROW_EXCEPTION(this->asString () << " type does not matches with " << other);
+   }
+
    if (this->hasValue() == false && other.hasValue () == false)
       return 0;
 
@@ -94,10 +98,6 @@ int datatype::Abstract::compare (const Abstract& other) const
 
    if (this->hasValue () == false && other.hasValue () == true)
       return -1;
-
-   if (this->getType () != other.getType()) {
-      WEPA_THROW_EXCEPTION(this->asString () << " type does not matches with " << other);
-   }
 
    return this->do_compare (other);
 }

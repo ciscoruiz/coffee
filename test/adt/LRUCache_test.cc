@@ -32,64 +32,40 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/persistence/GuardClass.hpp>
-#include <wepa/persistence/Class.hpp>
+#include <wepa/adt/pattern/lru/Cache.hpp>
+#include <wepa/adt/StreamString.hpp>
 
-#include <wepa/logger/Logger.hpp>
+#include <boost/test/unit_test.hpp>
 
-using namespace wepa;
+using namespace wepa::adt::pattern;
 
-persistence::GuardClass::GuardClass (Class& _class, const char* text) :
-   m_class (_class),
-   m_text (text)
+BOOST_AUTO_TEST_CASE(basic_access)
 {
-   if (text == NULL) {
-      LOG_DEBUG ("+++ Locking " << _class);
-   }
-   else {
-      LOG_DEBUG ("+++ Locking " << _class << " for '" << m_text << "'");
+   const int MaxCacheSize = 5;
+
+   typedef lru::Cache<int, wepa::adt::StreamString> TheCache;
+
+   TheCache cache(MaxCacheSize);
+
+   for(int ii = 0; ii < MaxCacheSize + 1; ++ ii) {
+      wepa::adt::StreamString string;
+      string << "Number-" << ii;
+      cache.set(ii, string);
    }
 
-   m_class.m_mutex.lock ();
+   BOOST_REQUIRE_EQUAL(cache.size(), MaxCacheSize);
 
-   if (m_class.m_members.empty() == true) {
-      try {
-         m_class.createMembers();
-         if (m_class.m_members.empty() == true) {
-            WEPA_THROW_EXCEPTION(m_class << " method createMembers does not define any member");
-         }
-      }
-      catch (adt::RuntimeException& ex) {
-         logger::Logger::write(ex);
-      }
+   int jj = 1;
+   for (TheCache::pair_iterator ii = cache.begin(), maxii = cache.end(); ii != maxii; ++ ii) {
+      wepa::adt::StreamString string;
+      string << "Number-" << jj;
+      BOOST_REQUIRE_EQUAL(TheCache::key(ii), jj);
+      BOOST_REQUIRE_EQUAL(TheCache::value(ii), string);
+      ++ jj;
    }
 }
 
-persistence::GuardClass::~GuardClass ()
-{
-   if (m_text == NULL) {
-      LOG_DEBUG ("+++ Unlocking " << m_class);
-   }
-   else {
-      LOG_DEBUG ("+++ Unlocking " << m_class << " for '" << m_text << "'");
-   }
 
-   m_class.m_mutex.unlock ();
-}
 
-dbms::datatype::Abstract& persistence::GuardClass::getMember (const int columnNumber)
-   throw (adt::RuntimeException)
-{
-   return std::ref (m_class.getMember (columnNumber));
-}
 
-const dbms::datatype::Abstract& persistence::GuardClass::getMember (const int columnNumber) const
-   throw (adt::RuntimeException)
-{
-   return std::ref (m_class.getMember (columnNumber));
-}
 
-persistence::Object* persistence::GuardClass::createObject () noexcept
-{
-   return m_class.createObject();
-}

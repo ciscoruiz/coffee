@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2013 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,50 +23,34 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_persistence_GuardClass_hpp
-#define __wepa_persistence_GuardClass_hpp
+#ifndef __wepa_mock_MockOutput_hpp
+#define __wepa_mock_MockOutput_hpp
 
-#include <wepa/adt/RuntimeException.hpp>
+#include <wepa/dbms/binder/Output.hpp>
 
 namespace wepa {
+namespace mock {
 
-namespace dbms {
-   namespace datatype {
-      class Abstract;
-   }
-}
-namespace persistence {
-
-class Class;
-class Object;
-
-class GuardClass {
+class MockOutput : public dbms::binder::Output {
 public:
-   GuardClass (Class& _class, const char* text = NULL);
-   ~GuardClass ();
-
-   Class* operator-> () noexcept { return &m_class; }
-   const Class* operator-> () const noexcept { return &m_class; }
-
-   dbms::datatype::Abstract& getMember (const int columnNumber) throw (adt::RuntimeException);
-   const dbms::datatype::Abstract& getMember (const int columnNumber) const throw (adt::RuntimeException);
-
-   Object* createObject () noexcept;
+   explicit MockOutput(std::shared_ptr<dbms::datatype::Abstract>& abstract) : dbms::binder::Output(abstract) {;}
 
 private:
-   Class& m_class;
-   const char* m_text;
+   void do_prepare(dbms::Statement& statement, const int pos) throw(adt::RuntimeException, dbms::DatabaseException) {;}
+   void do_release(dbms::Statement& statement) noexcept {;}
+   void do_decode() throw(adt::RuntimeException) {;}
+   void do_write(const std::shared_ptr<dbms::datatype::LongBlock>&) throw(adt::RuntimeException, dbms::DatabaseException) {;}
 };
 
-} /* namespace persistence */
+} /* namespace mock */
 } /* namespace wepa */
 #endif

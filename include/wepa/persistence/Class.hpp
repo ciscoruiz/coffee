@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2013 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -36,8 +36,8 @@
 #define __wepa_persistence_Class_hpp
 
 #include <mutex>
-
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <memory>
+#include <vector>
 
 #include <wepa/adt/NamedObject.hpp>
 #include <wepa/adt/RuntimeException.hpp>
@@ -54,39 +54,34 @@ namespace persistence {
 
 class Object;
 class Accessor;
-class GuardClass;
+class ClassBuilder;
+class PrimaryKey;
 
-class Class : public adt::NamedObject {
-   typedef boost::ptr_vector <dbms::datatype::Abstract> Members;
-
+class Class : public adt::NamedObject {   
 public:
-   virtual ~Class ();
+   typedef std::shared_ptr<dbms::datatype::Abstract> Data;
+   typedef std::pair<Data, bool> Member;
+   typedef std::vector<Member> Members;
 
-   int member_size () const noexcept { return m_members.size (); }
+   Class(const ClassBuilder& classBuilder);
 
-   adt::StreamString asString () const noexcept;
+   virtual ~Class();
 
-   xml::Node& asXML (xml::Node& parent) const noexcept;
+   adt::StreamString asString() const noexcept;
+      
+   static const bool isPrimaryKeyComponent(const Member& member) noexcept {
+      return member.second == true;
+   }
 
-   Class (const Class&) = delete;
+   std::shared_ptr<Object> createObject() const throw (adt::RuntimeException);
+   std::shared_ptr<Object> createObject(const std::shared_ptr<PrimaryKey>& primaryKey) const throw (adt::RuntimeException);
 
-protected:
-   Class (const char* name) : adt::NamedObject (name) {;}
+   xml::Node& asXML(xml::Node& parent) const noexcept;
 
-   dbms::datatype::Abstract& getMember (const int columnNumber) throw (adt::RuntimeException);
-   const dbms::datatype::Abstract& getMember (const int columnNumber) const throw (adt::RuntimeException);
+   Class(const Class&) = delete;
 
 private:
    Members m_members;
-   std::recursive_mutex m_mutex;
-
-   void createMembers () throw (adt::RuntimeException);
-
-   virtual dbms::datatype::Abstract* do_createMember (const int columnNumber) const noexcept = 0;
-   virtual Object* createObject () noexcept = 0;
-
-   friend class Accessor;
-   friend class GuardClass;
 };
 
 } /* namespace persistence */

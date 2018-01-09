@@ -256,7 +256,7 @@ std::shared_ptr<dbms::Statement>& dbms::Database::findStatement(const char* name
    WEPA_THROW_EXCEPTION("Statement '" << name << "' was not found");
 }
 
-void dbms::Database::notifyRecoveryFail(dbms::Connection& connection)
+void dbms::Database::notifyRecoveryFail(dbms::Connection& connection) const
    throw(adt::RuntimeException)
 {
    LOG_WARN(connection.asString());

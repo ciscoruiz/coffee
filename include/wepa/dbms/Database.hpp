@@ -29,6 +29,7 @@ class Abstract;
 class Statement;
 class FailRecoveryHandler;
 class StatementTranslator;
+class ErrorCodeInterpreter;
 
 /**
    Clase que modela la interaccion entre la base y nuestra aplicacion.
@@ -80,9 +81,25 @@ public:
    void externalInitialize() throw(adt::RuntimeException);
    void externalStop() throw(adt::RuntimeException);
 
-   void setFailRecoveryHandler(std::shared_ptr<FailRecoveryHandler>& failRecoveryHandler) noexcept { m_failRecoveryHandler = failRecoveryHandler; }
+   void setFailRecoveryHandler(std::shared_ptr<FailRecoveryHandler>& failRecoveryHandler)
+      noexcept
+   {
+      m_failRecoveryHandler = failRecoveryHandler;
+   }
 
-   void setStatementTranslator(std::shared_ptr<StatementTranslator>& statementTranslator) noexcept { m_statementTranslator = statementTranslator; }
+   void setStatementTranslator(std::shared_ptr<StatementTranslator>& statementTranslator)
+      noexcept
+   {
+      m_statementTranslator = statementTranslator;
+   }
+
+   void setErrorCodeInterpreter(std::shared_ptr<ErrorCodeInterpreter>& errorCodeInterpreter)
+      noexcept
+   {
+      m_errorCodeInterpreter = errorCodeInterpreter;
+   }
+
+   const std::shared_ptr<ErrorCodeInterpreter>& getErrorCodeInterpreter() const noexcept { return m_errorCodeInterpreter; }
 
    std::shared_ptr<Connection> createConnection(const char* name, const char* user, const char* password)
       throw(adt::RuntimeException, DatabaseException);
@@ -126,7 +143,7 @@ protected:
 
    Database(const char* rdbmsName, const char* dbmsName);
 
-   void notifyRecoveryFail(Connection& connection) throw(adt::RuntimeException);
+   void notifyRecoveryFail(Connection& connection) const throw(adt::RuntimeException);
 
    /**
       Inicializa las conexiones definidas sobre esta base de datos. Este metodo se invocaria
@@ -191,8 +208,9 @@ private:
    connection_container m_connections;
    statement_container m_statements;
    const Type::_v m_type;
-   std::shared_ptr<FailRecoveryHandler> m_failRecoveryHandler;
+   mutable std::shared_ptr<FailRecoveryHandler> m_failRecoveryHandler;
    std::shared_ptr<StatementTranslator> m_statementTranslator;
+   std::shared_ptr<ErrorCodeInterpreter> m_errorCodeInterpreter;
 
    virtual std::shared_ptr<Connection> allocateConnection(const std::string& name, const char* user, const char* password)
       throw(adt::RuntimeException) = 0;
@@ -200,13 +218,10 @@ private:
    virtual std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
       throw(adt::RuntimeException) = 0;
 
-   virtual std::shared_ptr<binder::Input> allocateInputBind(datatype::Abstract& data) throw(adt::RuntimeException) = 0;
-   virtual std::shared_ptr<binder::Output> allocateOutputBind(datatype::Abstract& data) throw(adt::RuntimeException) = 0;
-
-   virtual bool notFound(const int errorCode) const noexcept = 0;
-   virtual bool successful(const int errorCode) const noexcept = 0;
-   virtual bool locked(const int errorCode) const noexcept = 0;
-   virtual bool lostConnection(const int errorCode) const noexcept = 0;
+   virtual std::shared_ptr<binder::Input> allocateInputBind(std::shared_ptr<datatype::Abstract>& data) const
+      throw(adt::RuntimeException) = 0;
+   virtual std::shared_ptr<binder::Output> allocateOutputBind(std::shared_ptr<datatype::Abstract>& data) const
+      throw(adt::RuntimeException) = 0;
 
    friend class Statement;
    friend class ResultCode;

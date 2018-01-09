@@ -20,13 +20,13 @@ namespace binder {
  */
 class Input : public Binder {
 public:
-   adt::StreamString asString () const noexcept;
+   adt::StreamString asString() const noexcept;
 
 protected:
-   explicit Input (std::shared_ptr<datatype::Abstract>& value) : Binder (value) {;}
+   explicit Input(std::shared_ptr<datatype::Abstract>& value) : Binder(value) {;}
 
 private:
-   void do_decode () throw (adt::RuntimeException) {;}
+   void do_decode() throw(adt::RuntimeException) {;}
 };
 
 }

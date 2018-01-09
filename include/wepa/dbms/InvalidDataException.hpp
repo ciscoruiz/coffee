@@ -32,38 +32,38 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_persistence_Recorder_hpp
-#define __wepa_persistence_Recorder_hpp
+#ifndef _wepa_dbms_InvalidDataException_hpp
+#define _wepa_dbms_InvalidDataException_hpp
 
-#include <wepa/persistence/Accessor.hpp>
-#include <wepa/persistence/Object.hpp>
-
-#include <wepa/adt/RuntimeException.hpp>
+#include <wepa/adt/Exception.hpp>
 
 namespace wepa {
-namespace persistence {
 
-class Object;
+namespace dbms {
 
-class Recorder : public Accessor {
+/**
+ * Defines exception used for this library.
+ *
+ * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
+ */
+class InvalidDataException : public adt::Exception {
 public:
-   virtual ~Recorder () {;}
-
-   const Accessor::TheObject& getObject() const noexcept { return m_object; }
-
-   virtual dbms::ResultCode apply(TheConnection& connection) const
-      throw(adt::RuntimeException, dbms::DatabaseException) = 0;
-
-protected:
-   Recorder (const char* name, const Accessor::TheObject& object) :
-      Accessor(name, object->getPrimaryKey()),
-	  m_object(object)
+   InvalidDataException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
+      adt::Exception (str, fromMethod, fromFile, fromLine)
    {;}
 
-private:
-   Accessor::TheObject m_object;
+   InvalidDataException (const InvalidDataException& other) : adt::Exception (other) {;}
+
+   std::string asString () const noexcept {
+      adt::StreamString str (this->filePosition());
+      str << what ();
+      return str;
+   }
 };
 
-} /* namespace persistence */
-} /* namespace wepa */
+}
+}
+
+
 #endif
+

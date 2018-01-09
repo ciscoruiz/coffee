@@ -32,8 +32,8 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepm_dbms_Statement_h
-#define _wepm_dbms_Statement_h
+#ifndef _wepa_dbms_Statement_h
+#define _wepa_dbms_Statement_h
 
 #include <vector>
 #include <mutex>
@@ -47,9 +47,6 @@
 #include <wepa/dbms/DatabaseException.hpp>
 #include <wepa/dbms/ResultCode.hpp>
 #include <wepa/dbms/ActionOnError.hpp>
-
-#include <wepa/dbms/binder/Input.hpp>
-#include <wepa/dbms/binder/Output.hpp>
 
 namespace wepa {
 
@@ -83,11 +80,11 @@ class Abstract;
 */
 class Statement {
 public:
-   typedef std::vector<std::shared_ptr<binder::Input> > input_container;
-   typedef std::vector<std::shared_ptr<binder::Output> > output_container;
+   typedef std::vector<std::shared_ptr<binder::Input> > Inputs;
+   typedef std::vector<std::shared_ptr<binder::Output> > Outputs;
 
-   typedef input_container::iterator input_iterator;
-   typedef output_container::iterator output_iterator;
+   typedef Inputs::iterator input_iterator;
+   typedef Outputs::iterator output_iterator;
 
    /**
       Destructor.
@@ -119,7 +116,7 @@ public:
       Devuelve la instancia de la base de datos asociada a esta sentencia.
       \return La instancia de la base de datos asociada a la sentencia.
    */
-   const std::shared_ptr<Database>& getDatabase() const noexcept { return m_database; }
+   const Database& getDatabase() const noexcept { return m_database; }
 
    /**
       Devuelve \em true si la sentencia requiere la invocacion a \em commit o \em rollback
@@ -148,7 +145,7 @@ public:
       \param data Variable que deseamos asociar como variable de entrada. La correspondencia entre esta
       y la sentencia SQL vendra dada por el orden de declaracion.
    */
-   void createBinderInput(datatype::Abstract& data) throw(adt::RuntimeException);
+   void createBinderInput(std::shared_ptr<datatype::Abstract>& data) throw(adt::RuntimeException);
 
    /**
       Establece el parametro de salida de la sentencia SQL.Cada una de las variables de salida indicadas
@@ -173,7 +170,7 @@ public:
 
       \warning Solo las sentencias SQL del tipo \em select usan las variables de salida.
    */
-   void createBinderOutput(datatype::Abstract& data) throw(adt::RuntimeException);
+   void createBinderOutput(std::shared_ptr<datatype::Abstract>& data) throw(adt::RuntimeException);
 
    /**
       Devuelve un documento XML con la informacion referente a esta instancia.
@@ -204,7 +201,7 @@ protected:
       la conexion con la que ejecutamos esta sentencia se invocara a Connection::rollback, en otro caso
       aunque falle se invocara a Connection::commit. Solo aplicara en sentencias que no sean de seleccion.
    */
-   Statement(std::shared_ptr<Database>& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
+   Statement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
       m_database(database),
       m_name(name),
       m_expression(expression),
@@ -226,7 +223,7 @@ protected:
       aunque falle se invocara a Connection::commit. Solo aplicara en cuenta en sentencias que no
       sean de seleccion.
    */
-   Statement(std::shared_ptr<Database>& database, const char* name, const std::string& expression, const ActionOnError::_v actionOnError) :
+   Statement(const Database& database, const char* name, const std::string& expression, const ActionOnError::_v actionOnError) :
       m_database(database),
       m_name(name),
       m_expression(expression),
@@ -240,17 +237,16 @@ protected:
    int input_size() const noexcept { return m_inputBinds.size(); }
    int output_size() const noexcept { return m_outputBinds.size(); }
 
-   // These methods will be called from GuardStatement
-   std::shared_ptr<datatype::Abstract>& getInputData(const int pos) throw(adt::RuntimeException);
-   std::shared_ptr<datatype::Abstract>& getOutputData(const int pos) throw(adt::RuntimeException);
-   const std::shared_ptr<datatype::Abstract>& getOutputData(const int pos) const throw(adt::RuntimeException);
+   std::shared_ptr<datatype::Abstract>& getInputData(const GuardStatement&, const int pos) throw(adt::RuntimeException);
+   std::shared_ptr<datatype::Abstract>& getOutputData(const GuardStatement&, const int pos) throw(adt::RuntimeException);
+   const std::shared_ptr<datatype::Abstract>& getOutputData(const GuardStatement&, const int pos) const throw(adt::RuntimeException);
 
 private:
-   std::shared_ptr<Database> m_database;
+   const Database& m_database;
    const std::string m_name;
    std::string m_expression;
-   input_container m_inputBinds;  /**< Lista de variables de entrada */
-   output_container m_outputBinds; /**< Lista de variables de salida */
+   Inputs m_inputBinds;  /**< Lista de variables de entrada */
+   Outputs m_outputBinds; /**< Lista de variables de salida */
    bool m_prepared;
    const ActionOnError::_v m_actionOnError;
    adt::Average <adt::Microsecond> m_measureTiming;

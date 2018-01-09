@@ -37,10 +37,11 @@
 
 #include <wepa/app/Application.hpp>
 #include <wepa/dbms/Database.hpp>
+#include <wepa/dbms/ErrorCodeInterpreter.hpp>
 
-#include <mock/MockInput.hpp>
-#include <mock/MockOutput.hpp>
-#include <mock/MockConnection.hpp>
+#include "MockInput.hpp"
+#include "MockOutput.hpp"
+#include "MockConnection.hpp"
 
 namespace wepa {
 
@@ -50,7 +51,7 @@ class MockDatabase : public dbms::Database {
 public:
    enum ErrorCode { NotFound, Successful, Lock, LostConnection };
 
-   MockDatabase(app::Application& app) : dbms::Database(app, "map", app.getTitle().c_str()) {;}
+   MockDatabase(app::Application& app);
    MockDatabase(const char* name);
 
    void add(const mock::MockLowLevelRecord& record) noexcept {
@@ -66,23 +67,30 @@ public:
 private:
    mock::MockLowLevelContainer m_container;
 
-   bool notFound(const int errorCode) const noexcept { return errorCode == NotFound; }
-   bool successful(const int errorCode) const noexcept { return errorCode == Successful; }
-   bool locked(const int errorCode) const noexcept { return errorCode == Lock; }
-   bool lostConnection(const int errorCode) const noexcept { return errorCode == LostConnection; }
+   class MockErrorCodeInterpreter : public dbms::ErrorCodeInterpreter {
+   public:
+      bool notFound(const int errorCode) const noexcept { return errorCode == NotFound; }
+      bool successful(const int errorCode) const noexcept { return errorCode == Successful; }
+      bool locked(const int errorCode) const noexcept { return errorCode == Lock; }
+      bool lostConnection(const int errorCode) const noexcept { return errorCode == LostConnection; }
+   };
 
-   dbms::Connection* allocateConnection(const std::string& name, const char* user, const char* password)
+   std::shared_ptr<dbms::Connection> allocateConnection(const std::string& name, const char* user, const char* password)
       throw(adt::RuntimeException)
    {
-      return new mock::MockConnection(std::ref(*this), name, user, password);
+      return std::make_shared<mock::MockConnection>(std::ref(*this), name, user, password);
    }
 
-   std::shared_ptr<dbms::binder::Input> allocateInputBind(dbms::datatype::Abstract& data) throw(adt::RuntimeException) {
-      return std::make_shared<dbms::binder::Input>(new MockInput(data));
+   std::shared_ptr<dbms::binder::Input> allocateInputBind(std::shared_ptr<dbms::datatype::Abstract>& data) const
+      throw(adt::RuntimeException)
+   {
+      return std::make_shared<MockInput>(data);
    }
 
-   std::shared_ptr<dbms::binder::Output> allocateOutputBind(dbms::datatype::Abstract& data) throw(adt::RuntimeException) {
-      return std::make_shared<dbms::binder::Input>(new MockOutput(data));
+   std::shared_ptr<dbms::binder::Output> allocateOutputBind(std::shared_ptr<dbms::datatype::Abstract>& data) const
+      throw(adt::RuntimeException)
+   {
+      return std::make_shared<MockOutput>(data);
    }
 
    friend class MockConnection;

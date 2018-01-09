@@ -31,27 +31,16 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
-//
-#ifndef __wepa_mock_MockInput_hpp
-#define __wepa_mock_MockInput_hpp
+#include <wepa/persistence/ClassBuilder.hpp>
 
-#include <wepa/dbms/binder/Input.hpp>
+using namespace wepa;
 
-namespace wepa {
-namespace mock {
+std::shared_ptr<persistence::Class> persistence::ClassBuilder::build() const
+      throw (adt::RuntimeException)
+{
+   if (m_members.empty()) {
+      WEPA_THROW_EXCEPTION(m_className << " does not define any member");
+   }
 
-class MockInput : public dbms::binder::Input {
-public:
-   explicit MockInput (dbms::datatype::Abstract& abstract) : dbms::binder::Input (abstract) {;}
-
-private:
-   void do_prepare (dbms::Statement* statement, dbms::Connection* connection, const int pos) throw (adt::RuntimeException, dbms::DatabaseException) {;}
-   void do_release (dbms::Statement* statement) noexcept {;}
-   void do_encode () throw (adt::RuntimeException) {;}
-};
-
-
-} /* namespace mock */
-} /* namespace wepa */
-
-#endif
+   return std::make_shared<persistence::Class>(*this);
+}

@@ -62,13 +62,13 @@ dbms::GuardStatement::~GuardStatement()
 std::shared_ptr<dbms::datatype::Abstract>& dbms::GuardStatement::getInputData(const int pos)
    throw(adt::RuntimeException)
 {
-   return m_statement->getInputData(pos);
+   return m_statement->getInputData(*this, pos);
 }
 
 const std::shared_ptr<dbms::datatype::Abstract>& dbms::GuardStatement::getOutputData(const int pos) const
    throw(adt::RuntimeException)
 {
-   return m_statement->getOutputData(pos);
+   return m_statement->getOutputData(*this, pos);
 }
 
 dbms::ResultCode dbms::GuardStatement::execute()

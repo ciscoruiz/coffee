@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2013 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -66,68 +66,28 @@ namespace dbms {
 namespace persistence {
 
 class Class;
-class GuardClass;
 class Object;
 
 class Accessor : public adt::NamedObject {
-   typedef std::vector <dbms::datatype::Abstract*> Values;
-
 public:
-   virtual ~Accessor () { m_statement = NULL; }
-
-   void initialize (GuardClass& _class, dbms::Statement* statement) throw (adt::RuntimeException);
-
-   unsigned int getApplyCounter () const noexcept { return m_applyCounter; }
-
-   const PrimaryKey& getPrimaryKey () const throw (adt::RuntimeException);
-   const int getIdent () const noexcept { return m_ident; }
-
-   Object& getObject () throw (adt::RuntimeException);
-   const Object& getObject () const throw (adt::RuntimeException);
-
-   void setObject (Object& object) throw (adt::RuntimeException);
-
-   void clearObject () noexcept { m_object = NULL; }
-
-   dbms::ResultCode apply (dbms::Connection& connection, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException);
-
-   Accessor (const Accessor&) = delete;
+   typedef std::shared_ptr<dbms::Connection> TheConnection;
+   typedef std::shared_ptr<dbms::Statement> TheStatement;
+   typedef std::shared_ptr<Class> TheClass;
+   typedef std::shared_ptr<Object> TheObject;
+   typedef std::shared_ptr<PrimaryKey> ThePrimaryKey;
+   
+   const ThePrimaryKey& getPrimaryKey() const throw(adt::RuntimeException) { return m_primaryKey; }
+   
+   Accessor(const Accessor&) = delete;
 
 protected:
-   Accessor (const char* name, const int ident) : adt::NamedObject (name), m_ident (ident), m_statement (NULL), m_applyCounter (0), m_object (NULL) {;}
-
-   dbms::Statement& getStatement () throw (adt::RuntimeException);
-
-   void setMember (GuardClass& _class, const int columnNumber, const int value) throw (adt::RuntimeException);
-   void setMember (GuardClass& _class, const int columnNumber, const char* value) throw (adt::RuntimeException);
-   void setMember (GuardClass& _class, const int columnNumber, const std::string& value) throw (adt::RuntimeException) {
-      setMember (_class, columnNumber, value.c_str ());
-   }
-   void setMember (GuardClass& _class, const int columnNumber, const float value) throw (adt::RuntimeException);
-   void setMember (GuardClass& _class, const int columnNumber, const adt::DataBlock& value) throw (adt::RuntimeException);
-   void setMember (GuardClass& _class, const int columnNumber, const adt::Second& value) throw (adt::RuntimeException);
-
-   int readInteger (GuardClass& _class, const int columnNumber) const throw (adt::RuntimeException);
-   const char* readCString (GuardClass& _class, const int columnNumber) const throw (adt::RuntimeException);
-   float readFloat (GuardClass& _class, const int columnNumber) const throw (adt::RuntimeException);
-   const adt::DataBlock& readDataBlock (GuardClass& _class, const int columnNumber) const throw (adt::RuntimeException);
-   const adt::Second& readDate (GuardClass& _class, const int columnNumber) const throw (adt::RuntimeException);
-
-   virtual bool isInputValue (const int columnNumber) const noexcept = 0;
-   virtual bool isPrimaryKeyComponent (const int columnNumber) const noexcept = 0;
-   virtual bool isOutputValue (const int columnNumber) const noexcept = 0;
-
-   virtual dbms::ResultCode do_apply (dbms::GuardStatement& statement, GuardClass& _class, Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
-
+   Accessor(const char* name, const ThePrimaryKey& primaryKey) : adt::NamedObject(name), m_primaryKey(primaryKey) {;}
+   
+   virtual bool isInputValue(const int columnNumber) const noexcept = 0;
+   virtual bool isOutputValue(const int columnNumber) const noexcept = 0;
+      
 private:
-   Values m_inputValues;
-   Values m_outputValues;
-   PrimaryKey m_primaryKey;
-   const int m_ident;
-   dbms::Statement* m_statement;
-   unsigned int m_applyCounter;
-   Object* m_object;
-
+   const ThePrimaryKey m_primaryKey;
 };
 
 } /* namespace persistence */

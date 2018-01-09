@@ -37,19 +37,18 @@
 
 #include <wepa/persistence/Accessor.hpp>
 
-#include <wepa/adt/RuntimeException.hpp>
-
 namespace wepa {
 namespace persistence {
-
-class Object;
 
 class Eraser : public Accessor {
 public:
    virtual ~Eraser () {;}
 
+   virtual dbms::ResultCode apply(TheConnection& connection) const
+      throw(adt::RuntimeException, dbms::DatabaseException) = 0;
+
 protected:
-   Eraser (const char* name, const int ident) : Accessor(name, ident) {;}
+   Eraser (const char* name, const ThePrimaryKey& primaryKey) : Accessor(name, primaryKey) {;}
 };
 
 } /* namespace persistence */

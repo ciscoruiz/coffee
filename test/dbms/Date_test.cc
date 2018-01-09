@@ -147,7 +147,8 @@ BOOST_AUTO_TEST_CASE (date_downcast)
 
    datatype::Abstract& abs = column;
 
-   datatype::Date& other = wepa_datatype_downcast(datatype::Date, abs);
+   wepa_datatype_downcast(datatype::Date, abs);
+   const datatype::Date& other = wepa_datatype_downcast(datatype::Date, abs);
 
    BOOST_REQUIRE_EQUAL (&other, &column);
 
@@ -164,8 +165,8 @@ BOOST_AUTO_TEST_CASE (date_clone)
    BOOST_REQUIRE_EQUAL (cannotBeNull.hasValue(), true);
    BOOST_REQUIRE_EQUAL (canBeNull.hasValue(), false);
 
-   std::auto_ptr <datatype::Abstract> notnull (cannotBeNull.clone ());
-   std::auto_ptr <datatype::Abstract> null (canBeNull.clone ());
+   std::shared_ptr<datatype::Abstract> notnull (cannotBeNull.clone ());
+   std::shared_ptr<datatype::Abstract> null (canBeNull.clone ());
 
    BOOST_REQUIRE_EQUAL (notnull->hasValue(), true);
    BOOST_REQUIRE_EQUAL (null->hasValue(), false);
@@ -176,12 +177,12 @@ BOOST_AUTO_TEST_CASE (date_clone)
 
    BOOST_REQUIRE_EQUAL (cannotBeNull.getValue (), adt::Second (5));
 
-   notnull.reset (cannotBeNull.clone ());
+   notnull = cannotBeNull.clone ();
    BOOST_REQUIRE_EQUAL (notnull->hasValue(), true);
    BOOST_REQUIRE_EQUAL (notnull->compare (cannotBeNull), 0);
 
    canBeNull.setValue (adt::Second (25));
-   null.reset (canBeNull.clone ());
+   null = canBeNull.clone ();
    BOOST_REQUIRE_EQUAL (null->hasValue(), true);
    BOOST_REQUIRE_EQUAL (null->compare (canBeNull), 0);
 

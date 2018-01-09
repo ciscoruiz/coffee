@@ -37,20 +37,26 @@
 
 #include <wepa/persistence/Accessor.hpp>
 
-#include <wepa/adt/RuntimeException.hpp>
-
 namespace wepa {
 namespace persistence {
-
-class Object;
 
 class Creator : public Accessor {
 public:
    virtual ~Creator () {;}
 
-protected:
-   Creator (const char* name, const int ident) : Accessor(name, ident) {;}
+   const TheClass& getClass() const noexcept { return m_class; }
 
+   virtual dbms::ResultCode apply(TheConnection& connection, TheObject& object) const
+      throw(adt::RuntimeException, dbms::DatabaseException) = 0;
+
+protected:
+   Creator (const char* name, const ThePrimaryKey& primaryKey, const TheClass& clazz) :
+	   Accessor(name, primaryKey),
+	   m_class(clazz)
+   {;}
+
+private:
+   TheClass m_class;
 };
 
 } /* namespace persistence */

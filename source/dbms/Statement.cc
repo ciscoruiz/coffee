@@ -23,29 +23,28 @@ Statement::~Statement()
    m_outputBinds.clear();
 }
 
-
-void Statement::createBinderInput(datatype::Abstract& data)
+void Statement::createBinderInput(std::shared_ptr<datatype::Abstract>& data)
    throw(adt::RuntimeException)
 {
-   std::shared_ptr<binder::Input> result = m_database->allocateInputBind(data);
+   std::shared_ptr<binder::Input> result = m_database.allocateInputBind(data);
 
    if(!result)
-      WEPA_THROW_EXCEPTION(data << " | Data returned a null binder");
+      WEPA_THROW_EXCEPTION(data->asString() << " | Data returned a null binder");
 
    m_inputBinds.push_back(result);
 }
 
-std::shared_ptr<datatype::Abstract>& Statement::getInputData(const int pos)
+std::shared_ptr<datatype::Abstract>& Statement::getInputData(const GuardStatement&, const int pos)
    throw(adt::RuntimeException)
 {
-   if(pos >= input_size()) {
+   if(pos >= input_size()) {  
       WEPA_THROW_EXCEPTION(pos << " is out of range [0," << input_size() << ")");
    }
 
-   return m_inputBinds[pos]->getData();
+   return m_inputBinds[pos]->getData();   
 }
 
-const std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const int pos) const
+const std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const GuardStatement&, const int pos) const
    throw(adt::RuntimeException)
 {
    if(pos >= output_size()) {
@@ -55,7 +54,7 @@ const std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const int po
    return m_outputBinds[pos]->getData();
 }
 
-std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const int pos)
+std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const GuardStatement&, const int pos)
    throw(adt::RuntimeException)
 {
    if(pos >= output_size()) {
@@ -65,13 +64,13 @@ std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const int pos)
    return m_outputBinds[pos]->getData();
 }
 
-void Statement::createBinderOutput(datatype::Abstract& data)
+void Statement::createBinderOutput(std::shared_ptr<datatype::Abstract>& data)
    throw(adt::RuntimeException)
 {
-   std::shared_ptr<binder::Output> result = m_database->allocateOutputBind(data);
+   std::shared_ptr<binder::Output> result = m_database.allocateOutputBind(data);
 
    if(!result)
-      WEPA_THROW_EXCEPTION(data << " | Data returned a null binder");
+      WEPA_THROW_EXCEPTION(data->asString() << " | Data returned a null binder");
 
    m_outputBinds.push_back(result);
 }

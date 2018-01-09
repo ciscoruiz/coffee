@@ -39,7 +39,7 @@
 
 using namespace wepa;
 
-dbms::GuardConnection::GuardConnection(std::shared_ptr<Connection>& connection)  throw (adt::RuntimeException) :
+dbms::GuardConnection::GuardConnection(std::shared_ptr<Connection> connection)  throw (adt::RuntimeException) :
    m_connection (connection),
    m_countLinkedStatement (0)
 {

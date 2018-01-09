@@ -32,16 +32,26 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include "MockDatabase.hpp"
+#ifndef __wepa_mock_MockInput_hpp
+#define __wepa_mock_MockInput_hpp
 
-using namespace wepa;
+#include <wepa/dbms/binder/Input.hpp>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TtyWriter.hpp>
+namespace wepa {
+namespace mock {
 
-mock::MockDatabase::MockDatabase (const char* name) :
-   dbms::Database ("map", name)
-{
-   logger::Logger::initialize(new logger::TtyWriter);
-}
+class MockInput : public dbms::binder::Input {
+public:
+   explicit MockInput (std::shared_ptr<dbms::datatype::Abstract>& abstract) : dbms::binder::Input (abstract) {;}
 
+private:
+   void do_prepare (dbms::Statement& statement, const int pos) throw (adt::RuntimeException, dbms::DatabaseException) {;}
+   void do_release (dbms::Statement& statement) noexcept {;}
+   void do_encode () throw (adt::RuntimeException) {;}
+};
+
+
+} /* namespace mock */
+} /* namespace wepa */
+
+#endif

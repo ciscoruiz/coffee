@@ -32,25 +32,28 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_mock_MockOutput_hpp
-#define __wepa_mock_MockOutput_hpp
+#include <memory>
 
-#include <wepa/dbms/binder/Output.hpp>
+#include "MockDatabase.hpp"
 
-namespace wepa {
-namespace mock {
+using namespace wepa;
 
-class MockOutput : public dbms::binder::Output {
-public:
-   explicit MockOutput (dbms::datatype::Abstract& abstract) : dbms::binder::Output (abstract) {;}
+#include <wepa/logger/Logger.hpp>
+#include <wepa/logger/TtyWriter.hpp>
 
-private:
-   void do_prepare (dbms::Statement* statement, dbms::Connection* connection, const int pos) throw (adt::RuntimeException, dbms::DatabaseException) {;}
-   void do_release (dbms::Statement* statement) noexcept {;}
-   void do_decode () throw (adt::RuntimeException) {;}
-   void do_write (const dbms::datatype::LongBlock&) throw (adt::RuntimeException, dbms::DatabaseException) {;}
-};
+mock::MockDatabase::MockDatabase(app::Application& app) :
+   dbms::Database(app, "map", app.getTitle().c_str())
+{
+   std::shared_ptr<dbms::ErrorCodeInterpreter> eci = std::make_shared<MockErrorCodeInterpreter>();
+   setErrorCodeInterpreter(eci);
+}
 
-} /* namespace mock */
-} /* namespace wepa */
-#endif
+mock::MockDatabase::MockDatabase (const char* name) :
+   dbms::Database("map", name)
+{
+   logger::Logger::initialize(new logger::TtyWriter);
+
+   std::shared_ptr<dbms::ErrorCodeInterpreter> eci = std::make_shared<MockErrorCodeInterpreter>();
+   setErrorCodeInterpreter(eci);
+}
+

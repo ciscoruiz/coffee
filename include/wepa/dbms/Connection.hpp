@@ -39,7 +39,7 @@ class GuardConnection;
 */
 class Connection : public balance::Resource {
 public:
-   const std::shared_ptr<Database>& getDatabase () const noexcept { return m_dbmsDatabase; }
+   const Database& getDatabase () const noexcept { return m_dbmsDatabase; }
 
    const std::string& getUser () const noexcept { return m_user; }
 
@@ -55,11 +55,11 @@ public:
    Connection& operator= (const Connection&) = delete;
 
 protected:
-   std::shared_ptr<Database> m_dbmsDatabase;
+   const Database& m_dbmsDatabase;
    std::string m_user; /**< Nombre del usuario */
    std::string m_password; /**< Clave de acceso del usuario. */
 
-   Connection (std::shared_ptr<Database>& dbmsDatabase, const std::string& name, const char* user, const char* password) :
+   Connection (const Database& dbmsDatabase, const std::string& name, const char* user, const char* password) :
       balance::Resource (name),
       m_dbmsDatabase (dbmsDatabase),
       m_user (user),

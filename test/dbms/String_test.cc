@@ -102,17 +102,18 @@ BOOST_AUTO_TEST_CASE(string_is_not_nulleable)
 
 BOOST_AUTO_TEST_CASE(string_downcast)
 {
-   datatype::String column("not_nulleable", 4);
+   datatype::String column("string_downcast", 4);
 
    datatype::Abstract& abs = column;
 
    auto other = wepa_datatype_downcast(datatype::String, abs);
+   column.setValue("123");
 
-   BOOST_REQUIRE_EQUAL(&other, &column);
+   BOOST_REQUIRE_EQUAL(other == column, true);
 
    datatype::Integer zzz("zzz");
 
-   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::String, zzz), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::String, zzz), dbms::InvalidDataException);
 }
 
 BOOST_AUTO_TEST_CASE(string_clone)

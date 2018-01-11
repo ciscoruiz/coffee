@@ -82,17 +82,20 @@ BOOST_AUTO_TEST_CASE(float_is_not_nulleable)
 
 BOOST_AUTO_TEST_CASE(float_downcast)
 {
-   datatype::Float column("not_nulleable");
+   datatype::Float column("float_downcast");
 
    datatype::Abstract& abs = column;
 
-   auto other = wepa_datatype_downcast(datatype::Float, abs);
+   BOOST_REQUIRE_EQUAL(abs.hasValue(), true);
 
-   BOOST_REQUIRE_EQUAL(&other, &column);
+   const datatype::Float& other = wepa_datatype_downcast(datatype::Float, abs);
+   column.setValue(0.0006);
+
+   BOOST_REQUIRE_EQUAL(other == column, true);
 
    datatype::Integer zzz("zzz");
 
-   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::Float, zzz), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::Float, zzz), dbms::InvalidDataException);
 }
 
 BOOST_AUTO_TEST_CASE(float_clone)

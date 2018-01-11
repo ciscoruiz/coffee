@@ -44,15 +44,13 @@ namespace mock {
 
 class MockApplication : public app::Application {
 public:
-   MockApplication (const char* title);
-
-   void disableTermination () noexcept { m_termination.lock (); }
-   void operator ()();
-   void enableTermination() noexcept { m_termination.unlock (); }
-
-private:
    std::mutex m_termination;
 
+   MockApplication (const char* title);
+
+   void operator ()();
+
+private:
    void run () throw (adt::RuntimeException);
 };
 

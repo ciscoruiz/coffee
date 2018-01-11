@@ -370,7 +370,7 @@ BOOST_AUTO_TEST_CASE(dbms_link_guards)
    BOOST_REQUIRE_NO_THROW(st0 = database.createStatement("zero", "write"));
    BOOST_REQUIRE_NO_THROW(st1 = database.createStatement("one", "write"));
 
-   application.disableTermination();
+   std::lock_guard<std::mutex> guard(application.m_termination);
 
    std::thread tr(std::ref(application));
    usleep(500);
@@ -400,7 +400,6 @@ BOOST_AUTO_TEST_CASE(dbms_link_guards)
    }
 
    LOG_DEBUG("Enables termination");
-   application.enableTermination();
 
    tr.join();
 }

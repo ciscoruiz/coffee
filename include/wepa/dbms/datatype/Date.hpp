@@ -150,6 +150,7 @@ public:
    const char* className() noexcept { return "dbms::type::Date"; }
 
    Date& operator=(const Date&) = delete;
+   bool operator==(const Date& other) const noexcept { return m_value == other.m_value; }
 
    wepa_declare_datatype_downcast(Date)
 

@@ -111,9 +111,7 @@ BOOST_AUTO_TEST_CASE (shortblock_downcast)
 
    auto other = wepa_datatype_downcast(datatype::ShortBlock, abs);
 
-   BOOST_REQUIRE_EQUAL (&other, &column);
-
    datatype::Integer zzz ("zzz");
 
-   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::ShortBlock, zzz), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::ShortBlock, zzz), dbms::InvalidDataException);
 }

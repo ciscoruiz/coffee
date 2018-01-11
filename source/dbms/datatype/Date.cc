@@ -159,3 +159,4 @@ int datatype::Date::do_compare (const datatype::Abstract& other) const
 
    return this->m_value - _other.m_value;
 }
+

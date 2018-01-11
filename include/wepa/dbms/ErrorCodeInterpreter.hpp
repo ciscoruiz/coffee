@@ -25,6 +25,8 @@ class Database;
  */
 class ErrorCodeInterpreter {
 public:
+   virtual ~ErrorCodeInterpreter() {;}
+
    /**
       Devuelve \em true si las condiciones de busqueda de la ultimo operacion
       no han sido satisfechas por ningun registro o \em false en otro caso.      

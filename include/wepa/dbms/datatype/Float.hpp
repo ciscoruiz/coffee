@@ -35,6 +35,8 @@ public:
 
    std::shared_ptr<Abstract> clone() const noexcept { return std::make_shared<Float>(*this); }
 
+   bool operator==(const Float& other) const noexcept { return m_value == other.m_value; }
+
    operator adt::StreamString () const noexcept { return asString (); }
 
    adt::StreamString asString () const noexcept;

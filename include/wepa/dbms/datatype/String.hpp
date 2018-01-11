@@ -37,6 +37,8 @@ public:
 
    std::shared_ptr<Abstract> clone() const noexcept { return std::make_shared<String>(*this); }
 
+   bool operator==(const String& other) const noexcept { return wepa_strcmp (this->m_value, other.m_value) == 0; }
+
    operator adt::StreamString() const noexcept { return asString(); }
 
    adt::StreamString asString() const noexcept;

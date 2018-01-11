@@ -113,24 +113,27 @@ private:
 #define wepa_declare_datatype_downcast(inherit) \
    static const inherit& downcast(const datatype::Abstract& data,const char* function, const char* file, const int lineno) \
          throw(wepa::dbms::InvalidDataException) { \
-      const inherit* result = dynamic_cast <const inherit*>(&data); \
-      if(result == nullptr) { \
-         wepa::adt::StreamString str; \
-         str << data.asString() << " | Invalid down cast"; \
-         throw wepa::dbms::InvalidDataException(str, function, file, lineno); \
+      try { \
+         return dynamic_cast <const inherit&>(data); \
       } \
-      return std::ref(*result); \
+      catch(std::bad_cast& ex) { \
+      } \
+      wepa::adt::StreamString str; \
+      str << data.asString() << " | Invalid down cast"; \
+      throw wepa::dbms::InvalidDataException(str, function, file, lineno); \
    } \
    static inherit& downcast(datatype::Abstract& data,char* function, char* file, int lineno) \
          throw(wepa::dbms::InvalidDataException) { \
-      inherit* result = dynamic_cast <inherit*>(&data); \
-      if(result == nullptr) { \
-         wepa::adt::StreamString str; \
-         str << data.asString() << " | Invalid down cast"; \
-         throw wepa::dbms::InvalidDataException(str, function, file, lineno); \
+      try { \
+         return dynamic_cast <inherit&>(data); \
       } \
-      return std::ref(*result); \
+      catch(std::bad_cast& ex) { \
+      } \
+      wepa::adt::StreamString str; \
+      str << data.asString() << " | Invalid down cast"; \
+      throw wepa::dbms::InvalidDataException(str, function, file, lineno); \
    } \
+   \
    static const std::shared_ptr<inherit> downcast(const std::shared_ptr<datatype::Abstract>& data,const char* function, const char* file, const int lineno) \
          throw(wepa::dbms::InvalidDataException) { \
       const std::shared_ptr<inherit> result = std::dynamic_pointer_cast<inherit>(data); \

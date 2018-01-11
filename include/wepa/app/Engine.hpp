@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2013 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -64,50 +64,50 @@ class Application;
    El siguiente ejemplo muestra como obtener la instancia de un enginee asociado a nuestra aplicacion:
 
    \code
-      Clase* objeto = nemesis::app::functions::engine <Clase> (FILE_LOCATION);
+      Clase* objeto = nemesis::app::functions::engine <Clase>(FILE_LOCATION);
 
       ..... uso del objeto ....
    \endcode
 
-   Si el enginee \em 'Clase' no hubiera sido registrado (instanciado) en nuestra aplicacion el metodo
+   Si el enginee \em 'Clase' no hubiera sido registrado(instanciado) en nuestra aplicacion el metodo
    template nemesis::engine lanzara una excepcion.
 
    \author cisco.tierra@gmail.com.
 */
-class EngineIf : public Runnable  {
+class Engine : public Runnable  {
 public:
    /**
       Destructor.
    */
-   virtual ~EngineIf () {;}
+   virtual ~Engine() {;}
 
    /**
     * Devuelve la aplicaci�n asociado a este enginee.
     * \return la aplicaci�n asociado a este enginee.
     * \since NemesisRD.app 2.0.0
     */
-   Application& getApplication () noexcept { return a_app; }
+   Application& getApplication() noexcept { return a_app; }
 
    /**
       Devuelve el nombre de esta clase indicado en el constructor.
       \return El nombre de la clase indicado en el constructor.
    */
-   const char* getClassName () const noexcept { return getName (); }
+   const char* getClassName() const noexcept { return getName(); }
 
-   operator adt::StreamString () const noexcept { return asString (); }
+   operator adt::StreamString() const noexcept { return asString(); }
 
    /**
       Devuelve una cadena con la informacion mas relevante de esta instancia.
       \return Una cadena con la informacion mas relevante de esta instancia.
    */
-   virtual adt::StreamString asString () const noexcept;
+   virtual adt::StreamString asString() const noexcept;
 
    /**
       Devuelve un documento XML con la informacion mas relevante de esta instancia.
       \param parent Nodo XML del que colgar la informacion referente a esta instancia.
       \return Un documento XML con la informacion mas relevante de esta instancia.
    */
-   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
+   virtual xml::Node& asXML(xml::Node& parent) const noexcept;
 
 protected:
    /**
@@ -115,20 +115,24 @@ protected:
       \param app Aplicaci�n a la que pertence este enginee.
       @param className Nombre lgico asociado a esta clase.
    */
-   EngineIf (Application& app, const char* className);
+   Engine(Application& app, const char* className) :
+      Runnable(className),
+      a_app(app)
+   {
+   }
 
    /**
       Indica que el nombre de un enginee que debe ser initializa antes que este.
       \param engineName Nombre de enginee requerido por esta instancia.
       \warning Solo tendra efecto antes de inicializar el enginee.
    */
-   void addPredecessor (const char* engineName) noexcept;
+   void addPredecessor(const char* engineName) noexcept;
 
    /**
       metodo que debemos implementar si la clase heredada necesita algn tipo de inicializacin.
       Este metodo se invocara automaticamente desde nemesis::Application::start.
    */
-   void initialize () throw (adt::RuntimeException);
+   void initialize() throw(adt::RuntimeException);
 
    /**
       metodo que debemos implementar en la clase heredada para implementar el proceso de parada de
@@ -137,7 +141,7 @@ protected:
       Este metodo debe implementar un metodo de parada controlada. Se invocara automaticamente
       desde el ncleo de NemesisRD.
    */
-   void stop () throw (adt::RuntimeException) { statusStopped (); do_stop (); }
+   void stop() throw(adt::RuntimeException) { statusStopped(); do_stop(); }
 
    /**
       metodo que debemos implementar en la clase heredada para implementar el proceso de parada de
@@ -145,7 +149,7 @@ protected:
 
       Este metodo implementa un metodo de parada no controlada.
    */
-   virtual void kill () noexcept { stop (); }
+   virtual void kill() noexcept { stop(); }
 
 private:
    typedef std::vector <std::string>::iterator iterator;
@@ -153,16 +157,16 @@ private:
    Application& a_app;
    std::vector <std::string> a_predecessors;
 
-   EngineIf (const EngineIf& other);
-   iterator begin () noexcept { return a_predecessors.begin (); }
-   iterator end () noexcept { return a_predecessors.end (); }
-   const std::string& data (iterator ii) noexcept { return *ii; }
+   Engine(const Engine& other);
+   iterator begin() noexcept { return a_predecessors.begin(); }
+   iterator end() noexcept { return a_predecessors.end(); }
+   const std::string& data(iterator ii) noexcept { return *ii; }
 
    /**
       metodo que debemos implementar si la clase heredada necesita algn tipo de inicializacin.
       Este metodo se invocara automaticamente desde nemesis::Application::start.
    */
-   virtual void do_initialize () throw (adt::RuntimeException) = 0;
+   virtual void do_initialize() throw(adt::RuntimeException) = 0;
 
    /**
       Metodo que debemos implementar en la clase heredada para tratar el proceso de parada de
@@ -173,7 +177,7 @@ private:
       La mayor�a de las veces ser� la re-implementaci�n del m�todo nemesis::Runnable::do_requestStop
       el que realice las acciones necesarias para parar un enginee.
    */
-   virtual void do_stop () throw (adt::RuntimeException) = 0;
+   virtual void do_stop() throw(adt::RuntimeException) = 0;
 
    friend class Application;
 };

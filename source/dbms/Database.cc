@@ -61,7 +61,7 @@ using namespace wepa;
 
 
 dbms::Database::Database(app::Application& app, const char* className, const char* dbmsName) :
-   app::EngineIf(app, className),
+   app::Engine(app, className),
    m_name((dbmsName == NULL) ? "local": dbmsName),
    m_type((dbmsName == NULL) ? Type::Local: Type::Remote),
    m_failRecoveryHandler(NULL),
@@ -83,13 +83,6 @@ dbms::Database::~Database()
 void dbms::Database::externalInitialize()
    throw(adt::RuntimeException)
 {
-   app::Application& application(getApplication());
-   app::Application& dummy = internal::DummyApplication::getInstance();
-
-   if(&dummy != &application) {
-      WEPA_THROW_EXCEPTION(asString() << " | This method can't be applied to a database with associated application");
-   }
-
    initialize();
 }
 
@@ -270,7 +263,7 @@ adt::StreamString dbms::Database::asString() const
 {
    adt::StreamString result("dbms::Database { ");
 
-   result << app::EngineIf::asString();
+   result << app::Engine::asString();
 
    if(m_type == Type::Local)
       result += " | Type: Local";
@@ -290,7 +283,7 @@ xml::Node& dbms::Database::asXML(xml::Node& parent) const
 {
    xml::Node& result = parent.createChild("dbms.Database");
 
-   app::EngineIf::asXML(result);
+   app::Engine::asXML(result);
 
    result.createAttribute("Type",(m_type == Type::Local) ? "Local": "Remote");
 

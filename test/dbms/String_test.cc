@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(string_downcast)
 
    datatype::Abstract& abs = column;
 
-   auto other = wepa_datatype_downcast(datatype::String, abs);
+   const datatype::String& other = wepa_datatype_downcast(datatype::String, abs);
    column.setValue("123");
 
    BOOST_REQUIRE_EQUAL(other == column, true);

@@ -81,13 +81,13 @@ private:
       return std::make_shared<mock::MockConnection>(std::ref(*this), name, user, password);
    }
 
-   std::shared_ptr<dbms::binder::Input> allocateInputBind(std::shared_ptr<dbms::datatype::Abstract>& data) const
+   std::shared_ptr<dbms::binder::Input> allocateInputBind(std::shared_ptr<dbms::datatype::Abstract> data) const
       throw(adt::RuntimeException)
    {
       return std::make_shared<MockInput>(data);
    }
 
-   std::shared_ptr<dbms::binder::Output> allocateOutputBind(std::shared_ptr<dbms::datatype::Abstract>& data) const
+   std::shared_ptr<dbms::binder::Output> allocateOutputBind(std::shared_ptr<dbms::datatype::Abstract> data) const
       throw(adt::RuntimeException)
    {
       return std::make_shared<MockOutput>(data);

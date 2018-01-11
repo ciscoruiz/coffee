@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(integer_downcast)
 
    datatype::Abstract& abs = column;
 
-   auto other = wepa_datatype_downcast(datatype::Integer, abs);
+   const datatype::Integer& other = wepa_datatype_downcast(datatype::Integer, abs);
    column.setValue(1234);
 
    BOOST_REQUIRE_EQUAL(other == column, true);

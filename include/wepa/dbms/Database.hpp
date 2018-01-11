@@ -5,10 +5,9 @@
 #include <vector>
 #include <memory>
 
-#include <wepa/app/EngineIf.hpp>
-
 #include <wepa/dbms/DatabaseException.hpp>
 #include <wepa/dbms/ActionOnError.hpp>
+#include "../app/Engine.hpp"
 
 namespace wepa {
 
@@ -39,7 +38,7 @@ class ErrorCodeInterpreter;
 
    @author cisco.tierra@gmail.com.
 */
-class Database : public app::EngineIf {
+class Database : public app::Engine {
 protected:
    typedef std::vector<std::shared_ptr <Connection> > connection_container;
    typedef connection_container::iterator connection_iterator;
@@ -81,19 +80,19 @@ public:
    void externalInitialize() throw(adt::RuntimeException);
    void externalStop() throw(adt::RuntimeException);
 
-   void setFailRecoveryHandler(std::shared_ptr<FailRecoveryHandler>& failRecoveryHandler)
+   void setFailRecoveryHandler(std::shared_ptr<FailRecoveryHandler> failRecoveryHandler)
       noexcept
    {
       m_failRecoveryHandler = failRecoveryHandler;
    }
 
-   void setStatementTranslator(std::shared_ptr<StatementTranslator>& statementTranslator)
+   void setStatementTranslator(std::shared_ptr<StatementTranslator> statementTranslator)
       noexcept
    {
       m_statementTranslator = statementTranslator;
    }
 
-   void setErrorCodeInterpreter(std::shared_ptr<ErrorCodeInterpreter>& errorCodeInterpreter)
+   void setErrorCodeInterpreter(std::shared_ptr<ErrorCodeInterpreter> errorCodeInterpreter)
       noexcept
    {
       m_errorCodeInterpreter = errorCodeInterpreter;
@@ -218,9 +217,9 @@ private:
    virtual std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
       throw(adt::RuntimeException) = 0;
 
-   virtual std::shared_ptr<binder::Input> allocateInputBind(std::shared_ptr<datatype::Abstract>& data) const
+   virtual std::shared_ptr<binder::Input> allocateInputBind(std::shared_ptr<datatype::Abstract> data) const
       throw(adt::RuntimeException) = 0;
-   virtual std::shared_ptr<binder::Output> allocateOutputBind(std::shared_ptr<datatype::Abstract>& data) const
+   virtual std::shared_ptr<binder::Output> allocateOutputBind(std::shared_ptr<datatype::Abstract> data) const
       throw(adt::RuntimeException) = 0;
 
    friend class Statement;

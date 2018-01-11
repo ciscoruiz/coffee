@@ -313,8 +313,6 @@ BOOST_AUTO_TEST_CASE(dbms_define_structure)
 
    test_dbms::MyDatabase database(application);
 
-   BOOST_REQUIRE_THROW(database.externalInitialize(), adt::RuntimeException);
-
    auto connection = database.createConnection("0", "0", "0");
 
    BOOST_REQUIRE_THROW(database.createConnection("0", "bis0", "bis0"), adt::RuntimeException);
@@ -350,67 +348,16 @@ BOOST_AUTO_TEST_CASE(dbms_translator)
    auto st0 = database.createStatement("zero", "read");
    BOOST_REQUIRE_EQUAL(st0->getExpression(), "read");
 
-   std::shared_ptr<dbms::StatementTranslator>translator = std::make_shared<test_dbms::MyTranslator>();
-   database.setStatementTranslator(translator);
+   database.setStatementTranslator(std::make_shared<test_dbms::MyTranslator>());
    auto st1 = database.createStatement("one", "read");
    BOOST_REQUIRE_EQUAL(st1->getExpression(), "READ");
 }
 
-BOOST_AUTO_TEST_CASE(dbms_link_guards)
-{
-   MockApplication application("dbms_link_guards");
-
-   test_dbms::MyDatabase database(application);
-
-   std::shared_ptr<dbms::Connection> conn0;
-   std::shared_ptr<dbms::Statement> st0;
-   std::shared_ptr<dbms::Statement> st1;
-
-   BOOST_REQUIRE_NO_THROW(conn0 = database.createConnection("0", "0", "0"));
-   BOOST_REQUIRE_NO_THROW(st0 = database.createStatement("zero", "write"));
-   BOOST_REQUIRE_NO_THROW(st1 = database.createStatement("one", "write"));
-
-   std::lock_guard<std::mutex> guard(application.m_termination);
-
-   std::thread tr(std::ref(application));
-   usleep(500);
-
-   BOOST_REQUIRE_EQUAL(application.isRunning(), true);
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
-
-   if(true) {
-      dbms::GuardConnection guardConnection(conn0);
-
-      BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 0);
-
-      if(true) {
-         dbms::GuardStatement guardSt0(guardConnection, st0);
-
-         BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 1);
-
-         if(true) {
-            dbms::GuardStatement guardSt1(guardConnection, st1);
-            BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 2);
-         }
-
-         BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 1);
-      }
-
-      BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 0);
-   }
-
-   LOG_DEBUG("Enables termination");
-
-   tr.join();
-}
-
 BOOST_AUTO_TEST_CASE(dbms_write_and_read_and_delete)
 {
-   MockApplication application("dbms_write_and_read_and_delete");
+   test_dbms::MyDatabase database("dbms_write_and_read_and_delete");
 
-   test_dbms::MyDatabase database(application);
-
-   application.disableTermination();
+   database.externalInitialize();
 
    std::shared_ptr<mock::MockConnection> conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
    auto stWriter = database.createStatement("the_write", "write");
@@ -418,10 +365,6 @@ BOOST_AUTO_TEST_CASE(dbms_write_and_read_and_delete)
    auto stEraser = database.createStatement("the_erase", "delete");
    ResultCode resultCode;
 
-   std::thread tr(std::ref(application));
-   usleep(500);
-
-   BOOST_REQUIRE_EQUAL(application.isRunning(), true);
    BOOST_REQUIRE_EQUAL(database.isRunning(), true);
 
    try {
@@ -538,29 +481,18 @@ BOOST_AUTO_TEST_CASE(dbms_write_and_read_and_delete)
 
    BOOST_REQUIRE_EQUAL(database.container_size(), 1);
    BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 2);
-
-   LOG_DEBUG("Enables termination");
-   application.enableTermination();
-
-   tr.join();
 }
 
 BOOST_AUTO_TEST_CASE(dbms_write_rollback)
 {
-   MockApplication application("dbms_write_rollback");
+   test_dbms::MyDatabase database("dbms_write_rollback");
 
-   test_dbms::MyDatabase database(application);
-
-   application.disableTermination();
+   database.externalInitialize();
 
    auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
    auto rollbackWriter = database.createStatement("rollback_write", "write");
    ResultCode resultCode;
 
-   std::thread tr(std::ref(application));
-   usleep(500);
-
-   BOOST_REQUIRE_EQUAL(application.isRunning(), true);
    BOOST_REQUIRE_EQUAL(database.isRunning(), true);
 
    if(true) {
@@ -624,29 +556,18 @@ BOOST_AUTO_TEST_CASE(dbms_write_rollback)
    BOOST_REQUIRE_EQUAL(database.container_size(), 3);
    BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
    BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 1);
-
-   LOG_DEBUG("Enables termination");
-   application.enableTermination();
-
-   tr.join();
 }
 
 BOOST_AUTO_TEST_CASE(dbms_write_norollback)
 {
-   MockApplication application("dbms_write_norollback");
+   test_dbms::MyDatabase database("dbms_write_norollback");
 
-   test_dbms::MyDatabase database(application);
-
-   application.disableTermination();
+   database.externalInitialize();
 
    auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
    auto noRollbackWriter = database.createStatement("no_rollback_write", "write", dbms::ActionOnError::Ignore);
    ResultCode resultCode;
 
-   std::thread tr(std::ref(application));
-   usleep(500);
-
-   BOOST_REQUIRE_EQUAL(application.isRunning(), true);
    BOOST_REQUIRE_EQUAL(database.isRunning(), true);
 
    if(true) {
@@ -720,20 +641,13 @@ BOOST_AUTO_TEST_CASE(dbms_write_norollback)
    BOOST_REQUIRE_EQUAL(database.container_size(), 4);
    BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 2);
    BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 0);
-
-   LOG_DEBUG("Enables termination");
-   application.enableTermination();
-
-   tr.join();
 }
 
 BOOST_AUTO_TEST_CASE(dbms_erase_rollback)
 {
-   MockApplication application("dbms_erase_rollback");
+   test_dbms::MyDatabase database("dbms_erase_rollback");
 
-   test_dbms::MyDatabase database(application);
-
-   application.disableTermination();
+   database.externalInitialize();
 
    auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
    auto stWriter = database.createStatement("writer", "write");
@@ -741,10 +655,6 @@ BOOST_AUTO_TEST_CASE(dbms_erase_rollback)
    auto noRollbackEraser = database.createStatement("no_rollback_eraser", "delete", dbms::ActionOnError::Ignore);
    ResultCode resultCode;
 
-   std::thread tr(std::ref(application));
-   usleep(500);
-
-   BOOST_REQUIRE_EQUAL(application.isRunning(), true);
    BOOST_REQUIRE_EQUAL(database.isRunning(), true);
 
    if(true) {
@@ -807,30 +717,19 @@ BOOST_AUTO_TEST_CASE(dbms_erase_rollback)
    BOOST_REQUIRE_EQUAL(database.container_size(), 3);
    BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
    BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 1);
-
-   LOG_DEBUG("Enables termination");
-   application.enableTermination();
-
-   tr.join();
 }
 
 BOOST_AUTO_TEST_CASE(dbms_erase_norollback)
 {
-   MockApplication application("dbms_erase_norollback");
+   test_dbms::MyDatabase database("dbms_erase_norollback");
 
-   test_dbms::MyDatabase database(application);
-
-   application.disableTermination();
+   database.externalInitialize();
 
    auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
    auto stWriter = database.createStatement("writer", "write");
    auto noRollbackEraser = database.createStatement("no_rollback_eraser", "delete", dbms::ActionOnError::Ignore);
    ResultCode resultCode;
 
-   std::thread tr(std::ref(application));
-   usleep(500);
-
-   BOOST_REQUIRE_EQUAL(application.isRunning(), true);
    BOOST_REQUIRE_EQUAL(database.isRunning(), true);
 
    if(true) {
@@ -893,30 +792,18 @@ BOOST_AUTO_TEST_CASE(dbms_erase_norollback)
    BOOST_REQUIRE_EQUAL(database.container_size(), 2);
    BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 2);
    BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 0);
-
-   LOG_DEBUG("Enables termination");
-   application.enableTermination();
-
-   tr.join();
 }
 
 BOOST_AUTO_TEST_CASE(dbms_set_max_commit)
 {
-   MockApplication application("dbms_set_max_commit");
+   test_dbms::MyDatabase database("dbms_set_max_commit");
 
-   test_dbms::MyDatabase database(application);
-
-   application.disableTermination();
+   database.externalInitialize();
 
    auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
    auto stWriter = database.createStatement("the_write", "write");
    auto stReader = database.createStatement("the_read", "read");
 
-   std::thread tr(std::ref(application));
-
-   while(application.isRunning() == false);
-
-   BOOST_REQUIRE_EQUAL(application.isRunning(), true);
    BOOST_REQUIRE_EQUAL(database.isRunning(), true);
 
    if(true) {
@@ -961,29 +848,17 @@ BOOST_AUTO_TEST_CASE(dbms_set_max_commit)
    BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 0);
    BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
    BOOST_REQUIRE_EQUAL(database.container_size(), 30);
-
-   LOG_DEBUG("Enables termination");
-   application.enableTermination();
-
-   tr.join();
 }
 
 BOOST_AUTO_TEST_CASE(dbms_break_detected_executing)
 {
-   MockApplication application("dbms_break_detected_executing");
+   test_dbms::MyDatabase database("dbms_break_detected_executing");
 
-   test_dbms::MyDatabase database(application);
-
-   application.disableTermination();
+   database.externalInitialize();
 
    auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
    auto stWriter = database.createStatement("the_write", "write");
 
-   std::thread tr(std::ref(application));
-
-   while(application.isRunning() == false);
-
-   BOOST_REQUIRE_EQUAL(application.isRunning(), true);
    BOOST_REQUIRE_EQUAL(database.isRunning(), true);
 
    if(true) {
@@ -1021,29 +896,17 @@ BOOST_AUTO_TEST_CASE(dbms_break_detected_executing)
    // It will recover the connection after it will detect
    BOOST_REQUIRE_EQUAL(conn0->isAvailable(), true);
    BOOST_REQUIRE_EQUAL(database.container_size(), 0);
-
-   LOG_DEBUG("Enables termination");
-   application.enableTermination();
-
-   tr.join();
 }
 
 BOOST_AUTO_TEST_CASE(dbms_break_detected_locking)
 {
-   MockApplication application("dbms_break_detected_locking");
+   test_dbms::MyDatabase database("dbms_break_detected_locking");
 
-   test_dbms::MyDatabase database(application);
-
-   application.disableTermination();
+   database.externalInitialize();
 
    auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
    auto stWriter = database.createStatement("the_write", "write");
 
-   std::thread tr(std::ref(application));
-
-   while(application.isRunning() == false);
-
-   BOOST_REQUIRE_EQUAL(application.isRunning(), true);
    BOOST_REQUIRE_EQUAL(database.isRunning(), true);
 
    if(true) {
@@ -1118,33 +981,20 @@ BOOST_AUTO_TEST_CASE(dbms_break_detected_locking)
    // It will recover the connection after it will detect
    BOOST_REQUIRE_EQUAL(conn0->isAvailable(), true);
    BOOST_REQUIRE_EQUAL(database.container_size(), 3);
-
-   LOG_DEBUG("Enables termination");
-   application.enableTermination();
-
-   tr.join();
 }
 
 BOOST_AUTO_TEST_CASE(dbms_break_unrecovery_executing)
 {
-   MockApplication application("dbms_break_unrecovery_executing");
+   test_dbms::MyDatabase database("dbms_break_unrecovery_executing");
 
-   test_dbms::MyDatabase database(application);
+   database.externalInitialize();
 
    std::shared_ptr<test_dbms::MyRecoveryHandler> recoveryHandler = std::make_shared<test_dbms::MyRecoveryHandler>();
-   auto frh = std::dynamic_pointer_cast<dbms::FailRecoveryHandler>(recoveryHandler);
-   database.setFailRecoveryHandler(frh);
-
-   application.disableTermination();
+   database.setFailRecoveryHandler(recoveryHandler);
 
    auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
    auto stWriter = database.createStatement("the_write", "write");
 
-   std::thread tr(std::ref(application));
-
-   while(application.isRunning() == false);
-
-   BOOST_REQUIRE_EQUAL(application.isRunning(), true);
    BOOST_REQUIRE_EQUAL(database.isRunning(), true);
 
    if(true) {
@@ -1184,33 +1034,20 @@ BOOST_AUTO_TEST_CASE(dbms_break_unrecovery_executing)
    // It will recover the connection after it will detect
    BOOST_REQUIRE_EQUAL(conn0->isAvailable(), false);
    BOOST_REQUIRE_EQUAL(database.container_size(), 0);
-
-   LOG_DEBUG("Enables termination");
-   application.enableTermination();
-
-   tr.join();
 }
 
 BOOST_AUTO_TEST_CASE(dbms_break_unrecovery_locking)
 {
-   MockApplication application("dbms_break_unrecovery_locking");
+   test_dbms::MyDatabase database("dbms_break_unrecovery_locking");
 
-   test_dbms::MyDatabase database(application);
+   database.externalInitialize();
 
    std::shared_ptr<test_dbms::MyRecoveryHandler> recoveryHandler = std::make_shared<test_dbms::MyRecoveryHandler>();
-   auto frh = std::dynamic_pointer_cast<dbms::FailRecoveryHandler>(recoveryHandler);
-   database.setFailRecoveryHandler(frh);
-
-   application.disableTermination();
+   database.setFailRecoveryHandler(recoveryHandler);
 
    auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
    auto stWriter = database.createStatement("the_write", "write");
 
-   std::thread tr(std::ref(application));
-
-   while(application.isRunning() == false);
-
-   BOOST_REQUIRE_EQUAL(application.isRunning(), true);
    BOOST_REQUIRE_EQUAL(database.isRunning(), true);
 
    if(true) {
@@ -1242,30 +1079,19 @@ BOOST_AUTO_TEST_CASE(dbms_break_unrecovery_locking)
    // It will recover the connection after it will detect
    BOOST_REQUIRE_EQUAL(conn0->isAvailable(), false);
    BOOST_REQUIRE_EQUAL(database.container_size(), 1);
-
-   LOG_DEBUG("Enables termination");
-   application.enableTermination();
-
-   tr.join();
 }
 
 BOOST_AUTO_TEST_CASE(dbms_dealing_with_nulls)
 {
-   MockApplication application("dbms_dealing_with_nulls");
+   test_dbms::MyDatabase database("dbms_dealing_with_nulls");
 
-   test_dbms::MyDatabase database(application);
-
-   application.disableTermination();
+   database.externalInitialize();
 
    auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
    auto stWriter = database.createStatement("the_write", "write");
    auto stReader = database.createStatement("the_read", "read");
    ResultCode resultCode;
 
-   std::thread tr(std::ref(application));
-   usleep(500);
-
-   BOOST_REQUIRE_EQUAL(application.isRunning(), true);
    BOOST_REQUIRE_EQUAL(database.isRunning(), true);
 
    if(true) {
@@ -1338,11 +1164,6 @@ BOOST_AUTO_TEST_CASE(dbms_dealing_with_nulls)
 
       BOOST_REQUIRE_EQUAL(reader.fetch(), false);
    }
-
-   LOG_DEBUG("Enables termination");
-   application.enableTermination();
-
-   tr.join();
 }
 
 BOOST_AUTO_TEST_CASE(dbms_without_app)
@@ -1400,3 +1221,59 @@ BOOST_AUTO_TEST_CASE(dbms_without_app)
    BOOST_REQUIRE_EQUAL(database.isRunning(), false);
 }
 
+/*
+BOOST_AUTO_TEST_CASE(dbms_link_guards)
+{
+   MockApplication application("dbms_link_guards");
+
+   std::shared_ptr<test_dbms::MyDatabase> database = std::make_shared<test_dbms::MyDatabase>(application);
+
+   application.attach(database);
+
+   std::shared_ptr<dbms::Connection> conn0;
+   std::shared_ptr<dbms::Statement> st0;
+   std::shared_ptr<dbms::Statement> st1;
+
+   BOOST_REQUIRE_NO_THROW(conn0 = database->createConnection("0", "0", "0"));
+   BOOST_REQUIRE_NO_THROW(st0 = database->createStatement("zero", "write"));
+   BOOST_REQUIRE_NO_THROW(st1 = database->createStatement("one", "write"));
+
+   std::shared_ptr<std::thread> tr;
+
+   {
+      std::lock_guard<std::mutex> guard(application.m_termination);
+
+      tr = std::make_shared<std::thread>(std::ref(application));
+      usleep(400);
+
+      BOOST_REQUIRE_EQUAL(application.isRunning(), true);
+      BOOST_REQUIRE_EQUAL(database->isRunning(), true);
+
+      if(true) {
+         dbms::GuardConnection guardConnection(conn0);
+
+         BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 0);
+
+         if(true) {
+            dbms::GuardStatement guardSt0(guardConnection, st0);
+
+            BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 1);
+
+            if(true) {
+               dbms::GuardStatement guardSt1(guardConnection, st1);
+               BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 2);
+            }
+
+            BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 1);
+         }
+
+         BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 0);
+      }
+
+      LOG_DEBUG("Enables termination");
+   }
+
+   tr->join();
+}
+
+*/

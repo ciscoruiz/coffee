@@ -54,7 +54,7 @@ int persistence::PrimaryKey::compareTo(const PrimaryKey& other) const
 
    if(m_components.size() != other.m_components.size()) {
       WEPA_THROW_EXCEPTION(
-         "Can not compare primary keys with different number of compoents | N-Size=" << m_components.size() << " | other-Size=" << other.m_components.size()
+         "Can not compare primary keys with different number of components | N-Size=" << m_components.size() << " | other-Size=" << other.m_components.size()
       );
    }
 

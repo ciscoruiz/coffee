@@ -49,12 +49,12 @@ class ClassBuilder {
 public:
    ClassBuilder(const std::string& className) : m_className (className) {;}
    
-   ClassBuilder& addPrimaryKeyCompoment(Class::Data& data) noexcept {
+   ClassBuilder& addPrimaryKeyCompoment(Class::Data data) noexcept {
       m_members.push_back(Class::Member(data, true));
       return *this;
    }
    
-   ClassBuilder& addMember(Class::Data& data) noexcept {
+   ClassBuilder& addMember(Class::Data data) noexcept {
       m_members.push_back(Class::Member(data, false));
       return *this;
    }

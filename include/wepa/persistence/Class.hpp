@@ -73,7 +73,6 @@ public:
       return member.second == true;
    }
 
-   std::shared_ptr<Object> createObject() const throw (adt::RuntimeException);
    std::shared_ptr<Object> createObject(const std::shared_ptr<PrimaryKey>& primaryKey) const throw (adt::RuntimeException);
 
    xml::Node& asXML(xml::Node& parent) const noexcept;

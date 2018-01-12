@@ -46,8 +46,6 @@ namespace wepa {
     
 namespace persistence {
 
-class Class;
-
 /**
  * @todo write docs
  */
@@ -56,16 +54,14 @@ public:
    /**
     * Default constructor
     */
-   PrimaryKeyBuilder(const Class& clazz) : m_class(clazz) {;}
+   PrimaryKeyBuilder() {;}
 
    /**
     * Destructor
     */
     ~PrimaryKeyBuilder() { m_components.clear(); }
-    
-    const PrimaryKey::Components& getComponents() const noexcept { return m_components; }
-    
-    PrimaryKeyBuilder& add(const PrimaryKey::Component& component) noexcept {
+
+    PrimaryKeyBuilder& add(const PrimaryKey::Component component) noexcept {
        m_components.push_back(component);
        return *this;
     }
@@ -73,8 +69,11 @@ public:
     std::shared_ptr<persistence::PrimaryKey> build() const throw (adt::RuntimeException);
     
 private:
-    const Class& m_class;
     PrimaryKey::Components m_components;
+
+    const PrimaryKey::Components& getComponents() const noexcept { return m_components; }
+
+    friend class PrimaryKey;
 };
 
 }

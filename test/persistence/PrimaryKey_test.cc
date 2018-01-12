@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2013 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -36,192 +36,159 @@
 
 #include <functional>
 #include <iostream>
-
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <vector>
+#include <unordered_map>
 
 #include <wepa/dbms/datatype/Integer.hpp>
 #include <wepa/dbms/datatype/String.hpp>
 
 #include <wepa/persistence/PrimaryKey.hpp>
-#include <wepa/persistence/Storage.hpp>
+#include <wepa/persistence/PrimaryKeyBuilder.hpp>
 
 using namespace wepa;
 
-BOOST_AUTO_TEST_CASE (persistence_primary_key_compare)
+BOOST_AUTO_TEST_CASE(persistence_primary_key_compare)
 {
-   boost::ptr_vector <dbms::datatype::Abstract> values;
-   dbms::datatype::Integer* ivalue;
+   std::shared_ptr<dbms::datatype::Integer> p00;
+   std::shared_ptr<dbms::datatype::Integer> p01;
+   std::shared_ptr<persistence::PrimaryKey> pk0;
 
-   persistence::PrimaryKey pk0;
-   persistence::PrimaryKey pk1;
-   persistence::PrimaryKey pk2;
+   std::shared_ptr<dbms::datatype::Integer> p10;
+   std::shared_ptr<dbms::datatype::Integer> p11;
+   std::shared_ptr<persistence::PrimaryKey> pk1;
 
-   BOOST_REQUIRE_EQUAL (pk0.isDefined (), false);
+   std::shared_ptr<dbms::datatype::Integer> p20;
+   std::shared_ptr<dbms::datatype::Integer> p21;
+   std::shared_ptr<persistence::PrimaryKey> pk2;
 
-   BOOST_REQUIRE_THROW (pk0 == pk1, adt::RuntimeException);
-
-   values.push_back (ivalue = new dbms::datatype::Integer ("p0"));
-   pk0.addComponent(ivalue);
-   ivalue->setValue (0);
-
-   values.push_back (ivalue = new dbms::datatype::Integer ("p0-i0"));
-   pk0.addComponent(ivalue);
-   ivalue->setValue (0);
-
-   BOOST_REQUIRE_EQUAL (pk0.isDefined (), true);
-
-   values.push_back (ivalue = new dbms::datatype::Integer ("p0"));
-   pk1.addComponent(ivalue);
-   ivalue->setValue (0);
-
-   values.push_back (ivalue = new dbms::datatype::Integer ("p0-i1"));
-   pk1.addComponent(ivalue);
-   ivalue->setValue (1);
-
-   values.push_back (ivalue = new dbms::datatype::Integer ("p0"));
-   pk2.addComponent(ivalue);
-   ivalue->setValue (0);
-
-   values.push_back (ivalue = new dbms::datatype::Integer ("p0-i2"));
-   pk2.addComponent(ivalue);
-   ivalue->setValue (2);
-
-   BOOST_REQUIRE_EQUAL (pk0 < pk1, true);
-   BOOST_REQUIRE_EQUAL (pk0 < pk2, true);
-
-   BOOST_REQUIRE_EQUAL (pk1 < pk0, false);
-   BOOST_REQUIRE_EQUAL (pk2 < pk0, false);
-
-   BOOST_REQUIRE_EQUAL (pk1 < pk0, false);
-   BOOST_REQUIRE_EQUAL (pk1 < pk2, true);
-
-   BOOST_REQUIRE_EQUAL (pk0 < pk1, true);
-   BOOST_REQUIRE_EQUAL (pk2 < pk1, false);
-
-   BOOST_REQUIRE_EQUAL (pk2 < pk0, false);
-   BOOST_REQUIRE_EQUAL (pk2 < pk1, false);
-
-   BOOST_REQUIRE_EQUAL (pk0 < pk2, true);
-   BOOST_REQUIRE_EQUAL (pk1 < pk2, true);
-}
-
-namespace test_dbms_pk {
-
-typedef std::shared_ptr <persistence::PrimaryKey> PtrPrimaryKey;
-
-struct PrimaryKeyTestPtrLess {
-   bool operator () (const PtrPrimaryKey& first, const PtrPrimaryKey& second) throw (adt::RuntimeException) {
-      return first.get() < second.get();
+   {
+      persistence::PrimaryKeyBuilder builder;
+      p00 = std::make_shared<dbms::datatype::Integer>("p00");
+      p01 = std::make_shared<dbms::datatype::Integer>("p01");
+      pk0 = builder.add(p00).add(p01).build();
+      p00->setValue(0);
+      p01->setValue(2);
    }
-};
 
+   {
+      persistence::PrimaryKeyBuilder builder;
+      p10 = std::make_shared<dbms::datatype::Integer>("p10");
+      p11 = std::make_shared<dbms::datatype::Integer>("p11");
+      pk1 = builder.add(p10).add(p11).build();
+      p10->setValue(1);
+      p11->setValue(1);
+   }
+
+   {
+      persistence::PrimaryKeyBuilder builder;
+      p20 = std::make_shared<dbms::datatype::Integer>("p20");
+      p21 = std::make_shared<dbms::datatype::Integer>("p21");
+      pk2 = builder.add(p20).add(p21).build();
+      p20->setValue(2);
+      p21->setValue(0);
+   }
+
+   BOOST_REQUIRE_EQUAL(pk0 < pk1, true);
+   BOOST_REQUIRE_EQUAL(pk0 < pk2, true);
+   BOOST_REQUIRE_EQUAL(pk0 > pk1, false);
+   BOOST_REQUIRE_EQUAL(pk0 > pk2, false);
+
+   BOOST_REQUIRE_EQUAL(pk1 < pk0, false);
+   BOOST_REQUIRE_EQUAL(pk1 < pk2, false);
+   BOOST_REQUIRE_EQUAL(pk1 > pk0, true);
+   BOOST_REQUIRE_EQUAL(pk1 > pk2, false);
+
+   BOOST_REQUIRE_EQUAL(pk2 < pk0, false);
+   BOOST_REQUIRE_EQUAL(pk2 < pk1, false);
+   BOOST_REQUIRE_EQUAL(pk2 > pk0, true);
+   BOOST_REQUIRE_EQUAL(pk2 > pk1, true);
+
+   p00->setValue(1);
+   p01->setValue(1);
+   BOOST_REQUIRE_EQUAL(pk0 == pk1, true);
+   BOOST_REQUIRE_EQUAL(pk0 == pk2, false);
 }
 
-BOOST_AUTO_TEST_CASE (persistence_primary_key_sort)
+BOOST_AUTO_TEST_CASE(persistence_primary_key_sort)
 {
-   boost::ptr_vector <dbms::datatype::Abstract> values;
-   std::vector <test_dbms_pk::PtrPrimaryKey> keys;
+   std::vector <std::shared_ptr<persistence::PrimaryKey> > pks;
 
-   char name [2];
+   char name[2];
 
-   for (int key = 0; key < 10; ++ key) {
-      test_dbms_pk::PtrPrimaryKey primaryKey (new persistence::PrimaryKey);
+   for(int key = 0; key < 10; ++ key) {
+      persistence::PrimaryKeyBuilder builder;
 
-      keys.push_back (primaryKey);
+      auto integer = std::make_shared<dbms::datatype::Integer>("ii");
+      integer->setValue(key % 3);
 
-      dbms::datatype::Integer* ivalue = new dbms::datatype::Integer ("ii");
-      ivalue->setValue (key % 3);
-      values.push_back (ivalue);
+      name[0] = 'a' +(key % 5);
+      name[1] = 0;
+      auto string = std::make_shared<dbms::datatype::String>(name, 10);
+      string->setValue(name);
 
-      name [0] = 'a' + (key % 5);
-      name [1] = 0;
-      dbms::datatype::String* svalue = new dbms::datatype::String (name, 10);
-      svalue->setValue(name);
-      values.push_back (svalue);
-
-      primaryKey->addComponent(ivalue);
-      primaryKey->addComponent(svalue);
+      pks.push_back(builder.add(integer).add(string).build());
    }
 
    bool isSorted = true;
 
-   for (int ii = 1; ii < 10; ++ ii) {
-      if ((keys [ii - 1] < keys [ii]) == false) {
+   for(int ii = 1; ii < 10; ++ ii) {
+      if((pks[ii - 1] < pks[ii]) == false) {
          isSorted = false;
          break;
       }
    }
 
-   BOOST_REQUIRE_EQUAL (isSorted, false);
+   BOOST_REQUIRE_EQUAL(isSorted, false);
 
    try {
-      std::sort (keys.begin (), keys.end (), test_dbms_pk::PrimaryKeyTestPtrLess ());
+      std::sort(pks.begin(), pks.end());
    }
-   catch (adt::Exception& ex) {
-      std::cout << ex.what () << std::endl;
+   catch(adt::Exception& ex) {
+      std::cout << ex.what() << std::endl;
    }
 
    isSorted = true;
-   for (int ii = 1; ii < 10; ++ ii) {
-      if ((keys [ii - 1] < keys [ii]) == false) {
+   for(int ii = 1; ii < 10; ++ ii) {
+      if((pks[ii - 1] < pks[ii]) == false) {
          std::cout << "Failed Index=" << ii << std::endl;
-         std::cout << "\t" << keys [ii - 1]->asString ();
+         std::cout << "\t" << pks[ii - 1]->asString();
          std::cout << std::endl;
-         std::cout << "\t" << keys [ii]->asString ();
+         std::cout << "\t" << pks[ii]->asString();
          std::cout << std::endl;
          isSorted = false;
          break;
       }
    }
 
-   BOOST_REQUIRE_EQUAL (isSorted, true);
+   BOOST_REQUIRE_EQUAL(isSorted, true);
 }
 
 
-BOOST_AUTO_TEST_CASE (persistence_primary_key_map)
+BOOST_AUTO_TEST_CASE(persistence_primary_key_map)
 {
-   // Duplicate private Storage::PtrLess
-   struct PtrLess {
-      bool operator () (const persistence::PrimaryKey& first, const persistence::PrimaryKey& second) throw (adt::RuntimeException) {
-         return first < second;
-      }
-   };
-
-   typedef std::map <persistence::PrimaryKey, int, PtrLess> Entries;
+   typedef std::unordered_map<std::shared_ptr<persistence::PrimaryKey>, int> Entries;
    typedef Entries::iterator entries_iterator;
    Entries entries;
 
-   persistence::PrimaryKey primaryKey;
-   std::unique_ptr <dbms::datatype::Integer> ivalue (new dbms::datatype::Integer ("ii"));
+   auto integer = std::make_shared<dbms::datatype::Integer>("ii");
+   persistence::PrimaryKeyBuilder builder;
+   std::shared_ptr<persistence::PrimaryKey> findKey = builder.add(integer).build();
 
-   primaryKey.addComponent(ivalue.get());
+   for(int key = 0; key < 10; ++ key) {
+      persistence::PrimaryKeyBuilder builder;
 
-   for (int key = 100; key < 110; ++ key) {
-      std::cout << "Key=" << key << std::endl;
+      auto integer = std::make_shared<dbms::datatype::Integer>("ii");
+      integer->setValue(key);
 
-      BOOST_REQUIRE_NO_THROW(ivalue->setValue (key));
-
-      BOOST_REQUIRE_EQUAL (entries.find (primaryKey) == entries.end (), true);
-
-      entries [primaryKey] = key;
+      auto pk = builder.add(integer).build();
+      entries[pk] = key * key;
    }
 
-   for (int key = 10; key < 0; -- key) {
-      std::cout << "Key=" << key << std::endl;
+   integer->setValue(100);
+   BOOST_REQUIRE_EQUAL(entries.find(findKey) == entries.end(), true);
 
-      BOOST_REQUIRE_NO_THROW(ivalue->setValue (key));
-
-      BOOST_REQUIRE_EQUAL (entries.find (primaryKey) == entries.end (), true);
-
-      entries [primaryKey] = key;
-   }
-
-   for (int key = 100; key < 110; ++ key) {
-      BOOST_REQUIRE_NO_THROW(ivalue->setValue (key));
-      entries_iterator ii = entries.find (primaryKey);
-
-      BOOST_REQUIRE_EQUAL (ii == entries.end (), false);
-
-      BOOST_REQUIRE_EQUAL (ii->second, key);
+   for(int key = 0; key < 10; ++ key) {
+      integer->setValue(key);
+      BOOST_REQUIRE_EQUAL(entries.find(findKey) == entries.end(), false);
    }
 }

@@ -44,7 +44,8 @@ std::shared_ptr<persistence::PrimaryKey> persistence::PrimaryKeyBuilder::build()
       throw (adt::RuntimeException)
 {
    if (m_components.empty()) {
-      WEPA_THROW_EXCEPTION(m_class.asString() << " does not define any component");
+      WEPA_THROW_EXCEPTION("PrimaryKeyBuilder does not define any component");
    }
+
    return std::make_shared<persistence::PrimaryKey>(*this);
 }

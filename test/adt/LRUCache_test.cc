@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(lrucache_shared_ptr)
 
    typedef lru::Cache<Key, wepa::adt::StreamString> TheCache;
 
-   TheCache cache(MaxFirstLevel * MaxSecondLevel);
+   TheCache cache(MaxSecondLevel);
 
    for(int ii = 0; ii < MaxFirstLevel; ++ ii) {
       for (int jj = 0; jj < MaxSecondLevel; ++ jj) {
@@ -204,11 +204,12 @@ BOOST_AUTO_TEST_CASE(lrucache_shared_ptr)
       }
    }
 
-   cache.find(0);
+   BOOST_REQUIRE_EQUAL(cache.size(), MaxSecondLevel);
 
-   std::vector<int> expectedOrder = { 1, 2, 3, 4, 0 };
-   int jj = 0;
+   int counter = 0;
    for (TheCache::pair_iterator ii = cache.begin(), maxii = cache.end(); ii != maxii; ++ ii) {
-      BOOST_REQUIRE_EQUAL(TheCache::key(ii), expectedOrder[jj ++]);
+      const Key& key = TheCache::key(ii);
+      BOOST_REQUIRE_EQUAL(key->first, MaxFirstLevel - 1);
+      BOOST_REQUIRE_EQUAL(key->second, counter ++);
    }
 }

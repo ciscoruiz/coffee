@@ -39,6 +39,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include <wepa/adt/pattern/lru/Cache.hpp>
+
 #include <wepa/dbms/datatype/Integer.hpp>
 #include <wepa/dbms/datatype/String.hpp>
 
@@ -63,8 +65,8 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_compare)
 
    {
       persistence::PrimaryKeyBuilder builder;
-      p00 = std::make_shared<dbms::datatype::Integer>("p00");
-      p01 = std::make_shared<dbms::datatype::Integer>("p01");
+      p00 = std::make_shared<dbms::datatype::Integer>("first");
+      p01 = std::make_shared<dbms::datatype::Integer>("second");
       pk0 = builder.add(p00).add(p01).build();
       p00->setValue(0);
       p01->setValue(2);
@@ -72,8 +74,8 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_compare)
 
    {
       persistence::PrimaryKeyBuilder builder;
-      p10 = std::make_shared<dbms::datatype::Integer>("p10");
-      p11 = std::make_shared<dbms::datatype::Integer>("p11");
+      p10 = std::make_shared<dbms::datatype::Integer>("first");
+      p11 = std::make_shared<dbms::datatype::Integer>("second");
       pk1 = builder.add(p10).add(p11).build();
       p10->setValue(1);
       p11->setValue(1);
@@ -81,8 +83,8 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_compare)
 
    {
       persistence::PrimaryKeyBuilder builder;
-      p20 = std::make_shared<dbms::datatype::Integer>("p20");
-      p21 = std::make_shared<dbms::datatype::Integer>("p21");
+      p20 = std::make_shared<dbms::datatype::Integer>("first");
+      p21 = std::make_shared<dbms::datatype::Integer>("second");
       pk2 = builder.add(p20).add(p21).build();
       p20->setValue(2);
       p21->setValue(0);
@@ -94,7 +96,7 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_compare)
    BOOST_REQUIRE_EQUAL(pk0 > pk2, false);
 
    BOOST_REQUIRE_EQUAL(pk1 < pk0, false);
-   BOOST_REQUIRE_EQUAL(pk1 < pk2, false);
+   BOOST_REQUIRE_EQUAL(pk1 < pk2, true);
    BOOST_REQUIRE_EQUAL(pk1 > pk0, true);
    BOOST_REQUIRE_EQUAL(pk1 > pk2, false);
 
@@ -105,70 +107,18 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_compare)
 
    p00->setValue(1);
    p01->setValue(1);
-   BOOST_REQUIRE_EQUAL(pk0 == pk1, true);
-   BOOST_REQUIRE_EQUAL(pk0 == pk2, false);
+
+   BOOST_REQUIRE_EQUAL(pk0->compare(pk1), 0);
+   BOOST_REQUIRE_NE(pk0->compare(pk2), 0);
 }
-
-BOOST_AUTO_TEST_CASE(persistence_primary_key_sort)
-{
-   std::vector <std::shared_ptr<persistence::PrimaryKey> > pks;
-
-   char name[2];
-
-   for(int key = 0; key < 10; ++ key) {
-      persistence::PrimaryKeyBuilder builder;
-
-      auto integer = std::make_shared<dbms::datatype::Integer>("ii");
-      integer->setValue(key % 3);
-
-      name[0] = 'a' +(key % 5);
-      name[1] = 0;
-      auto string = std::make_shared<dbms::datatype::String>(name, 10);
-      string->setValue(name);
-
-      pks.push_back(builder.add(integer).add(string).build());
-   }
-
-   bool isSorted = true;
-
-   for(int ii = 1; ii < 10; ++ ii) {
-      if((pks[ii - 1] < pks[ii]) == false) {
-         isSorted = false;
-         break;
-      }
-   }
-
-   BOOST_REQUIRE_EQUAL(isSorted, false);
-
-   try {
-      std::sort(pks.begin(), pks.end());
-   }
-   catch(adt::Exception& ex) {
-      std::cout << ex.what() << std::endl;
-   }
-
-   isSorted = true;
-   for(int ii = 1; ii < 10; ++ ii) {
-      if((pks[ii - 1] < pks[ii]) == false) {
-         std::cout << "Failed Index=" << ii << std::endl;
-         std::cout << "\t" << pks[ii - 1]->asString();
-         std::cout << std::endl;
-         std::cout << "\t" << pks[ii]->asString();
-         std::cout << std::endl;
-         isSorted = false;
-         break;
-      }
-   }
-
-   BOOST_REQUIRE_EQUAL(isSorted, true);
-}
-
 
 BOOST_AUTO_TEST_CASE(persistence_primary_key_map)
 {
-   typedef std::unordered_map<std::shared_ptr<persistence::PrimaryKey>, int> Entries;
-   typedef Entries::iterator entries_iterator;
-   Entries entries;
+   using persistence::PrimaryKey;
+
+   typedef adt::pattern::lru::Cache<std::shared_ptr<PrimaryKey>, int, PrimaryKey::HashSharedPointer, PrimaryKey::EqualSharedPointer> Cache;
+
+   Cache entries(16);
 
    auto integer = std::make_shared<dbms::datatype::Integer>("ii");
    persistence::PrimaryKeyBuilder builder;
@@ -176,19 +126,25 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_map)
 
    for(int key = 0; key < 10; ++ key) {
       persistence::PrimaryKeyBuilder builder;
-
       auto integer = std::make_shared<dbms::datatype::Integer>("ii");
       integer->setValue(key);
-
       auto pk = builder.add(integer).build();
-      entries[pk] = key * key;
+      entries.set(pk, key * key);
    }
 
-   integer->setValue(100);
-   BOOST_REQUIRE_EQUAL(entries.find(findKey) == entries.end(), true);
+   BOOST_REQUIRE_EQUAL(entries.size(), 10);
+
+   for(int key = 100; key < 110; ++ key) {
+      integer->setValue(key);
+      BOOST_REQUIRE_EQUAL(entries.find(findKey) == entries.end(), true);
+   }
+
+   BOOST_REQUIRE_EQUAL(entries.size(), 10);
 
    for(int key = 0; key < 10; ++ key) {
       integer->setValue(key);
       BOOST_REQUIRE_EQUAL(entries.find(findKey) == entries.end(), false);
    }
 }
+
+

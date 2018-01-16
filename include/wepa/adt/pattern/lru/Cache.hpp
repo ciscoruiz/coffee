@@ -48,11 +48,11 @@ namespace adt {
 namespace pattern {
 namespace lru {
 
-template <class _Key, class _Value> class Cache {
+template <class _Key, class _Value, class _Hash = std::hash<_Key>, class _Pred=std::equal_to<_Key> > class Cache {
 public:
    typedef std::list<std::pair<_Key,_Value> > Pairs;
    typedef typename Pairs::iterator pair_iterator;
-   typedef std::unordered_map<_Key, pair_iterator> QuickAccess;
+   typedef std::unordered_map<_Key, pair_iterator, _Hash, _Pred> QuickAccess;
    typedef typename QuickAccess::iterator qa_iterator;
 
    Cache(const int maxSize) : m_maxSize(maxSize){;}
@@ -92,7 +92,7 @@ public:
       }
       else {
          _Value& refValue = Cache<_Key,_Value>::value(ii->second);
-         refValue.operator=(value);
+         refValue = value;
          updateAccess(ii);         
       }   
    }

@@ -57,6 +57,15 @@ class PrimaryKeyBuilder;
 
 class PrimaryKey : public dbms::datatype::Set {
 public:
+   struct EqualSharedPointer {
+      bool operator()(const std::shared_ptr<PrimaryKey>& lhs, const std::shared_ptr<PrimaryKey>& rhs) const {
+         return lhs->compare(rhs) == 0;
+      }
+   };
+   struct HashSharedPointer {
+      size_t operator()(const std::shared_ptr<PrimaryKey>& primaryKey) const;
+   };
+
    PrimaryKey(const PrimaryKeyBuilder& builder);
 
    PrimaryKey& operator= (const PrimaryKey& other) throw (adt::Exception) { Set::operator=(other); return *this; }

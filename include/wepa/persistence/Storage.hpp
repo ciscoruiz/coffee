@@ -64,18 +64,16 @@ class Eraser;
 class Creator;
 
 class Storage : public adt::NamedObject {
-   typedef adt::pattern::lru::Cache<Accessor::ThePrimaryKey, Accessor::TheObject> Cache;
-   
-   struct PtrLess {
-      bool operator () (const PrimaryKey& first, const PrimaryKey& second) throw (adt::RuntimeException) {
-         return first < second;
-      }
-   };
+public:
+
+private:
+   typedef adt::pattern::lru::Cache<Accessor::ThePrimaryKey, Accessor::TheObject, persistence::PrimaryKey::HashSharedPointer, persistence::PrimaryKey::EqualSharedPointer> Cache;
 
    static const int UpperLimitForMaxCacheSize = 4 * 1024;
    static const int LowerLimitForMaxCacheSize = 16;
 
 public:
+
    static const int DefaultMaxCacheSize = 128;
 
    Storage (const char* name, const int maxCacheSize);

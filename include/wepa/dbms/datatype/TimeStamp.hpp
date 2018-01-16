@@ -34,6 +34,8 @@ public:
 
    const char* className() noexcept { return "dbms::datatype::TimeStamp"; }
 
+   size_t hash() const noexcept { return std::hash(m_value); }
+
    wepa_declare_datatype_downcast(TimeStamp)
 
 private:

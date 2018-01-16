@@ -92,6 +92,7 @@ public:
    Set& operator=(const Set& other) noexcept;
 
    int compare(const Set& other) const throw (adt::RuntimeException);
+   int compare(const std::shared_ptr<Set>& other) const throw (adt::RuntimeException) { return compare(*other.get()); }
 
    bool operator==(const Set& other) const noexcept;
    bool operator< (const Set& other) const throw (adt::RuntimeException){ return compare(other) < 0; }

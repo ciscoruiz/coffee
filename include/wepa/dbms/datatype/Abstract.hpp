@@ -95,6 +95,7 @@ public:
    virtual adt::StreamString asString() const noexcept;
 
    virtual std::shared_ptr<Abstract> clone() const noexcept = 0;
+   virtual size_t hash() const noexcept = 0;
 
    virtual const char* className() noexcept = 0;
 

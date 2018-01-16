@@ -49,7 +49,20 @@ persistence::PrimaryKey::PrimaryKey(const PrimaryKeyBuilder& builder) :
 bool persistence::PrimaryKey::matches(const PrimaryKey& other) const
    noexcept
 {
-   return dbms::datatype::Set::operator==(other);
+   if (size() != other.size())
+      return false;
+
+   for (const_data_iterator ii = begin(), maxii = end(); ii != maxii; ii ++) {
+      if (other.constains(PrimaryKey::name(ii)) == false)
+         return false;
+   }
+
+   for (const_data_iterator ii = other.begin(), maxii = other.end(); ii != maxii; ii ++) {
+      if (constains(PrimaryKey::name(ii)) == false)
+         return false;
+   }
+
+   return true;
 }
 
 adt::StreamString persistence::PrimaryKey::asString() const noexcept
@@ -64,3 +77,12 @@ adt::StreamString persistence::PrimaryKey::asString() const noexcept
    return result += "}";
 }
 
+size_t persistence::PrimaryKey::HashSharedPointer::operator()(const std::shared_ptr<PrimaryKey>& primaryKey) const
+{
+   size_t result = primaryKey->size();
+
+   for(PrimaryKey::const_data_iterator ii = primaryKey->begin(), maxii = primaryKey->end(); ii != maxii; ++ ii) {
+      result ^= PrimaryKey::data(ii)->hash();
+   }
+   return result;
+}

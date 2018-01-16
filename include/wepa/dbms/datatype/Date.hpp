@@ -152,6 +152,8 @@ public:
    Date& operator=(const Date&) = delete;
    bool operator==(const Date& other) const noexcept { return m_value == other.m_value; }
 
+   size_t hash() const noexcept { return std::hash<adt::Second::type_t>{}(m_value.getValue()); }
+
    wepa_declare_datatype_downcast(Date)
 
 protected:

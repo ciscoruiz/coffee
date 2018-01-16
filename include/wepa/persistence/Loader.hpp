@@ -40,32 +40,35 @@
 #include <wepa/adt/RuntimeException.hpp>
 
 namespace wepa {
+
+namespace dbms {
+   class GuardStatement;
+}
+
 namespace persistence {
 
-class Storage;
+
 
 class Loader : public Accessor {
 public:
    virtual ~Loader () {;}
 
-   virtual dbms::ResultCode apply(TheConnection& connection, TheObject& object) const
+   virtual dbms::ResultCode apply(dbms::GuardStatement& statement, TheObject& object)
       throw(adt::RuntimeException, dbms::DatabaseException) = 0;
 
-   virtual bool hasToRefresh (TheConnection& connection, TheObject& object) const
+   virtual bool hasToRefresh (dbms::GuardStatement& statement, TheObject& object)
       throw (adt::RuntimeException, dbms::DatabaseException) = 0;
 
    const TheClass& getClass() const noexcept { return m_class; }
    
 protected:
-   Loader (const char* name, const ThePrimaryKey& primaryKey, const TheClass& clazz, const TheStatement& statement) :
-      Accessor(name, primaryKey),
-      m_class(clazz),
-      m_statement(statement)
+   Loader (const char* name, TheStatement& statement, const ThePrimaryKey& primaryKey, const TheClass& clazz) :
+      Accessor(name, statement, primaryKey),
+      m_class(clazz)
    {;}
    
 private:
    TheClass m_class;
-   TheStatement m_statement;
 };
 
 } /* namespace persistence */

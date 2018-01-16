@@ -59,11 +59,6 @@ dbms::ResultCode dbms::Connection::execute(std::shared_ptr<Statement>& statement
 
    adt::DelayMeter <adt::Microsecond> delay;
 
-   if(statement->m_prepared == false) {
-      statement->prepare();
-      statement->m_prepared = true;
-   }
-
    LOG_DEBUG("Using " << asString() << " to run " << statement->asString());
 
    if(statement->requiresCommit() == true && m_rollbackPending == true) {      //(1)

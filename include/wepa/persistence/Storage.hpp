@@ -84,13 +84,13 @@ public:
    unsigned int getHitCounter () const noexcept { return m_hitCounter; }
    unsigned int getFaultCounter () const noexcept { return m_faultCounter; }
 
-   Accessor::TheObject load (Accessor::TheConnection& connection, const Loader& loader) 
+   Accessor::TheObject load (Accessor::TheConnection& connection, Loader& loader)
       throw (adt::RuntimeException, dbms::DatabaseException);
    Accessor::TheObject create (Accessor::TheConnection& connection, const Creator& creator) 
       throw (adt::RuntimeException, dbms::DatabaseException);
-   void save (Accessor::TheConnection& connection, const Recorder& recorder) 
+   void save (Accessor::TheConnection& connection, Recorder& recorder)
       throw (adt::RuntimeException, dbms::DatabaseException);
-   void erase (Accessor::TheConnection& connection, const Eraser& eraser) 
+   void erase (Accessor::TheConnection& connection, Eraser& eraser)
       throw (adt::RuntimeException, dbms::DatabaseException);
 
    operator adt::StreamString () const noexcept { return asString (); }
@@ -106,9 +106,6 @@ private:
    Cache m_cache;
    mutable unsigned int m_hitCounter;
    mutable unsigned int m_faultCounter;
-
-   persistence::Accessor::TheObject createEntry(Accessor::TheConnection& connection, const Loader& loader)
-      throw(adt::RuntimeException, dbms::DatabaseException);
 };
 
 } /* namespace persistence */

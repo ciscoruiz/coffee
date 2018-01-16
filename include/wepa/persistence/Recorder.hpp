@@ -41,6 +41,10 @@
 #include <wepa/adt/RuntimeException.hpp>
 
 namespace wepa {
+
+namespace dbms {
+   class GuardStatement;
+}
 namespace persistence {
 
 class Object;
@@ -51,13 +55,13 @@ public:
 
    const Accessor::TheObject& getObject() const noexcept { return m_object; }
 
-   virtual dbms::ResultCode apply(TheConnection& connection) const
+   virtual dbms::ResultCode apply(dbms::GuardStatement& statement)
       throw(adt::RuntimeException, dbms::DatabaseException) = 0;
 
 protected:
-   Recorder (const char* name, const Accessor::TheObject& object) :
-      Accessor(name, object->getPrimaryKey()),
-	  m_object(object)
+   Recorder (const char* name, TheStatement& statement, const Accessor::TheObject& object) :
+      Accessor(name, statement, object->getPrimaryKey()),
+      m_object(object)
    {;}
 
 private:

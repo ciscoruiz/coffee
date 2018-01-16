@@ -50,7 +50,8 @@
 #include <wepa/persistence/Creator.hpp>
 #include <wepa/persistence/Object.hpp>
 #include <wepa/persistence/Class.hpp>
-
+#include <wepa/persistence/PrimaryKeyBuilder.hpp>
+#include <wepa/persistence/ClassBuilder.hpp>
 
 #include <wepa/dbms/Database.hpp>
 #include <wepa/dbms/GuardConnection.hpp>
@@ -66,275 +67,14 @@
 #include "../dbms/MockLowLevelRecord.hpp"
 #include "../dbms/MockConnection.hpp"
 
-namespace wepa {
-
-namespace test_persistence {
-
-using namespace wepa::persistence;
-using namespace wepa::dbms;
-using namespace wepa::mock;
-
-
-/******
- * Low level data access
- */
-class MyReadStatement : public dbms::Statement {
-public:
-   MyReadStatement(const dbms::Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
-      dbms::Statement(database, name, expression, actionOnError),
-      m_isValid(false)
-   {;}
-
-private:
-   bool m_isValid;
-   mock::MockLowLevelRecord m_selection;
-
-   void do_prepare(dbms::Connection* connection) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-   dbms::ResultCode do_execute(dbms::Connection& connection) throw(adt::RuntimeException, dbms::DatabaseException);
-   bool do_fetch() throw(adt::RuntimeException, dbms::DatabaseException);
-};
-
-class MyWriteStatement : public dbms::Statement {
-public:
-   MyWriteStatement(const dbms::Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
-      dbms::Statement(database, name, expression, actionOnError),
-      m_isValid(false)
-   {;}
-
-private:
-   bool m_isValid;
-   mock::MockLowLevelRecord m_selection;
-
-   void do_prepare(dbms::Connection* connection) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-   dbms::ResultCode do_execute(dbms::Connection& connection) throw(adt::RuntimeException, dbms::DatabaseException);
-   bool do_fetch() throw(adt::RuntimeException, dbms::DatabaseException) { return false; }
-};
-
-
-class MyDatabase : public mock::MockDatabase {
-public:
-   MyDatabase(app::Application& app) : mock::MockDatabase(app) { fillup(); }
-   MyDatabase(const char* name) : mock::MockDatabase(name) { fillup(); }
-
-private:
-   void fillup() {
-      mock::MockLowLevelRecord record;
-      for(int ii = 0; ii < 10; ++ ii) {
-         record.m_id = ii;
-         record.m_name = adt::StreamString("the name ") << ii;
-         add(record);
-      }
-   }
-   std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
-      throw(adt::RuntimeException)
-   {
-      std::shared_ptr<Statement> result;
-
-      if(expression == "read" || expression == "READ")
-         result = std::make_shared<MyReadStatement>(*this, name, expression.c_str(), actionOnError);
-
-      if(expression == "write" || expression == "delete")
-         result = std::make_shared<MyWriteStatement>(*this, name, expression.c_str(), actionOnError);
-
-      if(!result)
-         WEPA_THROW_EXCEPTION(name << " invalid statement");
-
-      return result;
-   }
-};
-
-class CustomerObjectWrapper {
-public:
-   CustomerObjectWrapper(std::shared_ptr<Object>& object) : m_object(object) { }
-
-   int getId() const throw(dbms::InvalidDataException) { return m_object->getInteger(0); }
-   const std::string& getName() const throw(dbms::InvalidDataException) { return m_object->getString(1); }
-
-   void setId(const int value) throw(dbms::InvalidDataException)  { m_object->setInteger(0, value); }
-   void setName(const std::string& value) throw(dbms::InvalidDataException) { m_object->setString(1, value); }
-
-private:
-   std::shared_ptr<Object> m_object;
-};
-
-struct MockCustomerLoader : public Loader {
-public:
-   MockCustomerLoader(const ThePrimaryKey& primaryKey, const TheClass& clazz, const TheStatement& statement) :
-      Loader("MockCustomerLoader", primaryKey, clazz, statement),
-      m_id(0)
-   {;}
-
-   void setId(const int id) throw(adt::RuntimeException) { m_id = id; }
-
-private:
-   int m_id;
-
-   dbms::ResultCode apply(TheConnection& connection, TheObject& object) const throw(adt::RuntimeException, dbms::DatabaseException);
-   virtual bool hasToRefresh (TheConnection& connection, TheObject& object) const throw (adt::RuntimeException, dbms::DatabaseException) { return true; }
-};
-
-struct MockCustomerRecorder : public Recorder {
-public:
-   MockCustomerRecorder(const TheObject& object) : Recorder("MockCustomerRecorder", object) {;}
-
-private:
-   dbms::ResultCode apply(TheConnection& connection) const throw(adt::RuntimeException, dbms::DatabaseException);
-
-};
-
-struct MockCustomerEraser : public Eraser {
-public:
-   MockCustomerEraser(const ThePrimaryKey& primaryKey) : Eraser("MockCustomerEraser", primaryKey) {;}
-
-private:
-   dbms::ResultCode apply(TheConnection& connection) const throw(adt::RuntimeException, dbms::DatabaseException);
-};
-
-struct MockCustomerCreator : public Creator {
-public:
-   MockCustomerCreator(const ThePrimaryKey& primaryKey, const TheClass& clazz) : Creator("MockCustomerCreator", primaryKey, clazz) {;}
-
-private:
-   dbms::ResultCode apply(TheConnection& connection, TheObject& object) const throw(adt::RuntimeException, dbms::DatabaseException);
-};
-
-}
-}
-
-using namespace wepa;
-using namespace wepa::dbms;
-
-dbms::ResultCode test_persistence::MyReadStatement::do_execute(dbms::Connection& connection)
-   throw(adt::RuntimeException, dbms::DatabaseException)
-{
-   m_isValid = false;
-
-   mock::MockConnection& _connection(static_cast <mock::MockConnection&>(connection));
-
-   int searchedId = wepa_datatype_downcast(dbms::datatype::Integer, getInputData(0)).getValue();
-
-   for(auto ii : _connection.getContainer()) {
-      if(ii.second.m_id == searchedId) {
-         m_selection = ii.second;
-         m_isValid = true;
-      }
-   }
-
-   ResultCode result(getDatabase(),(m_isValid == false) ? MyDatabase::NotFound: MyDatabase::Successful);
-
-   LOG_DEBUG("Searching ID=" << searchedId << " | n-size=" << _connection.getContainer().size() << " | Result =" << result);
-
-   return result;
-}
-
-bool test_persistence::MyReadStatement::do_fetch() throw(adt::RuntimeException, DatabaseException)
-{
-   if(m_isValid == true) {
-      m_isValid = false;
-
-      wepa_datatype_downcast(dbms::datatype::String, getOutputData(0)).setValue(m_selection.m_name);
-
-      return true;
-   }
-
-   return false;
-}
-
-dbms::ResultCode test_persistence::MyWriteStatement::do_execute(dbms::Connection& connection)
-   throw(adt::RuntimeException, dbms::DatabaseException)
-{
-   dbms::ResultCode result(getDatabase(), MyDatabase::Successful);
-
-   mock::MockConnection::OpCode opCode =(getExpression() == "write") ? mock::MockConnection::Write: mock::MockConnection::Delete;
-
-   mock::MockLowLevelRecord record;
-
-   record.m_id =(wepa_datatype_downcast(dbms::datatype::Integer, getInputData(0)).getValue());
-
-   if(record.m_id == 666) {
-      result.initialize(MyDatabase::NotFound, NULL);
-      return result;
-   }
-
-   if(opCode != mock::MockConnection::Delete) {
-      record.m_name =(wepa_datatype_downcast(dbms::datatype::String, getInputData(1)).getValue());
-   }
-
-   LOG_DEBUG("ID = " << record.m_id);
-
-   static_cast <mock::MockConnection&>(connection).addOperation(opCode, record);
-
-   return result;
-}
-
-datatype::Abstract* test_persistence::MockCustomerClass::do_createMember(const int columnNumber) const noexcept
-{
-   datatype::Abstract* result = NULL;
-
-   switch(columnNumber) {
-   case 0: result = new datatype::Integer("id"); break;
-   case 1: result = new datatype::String("name", 64, dbms::datatype::Constraint::CanBeNull); break;
-   }
-
-   return result;
-}
-
-dbms::ResultCode test_persistence::MockCustomerLoader::do_apply(dbms::GuardStatement& statement, GuardClass& _class, Object& object)
-   throw(adt::RuntimeException, dbms::DatabaseException)
-{
-   dbms::ResultCode result = statement.execute();
-
-   if(result.successful() == true) {
-      if(statement.fetch()) {
-         CustomerObjectWrapper& customer = static_cast <CustomerObjectWrapper&>(object);
-         customer.setId(this->readInteger(_class, 0));
-         customer.setName(this->readCString(_class, 1));
-      }
-   }
-
-   return result;
-}
-
-dbms::ResultCode test_persistence::MockCustomerRecorder::do_apply(dbms::GuardStatement& statement, GuardClass& _class, Object& object)
-   throw(adt::RuntimeException, dbms::DatabaseException)
-{
-   test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(object);
-
-   this->setMember(_class, 0, customer.getId());
-   this->setMember(_class, 1, customer.getName());
-
-   return statement.execute();
-}
-
-dbms::ResultCode test_persistence::MockCustomerEraser::do_apply(dbms::GuardStatement& statement, GuardClass& _class, Object& object)
-   throw(adt::RuntimeException, dbms::DatabaseException)
-{
-   test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(object);
-
-   this->setMember(_class, 0, customer.getId());
-
-   return statement.execute();
-}
-
-dbms::ResultCode test_persistence::MockCustomerCreator::do_apply(dbms::GuardStatement& statement, GuardClass& _class, Object& object)
-   throw(adt::RuntimeException, dbms::DatabaseException)
-{
-   LOG_THIS_METHOD();
-
-   test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(object);
-
-   customer.setId(this->readInteger(_class, 0));
-   customer.setName(this->readCString(_class, 1));
-
-   return dbms::ResultCode(statement->getDatabase(), mock::MockDatabase::Successful);
-}
+#include "PersistenceMocks.hpp"
 
 using namespace wepa;
 using namespace wepa::mock;
 
-BOOST_AUTO_TEST_CASE(persistence_storage_readonly)
+BOOST_AUTO_TEST_CASE(persistence_storage_read)
 {
-   test_persistence::MyDatabase database("persistence_storage_readonly");
+   test_persistence::MyDatabase database("persistence_storage_read");
 
    BOOST_REQUIRE_NO_THROW(database.externalInitialize());
 
@@ -343,699 +83,646 @@ BOOST_AUTO_TEST_CASE(persistence_storage_readonly)
    auto conn0 = database.createConnection("0", "0", "0");
    auto stReader = database.createStatement("read_only", "read");
 
-   persistence::Repository repository("persistence_storage_readonly");
+   persistence::Repository repository("persistence_storage_read");
    auto ro_storage = repository.createStorage("storage_readonly", persistence::Storage::DefaultMaxCacheSize);
 
-   test_persistence::MockCustomerClass _class;
+   persistence::PrimaryKeyBuilder pkBuilder;
+   pkBuilder.add(std::make_shared<dbms::datatype::Integer>("id"));
+   auto pkClass = pkBuilder.build();
 
-   test_persistence::MockCustomerLoader myLoader;
+   persistence::ClassBuilder builder("customer");
+   builder.set(pkClass).add(std::make_shared<dbms::datatype::String>("name", 64));
+
+
+   auto pkInstance = pkBuilder.build();
+   auto clazz = builder.build();
+
+   test_persistence::MockCustomerLoader myLoader(stReader, pkInstance, clazz);
 
    if(true) {
-      persistence::GuardClass guardCustomer(_class);
+      wepa_datatype_downcast(dbms::datatype::Integer, pkInstance->find("id"))->setValue(6);
 
-      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 6));
-      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(ro_storage->load(*conn0, guardCustomer, myLoader));
+      test_persistence::CustomerObjectWrapper customer(ro_storage->load(conn0, myLoader));
 
       BOOST_REQUIRE_EQUAL(customer.getId(), 6);
       BOOST_REQUIRE_EQUAL(customer.getName(), "the name 6");
 
-      test_persistence::CustomerObjectWrapper& customer2 = static_cast <test_persistence::CustomerObjectWrapper&>(ro_storage->load(*conn0, guardCustomer, myLoader));
+      test_persistence::CustomerObjectWrapper customer2(ro_storage->load(conn0, myLoader));
 
-      BOOST_REQUIRE_EQUAL(&customer, &customer2);
+      BOOST_REQUIRE_EQUAL(customer.getId(), customer2.getId());
    }
 
    BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 1);
    BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 1);
-   BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 0);
 
    if(true) {
-      persistence::GuardClass guardCustomer(_class);
+      wepa_datatype_downcast(dbms::datatype::Integer, pkInstance->find("id"))->setValue(7);
 
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 7));
-      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(ro_storage->load(*conn0, guardCustomer, myLoader));
+      test_persistence::CustomerObjectWrapper customer(ro_storage->load(conn0, myLoader));
 
       BOOST_REQUIRE_EQUAL(customer.getId(), 7);
       BOOST_REQUIRE_EQUAL(customer.getName(), "the name 7");
 
-      BOOST_REQUIRE_EQUAL(ro_storage->release(guardCustomer, customer), true);
-      BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
-      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 1);
+      BOOST_REQUIRE_EQUAL(customer.getId(), 7);
+      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 7");
 
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 7));
-      test_persistence::CustomerObjectWrapper& customer2 = static_cast <test_persistence::CustomerObjectWrapper&>(ro_storage->load(*conn0, guardCustomer, myLoader));
+      test_persistence::CustomerObjectWrapper customer2(ro_storage->load(conn0, myLoader));
 
-      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 0);
-
-      BOOST_REQUIRE_EQUAL(customer2.getId(), 7);
-      BOOST_REQUIRE_EQUAL(customer2.getName(), "the name 7");
-      BOOST_REQUIRE_EQUAL(ro_storage->release(guardCustomer, customer2), true);
-      BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
-
-      BOOST_REQUIRE_EQUAL(&customer, &customer2);
-   }
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class);
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 77));
-      BOOST_REQUIRE_THROW(ro_storage->load(*conn0, guardCustomer, myLoader), dbms::DatabaseException);
-   }
-
-   BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 3);
-   BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 2);
-   BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), myLoader.getApplyCounter());
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class, "Reload record 6");
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 6));
-      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(ro_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(customer.getId(), 6);
-      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 6");
-   }
-
-   BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 3);
-   BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 3);
-   BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), myLoader.getApplyCounter());
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class, "Reload record 6");
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 8));
-      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(ro_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(customer.getId(), 8);
-
-      BOOST_REQUIRE_EQUAL(ro_storage->release(guardCustomer, customer), true);
-
-      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 2);
-
-      test_persistence::CustomerObjectWrapper& customer2 = static_cast <test_persistence::CustomerObjectWrapper&>(ro_storage->clone(guardCustomer, customer));
-
-      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 1);
-
-      BOOST_REQUIRE_EQUAL(customer.getId(), 8);
-
-      BOOST_REQUIRE_EQUAL(ro_storage->release(guardCustomer, customer), true);
-
-      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 2);
-   }
-
-   BOOST_REQUIRE_NO_THROW(database.externalStop());
-}
-
-BOOST_AUTO_TEST_CASE(persistence_storage_readonly_ignore_issue)
-{
-   test_persistence::MyDatabase database("persistence_storage_readonly_ignore_issue");
-
-   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
-
-   dbms::Connection* conn0 = database.createConnection("0", "0", "0");
-   dbms::Statement* stReader = database.createStatement("read_only_ignore_issue", "read", dbms::ActionOnError::Ignore);
-
-   persistence::Repository repository("persistence_storage_readonly_ignore_issue");
-   persistence::Storage* ro_storage = repository.createStorage(0, "storage_readonly", persistence::Storage::AccessMode::ReadOnly);
-
-   test_persistence::MockCustomerClass _class;
-
-   BOOST_REQUIRE_NE(ro_storage,(void*) 0);
-
-   test_persistence::MockCustomerLoader myLoader;
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class);
-
-      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 6));
-      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(ro_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(customer.getId(), 6);
-      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 6");
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 600));
-      BOOST_REQUIRE_THROW(ro_storage->load(*conn0, guardCustomer, myLoader), dbms::DatabaseException);
-   }
-
-   BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
-   BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 0);
-   BOOST_REQUIRE_EQUAL(myLoader.getApplyCounter(), 2);
-
-   BOOST_REQUIRE_NO_THROW(database.externalStop());
-}
-
-BOOST_AUTO_TEST_CASE(persistence_storage_readwrite)
-{
-   test_persistence::MyDatabase database("persistence_storage_readwrite");
-
-   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
-
-   dbms::Connection* conn0 = database.createConnection("0", "0", "0");
-   dbms::Statement* stReader = database.createStatement("read_only", "read");
-
-   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
-
-   persistence::Repository repository("persistence_storage_readwrite");
-   persistence::Storage* rw_storage = repository.createStorage(0, "storage_readwrite", persistence::Storage::AccessMode::ReadWrite);
-
-   test_persistence::MockCustomerClass _class;
-
-   BOOST_REQUIRE_NE(rw_storage,(void*) 0);
-
-   test_persistence::MockCustomerLoader myLoader;
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class);
-
-      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 9));
-      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(rw_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(customer.getId(), 9);
-      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 9");
-
-      test_persistence::CustomerObjectWrapper& customer2 = static_cast <test_persistence::CustomerObjectWrapper&>(rw_storage->load(*conn0, guardCustomer, myLoader));
-      BOOST_REQUIRE_EQUAL(&customer, &customer2);
-
-      BOOST_REQUIRE_EQUAL(rw_storage->getFaultCounter(), 1);
-      BOOST_REQUIRE_EQUAL(rw_storage->getHitCounter(), 1);
-      BOOST_REQUIRE_EQUAL(myLoader.getApplyCounter(), 2);
-
-      BOOST_REQUIRE_EQUAL(rw_storage->release(guardCustomer, customer), false);
-      BOOST_REQUIRE_EQUAL(rw_storage->release(guardCustomer, customer2), true);
-   }
-
-   if(true) {
-      LOG_DEBUG("Reload record 9...");
-      persistence::GuardClass guardCustomer(_class);
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 9));
-      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(rw_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(customer.getId(), 9);
-      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 9");
-
-      mock::MockLowLevelRecord record;
-      record.m_id = 9;
-      record.m_name = "updated name 9";
-      database.update(record);
-
-      test_persistence::CustomerObjectWrapper& customer2 = static_cast <test_persistence::CustomerObjectWrapper&>(rw_storage->load(*conn0, guardCustomer, myLoader));
-      BOOST_REQUIRE_EQUAL(&customer, &customer2);
-
-      BOOST_REQUIRE_EQUAL(customer.getId(), 9);
-      BOOST_REQUIRE_EQUAL(customer.getName(), "updated name 9");
-
-      BOOST_REQUIRE_EQUAL(rw_storage->getFaultCounter(), 1);
-      BOOST_REQUIRE_EQUAL(rw_storage->getHitCounter(), 3);
-      BOOST_REQUIRE_EQUAL(myLoader.getApplyCounter(), 4);
-
-      BOOST_REQUIRE_EQUAL(rw_storage->release(guardCustomer, customer), false);
-      BOOST_REQUIRE_EQUAL(rw_storage->release(guardCustomer, customer2), true);
-   }
-
-   BOOST_REQUIRE_NO_THROW(database.externalStop());
-}
-
-BOOST_AUTO_TEST_CASE(persistence_storage_readonly_avoid_write)
-{
-   test_persistence::MyDatabase database("persistence_storage_readonly");
-
-   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
-
-   dbms::Connection* conn0 = database.createConnection("0", "0", "0");
-   dbms::Statement* stReader = database.createStatement("read_only", "read");
-   dbms::Statement* stWriter = database.createStatement("writer", "write");
-
-   persistence::Repository repository("persistence_storage_readonly_avoid_write");
-   persistence::Storage* ro_storage = repository.createStorage(0, "storage_readonly", persistence::Storage::AccessMode::ReadOnly);
-
-   test_persistence::MockCustomerClass _class;
-
-   BOOST_REQUIRE_NE(ro_storage,(void*) 0);
-
-   test_persistence::MockCustomerLoader myLoader;
-   test_persistence::MockCustomerRecorder myRecorder;
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class);
-
-      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 6));
-      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(ro_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(customer.getId(), 6);
-      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 6");
-   }
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class);
-
-      BOOST_REQUIRE_NO_THROW(myRecorder.initialize(guardCustomer, stWriter));
-
-      try {
-         ro_storage->save(*conn0, guardCustomer, myRecorder);
-         BOOST_REQUIRE_EQUAL(true, false);
-      }
-      catch(adt::RuntimeException& ex) {
-         std::cout << ex.asString() << std::endl;
-         std::string error = ex.what();
-         BOOST_REQUIRE_NE(error.find("can not write on a read-only storage"), std::string::npos);
-      }
-   }
-
-   BOOST_REQUIRE_NO_THROW(database.externalStop());
-}
-
-BOOST_AUTO_TEST_CASE(persistence_storage_write)
-{
-   test_persistence::MyDatabase database("persistence_storage_write");
-
-   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
-
-   mock::MockConnection* conn0 = static_cast <mock::MockConnection*>(database.createConnection("0", "0", "0"));
-   dbms::Statement* stReader = database.createStatement("read_only", "read");
-   dbms::Statement* stWriter = database.createStatement("writer", "write");
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
-
-   persistence::Repository repository("persistence_storage_write");
-   persistence::Storage* wr_storage = repository.createStorage(0, "storage_write", persistence::Storage::AccessMode::ReadWrite);
-
-   test_persistence::MockCustomerClass _class;
-
-   BOOST_REQUIRE_NE(wr_storage,(void*) 0);
-
-   test_persistence::MockCustomerLoader myLoader;
-   test_persistence::MockCustomerRecorder myRecorder;
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class);
-
-      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 2));
-      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(wr_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(customer.getId(), 2);
-      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 2");
-
-      BOOST_REQUIRE_NO_THROW(myRecorder.initialize(guardCustomer, stWriter));
-
-      customer.setName("updated name 2");
-
-      BOOST_REQUIRE_THROW(myRecorder.getObject(), adt::RuntimeException);
-      BOOST_REQUIRE_NO_THROW(myRecorder.setObject(customer));
-
-      BOOST_REQUIRE_NO_THROW(wr_storage->save(*conn0, guardCustomer, myRecorder));
-
-      BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   }
-
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 10);
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class);
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 2));
-      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(wr_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(customer.getId(), 2);
-      BOOST_REQUIRE_EQUAL(customer.getName(), "updated name 2");
-   }
-
-   BOOST_REQUIRE_NO_THROW(database.externalStop());
-}
-
-BOOST_AUTO_TEST_CASE(persistence_storage_erase)
-{
-   test_persistence::MyDatabase database("dbms_with_app");
-
-   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
-
-   mock::MockConnection* conn0 = static_cast <mock::MockConnection*>(database.createConnection("0", "0", "0"));
-   dbms::Statement* stReader = database.createStatement("read_only", "read");
-   dbms::Statement* stEraser = database.createStatement("eraser", "delete");
-
-   persistence::Repository repository("persistence_storage_erase");
-   persistence::Storage* wr_storage = repository.createStorage(0, "storage_erase", persistence::Storage::AccessMode::ReadWrite);
-
-   test_persistence::MockCustomerClass _class;
-
-   BOOST_REQUIRE_NE(wr_storage,(void*) 0);
-
-   test_persistence::MockCustomerLoader myLoader;
-   test_persistence::MockCustomerEraser myEraser;
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class);
-
-      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 2));
-      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(wr_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(customer.getId(), 2);
-      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 2");
-
-      BOOST_REQUIRE_NO_THROW(myEraser.initialize(guardCustomer, stEraser));
-
-      BOOST_REQUIRE_THROW(myEraser.getObject(), adt::RuntimeException);
-
-      BOOST_REQUIRE_NO_THROW(customer.getPrimaryKey());
-
-      myEraser.setObject(customer);
-
-      BOOST_REQUIRE_NO_THROW(myEraser.getObject());
-      BOOST_REQUIRE_NO_THROW(myEraser.getObject().getPrimaryKey());
-
-      try {
-         wr_storage->erase(*conn0, guardCustomer, myEraser);
-      }
-      catch(adt::RuntimeException& ex) {
-         std::cout << ex.asString() << std::endl;
-         BOOST_REQUIRE_EQUAL(std::string("none"), ex.what());
-      }
-
-      BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   }
-
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 9);
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class);
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 4));
-      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(wr_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(customer.getId(), 4);
-      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 4");
-
-      BOOST_REQUIRE_NO_THROW(wr_storage->load(*conn0, guardCustomer, myLoader));
-
-      try {
-         myEraser.setObject(customer);
-         wr_storage->erase(*conn0, guardCustomer, myEraser);
-         BOOST_REQUIRE_EQUAL(true, false);
-      }
-      catch(adt::RuntimeException& ex) {
-         std::cout << ex.asString() << std::endl;
-         std::string error = ex.what();
-         BOOST_REQUIRE_NE(error.find("due to multiple references"), std::string::npos);
-      }
-   }
-
-   BOOST_REQUIRE_NO_THROW(database.externalStop());
-}
-
-BOOST_AUTO_TEST_CASE(persistence_storage_create)
-{
-   test_persistence::MyDatabase database("persistence_storage_create");
-
-   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
-
-   mock::MockConnection* conn0 = static_cast <mock::MockConnection*>(database.createConnection("0", "0", "0"));
-
-   BOOST_REQUIRE_NE(conn0,(void*) 0);
-
-   dbms::Statement* stReader = database.createStatement("read_only", "read");
-
-   BOOST_REQUIRE_NE(stReader,(void*) 0);
-
-   dbms::Statement* stCreator = database.createStatement("creator", "none");
-
-   BOOST_REQUIRE_NE(stCreator,(void*) 0);
-
-   dbms::Statement* stWriter = database.createStatement("writer", "write");
-
-   persistence::Repository repository("persistence_storage_create");
-   persistence::Storage* wr_storage = repository.createStorage(0, "storage_create", persistence::Storage::AccessMode::ReadWrite);
-
-   test_persistence::MockCustomerClass _class;
-
-   BOOST_REQUIRE_NE(wr_storage,(void*) 0);
-
-   test_persistence::MockCustomerRecorder myRecorder;
-   test_persistence::MockCustomerCreator myCreator;
-   test_persistence::MockCustomerLoader myLoader;
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class);
-
-      BOOST_CHECK_NO_THROW(myCreator.initialize(guardCustomer, stCreator));
-
-      myCreator.setId(guardCustomer, 1000);
-      myCreator.setName(guardCustomer, "the name 1000");
-      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(wr_storage->create(*conn0, guardCustomer, myCreator));
-
-      LOG_DEBUG("Customer has been created");
-
-      BOOST_REQUIRE_NO_THROW(myRecorder.initialize(guardCustomer, stWriter));
-      myRecorder.setObject(customer);
-
-      BOOST_REQUIRE_NO_THROW(wr_storage->save(*conn0, guardCustomer, myRecorder));
-
-      BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   }
-
-   BOOST_REQUIRE_EQUAL(database.container_size(), 11);
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class);
-
-      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 1000));
-      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(wr_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(customer.getId(), 1000);
-      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 1000");
-   }
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class);
-
-      // Accessor already initialized
-      BOOST_CHECK_THROW(myCreator.initialize(guardCustomer, stCreator), adt::RuntimeException);
-
-      myCreator.setId(guardCustomer, 1000);
-      myCreator.setName(guardCustomer, "the name 1000");
-
-      try {
-         wr_storage->create(*conn0, guardCustomer, myCreator);
-         BOOST_REQUIRE_EQUAL(false, true);
-      }
-      catch(adt::RuntimeException& ex) {
-         std::cout << ex.asString() << std::endl;
-         BOOST_REQUIRE_NE(ex.asString().find("PrimaryKey is already registered"), std::string::npos);
-      }
-   }
-
-   BOOST_REQUIRE_NO_THROW(database.externalStop());
-}
-
-BOOST_AUTO_TEST_CASE(persistence_storage_cache)
-{
-   test_persistence::MyDatabase database("persistence_storage_cache");
-
-   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
-
-   mock::MockConnection* conn0 = static_cast <mock::MockConnection*>(database.createConnection("0", "0", "0"));
-
-   persistence::Repository repository("persistence_storage_cache");
-   persistence::Storage* wr_storage = repository.createStorage(0, "storage_cache", persistence::Storage::AccessMode::ReadWrite);
-
-   BOOST_REQUIRE_THROW(wr_storage->setMaxCacheSize(10000), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(wr_storage->setMaxCacheSize(0), adt::RuntimeException);
-
-   BOOST_REQUIRE_NO_THROW(wr_storage->setMaxCacheSize(16));
-
-   test_persistence::MockCustomerClass _class;
-
-   BOOST_REQUIRE_NE(wr_storage,(void*) 0);
-
-   test_persistence::MockCustomerLoader myLoader;
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class, "Register 100 new records");
-      test_persistence::MockCustomerCreator myCreator;
-      test_persistence::MockCustomerRecorder myRecorder;
-
-      BOOST_CHECK_NO_THROW(myCreator.initialize(guardCustomer, database.createStatement("creator", "none")));
-      BOOST_REQUIRE_NO_THROW(myRecorder.initialize(guardCustomer, database.createStatement("writer", "write")));
-
-      adt::StreamString name;
-
-      int initSize = database.container_size();
-
-      BOOST_REQUIRE_EQUAL(wr_storage->getSize(), 0);
-
-      for(int ii = 100; ii < 200; ++ ii) {
-         myCreator.setId(guardCustomer, ii);
-         myCreator.setName(guardCustomer, adt::StreamString("the name ") << ii);
-
-         persistence::Object& object = wr_storage->create(*conn0, guardCustomer, myCreator);
-
-         BOOST_REQUIRE_NO_THROW(myRecorder.setObject(object));
-
-         BOOST_REQUIRE_NO_THROW(wr_storage->save(*conn0, guardCustomer, myRecorder));
-
-         BOOST_REQUIRE_EQUAL(initSize +(ii - 99), database.container_size());
-
-         BOOST_REQUIRE_EQUAL(wr_storage->release(guardCustomer, object), true);
-
-         if((ii - 100) > 16)
-            BOOST_REQUIRE_EQUAL(wr_storage->getCacheSize(), 16);
-      }
-
-      BOOST_REQUIRE_EQUAL(wr_storage->getSize(), 16);
-   }
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class, "Read object stored in cache");
-
-      dbms::Statement* stReader = database.createStatement("read_only", "read");
-
-      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
-
-      for(int ii = 200 - 16; ii < 200; ++ ii) {
-         BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, ii));
-
-         test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(wr_storage->load(*conn0, guardCustomer, myLoader));
-
-         BOOST_REQUIRE_EQUAL(customer.getId(), ii);
-         BOOST_REQUIRE_EQUAL(customer.getName(), adt::StreamString("the name ") << ii);
-
-         BOOST_REQUIRE_EQUAL(wr_storage->getCacheSize(), 15);
-
-         BOOST_REQUIRE_EQUAL(wr_storage->release(guardCustomer, customer), true);
-      }
-
-      BOOST_REQUIRE_EQUAL(wr_storage->getHitCounter(), 16);
-      BOOST_REQUIRE_EQUAL(wr_storage->getCacheSize(), 16);
+      BOOST_REQUIRE_EQUAL(customer.getId(), customer2.getId());
    }
 }
 
-BOOST_AUTO_TEST_CASE(persistence_storage_using_auto)
-{
-   test_persistence::MyDatabase database("persistence_storage_using_auto");
-
-   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
-
-   dbms::Connection* conn0 = database.createConnection("0", "0", "0");
-   dbms::Statement* stReader = database.createStatement("read_only", "read");
-
-   persistence::Repository repository("persistence_storage_using_auto");
-   persistence::Storage* ro_storage = repository.createStorage(0, "storage_using_auto", persistence::Storage::AccessMode::ReadOnly);
-
-   test_persistence::MockCustomerClass _class;
-
-   BOOST_REQUIRE_NE(ro_storage,(void*) 0);
-
-   test_persistence::MockCustomerLoader myLoader;
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class, "First load 6");
-
-      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 6));
-      persistence::AutoObject<test_persistence::CustomerObjectWrapper> customer(ro_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(customer->getId(), 6);
-      BOOST_REQUIRE_EQUAL(customer->getName(), "the name 6");
-
-      persistence::AutoObject<test_persistence::CustomerObjectWrapper> customer2(ro_storage->load(*conn0, guardCustomer, myLoader));
-   }
-
-   BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 1);
-   BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 1);
-   BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 1);
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class, "Second load 7");
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 7));
-      persistence::AutoObject<test_persistence::CustomerObjectWrapper> customer(ro_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(customer->getId(), 7);
-      BOOST_REQUIRE_EQUAL(customer->getName(), "the name 7");
-
-      BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
-      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 1);
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 7));
-      persistence::AutoObject<test_persistence::CustomerObjectWrapper> customer2(ro_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 1);
-
-      BOOST_REQUIRE_EQUAL(customer2->getId(), 7);
-      BOOST_REQUIRE_EQUAL(customer2->getName(), "the name 7");
-
-      BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
-      BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 2);
-
-      BOOST_REQUIRE_EQUAL(&customer.get(), &customer2.get());
-   }
-
-   BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
-   BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 2);
-   BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 2);
-
-   if(true) {
-      persistence::GuardClass guardCustomer(_class, "Reload records");
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 6));
-      persistence::AutoObject<test_persistence::CustomerObjectWrapper> customer(ro_storage->load(*conn0, guardCustomer, myLoader));
-
-      BOOST_REQUIRE_EQUAL(customer->getId(), 6);
-      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 1);
-      BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
-      BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 3);
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 6));
-      customer = ro_storage->load(*conn0, guardCustomer, myLoader);
-
-      BOOST_REQUIRE_EQUAL(customer->getId(), 6);
-      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 1);
-      BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
-      BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 4);
-
-      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 7));
-      customer = ro_storage->load(*conn0, guardCustomer, myLoader);
-
-      BOOST_REQUIRE_EQUAL(customer->getId(), 7);
-      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 1);
-      BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
-      BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 5);
-   }
-
-   BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 2);
-
-   BOOST_REQUIRE_NO_THROW(database.externalStop());
-}
+//
+//BOOST_AUTO_TEST_CASE(persistence_storage_read_ignore_issue)
+//{
+//   test_persistence::MyDatabase database("persistence_storage_read_ignore_issue");
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
+//
+//   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+//
+//   dbms::Connection* conn0 = database.createConnection("0", "0", "0");
+//   dbms::Statement* stReader = database.createStatement("read_only_ignore_issue", "read", dbms::ActionOnError::Ignore);
+//
+//   persistence::Repository repository("persistence_storage_read_ignore_issue");
+//   persistence::Storage* ro_storage = repository.createStorage(0, "storage_readonly", persistence::Storage::AccessMode::ReadOnly);
+//
+//   test_persistence::MockCustomerClass _class;
+//
+//   BOOST_REQUIRE_NE(ro_storage,(void*) 0);
+//
+//   test_persistence::MockCustomerLoader myLoader;
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class);
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 6));
+//      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(ro_storage->load(*conn0, guardCustomer, myLoader));
+//
+//      BOOST_REQUIRE_EQUAL(customer.getId(), 6);
+//      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 6");
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 600));
+//      BOOST_REQUIRE_THROW(ro_storage->load(*conn0, guardCustomer, myLoader), dbms::DatabaseException);
+//   }
+//
+//   BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
+//   BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 0);
+//   BOOST_REQUIRE_EQUAL(myLoader.getApplyCounter(), 2);
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalStop());
+//}
+//
+//BOOST_AUTO_TEST_CASE(persistence_storage_readwrite)
+//{
+//   test_persistence::MyDatabase database("persistence_storage_readwrite");
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
+//
+//   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+//
+//   dbms::Connection* conn0 = database.createConnection("0", "0", "0");
+//   dbms::Statement* stReader = database.createStatement("read_only", "read");
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
+//
+//   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+//
+//   persistence::Repository repository("persistence_storage_readwrite");
+//   persistence::Storage* rw_storage = repository.createStorage(0, "storage_readwrite", persistence::Storage::AccessMode::ReadWrite);
+//
+//   test_persistence::MockCustomerClass _class;
+//
+//   BOOST_REQUIRE_NE(rw_storage,(void*) 0);
+//
+//   test_persistence::MockCustomerLoader myLoader;
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class);
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 9));
+//      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(rw_storage->load(*conn0, guardCustomer, myLoader));
+//
+//      BOOST_REQUIRE_EQUAL(customer.getId(), 9);
+//      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 9");
+//
+//      test_persistence::CustomerObjectWrapper& customer2 = static_cast <test_persistence::CustomerObjectWrapper&>(rw_storage->load(*conn0, guardCustomer, myLoader));
+//      BOOST_REQUIRE_EQUAL(&customer, &customer2);
+//
+//      BOOST_REQUIRE_EQUAL(rw_storage->getFaultCounter(), 1);
+//      BOOST_REQUIRE_EQUAL(rw_storage->getHitCounter(), 1);
+//      BOOST_REQUIRE_EQUAL(myLoader.getApplyCounter(), 2);
+//
+//      BOOST_REQUIRE_EQUAL(rw_storage->release(guardCustomer, customer), false);
+//      BOOST_REQUIRE_EQUAL(rw_storage->release(guardCustomer, customer2), true);
+//   }
+//
+//   if(true) {
+//      LOG_DEBUG("Reload record 9...");
+//      persistence::GuardClass guardCustomer(_class);
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 9));
+//      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(rw_storage->load(*conn0, guardCustomer, myLoader));
+//
+//      BOOST_REQUIRE_EQUAL(customer.getId(), 9);
+//      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 9");
+//
+//      mock::MockLowLevelRecord record;
+//      record.m_id = 9;
+//      record.m_name = "updated name 9";
+//      database.update(record);
+//
+//      test_persistence::CustomerObjectWrapper& customer2 = static_cast <test_persistence::CustomerObjectWrapper&>(rw_storage->load(*conn0, guardCustomer, myLoader));
+//      BOOST_REQUIRE_EQUAL(&customer, &customer2);
+//
+//      BOOST_REQUIRE_EQUAL(customer.getId(), 9);
+//      BOOST_REQUIRE_EQUAL(customer.getName(), "updated name 9");
+//
+//      BOOST_REQUIRE_EQUAL(rw_storage->getFaultCounter(), 1);
+//      BOOST_REQUIRE_EQUAL(rw_storage->getHitCounter(), 3);
+//      BOOST_REQUIRE_EQUAL(myLoader.getApplyCounter(), 4);
+//
+//      BOOST_REQUIRE_EQUAL(rw_storage->release(guardCustomer, customer), false);
+//      BOOST_REQUIRE_EQUAL(rw_storage->release(guardCustomer, customer2), true);
+//   }
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalStop());
+//}
+//
+//BOOST_AUTO_TEST_CASE(persistence_storage_read_avoid_write)
+//{
+//   test_persistence::MyDatabase database("persistence_storage_read");
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
+//
+//   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+//
+//   dbms::Connection* conn0 = database.createConnection("0", "0", "0");
+//   dbms::Statement* stReader = database.createStatement("read_only", "read");
+//   dbms::Statement* stWriter = database.createStatement("writer", "write");
+//
+//   persistence::Repository repository("persistence_storage_read_avoid_write");
+//   persistence::Storage* ro_storage = repository.createStorage(0, "storage_readonly", persistence::Storage::AccessMode::ReadOnly);
+//
+//   test_persistence::MockCustomerClass _class;
+//
+//   BOOST_REQUIRE_NE(ro_storage,(void*) 0);
+//
+//   test_persistence::MockCustomerLoader myLoader;
+//   test_persistence::MockCustomerRecorder myRecorder;
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class);
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 6));
+//      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(ro_storage->load(*conn0, guardCustomer, myLoader));
+//
+//      BOOST_REQUIRE_EQUAL(customer.getId(), 6);
+//      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 6");
+//   }
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class);
+//
+//      BOOST_REQUIRE_NO_THROW(myRecorder.initialize(guardCustomer, stWriter));
+//
+//      try {
+//         ro_storage->save(*conn0, guardCustomer, myRecorder);
+//         BOOST_REQUIRE_EQUAL(true, false);
+//      }
+//      catch(adt::RuntimeException& ex) {
+//         std::cout << ex.asString() << std::endl;
+//         std::string error = ex.what();
+//         BOOST_REQUIRE_NE(error.find("can not write on a read-only storage"), std::string::npos);
+//      }
+//   }
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalStop());
+//}
+//
+//BOOST_AUTO_TEST_CASE(persistence_storage_write)
+//{
+//   test_persistence::MyDatabase database("persistence_storage_write");
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
+//
+//   mock::MockConnection* conn0 = static_cast <mock::MockConnection*>(database.createConnection("0", "0", "0"));
+//   dbms::Statement* stReader = database.createStatement("read_only", "read");
+//   dbms::Statement* stWriter = database.createStatement("writer", "write");
+//
+//   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+//
+//   persistence::Repository repository("persistence_storage_write");
+//   persistence::Storage* wr_storage = repository.createStorage(0, "storage_write", persistence::Storage::AccessMode::ReadWrite);
+//
+//   test_persistence::MockCustomerClass _class;
+//
+//   BOOST_REQUIRE_NE(wr_storage,(void*) 0);
+//
+//   test_persistence::MockCustomerLoader myLoader;
+//   test_persistence::MockCustomerRecorder myRecorder;
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class);
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 2));
+//      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(wr_storage->load(*conn0, guardCustomer, myLoader));
+//
+//      BOOST_REQUIRE_EQUAL(customer.getId(), 2);
+//      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 2");
+//
+//      BOOST_REQUIRE_NO_THROW(myRecorder.initialize(guardCustomer, stWriter));
+//
+//      customer.setName("updated name 2");
+//
+//      BOOST_REQUIRE_THROW(myRecorder.getObject(), adt::RuntimeException);
+//      BOOST_REQUIRE_NO_THROW(myRecorder.setObject(customer));
+//
+//      BOOST_REQUIRE_NO_THROW(wr_storage->save(*conn0, guardCustomer, myRecorder));
+//
+//      BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
+//      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
+//   }
+//
+//   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
+//   BOOST_REQUIRE_EQUAL(database.container_size(), 10);
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class);
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 2));
+//      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(wr_storage->load(*conn0, guardCustomer, myLoader));
+//
+//      BOOST_REQUIRE_EQUAL(customer.getId(), 2);
+//      BOOST_REQUIRE_EQUAL(customer.getName(), "updated name 2");
+//   }
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalStop());
+//}
+//
+//BOOST_AUTO_TEST_CASE(persistence_storage_erase)
+//{
+//   test_persistence::MyDatabase database("dbms_with_app");
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
+//
+//   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+//
+//   mock::MockConnection* conn0 = static_cast <mock::MockConnection*>(database.createConnection("0", "0", "0"));
+//   dbms::Statement* stReader = database.createStatement("read_only", "read");
+//   dbms::Statement* stEraser = database.createStatement("eraser", "delete");
+//
+//   persistence::Repository repository("persistence_storage_erase");
+//   persistence::Storage* wr_storage = repository.createStorage(0, "storage_erase", persistence::Storage::AccessMode::ReadWrite);
+//
+//   test_persistence::MockCustomerClass _class;
+//
+//   BOOST_REQUIRE_NE(wr_storage,(void*) 0);
+//
+//   test_persistence::MockCustomerLoader myLoader;
+//   test_persistence::MockCustomerEraser myEraser;
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class);
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 2));
+//      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(wr_storage->load(*conn0, guardCustomer, myLoader));
+//
+//      BOOST_REQUIRE_EQUAL(customer.getId(), 2);
+//      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 2");
+//
+//      BOOST_REQUIRE_NO_THROW(myEraser.initialize(guardCustomer, stEraser));
+//
+//      BOOST_REQUIRE_THROW(myEraser.getObject(), adt::RuntimeException);
+//
+//      BOOST_REQUIRE_NO_THROW(customer.getPrimaryKey());
+//
+//      myEraser.setObject(customer);
+//
+//      BOOST_REQUIRE_NO_THROW(myEraser.getObject());
+//      BOOST_REQUIRE_NO_THROW(myEraser.getObject().getPrimaryKey());
+//
+//      try {
+//         wr_storage->erase(*conn0, guardCustomer, myEraser);
+//      }
+//      catch(adt::RuntimeException& ex) {
+//         std::cout << ex.asString() << std::endl;
+//         BOOST_REQUIRE_EQUAL(std::string("none"), ex.what());
+//      }
+//
+//      BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
+//      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
+//   }
+//
+//   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
+//   BOOST_REQUIRE_EQUAL(database.container_size(), 9);
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class);
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 4));
+//      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(wr_storage->load(*conn0, guardCustomer, myLoader));
+//
+//      BOOST_REQUIRE_EQUAL(customer.getId(), 4);
+//      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 4");
+//
+//      BOOST_REQUIRE_NO_THROW(wr_storage->load(*conn0, guardCustomer, myLoader));
+//
+//      try {
+//         myEraser.setObject(customer);
+//         wr_storage->erase(*conn0, guardCustomer, myEraser);
+//         BOOST_REQUIRE_EQUAL(true, false);
+//      }
+//      catch(adt::RuntimeException& ex) {
+//         std::cout << ex.asString() << std::endl;
+//         std::string error = ex.what();
+//         BOOST_REQUIRE_NE(error.find("due to multiple references"), std::string::npos);
+//      }
+//   }
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalStop());
+//}
+//
+//BOOST_AUTO_TEST_CASE(persistence_storage_create)
+//{
+//   test_persistence::MyDatabase database("persistence_storage_create");
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
+//
+//   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+//
+//   mock::MockConnection* conn0 = static_cast <mock::MockConnection*>(database.createConnection("0", "0", "0"));
+//
+//   BOOST_REQUIRE_NE(conn0,(void*) 0);
+//
+//   dbms::Statement* stReader = database.createStatement("read_only", "read");
+//
+//   BOOST_REQUIRE_NE(stReader,(void*) 0);
+//
+//   dbms::Statement* stCreator = database.createStatement("creator", "none");
+//
+//   BOOST_REQUIRE_NE(stCreator,(void*) 0);
+//
+//   dbms::Statement* stWriter = database.createStatement("writer", "write");
+//
+//   persistence::Repository repository("persistence_storage_create");
+//   persistence::Storage* wr_storage = repository.createStorage(0, "storage_create", persistence::Storage::AccessMode::ReadWrite);
+//
+//   test_persistence::MockCustomerClass _class;
+//
+//   BOOST_REQUIRE_NE(wr_storage,(void*) 0);
+//
+//   test_persistence::MockCustomerRecorder myRecorder;
+//   test_persistence::MockCustomerCreator myCreator;
+//   test_persistence::MockCustomerLoader myLoader;
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class);
+//
+//      BOOST_CHECK_NO_THROW(myCreator.initialize(guardCustomer, stCreator));
+//
+//      myCreator.setId(guardCustomer, 1000);
+//      myCreator.setName(guardCustomer, "the name 1000");
+//      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(wr_storage->create(*conn0, guardCustomer, myCreator));
+//
+//      LOG_DEBUG("Customer has been created");
+//
+//      BOOST_REQUIRE_NO_THROW(myRecorder.initialize(guardCustomer, stWriter));
+//      myRecorder.setObject(customer);
+//
+//      BOOST_REQUIRE_NO_THROW(wr_storage->save(*conn0, guardCustomer, myRecorder));
+//
+//      BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
+//      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
+//   }
+//
+//   BOOST_REQUIRE_EQUAL(database.container_size(), 11);
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class);
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 1000));
+//      test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(wr_storage->load(*conn0, guardCustomer, myLoader));
+//
+//      BOOST_REQUIRE_EQUAL(customer.getId(), 1000);
+//      BOOST_REQUIRE_EQUAL(customer.getName(), "the name 1000");
+//   }
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class);
+//
+//      // Accessor already initialized
+//      BOOST_CHECK_THROW(myCreator.initialize(guardCustomer, stCreator), adt::RuntimeException);
+//
+//      myCreator.setId(guardCustomer, 1000);
+//      myCreator.setName(guardCustomer, "the name 1000");
+//
+//      try {
+//         wr_storage->create(*conn0, guardCustomer, myCreator);
+//         BOOST_REQUIRE_EQUAL(false, true);
+//      }
+//      catch(adt::RuntimeException& ex) {
+//         std::cout << ex.asString() << std::endl;
+//         BOOST_REQUIRE_NE(ex.asString().find("PrimaryKey is already registered"), std::string::npos);
+//      }
+//   }
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalStop());
+//}
+//
+//BOOST_AUTO_TEST_CASE(persistence_storage_cache)
+//{
+//   test_persistence::MyDatabase database("persistence_storage_cache");
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
+//
+//   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+//
+//   mock::MockConnection* conn0 = static_cast <mock::MockConnection*>(database.createConnection("0", "0", "0"));
+//
+//   persistence::Repository repository("persistence_storage_cache");
+//   persistence::Storage* wr_storage = repository.createStorage(0, "storage_cache", persistence::Storage::AccessMode::ReadWrite);
+//
+//   BOOST_REQUIRE_THROW(wr_storage->setMaxCacheSize(10000), adt::RuntimeException);
+//   BOOST_REQUIRE_THROW(wr_storage->setMaxCacheSize(0), adt::RuntimeException);
+//
+//   BOOST_REQUIRE_NO_THROW(wr_storage->setMaxCacheSize(16));
+//
+//   test_persistence::MockCustomerClass _class;
+//
+//   BOOST_REQUIRE_NE(wr_storage,(void*) 0);
+//
+//   test_persistence::MockCustomerLoader myLoader;
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class, "Register 100 new records");
+//      test_persistence::MockCustomerCreator myCreator;
+//      test_persistence::MockCustomerRecorder myRecorder;
+//
+//      BOOST_CHECK_NO_THROW(myCreator.initialize(guardCustomer, database.createStatement("creator", "none")));
+//      BOOST_REQUIRE_NO_THROW(myRecorder.initialize(guardCustomer, database.createStatement("writer", "write")));
+//
+//      adt::StreamString name;
+//
+//      int initSize = database.container_size();
+//
+//      BOOST_REQUIRE_EQUAL(wr_storage->getSize(), 0);
+//
+//      for(int ii = 100; ii < 200; ++ ii) {
+//         myCreator.setId(guardCustomer, ii);
+//         myCreator.setName(guardCustomer, adt::StreamString("the name ") << ii);
+//
+//         persistence::Object& object = wr_storage->create(*conn0, guardCustomer, myCreator);
+//
+//         BOOST_REQUIRE_NO_THROW(myRecorder.setObject(object));
+//
+//         BOOST_REQUIRE_NO_THROW(wr_storage->save(*conn0, guardCustomer, myRecorder));
+//
+//         BOOST_REQUIRE_EQUAL(initSize +(ii - 99), database.container_size());
+//
+//         BOOST_REQUIRE_EQUAL(wr_storage->release(guardCustomer, object), true);
+//
+//         if((ii - 100) > 16)
+//            BOOST_REQUIRE_EQUAL(wr_storage->getCacheSize(), 16);
+//      }
+//
+//      BOOST_REQUIRE_EQUAL(wr_storage->getSize(), 16);
+//   }
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class, "Read object stored in cache");
+//
+//      dbms::Statement* stReader = database.createStatement("read_only", "read");
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
+//
+//      for(int ii = 200 - 16; ii < 200; ++ ii) {
+//         BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, ii));
+//
+//         test_persistence::CustomerObjectWrapper& customer = static_cast <test_persistence::CustomerObjectWrapper&>(wr_storage->load(*conn0, guardCustomer, myLoader));
+//
+//         BOOST_REQUIRE_EQUAL(customer.getId(), ii);
+//         BOOST_REQUIRE_EQUAL(customer.getName(), adt::StreamString("the name ") << ii);
+//
+//         BOOST_REQUIRE_EQUAL(wr_storage->getCacheSize(), 15);
+//
+//         BOOST_REQUIRE_EQUAL(wr_storage->release(guardCustomer, customer), true);
+//      }
+//
+//      BOOST_REQUIRE_EQUAL(wr_storage->getHitCounter(), 16);
+//      BOOST_REQUIRE_EQUAL(wr_storage->getCacheSize(), 16);
+//   }
+//}
+//
+//BOOST_AUTO_TEST_CASE(persistence_storage_using_auto)
+//{
+//   test_persistence::MyDatabase database("persistence_storage_using_auto");
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
+//
+//   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+//
+//   dbms::Connection* conn0 = database.createConnection("0", "0", "0");
+//   dbms::Statement* stReader = database.createStatement("read_only", "read");
+//
+//   persistence::Repository repository("persistence_storage_using_auto");
+//   persistence::Storage* ro_storage = repository.createStorage(0, "storage_using_auto", persistence::Storage::AccessMode::ReadOnly);
+//
+//   test_persistence::MockCustomerClass _class;
+//
+//   BOOST_REQUIRE_NE(ro_storage,(void*) 0);
+//
+//   test_persistence::MockCustomerLoader myLoader;
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class, "First load 6");
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.initialize(guardCustomer, stReader));
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 6));
+//      persistence::AutoObject<test_persistence::CustomerObjectWrapper> customer(ro_storage->load(*conn0, guardCustomer, myLoader));
+//
+//      BOOST_REQUIRE_EQUAL(customer->getId(), 6);
+//      BOOST_REQUIRE_EQUAL(customer->getName(), "the name 6");
+//
+//      persistence::AutoObject<test_persistence::CustomerObjectWrapper> customer2(ro_storage->load(*conn0, guardCustomer, myLoader));
+//   }
+//
+//   BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 1);
+//   BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 1);
+//   BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 1);
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class, "Second load 7");
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 7));
+//      persistence::AutoObject<test_persistence::CustomerObjectWrapper> customer(ro_storage->load(*conn0, guardCustomer, myLoader));
+//
+//      BOOST_REQUIRE_EQUAL(customer->getId(), 7);
+//      BOOST_REQUIRE_EQUAL(customer->getName(), "the name 7");
+//
+//      BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
+//      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 1);
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 7));
+//      persistence::AutoObject<test_persistence::CustomerObjectWrapper> customer2(ro_storage->load(*conn0, guardCustomer, myLoader));
+//
+//      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 1);
+//
+//      BOOST_REQUIRE_EQUAL(customer2->getId(), 7);
+//      BOOST_REQUIRE_EQUAL(customer2->getName(), "the name 7");
+//
+//      BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
+//      BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 2);
+//
+//      BOOST_REQUIRE_EQUAL(&customer.get(), &customer2.get());
+//   }
+//
+//   BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
+//   BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 2);
+//   BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 2);
+//
+//   if(true) {
+//      persistence::GuardClass guardCustomer(_class, "Reload records");
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 6));
+//      persistence::AutoObject<test_persistence::CustomerObjectWrapper> customer(ro_storage->load(*conn0, guardCustomer, myLoader));
+//
+//      BOOST_REQUIRE_EQUAL(customer->getId(), 6);
+//      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 1);
+//      BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
+//      BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 3);
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 6));
+//      customer = ro_storage->load(*conn0, guardCustomer, myLoader);
+//
+//      BOOST_REQUIRE_EQUAL(customer->getId(), 6);
+//      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 1);
+//      BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
+//      BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 4);
+//
+//      BOOST_REQUIRE_NO_THROW(myLoader.setId(guardCustomer, 7));
+//      customer = ro_storage->load(*conn0, guardCustomer, myLoader);
+//
+//      BOOST_REQUIRE_EQUAL(customer->getId(), 7);
+//      BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 1);
+//      BOOST_REQUIRE_EQUAL(ro_storage->getFaultCounter(), 2);
+//      BOOST_REQUIRE_EQUAL(ro_storage->getHitCounter(), 5);
+//   }
+//
+//   BOOST_REQUIRE_EQUAL(ro_storage->getCacheSize(), 2);
+//
+//   BOOST_REQUIRE_NO_THROW(database.externalStop());
+//}

@@ -38,17 +38,23 @@
 #include <wepa/persistence/Accessor.hpp>
 
 namespace wepa {
+
+namespace dbms {
+   class GuardStatement;
+}
+
 namespace persistence {
 
 class Eraser : public Accessor {
 public:
    virtual ~Eraser () {;}
 
-   virtual dbms::ResultCode apply(TheConnection& connection) const
+   virtual dbms::ResultCode apply(dbms::GuardStatement& statement)
       throw(adt::RuntimeException, dbms::DatabaseException) = 0;
 
 protected:
-   Eraser (const char* name, const ThePrimaryKey& primaryKey) : Accessor(name, primaryKey) {;}
+   Eraser (const char* name, TheStatement& statement, const ThePrimaryKey& primaryKey) :
+      Accessor(name, statement, primaryKey) {;}
 };
 
 } /* namespace persistence */

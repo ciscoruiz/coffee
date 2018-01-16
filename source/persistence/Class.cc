@@ -34,8 +34,8 @@
 //
 #include <wepa/persistence/Class.hpp>
 #include <wepa/persistence/ClassBuilder.hpp>
-#include <wepa/persistence/PrimaryKeyBuilder.hpp>
 #include <wepa/persistence/Object.hpp>
+#include <wepa/persistence/PrimaryKey.hpp>
 
 #include <wepa/logger/Logger.hpp>
 
@@ -48,23 +48,23 @@ using namespace wepa;
 
 persistence::Class::Class(const ClassBuilder& classBuilder) :
      adt::NamedObject(classBuilder.getClassName())
-{
-   m_members = classBuilder.getMembers();
-}
 
-persistence::Class::~Class()
 {
-   m_members.clear();
+   m_primaryKey = classBuilder.getPrimaryKey();
+   m_members = classBuilder;
 }
 
 std::shared_ptr<persistence::Object> persistence::Class::createObject(const std::shared_ptr<PrimaryKey>& primaryKey) const
    throw (adt::RuntimeException)
 {
-    Members members;
+   if (!m_primaryKey->matches(*primaryKey.get())) {
+      WEPA_THROW_EXCEPTION(asString() << " primary key does not matches with class");
+   }
 
-    for(const auto& member : m_members) {
-       Member objectMember = Member(member.first->clone(), member.second);
-       members.push_back(objectMember);
+    dbms::datatype::Set members;
+
+    for(dbms::datatype::Set::const_data_iterator ii = m_members.begin(), maxii = m_members.end(); ii != maxii; ++ ii) {
+       members.insert(dbms::datatype::Set::data(ii)->clone());
     }
 
     return std::make_shared<Object>(*this, primaryKey, members);
@@ -81,6 +81,7 @@ xml::Node& persistence::Class::asXML(xml::Node& parent) const noexcept
 {
    xml::Node& result = parent.createChild("persistence.Class");
    result.createAttribute("Name", this->getName());
+
    return result;
 }
 

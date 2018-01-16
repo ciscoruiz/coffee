@@ -32,6 +32,8 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+#include <functional>
+
 #include <wepa/adt/StreamString.hpp>
 
 #include <wepa/adt/AsHexString.hpp>
@@ -82,12 +84,17 @@ void datatype::Abstract::exceptionWhenIsNull () const
    }
 }
 
-// this - other
+int datatype::Abstract::compare (const std::shared_ptr<Abstract>& other) const
+   throw (adt::RuntimeException)
+{
+   return compare(std::ref(*other.get()));
+}
+
 int datatype::Abstract::compare (const Abstract& other) const
    throw (adt::RuntimeException)
 {
    if (this->getType () != other.getType()) {
-      WEPA_THROW_EXCEPTION(this->asString () << " type does not matches with " << other);
+      WEPA_THROW_EXCEPTION(this->asString () << " type does not matches with " << other.asString());
    }
 
    if (this->hasValue() == false && other.hasValue () == false)

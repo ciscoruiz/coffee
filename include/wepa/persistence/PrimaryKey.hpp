@@ -39,8 +39,9 @@
 #include <memory>
 
 #include <wepa/adt/RuntimeException.hpp>
-
 #include <wepa/adt/StreamString.hpp>
+
+#include <wepa/dbms/datatype/Set.hpp>
 
 namespace wepa {
 
@@ -54,28 +55,22 @@ namespace persistence {
 
 class PrimaryKeyBuilder;
 
-class PrimaryKey {
+class PrimaryKey : public dbms::datatype::Set {
 public:
-   typedef std::shared_ptr<dbms::datatype::Abstract> Component;
-   typedef std::vector<Component> Components;
-
    PrimaryKey(const PrimaryKeyBuilder& builder);
-   ~PrimaryKey () { m_components.clear(); }
 
-   PrimaryKey& operator= (const PrimaryKey& other) throw (adt::Exception);
-   int compareTo (const PrimaryKey& other) const throw (adt::RuntimeException);
-   bool operator== (const PrimaryKey& other) const throw (adt::RuntimeException) { return compareTo (other) == 0; }
-   bool operator< (const PrimaryKey& other) const throw (adt::RuntimeException){ return compareTo(other) < 0; }
+   PrimaryKey& operator= (const PrimaryKey& other) throw (adt::Exception) { Set::operator=(other); return *this; }
+
+   bool operator== (const PrimaryKey& other) const throw (adt::RuntimeException) { return compare(other) == 0; }
+   bool operator< (const PrimaryKey& other) const throw (adt::RuntimeException){ return compare(other) < 0; }
+
+   bool matches(const PrimaryKey& other) const noexcept;
 
    operator adt::StreamString () const noexcept { return asString (); }
    adt::StreamString asString () const noexcept;
 
 private:
-   Components m_components;
-
    PrimaryKey (const PrimaryKey& other) = delete;
-   
-   const Component& getComponent(const int pos) const throw(adt::RuntimeException);   
 };
 
 } /* namespace persistence */

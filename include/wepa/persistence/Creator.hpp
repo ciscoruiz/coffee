@@ -46,9 +46,6 @@ public:
 
    const TheClass& getClass() const noexcept { return m_class; }
 
-   virtual dbms::ResultCode apply(TheConnection& connection, TheObject& object) const
-      throw(adt::RuntimeException, dbms::DatabaseException) = 0;
-
 protected:
    Creator (const char* name, const ThePrimaryKey& primaryKey, const TheClass& clazz) :
 	   Accessor(name, primaryKey),

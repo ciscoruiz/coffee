@@ -43,7 +43,7 @@ using namespace wepa;
 std::shared_ptr<persistence::PrimaryKey> persistence::PrimaryKeyBuilder::build() const
       throw (adt::RuntimeException)
 {
-   if (m_components.empty()) {
+   if (empty()) {
       WEPA_THROW_EXCEPTION("PrimaryKeyBuilder does not define any component");
    }
 

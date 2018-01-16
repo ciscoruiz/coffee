@@ -50,6 +50,9 @@
 #include <wepa/persistence/Storage.hpp>
 #include <wepa/persistence/Class.hpp>
 
+#include <wepa/dbms/GuardConnection.hpp>
+#include <wepa/dbms/GuardStatement.hpp>
+
 using namespace wepa;
 using namespace wepa::persistence;
 
@@ -64,7 +67,7 @@ Storage::~Storage()
 {
 }
 
-Accessor::TheObject Storage::load(Accessor::TheConnection& connection, const Loader& loader)
+Accessor::TheObject Storage::load(Accessor::TheConnection& connection, Loader& loader)
    throw(adt::RuntimeException, dbms::DatabaseException)
 {
    LOG_THIS_METHOD();
@@ -76,18 +79,29 @@ Accessor::TheObject Storage::load(Accessor::TheConnection& connection, const Loa
    LOG_DEBUG(asString() << " | Loading=" << primaryKey->asString());
 
    Cache::pair_iterator vv = m_cache.find(primaryKey);
-   
+
+   dbms::GuardConnection guardConnection(connection);
+   dbms::GuardStatement guardStatement(guardConnection, loader.getStatement());
+
    if(vv == m_cache.end()) {
       m_faultCounter ++;
-      result = createEntry(connection, loader);
+
+      result = loader.getClass()->createObject(primaryKey);
+
+      dbms::ResultCode resultCode = loader.apply(guardStatement, result);
+
+      if(resultCode.successful() == false)
+         WEPA_THROW_NAME_DB_EXCEPTION(loader.getName(), resultCode);
+
+      m_cache.set(primaryKey, result);
    }
    else {
       m_hitCounter ++;
 
       result = m_cache.value(vv);
 
-      if (loader.hasToRefresh(connection, result)) {
-         dbms::ResultCode resultCode = loader.apply(connection, result);
+      if (loader.hasToRefresh(guardStatement, result)) {
+         dbms::ResultCode resultCode = loader.apply(guardStatement, result);
 
          if(resultCode.successful() == false)
             WEPA_THROW_NAME_DB_EXCEPTION(loader.getName(), resultCode);
@@ -124,14 +138,17 @@ Accessor::TheObject Storage::create(Accessor::TheConnection& connection, const C
    return object;
 }
 
-void Storage::save(Accessor::TheConnection& connection, const Recorder& recorder)
+void Storage::save(Accessor::TheConnection& connection, Recorder& recorder)
    throw(adt::RuntimeException, dbms::DatabaseException)
 {
    LOG_THIS_METHOD();
 
    Accessor::TheObject object = recorder.getObject();
 
-   dbms::ResultCode resultCode = recorder.apply(connection);
+   dbms::GuardConnection guardConnection(connection);
+   dbms::GuardStatement guardStatement(guardConnection, recorder.getStatement());
+
+   dbms::ResultCode resultCode = recorder.apply(guardStatement);
 
    if(resultCode.successful() == false)
       WEPA_THROW_NAME_DB_EXCEPTION(recorder.getName(), resultCode);
@@ -139,7 +156,7 @@ void Storage::save(Accessor::TheConnection& connection, const Recorder& recorder
    LOG_DEBUG(recorder << " | ObjectId=" << object->getInternalId() << " | " << resultCode);
 }
 
-void Storage::erase(Accessor::TheConnection& connection, const Eraser& eraser)
+void Storage::erase(Accessor::TheConnection& connection, Eraser& eraser)
    throw(adt::RuntimeException, dbms::DatabaseException)
 {
    const Accessor::ThePrimaryKey& primaryKey(eraser.getPrimaryKey());
@@ -154,35 +171,15 @@ void Storage::erase(Accessor::TheConnection& connection, const Eraser& eraser)
       m_hitCounter ++;
    }
 
-   dbms::ResultCode resultCode = eraser.apply(connection);
+   dbms::GuardConnection guardConnection(connection);
+   dbms::GuardStatement guardStatement(guardConnection, eraser.getStatement());
+
+   dbms::ResultCode resultCode = eraser.apply(guardStatement);
 
    if(resultCode.successful() == false)
       WEPA_THROW_NAME_DB_EXCEPTION(eraser.getName(), resultCode);
 
    LOG_DEBUG(eraser << " | " << primaryKey->asString() << " | " << resultCode);
-}
-
-Accessor::TheObject Storage::createEntry(Accessor::TheConnection& connection, const Loader& loader)
-   throw(adt::RuntimeException, dbms::DatabaseException)
-{
-   LOG_THIS_METHOD();
-
-   const Accessor::ThePrimaryKey& primaryKey = loader.getPrimaryKey();
-
-   LOG_DEBUG("Storage='" << getName() << "' | " << primaryKey->asString());
-
-   Accessor::TheObject object = loader.getClass()->createObject(primaryKey);
-   
-   dbms::ResultCode resultCode = loader.apply(connection, object);
-
-   if(resultCode.successful() == false)
-      WEPA_THROW_NAME_DB_EXCEPTION(loader.getName(), resultCode);
-   
-   m_cache.set(primaryKey, object);
-
-   LOG_DEBUG("Result(ObjectId)=" << object->getInternalId());
-
-   return object;
 }
 
 adt::StreamString Storage::asString() const

@@ -224,6 +224,8 @@ std::shared_ptr<dbms::Statement> dbms::Database::createStatement(const char* nam
 
    std::shared_ptr<Statement> result = allocateStatement(name, expression, actionOnError);
 
+   result->prepare();
+
    LOG_DEBUG(result->asString());
 
    m_statements.push_back(result);

@@ -76,17 +76,26 @@ public:
    typedef std::shared_ptr<Object> TheObject;
    typedef std::shared_ptr<PrimaryKey> ThePrimaryKey;
    
+   TheStatement& getStatement() noexcept { return m_statement; }
    const ThePrimaryKey& getPrimaryKey() const throw(adt::RuntimeException) { return m_primaryKey; }
    
    Accessor(const Accessor&) = delete;
 
 protected:
-   Accessor(const char* name, const ThePrimaryKey& primaryKey) : adt::NamedObject(name), m_primaryKey(primaryKey) {;}
-   
-   virtual bool isInputValue(const int columnNumber) const noexcept = 0;
-   virtual bool isOutputValue(const int columnNumber) const noexcept = 0;
+   Accessor(const char* name, TheStatement& statement, const ThePrimaryKey& primaryKey) :
+      adt::NamedObject(name),
+      m_statement(statement),
+      m_primaryKey(primaryKey)
+   {;}
+
+   Accessor(const char* name, const ThePrimaryKey& primaryKey) :
+      adt::NamedObject(name),
+      m_statement(nullptr),
+      m_primaryKey(primaryKey)
+   {;}
       
 private:
+   TheStatement m_statement;
    const ThePrimaryKey m_primaryKey;
 };
 

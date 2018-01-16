@@ -23,7 +23,7 @@ Statement::~Statement()
    m_outputBinds.clear();
 }
 
-void Statement::createBinderInput(std::shared_ptr<datatype::Abstract>& data)
+void Statement::createBinderInput(std::shared_ptr<datatype::Abstract> data)
    throw(adt::RuntimeException)
 {
    std::shared_ptr<binder::Input> result = m_database.allocateInputBind(data);
@@ -44,6 +44,17 @@ std::shared_ptr<datatype::Abstract>& Statement::getInputData(const GuardStatemen
    return m_inputBinds[pos]->getData();   
 }
 
+const std::shared_ptr<datatype::Abstract>& Statement::getInputData(const int pos) const
+   throw(adt::RuntimeException)
+{
+   if(pos >= input_size()) {
+      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << input_size() << ")");
+   }
+
+   return m_inputBinds[pos]->getData();
+
+}
+
 const std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const GuardStatement&, const int pos) const
    throw(adt::RuntimeException)
 {
@@ -57,6 +68,12 @@ const std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const GuardS
 std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const GuardStatement&, const int pos)
    throw(adt::RuntimeException)
 {
+   return getOutputData(pos);
+}
+
+std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const int pos)
+   throw(adt::RuntimeException)
+{
    if(pos >= output_size()) {
       WEPA_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << ")");
    }
@@ -64,7 +81,7 @@ std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const GuardStateme
    return m_outputBinds[pos]->getData();
 }
 
-void Statement::createBinderOutput(std::shared_ptr<datatype::Abstract>& data)
+void Statement::createBinderOutput(std::shared_ptr<datatype::Abstract> data)
    throw(adt::RuntimeException)
 {
    std::shared_ptr<binder::Output> result = m_database.allocateOutputBind(data);

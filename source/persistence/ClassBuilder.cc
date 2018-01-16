@@ -32,14 +32,42 @@
 //
 // Author: cisco.tierra@gmail.com
 #include <wepa/persistence/ClassBuilder.hpp>
+#include <wepa/persistence/PrimaryKey.hpp>
 
 using namespace wepa;
+
+persistence::ClassBuilder& persistence::ClassBuilder::set(std::shared_ptr<PrimaryKey>& primaryKey)
+throw (adt::RuntimeException)
+{
+   if (m_primaryKey) {
+      WEPA_THROW_EXCEPTION(m_className << " primary key already added");
+   }
+
+   m_primaryKey = primaryKey;
+   return *this;
+}
 
 std::shared_ptr<persistence::Class> persistence::ClassBuilder::build() const
       throw (adt::RuntimeException)
 {
-   if (m_members.empty()) {
+   if (!m_primaryKey || m_primaryKey->empty()) {
+      WEPA_THROW_EXCEPTION(m_className << " does not define a valid primary key");
+   }
+
+   if (empty()) {
       WEPA_THROW_EXCEPTION(m_className << " does not define any member");
+   }
+
+   for (const_data_iterator ii = begin(), maxii = end(); ii != maxii; ++ ii) {
+      if (m_primaryKey->constains(name(ii)) == true) {
+         WEPA_THROW_EXCEPTION(m_className << " member " << name(ii) << " already used as a member in the primary key");
+      }
+   }
+
+   for (const_data_iterator ii = m_primaryKey->begin(), maxii = m_primaryKey->end(); ii != maxii; ++ ii) {
+      if (constains(name(ii)) == true) {
+         WEPA_THROW_EXCEPTION(m_className << " member " << name(ii) << " already used as a member class");
+      }
    }
 
    return std::make_shared<persistence::Class>(*this);

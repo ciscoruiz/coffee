@@ -40,6 +40,8 @@
 
 #include <wepa/adt/RuntimeException.hpp>
 
+#include <wepa/dbms/datatype/Set.hpp>
+
 #include <wepa/persistence/PrimaryKey.hpp>
 
 namespace wepa {
@@ -49,30 +51,21 @@ namespace persistence {
 /**
  * @todo write docs
  */
-class PrimaryKeyBuilder {
+class PrimaryKeyBuilder : public dbms::datatype::Set {
 public:
    /**
     * Default constructor
     */
    PrimaryKeyBuilder() {;}
 
-   /**
-    * Destructor
-    */
-    ~PrimaryKeyBuilder() { m_components.clear(); }
-
-    PrimaryKeyBuilder& add(const PrimaryKey::Component component) noexcept {
-       m_components.push_back(component);
-       return *this;
-    }
+   PrimaryKeyBuilder& add(std::shared_ptr<dbms::datatype::Abstract> data) throw (adt::RuntimeException) {
+      insert(data);
+      return *this;
+   }
     
-    std::shared_ptr<persistence::PrimaryKey> build() const throw (adt::RuntimeException);
+   std::shared_ptr<persistence::PrimaryKey> build() const throw (adt::RuntimeException);
     
 private:
-    PrimaryKey::Components m_components;
-
-    const PrimaryKey::Components& getComponents() const noexcept { return m_components; }
-
     friend class PrimaryKey;
 };
 

@@ -43,6 +43,7 @@
 #include <wepa/adt/RuntimeException.hpp>
 
 #include <wepa/dbms/datatype/Abstract.hpp>
+#include <wepa/dbms/datatype/Set.hpp>
 
 namespace wepa {
 
@@ -57,22 +58,14 @@ class Accessor;
 class ClassBuilder;
 class PrimaryKey;
 
-class Class : public adt::NamedObject {   
+class Class : public adt::NamedObject {
 public:
-   typedef std::shared_ptr<dbms::datatype::Abstract> Data;
-   typedef std::pair<Data, bool> Member;
-   typedef std::vector<Member> Members;
-
    Class(const ClassBuilder& classBuilder);
 
-   virtual ~Class();
+   virtual ~Class() {;}
 
    adt::StreamString asString() const noexcept;
       
-   static const bool isPrimaryKeyComponent(const Member& member) noexcept {
-      return member.second == true;
-   }
-
    std::shared_ptr<Object> createObject(const std::shared_ptr<PrimaryKey>& primaryKey) const throw (adt::RuntimeException);
 
    xml::Node& asXML(xml::Node& parent) const noexcept;
@@ -80,7 +73,9 @@ public:
    Class(const Class&) = delete;
 
 private:
-   Members m_members;
+   std::shared_ptr<PrimaryKey> m_primaryKey;
+   dbms::datatype::Set m_members;
+
 };
 
 } /* namespace persistence */

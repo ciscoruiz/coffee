@@ -41,65 +41,23 @@
 
 using namespace wepa;
 
-persistence::PrimaryKey::PrimaryKey(const PrimaryKeyBuilder& builder)
+persistence::PrimaryKey::PrimaryKey(const PrimaryKeyBuilder& builder) :
+   dbms::datatype::Set(builder)
 {
-    m_components = builder.getComponents();
 }
 
-int persistence::PrimaryKey::compareTo(const PrimaryKey& other) const
-   throw(adt::RuntimeException)
+bool persistence::PrimaryKey::matches(const PrimaryKey& other) const
+   noexcept
 {
-   if(this == &other)
-      return 0;
-
-   if(m_components.size() != other.m_components.size()) {
-      WEPA_THROW_EXCEPTION(
-         "Can not compare primary keys with different number of components | N-Size=" << m_components.size() << " | other-Size=" << other.m_components.size()
-      );
-   }
-
-   int result = 0;
-
-   for(int ii = 0, maxii = m_components.size(); ii < maxii && result == 0; ++ ii) {
-      auto thisComponent = m_components[ii];
-      auto otherComponent = other.m_components[ii];
-      result = thisComponent->compare(std::ref(*otherComponent));
-   }
-
-   return result;
-}
-
-const persistence::PrimaryKey::Component& persistence::PrimaryKey::getComponent(const int pos) const
-   throw(adt::RuntimeException)
-{
-   if(pos >= m_components.size()) {
-      WEPA_THROW_EXCEPTION("Position " << pos << " is out of range");
-   }
-
-   return m_components[pos];
-}
-
-persistence::PrimaryKey& persistence::PrimaryKey::operator=(const PrimaryKey& other)
-   throw(adt::Exception)
-{
-   if(this == &other)
-      return std::ref(*this);
-
-   m_components.clear();
-   
-   for(const auto& ii : other.m_components) {
-      m_components.push_back(ii->clone());
-   }
-
-   return *this;
+   return dbms::datatype::Set::operator==(other);
 }
 
 adt::StreamString persistence::PrimaryKey::asString() const noexcept
 {
    adt::StreamString result("persistence.PrimaryKey { ");
 
-   for(const auto& component: m_components) {
-      result += component->asString();
+   for (const_data_iterator ii = begin(), maxii = end(); ii != maxii; ++ ii) {
+      result += data(ii)->asString();
       result += "  ";
    }
 

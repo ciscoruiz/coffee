@@ -77,7 +77,7 @@ void mock::MockConnection::do_commit() noexcept
 
    m_commitCounter ++;
 
-   LOG_DEBUG("Commiting " << operation_size() << " changes");
+   LOG_DEBUG("Committing " << operation_size() << " changes");
 
    for(Operation& operation : m_operations) {
       switch(operation.first) {

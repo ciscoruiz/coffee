@@ -40,18 +40,10 @@
 #include <wepa/adt/StreamString.hpp>
 #include <wepa/adt/RuntimeException.hpp>
 
-#include <wepa/dbms/DatabaseException.hpp>
-#include <wepa/dbms/InvalidDataException.hpp>
-
-#include <wepa/persistence/Class.hpp>
+#include <wepa/dbms/datatype/Set.hpp>
 
 namespace wepa {
    
-namespace adt {
-   class Date;
-   class DataBlock;
-   class Second;
-}
 namespace persistence {
 
 class PrimaryKey;
@@ -61,33 +53,18 @@ class Class;
 //// See http://stackoverflow.com/questions/1319876/weird-c-templating-issues
 //template <typename _T> class AutoObject;
 
-class Object {
+class Object : public dbms::datatype::Set {
 public:
-   Object(const Class& _class, const std::shared_ptr<PrimaryKey>& primaryKey, const Class::Members& members);
+   Object(const Class& _class, const std::shared_ptr<PrimaryKey>& primaryKey, const dbms::datatype::Set& members);
 
-   virtual ~Object() { 
+   ~Object() {
        m_primaryKey.reset();
-       m_members.clear();
    }
 
    const Class& getClass() const noexcept { return std::ref(m_class); }
    const std::shared_ptr<PrimaryKey>& getPrimaryKey() const throw(adt::RuntimeException) { return m_primaryKey; }
-   std::shared_ptr<dbms::datatype::Abstract>& getMember(const int columnNumber) throw(adt::RuntimeException);
-   const std::shared_ptr<dbms::datatype::Abstract>& getMember(const int columnNumber) const throw(adt::RuntimeException);
 
    std::string getInternalId() const noexcept;
-   
-   int getInteger(const int columnNumber) const throw(dbms::InvalidDataException);
-   std::string getString(const int columnNumber) const throw(adt::RuntimeException, dbms::InvalidDataException);
-   float getFloat(const int columnNumber) const throw(dbms::InvalidDataException);
-   const adt::DataBlock& getDataBlock(const int columnNumber) const throw(dbms::InvalidDataException);
-   const adt::Second& getDate(const int columnNumber) const throw(dbms::InvalidDataException);
-
-   void setInteger(const int columnNumber, const int value) throw(dbms::InvalidDataException);
-   void setString(const int columnNumber, const std::string& value) throw(adt::RuntimeException, dbms::InvalidDataException);
-   void setFloat(const int columnNumber, const float value) throw(dbms::InvalidDataException);
-   void setDataBlock(const int columnNumber, const adt::DataBlock& value) throw(dbms::InvalidDataException);
-   void setDate(const int columnNumber, const adt::Second& date) throw(adt::RuntimeException, dbms::InvalidDataException);
    
    operator adt::StreamString() const noexcept { return asString(); }
 
@@ -96,7 +73,6 @@ public:
 private:
    const Class& m_class;
    std::shared_ptr<PrimaryKey> m_primaryKey;
-   Class::Members m_members;
 };
 
 } /* namespace persistence */

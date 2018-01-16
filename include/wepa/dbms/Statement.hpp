@@ -145,7 +145,7 @@ public:
       \param data Variable que deseamos asociar como variable de entrada. La correspondencia entre esta
       y la sentencia SQL vendra dada por el orden de declaracion.
    */
-   void createBinderInput(std::shared_ptr<datatype::Abstract>& data) throw(adt::RuntimeException);
+   void createBinderInput(std::shared_ptr<datatype::Abstract> data) throw(adt::RuntimeException);
 
    /**
       Establece el parametro de salida de la sentencia SQL.Cada una de las variables de salida indicadas
@@ -170,7 +170,7 @@ public:
 
       \warning Solo las sentencias SQL del tipo \em select usan las variables de salida.
    */
-   void createBinderOutput(std::shared_ptr<datatype::Abstract>& data) throw(adt::RuntimeException);
+   void createBinderOutput(std::shared_ptr<datatype::Abstract> data) throw(adt::RuntimeException);
 
    /**
       Devuelve un documento XML con la informacion referente a esta instancia.
@@ -205,7 +205,6 @@ protected:
       m_database(database),
       m_name(name),
       m_expression(expression),
-      m_prepared(false),
       m_actionOnError(actionOnError),
       m_measureTiming("Timing", "us"),
       m_requiresCommit(false)
@@ -227,7 +226,6 @@ protected:
       m_database(database),
       m_name(name),
       m_expression(expression),
-      m_prepared(false),
       m_actionOnError(actionOnError),
       m_measureTiming("Timing", "us"),
       m_requiresCommit(false)
@@ -241,13 +239,15 @@ protected:
    std::shared_ptr<datatype::Abstract>& getOutputData(const GuardStatement&, const int pos) throw(adt::RuntimeException);
    const std::shared_ptr<datatype::Abstract>& getOutputData(const GuardStatement&, const int pos) const throw(adt::RuntimeException);
 
+   const std::shared_ptr<datatype::Abstract>& getInputData(const int pos) const throw(adt::RuntimeException);
+   std::shared_ptr<datatype::Abstract>& getOutputData(const int pos) throw(adt::RuntimeException);
+
 private:
    const Database& m_database;
    const std::string m_name;
    std::string m_expression;
    Inputs m_inputBinds;  /**< Lista de variables de entrada */
    Outputs m_outputBinds; /**< Lista de variables de salida */
-   bool m_prepared;
    const ActionOnError::_v m_actionOnError;
    adt::Average <adt::Microsecond> m_measureTiming;
    bool m_requiresCommit;
@@ -272,6 +272,7 @@ private:
    friend class Connection;
    friend class std::shared_ptr<Database>;
    friend class GuardStatement;
+   friend class Database;
 };
 
 }

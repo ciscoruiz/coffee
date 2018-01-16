@@ -59,11 +59,11 @@
 #include <wepa/dbms/datatype/Float.hpp>
 #include <wepa/dbms/datatype/Date.hpp>
 
-static const int IdToThrowDbException = 666;
-
 namespace wepa {
 
 namespace test_dbms {
+
+static const int IdToThrowDbException = 666;
 
 using namespace wepa::dbms;
 
@@ -264,7 +264,7 @@ dbms::ResultCode test_dbms::MyWriteStatement::do_execute(dbms::Connection& conne
 
    record.m_id = wepa_datatype_downcast(dbms::datatype::Integer, m_datas[0])->getValue();
 
-   if(record.m_id == IdToThrowDbException) {
+   if(record.m_id == test_dbms::IdToThrowDbException) {
       result.initialize(MyDatabase::NotFound, NULL);
       return result;
    }
@@ -543,9 +543,9 @@ BOOST_AUTO_TEST_CASE(dbms_write_rollback)
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database.container_size(), 3);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(IdToThrowDbException);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the IdToThrowDbException");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(IdToThrowDbException * IdToThrowDbException);
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the test_dbms::IdToThrowDbException");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(test_dbms::IdToThrowDbException * test_dbms::IdToThrowDbException);
       wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(3.3);
       wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("3/3/2003T03:03:03", "%d/%m/%YT%H:%M");
 
@@ -624,9 +624,9 @@ BOOST_AUTO_TEST_CASE(dbms_write_norollback)
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database.container_size(), 3);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(IdToThrowDbException);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the IdToThrowDbException");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(IdToThrowDbException * IdToThrowDbException);
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
+      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the test_dbms::IdToThrowDbException");
+      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(test_dbms::IdToThrowDbException * test_dbms::IdToThrowDbException);
       wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(3.3);
       wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("3/3/2003T03:03:03", "%d/%m/%YT%H:%M");
 
@@ -706,7 +706,7 @@ BOOST_AUTO_TEST_CASE(dbms_erase_rollback)
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database.container_size(), 3);
 
-      wepa_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(IdToThrowDbException);
+      wepa_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
       BOOST_REQUIRE_THROW(eraser.execute(), dbms::DatabaseException);
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
@@ -779,7 +779,7 @@ BOOST_AUTO_TEST_CASE(dbms_erase_norollback)
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database.container_size(), 3);
 
-      wepa_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(IdToThrowDbException);
+      wepa_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
       BOOST_REQUIRE_NO_THROW(resultCode = eraser.execute());
 
       BOOST_REQUIRE_EQUAL(resultCode.successful(), false);

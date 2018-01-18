@@ -76,7 +76,7 @@ public:
 
    static const int DefaultMaxCacheSize = 128;
 
-   Storage (const char* name, const int maxCacheSize);
+   Storage (const std::string& name, const int maxCacheSize);
    ~Storage ();
 
    unsigned int getHitCounter () const noexcept { return m_hitCounter; }

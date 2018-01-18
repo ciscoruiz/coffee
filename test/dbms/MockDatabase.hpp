@@ -62,6 +62,10 @@ public:
       m_container [record.m_id] = record;
    }
 
+   void erase(const int id) noexcept {
+      m_container.erase(id);
+   }
+
    int container_size() const noexcept { return m_container.size(); }
 
 private:

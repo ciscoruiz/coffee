@@ -134,7 +134,5 @@ adt::StreamString dbms::ResultCode::asString() const
    adt::StreamString result("dbms.ResultCode { NumericCode=");
    result << m_numericCode;
    result << " | Comment=" <<((m_errorText == NULL) ? "(null)": m_errorText);
-   result << " | Success=";
-
    return result << " }";
 }

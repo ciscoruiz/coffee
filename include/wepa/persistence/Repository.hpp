@@ -57,8 +57,8 @@ public:
    explicit Repository(const char* name) : NamedObject(name) {;}
    explicit Repository(const std::string& name) : NamedObject(name) {;}
 
-   std::shared_ptr<Storage> createStorage(const char* name, const int maxCacheSize) throw(adt::RuntimeException);
-   std::shared_ptr<Storage>& findStorage(const char* name) throw(adt::RuntimeException);
+   std::shared_ptr<Storage> createStorage(const std::string& name, const int maxCacheSize) throw(adt::RuntimeException);
+   std::shared_ptr<Storage>& findStorage(const std::string& name) throw(adt::RuntimeException);
 
    adt::StreamString asString() const noexcept;
 

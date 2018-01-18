@@ -70,3 +70,9 @@ dbms::ResultCode dbms::GuardConnection::execute (std::shared_ptr<Statement>& sta
 {
    return m_connection->execute(statement);
 }
+
+void dbms::GuardConnection::commit()
+   throw (adt::RuntimeException, dbms::DatabaseException)
+{
+   m_connection->commit();
+}

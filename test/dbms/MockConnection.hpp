@@ -60,8 +60,8 @@ public:
 
    int operation_size() const noexcept { return m_operations.size(); }
 
-   void manualBreak() noexcept { m_container = nullptr; }
-   bool isAvailable() const noexcept { return m_container != nullptr; }
+   void manualBreak() noexcept { m_isOpen = false; }
+   bool isAvailable() const noexcept { return m_isOpen; }
    void avoidRecovery() noexcept { m_avoidRecovery = true; }
    void clearAvoidRecovery() noexcept { m_avoidRecovery = false; }
 
@@ -93,14 +93,14 @@ private:
    unsigned int m_openCounter;
    unsigned int m_closeCounter;
 
-   mock::MockLowLevelContainer& m_refContainer;
-   mock::MockLowLevelContainer* m_container;
+   bool m_isOpen;
+   mock::MockLowLevelContainer& m_container;
    Operations m_operations;
    bool m_avoidRecovery;
 
    void open() throw(dbms::DatabaseException);
    void close() noexcept;
-   void do_commit() noexcept ;
+   void do_commit() throw (adt::RuntimeException, dbms::DatabaseException);
    void do_rollback() noexcept;
 
    friend class MyReadStatement;

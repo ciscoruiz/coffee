@@ -79,24 +79,32 @@ public:
    TheStatement& getStatement() noexcept { return m_statement; }
    const ThePrimaryKey& getPrimaryKey() const throw(adt::RuntimeException) { return m_primaryKey; }
    
+   bool hasAutoCommit() const noexcept { return m_autoCommit; }
+   bool setAutoCommit(const bool value) { bool result(m_autoCommit); m_autoCommit = value; return result; }
+   bool enableAutoCommit() noexcept { return setAutoCommit(true); }
+   void disableAutoCommit() noexcept { setAutoCommit(false); }
+
    Accessor(const Accessor&) = delete;
 
 protected:
    Accessor(const char* name, TheStatement& statement, const ThePrimaryKey& primaryKey) :
       adt::NamedObject(name),
       m_statement(statement),
-      m_primaryKey(primaryKey)
+      m_primaryKey(primaryKey),
+      m_autoCommit(false)
    {;}
 
    Accessor(const char* name, const ThePrimaryKey& primaryKey) :
       adt::NamedObject(name),
       m_statement(nullptr),
-      m_primaryKey(primaryKey)
+      m_primaryKey(primaryKey),
+      m_autoCommit(false)
    {;}
       
 private:
    TheStatement m_statement;
    const ThePrimaryKey m_primaryKey;
+   bool m_autoCommit;
 };
 
 } /* namespace persistence */

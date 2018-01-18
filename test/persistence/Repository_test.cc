@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE (persistence_repository_repeat)
 
    auto ii = repository.createStorage("the 0", 128);
 
-   std::shared_ptr<persistence::Storage>& find = repository.findStorage(0);
+   std::shared_ptr<persistence::Storage>& find = repository.findStorage("the 0");
 
    BOOST_REQUIRE_EQUAL (ii.get(), find.get());
 
@@ -85,10 +85,4 @@ BOOST_AUTO_TEST_CASE (persistence_repository_as)
    xml::Node& info = repository.asXML(myNode);
 
    BOOST_REQUIRE_EQUAL (info.children_size(), 2);
-
-   xml::Node& zero = info.childAt(0);
-   BOOST_REQUIRE_EQUAL (zero.lookupAttribute("Name").getValue(), "the 0");
-
-   xml::Node& one = info.childAt(1);
-   BOOST_REQUIRE_EQUAL (one.lookupAttribute("Name").getValue(), "the 1");
 }

@@ -63,7 +63,7 @@ public:
       }
    };
    struct HashSharedPointer {
-      size_t operator()(const std::shared_ptr<PrimaryKey>& primaryKey) const;
+      size_t operator()(const std::shared_ptr<PrimaryKey>& primaryKey) const { return primaryKey->hash(); }
    };
 
    PrimaryKey(const PrimaryKeyBuilder& builder);
@@ -74,6 +74,8 @@ public:
    bool operator< (const PrimaryKey& other) const throw (adt::RuntimeException){ return compare(other) < 0; }
 
    bool matches(const PrimaryKey& other) const noexcept;
+
+   size_t hash() const noexcept;
 
    operator adt::StreamString () const noexcept { return asString (); }
    adt::StreamString asString () const noexcept;

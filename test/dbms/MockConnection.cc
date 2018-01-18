@@ -42,8 +42,8 @@ using namespace wepa;
 
 mock::MockConnection::MockConnection (MockDatabase& database, const std::string& name, const char* user, const char* password) :
    dbms::Connection (database, name, user, password),
-   m_refContainer(database.m_container),
-   m_container(nullptr)
+   m_container(database.m_container),
+   m_isOpen(false)
 {
    m_commitCounter = m_rollbackCounter = m_openCounter = m_closeCounter = 0;
    m_avoidRecovery = false;
@@ -59,21 +59,25 @@ void mock::MockConnection::open()
    }
 
    ++ m_openCounter;
-   m_container = &m_refContainer;
+   m_isOpen = true;
    LOG_DEBUG("OpenCounter=" << m_openCounter);
 }
 
 void mock::MockConnection::close() noexcept
 {
    ++ m_closeCounter;
+   m_isOpen = false;
    LOG_DEBUG("CloseCounter=" << m_closeCounter);
 }
 
-void mock::MockConnection::do_commit() noexcept
+void mock::MockConnection::do_commit()
+   throw (adt::RuntimeException, dbms::DatabaseException)
 {
    LOG_THIS_METHOD();
 
-   mock::MockLowLevelContainer& container(*m_container);
+   if (m_isOpen == false) {
+      WEPA_THROW_EXCEPTION(asString() << " is not open");
+   }
 
    m_commitCounter ++;
 
@@ -83,14 +87,14 @@ void mock::MockConnection::do_commit() noexcept
       switch(operation.first) {
       case Write:
          LOG_DEBUG("Writing " << operation.second.m_id);
-         container[operation.second.m_id] = operation.second;
+         m_container[operation.second.m_id] = operation.second;
          break;
       case Delete:
          {
-            auto ii = container.find(operation.second.m_id);
-            if(ii != container.end()) {
+            auto ii = m_container.find(operation.second.m_id);
+            if(ii != m_container.end()) {
                LOG_DEBUG("Deleting " << operation.second.m_id);
-               container.erase(ii);
+               m_container.erase(ii);
             }
          }
          break;
@@ -111,8 +115,9 @@ void mock::MockConnection::do_rollback()
 mock::MockLowLevelContainer& mock::MockConnection::getContainer()
    throw(adt::RuntimeException)
 {
-   if(m_container == NULL)
+   if (m_isOpen == false) {
       WEPA_THROW_EXCEPTION("Connection " << getName() << " is not available");
+   }
 
-   return std::ref(*m_container);
+   return std::ref(m_container);
 }

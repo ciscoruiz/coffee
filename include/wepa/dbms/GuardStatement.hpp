@@ -60,6 +60,7 @@ public:
    GuardStatement(GuardConnection& guardConnection, std::shared_ptr<Statement>&) throw(adt::RuntimeException);
    ~GuardStatement();
 
+   GuardConnection& getGuardConnection() noexcept { return m_guardConnection; }
    std::shared_ptr<Statement> operator->() noexcept { return m_statement; }
 
    std::shared_ptr<datatype::Abstract>& getInputData(const int pos) throw(adt::RuntimeException);

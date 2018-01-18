@@ -110,13 +110,15 @@ private:
 
 class MyDatabase : public mock::MockDatabase {
 public:
+   static const int PreloadRegisterCounter;
+
    MyDatabase(app::Application& app) : mock::MockDatabase(app) { fillup(); }
    MyDatabase(const char* name) : mock::MockDatabase(name) { fillup(); }
 
 private:
    void fillup() {
       mock::MockLowLevelRecord record;
-      for(int ii = 0; ii < 10; ++ ii) {
+      for(int ii = 0; ii < PreloadRegisterCounter; ++ ii) {
          record.m_id = ii;
          record.m_name = adt::StreamString("the name ") << ii;
          add(record);
@@ -144,10 +146,10 @@ class CustomerObjectWrapper {
 public:
    CustomerObjectWrapper(std::shared_ptr<persistence::Object> object) : m_object(object) { }
 
-   int getId() const throw(dbms::InvalidDataException) { return m_object->getInteger("id"); }
+   int getId() const throw(dbms::InvalidDataException) { return m_object->getPrimaryKey()->getInteger("id"); }
    std::string getName() const throw(dbms::InvalidDataException) { return m_object->getString("name"); }
 
-   void setId(const int value) throw(dbms::InvalidDataException)  { m_object->setInteger("id", value); }
+   void setId(const int value) throw(dbms::InvalidDataException)  { m_object->getPrimaryKey()->setInteger("id", value); }
    void setName(const std::string& value) throw(dbms::InvalidDataException) { m_object->setString("name", value); }
 
 private:
@@ -162,7 +164,7 @@ public:
 
 private:
    dbms::ResultCode apply(dbms::GuardStatement& statement, TheObject& object) throw(adt::RuntimeException, dbms::DatabaseException);
-   virtual bool hasToRefresh (dbms::GuardStatement& statement, TheObject& object) throw (adt::RuntimeException, dbms::DatabaseException) { return true; }
+   bool hasToRefresh (dbms::GuardStatement& statement, TheObject& object) throw (adt::RuntimeException, dbms::DatabaseException);
 };
 
 class MockCustomerRecorder : public persistence::Recorder {
@@ -170,7 +172,7 @@ public:
    MockCustomerRecorder(TheStatement& statement, const TheObject& object) : persistence::Recorder("MockCustomerRecorder", statement, object) {;}
 
 private:
-   dbms::ResultCode apply(dbms::GuardStatement& statement) const throw(adt::RuntimeException, dbms::DatabaseException);
+   dbms::ResultCode apply(dbms::GuardStatement& statement) throw(adt::RuntimeException, dbms::DatabaseException);
 };
 
 struct MockCustomerEraser : public persistence::Eraser {
@@ -178,7 +180,7 @@ public:
    MockCustomerEraser(TheStatement& statement, const ThePrimaryKey& primaryKey) : persistence::Eraser("MockCustomerEraser", statement, primaryKey) {;}
 
 private:
-   dbms::ResultCode apply(dbms::GuardStatement& statement) const throw(adt::RuntimeException, dbms::DatabaseException);
+   dbms::ResultCode apply(dbms::GuardStatement& statement) throw(adt::RuntimeException, dbms::DatabaseException);
 };
 
 class MockCustomerCreator : public persistence::Creator {

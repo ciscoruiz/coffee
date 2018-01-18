@@ -56,6 +56,7 @@ public:
 
    int setMaxCommitPending (const int maxCommitPending) noexcept;
    void clearMaxCommitPending () noexcept;
+   void commit() throw (adt::RuntimeException, DatabaseException);
 
    int getCountLinkedStatement () const noexcept { return m_countLinkedStatement; }
 

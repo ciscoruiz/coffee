@@ -43,6 +43,9 @@
 
 using namespace wepa;
 
+//static
+const int test_persistence::MyDatabase::PreloadRegisterCounter = 100;
+
 dbms::ResultCode test_persistence::MyReadStatement::do_execute(dbms::Connection& connection)
    throw(adt::RuntimeException, dbms::DatabaseException)
 {
@@ -126,7 +129,13 @@ dbms::ResultCode test_persistence::MockCustomerLoader::apply(dbms::GuardStatemen
    return result;
 }
 
-dbms::ResultCode test_persistence::MockCustomerRecorder::apply(dbms::GuardStatement& statement) const
+bool test_persistence::MockCustomerLoader::hasToRefresh (dbms::GuardStatement& statement, TheObject& object) throw (adt::RuntimeException, dbms::DatabaseException)
+{
+   // It will only refresh odd id-numbers.
+   return (object->getPrimaryKey()->getInteger("id") % 2) == 0;
+}
+
+dbms::ResultCode test_persistence::MockCustomerRecorder::apply(dbms::GuardStatement& statement)
    throw(adt::RuntimeException, dbms::DatabaseException)
 {
    CustomerObjectWrapper customer(getObject());
@@ -137,7 +146,7 @@ dbms::ResultCode test_persistence::MockCustomerRecorder::apply(dbms::GuardStatem
    return statement.execute();
 }
 
-dbms::ResultCode test_persistence::MockCustomerEraser::apply(dbms::GuardStatement& statement) const
+dbms::ResultCode test_persistence::MockCustomerEraser::apply(dbms::GuardStatement& statement)
    throw(adt::RuntimeException, dbms::DatabaseException)
 {
    auto primaryKey = getPrimaryKey();

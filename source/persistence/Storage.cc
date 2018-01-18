@@ -56,7 +56,7 @@
 using namespace wepa;
 using namespace wepa::persistence;
 
-Storage::Storage(const char* name, const int maxCacheSize) :
+Storage::Storage(const std::string& name, const int maxCacheSize) :
    adt::NamedObject(name),
    m_cache(maxCacheSize)
 {
@@ -153,6 +153,10 @@ void Storage::save(Accessor::TheConnection& connection, Recorder& recorder)
    if(resultCode.successful() == false)
       WEPA_THROW_NAME_DB_EXCEPTION(recorder.getName(), resultCode);
 
+   if (recorder.hasAutoCommit()) {
+      guardConnection.commit();
+   }
+
    LOG_DEBUG(recorder << " | ObjectId=" << object->getInternalId() << " | " << resultCode);
 }
 
@@ -164,7 +168,7 @@ void Storage::erase(Accessor::TheConnection& connection, Eraser& eraser)
    LOG_DEBUG(asString() << " | Erasing =" << primaryKey->asString());
    
    if(!m_cache.erase(primaryKey)) {
-      LOG_WARN(primaryKey->asString() << " is not loaded in storage '" << getName() << "'");
+      LOG_DEBUG(primaryKey->asString() << " is not loaded in storage '" << getName() << "'");
       m_faultCounter ++;
    }
    else {      
@@ -178,6 +182,10 @@ void Storage::erase(Accessor::TheConnection& connection, Eraser& eraser)
 
    if(resultCode.successful() == false)
       WEPA_THROW_NAME_DB_EXCEPTION(eraser.getName(), resultCode);
+
+   if (eraser.hasAutoCommit()) {
+      guardConnection.commit();
+   }
 
    LOG_DEBUG(eraser << " | " << primaryKey->asString() << " | " << resultCode);
 }

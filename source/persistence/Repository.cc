@@ -42,28 +42,25 @@
 
 using namespace wepa;
 
-std::shared_ptr<persistence::Storage> persistence::Repository::createStorage(const char* name, const int maxCacheSize)
+std::shared_ptr<persistence::Storage> persistence::Repository::createStorage(const std::string& ident, const int maxCacheSize)
    throw(adt::RuntimeException)
 {
-   const std::string ident(name);
-
    storage_iterator ii = m_storages.find(ident);
 
    if(ii != m_storages.end()) {
       WEPA_THROW_EXCEPTION("Ident=" << ident << " has already been used");
    }
 
-   std::shared_ptr<Storage> result = std::make_shared<Storage>(name, maxCacheSize);
+   std::shared_ptr<Storage> result = std::make_shared<Storage>(ident, maxCacheSize);
    LOG_DEBUG(result->asString());
    m_storages[ident] = result;
 
    return result;
 }
 
-std::shared_ptr<persistence::Storage>& persistence::Repository::findStorage(const char* name)
+std::shared_ptr<persistence::Storage>& persistence::Repository::findStorage(const std::string& ident)
    throw(adt::RuntimeException)
 {
-   const std::string ident(name);
 
    storage_iterator ii = m_storages.find(ident);
 

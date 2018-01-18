@@ -38,8 +38,10 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <map>
 
 #include <wepa/adt/pattern/lru/Cache.hpp>
+#include <wepa/adt/AsString.hpp>
 
 #include <wepa/dbms/datatype/Integer.hpp>
 #include <wepa/dbms/datatype/String.hpp>
@@ -147,4 +149,32 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_map)
    }
 }
 
+BOOST_AUTO_TEST_CASE(persistence_primary_key_hash)
+{
+   static const int maxSize = 10000;
 
+   std::map<size_t, int> collisions;
+
+   for (int ii = 0; ii < maxSize; ++ ii) {
+      auto integer = std::make_shared<dbms::datatype::Integer>("integer");
+      auto string = std::make_shared<dbms::datatype::String>("string", 16);
+
+      integer->setValue(ii);
+      string->setValue(adt::AsString::apply(ii));
+
+      persistence::PrimaryKeyBuilder builder;
+      std::shared_ptr<persistence::PrimaryKey> pk = builder.add(string).add(integer).build();
+
+      auto hash = pk->hash();
+
+      if (collisions.find(hash) == collisions.end()) {
+         collisions[hash] = 1;
+      }
+      else {
+         collisions[hash] ++;
+      }
+   }
+
+   BOOST_CHECK_GT(collisions.size(), maxSize * 90 / 100);
+
+}

@@ -65,6 +65,17 @@ bool persistence::PrimaryKey::matches(const PrimaryKey& other) const
    return true;
 }
 
+size_t persistence::PrimaryKey::hash() const noexcept
+{
+   size_t result = size();
+
+   for(PrimaryKey::const_data_iterator ii = begin(), maxii = end(); ii != maxii; ++ ii) {
+      result ^= PrimaryKey::data(ii)->hash() << 1;
+   }
+
+   return result;
+}
+
 adt::StreamString persistence::PrimaryKey::asString() const noexcept
 {
    adt::StreamString result("persistence.PrimaryKey { ");
@@ -77,12 +88,3 @@ adt::StreamString persistence::PrimaryKey::asString() const noexcept
    return result += "}";
 }
 
-size_t persistence::PrimaryKey::HashSharedPointer::operator()(const std::shared_ptr<PrimaryKey>& primaryKey) const
-{
-   size_t result = primaryKey->size();
-
-   for(PrimaryKey::const_data_iterator ii = primaryKey->begin(), maxii = primaryKey->end(); ii != maxii; ++ ii) {
-      result ^= PrimaryKey::data(ii)->hash();
-   }
-   return result;
-}

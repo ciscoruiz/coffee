@@ -45,7 +45,7 @@ public:
 
    const char* className() noexcept { return "dbms::datatype::ShortBlock"; }
 
-   size_t hash() const noexcept { return std::hash(m_value); }
+   size_t hash() const noexcept { return m_value.size(); }
 
    wepa_declare_datatype_downcast(ShortBlock)
 

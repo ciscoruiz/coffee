@@ -35,6 +35,7 @@
 #include <wepa/adt/AsString.hpp>
 
 #include <wepa/dbms/datatype/ShortBlock.hpp>
+#include <wepa/adt/AsHexString.hpp>
 
 using namespace wepa;
 using namespace wepa::dbms;
@@ -77,8 +78,10 @@ void datatype::ShortBlock::setValue(const adt::DataBlock& value)
 adt::StreamString datatype::ShortBlock::asString () const
    noexcept
 {
-   adt::StreamString result ("dbms::datatype::ShortBlock { ");
+   adt::StreamString result ("datatype.ShortBlock { ");
    result += datatype::Abstract::asString ();
+   result << " | Buffer: " << adt::AsHexString::apply(wepa_ptrnumber_cast (getBuffer()));
+   result << " | MaxSize: " << getMaxSize();
    result += " | Value: ";
 
    if (this->hasValue() == true)

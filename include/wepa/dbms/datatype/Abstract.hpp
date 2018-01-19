@@ -78,6 +78,7 @@ public:
    Datatype::_v getType() const noexcept { return m_type; }
 
    void* getBuffer() noexcept { return m_buffer; }
+   const void* getBuffer() const noexcept { return m_buffer; }
 
    bool hasValue() const noexcept { return m_isNull == false; }
 

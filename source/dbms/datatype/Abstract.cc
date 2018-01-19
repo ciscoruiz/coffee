@@ -36,8 +36,6 @@
 
 #include <wepa/adt/StreamString.hpp>
 
-#include <wepa/adt/AsHexString.hpp>
-
 #include <wepa/dbms/datatype/Abstract.hpp>
 
 using namespace wepa;
@@ -49,8 +47,6 @@ adt::StreamString datatype::Abstract::asString () const
    adt::StreamString result;
 
    result << "datatype.Abstract { Name: " << m_name;
-   result << " | Buffer: " << adt::AsHexString::apply(wepa_ptrnumber_cast (m_buffer));
-   result << " | MaxSize: " << m_maxSize;
    result << " | Null: " << m_isNull;
    result << " | Constraint: " << ((m_constraint == Constraint::CanBeNull) ? "CanBeNull": "CanNotBeNull");
 

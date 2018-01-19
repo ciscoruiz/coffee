@@ -103,8 +103,9 @@ char* datatype::String::strip (char *str)
 adt::StreamString datatype::String::asString () const
    noexcept
 {
-   adt::StreamString result ("dbms::datatype::String { ");
+   adt::StreamString result ("datatype.String { ");
    result += datatype::Abstract::asString ();
+   result << " | MaxSize: " << getMaxSize();
    result += " | Value: ";
 
    if (this->hasValue () == true)

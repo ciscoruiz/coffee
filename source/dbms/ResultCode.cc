@@ -131,8 +131,26 @@ void dbms::ResultCode::copy(const char* text)
 adt::StreamString dbms::ResultCode::asString() const
    noexcept
 {
-   adt::StreamString result("dbms.ResultCode { NumericCode=");
-   result << m_numericCode;
-   result << " | Comment=" <<((m_errorText == NULL) ? "(null)": m_errorText);
+   adt::StreamString result("dbms.ResultCode { Status=");
+
+   if (successful()) {
+      result << "Successful";
+   }
+   else if (notFound()) {
+      result << "Not-Found";
+   }
+   else if (locked()) {
+      result << "Locked";
+   }
+   else if (lostConnection()) {
+      result << "Lost-Connection";
+   }
+
+   result << "(" << m_numericCode << ")";
+
+   if (m_errorText != NULL) {
+      result << " | Comment=" << m_errorText;
+   }
+
    return result << " }";
 }

@@ -46,7 +46,6 @@
 #include <wepa/persistence/Loader.hpp>
 #include <wepa/persistence/Recorder.hpp>
 #include <wepa/persistence/Eraser.hpp>
-#include <wepa/persistence/Creator.hpp>
 #include <wepa/persistence/Storage.hpp>
 #include <wepa/persistence/Class.hpp>
 
@@ -115,27 +114,6 @@ Accessor::TheObject Storage::load(Accessor::TheConnection& connection, Loader& l
    LOG_DEBUG(loader << " | ObjectId=" << result->getInternalId() << " | Result=" << result->asString());
 
    return result;
-}
-
-Accessor::TheObject Storage::create(Accessor::TheConnection& connection, const Creator& creator)
-   throw(adt::RuntimeException, dbms::DatabaseException)
-{
-   LOG_THIS_METHOD();
-
-   const Accessor::ThePrimaryKey& primaryKey(creator.getPrimaryKey());
-
-   LOG_DEBUG(asString() << " | Creating=" << primaryKey->asString());
-
-   Cache::pair_iterator vv = m_cache.find(primaryKey);
-   
-   if(vv != m_cache.end()) {
-      WEPA_THROW_EXCEPTION(getName() << " | " << primaryKey->asString() << " | PrimaryKey is already registered");
-   }
-
-   Accessor::TheObject object = creator.getClass()->createObject(primaryKey);
-   m_cache.set(primaryKey, object);
-   LOG_DEBUG("Result(ObjectId)=" << object->getInternalId());
-   return object;
 }
 
 void Storage::save(Accessor::TheConnection& connection, Recorder& recorder)

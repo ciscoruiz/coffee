@@ -84,8 +84,6 @@ public:
 
    Accessor::TheObject load (Accessor::TheConnection& connection, Loader& loader)
       throw (adt::RuntimeException, dbms::DatabaseException);
-   Accessor::TheObject create (Accessor::TheConnection& connection, const Creator& creator) 
-      throw (adt::RuntimeException, dbms::DatabaseException);
    void save (Accessor::TheConnection& connection, Recorder& recorder)
       throw (adt::RuntimeException, dbms::DatabaseException);
    void erase (Accessor::TheConnection& connection, Eraser& eraser)

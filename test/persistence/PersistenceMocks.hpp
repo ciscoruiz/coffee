@@ -46,7 +46,6 @@
 #include "../dbms/MockDatabase.hpp"
 
 #include <wepa/persistence/Loader.hpp>
-#include <wepa/persistence/Creator.hpp>
 #include <wepa/persistence/Eraser.hpp>
 #include <wepa/persistence/Recorder.hpp>
 #include <wepa/persistence/Accessor.hpp>
@@ -181,11 +180,6 @@ public:
 
 private:
    dbms::ResultCode apply(dbms::GuardStatement& statement) throw(adt::RuntimeException, dbms::DatabaseException);
-};
-
-class MockCustomerCreator : public persistence::Creator {
-public:
-   MockCustomerCreator(const ThePrimaryKey& primaryKey, const TheClass& clazz) : persistence::Creator("MockCustomerCreator", primaryKey, clazz) {;}
 };
 
 }

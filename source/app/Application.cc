@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -98,7 +98,7 @@ app::Application::Application (const char* shortName, const char* title, const c
       if (time) cout << time;
       cout << endl;
    }
-   cout << "(c) Copyright 2013 by Francisco Ruiz." << endl << endl;
+   cout << "(c) Copyright 2018 by Francisco Ruiz." << endl << endl;
 }
 
 app::Application::~Application()
@@ -158,7 +158,7 @@ void app::Application::start ()
       cout << "WEPA - Write Excellent Professional Applications. Version " << config::Release::getVersion () << endl;
       cout << "Developed by Francisco Ruiz" << endl;
       cout << "Release date: " << __DATE__ << " " << __TIME__ << endl;
-      cout << "(c) Copyright 2013,2014 by Francisco Ruiz." << endl << endl;
+      cout << "(c) Copyright 2018,2014 by Francisco Ruiz." << endl << endl;
 
       initialize ();
 

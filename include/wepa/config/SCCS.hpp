@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -37,11 +37,11 @@
 #define _wepa_config_sccs_hpp_
 
 #ifndef _DEBUG
-   #define wepa_sccs_define_tag(module,release)  const char* wepa_sccs_##module = "@(#)WEPA."#module" VERSION alfa-13.05."#release"/O";
-   #define wepa_sccs_define_tag_ex(module,ex,release)  const char* wepa_sccs_##module = "@(#)WEPA."#ex" VERSION alfa-13.05."#release"/O";
+   #define wepa_sccs_define_tag(module,release)  const char* wepa_sccs_##module = "@(#)WEPA."#module" VERSION alfa-18.01."#release"/O";
+   #define wepa_sccs_define_tag_ex(module,ex,release)  const char* wepa_sccs_##module = "@(#)WEPA."#ex" VERSION alfa-18.01."#release"/O";
 #else
-   #define wepa_sccs_define_tag(module,release)  const char* wepa_sccs_##module = "@(#)WEPA."#module" VERSION alfa-13.05."#release"/D";
-   #define wepa_sccs_define_tag_ex(module,ex,release)  const char* wepa_sccs_##module = "@(#)WEPA."#ex" VERSION alfa-13.05."#release"/D";
+   #define wepa_sccs_define_tag(module,release)  const char* wepa_sccs_##module = "@(#)WEPA."#module" VERSION alfa-18.01."#release"/D";
+   #define wepa_sccs_define_tag_ex(module,ex,release)  const char* wepa_sccs_##module = "@(#)WEPA."#ex" VERSION alfa-18.01."#release"/D";
 #endif
 
 #define wepa_sccs_use_tag(module) (const char *) wepa_sccs_##module

@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -77,7 +77,7 @@ public:
     * Devuelve el nombre l�gico de este traductor.
     * \return el nombre l�gico de este traductor.
     */
-   const char* getName () const noexcept { return a_name; }
+   const std::string& getName () const noexcept { return a_name; }
    
 protected:
    /**
@@ -102,7 +102,7 @@ protected:
    virtual const char* apply (const char* statement) throw (adt::RuntimeException) = 0;
    
 private:
-   const char* a_name;
+   const std::string a_name;
    
    StatementTranslator (const StatementTranslator&);
    

@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,17 +23,19 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
 //
 #ifndef __wepa_dbms_GuardStatement_hpp
 #define __wepa_dbms_GuardStatement_hpp
+
+#include <memory>
 
 #include <wepa/adt/RuntimeException.hpp>
 #include <wepa/dbms/ResultCode.hpp>
@@ -55,24 +57,24 @@ class Statement;
  */
 class GuardStatement {
 public:
-   GuardStatement (GuardConnection& guardConnection, Statement&) throw (adt::RuntimeException);
-   GuardStatement (GuardConnection& guardConnection, Statement*) throw (adt::RuntimeException);
-   ~GuardStatement ();
+   GuardStatement(GuardConnection& guardConnection, std::shared_ptr<Statement>&) throw(adt::RuntimeException);
+   ~GuardStatement();
 
-   Statement* operator-> () noexcept { return &m_statement; }
+   GuardConnection& getGuardConnection() noexcept { return m_guardConnection; }
+   std::shared_ptr<Statement> operator->() noexcept { return m_statement; }
 
-   datatype::Abstract& getInputData (const int pos) throw (adt::RuntimeException);
-   const datatype::Abstract& getOutputData (const int pos) const throw (adt::RuntimeException);
+   std::shared_ptr<datatype::Abstract>& getInputData(const int pos) throw(adt::RuntimeException);
+   const std::shared_ptr<datatype::Abstract>& getOutputData(const int pos) const throw(adt::RuntimeException);
 
-   ResultCode execute () throw (adt::RuntimeException, DatabaseException);
+   ResultCode execute() throw(adt::RuntimeException, DatabaseException);
 
-   bool fetch () throw (adt::RuntimeException, DatabaseException);
+   bool fetch() throw(adt::RuntimeException, DatabaseException);
 
-   void setRequiresCommit (const bool requiresCommit) noexcept;
+   void setRequiresCommit(const bool requiresCommit) noexcept;
 
 private:
    GuardConnection& m_guardConnection;
-   Statement& m_statement;
+   std::shared_ptr<Statement> m_statement;
 };
 }
 }

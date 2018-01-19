@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -39,43 +39,40 @@
 
 using namespace wepa;
 
-dbms::GuardConnection::GuardConnection(Connection& connection)  throw (adt::RuntimeException) :
+dbms::GuardConnection::GuardConnection(std::shared_ptr<Connection> connection)  throw (adt::RuntimeException) :
    m_connection (connection),
    m_countLinkedStatement (0)
 {
-   connection.lock();
-}
-
-dbms::GuardConnection::GuardConnection(Connection* connection)  throw (adt::RuntimeException) :
-   m_connection (*connection),
-   m_countLinkedStatement (0)
-{
-   if (connection == NULL)
-      WEPA_THROW_EXCEPTION("Connection can not be NULL");
-
    connection->lock();
 }
 
 dbms::GuardConnection::~GuardConnection()
 {
    if (m_countLinkedStatement != 0) {
-      LOG_CRITICAL(m_connection << " as freed before some of its linked GuardStatement");
+      LOG_CRITICAL(m_connection->asString() << " as freed before some of its linked GuardStatement");
    }
-   m_connection.unlock();
+
+   m_connection->unlock();
 }
 
 int dbms::GuardConnection::setMaxCommitPending (const int maxCommitPending) noexcept
 {
-   return m_connection.setMaxCommitPending(maxCommitPending);
+   return m_connection->setMaxCommitPending(maxCommitPending);
 }
 
 void dbms::GuardConnection::clearMaxCommitPending () noexcept
 {
-   m_connection.clearMaxCommitPending ();
+   m_connection->clearMaxCommitPending ();
 }
 
-dbms::ResultCode dbms::GuardConnection::execute (Statement& statement)
+dbms::ResultCode dbms::GuardConnection::execute (std::shared_ptr<Statement>& statement)
    throw (adt::RuntimeException, DatabaseException)
 {
-   return m_connection.execute(statement);
+   return m_connection->execute(statement);
+}
+
+void dbms::GuardConnection::commit()
+   throw (adt::RuntimeException, dbms::DatabaseException)
+{
+   m_connection->commit();
 }

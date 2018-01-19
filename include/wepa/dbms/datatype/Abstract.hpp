@@ -1,12 +1,48 @@
 // WEPA - Write Excellent Professional Applications
-#ifndef _wepa_dbms_type_Abstract_h
-#define _wepa_dbms_type_Abstract_h
+//
+//(c) Copyright 2018 Francisco Ruiz Rayo
+//
+// https://github.com/ciscoruiz/wepa
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//     * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//     * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// Author: cisco.tierra@gmail.com
+//
+#ifndef _wepa_dbms_datatype_Abstract_h
+#define _wepa_dbms_datatype_Abstract_h
 
 #include <functional>
+#include <memory>
 
 #include <wepa/adt/StreamString.hpp>
 #include <wepa/adt/RuntimeException.hpp>
 #include <wepa/dbms/datatype/Constraint.hpp>
+
+#include <wepa/dbms/InvalidDataException.hpp>
 
 namespace wepa {
 
@@ -28,72 +64,75 @@ public:
          Float, /**< N�mero en coma flotante */
          ShortBlock,  /**< Tipos de dato RAW */
          LongBlock,  /**< Tipo de datos CLOB */
-         Date, /** Tipo de fecha (dependiendo del gestor de base de datos puede contener tambien la hora) */
+         Date, /** Tipo de fecha(dependiendo del gestor de base de datos puede contener tambien la hora) */
          TimeStamp /** Tipo para contener simult�neamente la fecha y la hora */
       };
    };
 
-   virtual ~Abstract () {;}
+   virtual ~Abstract() {;}
 
-   const char* getName () const noexcept { return m_name.c_str (); }
+   const char* getName() const noexcept { return m_name.c_str(); }
 
-   int getMaxSize () const noexcept { return m_maxSize; }
+   int getMaxSize() const noexcept { return m_maxSize; }
 
-   Datatype::_v getType () const noexcept { return m_type; }
+   Datatype::_v getType() const noexcept { return m_type; }
 
-   void* getBuffer () noexcept { return m_buffer; }
+   void* getBuffer() noexcept { return m_buffer; }
+   const void* getBuffer() const noexcept { return m_buffer; }
 
-   bool hasValue () const noexcept { return m_isNull == false; }
+   bool hasValue() const noexcept { return m_isNull == false; }
 
-   bool canBeNull () const noexcept { return m_constraint == Constraint::CanBeNull; }
+   bool canBeNull() const noexcept { return m_constraint == Constraint::CanBeNull; }
 
-   void isNull () throw (adt::RuntimeException);
+   void isNull() throw(adt::RuntimeException);
 
-   void clear () noexcept;
+   void clear() noexcept;
 
-   int compare (const Abstract& other) const throw (adt::RuntimeException);
+   int compare(const std::shared_ptr<Abstract>& other) const throw(adt::RuntimeException);
+   int compare(const Abstract& other) const throw(adt::RuntimeException);
 
-   operator adt::StreamString () const noexcept { return asString (); }
+   operator adt::StreamString() const noexcept { return asString(); }
 
-   virtual adt::StreamString asString () const noexcept;
+   virtual adt::StreamString asString() const noexcept;
 
-   virtual Abstract* clone () const noexcept = 0;
+   virtual std::shared_ptr<Abstract> clone() const noexcept = 0;
+   virtual size_t hash() const noexcept = 0;
 
-   static const char* className () noexcept { return "dbms.datatype.Abstract"; }
+   virtual const char* className() noexcept = 0;
 
 protected:
-   explicit Abstract (const char* name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
-      m_name (name),
-      m_type (type),
-      m_maxSize (maxSize),
-      m_constraint (constraint),
-      m_isNull (constraint == Constraint::CanBeNull),
-      m_buffer (NULL)
+   explicit Abstract(const char* name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
+      m_name(name),
+      m_type(type),
+      m_maxSize(maxSize),
+      m_constraint(constraint),
+      m_isNull(constraint == Constraint::CanBeNull),
+      m_buffer(NULL)
    {;}
 
-   explicit Abstract (const std::string& name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
-      m_name (name),
-      m_type (type),
-      m_maxSize (maxSize),
-      m_constraint (constraint),
-      m_isNull (constraint == Constraint::CanBeNull),
-      m_buffer (NULL)
+   explicit Abstract(const std::string& name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
+      m_name(name),
+      m_type(type),
+      m_maxSize(maxSize),
+      m_constraint(constraint),
+      m_isNull(constraint == Constraint::CanBeNull),
+      m_buffer(NULL)
    {;}
 
-   Abstract (const Abstract& other) :
-      m_name (other.m_name),
-      m_type (other.m_type),
-      m_maxSize (other.m_maxSize),
-      m_constraint (other.m_constraint),
-      m_isNull (other.m_isNull),
-      m_buffer (NULL)
+   Abstract(const Abstract& other) :
+      m_name(other.m_name),
+      m_type(other.m_type),
+      m_maxSize(other.m_maxSize),
+      m_constraint(other.m_constraint),
+      m_isNull(other.m_isNull),
+      m_buffer(NULL)
    {;}
 
-   void setBuffer (void* buffer) noexcept { m_buffer = buffer; }
+   void setBuffer(void* buffer) noexcept { m_buffer = buffer; }
 
-   void isNotNull () noexcept { m_isNull = false; }
+   void isNotNull() noexcept { m_isNull = false; }
 
-   void exceptionWhenIsNull () const throw (adt::RuntimeException);
+   void exceptionWhenIsNull() const throw(adt::RuntimeException);
 
 private:
    const std::string m_name;
@@ -103,34 +142,57 @@ private:
    void* m_buffer;
    bool m_isNull;
 
-   virtual void do_clear () noexcept = 0;
-   virtual int do_compare (const Abstract& other) const throw (adt::RuntimeException) = 0;
+   virtual void do_clear() noexcept = 0;
+   virtual int do_compare(const Abstract& other) const throw(adt::RuntimeException) = 0;
 };
 
 #define wepa_declare_datatype_downcast(inherit) \
-   static const inherit& downcast (const datatype::Abstract& data,const char* function, const char* file, const int lineno) \
-   throw (adt::RuntimeException) { \
-      const inherit* result = dynamic_cast <const inherit*> (&data); \
-      if (result == NULL) { \
-         wepa::adt::StreamString str; \
-         str << data.asString () << " | Invalid down cast"; \
-         throw wepa::adt::RuntimeException (str, function, file, lineno); \
+   static const inherit& downcast(const datatype::Abstract& data,const char* function, const char* file, const int lineno) \
+         throw(wepa::dbms::InvalidDataException) { \
+      try { \
+         return dynamic_cast <const inherit&>(data); \
       } \
-      return std::ref (*result); \
+      catch(std::bad_cast& ex) { \
+      } \
+      wepa::adt::StreamString str; \
+      str << data.asString() << " | Invalid down cast"; \
+      throw wepa::dbms::InvalidDataException(str, function, file, lineno); \
+   } \
+   static inherit& downcast(datatype::Abstract& data,char* function, char* file, int lineno) \
+         throw(wepa::dbms::InvalidDataException) { \
+      try { \
+         return dynamic_cast <inherit&>(data); \
+      } \
+      catch(std::bad_cast& ex) { \
+      } \
+      wepa::adt::StreamString str; \
+      str << data.asString() << " | Invalid down cast"; \
+      throw wepa::dbms::InvalidDataException(str, function, file, lineno); \
    } \
    \
-   static inherit& downcast (datatype::Abstract& data,const char* function, const char* file, const int lineno) \
-   throw (adt::RuntimeException) { \
-      inherit* result = dynamic_cast <inherit*> (&data); \
-      if (result == NULL) { \
+   static const std::shared_ptr<inherit> downcast(const std::shared_ptr<datatype::Abstract>& data,const char* function, const char* file, const int lineno) \
+         throw(wepa::dbms::InvalidDataException) { \
+      const std::shared_ptr<inherit> result = std::dynamic_pointer_cast<inherit>(data); \
+      if(!result) { \
          wepa::adt::StreamString str; \
-         str << data.asString () << " | Invalid down cast"; \
-         throw wepa::adt::RuntimeException (str, function, file, lineno); \
+         str << data->asString() << " | Invalid down cast"; \
+         throw wepa::dbms::InvalidDataException(str, function, file, lineno); \
       } \
-      return std::ref (*result); \
+      return result; \
+   } \
+   \
+   static std::shared_ptr<inherit> downcast(std::shared_ptr<datatype::Abstract>& data,const char* function, const char* file, const int lineno) \
+   throw(dbms::InvalidDataException) { \
+      std::shared_ptr<inherit> result = std::dynamic_pointer_cast<inherit>(data); \
+      if(!result) { \
+         wepa::adt::StreamString str; \
+         str << data->asString() << " | Invalid down cast"; \
+         throw wepa::dbms::InvalidDataException(str, function, file, lineno); \
+      } \
+      return result; \
    }
 
-#define wepa_datatype_downcast(inherit,reference) inherit::downcast(reference,WEPA_FILE_LOCATION)
+#define wepa_datatype_downcast(inherit,data) inherit::downcast(data,WEPA_FILE_LOCATION)
 
 }
 }

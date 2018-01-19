@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -36,6 +36,7 @@
 #include <wepa/logger/Logger.hpp>
 
 #include <wepa/dbms/datatype/Abstract.hpp>
+#include <wepa/dbms/datatype/LongBlock.hpp>
 
 #include <wepa/dbms/binder/Output.hpp>
 
@@ -45,23 +46,24 @@ using namespace wepa::dbms;
 adt::StreamString binder::Output::asString() const
    noexcept
 {
-   adt::StreamString result ("binder.Output {");
+   adt::StreamString result("binder.Output {");
 
-   result += this->getData ().asString();
+   result += getData()->asString();
 
    return result += "}";
 }
 
-void binder::Output::write ()
-   throw (adt::RuntimeException, DatabaseException)
+void binder::Output::write()
+   throw(adt::RuntimeException, DatabaseException)
 {
-   const datatype::Abstract& data = this->getData ();
+   const std::shared_ptr<datatype::Abstract>& data = this->getData();
 
-   if (data.getType () != datatype::Abstract::Datatype::LongBlock) {
+   if(data->getType() != datatype::Abstract::Datatype::LongBlock) {
       WEPA_THROW_EXCEPTION("This method only works over dbms::datatype::LongBlock");
    }
 
-   LOG_DEBUG (data.asString ());
+   LOG_DEBUG(data->asString());
 
-   do_write (reinterpret_cast <const datatype::LongBlock&> (data));
+   do_write(std::static_pointer_cast<datatype::LongBlock>(data));
+
 }

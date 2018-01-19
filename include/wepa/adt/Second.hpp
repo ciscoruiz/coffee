@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -149,9 +149,7 @@ public:
 
       \see man strftime
    */
-   std::string asDateTime (const char* format = "%d/%0m/%Y %T") const noexcept;
-
-   const char* asDateTime (char* result, const char* format = "%d/%0m/%Y %T") const noexcept;
+   std::string asDateTime (const char* format = "%d/%0m/%Y %T") const throw (RuntimeException);
 
    /**
     * Devuelve una cadena con el valor de esta instancia y las unidades "sec".

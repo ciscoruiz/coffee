@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -73,7 +73,7 @@
 #define wepa_signal_shield(r,a) { register int cx (0); do { if ((r = (a)) < 0) cx ++; } while (r < 0 && errno == EINTR && cx < 5); }
 
 namespace wepa {
-   #ifndef __x86_64__
+   #if !defined(__x86_64__) && !defined(__x86_64)
       #undef  __wepa64__
       typedef int64_t Integer64;
       typedef u_int64_t Unsigned64;

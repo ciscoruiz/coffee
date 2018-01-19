@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -33,6 +33,7 @@
 // Author: cisco.tierra@gmail.com
 //
 #include <wepa/dbms/datatype/LongBlock.hpp>
+#include <wepa/adt/AsHexString.hpp>
 
 using namespace wepa;
 using namespace wepa::dbms;
@@ -69,6 +70,8 @@ adt::StreamString datatype::LongBlock::asString () const
 {
    adt::StreamString result ("datatype.LongBlock { ");
    result += datatype::Abstract::asString ();
+   result << " | Buffer: " << adt::AsHexString::apply(wepa_ptrnumber_cast (getBuffer()));
+   result << " | MaxSize: " << getMaxSize();
    result += " | Size: ";
    if (this->hasValue () == true)
       result << m_value.size ();

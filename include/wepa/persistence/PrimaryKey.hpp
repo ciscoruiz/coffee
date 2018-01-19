@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -36,10 +36,12 @@
 #define __wepa_persistence_PrimaryKey_hpp
 
 #include <vector>
+#include <memory>
 
 #include <wepa/adt/RuntimeException.hpp>
-
 #include <wepa/adt/StreamString.hpp>
+
+#include <wepa/dbms/datatype/Set.hpp>
 
 namespace wepa {
 
@@ -51,49 +53,35 @@ namespace dbms {
 
 namespace persistence {
 
-class Accessor;
-class Storage;
+class PrimaryKeyBuilder;
 
-class PrimaryKey {
-   typedef std::vector <dbms::datatype::Abstract*> Components;
-
+class PrimaryKey : public dbms::datatype::Set {
 public:
-   PrimaryKey (const PrimaryKey& other);
-   PrimaryKey ();
-   ~PrimaryKey ();
+   struct EqualSharedPointer {
+      bool operator()(const std::shared_ptr<PrimaryKey>& lhs, const std::shared_ptr<PrimaryKey>& rhs) const {
+         return lhs->compare(rhs) == 0;
+      }
+   };
+   struct HashSharedPointer {
+      size_t operator()(const std::shared_ptr<PrimaryKey>& primaryKey) const { return primaryKey->hash(); }
+   };
 
-   PrimaryKey& operator= (const PrimaryKey& other) throw (adt::Exception);
+   PrimaryKey(const PrimaryKeyBuilder& builder);
 
-   int compareTo (const PrimaryKey& other) const throw (adt::RuntimeException);
+   PrimaryKey& operator= (const PrimaryKey& other) throw (adt::Exception) { Set::operator=(other); return *this; }
 
-   bool isDefined () const noexcept { return m_components.size () > 0; }
+   bool operator== (const PrimaryKey& other) const throw (adt::RuntimeException) { return compare(other) == 0; }
+   bool operator< (const PrimaryKey& other) const throw (adt::RuntimeException){ return compare(other) < 0; }
 
-   bool operator== (const PrimaryKey& other) const throw (adt::RuntimeException) { return compareTo (other) == 0; }
+   bool matches(const PrimaryKey& other) const noexcept;
 
-   bool operator < (const PrimaryKey& other) const throw (adt::RuntimeException){ return compareTo(other) < 0; }
-
-   const dbms::datatype::Abstract* getComponent (const int pos) const throw (adt::RuntimeException);
-
-   /**
-    * \warning This method will be public for Unit test purposes
-    * @param component
-    */
-   void addComponent (dbms::datatype::Abstract* component) noexcept {
-      m_components.push_back (component);
-   }
+   size_t hash() const noexcept;
 
    operator adt::StreamString () const noexcept { return asString (); }
-
    adt::StreamString asString () const noexcept;
 
 private:
-   const bool m_mustDeleteComponents;
-   Components m_components;
-
-   void clear () noexcept;
-
-   friend class Accessor;
-   friend class Storage;
+   PrimaryKey (const PrimaryKey& other) = delete;
 };
 
 } /* namespace persistence */

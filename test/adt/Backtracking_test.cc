@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -34,6 +34,7 @@
 //
 
 #include <stdlib.h>
+#include <iostream>
 
 #include <boost/test/unit_test.hpp>
 

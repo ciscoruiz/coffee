@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -48,21 +48,21 @@ BOOST_AUTO_TEST_CASE( delaymeter_seconds )
    adt::DelayMeter <adt::Second> meter;
 
    sleep(2);
-   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (2));
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second(2));
 
-   sleep (1);
-   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (3));
+   sleep(1);
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second(3));
 
-   meter.reset ();
-   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (0));
+   meter.reset();
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second(0));
 
    sleep(2);
-   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second (2));
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Second(2));
 
-   adt::DelayMeter <adt::Second> meter2 (meter);
+   adt::DelayMeter <adt::Second> meter2(meter);
    BOOST_REQUIRE_EQUAL(meter.getValue(), meter2.getValue());
 
-   meter2.reset ();
+   meter2.reset();
    meter2 = meter;
    BOOST_REQUIRE_EQUAL(meter.getValue(), meter2.getValue());
 }
@@ -75,19 +75,16 @@ BOOST_AUTO_TEST_CASE( delaymeter_milliseconds )
    adt::Millisecond tt;
 
    tt = meter.getValue();
-   BOOST_REQUIRE_GE (tt, adt::Millisecond (2));
-   BOOST_REQUIRE_LE (tt, adt::Millisecond (3));
+   BOOST_REQUIRE_GE(tt, adt::Millisecond(2));
 
-   usleep (1500);
+   usleep(1100);
    tt = meter.getValue();
-   BOOST_REQUIRE_GE (tt, adt::Millisecond (3));
-   BOOST_REQUIRE_LE (tt, adt::Millisecond (5));
+   BOOST_REQUIRE_GE(tt, adt::Millisecond(3));
 
-   meter.reset ();
-   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Millisecond (0));
+   meter.reset();
+   BOOST_REQUIRE_EQUAL(meter.getValue(), adt::Millisecond(0));
 
    usleep(2500);
    tt = meter.getValue();
-   BOOST_REQUIRE_GE (tt, adt::Millisecond (2));
-   BOOST_REQUIRE_LE (tt, adt::Millisecond (3));
+   BOOST_REQUIRE_GE(tt, adt::Millisecond(2));
 }

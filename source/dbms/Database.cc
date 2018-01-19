@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -46,7 +46,6 @@
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Attribute.hpp>
 
-#include <wepa/dbms/Database.hpp>
 #include <wepa/dbms/Statement.hpp>
 #include <wepa/dbms/Connection.hpp>
 
@@ -55,279 +54,254 @@
 #include <wepa/dbms/SCCS.hpp>
 
 #include <wepa/dbms/internal/DummyApplication.hpp>
+#include "../../include/wepa/dbms/Database.hpp"
 
 using namespace std;
 using namespace wepa;
 
 
-dbms::Database::Database (app::Application& app, const char* className, const char* dbmsName) :
-   app::EngineIf (app, className),
-   m_name ((dbmsName == NULL) ? "local": dbmsName),
-   m_type ((dbmsName == NULL) ? Type::Local: Type::Remote),
-   m_failRecoveryHandler (NULL),
-   m_statementTranslator (NULL)
+dbms::Database::Database(app::Application& app, const char* className, const char* dbmsName) :
+   app::Engine(app, className),
+   m_name((dbmsName == NULL) ? "local": dbmsName),
+   m_type((dbmsName == NULL) ? Type::Local: Type::Remote),
+   m_failRecoveryHandler(NULL),
+   m_statementTranslator(NULL)
 {
-   dbms::SCCS::activate ();
+   dbms::SCCS::activate();
 }
 
-dbms::Database::Database (const char* rdbmsName, const char* dbmsName) :
-   dbms::Database (internal::DummyApplication::getInstance (), rdbmsName, dbmsName)
+dbms::Database::Database(const char* rdbmsName, const char* dbmsName) :
+   dbms::Database(internal::DummyApplication::getInstance(), rdbmsName, dbmsName)
 {;}
 
-dbms::Database::~Database ()
+dbms::Database::~Database()
 {
-   if (this->isStopped() == false)
-      stop ();
+   if(this->isStopped() == false)
+      stop();
 }
 
-void dbms::Database::externalInitialize ()
-   throw (adt::RuntimeException)
+void dbms::Database::externalInitialize()
+   throw(adt::RuntimeException)
 {
-   app::Application& application (getApplication());
-   app::Application& dummy = internal::DummyApplication::getInstance();
-
-   if (&dummy != &application) {
-      WEPA_THROW_EXCEPTION(asString () << " | This method can't be applied to a database with associated application");
-   }
-
    initialize();
 }
 
-void dbms::Database::externalStop ()
-   throw (adt::RuntimeException)
+void dbms::Database::externalStop()
+   throw(adt::RuntimeException)
 {
-   app::Application& application (getApplication());
+   app::Application& application(getApplication());
    app::Application& dummy = internal::DummyApplication::getInstance();
 
-   if (&dummy != &application) {
-      WEPA_THROW_EXCEPTION(asString () << " | This method can't be applied to a database with associated application");
+   if(&dummy != &application) {
+      WEPA_THROW_EXCEPTION(asString() << " | This method can't be applied to a database with associated application");
    }
 
-   stop ();
+   stop();
 }
 
-void dbms::Database::do_initialize ()
-   throw (adt::RuntimeException)
+void dbms::Database::do_initialize()
+   throw(adt::RuntimeException)
 {
    LOG_THIS_METHOD();
 
-   int counter (0);
+   int counter(0);
    bool error = false;
 
-   for (connection_iterator iic = connection_begin (), maxiic = connection_end (); iic != maxiic; iic ++) {
+   for(connection_iterator iic = connection_begin(), maxiic = connection_end(); iic != maxiic; iic ++) {
       try {
-         connection (iic).open ();
+         connection(iic)->open();
          counter ++;
       }
-      catch (adt::Exception& ex) {
+      catch(adt::Exception& ex) {
          logger::Logger::write(ex);
          error = true;
       }
    }
 
-   if (counter == 0 && error == true) {
-      WEPA_THROW_EXCEPTION(asString () << " | There is not connection available");
+   if(counter == 0 && error == true) {
+      WEPA_THROW_EXCEPTION(asString() << " | There is not connection available");
    }
 
-   LOG_INFO(asString () << " | It is initialized");
+   LOG_INFO(asString() << " | It is initialized");
 }
 
-void dbms::Database::do_stop ()
+void dbms::Database::do_stop()
    noexcept
 {
    LOG_THIS_METHOD();
 
    int counter = 0;
 
-   for (connection_iterator iic = connection_begin (), maxiic = connection_end (); iic != maxiic; ++ iic) {
-      Connection& _connection = connection (iic);
+   for(connection_iterator iic = connection_begin(), maxiic = connection_end(); iic != maxiic; ++ iic) {
+      std::shared_ptr<Connection>& _connection = connection(iic);
       try {
-         _connection.close ();
+         _connection->close();
          ++ counter;
       }
-      catch (adt::Exception& ex) {
+      catch(adt::Exception& ex) {
          logger::Logger::write(ex);
       }
    }
 
-   LOG_DEBUG (asString () << " | Closed " << counter << " of " << m_connections.size ());
+   LOG_DEBUG(asString() << " | Closed " << counter << " of " << m_connections.size());
 
-   m_connections.clear ();
-   m_statements.clear ();
+   m_connections.clear();
+   m_statements.clear();
 }
 
-dbms::Connection* dbms::Database::createConnection (const char* name, const char* user, const char* password)
-   throw (adt::RuntimeException, dbms::DatabaseException)
+std::shared_ptr<dbms::Connection> dbms::Database::createConnection(const char* name, const char* user, const char* password)
+   throw(adt::RuntimeException, dbms::DatabaseException)
 {
-   logger::TraceMethod ttmm (logger::Level::Local7, WEPA_FILE_LOCATION);
+   logger::TraceMethod ttmm(logger::Level::Local7, WEPA_FILE_LOCATION);
 
-   LOG_DEBUG ("Name=" << name << " | User=" << user);
+   LOG_DEBUG("Name=" << name << " | User=" << user);
 
-   if (m_connections.size () >= MaxConnection) {
-      WEPA_THROW_EXCEPTION(asString () << " Can not create more than " << MaxConnection);
+   if(m_connections.size() >= MaxConnection) {
+      WEPA_THROW_EXCEPTION(asString() << " Can not create more than " << MaxConnection);
    }
 
-   for (connection_iterator ii = connection_begin (), maxii = connection_end (); ii != maxii; ii ++) {
-      if (connection (ii).getName () == name) {
-         WEPA_THROW_EXCEPTION(asString () << " | Connection=" << name << " is already defined");
+   for(connection_iterator ii = connection_begin(), maxii = connection_end(); ii != maxii; ii ++) {
+      if(connection(ii)->getName() == name) {
+         WEPA_THROW_EXCEPTION(asString() << " | Connection=" << name << " is already defined");
       }
    }
 
-   string strname (name);
+   string strname(name);
 
-   Connection* result = allocateConnection (strname, user, password);
+   std::shared_ptr<Connection> result = allocateConnection(strname, user, password);
 
-   if (result == NULL) {
-      WEPA_THROW_EXCEPTION(asString () << " could not create connection");
-   }
+   LOG_DEBUG(result->asString());
 
-   LOG_DEBUG (result->asString ());
-
-   if (this->isRunning () == true) {
+   if(this->isRunning() == true) {
       try {
-         result->open ();
-         m_connections.push_back (result);
+         result->open();
+         m_connections.push_back(result);
       }
-      catch (adt::Exception& ex) {
+      catch(adt::Exception& ex) {
          logger::Logger::write(ex);
-         delete result;
+         result.reset();
          throw;
       }
    }
    else
-      m_connections.push_back (result);
+      m_connections.push_back(result);
+
+   LOG_DEBUG(result->asString());
 
    return result;
 }
 
-dbms::Connection& dbms::Database::findConnection (const char* name)
-   throw (adt::RuntimeException)
+std::shared_ptr<dbms::Connection>& dbms::Database::findConnection(const char* name)
+   throw(adt::RuntimeException)
 {
-   logger::TraceMethod ttmm (logger::Level::Local7, WEPA_FILE_LOCATION);
+   logger::TraceMethod ttmm(logger::Level::Local7, WEPA_FILE_LOCATION);
 
-   LOG_DEBUG ("Name=" << name);
+   LOG_DEBUG("Name=" << name);
 
-   Connection* result = NULL;
-
-   for (connection_iterator ii = connection_begin (), maxii = connection_end (); ii != maxii; ii ++) {
-      if (connection_ptr (ii)->getName () == name) {
-         result = connection_ptr (ii);
-         break;
+   for(connection_iterator ii = connection_begin(), maxii = connection_end(); ii != maxii; ii ++) {
+      if(connection(ii)->getName() == name) {
+         return connection(ii);
       }
    }
 
-   if (result == NULL) {
-      WEPA_THROW_EXCEPTION(asString () << " | Connection='" << name << "' is not defined");
-   }
-
-   LOG_DEBUG (result->asString ());
-
-   return std::ref (*result);
+   WEPA_THROW_EXCEPTION(asString() << " | Connection='" << name << "' is not defined");
 }
 
-dbms::Statement* dbms::Database::createStatement (const char* name, const char* expression, const ActionOnError::_v actionOnError)
-   throw (adt::RuntimeException)
+std::shared_ptr<dbms::Statement> dbms::Database::createStatement(const char* name, const char* expression, const ActionOnError::_v actionOnError)
+   throw(adt::RuntimeException)
 {
-   logger::TraceMethod ttmm (logger::Level::Local7, WEPA_FILE_LOCATION);
+   logger::TraceMethod ttmm(logger::Level::Local7, WEPA_FILE_LOCATION);
 
-   LOG_DEBUG ("Name=" << name);
+   LOG_DEBUG("Name=" << name);
 
-   for (statement_iterator ii = statement_begin(), maxii = statement_end(); ii != maxii; ++ ii) {
-      if (statement(ii).getName () == name)
+   for(statement_iterator ii = statement_begin(), maxii = statement_end(); ii != maxii; ++ ii) {
+      if(statement(ii)->getName() == name)
          WEPA_THROW_EXCEPTION("Sentence '" << name << "' is already defined");
    }
 
-   if (m_statementTranslator != NULL)
-      expression = m_statementTranslator->apply (expression);
+   if(m_statementTranslator)
+      expression = m_statementTranslator->apply(expression);
 
-   Statement* result = allocateStatement (name, expression, actionOnError);
+   std::shared_ptr<Statement> result = allocateStatement(name, expression, actionOnError);
 
-   if (result == NULL) {
-      WEPA_THROW_EXCEPTION(asString () << " could not create statement '" << name << "'");
-   }
+   result->prepare();
 
-   LOG_DEBUG(result->asString ());
+   LOG_DEBUG(result->asString());
 
-   m_statements.push_back (result);
+   m_statements.push_back(result);
 
    return result;
 }
 
-dbms::Statement& dbms::Database::findStatement (const char* name)
-   throw (adt::RuntimeException)
+std::shared_ptr<dbms::Statement>& dbms::Database::findStatement(const char* name)
+   throw(adt::RuntimeException)
 {
-   logger::TraceMethod ttmm (logger::Level::Local7, WEPA_FILE_LOCATION);
+   logger::TraceMethod ttmm(logger::Level::Local7, WEPA_FILE_LOCATION);
 
-   Statement* result (NULL);
+   Statement* result(NULL);
 
-   LOG_DEBUG ("Name=" << name);
+   LOG_DEBUG("Name=" << name);
 
-   for (statement_iterator ii = statement_begin (), maxii = statement_end (); ii != maxii; ii ++) {
-      if (statement_ptr (ii)->getName () == name) {
-         result = statement_ptr (ii);
-         break;
+   for(statement_iterator ii = statement_begin(), maxii = statement_end(); ii != maxii; ii ++) {
+      if(statement(ii)->getName() == name) {
+         return statement(ii);
       }
    }
 
-   if (result == NULL)
-      WEPA_THROW_EXCEPTION("Statement '" << name << "' was not found");
-
-   LOG_DEBUG (result->asString ());
-
-   return std::ref (*result);
+   WEPA_THROW_EXCEPTION("Statement '" << name << "' was not found");
 }
 
-void dbms::Database::notifyRecoveryFail (dbms::Connection& connection)
-   throw (adt::RuntimeException)
+void dbms::Database::notifyRecoveryFail(dbms::Connection& connection) const
+   throw(adt::RuntimeException)
 {
-   LOG_WARN(connection.asString ());
+   LOG_WARN(connection.asString());
 
-   if (m_failRecoveryHandler != NULL)
-      m_failRecoveryHandler->apply (connection);
+   if(m_failRecoveryHandler)
+      m_failRecoveryHandler->apply(connection);
 }
 
-adt::StreamString dbms::Database::asString () const
+adt::StreamString dbms::Database::asString() const
    noexcept
 {
-   adt::StreamString result ("dbms::Database { ");
+   adt::StreamString result("dbms::Database { ");
 
-   result << app::EngineIf::asString ();
+   result << app::Engine::asString();
 
-   if (m_type == Type::Local)
+   if(m_type == Type::Local)
       result += " | Type: Local";
    else {
       result += " | Type: Remote | Name: ";
       result += m_name;
    }
 
-   if (m_statementTranslator)
-      result << " | StatementTranslator=" << m_statementTranslator->getName ();
+   if(m_statementTranslator)
+      result << " | StatementTranslator=" << m_statementTranslator->getName();
 
    return result += " }";
 }
 
-xml::Node& dbms::Database::asXML (xml::Node& parent) const
+xml::Node& dbms::Database::asXML(xml::Node& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild ("dbms.Database");
+   xml::Node& result = parent.createChild("dbms.Database");
 
-   app::EngineIf::asXML (result);
+   app::Engine::asXML(result);
 
-   result.createAttribute ("Type", (m_type == Type::Local) ? "Local": "Remote");
+   result.createAttribute("Type",(m_type == Type::Local) ? "Local": "Remote");
 
-   if (m_type != Type::Local)
-      result.createAttribute ("Name", m_name);
+   if(m_type != Type::Local)
+      result.createAttribute("Name", m_name);
 
-   if (m_statementTranslator != NULL)
-      result.createAttribute ("Translator", m_statementTranslator->getName ());
+   if(m_statementTranslator)
+      result.createAttribute("Translator", m_statementTranslator->getName());
 
-   xml::Node& connections = result. createChild ("Connections");
-   for (const_connection_iterator ii = connection_begin (), maxii = connection_end (); ii != maxii; ii ++)
-      connection (ii).asXML (connections);
+   xml::Node& connections = result. createChild("Connections");
+   for(const_connection_iterator ii = connection_begin(), maxii = connection_end(); ii != maxii; ii ++)
+      connection(ii)->asXML(connections);
 
-   xml::Node& statements = result. createChild ("Statements");
-   for (const_statement_iterator ii = statement_begin (), maxii = statement_end (); ii != maxii; ii ++)
-      statement (ii).asXML (statements);
+   xml::Node& statements = result. createChild("Statements");
+   for(const_statement_iterator ii = statement_begin(), maxii = statement_end(); ii != maxii; ii ++)
+      statement(ii)->asXML(statements);
 
    return result;
 }

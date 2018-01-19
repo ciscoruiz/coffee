@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -34,6 +34,8 @@
 //
 
 #include <boost/test/unit_test.hpp>
+
+#include <iostream>
 
 #include <wepa/adt/Second.hpp>
 #include <wepa/adt/Millisecond.hpp>
@@ -175,9 +177,15 @@ BOOST_AUTO_TEST_CASE( TimeClasses_excep_from_string )
 
 BOOST_AUTO_TEST_CASE( TimeClasses_as_date_time )
 {
-   adt::Second sec (LONG_MAX);
+   adt::Second sec (INT_MAX);
    std::string str;
 
    str = sec.asDateTime();
    BOOST_REQUIRE_EQUAL (str, "19/01/2038 04:14:07");
+}
+
+BOOST_AUTO_TEST_CASE( TimeClasses_bad_time )
+{
+	adt::Second sec (LONG_MAX);
+	BOOST_CHECK_THROW (sec.asDateTime(), adt::RuntimeException);
 }

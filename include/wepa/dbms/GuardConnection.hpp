@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -35,6 +35,9 @@
 #ifndef __wepa_dbms_GuardConnection_hpp
 #define __wepa_dbms_GuardConnection_hpp
 
+#include <memory>
+#include <functional>
+
 #include <wepa/adt/RuntimeException.hpp>
 #include <wepa/dbms/ResultCode.hpp>
 
@@ -46,25 +49,25 @@ class GuardStatement;
 
 class GuardConnection {
 public:
-   GuardConnection (Connection&) throw (adt::RuntimeException);
-   GuardConnection (Connection*) throw (adt::RuntimeException);
+   GuardConnection (std::shared_ptr<Connection> connection) throw (adt::RuntimeException);
    ~GuardConnection ();
 
-   Connection* operator-> () noexcept { return &m_connection; }
+   std::shared_ptr<Connection>& operator-> () noexcept { return std::ref(m_connection); }
 
    int setMaxCommitPending (const int maxCommitPending) noexcept;
    void clearMaxCommitPending () noexcept;
+   void commit() throw (adt::RuntimeException, DatabaseException);
 
    int getCountLinkedStatement () const noexcept { return m_countLinkedStatement; }
 
 private:
-   Connection& m_connection;
+   std::shared_ptr<Connection> m_connection;
    int m_countLinkedStatement;
 
    void linkStatement () noexcept { m_countLinkedStatement ++; }
    void unlinkStatement () noexcept { m_countLinkedStatement --; }
 
-   ResultCode execute (Statement& statement) throw (adt::RuntimeException, DatabaseException);
+   ResultCode execute (std::shared_ptr<Statement>& statement) throw (adt::RuntimeException, DatabaseException);
 
    friend class GuardStatement;
 };

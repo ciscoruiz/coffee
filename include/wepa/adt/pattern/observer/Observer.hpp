@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -36,6 +36,7 @@
 #define _wepa_adt_pattern_observer_Observer_h
 
 #include <string>
+#include <memory>
 
 #include <wepa/adt/RuntimeException.hpp>
 #include <wepa/adt/NamedObject.hpp>
@@ -52,14 +53,19 @@ class Event;
 class Subject;
 
 class Observer : public NamedObject {
-protected:
-   Observer (const std::string& name) : NamedObject (name), m_subject (NULL) {;}
-   virtual ~Observer (); 
+public:
+   bool isSubscribed() const noexcept { return m_isSubscribed; }
 
-   virtual void update (const Event&) noexcept = 0 ;
+protected:
+   Observer(const std::string& name) : NamedObject(name), m_isSubscribed(false) {;}
+   virtual ~Observer() {;}
+
+   virtual void update(const Subject& subject, const Event&) noexcept = 0 ;
 
 private:
-   Subject* m_subject;
+   bool m_isSubscribed;
+
+   void isSubscribed(const bool value) noexcept { m_isSubscribed = value; }
 
    friend class Subject;
 };

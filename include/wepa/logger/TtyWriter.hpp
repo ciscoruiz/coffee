@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -34,6 +34,8 @@
 //
 #ifndef __wepa_logger_TtyWriter_hpp
 #define __wepa_logger_TtyWriter_hpp
+
+#include <iostream>
 
 #include <wepa/logger/Writer.hpp>
 

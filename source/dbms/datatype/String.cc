@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -103,8 +103,9 @@ char* datatype::String::strip (char *str)
 adt::StreamString datatype::String::asString () const
    noexcept
 {
-   adt::StreamString result ("dbms::datatype::String { ");
+   adt::StreamString result ("datatype.String { ");
    result += datatype::Abstract::asString ();
+   result << " | MaxSize: " << getMaxSize();
    result += " | Value: ";
 
    if (this->hasValue () == true)
@@ -120,6 +121,6 @@ int datatype::String::do_compare (const datatype::Abstract& other) const
 {
    const String& _other = wepa_datatype_downcast(String, other);
 
-   return wepa_strcmp (this->m_value,_other.m_value);
+   return wepa_strcmp (this->m_value, _other.m_value);
 }
 

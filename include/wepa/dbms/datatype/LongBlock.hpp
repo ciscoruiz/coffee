@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -60,32 +60,36 @@ namespace datatype {
 */
 class LongBlock : public datatype::Abstract {
 public:
-   explicit LongBlock (const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull);
-   explicit LongBlock (const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull);
-   LongBlock (const LongBlock& other);
-   ~LongBlock () {;}
+   explicit LongBlock(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull);
+   explicit LongBlock(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull);
+   LongBlock(const LongBlock& other);
+   ~LongBlock() {;}
 
-   int getSize () const noexcept { return (hasValue () == true) ? m_value.size (): 0; }
+   int getSize() const noexcept { return(hasValue() == true) ? m_value.size(): 0; }
 
-   const adt::DataBlock& getValue (adt::RuntimeException) const noexcept { this->exceptionWhenIsNull(); return m_value; }
+   const adt::DataBlock& getValue(adt::RuntimeException) const noexcept { this->exceptionWhenIsNull(); return m_value; }
 
-   adt::DataBlock& getValue () throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
+   adt::DataBlock& getValue() throw(adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
-   void setValue (const adt::DataBlock& value) throw (adt::RuntimeException);
+   void setValue(const adt::DataBlock& value) throw(adt::RuntimeException);
 
-   Abstract* clone () const noexcept { return new LongBlock(*this); }
+   std::shared_ptr<Abstract> clone() const noexcept { return std::make_shared<LongBlock>(*this); }
 
-   operator adt::StreamString () const noexcept { return asString (); }
+   operator adt::StreamString() const noexcept { return asString(); }
 
-   adt::StreamString asString () const noexcept;
+   adt::StreamString asString() const noexcept;
+   
+   const char* className() noexcept { return "dbms::datatype::LongBlock"; }
+
+   size_t hash() const noexcept { return m_value.size(); }
 
    wepa_declare_datatype_downcast(LongBlock)
 
 protected:
    adt::DataBlock m_value;
 
-   void do_clear () noexcept { m_value.clear (); }
-   int do_compare (const Abstract& other) const throw (adt::RuntimeException);
+   void do_clear() noexcept { m_value.clear(); }
+   int do_compare(const Abstract& other) const throw(adt::RuntimeException);
 };
 
 }

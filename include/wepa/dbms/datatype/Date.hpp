@@ -28,17 +28,17 @@ public:
     */
    static const int MaxDateSize = 48;
 
-   explicit Date (const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) ;
+   explicit Date(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) ;
 
-   explicit Date (const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) ;
+   explicit Date(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) ;
 
-   Date (const Date& other);
+   Date(const Date& other);
 
-   ~Date () { ; }
+   ~Date() { ; }
 
-   const adt::Second& getValue () const throw (adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
+   const adt::Second& getValue() const throw(adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
-   struct tm* getLocalTime () const throw (adt::RuntimeException);
+   struct tm* getLocalTime() const throw(adt::RuntimeException);
 
    /**
        \code
@@ -50,7 +50,7 @@ public:
 
         %B     Replaced by the localeâs full month name. [ tm_mon]
 
-        %c     Replaced  by  the  localeâs  appropriate date and time representation.  (See the Base Definitions volume of
+        %c     Replaced  by  the  localeâs  appropriate date and time representation. (See the Base Definitions volume of
                IEEE Std 1003.1-2001, <time.h>.)
 
         %C     Replaced by the year divided by 100 and truncated to an integer, as a decimal number [00,99]. [ tm_year]
@@ -62,19 +62,19 @@ public:
         %e     Replaced by the day of the month as a decimal number [1,31]; a single digit  is  preceded  by  a  space.  [
                tm_mday]
 
-        %F     Equivalent to %Y - %m - %d (the ISO 8601:2000 standard date format). [ tm_year, tm_mon, tm_mday]
+        %F     Equivalent to %Y - %m - %d(the ISO 8601:2000 standard date format). [ tm_year, tm_mon, tm_mday]
 
-        %g     Replaced  by  the  last 2 digits of the week-based year (see below) as a decimal number [00,99]. [ tm_year,
+        %g     Replaced  by  the  last 2 digits of the week-based year(see below) as a decimal number [00,99]. [ tm_year,
                tm_wday, tm_yday]
 
-        %G     Replaced by the week-based year (see below) as a decimal number (for example, 1977).  [  tm_year,  tm_wday,
+        %G     Replaced by the week-based year(see below) as a decimal number(for example, 1977).  [  tm_year,  tm_wday,
                tm_yday]
 
         %h     Equivalent to %b . [ tm_mon]
 
-        %H     Replaced by the hour (24-hour clock) as a decimal number [00,23].  [ tm_hour]
+        %H     Replaced by the hour(24-hour clock) as a decimal number [00,23].  [ tm_hour]
 
-        %I     Replaced by the hour (12-hour clock) as a decimal number [01,12].  [ tm_hour]
+        %I     Replaced by the hour(12-hour clock) as a decimal number [01,12].  [ tm_hour]
 
         %j     Replaced by the day of the year as a decimal number [001,366]. [ tm_yday]
 
@@ -89,20 +89,20 @@ public:
         %r     Replaced  by the time in a.m. and p.m. notation;    in the POSIX locale this shall be equivalent to %I : %M
                : %S %p .  [ tm_hour, tm_min, tm_sec]
 
-        %R     Replaced by the time in 24-hour notation ( %H : %M ).  [ tm_hour, tm_min]
+        %R     Replaced by the time in 24-hour notation( %H : %M ).  [ tm_hour, tm_min]
 
         %S     Replaced by the second as a decimal number [00,60]. [ tm_sec]
 
         %t     Replaced by a <tab>.
 
-        %T     Replaced by the time ( %H : %M : %S ). [ tm_hour, tm_min, tm_sec]
+        %T     Replaced by the time( %H : %M : %S ). [ tm_hour, tm_min, tm_sec]
 
         %u     Replaced by the weekday as a decimal number [1,7], with 1 representing Monday. [ tm_wday]
 
         %U     Replaced by the week number of the year as a decimal number [00,53].  The first Sunday of  January  is  the
                first day of week 1; days in the new year before this are in week 0. [ tm_year, tm_wday, tm_yday]
 
-        %V     Replaced  by the week number of the year (Monday as the first day of the week) as a decimal number [01,53].
+        %V     Replaced  by the week number of the year(Monday as the first day of the week) as a decimal number [01,53].
                If the week containing 1 January has four or more days in the new year, then it is considered week 1.  Oth-
                erwise,  it  is  the  last week of the previous year, and the next week is week 1. Both January 4th and the
                first Thursday of January are always in week 1. [ tm_year, tm_wday, tm_yday]
@@ -112,18 +112,18 @@ public:
         %W     Replaced by the week number of the year as a decimal number [00,53].  The first Monday of  January  is  the
                first day of week 1; days in the new year before this are in week 0. [ tm_year, tm_wday, tm_yday]
 
-        %x     Replaced   by   the  localeâs  appropriate  date  representation.  (See  the  Base  Definitions  volume  of
+        %x     Replaced   by   the  localeâs  appropriate  date  representation. (See  the  Base  Definitions  volume  of
                IEEE Std 1003.1-2001, <time.h>.)
 
-        %X     Replaced  by  the  localeâs  appropriate  time  representation.  (See  the  Base  Definitions   volume   of
+        %X     Replaced  by  the  localeâs  appropriate  time  representation. (See  the  Base  Definitions   volume   of
                IEEE Std 1003.1-2001, <time.h>.)
 
         %y     Replaced by the last two digits of the year as a decimal number [00,99].  [ tm_year]
 
-        %Y     Replaced by the year as a decimal number (for example, 1997). [ tm_year]
+        %Y     Replaced by the year as a decimal number(for example, 1997). [ tm_year]
 
-        %z     Replaced  by  the offset from UTC in the ISO 8601:2000 standard format ( +hhmm or -hhmm ), or by no charac-
-               ters if no timezone is determinable. For example, "-0430" means 4 hours 30  minutes  behind  UTC  (west  of
+        %z     Replaced  by  the offset from UTC in the ISO 8601:2000 standard format( +hhmm or -hhmm ), or by no charac-
+               ters if no timezone is determinable. For example, "-0430" means 4 hours 30  minutes  behind  UTC (west  of
                Greenwich).    If tm_isdst is zero, the standard time offset is used. If tm_isdst is greater than zero, the
                daylight savings time offset is used. If tm_isdst is negative, no characters are returned.  [ tm_isdst]
 
@@ -133,23 +133,26 @@ public:
         %%     Replaced by % .
        \endcode
 
-      Para obtener m�s informacion sobre la espeficacion de formato \em man \em strftime (p.e.).
+      Para obtener m�s informacion sobre la espeficacion de formato \em man \em strftime(p.e.).
    */
-   void setValue (const char* str, const char* format) throw (adt::RuntimeException);
+   void setValue(const char* str, const char* format) throw(adt::RuntimeException);
 
-   void setValue (const std::string& str, const char* format) throw (adt::RuntimeException) { setValue (str.c_str (), format); }
+   void setValue(const std::string& str, const char* format) throw(adt::RuntimeException) { setValue(str.c_str(), format); }
 
-   void setValue (const adt::Second& second) throw (adt::RuntimeException);
+   void setValue(const adt::Second& second) throw(adt::RuntimeException);
 
-   virtual Abstract* clone () const noexcept { return new Date (*this); }
+   std::shared_ptr<Abstract> clone() const noexcept { return std::make_shared<Date>(*this); }
 
-   operator adt::StreamString () const noexcept { return asString (); }
+   operator adt::StreamString() const noexcept { return asString(); }
 
-   virtual adt::StreamString asString () const noexcept;
+   virtual adt::StreamString asString() const noexcept;
 
-   static const char* className () noexcept { return "dbms::type::Date"; }
+   const char* className() noexcept { return "dbms::type::Date"; }
 
-   Date& operator= (const Date&) = delete;
+   Date& operator=(const Date&) = delete;
+   bool operator==(const Date& other) const noexcept { return m_value == other.m_value; }
+
+   size_t hash() const noexcept { return std::hash<adt::Second::type_t>{}(m_value.getValue()); }
 
    wepa_declare_datatype_downcast(Date)
 
@@ -157,14 +160,14 @@ protected:
    adt::Second m_value;
    char m_buffer  [MaxDateSize + 1];
 
-   explicit Date (const char* name, const Datatype::_v type, const Constraint::_v constraint);
+   explicit Date(const char* name, const Datatype::_v type, const Constraint::_v constraint);
 
-   explicit Date (const std::string& name, const Datatype::_v type, const Constraint::_v constraint);
+   explicit Date(const std::string& name, const Datatype::_v type, const Constraint::_v constraint);
 
-   void do_clear () noexcept { m_value = 0; }
+   void do_clear() noexcept { m_value = 0; }
 
 private:
-   int do_compare (const Abstract& other) const throw (adt::RuntimeException);
+   int do_compare(const Abstract& other) const throw(adt::RuntimeException);
 };
 
 }

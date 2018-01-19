@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -40,28 +40,12 @@
 
 using namespace wepa;
 
-dbms::GuardStatement::GuardStatement(GuardConnection& guardConnection, Statement& statement)  throw (adt::RuntimeException) :
-   m_guardConnection (guardConnection),
-   m_statement (statement)
+dbms::GuardStatement::GuardStatement(GuardConnection& guardConnection, std::shared_ptr<Statement>& statement)  throw(adt::RuntimeException) :
+   m_guardConnection(guardConnection),
+   m_statement(statement)
 {
-   if (guardConnection->isAvailable () == false) {
-      WEPA_THROW_EXCEPTION(guardConnection->asString () << " | Connection is not available");
-   }
-
-   guardConnection.linkStatement();
-
-   statement.lock();
-}
-
-dbms::GuardStatement::GuardStatement(GuardConnection& guardConnection, Statement* statement) throw (adt::RuntimeException) :
-   m_guardConnection (guardConnection),
-   m_statement (*statement)
-{
-   if (statement == NULL)
-      WEPA_THROW_EXCEPTION("Statement can not be NULL");
-
-   if (guardConnection->isAvailable () == false) {
-      WEPA_THROW_EXCEPTION(guardConnection->asString () << " | Connection is not available");
+   if(guardConnection->isAvailable() == false) {
+      WEPA_THROW_EXCEPTION(guardConnection->asString() << " | Connection is not available");
    }
 
    guardConnection.linkStatement();
@@ -71,37 +55,37 @@ dbms::GuardStatement::GuardStatement(GuardConnection& guardConnection, Statement
 
 dbms::GuardStatement::~GuardStatement()
 {
-   m_statement.unlock();
+   m_statement->unlock();
    m_guardConnection.unlinkStatement();
 }
 
-dbms::datatype::Abstract& dbms::GuardStatement::getInputData (const int pos)
-   throw (adt::RuntimeException)
+std::shared_ptr<dbms::datatype::Abstract>& dbms::GuardStatement::getInputData(const int pos)
+   throw(adt::RuntimeException)
 {
-   return m_statement.getInputData(pos);
+   return m_statement->getInputData(*this, pos);
 }
 
-const dbms::datatype::Abstract& dbms::GuardStatement::getOutputData (const int pos) const
-   throw (adt::RuntimeException)
+const std::shared_ptr<dbms::datatype::Abstract>& dbms::GuardStatement::getOutputData(const int pos) const
+   throw(adt::RuntimeException)
 {
-   return m_statement.getOutputData(pos);
+   return m_statement->getOutputData(*this, pos);
 }
 
-dbms::ResultCode dbms::GuardStatement::execute ()
-   throw (adt::RuntimeException, DatabaseException)
+dbms::ResultCode dbms::GuardStatement::execute()
+   throw(adt::RuntimeException, DatabaseException)
 {
-   return m_guardConnection.execute (m_statement);
+   return m_guardConnection.execute(m_statement);
 }
 
-bool dbms::GuardStatement::fetch ()
-   throw (adt::RuntimeException, DatabaseException)
+bool dbms::GuardStatement::fetch()
+   throw(adt::RuntimeException, DatabaseException)
 {
-   return m_statement.fetch();
+   return m_statement->fetch();
 }
 
-void dbms::GuardStatement::setRequiresCommit (const bool requiresCommit) noexcept
+void dbms::GuardStatement::setRequiresCommit(const bool requiresCommit) noexcept
 {
-   m_statement.setRequiresCommit(requiresCommit);
+   m_statement->setRequiresCommit(requiresCommit);
 }
 
 

@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -33,25 +33,39 @@
 // Author: cisco.tierra@gmail.com
 //
 #include <wepa/persistence/Object.hpp>
+#include <wepa/persistence/PrimaryKey.hpp>
 
 #include <wepa/adt/AsHexString.hpp>
 
 #include <wepa/persistence/Class.hpp>
+#include <wepa/persistence/PrimaryKey.hpp>
+
 
 using namespace wepa;
 
-const persistence::PrimaryKey& persistence::Object::getPrimaryKey () const
-   throw (adt::RuntimeException)
-{
-   if (m_primaryKey == NULL) {
-      WEPA_THROW_EXCEPTION(m_class << " | ObjectId=" <<  getInternalId () << " | Object does not have primary key");
-   }
-
-   return *m_primaryKey;
-}
-
+persistence::Object::Object(const Class& clazz, const std::shared_ptr<PrimaryKey>& primaryKey, const dbms::datatype::Set& members) :
+   dbms::datatype::Set(members),
+   m_class(clazz), 
+   m_primaryKey(primaryKey)
+{;}
 
 std::string persistence::Object::getInternalId () const noexcept
 {
    return adt::AsHexString::apply (wepa_ptrnumber_cast(this));
 }
+
+adt::StreamString persistence::Object::asString() const noexcept
+{
+   adt::StreamString result("persistence.Object { ClassName=");
+   result << m_class.getName();
+   result << " | " << m_primaryKey->asString();
+   
+   result << " | Members={";
+   for(auto& member : *this) {
+      if(!member.second) {
+         result << "," << member.second->getName();
+      }
+   }
+   return result << "} }";
+}
+

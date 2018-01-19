@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -55,33 +55,26 @@
 
 using namespace wepa;
 
-BOOST_AUTO_TEST_CASE (persistence_define_structure)
+BOOST_AUTO_TEST_CASE (persistence_repository_repeat)
 {
    persistence::Repository repository ("persistence_define_structure");
 
-   persistence::Storage* ii = repository.createStorage(0, "the 0", persistence::Storage::AccessMode::ReadOnly);
+   auto ii = repository.createStorage("the 0", 128);
 
-   BOOST_REQUIRE_NE (ii, (void*) 0);
+   std::shared_ptr<persistence::Storage>& find = repository.findStorage("the 0");
 
-   persistence::Storage& find = repository.findStorage(0);
+   BOOST_REQUIRE_EQUAL (ii.get(), find.get());
 
-   BOOST_REQUIRE_EQUAL (ii, &find);
+   BOOST_REQUIRE_THROW(repository.createStorage("the 0", 16), adt::RuntimeException);
 
-   BOOST_REQUIRE_THROW(repository.createStorage(0, "another 0", persistence::Storage::AccessMode::ReadOnly), adt::RuntimeException);
-
-   persistence::Storage* jj = repository.createStorage(1, "the 1", persistence::Storage::AccessMode::ReadOnly);
-
-   BOOST_REQUIRE_NE (ii, jj);
-
-   BOOST_REQUIRE_THROW(repository.createStorage(333, "the 333", persistence::Storage::AccessMode::None), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE (persistence_repository_as)
 {
    persistence::Repository repository ("persistence_define_structure");
 
-   repository.createStorage(0, "the 0", persistence::Storage::AccessMode::ReadOnly);
-   repository.createStorage(1, "the 1", persistence::Storage::AccessMode::ReadWrite);
+   repository.createStorage("the 0", 16);
+   repository.createStorage("the 1", persistence::Storage::DefaultMaxCacheSize);
 
    adt::StreamString zz = repository.asString ();
 
@@ -92,12 +85,4 @@ BOOST_AUTO_TEST_CASE (persistence_repository_as)
    xml::Node& info = repository.asXML(myNode);
 
    BOOST_REQUIRE_EQUAL (info.children_size(), 2);
-
-   xml::Node& zero = info.childAt(0);
-   BOOST_REQUIRE_EQUAL (zero.lookupAttribute("Name").getValue(), "the 0");
-   BOOST_REQUIRE_EQUAL (zero.lookupAttribute("Mode").getValue(), "ReadOnly");
-
-   xml::Node& one = info.childAt(1);
-   BOOST_REQUIRE_EQUAL (one.lookupAttribute("Name").getValue(), "the 1");
-   BOOST_REQUIRE_EQUAL (one.lookupAttribute("Mode").getValue(), "ReadWrite");
 }

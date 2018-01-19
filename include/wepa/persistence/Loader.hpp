@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -40,18 +40,35 @@
 #include <wepa/adt/RuntimeException.hpp>
 
 namespace wepa {
+
+namespace dbms {
+   class GuardStatement;
+}
+
 namespace persistence {
 
-class Storage;
+
 
 class Loader : public Accessor {
 public:
    virtual ~Loader () {;}
 
-   virtual bool hasToRefresh (dbms::Connection& connection, GuardClass& _class, const Object& object) throw (adt::RuntimeException, dbms::DatabaseException) = 0;
+   virtual dbms::ResultCode apply(dbms::GuardStatement& statement, TheObject& object)
+      throw(adt::RuntimeException, dbms::DatabaseException) = 0;
 
+   virtual bool hasToRefresh (dbms::GuardStatement& statement, TheObject& object)
+      throw (adt::RuntimeException, dbms::DatabaseException) = 0;
+
+   const TheClass& getClass() const noexcept { return m_class; }
+   
 protected:
-   Loader (const char* name, const int ident) : Accessor(name, ident) {;}
+   Loader (const char* name, TheStatement& statement, const ThePrimaryKey& primaryKey, const TheClass& clazz) :
+      Accessor(name, statement, primaryKey),
+      m_class(clazz)
+   {;}
+   
+private:
+   TheClass m_class;
 };
 
 } /* namespace persistence */

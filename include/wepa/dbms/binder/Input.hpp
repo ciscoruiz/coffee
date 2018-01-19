@@ -2,7 +2,7 @@
 #ifndef _wepa_dbms_bind_Input_h
 #define _wepa_dbms_bind_Input_h
 
-#include <wepa/dbms/binder/BinderIf.hpp>
+#include "Binder.hpp"
 
 namespace wepa {
 
@@ -18,15 +18,15 @@ namespace binder {
  * A continuacion presentamos un ejemplo de uso detallado.
  * \include dbms.ss/oracle.ss/db_null.p/db_null.cc
  */
-class Input : public BinderIf {
+class Input : public Binder {
 public:
-   adt::StreamString asString () const noexcept;
+   adt::StreamString asString() const noexcept;
 
 protected:
-   explicit Input (datatype::Abstract& value) : BinderIf (value) {;}
+   explicit Input(std::shared_ptr<datatype::Abstract>& value) : Binder(value) {;}
 
 private:
-   void do_decode () throw (adt::RuntimeException) {;}
+   void do_decode() throw(adt::RuntimeException) {;}
 };
 
 }

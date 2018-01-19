@@ -41,6 +41,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <iostream>
+
 #include <wepa/adt/Microsecond.hpp>
 
 #include <wepa/logger/CircularTraceWriter.hpp>
@@ -72,10 +74,6 @@ BOOST_AUTO_TEST_CASE( CircularTraceWriter_oversized_file )
    unlink ("trace.log.old");
 
    CircularTraceWriter* writer = new CircularTraceWriter ("trace.log", 128);
-   std::shared_ptr <TraceObserver> observer (new TraceObserver ());
-
-   // This will generate the first 'update'
-   writer->subscribeObserver(observer.get ());
 
    Logger::initialize(writer);
    Logger::setLevel(Level::Debug);
@@ -94,8 +92,6 @@ BOOST_AUTO_TEST_CASE( CircularTraceWriter_oversized_file )
 
    LOG_DEBUG ("This line will generate an oversized file while the size is measured");
 
-   BOOST_REQUIRE_EQUAL (observer->getInitCounter(), 1 /* subscription */ + 1 /* initialization */ + 1 /* file size reached */);
-
    for (int ii = 0; ii < loop; ++ ii) {
       LOG_DEBUG(ii << " " << value);
    }
@@ -103,8 +99,6 @@ BOOST_AUTO_TEST_CASE( CircularTraceWriter_oversized_file )
    LOG_DEBUG ("This line will generate an oversized file while the size is measured");
 
    BOOST_REQUIRE_EQUAL (writer->getLineNo(), loop * 2 + 2);
-
-   BOOST_REQUIRE_EQUAL (observer->getInitCounter(), 1 /* subscription */ + 1 /* initialization */ + 2 /* file size reached */);
 
    int stream = open ("trace.log.old", O_RDWR | O_CREAT | O_EXCL, S_IRUSR |S_IWUSR | S_IRGRP| S_IROTH);
 
@@ -114,10 +108,6 @@ BOOST_AUTO_TEST_CASE( CircularTraceWriter_oversized_file )
 BOOST_AUTO_TEST_CASE( CircularTraceWriter_can_not_write )
 {
    CircularTraceWriter* writer = new CircularTraceWriter ("/trace.log", 128);
-   std::shared_ptr <TraceObserver> observer (new TraceObserver ());
-
-   // This will generate the first 'update'
-   writer->subscribeObserver(observer.get ());
 
    // When the circular writer can not write over the file, then it will trace on cerr, but only traces with level error or lesser
    BOOST_CHECK_THROW (Logger::initialize(writer), adt::RuntimeException);
@@ -133,8 +123,6 @@ BOOST_AUTO_TEST_CASE( CircularTraceWriter_can_not_write )
    LOG_NOTICE ("Ignored line");
    LOG_INFO ("Ignored line");
    LOG_DEBUG ("Ignored line");
-
-   BOOST_REQUIRE_EQUAL (observer->getInitCounter(), 1);
 
    BOOST_REQUIRE_EQUAL (writer->getLineNo(), 4);
 }

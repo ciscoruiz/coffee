@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -37,19 +37,24 @@
 
 #include <wepa/persistence/Accessor.hpp>
 
-#include <wepa/adt/RuntimeException.hpp>
-
 namespace wepa {
-namespace persistence {
 
-class Object;
+namespace dbms {
+   class GuardStatement;
+}
+
+namespace persistence {
 
 class Eraser : public Accessor {
 public:
    virtual ~Eraser () {;}
 
+   virtual dbms::ResultCode apply(dbms::GuardStatement& statement)
+      throw(adt::RuntimeException, dbms::DatabaseException) = 0;
+
 protected:
-   Eraser (const char* name, const int ident) : Accessor(name, ident) {;}
+   Eraser (const char* name, TheStatement& statement, const ThePrimaryKey& primaryKey) :
+      Accessor(name, statement, primaryKey) {;}
 };
 
 } /* namespace persistence */

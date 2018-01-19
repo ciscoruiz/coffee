@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -42,7 +42,7 @@
 namespace wepa {
 
 namespace app {
-class EngineIf;
+class Engine;
 }
 
 namespace dbms {
@@ -58,7 +58,7 @@ private:
    static DummyApplication st_this;
 
    void run () throw (adt::RuntimeException) {;}
-   void attach (app::EngineIf*) throw (adt::RuntimeException) {;}
+   void attach (app::Engine*) throw (adt::RuntimeException) {;}
 
 };
 

@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -109,11 +109,9 @@ BOOST_AUTO_TEST_CASE (shortblock_downcast)
 
    datatype::Abstract& abs = column;
 
-   datatype::ShortBlock& other = wepa_datatype_downcast(datatype::ShortBlock, abs);
-
-   BOOST_REQUIRE_EQUAL (&other, &column);
+   auto other = wepa_datatype_downcast(datatype::ShortBlock, abs);
 
    datatype::Integer zzz ("zzz");
 
-   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::ShortBlock, zzz), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::ShortBlock, zzz), dbms::InvalidDataException);
 }

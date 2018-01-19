@@ -33,13 +33,17 @@ public:
       isNotNull();
    }
 
-   Abstract* clone () const noexcept { return new Float (*this); }
+   std::shared_ptr<Abstract> clone() const noexcept { return std::make_shared<Float>(*this); }
+
+   bool operator==(const Float& other) const noexcept { return m_value == other.m_value; }
 
    operator adt::StreamString () const noexcept { return asString (); }
 
    adt::StreamString asString () const noexcept;
 
-   static const char* className () noexcept { return "dbms::datatype::Float"; }
+   const char* className () noexcept { return "dbms::datatype::Float"; }
+
+   size_t hash() const noexcept { return std::hash<float>{}(m_value); }
 
    wepa_declare_datatype_downcast(Float)
 

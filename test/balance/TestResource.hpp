@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -38,6 +38,8 @@
 #include <wepa/balance/Resource.hpp>
 #include <wepa/adt/AsString.hpp>
 
+#include <wepa/balance/ResourceList.hpp>
+
 namespace wepa {
 
 namespace test {
@@ -54,6 +56,10 @@ public:
    void setAvailable (const bool available) noexcept { m_available = available; }
    int getKey () const noexcept { return m_key; }
 
+   static std::shared_ptr<TestResource> cast(std::shared_ptr<wepa::balance::Resource>& resource) { return std::dynamic_pointer_cast<TestResource>(resource); }
+   static std::shared_ptr<TestResource> cast(const std::shared_ptr<wepa::balance::Resource>& resource) { return std::dynamic_pointer_cast<TestResource>(resource); }
+   static std::shared_ptr<TestResource> cast_copy(std::shared_ptr<wepa::balance::Resource> resource) { return std::dynamic_pointer_cast<TestResource>(resource); }
+
 private:
    const int m_key;
    bool m_available;
@@ -61,6 +67,22 @@ private:
    bool isAvailable () const noexcept { return m_available; }
    void initialize () throw (adt::RuntimeException) { m_available = true; }
 };
+
+inline std::shared_ptr<wepa::balance::ResourceList> setup(const int maxResource, const int firstId = 0)
+{
+   std::shared_ptr<wepa::balance::ResourceList> result = std::make_shared<wepa::balance::ResourceList>("TestResources");
+
+   logger::Logger::initialize(new logger::TtyWriter);
+
+   int id = firstId;
+   for (int ii = 0; ii < maxResource; ++ ii) {
+      result->add(std::make_shared<TestResource>(id ++));
+   }
+
+   result->initialize();
+
+   return result;
+}
 
 }
 }

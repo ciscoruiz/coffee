@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -113,10 +113,11 @@ void datatype::Date::setValue (const char* str, const char* format)
    tm aux;
    char* r = strptime (str, format, &aux);
 
-   if (r == NULL) {
+   if (r == NULL ) {
       WEPA_THROW_EXCEPTION("'" << str << "' is not a valid date using format '" << format << "'");
    }
 
+   aux.tm_isdst = 0;
    time_t newValue = mktime (&aux);
 
    if (newValue == -1) {
@@ -158,3 +159,4 @@ int datatype::Date::do_compare (const datatype::Abstract& other) const
 
    return this->m_value - _other.m_value;
 }
+

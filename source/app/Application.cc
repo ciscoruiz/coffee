@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -60,13 +60,15 @@
 #include <wepa/xml/SCCS.hpp>
 
 #include <wepa/app/Application.hpp>
-#include <wepa/app/EngineIf.hpp>
 #include <wepa/app/SCCS.hpp>
-#include <wepa/app/functions.hpp>
+#include <wepa/app/Engine.hpp>
 
 using namespace std;
 using namespace wepa;
 using namespace wepa::adt;
+
+//static
+app::Application* app::Application::m_this = nullptr;
 
 app::Application::Application (const char* shortName, const char* title, const char* version, const char* date, const char* time) :
    Runnable (shortName),
@@ -86,7 +88,8 @@ app::Application::Application (const char* shortName, const char* title, const c
 
    a_pid = getpid ();
 
-   functions::st_application = this;
+   if (m_this == nullptr)
+      m_this = this;
 
    cout << getName () << " - " << a_title << ". Version " << a_version << endl;
    if (date || time) {
@@ -95,21 +98,27 @@ app::Application::Application (const char* shortName, const char* title, const c
       if (time) cout << time;
       cout << endl;
    }
-   cout << "(c) Copyright 2013 by Francisco Ruiz." << endl << endl;
+   cout << "(c) Copyright 2018 by Francisco Ruiz." << endl << endl;
 }
 
-app::EngineIf* app::Application::engine_find (const char* className)
+app::Application::~Application()
+{
+   if (m_this == this) {
+      m_this = nullptr;
+   }
+   a_engines.clear();
+}
+
+app::Application::engine_iterator app::Application::engine_find (const char* className)
    noexcept
 {
-   EngineIf* engine;
-
    for (engine_iterator ii = engine_begin (), maxii = engine_end (); ii != maxii; ii ++) {
-      engine = Application::engine (ii);
+      auto engine = Application::engine (ii);
       if (wepa_strcmp (className, engine->getClassName ()) == 0)
-         return engine;
+         return ii;
    }
 
-   return NULL;
+   return engine_end();
 }
 
 /**
@@ -149,7 +158,7 @@ void app::Application::start ()
       cout << "WEPA - Write Excellent Professional Applications. Version " << config::Release::getVersion () << endl;
       cout << "Developed by Francisco Ruiz" << endl;
       cout << "Release date: " << __DATE__ << " " << __TIME__ << endl;
-      cout << "(c) Copyright 2013,2014 by Francisco Ruiz." << endl << endl;
+      cout << "(c) Copyright 2018,2014 by Francisco Ruiz." << endl << endl;
 
       initialize ();
 
@@ -184,10 +193,8 @@ void app::Application::startEngines ()
 {
    LOG_THIS_METHOD ();
 
-   EngineIf* engine;
-
    for (engine_iterator ii = engine_begin (); ii != engine_end (); ii ++) {
-      engine = Application::engine (ii);
+      auto engine = Application::engine (ii);
       LOG_INFO ("Initializing engine | " <<  engine->asString ());
       engine->initialize ();
    }
@@ -198,10 +205,8 @@ void app::Application::stopEngines ()
 {
    LOG_THIS_METHOD ();
 
-   EngineIf* engine;
-
    for (engine_iterator ii = engine_begin (); ii != engine_end (); ii ++) {
-      engine = Application::engine (ii);
+      auto engine = Application::engine (ii);
 
       if (engine->isStopped() == true)
          continue;
@@ -227,10 +232,8 @@ void app::Application::do_requestStop ()
 {
    LOG_THIS_METHOD ();
 
-   EngineIf* engine;
-
    for (engine_iterator ii = engine_begin (), maxii = engine_end (); ii != maxii; ii ++) {
-      engine = Application::engine (ii);
+      auto engine = Application::engine (ii);
 
       LOG_INFO ("Request stop for engine | " <<  engine->asString ());
 
@@ -250,15 +253,15 @@ void app::Application::do_requestStop ()
 // ejecucin de la aplicacin => se inicilizar� en el Application::start ya que en
 // ese momento los objetos est� completamente creados.
 //---------------------------------------------------------------------------------------
-void app::Application::attach (app::EngineIf* engine)
+void app::Application::attach (std::shared_ptr<Engine> engine)
    throw (RuntimeException)
 {
-   if (engine == NULL)
+   if (!engine)
       WEPA_THROW_EXCEPTION ("Can not associate a NULL engine");
 
-   EngineIf* ww = engine_find(engine->getName());
+   auto ii = engine_find(engine->getName());
 
-   if (ww != NULL) {
+   if (ii != engine_end()) {
       LOG_INFO (engine->asString () << " | Already defined") ;
       return;
    }
@@ -295,6 +298,14 @@ void app::Application::writeContext (const std::string& file)
    out << compiler.apply (root) << std::endl;
 
    out.close ();
+}
+
+adt::StreamString app::Application::asString() const noexcept
+{
+   adt::StreamString result("app::Application { ");
+   result << app::Runnable::asString();
+   result << " | #engines=" << a_engines.size();
+   return result += " }";
 }
 
 xml::Node& app::Application::asXML (xml::Node& root) const
@@ -354,12 +365,12 @@ void app::Application::handlerUserSignal (int signalID)
    noexcept
 {
    try {
-      Application& app = app::functions::getApp ();
-
-      if (signalID == SIGUSR1)
-         app.signalUSR1 ();
-      else
-         app.signalUSR2 ();
+      if (m_this != nullptr) {
+         if (signalID == SIGUSR1)
+            m_this->signalUSR1 ();
+         else
+            m_this->signalUSR2 ();
+      }
    }
    catch (adt::RuntimeException& ex) {
       logger::Logger::write (ex);
@@ -371,9 +382,10 @@ void app::Application::handlerSignalTerminate (int)
    noexcept
 {
    try {
-      Application& app = app::functions::getApp();
-      LOG_WARN (app.asString () << " | Received SIGTERM signal");
-      app.requestStop ();
+      if (m_this != nullptr) {
+         LOG_WARN (m_this->asString () << " | Received SIGTERM signal");
+         m_this->requestStop ();
+      }
    }
    catch (adt::RuntimeException& ex) {
       logger::Logger::write (ex);

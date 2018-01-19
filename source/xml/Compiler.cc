@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -155,8 +155,6 @@ const char* xml::Compiler::encode (const char* text)
 
 //   m_encodedBuffer = (char*) xmlRealloc (m_encodedBuffer, outputSize + 1);
    m_encodedBuffer [outputSize] = 0;
-
-   std::cout << text << "='" << m_encodedBuffer << "'" << std::endl;
 
    return m_encodedBuffer;
 }

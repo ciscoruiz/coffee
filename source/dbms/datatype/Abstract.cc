@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -32,9 +32,9 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/adt/StreamString.hpp>
+#include <functional>
 
-#include <wepa/adt/AsHexString.hpp>
+#include <wepa/adt/StreamString.hpp>
 
 #include <wepa/dbms/datatype/Abstract.hpp>
 
@@ -47,8 +47,6 @@ adt::StreamString datatype::Abstract::asString () const
    adt::StreamString result;
 
    result << "datatype.Abstract { Name: " << m_name;
-   result << " | Buffer: " << adt::AsHexString::apply(wepa_ptrnumber_cast (m_buffer));
-   result << " | MaxSize: " << m_maxSize;
    result << " | Null: " << m_isNull;
    result << " | Constraint: " << ((m_constraint == Constraint::CanBeNull) ? "CanBeNull": "CanNotBeNull");
 
@@ -82,10 +80,19 @@ void datatype::Abstract::exceptionWhenIsNull () const
    }
 }
 
-// this - other
+int datatype::Abstract::compare (const std::shared_ptr<Abstract>& other) const
+   throw (adt::RuntimeException)
+{
+   return compare(std::ref(*other.get()));
+}
+
 int datatype::Abstract::compare (const Abstract& other) const
    throw (adt::RuntimeException)
 {
+   if (this->getType () != other.getType()) {
+      WEPA_THROW_EXCEPTION(this->asString () << " type does not matches with " << other.asString());
+   }
+
    if (this->hasValue() == false && other.hasValue () == false)
       return 0;
 
@@ -94,10 +101,6 @@ int datatype::Abstract::compare (const Abstract& other) const
 
    if (this->hasValue () == false && other.hasValue () == true)
       return -1;
-
-   if (this->getType () != other.getType()) {
-      WEPA_THROW_EXCEPTION(this->asString () << " type does not matches with " << other);
-   }
 
    return this->do_compare (other);
 }

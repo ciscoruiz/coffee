@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2013 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -32,6 +32,8 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+#include <memory>
+
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -42,195 +44,99 @@
 #include <wepa/logger/TtyWriter.hpp>
 
 #include <wepa/balance/Resource.hpp>
-#include <wepa/balance/BalanceIf.hpp>
+#include <wepa/balance/ResourceList.hpp>
+#include <wepa/balance/GuardResourceList.hpp>
+#include <wepa/balance/StrategyRoundRobin.hpp>
 
 #include <wepa/xml/Node.hpp>
 #include <wepa/xml/Compiler.hpp>
 
+#include "TestResource.hpp"
+
 using namespace wepa;
 using namespace wepa::balance;
-
-class MyResource : public Resource {
-public:
-   MyResource (const int key) :
-      Resource (adt::StreamString ("MyResource-").append (adt::AsString::apply (key, "%02d"))),
-      m_key (key),
-      m_available (false) {;}
-
-   void setAvailable (const bool available) noexcept { m_available = available; }
-   int getKey () const noexcept { return m_key; }
-
-private:
-   const int m_key;
-   bool m_available;
-
-   bool isAvailable () const noexcept { return m_available; }
-   void initialize () throw (adt::RuntimeException) { m_available = true; }
-};
-
-class MyBaseBalance : public BalanceIf {
-public:
-   MyBaseBalance (const Requires::_v requires);
-   ~MyBaseBalance () { m_resources.clear (); }
-
-   MyResource* get (const int index) noexcept { return &m_resources [index]; }
-
-private:
-   boost::ptr_vector<MyResource> m_resources;
-};
-
-class MyBasicBalance : public MyBaseBalance {
-public:
-   MyBasicBalance () : MyBaseBalance (Requires::None) {;}
-
-private:
-   Resource* do_apply (const int key) throw (adt::RuntimeException);
-};
-
-class MyKeyBalance : public MyBaseBalance {
-public:
-   MyKeyBalance () : MyBaseBalance (Requires::Key) {;}
-
-private:
-   Resource* do_apply (const int key) throw (adt::RuntimeException);
-};
+using namespace wepa::test::balance;
 
 int MaxResources = 10;
 
-MyBaseBalance::MyBaseBalance (const Requires::_v requires) :
-   BalanceIf ("MyBalance", requires)
+BOOST_AUTO_TEST_CASE( avoid_empties )
 {
-   logger::Logger::initialize(new logger::TtyWriter);
-
-   for (int ii = 0; ii < MaxResources; ++ ii) {
-      MyResource* resource = new MyResource (ii);
-      m_resources.push_back (resource);
-
-      this->add (resource);
-   }
-}
-
-Resource* MyBasicBalance::do_apply (const int key)
-   throw (adt::RuntimeException)
-{
-   for (resource_iterator ii = this->resource_begin(), maxii = this->resource_end(); ii != maxii; ++ ii) {
-      Resource* resource = BalanceIf::resource (ii);
-
-      if (resource->isAvailable() == false)
-         continue;
-
-      return resource;
-   }
-
-   return NULL;
-}
-
-Resource* MyKeyBalance::do_apply (const int key)
-   throw (adt::RuntimeException)
-{
-   for (resource_iterator ii = this->resource_begin(), maxii = this->resource_end(); ii != maxii; ++ ii) {
-      Resource* resource = BalanceIf::resource (ii);
-
-      MyResource* myResource = static_cast <MyResource*> (resource);
-
-      if (myResource->getKey () == key)
-         return resource;
-   }
-
-   return NULL;
+   ResourceList resourceList("otherList");
+   std::shared_ptr<Resource> emptyResource;
+   BOOST_REQUIRE_THROW (resourceList.add (emptyResource), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE( count_availables )
 {
-   MyBasicBalance myBalance;
+   auto resourceList = wepa::test::balance::setup(MaxResources);
 
-   BOOST_REQUIRE_THROW (myBalance.add (NULL), adt::RuntimeException);
+   GuardResourceList guard(resourceList);
 
-   BOOST_REQUIRE_EQUAL(myBalance.add (myBalance.get (0)), false);
+   BOOST_REQUIRE_EQUAL(resourceList->size(guard), MaxResources);
+   BOOST_REQUIRE_EQUAL(resourceList->countAvailableResources(guard), MaxResources);
 
-   myBalance.initialize();
-
-   BOOST_REQUIRE_EQUAL(myBalance.size (), MaxResources);
-   BOOST_REQUIRE_EQUAL(myBalance.countAvailableResources(), MaxResources);
-
-   for (int ii = 0; ii < MaxResources; ++ ii) {
-      if ((ii % 2) == 0)
-         myBalance.get(ii)->setAvailable(false);
+   bool available = false;
+   for (auto ii = resourceList->resource_begin(guard), maxii = resourceList->resource_end(guard); ii != maxii; ++ ii) {
+      std::shared_ptr<TestResource> myResource = TestResource::cast(ResourceList::resource(ii));
+      myResource->setAvailable(available);
+      available = !available;
    }
 
-   BOOST_REQUIRE_EQUAL(myBalance.countAvailableResources(), MaxResources / 2);
+   BOOST_REQUIRE_EQUAL(resourceList->countAvailableResources(guard), MaxResources / 2);
 }
 
 BOOST_AUTO_TEST_CASE( dont_use_unavailables )
 {
-   MyBasicBalance myBalance;
+   auto resourceList = wepa::test::balance::setup(MaxResources);
 
-   myBalance.initialize();
+   balance::StrategyRoundRobin strategy(resourceList);
 
-   Resource* resource = myBalance.apply();
-
-   BOOST_REQUIRE_EQUAL (resource, myBalance.get (0));
-
-   myBalance.get (0)->setAvailable(false);
-
-   resource = myBalance.apply();
-
-   BOOST_REQUIRE_EQUAL (resource, myBalance.get (1));
-
-   for (int ii = 0; ii < MaxResources; ++ ii) {
-      myBalance.get(ii)->setAvailable(false);
+   if (true) {
+      GuardResourceList guard(resourceList);
+      std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, 0));
+      myResource->setAvailable(false);
    }
 
-   BOOST_REQUIRE_THROW (myBalance.apply(), adt::RuntimeException);
-}
+   std::shared_ptr<TestResource> myResource = TestResource::cast_copy(strategy.apply());
+   BOOST_REQUIRE_EQUAL (myResource->getKey(), 1);
 
-BOOST_AUTO_TEST_CASE (must_have_key)
-{
-   MyKeyBalance myBalance;
+   if (true) {
+      GuardResourceList guard(resourceList);
+      for (auto ii = resourceList->resource_begin(guard), maxii = resourceList->resource_end(guard); ii != maxii; ++ ii) {
+         std::shared_ptr<TestResource> myResource = TestResource::cast(ResourceList::resource(ii));
+         myResource->setAvailable(false);
+      }
+   }
 
-   myBalance.initialize();
-
-   BOOST_REQUIRE_THROW (myBalance.apply(), adt::RuntimeException);
-
-   Resource* resource = myBalance.apply(MaxResources / 2);
-
-   BOOST_REQUIRE_EQUAL (resource, myBalance.get (MaxResources / 2));
-}
-
-
-BOOST_AUTO_TEST_CASE (avoid_using_unavailable)
-{
-   MyKeyBalance myBalance;
-
-   myBalance.initialize();
-
-   myBalance.get (MaxResources / 2)->setAvailable(false);
-
-   BOOST_REQUIRE_THROW (myBalance.apply (MaxResources / 2), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (strategy.apply(), ResourceUnavailableException);
 }
 
 BOOST_AUTO_TEST_CASE (as_string)
 {
-   MyKeyBalance myBalance;
+   auto resourceList = wepa::test::balance::setup(MaxResources);
 
-   myBalance.initialize();
+   if (true) {
+      GuardResourceList guard(resourceList);
+      std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, 0));
+      myResource->setAvailable(false);
+   }
 
-   myBalance.get (MaxResources / 2)->setAvailable(false);
-
-   BOOST_REQUIRE_EQUAL (myBalance.asString (), "balance.BalanceIf { adt.NamedObject { Name: MyBalance } | Requires=Key } | Available = 9 of 10 }");
+   BOOST_REQUIRE_EQUAL (resourceList->asString (), "balance.ResourceList { adt.NamedObject { Name: TestResources } | Available = 9 of 10 }");
 }
 
 BOOST_AUTO_TEST_CASE (as_xml)
 {
-   MyKeyBalance myBalance;
+   auto resourceList = wepa::test::balance::setup(MaxResources);
 
-   myBalance.initialize();
-
-   myBalance.get (MaxResources / 2)->setAvailable(false);
+   if (true) {
+      GuardResourceList guard(resourceList);
+      std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, MaxResources / 2));
+      myResource->setAvailable(false);
+   }
 
    xml::Node root ("root");
 
-   myBalance.asXML(root);
+   resourceList->asXML(root);
 
    xml::Compiler compiler;
 

@@ -52,6 +52,7 @@ namespace wepa {
    }
    namespace dbms {
       class Connection;
+      class GuardConnection;
    }
 
 namespace persistence {
@@ -87,6 +88,11 @@ public:
    void save (Accessor::TheConnection& connection, Recorder& recorder)
       throw (adt::RuntimeException, dbms::DatabaseException);
    void erase (Accessor::TheConnection& connection, Eraser& eraser)
+      throw (adt::RuntimeException, dbms::DatabaseException);
+
+   void save (dbms::GuardConnection& connection, Recorder& recorder)
+      throw (adt::RuntimeException, dbms::DatabaseException);
+   void erase (dbms::GuardConnection& connection, Eraser& eraser)
       throw (adt::RuntimeException, dbms::DatabaseException);
 
    operator adt::StreamString () const noexcept { return asString (); }

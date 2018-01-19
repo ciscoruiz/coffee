@@ -120,11 +120,18 @@ void Storage::save(Accessor::TheConnection& connection, Recorder& recorder)
    throw(adt::RuntimeException, dbms::DatabaseException)
 {
    LOG_THIS_METHOD();
+   dbms::GuardConnection guardConnection(connection);
+   save(guardConnection, recorder);
+}
+
+void Storage::save(dbms::GuardConnection& guardConnection, Recorder& recorder)
+   throw(adt::RuntimeException, dbms::DatabaseException)
+{
+   LOG_THIS_METHOD();
+
+   dbms::GuardStatement guardStatement(guardConnection, recorder.getStatement());
 
    Accessor::TheObject object = recorder.getObject();
-
-   dbms::GuardConnection guardConnection(connection);
-   dbms::GuardStatement guardStatement(guardConnection, recorder.getStatement());
 
    dbms::ResultCode resultCode = recorder.apply(guardStatement);
 
@@ -141,6 +148,14 @@ void Storage::save(Accessor::TheConnection& connection, Recorder& recorder)
 void Storage::erase(Accessor::TheConnection& connection, Eraser& eraser)
    throw(adt::RuntimeException, dbms::DatabaseException)
 {
+   LOG_THIS_METHOD();
+   dbms::GuardConnection guardConnection(connection);
+   erase(guardConnection, eraser);
+}
+
+void Storage::erase(dbms::GuardConnection& guardConnection, Eraser& eraser)
+   throw(adt::RuntimeException, dbms::DatabaseException)
+{
    const Accessor::ThePrimaryKey& primaryKey(eraser.getPrimaryKey());
 
    LOG_DEBUG(asString() << " | Erasing =" << primaryKey->asString());
@@ -153,7 +168,6 @@ void Storage::erase(Accessor::TheConnection& connection, Eraser& eraser)
       m_hitCounter ++;
    }
 
-   dbms::GuardConnection guardConnection(connection);
    dbms::GuardStatement guardStatement(guardConnection, eraser.getStatement());
 
    dbms::ResultCode resultCode = eraser.apply(guardStatement);

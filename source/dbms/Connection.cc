@@ -90,7 +90,7 @@ dbms::ResultCode dbms::Connection::execute(std::shared_ptr<Statement>& statement
    }
    else {
       m_commitPending ++;
-      if(m_maxCommitPending > 0 && m_commitPending >= m_maxCommitPending)  {
+      if(reachMaxCommitPending())  {
          commit();
       }
    }
@@ -205,11 +205,12 @@ adt::StreamString dbms::Connection::asString() const
 {
    adt::StreamString result("dbms::Connection { ");
    result += balance::Resource::asString();
-   result << " | Database: " << m_dbmsDatabase.getName();
-   result << " | User: " << m_user;
-   result << " | LockingCounter: " << m_lockingCounter << " | password: ****";
-   result << " | CommitPending: " << m_commitPending;
-   result << " | RollbackPending: " << m_rollbackPending;
+   result << " | Database=" << m_dbmsDatabase.getName();
+   result << " | User=" << m_user;
+   result << " | LockingCounter=" << m_lockingCounter << " | password=****";
+   result << " | MaxCommitPending=" << m_maxCommitPending;
+   result << " | CommitPending=" << m_commitPending;
+   result << " | RollbackPending=" << m_rollbackPending;
    return result += " }";
 }
 
@@ -223,6 +224,7 @@ xml::Node& dbms::Connection::asXML(xml::Node& parent) const
    result.createAttribute("User", m_user);
    result.createAttribute("AccessingCounter", m_accesingCounter);
    result.createAttribute("LockingCounter", m_lockingCounter);
+   result.createAttribute("MaxCommitPending", m_maxCommitPending);
    result.createAttribute("CommitPending", m_commitPending);
    result.createAttribute("RollbackPending", m_rollbackPending);
 

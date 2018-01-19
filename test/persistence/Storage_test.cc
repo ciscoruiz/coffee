@@ -361,3 +361,58 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_erase_noloaded, Fixture)
    BOOST_REQUIRE_EQUAL(storage->getFaultCounter(), 2);
    BOOST_REQUIRE_EQUAL(storage->getHitCounter(), 0);
 }
+
+BOOST_FIXTURE_TEST_CASE(persistence_storage_save_commit_pending, Fixture)
+{
+   const int maxCommitPending = 64;
+   const int minId = test_persistence::MyDatabase::PreloadRegisterCounter * 2;
+   const int commitCounter = 3;
+
+   {
+      dbms::GuardConnection guardConnection(connection);
+      guardConnection.setMaxCommitPending(maxCommitPending);
+
+      for (int ii = minId; ii < (minId + (maxCommitPending * commitCounter)); ++ ii) {
+         primaryKeyForFind->setInteger("id", ii);
+         auto object = customerClass->createObject(primaryKeyForFind);
+
+         adt::StreamString streamString;
+         streamString << ii << " - name";
+         object->setString("name", streamString);
+         test_persistence::MockCustomerRecorder recorder(writerStatement, object);
+
+         storage->save(guardConnection, recorder);
+      }
+   }
+
+   BOOST_REQUIRE_EQUAL(database.container_size(), test_persistence::MyDatabase::PreloadRegisterCounter + (maxCommitPending * commitCounter));
+
+   auto mockConnection = std::dynamic_pointer_cast<mock::MockConnection>(connection);
+
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), commitCounter);
+}
+
+BOOST_FIXTURE_TEST_CASE(persistence_storage_erase_commit_pending, Fixture)
+{
+   const int maxCommitPending = 16;
+   const int commitCounter = 3;
+   const int maxId = 10 + maxCommitPending * commitCounter;
+
+   {
+      dbms::GuardConnection guardConnection(connection);
+      guardConnection.setMaxCommitPending(maxCommitPending);
+
+      for (int ii = 10; ii < maxId; ++ ii) {
+         primaryKeyForFind->setInteger("id", ii);
+         test_persistence::MockCustomerEraser eraser(eraserStatement, primaryKeyForFind);
+         storage->erase(guardConnection, eraser);
+      }
+   }
+
+   BOOST_REQUIRE_EQUAL(database.container_size(), test_persistence::MyDatabase::PreloadRegisterCounter + 10 - maxId);
+
+   auto mockConnection = std::dynamic_pointer_cast<mock::MockConnection>(connection);
+
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), commitCounter);
+}
+

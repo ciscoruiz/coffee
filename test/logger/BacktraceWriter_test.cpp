@@ -49,8 +49,7 @@ BOOST_AUTO_TEST_CASE (backtraking_test)
 {
    int backtrackingLength = 5;
 
-   BacktraceWriter* writer = new BacktraceWriter ("backtrace.log", 256, backtrackingLength);
-
+   auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
    Logger::initialize (writer);
 
    for (int ii = 0; ii < backtrackingLength * 2; ++ ii)
@@ -70,8 +69,7 @@ BOOST_AUTO_TEST_CASE (backtraking_down_lowest_level_test)
 {
    int backtrackingLength = 5;
 
-   BacktraceWriter* writer = new BacktraceWriter ("backtrace.log", 256, backtrackingLength);
-
+   auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
    Logger::initialize (writer);
 
    writer->setLowestLeveL(Level::Local0);
@@ -93,8 +91,7 @@ BOOST_AUTO_TEST_CASE (backtraking_up_lowest_level_test)
 {
    int backtrackingLength = 5;
 
-   BacktraceWriter* writer = new BacktraceWriter ("backtrace.log", 256, backtrackingLength);
-
+   auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
    Logger::initialize (writer);
 
    writer->setLowestLeveL(Level::Information);
@@ -116,8 +113,7 @@ BOOST_AUTO_TEST_CASE (backtraking_change_level_test)
 {
    int backtrackingLength = 5;
 
-   BacktraceWriter* writer = new BacktraceWriter ("backtrace.log", 256, backtrackingLength);
-
+   auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
    Logger::initialize (writer);
 
    Logger::setLevel (Level::Error);
@@ -139,7 +135,7 @@ BOOST_AUTO_TEST_CASE (backtraking_performance_measure_test)
 {
    int backtrackingLength = 32;
 
-   BacktraceWriter* writer = new BacktraceWriter ("backtrace.log", 4096, backtrackingLength);
+   auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
 
    Logger::setLevel (Level::Error);
 

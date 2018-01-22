@@ -44,7 +44,7 @@ using namespace wepa;
 
 mock::MockApplication::MockApplication (const char* title) : app::Application ("MockApp", title, "0.0")
 {
-   logger::Logger::initialize(new logger::TtyWriter);
+   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
 }
 
 void mock::MockApplication::operator ()()

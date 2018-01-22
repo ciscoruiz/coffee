@@ -72,7 +72,7 @@ inline std::shared_ptr<wepa::balance::ResourceList> setup(const int maxResource,
 {
    std::shared_ptr<wepa::balance::ResourceList> result = std::make_shared<wepa::balance::ResourceList>("TestResources");
 
-   logger::Logger::initialize(new logger::TtyWriter);
+   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
 
    int id = firstId;
    for (int ii = 0; ii < maxResource; ++ ii) {

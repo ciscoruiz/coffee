@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2018 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -51,45 +51,45 @@ logger::Logger::FormatterPtr logger::Logger::m_formatter;
 logger::Logger::WriterPtr logger::Logger::m_writer;
 
 //static
-void logger::Logger::initialize (Writer* writer, Formatter* formatter)
-   throw (adt::RuntimeException)
+void logger::Logger::initialize(std::shared_ptr<Writer> writer, std::shared_ptr<Formatter> formatter)
+   throw(adt::RuntimeException)
 {
-   SCCS::activate ();
+   SCCS::activate();
 
-   m_writer.reset (writer);
-   m_writer->initialize ();
+   m_writer = writer;
+   m_writer->initialize();
 
-   m_formatter.reset (formatter);
+   m_formatter = formatter;
 }
 
 //static
-void logger::Logger::initialize (Writer* writer)
-   throw (adt::RuntimeException)
+void logger::Logger::initialize(std::shared_ptr<Writer> writer)
+   throw(adt::RuntimeException)
 {
-   initialize (writer, new DefaultFormatter ());
+   initialize(writer, std::make_shared<DefaultFormatter>());
 }
 
 //static
-void logger::Logger::write (const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned lineno)
+void logger::Logger::write(const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned lineno)
    noexcept
 {
-   if (m_writer.get () == NULL || m_formatter.get () == NULL)
+   if(m_writer.get() == NULL || m_formatter.get() == NULL)
       return;
 
    // Writer will ask 'Logger' about what to do with this level, but it could be different for some kinds of writer.
-   if (m_writer->wantsToProcess (level) == false)
+   if(m_writer->wantsToProcess(level) == false)
       return;
 
-   Formatter::Elements elements (level, input, function, file, lineno);
-   m_writer->apply (level, m_formatter->apply (elements));
+   Formatter::Elements elements(level, input, function, file, lineno);
+   m_writer->apply(level, m_formatter->apply(elements));
 }
 
 //static
-bool logger::Logger::wantsToProcess (const Level::_v level)
+bool logger::Logger::wantsToProcess(const Level::_v level)
    noexcept
 {
-   if (m_writer.get () == NULL || m_formatter.get () == NULL)
+   if(m_writer.get() == NULL || m_formatter.get() == NULL)
       return false;
 
-   return isActive (level) ? true: m_writer->wantsToProcess(level);
+   return isActive(level) ? true: m_writer->wantsToProcess(level);
 }

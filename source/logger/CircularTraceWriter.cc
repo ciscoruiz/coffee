@@ -95,7 +95,6 @@ void logger::CircularTraceWriter::apply(const Level::_v level, const std::string
          closeStream ();
          renameFile ();
          openStream ();
-         logger::Writer::notify ();
       }
    }
    catch (adt::RuntimeException& ex) {

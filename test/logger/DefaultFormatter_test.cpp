@@ -61,8 +61,8 @@ private:
 
 BOOST_AUTO_TEST_CASE( DefaultFormatter_test )
 {
-   TtyWriter* ww = new TtyWriter ();
-   logger::Logger::initialize (ww);
+   auto writer = std::make_shared<TtyWriter>();
+   logger::Logger::initialize(writer);
 
    logger::Logger::setLevel (logger::Level::Local2);
 
@@ -72,6 +72,6 @@ BOOST_AUTO_TEST_CASE( DefaultFormatter_test )
       logger::Logger::write((logger::Level::_v)ii, msg << " numeric value=" << ii, WEPA_FILE_LOCATION);
    }
 
-   BOOST_REQUIRE_EQUAL(ww->getCounter (), logger::Level::Local2 + 1);
+   BOOST_REQUIRE_EQUAL(writer->getCounter (), logger::Level::Local2 + 1);
 }
 

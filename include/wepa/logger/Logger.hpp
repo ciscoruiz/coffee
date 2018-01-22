@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2018 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -36,6 +36,7 @@
 #define wepa_logger_Logger_hpp
 
 #include <memory>
+#include <vector>
 
 #include <wepa/logger/Level.hpp>
 
@@ -52,40 +53,41 @@ namespace logger {
 class Writer;
 class Formatter;
 
-class Logger  {
+class Logger {
+   typedef std::vector<std::shared_ptr<Writer> > Writers;
+   typedef Writers::iterator writer_iterator;
+
 public:
-   typedef std::shared_ptr <Writer> WriterPtr;
-   typedef std::shared_ptr <Formatter> FormatterPtr;
+   static void initialize(std::shared_ptr<Writer> writer, std::shared_ptr<Formatter> formatter) throw(adt::RuntimeException);
+   static void initialize(std::shared_ptr<Writer> writer) throw(adt::RuntimeException);
+   static void add(std::shared_ptr<Writer> writer) throw (adt::RuntimeException);
 
-   static void initialize (Writer* writer, Formatter* formatter) throw (adt::RuntimeException);
-   static void initialize (Writer* writer) throw (adt::RuntimeException);
+   static void write(const Level::_v level, const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept;
 
-   static void write (const Level::_v level, const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept;
+   static void setLevel(const Level::_v level) noexcept { m_level = level; }
+   static Level::_v getLevel() noexcept { return m_level; }
 
-   static void setLevel (const Level::_v level) noexcept { m_level = level; }
-   static Level::_v getLevel () noexcept { return m_level; }
+   static bool isActive(const Level::_v level) noexcept { return(level <= Level::Error) ? true:(level <= m_level); }
+   static bool wantsToProcess(const Level::_v level) noexcept;
 
-   static bool isActive (const Level::_v level) noexcept { return (level <= Level::Error) ? true: (level <= m_level); }
-   static bool wantsToProcess (const Level::_v level) noexcept;
+   static void critical(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Critical, streamString, function, file, line); }
+   static void error(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Error, streamString, function, file, line); }
+   static void warning(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Warning, streamString, function, file, line); }
+   static void notice(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Notice, streamString, function, file, line); }
+   static void info(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Information, streamString, function, file, line); }
+   static void debug(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Debug, streamString, function, file, line); }
 
-   static void critical (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Critical, streamString, function, file, line); }
-   static void error (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Error, streamString, function, file, line); }
-   static void warning (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Warning, streamString, function, file, line); }
-   static void notice (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Notice, streamString, function, file, line); }
-   static void info (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Information, streamString, function, file, line); }
-   static void debug (const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write (Level::Debug, streamString, function, file, line); }
-
-   static void write (const adt::Exception& ex) {
-      error (ex.what (), ex.getMethod(), ex.getFile(), ex.getLine());
+   static void write(const adt::Exception& ex) {
+      error(ex.what(), ex.getMethod(), ex.getFile(), ex.getLine());
    }
 
 private:
    static Level::_v m_level;
-   static WriterPtr m_writer;
-   static FormatterPtr m_formatter;
+   static Writers m_writers;
+   static std::shared_ptr<Formatter> m_formatter;
 
-   Logger ();
-   Logger (const Logger&);
+   Logger() = delete;
+   Logger(const Logger&) = delete;
 };
 
 #ifdef WEPA_LOG_LOCATION
@@ -95,59 +97,59 @@ private:
 
 #define LOG_CRITICAL(args)\
    do {\
-   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Critical)) { \
+   if(wepa::logger::Logger::wantsToProcess(wepa::logger::Level::Critical)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::critical (msg << args, WEPA_LOG_LOCATION); \
+      wepa::logger::Logger::critical(msg << args, WEPA_LOG_LOCATION); \
    } \
-   } while (false);
+   } while(false);
 
 #define LOG_ERROR(args)\
    do {\
-   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Error)) { \
+   if(wepa::logger::Logger::wantsToProcess(wepa::logger::Level::Error)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::error (msg << args, WEPA_LOG_LOCATION); \
+      wepa::logger::Logger::error(msg << args, WEPA_LOG_LOCATION); \
    } \
-   } while (false);
+   } while(false);
 
 #define LOG_WARN(args)\
    do {\
-   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Warning)) { \
+   if(wepa::logger::Logger::wantsToProcess(wepa::logger::Level::Warning)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::warning (msg << args, WEPA_LOG_LOCATION); \
+      wepa::logger::Logger::warning(msg << args, WEPA_LOG_LOCATION); \
    } \
-   } while (false);
+   } while(false);
 
 #define LOG_NOTICE(args)\
    do {\
-   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Notice)) { \
+   if(wepa::logger::Logger::wantsToProcess(wepa::logger::Level::Notice)) { \
       wepa::adt::StreamString msg; \
       wepa::logger::Logger::notice(msg << args, WEPA_LOG_LOCATION); \
    } \
-   } while (false);
+   } while(false);
 
 #define LOG_INFO(args)\
    do {\
-   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Information)) { \
+   if(wepa::logger::Logger::wantsToProcess(wepa::logger::Level::Information)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::info (msg << args, WEPA_LOG_LOCATION); \
+      wepa::logger::Logger::info(msg << args, WEPA_LOG_LOCATION); \
    } \
-   } while (false);
+   } while(false);
 
 #define LOG_DEBUG(args)\
    do {\
-   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Debug)) { \
+   if(wepa::logger::Logger::wantsToProcess(wepa::logger::Level::Debug)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::debug (msg << args, WEPA_LOG_LOCATION); \
+      wepa::logger::Logger::debug(msg << args, WEPA_LOG_LOCATION); \
    } \
-   } while (false);
+   } while(false);
 
 #define LOG_LOCAL7(args)\
    do {\
-   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Local7)) { \
+   if(wepa::logger::Logger::wantsToProcess(wepa::logger::Level::Local7)) { \
       wepa::adt::StreamString msg; \
-      wepa::logger::Logger::debug (msg << args, WEPA_LOG_LOCATION); \
+      wepa::logger::Logger::debug(msg << args, WEPA_LOG_LOCATION); \
    } \
-   } while (false);
+   } while(false);
 
 }
 }

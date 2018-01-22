@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2018 Francisco Ruiz Rayo
+// (c) Copyright 2013 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -32,39 +32,31 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include "MockApplication.hpp"
+#include <boost/test/auto_unit_test.hpp>
 
-#include <iostream>
-
+#include <wepa/logger/SysLogWriter.hpp>
 #include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TraceMethod.hpp>
-#include <wepa/logger/TtyWriter.hpp>
+
+#include <syslog.h>
 
 using namespace wepa;
+using namespace wepa::logger;
 
-mock::MockApplication::MockApplication (const char* title) : app::Application ("MockApp", title, "0.0")
+BOOST_AUTO_TEST_CASE (syslog_test)
 {
-   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
-}
+   auto writer = std::make_shared<SysLogWriter>("SysLogTest", LOG_CONS | LOG_NOWAIT);
+   Logger::initialize (writer);
 
-void mock::MockApplication::operator ()()
-{
-   try {
-      start ();
+   Logger::setLevel(Level::Debug);
+
+   for (int ii = Level::Emergency; ii < Level::Local7; ++ ii) {
+      adt::StreamString ss;
+      Level::_v level = (Level::_v) ii;
+      ss << "This is the level " << level;
+      Logger::write(level, ss, WEPA_FILE_LOCATION);
    }
-   catch (adt::Exception& ex) {
-      logger::Logger::write(ex);
-   }
 }
 
-void mock::MockApplication::run ()
-   throw (adt::RuntimeException)
-{
-   LOG_THIS_METHOD();
 
-   LOG_DEBUG (asString() << "Waiting for enabled termination");
-   m_termination.lock();
-   LOG_DEBUG (asString() << " will terminate now");
 
-   // It will be block until something frees the mutex by calling enableTermination
-}
+

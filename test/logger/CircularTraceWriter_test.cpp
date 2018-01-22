@@ -73,9 +73,9 @@ BOOST_AUTO_TEST_CASE( CircularTraceWriter_oversized_file )
    unlink ("trace.log");
    unlink ("trace.log.old");
 
-   CircularTraceWriter* writer = new CircularTraceWriter ("trace.log", 128);
+   auto writer = std::make_shared<CircularTraceWriter>("trace.log", 128);
+   Logger::initialize (writer);
 
-   Logger::initialize(writer);
    Logger::setLevel(Level::Debug);
 
    BOOST_REQUIRE_NE (writer->getStream(), CircularTraceWriter::NullStream);
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE( CircularTraceWriter_oversized_file )
 
 BOOST_AUTO_TEST_CASE( CircularTraceWriter_can_not_write )
 {
-   CircularTraceWriter* writer = new CircularTraceWriter ("/trace.log", 128);
+   auto writer = std::make_shared<CircularTraceWriter>("/trace.log", 128);
 
    // When the circular writer can not write over the file, then it will trace on cerr, but only traces with level error or lesser
    BOOST_CHECK_THROW (Logger::initialize(writer), adt::RuntimeException);
@@ -123,13 +123,14 @@ BOOST_AUTO_TEST_CASE( CircularTraceWriter_can_not_write )
    LOG_NOTICE ("Ignored line");
    LOG_INFO ("Ignored line");
    LOG_DEBUG ("Ignored line");
+   LOG_LOCAL7("Ignored line");
 
    BOOST_REQUIRE_EQUAL (writer->getLineNo(), 4);
 }
 
 BOOST_AUTO_TEST_CASE (circular_performance_measure_test)
 {
-   CircularTraceWriter* writer = new CircularTraceWriter ("trace.log", 4096);
+   auto writer = std::make_shared<CircularTraceWriter>("trace.log", 4096);
 
    Logger::setLevel (Level::Error);
 

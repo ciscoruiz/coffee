@@ -51,7 +51,7 @@ mock::MockDatabase::MockDatabase(app::Application& app) :
 mock::MockDatabase::MockDatabase (const char* name) :
    dbms::Database("map", name)
 {
-   logger::Logger::initialize(new logger::TtyWriter);
+   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
 
    std::shared_ptr<dbms::ErrorCodeInterpreter> eci = std::make_shared<MockErrorCodeInterpreter>();
    setErrorCodeInterpreter(eci);

@@ -50,7 +50,7 @@ using namespace wepa;
 class SmallestApplication : public app::Application {
 public:
    SmallestApplication() : app::Application("SmallerApplication", "This is the title", "1.0") {
-      logger::Logger::initialize(new logger::TtyWriter);
+      logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
    }
 
    void run() throw(adt::RuntimeException) {;}

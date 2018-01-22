@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2018 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -47,49 +47,78 @@ using namespace wepa;
    logger::Level::_v logger::Logger::m_level = Level::Warning;
 #endif
 
-logger::Logger::FormatterPtr logger::Logger::m_formatter;
-logger::Logger::WriterPtr logger::Logger::m_writer;
+std::shared_ptr<logger::Formatter> logger::Logger::m_formatter;
+logger::Logger::Writers logger::Logger::m_writers;
 
 //static
-void logger::Logger::initialize (Writer* writer, Formatter* formatter)
+void logger::Logger::initialize(std::shared_ptr<Writer> writer, std::shared_ptr<Formatter> formatter)
+   throw(adt::RuntimeException)
+{
+   SCCS::activate();
+
+   m_writers.clear();
+   m_writers.push_back(writer);
+   m_formatter = formatter;
+
+   writer->initialize();
+}
+
+//static
+void logger::Logger::initialize(std::shared_ptr<Writer> writer)
+   throw(adt::RuntimeException)
+{
+   initialize(writer, std::make_shared<DefaultFormatter>());
+}
+
+//static
+void logger::Logger::add(std::shared_ptr<Writer> writer)
    throw (adt::RuntimeException)
 {
-   SCCS::activate ();
+   if (!m_formatter) {
+      WEPA_THROW_EXCEPTION("You should initialize the Logger before add a new writer");
+   }
 
-   m_writer.reset (writer);
-   m_writer->initialize ();
-
-   m_formatter.reset (formatter);
+   writer->initialize();
+   m_writers.push_back(writer);
 }
 
 //static
-void logger::Logger::initialize (Writer* writer)
-   throw (adt::RuntimeException)
-{
-   initialize (writer, new DefaultFormatter ());
-}
-
-//static
-void logger::Logger::write (const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned lineno)
+void logger::Logger::write(const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned lineno)
    noexcept
 {
-   if (m_writer.get () == NULL || m_formatter.get () == NULL)
+   if (!wantsToProcess(level))
       return;
 
-   // Writer will ask 'Logger' about what to do with this level, but it could be different for some kinds of writer.
-   if (m_writer->wantsToProcess (level) == false)
-      return;
+   Formatter::Elements elements(level, input, function, file, lineno);
+   adt::StreamString string = m_formatter->apply(elements);
 
-   Formatter::Elements elements (level, input, function, file, lineno);
-   m_writer->apply (level, m_formatter->apply (elements));
+   for (auto writer : m_writers) {
+      if (writer->wantsToProcess(level)) {
+         writer->apply(level, string);
+      }
+   }
 }
 
 //static
-bool logger::Logger::wantsToProcess (const Level::_v level)
+bool logger::Logger::wantsToProcess(const Level::_v level)
    noexcept
 {
-   if (m_writer.get () == NULL || m_formatter.get () == NULL)
+   if(m_writers.empty() || !m_formatter)
       return false;
 
-   return isActive (level) ? true: m_writer->wantsToProcess(level);
+   bool result = false;
+   for (auto writer : m_writers) {
+      if (writer->wantsToProcess(level)) {
+         result = true;
+         break;
+      }
+   }
+
+   if (result == false)
+      return false;
+
+   return isActive(level) ? true: result;
 }
+
+
+

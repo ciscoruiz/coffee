@@ -32,39 +32,33 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include "MockApplication.hpp"
+#include <syslog.h>
 
-#include <iostream>
-
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TraceMethod.hpp>
-#include <wepa/logger/TtyWriter.hpp>
+#include <wepa/logger/SysLogWriter.hpp>
 
 using namespace wepa;
 
-mock::MockApplication::MockApplication (const char* title) : app::Application ("MockApp", title, "0.0")
+logger::SysLogWriter::SysLogWriter (const std::string& ident, const int options) :
+   logger::Writer ("SysLogWriter"),
+   m_ident(ident),
+   m_options(options)
 {
-   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
 }
 
-void mock::MockApplication::operator ()()
+logger::SysLogWriter::~SysLogWriter ()
 {
-   try {
-      start ();
-   }
-   catch (adt::Exception& ex) {
-      logger::Logger::write(ex);
-   }
+   closelog();
 }
 
-void mock::MockApplication::run ()
+void logger::SysLogWriter::do_initialize ()
    throw (adt::RuntimeException)
 {
-   LOG_THIS_METHOD();
-
-   LOG_DEBUG (asString() << "Waiting for enabled termination");
-   m_termination.lock();
-   LOG_DEBUG (asString() << " will terminate now");
-
-   // It will be block until something frees the mutex by calling enableTermination
+   openlog(m_ident.c_str(), LOG_USER, m_options);
 }
+
+void logger::SysLogWriter::apply (const Level::_v level, const std::string& line)
+   noexcept
+{
+   syslog(level, "%s", line.c_str());
+}
+

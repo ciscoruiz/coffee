@@ -32,39 +32,36 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include "MockApplication.hpp"
+#ifndef __wepa_logger_SysLogWriter_hpp
+#define __wepa_logger_SysLogWriter_hpp
 
-#include <iostream>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TraceMethod.hpp>
-#include <wepa/logger/TtyWriter.hpp>
+#include <wepa/logger/Writer.hpp>
 
-using namespace wepa;
+namespace wepa {
 
-mock::MockApplication::MockApplication (const char* title) : app::Application ("MockApp", title, "0.0")
-{
-   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
+namespace logger {
+
+class SysLogWriter : public Writer {
+public:
+   static const int MinimalSize = 256;
+   static const int NullStream;
+   static const int CheckSizePeriod;
+
+   SysLogWriter (const std::string& ident, const int options);
+   virtual ~SysLogWriter ();
+
+protected:
+
+private:
+   const std::string m_ident;
+   const int m_options;
+
+   void do_initialize () throw (adt::RuntimeException);
+   void apply (const Level::_v level, const std::string& line) noexcept;
+};
+
+}
 }
 
-void mock::MockApplication::operator ()()
-{
-   try {
-      start ();
-   }
-   catch (adt::Exception& ex) {
-      logger::Logger::write(ex);
-   }
-}
-
-void mock::MockApplication::run ()
-   throw (adt::RuntimeException)
-{
-   LOG_THIS_METHOD();
-
-   LOG_DEBUG (asString() << "Waiting for enabled termination");
-   m_termination.lock();
-   LOG_DEBUG (asString() << " will terminate now");
-
-   // It will be block until something frees the mutex by calling enableTermination
-}
+#endif

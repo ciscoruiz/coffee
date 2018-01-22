@@ -78,7 +78,10 @@ using namespace wepa::logger;
 BOOST_AUTO_TEST_CASE(filter_level)
 {
    auto ss = std::make_shared<CounterStrategy>();
+   auto second = std::make_shared<CounterStrategy>();
+
    Logger::initialize(ss, std::make_shared<DummyFormatter>());
+   Logger::add(second);
 
    Logger::setLevel(Level::Notice);
 
@@ -89,6 +92,7 @@ BOOST_AUTO_TEST_CASE(filter_level)
    LOG_DEBUG("line" << 4 << ". This will be filtered");
 
    BOOST_REQUIRE_EQUAL(ss->getTotal(), 3);
+   BOOST_REQUIRE_EQUAL(ss->getTotal(), second->getTotal());
 
    BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Error), 1);
    BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Warning), 1);
@@ -105,6 +109,7 @@ BOOST_AUTO_TEST_CASE(filter_level)
    LOG_DEBUG("line" << 4 << ". This will be filtered");
 
    BOOST_REQUIRE_EQUAL(ss->getTotal(), 7);
+   BOOST_REQUIRE_EQUAL(ss->getTotal(), second->getTotal());
 
    BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Error), 2);
    BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Warning), 2);

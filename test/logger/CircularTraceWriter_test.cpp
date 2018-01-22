@@ -123,6 +123,7 @@ BOOST_AUTO_TEST_CASE( CircularTraceWriter_can_not_write )
    LOG_NOTICE ("Ignored line");
    LOG_INFO ("Ignored line");
    LOG_DEBUG ("Ignored line");
+   LOG_LOCAL7("Ignored line");
 
    BOOST_REQUIRE_EQUAL (writer->getLineNo(), 4);
 }

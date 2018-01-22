@@ -47,8 +47,8 @@ using namespace wepa;
    logger::Level::_v logger::Logger::m_level = Level::Warning;
 #endif
 
-logger::Logger::FormatterPtr logger::Logger::m_formatter;
-logger::Logger::WriterPtr logger::Logger::m_writer;
+std::shared_ptr<logger::Formatter> logger::Logger::m_formatter;
+logger::Logger::Writers logger::Logger::m_writers;
 
 //static
 void logger::Logger::initialize(std::shared_ptr<Writer> writer, std::shared_ptr<Formatter> formatter)
@@ -56,10 +56,11 @@ void logger::Logger::initialize(std::shared_ptr<Writer> writer, std::shared_ptr<
 {
    SCCS::activate();
 
-   m_writer = writer;
-   m_writer->initialize();
-
+   m_writers.clear();
+   m_writers.push_back(writer);
    m_formatter = formatter;
+
+   writer->initialize();
 }
 
 //static
@@ -70,26 +71,54 @@ void logger::Logger::initialize(std::shared_ptr<Writer> writer)
 }
 
 //static
+void logger::Logger::add(std::shared_ptr<Writer> writer)
+   throw (adt::RuntimeException)
+{
+   if (!m_formatter) {
+      WEPA_THROW_EXCEPTION("You should initialize the Logger before add a new writer");
+   }
+
+   writer->initialize();
+   m_writers.push_back(writer);
+}
+
+//static
 void logger::Logger::write(const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned lineno)
    noexcept
 {
-   if(m_writer.get() == NULL || m_formatter.get() == NULL)
-      return;
-
-   // Writer will ask 'Logger' about what to do with this level, but it could be different for some kinds of writer.
-   if(m_writer->wantsToProcess(level) == false)
+   if (!wantsToProcess(level))
       return;
 
    Formatter::Elements elements(level, input, function, file, lineno);
-   m_writer->apply(level, m_formatter->apply(elements));
+   adt::StreamString string = m_formatter->apply(elements);
+
+   for (auto writer : m_writers) {
+      if (writer->wantsToProcess(level)) {
+         writer->apply(level, string);
+      }
+   }
 }
 
 //static
 bool logger::Logger::wantsToProcess(const Level::_v level)
    noexcept
 {
-   if(m_writer.get() == NULL || m_formatter.get() == NULL)
+   if(m_writers.empty() || !m_formatter)
       return false;
 
-   return isActive(level) ? true: m_writer->wantsToProcess(level);
+   bool result = false;
+   for (auto writer : m_writers) {
+      if (writer->wantsToProcess(level)) {
+         result = true;
+         break;
+      }
+   }
+
+   if (result == false)
+      return false;
+
+   return isActive(level) ? true: result;
 }
+
+
+

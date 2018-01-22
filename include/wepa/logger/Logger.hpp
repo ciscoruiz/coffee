@@ -36,6 +36,7 @@
 #define wepa_logger_Logger_hpp
 
 #include <memory>
+#include <vector>
 
 #include <wepa/logger/Level.hpp>
 
@@ -52,13 +53,14 @@ namespace logger {
 class Writer;
 class Formatter;
 
-class Logger  {
-public:
-   typedef std::shared_ptr<Writer> WriterPtr;
-   typedef std::shared_ptr<Formatter> FormatterPtr;
+class Logger {
+   typedef std::vector<std::shared_ptr<Writer> > Writers;
+   typedef Writers::iterator writer_iterator;
 
+public:
    static void initialize(std::shared_ptr<Writer> writer, std::shared_ptr<Formatter> formatter) throw(adt::RuntimeException);
    static void initialize(std::shared_ptr<Writer> writer) throw(adt::RuntimeException);
+   static void add(std::shared_ptr<Writer> writer) throw (adt::RuntimeException);
 
    static void write(const Level::_v level, const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept;
 
@@ -81,11 +83,11 @@ public:
 
 private:
    static Level::_v m_level;
-   static WriterPtr m_writer;
-   static FormatterPtr m_formatter;
+   static Writers m_writers;
+   static std::shared_ptr<Formatter> m_formatter;
 
-   Logger();
-   Logger(const Logger&);
+   Logger() = delete;
+   Logger(const Logger&) = delete;
 };
 
 #ifdef WEPA_LOG_LOCATION

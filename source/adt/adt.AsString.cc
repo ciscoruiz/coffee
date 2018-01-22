@@ -54,44 +54,27 @@ string adt::AsString::apply (const int number, const char* format)
 string adt::AsString::apply (const unsigned int number)
    noexcept
 {
-   char aux [16];
-   sprintf (aux, "%u", number);
-   return string (aux);
+   return to_string(number);
 }
 
 #ifndef __wepa64__
 string adt::AsString::apply (const long number)
    noexcept
 {
-   char aux [32];
-   sprintf (aux, "%ld", number);
-   return string (aux);
+   return to_string(number);
 }
 #endif
 
 string adt::AsString::apply (const Integer64 number)
    noexcept
 {
-   char aux [24];
-#ifdef __wepa64__
-   sprintf (aux, "%ld", number);
-#else
-   sprintf (aux, "%lld", number);
-#endif
-
-   return string (aux);
+   return to_string(number);
 }
 
 string adt::AsString::apply (const Unsigned64 number)
    noexcept
 {
-   char aux [32];
-#ifdef __wepa64__
-   sprintf (aux, "%lu", number);
-#else
-   sprintf (aux, "%llu", number);
-#endif
-   return string (aux);
+   return to_string(number);
 }
 
 string adt::AsString::apply (const float number, const char* format)

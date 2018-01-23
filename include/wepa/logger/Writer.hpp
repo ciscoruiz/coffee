@@ -1,6 +1,6 @@
 // WEPA - Write Excellent Professional Applications
 //
-// (c) Copyright 2018 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/wepa
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -35,8 +35,8 @@
 #ifndef wepa_logger_Writer_hpp
 #define wepa_logger_Writer_hpp
 
-#include <wepa/adt/pattern/observer/Subject.hpp>
 #include <wepa/logger/Level.hpp>
+#include <wepa/adt/RuntimeException.hpp>
 
 namespace wepa {
 
@@ -44,25 +44,26 @@ namespace logger {
 
 class Logger;
 
-class Writer : public adt::pattern::observer::Subject {
+class Writer {
 public:
-   virtual ~Writer () {;}
+   virtual ~Writer() {;}
 
 protected:
-   Writer (const std::string& name) : adt::pattern::observer::Subject (name) {;}
+   Writer(const std::string& name) : m_name(name) {;}
 
-   virtual bool wantsToProcess (const Level::_v level) const noexcept;
+   virtual bool wantsToProcess(const Level::_v level) const noexcept;
 
 private:
-   Writer (const Writer&);
+   const std::string m_name;
 
-   void initialize () throw (adt::RuntimeException) {
-      do_initialize ();
-      notify ();
+   Writer(const Writer&);
+
+   void initialize() throw(adt::RuntimeException) {
+      do_initialize();
    }
 
-   virtual void do_initialize () throw (adt::RuntimeException) = 0;
-   virtual void apply (const Level::_v level, const std::string& line) noexcept = 0;
+   virtual void do_initialize() throw(adt::RuntimeException) = 0;
+   virtual void apply(const Level::_v level, const std::string& line) noexcept = 0;
 
    friend class Logger;
 };

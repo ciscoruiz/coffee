@@ -90,7 +90,7 @@ void logger::Logger::write(const Level::_v level, const adt::StreamString& input
       return;
 
    Formatter::Elements elements(level, input, function, file, lineno);
-   adt::StreamString string = m_formatter->apply(elements);
+   const std::string string = m_formatter->apply(elements);
 
    for (auto writer : m_writers) {
       if (writer->wantsToProcess(level)) {

@@ -40,6 +40,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <string.h>
 
 #include <algorithm>
 
@@ -95,7 +96,6 @@ void logger::CircularTraceWriter::apply(const Level::_v level, const std::string
          closeStream ();
          renameFile ();
          openStream ();
-         logger::Writer::notify ();
       }
    }
    catch (adt::RuntimeException& ex) {

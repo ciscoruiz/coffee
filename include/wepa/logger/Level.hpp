@@ -35,7 +35,7 @@
 #ifndef wepa_logger_Level_hpp
 #define wepa_logger_Level_hpp
 
-#include <auto_enum.h>
+#include <wepa/adt/RuntimeException.hpp>
 
 namespace wepa {
 
@@ -46,7 +46,7 @@ struct Level {
       Local0, Local1, Local2, Local3, Local4, Local5, Local6, Local7
    };
 
-   auto_enum_declare (Level);
+   static const char* enumName(const Level::_v level) noexcept;
 };
 
 }

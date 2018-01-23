@@ -65,16 +65,9 @@ public:
 protected:
    Formatter (const std::string& name) : adt::NamedObject (name) {;}
 
-   const adt::StreamString& apply (const Elements& elements) noexcept {
-      m_result.clear ();
-      return do_apply (elements, m_result);
-   }
-
-   virtual const adt::StreamString& do_apply (const Elements& elements, adt::StreamString& output) noexcept = 0;
+   virtual std::string apply (const Elements& elements) noexcept = 0;
 
 private:
-   adt::StreamString m_result;
-
    friend class Logger;
 
    Formatter (const Formatter&);

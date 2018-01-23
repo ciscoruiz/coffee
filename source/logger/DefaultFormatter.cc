@@ -48,7 +48,7 @@ std::string DefaultFormatter::apply (const Elements& elements)
    adt::StreamString output;
 
    output << "[" << second.asDateTime() << "] ";
-   output << Level::enumNameEx(elements.level) << " | ";
+   output << Level::enumName(elements.level) << " | ";
    output << elements.function << " [" << elements.file << "(" << elements.lineno << ")]: ";
    output << elements.input;
 

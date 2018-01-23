@@ -45,7 +45,7 @@ public:
    DefaultFormatter () : Formatter ("DefaultFormatter") {;}
 
 private:
-   const adt::StreamString& do_apply (const Elements& elements, adt::StreamString& output) noexcept;
+   std::string apply (const Elements& elements) noexcept;
 
 };
 

@@ -40,12 +40,13 @@
 using namespace wepa;
 using namespace wepa::logger;
 
-const adt::StreamString& DefaultFormatter::do_apply (const Elements& elements, adt::StreamString& output)
+std::string DefaultFormatter::apply (const Elements& elements)
    noexcept
 {
    auto second = adt::Second::getLocalTime ();
 
-   output.clear ();
+   adt::StreamString output;
+
    output << "[" << second.asDateTime() << "] ";
    output << Level::enumNameEx(elements.level) << " | ";
    output << elements.function << " [" << elements.file << "(" << elements.lineno << ")]: ";

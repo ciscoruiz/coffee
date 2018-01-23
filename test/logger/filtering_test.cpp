@@ -45,8 +45,8 @@ public:
    DummyFormatter() : logger::Formatter("DummyFormatter") {;}
 
 private:
-   const adt::StreamString& do_apply(const Elements& elements, adt::StreamString& output) throw() {
-      return output = elements.input;
+   std::string apply(const Elements& elements) noexcept {
+      return elements.input;
    }
 };
 

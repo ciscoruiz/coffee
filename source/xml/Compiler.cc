@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -35,11 +35,11 @@
 #include <libxml/xmlwriter.h>
 #include <libxml/encoding.h>
 
-#include <wepa/xml/Compiler.hpp>
-#include <wepa/xml/Document.hpp>
-#include <wepa/xml/Node.hpp>
+#include <coffee/xml/Compiler.hpp>
+#include <coffee/xml/Document.hpp>
+#include <coffee/xml/Node.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 xml::Compiler::Compiler() :
    m_encoding (NULL),
@@ -130,7 +130,7 @@ const char* xml::Compiler::encode (const char* text)
    xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler(m_encoding);
 
    if (handler == NULL) {
-      WEPA_THROW_EXCEPTION("Encoding '" << m_encoding << "' was not found");
+      COFFEE_THROW_EXCEPTION("Encoding '" << m_encoding << "' was not found");
    }
 
    int size = strlen (text) + 1;
@@ -150,7 +150,7 @@ const char* xml::Compiler::encode (const char* text)
    rc = handler->input ((xmlChar*) m_encodedBuffer, &outputSize, (const xmlChar *) text, &inputSize);
 
    if (rc < 0) {
-      WEPA_THROW_EXCEPTION("Can not encoding '" << text << "applying '" << m_encoding << "'");
+      COFFEE_THROW_EXCEPTION("Can not encoding '" << text << "applying '" << m_encoding << "'");
    }
 
 //   m_encodedBuffer = (char*) xmlRealloc (m_encodedBuffer, outputSize + 1);

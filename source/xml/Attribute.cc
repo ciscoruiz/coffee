@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -37,10 +37,10 @@
 #include <libxml/tree.h>
 #include <libxml/xmlwriter.h>
 
-#include <wepa/xml/Attribute.hpp>
-#include <wepa/xml/Compiler.hpp>
+#include <coffee/xml/Attribute.hpp>
+#include <coffee/xml/Compiler.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 xml::Attribute::Attribute (_xmlAttr* handler) : Wrapper (handler)
 {
@@ -108,5 +108,5 @@ void xml::Attribute::compile (Compiler& compiler) const
       rc = xmlTextWriterWriteAttributeNS (compiler, BAD_CAST (nameSpace->prefix), name, BAD_CAST (nameSpace->href), value);
 
    if (rc < 0)
-      WEPA_THROW_EXCEPTION("Can not compile attribute " << getName ());
+      COFFEE_THROW_EXCEPTION("Can not compile attribute " << getName ());
 }

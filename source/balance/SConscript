@@ -2,7 +2,7 @@ Import ('env')
 
 sources = Glob('*.cc')
 
-result = env.StaticLibrary ('wepa_balance', sources);
+result = env.StaticLibrary ('coffee_balance', sources);
 
 Return ('result')
 

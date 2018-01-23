@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyrigth 2013 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,10 +34,10 @@
 //
 #include <functional>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/BacktraceWriter.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/BacktraceWriter.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 //static
 const int logger::BacktraceWriter::MaxBacktrackingLength = 128;

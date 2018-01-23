@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,13 +34,13 @@
 //
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/RuntimeException.hpp>
+#include <coffee/adt/RuntimeException.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 int goo () {
-   WEPA_THROW_EXCEPTION ("this is goo");
+   COFFEE_THROW_EXCEPTION ("this is goo");
    return 0;
 }
 
@@ -59,10 +59,10 @@ int foo () {
 class AAA {
 public:
    void member (int xx, char zz) {
-      WEPA_THROW_EXCEPTION ("xx:" << xx << " zz:" << zz);
+      COFFEE_THROW_EXCEPTION ("xx:" << xx << " zz:" << zz);
    }
    static void member2 (float zz) {
-      WEPA_THROW_EXCEPTION ("float: " << zz);
+      COFFEE_THROW_EXCEPTION ("float: " << zz);
    }
 };
 
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE( RuntimeException_asString )
 }
 
 void hoo () {
-   adt::RuntimeException ex ("this is hoo", WEPA_FILE_LOCATION);
+   adt::RuntimeException ex ("this is hoo", COFFEE_FILE_LOCATION);
    ex.setErrorCode(100);
    throw ex;
 }

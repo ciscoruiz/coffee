@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,9 +32,9 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/dbms/internal/DummyApplication.hpp>
+#include <coffee/dbms/internal/DummyApplication.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 // static
 dbms::internal::DummyApplication dbms::internal::DummyApplication::st_this;

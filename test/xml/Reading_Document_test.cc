@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -37,16 +37,16 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 
-#include <wepa/adt/DataBlock.hpp>
-#include <wepa/adt/AsString.hpp>
+#include <coffee/adt/DataBlock.hpp>
+#include <coffee/adt/AsString.hpp>
 
-#include <wepa/xml/Document.hpp>
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Attribute.hpp>
-#include <wepa/xml/Compiler.hpp>
+#include <coffee/xml/Document.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
+#include <coffee/xml/Compiler.hpp>
 
-using namespace wepa;
-using namespace wepa::xml;
+using namespace coffee;
+using namespace coffee::xml;
 
 BOOST_AUTO_TEST_CASE (simpliest_memory)
 {
@@ -325,9 +325,9 @@ BOOST_AUTO_TEST_CASE (encoding)
 
 BOOST_AUTO_TEST_CASE (file_document)
 {
-   boost::filesystem::path wepaPath (boost::filesystem::current_path());
+   boost::filesystem::path coffeePath (boost::filesystem::current_path());
 
-   boost::filesystem::path xmlPath (wepaPath.native() + "/test/xml/example00.xml");
+   boost::filesystem::path xmlPath (coffeePath.native() + "/test/xml/example00.xml");
 
    boost::filesystem::path file (xmlPath);
 

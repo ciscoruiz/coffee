@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -36,12 +36,12 @@
 #include <string>
 #include <algorithm>
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/AsString.hpp>
-#include <wepa/adt/AsHexString.hpp>
+#include <coffee/adt/StreamString.hpp>
+#include <coffee/adt/AsString.hpp>
+#include <coffee/adt/AsHexString.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 void adt::StreamString::toUpper ()
    noexcept

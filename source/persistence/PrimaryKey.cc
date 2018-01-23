@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,12 +34,12 @@
 //
 #include <memory>
 
-#include <wepa/dbms/datatype/Abstract.hpp>
+#include <coffee/dbms/datatype/Abstract.hpp>
 
-#include <wepa/persistence/PrimaryKey.hpp>
-#include <wepa/persistence/PrimaryKeyBuilder.hpp>
+#include <coffee/persistence/PrimaryKey.hpp>
+#include <coffee/persistence/PrimaryKeyBuilder.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 persistence::PrimaryKey::PrimaryKey(const PrimaryKeyBuilder& builder) :
    dbms::datatype::Set(builder)

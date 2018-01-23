@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -35,9 +35,9 @@
 #include <libxml/xmlstring.h>
 #include <libxml/tree.h>
 
-#include <wepa/xml/Content.hpp>
+#include <coffee/xml/Content.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 void xml::Content::setValue (const char* value)
    noexcept

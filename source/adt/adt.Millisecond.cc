@@ -2,13 +2,13 @@
 #include <sys/time.h>
 #include <stdlib.h>
 
-#include <wepa/adt/AsString.hpp>
-#include <wepa/adt/Millisecond.hpp>
-#include <wepa/adt/Second.hpp>
-#include <wepa/adt/Microsecond.hpp>
+#include <coffee/adt/AsString.hpp>
+#include <coffee/adt/Millisecond.hpp>
+#include <coffee/adt/Second.hpp>
+#include <coffee/adt/Microsecond.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 #define implement_operator(op) \
    bool adt::Millisecond::operator op (const adt::Second& other) const \
@@ -83,7 +83,7 @@ adt::Millisecond adt::Millisecond::fromString (const std::string& value)
    throw (RuntimeException)
 {
    if (value.find (" ms") == string::npos)
-      WEPA_THROW_EXCEPTION ("String: " << value << " is not a valid microsecond expression");
+      COFFEE_THROW_EXCEPTION ("String: " << value << " is not a valid microsecond expression");
 
    return adt::Millisecond (atoll (value.c_str ()));
 }

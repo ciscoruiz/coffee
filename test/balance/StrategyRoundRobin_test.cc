@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -40,20 +40,20 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/AsString.hpp>
+#include <coffee/adt/AsString.hpp>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TtyWriter.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TtyWriter.hpp>
 
-#include <wepa/balance/Resource.hpp>
-#include <wepa/balance/StrategyRoundRobin.hpp>
-#include <wepa/balance/GuardResourceList.hpp>
+#include <coffee/balance/Resource.hpp>
+#include <coffee/balance/StrategyRoundRobin.hpp>
+#include <coffee/balance/GuardResourceList.hpp>
 
 #include "TestResource.hpp"
 
-using namespace wepa;
-using namespace wepa::balance;
-using namespace wepa::test::balance;
+using namespace coffee;
+using namespace coffee::balance;
+using namespace coffee::test::balance;
 
 namespace RoundRobinTest {
    typedef std::map <int, int> CounterContainer;
@@ -91,7 +91,7 @@ namespace RoundRobinTest {
 
 BOOST_AUTO_TEST_CASE( rr_dont_use_unavailables )
 {
-   auto resourceList = wepa::test::balance::setup(RoundRobinTest::MaxResources);
+   auto resourceList = coffee::test::balance::setup(RoundRobinTest::MaxResources);
 
    balance::StrategyRoundRobin strategy(resourceList);
 
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE( rr_dont_use_unavailables )
 
 BOOST_AUTO_TEST_CASE( rr_balance_quality)
 {
-   auto resourceList = wepa::test::balance::setup(RoundRobinTest::MaxResources);
+   auto resourceList = coffee::test::balance::setup(RoundRobinTest::MaxResources);
 
    balance::StrategyRoundRobin strategy(resourceList);
    RoundRobinTest::CounterContainer counterContainer;
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE( rr_balance_quality)
 
 BOOST_AUTO_TEST_CASE( rr_balance_multithread )
 {
-   auto resourceList = wepa::test::balance::setup(RoundRobinTest::MaxResources);
+   auto resourceList = coffee::test::balance::setup(RoundRobinTest::MaxResources);
 
    balance::StrategyRoundRobin strategy(resourceList);
    RoundRobinTest::CounterContainer counterContainer;

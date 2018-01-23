@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,12 +33,12 @@
 // Author: cisco.tierra@gmail.com
 //
 
-#include <wepa/dbms/ResultCode.hpp>
-#include <wepa/dbms/ErrorCodeInterpreter.hpp>
-#include <wepa/dbms/Database.hpp>
+#include <coffee/dbms/ResultCode.hpp>
+#include <coffee/dbms/ErrorCodeInterpreter.hpp>
+#include <coffee/dbms/Database.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 dbms::ResultCode::ResultCode(const dbms::Database& database, const int opCode) :
    m_errorCodeInterpreter(database.getErrorCodeInterpreter()),
@@ -65,7 +65,7 @@ bool dbms::ResultCode::notFound() const
    throw(adt::RuntimeException)
 {
    if(!m_errorCodeInterpreter)
-      WEPA_THROW_EXCEPTION(asString() << " does not have associated database to decode error");
+      COFFEE_THROW_EXCEPTION(asString() << " does not have associated database to decode error");
    
    return m_errorCodeInterpreter->notFound(m_numericCode);
 }
@@ -74,7 +74,7 @@ bool dbms::ResultCode::successful() const
    throw(adt::RuntimeException)
 {
    if(!m_errorCodeInterpreter)
-      WEPA_THROW_EXCEPTION(asString() << " does not have associated database to decode error");
+      COFFEE_THROW_EXCEPTION(asString() << " does not have associated database to decode error");
    
    return m_errorCodeInterpreter->successful(m_numericCode);
 }
@@ -83,7 +83,7 @@ bool dbms::ResultCode::locked() const
    throw(adt::RuntimeException)
 {
    if(!m_errorCodeInterpreter)
-      WEPA_THROW_EXCEPTION(asString() << " does not have associated database to decode error");
+      COFFEE_THROW_EXCEPTION(asString() << " does not have associated database to decode error");
    
    return m_errorCodeInterpreter->locked(m_numericCode);
 }
@@ -92,7 +92,7 @@ bool dbms::ResultCode::lostConnection() const
    throw(adt::RuntimeException)
 {
    if(!m_errorCodeInterpreter)
-      WEPA_THROW_EXCEPTION(asString() << " does not have associated database to decode error");
+      COFFEE_THROW_EXCEPTION(asString() << " does not have associated database to decode error");
    
    return m_errorCodeInterpreter->lostConnection(m_numericCode);
 }
@@ -112,15 +112,15 @@ void dbms::ResultCode::copy(const char* text)
    }
    else {
       char* aux;
-      if((aux = wepa_strchr((char*) text, '\n')) != NULL)
+      if((aux = coffee_strchr((char*) text, '\n')) != NULL)
          *aux = 0;
 
-      const int textLen = wepa_strlen(text);
+      const int textLen = coffee_strlen(text);
       
       if(m_errorText == NULL)
          m_errorText = strdup(text);
-      else if(wepa_strlen(m_errorText) >= textLen)
-         wepa_strcpy(m_errorText, text);
+      else if(coffee_strlen(m_errorText) >= textLen)
+         coffee_strcpy(m_errorText, text);
       else {
          free(m_errorText);
          m_errorText = strdup(text);

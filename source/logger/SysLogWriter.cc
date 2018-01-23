@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,9 +34,9 @@
 //
 #include <syslog.h>
 
-#include <wepa/logger/SysLogWriter.hpp>
+#include <coffee/logger/SysLogWriter.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 logger::SysLogWriter::SysLogWriter (const std::string& ident, const int options) :
    logger::Writer ("SysLogWriter"),

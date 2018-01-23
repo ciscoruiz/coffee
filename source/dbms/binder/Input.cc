@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,11 +33,11 @@
 // Author: cisco.tierra@gmail.com
 //
 
-#include <wepa/dbms/datatype/Abstract.hpp>
-#include <wepa/dbms/binder/Input.hpp>
+#include <coffee/dbms/datatype/Abstract.hpp>
+#include <coffee/dbms/binder/Input.hpp>
 
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 adt::StreamString binder::Input::asString() const
    noexcept

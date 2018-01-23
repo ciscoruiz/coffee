@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -38,9 +38,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/pattern/Singleton.hpp>
+#include <coffee/adt/pattern/Singleton.hpp>
 
-class TheClass : public wepa::adt::pattern::Singleton <TheClass> {
+class TheClass : public coffee::adt::pattern::Singleton <TheClass> {
 public:
    void setSome (const int some) { m_some = some; }
    int getSome () const noexcept { return m_some; }
@@ -50,11 +50,11 @@ private:
 
    TheClass () {;}
 
-   friend class  wepa::adt::pattern::Singleton <TheClass>;
+   friend class  coffee::adt::pattern::Singleton <TheClass>;
 };
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 BOOST_AUTO_TEST_CASE( basic_use )
 { 

@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,10 +32,10 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/balance/GuardResourceList.hpp>
-#include <wepa/balance/ResourceList.hpp>
+#include <coffee/balance/GuardResourceList.hpp>
+#include <coffee/balance/ResourceList.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 balance::GuardResourceList::GuardResourceList(std::shared_ptr<ResourceList>& resourceList) :
       m_lock(new lock_guard(resourceList->m_mutex))

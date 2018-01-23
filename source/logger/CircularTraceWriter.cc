@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -44,9 +44,9 @@
 
 #include <algorithm>
 
-#include <wepa/logger/CircularTraceWriter.hpp>
+#include <coffee/logger/CircularTraceWriter.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 //static
 const int logger::CircularTraceWriter::NullStream = -1;
@@ -110,20 +110,20 @@ bool logger::CircularTraceWriter::wantsToProcess (const logger::Level::_v level)
    return (m_stream != NullStream) ? logger::Writer::wantsToProcess(level): level <= Level::Error;
 }
 
-void wepa::logger::CircularTraceWriter::openStream()
+void coffee::logger::CircularTraceWriter::openStream()
    throw (adt::RuntimeException)
 {
    int stream = open (m_path.c_str (), O_RDWR | O_CREAT | O_APPEND, S_IRUSR |S_IWUSR | S_IRGRP| S_IROTH);
 
    if (stream == -1)
-      WEPA_THROW_EXCEPTION("Can not open file: " << m_path << ". Error: " << strerror(errno));
+      COFFEE_THROW_EXCEPTION("Can not open file: " << m_path << ". Error: " << strerror(errno));
 
    m_stream = stream;
 
    fcntl (stream, F_SETFL, fcntl (stream, F_GETFL) | O_NONBLOCK);
 }
 
-bool wepa::logger::CircularTraceWriter::oversizedStream()
+bool coffee::logger::CircularTraceWriter::oversizedStream()
    throw (adt::RuntimeException)
 {
    if (m_stream == NullStream)
@@ -133,7 +133,7 @@ bool wepa::logger::CircularTraceWriter::oversizedStream()
    int r;
 
    if (fstat (m_stream, &data) == -1)
-      WEPA_THROW_EXCEPTION("Can not get file length: " << m_path << ". Error: " << strerror(errno));
+      COFFEE_THROW_EXCEPTION("Can not get file length: " << m_path << ". Error: " << strerror(errno));
 
    return data.st_size > m_maxSize;
 }
@@ -156,6 +156,6 @@ void logger::CircularTraceWriter::renameFile()
    if (rename (m_path.c_str (), file_old.c_str ()) != 0) {
       int xerrno = errno;
       truncate (m_path.c_str (), 0);
-      WEPA_THROW_EXCEPTION("Could not rename: " << m_path << ". Error: " << strerror(xerrno));
+      COFFEE_THROW_EXCEPTION("Could not rename: " << m_path << ". Error: " << strerror(xerrno));
    }
 }

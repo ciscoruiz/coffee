@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,13 +32,13 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/adt/AsString.hpp>
+#include <coffee/adt/AsString.hpp>
 
-#include <wepa/dbms/datatype/ShortBlock.hpp>
-#include <wepa/adt/AsHexString.hpp>
+#include <coffee/dbms/datatype/ShortBlock.hpp>
+#include <coffee/adt/AsHexString.hpp>
 
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 datatype::ShortBlock::ShortBlock (const char* name, const int maxSize, const Constraint::_v constraint) :
    datatype::Abstract (name, Datatype::ShortBlock, maxSize, constraint),
@@ -68,9 +68,9 @@ void datatype::ShortBlock::setValue(const adt::DataBlock& value)
    throw (adt::RuntimeException)
 {
    if (value.size () > datatype::Abstract::getMaxSize ()) {
-      WEPA_THROW_EXCEPTION("Block out of range (" << datatype::Abstract::getMaxSize () << " and " << value.size ());
+      COFFEE_THROW_EXCEPTION("Block out of range (" << datatype::Abstract::getMaxSize () << " and " << value.size ());
    }
-//   wepa_memcpy(m_value.data (), value.data (), value.size ());
+//   coffee_memcpy(m_value.data (), value.data (), value.size ());
    m_value.assign(value.data (), value.size ());
    this->isNotNull();
 }
@@ -80,7 +80,7 @@ adt::StreamString datatype::ShortBlock::asString () const
 {
    adt::StreamString result ("datatype.ShortBlock { ");
    result += datatype::Abstract::asString ();
-   result << " | Buffer: " << adt::AsHexString::apply(wepa_ptrnumber_cast (getBuffer()));
+   result << " | Buffer: " << adt::AsHexString::apply(coffee_ptrnumber_cast (getBuffer()));
    result << " | MaxSize: " << getMaxSize();
    result += " | Value: ";
 
@@ -95,6 +95,6 @@ adt::StreamString datatype::ShortBlock::asString () const
 int datatype::ShortBlock::do_compare (const datatype::Abstract& other) const
    throw (adt::RuntimeException)
 {
-   WEPA_THROW_EXCEPTION(asString () << " | Can not apply");
+   COFFEE_THROW_EXCEPTION(asString () << " | Can not apply");
    return 0;
 }

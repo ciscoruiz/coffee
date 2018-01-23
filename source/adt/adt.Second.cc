@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -37,13 +37,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <wepa/adt/AsString.hpp>
-#include <wepa/adt/Second.hpp>
-#include <wepa/adt/Millisecond.hpp>
-#include <wepa/adt/Microsecond.hpp>
+#include <coffee/adt/AsString.hpp>
+#include <coffee/adt/Second.hpp>
+#include <coffee/adt/Millisecond.hpp>
+#include <coffee/adt/Microsecond.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 #define implement_operator(op) \
    bool adt::Second::operator op (const Millisecond& other) const \
@@ -90,11 +90,11 @@ string adt::Second::asDateTime (const char* format) const
    struct tm* tt = localtime (&time);
 
    if (tt == nullptr) {
-	   WEPA_THROW_EXCEPTION(m_value << " is a bad time");
+	   COFFEE_THROW_EXCEPTION(m_value << " is a bad time");
    }
 
    if (strftime (aux, sizeof (aux), format, tt) == 0) {
-	   WEPA_THROW_EXCEPTION(m_value << "is a bad date");
+	   COFFEE_THROW_EXCEPTION(m_value << "is a bad date");
    }
 
    return string(aux);
@@ -128,7 +128,7 @@ adt::Second adt::Second::fromString (const std::string& value)
    throw (adt::RuntimeException)
 {
    if (value.find (" sec") == string::npos)
-      WEPA_THROW_EXCEPTION ("String: " << value << " is not a valid second expression");
+      COFFEE_THROW_EXCEPTION ("String: " << value << " is not a valid second expression");
 
    return adt::Second (atol (value.c_str()));
 }

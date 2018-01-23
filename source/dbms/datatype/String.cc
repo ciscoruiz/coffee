@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,25 +32,25 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/config/defines.hpp>
+#include <coffee/config/defines.hpp>
 
-#include <wepa/dbms/datatype/String.hpp>
+#include <coffee/dbms/datatype/String.hpp>
 
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 datatype::String::String (const char* name, const int maxSize, const Constraint::_v constraint) :
    datatype::Abstract (name, Datatype::String, maxSize, constraint)
 {
    datatype::Abstract::setBuffer (m_value = new char [maxSize + 1]);
-   wepa_memset (m_value, 0, maxSize + 1);
+   coffee_memset (m_value, 0, maxSize + 1);
 }
 
 datatype::String::String (const std::string& name, const int maxSize, const Constraint::_v constraint) :
    datatype::Abstract (name, Datatype::String, maxSize, constraint)
 {
    datatype::Abstract::setBuffer (m_value = new char [maxSize + 1]);
-   wepa_memset (m_value, 0, maxSize + 1);
+   coffee_memset (m_value, 0, maxSize + 1);
 }
 
 datatype::String::String (const String& other) :
@@ -59,7 +59,7 @@ datatype::String::String (const String& other) :
    const int maxSize = getMaxSize ();
    datatype::Abstract::setBuffer (m_value = new char [maxSize + 1]);
 
-   wepa_memcpy (m_value, other.m_value, maxSize);
+   coffee_memcpy (m_value, other.m_value, maxSize);
 }
 
 void datatype::String::setValue (const char* str)
@@ -72,11 +72,11 @@ void datatype::String::setValue (const char* str)
    }
 
    if (m_value != str) {
-      auto len = wepa_strlen (str);
+      auto len = coffee_strlen (str);
       if (len > datatype::Abstract::getMaxSize ()) {
-         WEPA_THROW_EXCEPTION("'" << str << "' out of range | MaxLen=" << datatype::Abstract::getMaxSize () << " | Len=" << len);
+         COFFEE_THROW_EXCEPTION("'" << str << "' out of range | MaxLen=" << datatype::Abstract::getMaxSize () << " | Len=" << len);
       }
-      wepa_strcpy (m_value, str);
+      coffee_strcpy (m_value, str);
    }
 
    this->isNotNull();
@@ -87,7 +87,7 @@ char* datatype::String::strip (char *str)
 {
    int len;
 
-   if (str == NULL || (len = wepa_strlen (str)) == 0)
+   if (str == NULL || (len = coffee_strlen (str)) == 0)
       return str;
 
    register int end = len - 1;
@@ -119,8 +119,8 @@ adt::StreamString datatype::String::asString () const
 int datatype::String::do_compare (const datatype::Abstract& other) const
    throw (adt::RuntimeException)
 {
-   const String& _other = wepa_datatype_downcast(String, other);
+   const String& _other = coffee_datatype_downcast(String, other);
 
-   return wepa_strcmp (this->m_value, _other.m_value);
+   return coffee_strcmp (this->m_value, _other.m_value);
 }
 

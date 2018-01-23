@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,14 +32,14 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/balance/Resource.hpp>
-#include <wepa/balance/ResourceList.hpp>
-#include <wepa/balance/StrategyByRange.hpp>
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TraceMethod.hpp>
-#include <wepa/balance/GuardResourceList.hpp>
+#include <coffee/balance/Resource.hpp>
+#include <coffee/balance/ResourceList.hpp>
+#include <coffee/balance/StrategyByRange.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
+#include <coffee/balance/GuardResourceList.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 balance::StrategyByRange::StrategyByRange() :
    balance::Strategy("balance::ByRange"),
@@ -55,29 +55,29 @@ void balance::StrategyByRange::addRange (const int bottom, const int top, std::s
    GuardResourceList guard(m_unusedList);
 
    if (!strategy)
-      WEPA_THROW_EXCEPTION(asString () << " can not associate a null Strategy");
+      COFFEE_THROW_EXCEPTION(asString () << " can not associate a null Strategy");
 
    if (strategy.get() == this)
-      WEPA_THROW_EXCEPTION(asString () << " can not generate a recursive association");
+      COFFEE_THROW_EXCEPTION(asString () << " can not generate a recursive association");
 
    if (bottom > top)
-      WEPA_THROW_EXCEPTION(asString () << " | invalid range (bottom > top)");
+      COFFEE_THROW_EXCEPTION(asString () << " | invalid range (bottom > top)");
 
    for (range_iterator ii = range_begin(), maxii = range_end(); ii != maxii; ++ ii) {
       Range& range = StrategyByRange::range(ii);
       if (std::get<0>(range) >= bottom && std::get<1>(range) <= top) {
-         WEPA_THROW_EXCEPTION(std::get<2>(range)->asString () << " would be hidden by " << strategy->asString());
+         COFFEE_THROW_EXCEPTION(std::get<2>(range)->asString () << " would be hidden by " << strategy->asString());
       }
    }
 
    range_iterator ii;
 
    if ((ii = findRange(guard, bottom)) != range_end()) {
-      WEPA_THROW_EXCEPTION(std::get<2>(range(ii))->asString () << " has overlapping with " << strategy->asString());
+      COFFEE_THROW_EXCEPTION(std::get<2>(range(ii))->asString () << " has overlapping with " << strategy->asString());
    }
 
    if ((ii = findRange(guard, top)) != range_end()) {
-      WEPA_THROW_EXCEPTION(std::get<2>(range(ii))->asString () << " has overlapping with " << strategy->asString());
+      COFFEE_THROW_EXCEPTION(std::get<2>(range(ii))->asString () << " has overlapping with " << strategy->asString());
    }
 
    auto range = std::make_tuple(top, bottom, strategy);
@@ -113,7 +113,7 @@ std::shared_ptr<balance::Resource> balance::StrategyByRange::apply(const int key
 std::shared_ptr<balance::Resource> balance::StrategyByRange::apply(GuardResourceList& guard)
    throw (balance::ResourceUnavailableException)
 {
-   logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
+   logger::TraceMethod tm (logger::Level::Local7, COFFEE_FILE_LOCATION);
 
    std::shared_ptr<balance::Strategy> strategy;
 
@@ -121,7 +121,7 @@ std::shared_ptr<balance::Resource> balance::StrategyByRange::apply(GuardResource
       range_iterator ii = findRange (guard, m_key);
 
       if (ii == range_end()) {
-         WEPA_THROW_NAMED_EXCEPTION(balance::ResourceUnavailableException, "Key=" << m_key << " does not have a defined range");
+         COFFEE_THROW_NAMED_EXCEPTION(balance::ResourceUnavailableException, "Key=" << m_key << " does not have a defined range");
       }
 
       strategy = std::get<2>(range(ii));

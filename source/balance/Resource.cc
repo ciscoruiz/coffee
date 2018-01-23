@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,15 +33,15 @@
 // Author: cisco.tierra@gmail.com
 //
 
-#include <wepa/balance/Resource.hpp>
+#include <coffee/balance/Resource.hpp>
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/AsString.hpp>
+#include <coffee/adt/StreamString.hpp>
+#include <coffee/adt/AsString.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 //virtual
 adt::StreamString balance::Resource::asString () const

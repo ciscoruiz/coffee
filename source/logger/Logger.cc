@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,14 +32,14 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/logger/Logger.hpp>
+#include <coffee/logger/Logger.hpp>
 
-#include <wepa/logger/Writer.hpp>
-#include <wepa/logger/DefaultFormatter.hpp>
-#include <wepa/logger/Level.hpp>
-#include <wepa/logger/SCCS.hpp>
+#include <coffee/logger/Writer.hpp>
+#include <coffee/logger/DefaultFormatter.hpp>
+#include <coffee/logger/Level.hpp>
+#include <coffee/logger/SCCS.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 #ifdef _DEBUG
    logger::Level::_v logger::Logger::m_level = Level::Debug;
@@ -75,7 +75,7 @@ void logger::Logger::add(std::shared_ptr<Writer> writer)
    throw (adt::RuntimeException)
 {
    if (!m_formatter) {
-      WEPA_THROW_EXCEPTION("You should initialize the Logger before add a new writer");
+      COFFEE_THROW_EXCEPTION("You should initialize the Logger before add a new writer");
    }
 
    writer->initialize();

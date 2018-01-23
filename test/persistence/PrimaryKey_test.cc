@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -40,16 +40,16 @@
 #include <unordered_map>
 #include <map>
 
-#include <wepa/adt/pattern/lru/Cache.hpp>
-#include <wepa/adt/AsString.hpp>
+#include <coffee/adt/pattern/lru/Cache.hpp>
+#include <coffee/adt/AsString.hpp>
 
-#include <wepa/dbms/datatype/Integer.hpp>
-#include <wepa/dbms/datatype/String.hpp>
+#include <coffee/dbms/datatype/Integer.hpp>
+#include <coffee/dbms/datatype/String.hpp>
 
-#include <wepa/persistence/PrimaryKey.hpp>
-#include <wepa/persistence/PrimaryKeyBuilder.hpp>
+#include <coffee/persistence/PrimaryKey.hpp>
+#include <coffee/persistence/PrimaryKeyBuilder.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 BOOST_AUTO_TEST_CASE(persistence_primary_key_compare)
 {

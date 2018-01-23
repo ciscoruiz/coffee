@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,12 +34,12 @@
 //
 #include <functional>
 
-#include <wepa/adt/StreamString.hpp>
+#include <coffee/adt/StreamString.hpp>
 
-#include <wepa/dbms/datatype/Abstract.hpp>
+#include <coffee/dbms/datatype/Abstract.hpp>
 
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 adt::StreamString datatype::Abstract::asString () const
    noexcept
@@ -57,7 +57,7 @@ void datatype::Abstract::isNull ()
    throw (adt::RuntimeException)
 {
    if (m_constraint == Constraint::CanNotBeNull) {
-      WEPA_THROW_EXCEPTION(asString () << " | Data can not be NULL");
+      COFFEE_THROW_EXCEPTION(asString () << " | Data can not be NULL");
    }
 
    m_isNull = true;
@@ -76,7 +76,7 @@ void datatype::Abstract::exceptionWhenIsNull () const
    throw (adt::RuntimeException)
 {
    if (m_isNull == true) {
-      WEPA_THROW_EXCEPTION("Data '" << m_name << "' is null and it can not return any value");
+      COFFEE_THROW_EXCEPTION("Data '" << m_name << "' is null and it can not return any value");
    }
 }
 
@@ -90,7 +90,7 @@ int datatype::Abstract::compare (const Abstract& other) const
    throw (adt::RuntimeException)
 {
    if (this->getType () != other.getType()) {
-      WEPA_THROW_EXCEPTION(this->asString () << " type does not matches with " << other.asString());
+      COFFEE_THROW_EXCEPTION(this->asString () << " type does not matches with " << other.asString());
    }
 
    if (this->hasValue() == false && other.hasValue () == false)

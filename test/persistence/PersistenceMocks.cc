@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,16 +32,16 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/logger/Logger.hpp>
+#include <coffee/logger/Logger.hpp>
 
-#include <wepa/dbms/datatype/Integer.hpp>
-#include <wepa/dbms/datatype/String.hpp>
-#include <wepa/dbms/datatype/Float.hpp>
-#include <wepa/dbms/datatype/Date.hpp>
+#include <coffee/dbms/datatype/Integer.hpp>
+#include <coffee/dbms/datatype/String.hpp>
+#include <coffee/dbms/datatype/Float.hpp>
+#include <coffee/dbms/datatype/Date.hpp>
 
 #include "PersistenceMocks.hpp"
 
-using namespace wepa;
+using namespace coffee;
 
 //static
 const int test_persistence::MyDatabase::PreloadRegisterCounter = 100;
@@ -53,7 +53,7 @@ dbms::ResultCode test_persistence::MyReadStatement::do_execute(dbms::Connection&
 
    mock::MockConnection& _connection(static_cast <mock::MockConnection&>(connection));
 
-   const int searchedId = wepa_datatype_downcast(dbms::datatype::Integer, getInputData(0))->getValue();
+   const int searchedId = coffee_datatype_downcast(dbms::datatype::Integer, getInputData(0))->getValue();
 
    for(auto ii : _connection.getContainer()) {
       if(ii.second.m_id == searchedId) {
@@ -74,7 +74,7 @@ bool test_persistence::MyReadStatement::do_fetch() throw(adt::RuntimeException, 
    if(m_isValid == true) {
       m_isValid = false;
 
-      wepa_datatype_downcast(dbms::datatype::String, getOutputData(0))->setValue(m_selection.m_name);
+      coffee_datatype_downcast(dbms::datatype::String, getOutputData(0))->setValue(m_selection.m_name);
 
       return true;
    }
@@ -91,7 +91,7 @@ dbms::ResultCode test_persistence::MyWriteStatement::do_execute(dbms::Connection
 
    mock::MockLowLevelRecord record;
 
-   record.m_id =(wepa_datatype_downcast(dbms::datatype::Integer, getInputData(0))->getValue());
+   record.m_id =(coffee_datatype_downcast(dbms::datatype::Integer, getInputData(0))->getValue());
 
    if(record.m_id == IdToThrowDbException) {
       result.initialize(MyDatabase::NotFound, NULL);
@@ -99,7 +99,7 @@ dbms::ResultCode test_persistence::MyWriteStatement::do_execute(dbms::Connection
    }
 
    if(opCode != mock::MockConnection::Delete) {
-      record.m_name = wepa_datatype_downcast(dbms::datatype::String, getInputData(1))->getValue();
+      record.m_name = coffee_datatype_downcast(dbms::datatype::String, getInputData(1))->getValue();
    }
 
    LOG_DEBUG("ID = " << record.m_id);
@@ -114,7 +114,7 @@ dbms::ResultCode test_persistence::MockCustomerLoader::apply(dbms::GuardStatemen
 {
    const int id = object->getPrimaryKey()->getInteger("id");
 
-   wepa_datatype_downcast(dbms::datatype::Integer, statement.getInputData(0))->setValue(id);
+   coffee_datatype_downcast(dbms::datatype::Integer, statement.getInputData(0))->setValue(id);
 
    dbms::ResultCode result = statement.execute();
 
@@ -122,7 +122,7 @@ dbms::ResultCode test_persistence::MockCustomerLoader::apply(dbms::GuardStatemen
       if(statement.fetch()) {
          CustomerObjectWrapper customer(object);
          customer.setId(id);
-         customer.setName(wepa_datatype_downcast(dbms::datatype::String, statement.getOutputData(0))->getValue());
+         customer.setName(coffee_datatype_downcast(dbms::datatype::String, statement.getOutputData(0))->getValue());
       }
    }
 
@@ -140,8 +140,8 @@ dbms::ResultCode test_persistence::MockCustomerRecorder::apply(dbms::GuardStatem
 {
    CustomerObjectWrapper customer(getObject());
 
-   wepa_datatype_downcast(dbms::datatype::Integer, statement.getInputData(0))->setValue(customer.getId());
-   wepa_datatype_downcast(dbms::datatype::String, statement.getInputData(1))->setValue(customer.getName());
+   coffee_datatype_downcast(dbms::datatype::Integer, statement.getInputData(0))->setValue(customer.getId());
+   coffee_datatype_downcast(dbms::datatype::String, statement.getInputData(1))->setValue(customer.getName());
 
    return statement.execute();
 }
@@ -152,7 +152,7 @@ dbms::ResultCode test_persistence::MockCustomerEraser::apply(dbms::GuardStatemen
    auto primaryKey = getPrimaryKey();
 
    const int id = primaryKey->getInteger("id");
-   wepa_datatype_downcast(dbms::datatype::Integer, statement.getInputData(0))->setValue(id);
+   coffee_datatype_downcast(dbms::datatype::Integer, statement.getInputData(0))->setValue(id);
 
    return statement.execute();
 }

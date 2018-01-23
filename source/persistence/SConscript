@@ -2,7 +2,7 @@ Import ('env')
 
 sources = Glob('*.cc')
 
-result = env.StaticLibrary ('wepa_persistence', sources);
+result = env.StaticLibrary ('coffee_persistence', sources);
 
 Return ('result')
 

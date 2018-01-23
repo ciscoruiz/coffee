@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,17 +32,17 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/adt/Millisecond.hpp>
+#include <coffee/adt/Millisecond.hpp>
 
-#include <wepa/adt/pattern/observer/Subject.hpp>
-#include <wepa/adt/pattern/observer/Event.hpp>
-#include <wepa/adt/pattern/observer/Observer.hpp>
+#include <coffee/adt/pattern/observer/Subject.hpp>
+#include <coffee/adt/pattern/observer/Event.hpp>
+#include <coffee/adt/pattern/observer/Observer.hpp>
 
 #include <boost/test/unit_test.hpp>
 
 using namespace std;
-using namespace wepa::adt;
-using namespace wepa::adt::pattern;
+using namespace coffee::adt;
+using namespace coffee::adt::pattern;
 
 const char* initialValue = "MyFirstValue";
 const char* finalValue = "Cleared";
@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(too_many_events)
 {
    TheSubject subject;
 
-   BOOST_REQUIRE_THROW(subject.registerTooManyEvents(), wepa::adt::RuntimeException);
+   BOOST_REQUIRE_THROW(subject.registerTooManyEvents(), coffee::adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(promicuous_observer)
@@ -310,7 +310,7 @@ BOOST_AUTO_TEST_CASE(promicuous_observer)
    shared_ptr<observer::Observer> base = observer;
    subject1.subscribeObserver(base, TheSubject::Events::ChangeII);
 
-   BOOST_REQUIRE_THROW(subject2.subscribeObserver(base, TheSubject::Events::ChangeII), wepa::adt::RuntimeException);
+   BOOST_REQUIRE_THROW(subject2.subscribeObserver(base, TheSubject::Events::ChangeII), coffee::adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(observer_out_of_scope)

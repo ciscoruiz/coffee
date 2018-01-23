@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,12 +34,12 @@
 //
 #include <functional>
 
-#include <wepa/xml/Node.hpp>
+#include <coffee/xml/Node.hpp>
 
-#include <wepa/balance/Strategy.hpp>
-#include <wepa/balance/ResourceList.hpp>
+#include <coffee/balance/Strategy.hpp>
+#include <coffee/balance/ResourceList.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 //virtual
 adt::StreamString balance::Strategy::asString () const noexcept

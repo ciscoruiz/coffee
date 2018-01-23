@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -45,27 +45,27 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 
-#include <wepa/config/Release.hpp>
-#include <wepa/config/SCCSRepository.hpp>
-#include <wepa/config/defines.hpp>
+#include <coffee/config/Release.hpp>
+#include <coffee/config/SCCSRepository.hpp>
+#include <coffee/config/defines.hpp>
 
-#include <wepa/adt/RuntimeException.hpp>
+#include <coffee/adt/RuntimeException.hpp>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TraceMethod.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Attribute.hpp>
-#include <wepa/xml/Compiler.hpp>
-#include <wepa/xml/SCCS.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
+#include <coffee/xml/Compiler.hpp>
+#include <coffee/xml/SCCS.hpp>
 
-#include <wepa/app/Application.hpp>
-#include <wepa/app/SCCS.hpp>
-#include <wepa/app/Engine.hpp>
+#include <coffee/app/Application.hpp>
+#include <coffee/app/SCCS.hpp>
+#include <coffee/app/Engine.hpp>
 
 using namespace std;
-using namespace wepa;
-using namespace wepa::adt;
+using namespace coffee;
+using namespace coffee::adt;
 
 //static
 app::Application* app::Application::m_this = nullptr;
@@ -114,7 +114,7 @@ app::Application::engine_iterator app::Application::engine_find (const char* cla
 {
    for (engine_iterator ii = engine_begin (), maxii = engine_end (); ii != maxii; ii ++) {
       auto engine = Application::engine (ii);
-      if (wepa_strcmp (className, engine->getClassName ()) == 0)
+      if (coffee_strcmp (className, engine->getClassName ()) == 0)
          return ii;
    }
 
@@ -132,7 +132,7 @@ void app::Application::start ()
    config::SCCSRepository& moduleManager = config::SCCSRepository::getInstance();
 
    if (isRunning() == true) {
-      WEPA_THROW_EXCEPTION(asString () << " | Already running");
+      COFFEE_THROW_EXCEPTION(asString () << " | Already running");
    }
 
    if (sigset (SIGCHLD, handlerChildTerminate) != 0) {
@@ -155,7 +155,7 @@ void app::Application::start ()
          cout << "along with this program.  If not, see <http://www.gnu.org/licenses/>." << endl << endl;
       }
 
-      cout << "WEPA - Write Excellent Professional Applications. Version " << config::Release::getVersion () << endl;
+      cout << "COFFEE - COmpany eFFEEctive Platform. Version " << config::Release::getVersion () << endl;
       cout << "Developed by Francisco Ruiz" << endl;
       cout << "Release date: " << __DATE__ << " " << __TIME__ << endl;
       cout << "(c) Copyright 2018,2014 by Francisco Ruiz." << endl << endl;
@@ -257,7 +257,7 @@ void app::Application::attach (std::shared_ptr<Engine> engine)
    throw (RuntimeException)
 {
    if (!engine)
-      WEPA_THROW_EXCEPTION ("Can not associate a NULL engine");
+      COFFEE_THROW_EXCEPTION ("Can not associate a NULL engine");
 
    auto ii = engine_find(engine->getName());
 
@@ -284,7 +284,7 @@ void app::Application::writeContext (const std::string& file)
    out.open (file.c_str ());
 
    if (out.is_open () == false) {
-      WEPA_THROW_EXCEPTION("Can not open file'" << file << "'");
+      COFFEE_THROW_EXCEPTION("Can not open file'" << file << "'");
    }
 
    LOG_NOTICE ("File: " << file);
@@ -357,7 +357,7 @@ void app::Application::signalUSR2 ()
    msg += " | Current level: ";
    msg += logger::Level::enumName (logger::Logger::getLevel());
 
-   logger::Logger::write (logger::Logger::getLevel(), msg, WEPA_FILE_LOCATION);
+   logger::Logger::write (logger::Logger::getLevel(), msg, COFFEE_FILE_LOCATION);
 }
 
 // static

@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -36,15 +36,15 @@
 
 #include <time.h>
 
-#include <wepa/config/defines.hpp>
+#include <coffee/config/defines.hpp>
 
-#include <wepa/adt/Second.hpp>
+#include <coffee/adt/Second.hpp>
 
-#include <wepa/dbms/datatype/Date.hpp>
+#include <coffee/dbms/datatype/Date.hpp>
 
 using namespace std;
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 datatype::Date::Date (const char* name, const Constraint::_v constraint) :
    datatype::Abstract (name, Datatype::Date, MaxDateSize, constraint)
@@ -95,7 +95,7 @@ struct tm* datatype::Date::getLocalTime () const
    tm* result = localtime ((time_t*) &tt);
 
    if (result == NULL) {
-      WEPA_THROW_EXCEPTION(asString () << " | It is not a valid date");
+      COFFEE_THROW_EXCEPTION(asString () << " | It is not a valid date");
    }
 
    return result;
@@ -107,21 +107,21 @@ void datatype::Date::setValue (const char* str, const char* format)
    clear ();
 
    if (format == NULL) {
-      WEPA_THROW_EXCEPTION("This method requires a format specification");
+      COFFEE_THROW_EXCEPTION("This method requires a format specification");
    }
 
    tm aux;
    char* r = strptime (str, format, &aux);
 
    if (r == NULL ) {
-      WEPA_THROW_EXCEPTION("'" << str << "' is not a valid date using format '" << format << "'");
+      COFFEE_THROW_EXCEPTION("'" << str << "' is not a valid date using format '" << format << "'");
    }
 
    aux.tm_isdst = 0;
    time_t newValue = mktime (&aux);
 
    if (newValue == -1) {
-      WEPA_THROW_EXCEPTION("'" << str << "' can not be treated as adt::Second '" << format << "'");
+      COFFEE_THROW_EXCEPTION("'" << str << "' can not be treated as adt::Second '" << format << "'");
    }
 
    this->isNotNull();
@@ -155,7 +155,7 @@ adt::StreamString datatype::Date::asString () const
 int datatype::Date::do_compare (const datatype::Abstract& other) const
    throw (adt::RuntimeException)
 {
-   const Date& _other = wepa_datatype_downcast(Date, other);
+   const Date& _other = coffee_datatype_downcast(Date, other);
 
    return this->m_value - _other.m_value;
 }

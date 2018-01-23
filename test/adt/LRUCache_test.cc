@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,18 +32,18 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/adt/pattern/lru/Cache.hpp>
-#include <wepa/adt/StreamString.hpp>
+#include <coffee/adt/pattern/lru/Cache.hpp>
+#include <coffee/adt/StreamString.hpp>
 
 #include <boost/test/unit_test.hpp>
 
-using namespace wepa::adt::pattern;
+using namespace coffee::adt::pattern;
 
 BOOST_AUTO_TEST_CASE(lrucache_insert_twice)
 {
    const int MaxCacheSize = 5;
 
-   typedef lru::Cache<int, wepa::adt::StreamString> TheCache;
+   typedef lru::Cache<int, coffee::adt::StreamString> TheCache;
 
    TheCache cache(MaxCacheSize);
 
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(lrucache_find)
 {
    const int MaxCacheSize = 5;
 
-   typedef lru::Cache<int, wepa::adt::StreamString> TheCache;
+   typedef lru::Cache<int, coffee::adt::StreamString> TheCache;
 
    TheCache cache(MaxCacheSize);
 
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(lrucache_find)
    BOOST_REQUIRE_EQUAL(ii == cache.end(), true);
 
    for(int ii = 0; ii < MaxCacheSize; ++ ii) {
-      wepa::adt::StreamString string;
+      coffee::adt::StreamString string;
       string << "Number-" << ii;
       cache.set(ii, string);
    }
@@ -83,12 +83,12 @@ BOOST_AUTO_TEST_CASE(lrucache_erase)
 {
    const int MaxCacheSize = 5;
 
-   typedef lru::Cache<int, wepa::adt::StreamString> TheCache;
+   typedef lru::Cache<int, coffee::adt::StreamString> TheCache;
 
    TheCache cache(MaxCacheSize);
 
    for(int ii = 0; ii < MaxCacheSize; ++ ii) {
-      wepa::adt::StreamString string;
+      coffee::adt::StreamString string;
       string << "Number-" << ii;
       cache.set(ii, string);
    }
@@ -113,12 +113,12 @@ BOOST_AUTO_TEST_CASE(lrucache_max_size)
 {
    const int MaxCacheSize = 5;
 
-   typedef lru::Cache<int, wepa::adt::StreamString> TheCache;
+   typedef lru::Cache<int, coffee::adt::StreamString> TheCache;
 
    TheCache cache(MaxCacheSize);
 
    for(int ii = 0; ii < MaxCacheSize + 1; ++ ii) {
-      wepa::adt::StreamString string;
+      coffee::adt::StreamString string;
       string << "Number-" << ii;
       cache.set(ii, string);
    }
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(lrucache_max_size)
 
    int jj = 1;
    for (TheCache::pair_iterator ii = cache.begin(), maxii = cache.end(); ii != maxii; ++ ii) {
-      wepa::adt::StreamString string;
+      coffee::adt::StreamString string;
       string << "Number-" << jj;
       BOOST_REQUIRE_EQUAL(TheCache::key(ii), jj);
       BOOST_REQUIRE_EQUAL(TheCache::value(ii), string);
@@ -140,12 +140,12 @@ BOOST_AUTO_TEST_CASE(lrucache_update)
 {
    const int MaxCacheSize = 5;
 
-   typedef lru::Cache<int, wepa::adt::StreamString> TheCache;
+   typedef lru::Cache<int, coffee::adt::StreamString> TheCache;
 
    TheCache cache(MaxCacheSize);
 
    for(int ii = 0; ii < MaxCacheSize; ++ ii) {
-      wepa::adt::StreamString string;
+      coffee::adt::StreamString string;
       string << "Number-" << ii;
       cache.set(ii, string);
    }
@@ -163,12 +163,12 @@ BOOST_AUTO_TEST_CASE(lrucache_refresh)
 {
    const int MaxCacheSize = 5;
 
-   typedef lru::Cache<int, wepa::adt::StreamString> TheCache;
+   typedef lru::Cache<int, coffee::adt::StreamString> TheCache;
 
    TheCache cache(MaxCacheSize);
 
    for(int ii = 0; ii < MaxCacheSize; ++ ii) {
-      wepa::adt::StreamString string;
+      coffee::adt::StreamString string;
       string << "Number-" << ii;
       cache.set(ii, string);
    }
@@ -191,14 +191,14 @@ BOOST_AUTO_TEST_CASE(lrucache_shared_ptr)
    const int MaxFirstLevel = 5;
    const int MaxSecondLevel = 5;
 
-   typedef lru::Cache<Key, wepa::adt::StreamString> TheCache;
+   typedef lru::Cache<Key, coffee::adt::StreamString> TheCache;
 
    TheCache cache(MaxSecondLevel);
 
    for(int ii = 0; ii < MaxFirstLevel; ++ ii) {
       for (int jj = 0; jj < MaxSecondLevel; ++ jj) {
          Key key = std::make_shared<Complex>(ii, jj);
-         wepa::adt::StreamString string;
+         coffee::adt::StreamString string;
          string << ii << "-" << jj;
          cache.set(key, string);
       }

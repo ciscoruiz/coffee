@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,19 +33,19 @@
 // Author: cisco.tierra@gmail.com
 //
 
-#include <wepa/dbms/Statement.hpp>
-#include <wepa/dbms/GuardStatement.hpp>
-#include <wepa/dbms/GuardConnection.hpp>
-#include <wepa/dbms/Connection.hpp>
+#include <coffee/dbms/Statement.hpp>
+#include <coffee/dbms/GuardStatement.hpp>
+#include <coffee/dbms/GuardConnection.hpp>
+#include <coffee/dbms/Connection.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 dbms::GuardStatement::GuardStatement(GuardConnection& guardConnection, std::shared_ptr<Statement>& statement)  throw(adt::RuntimeException) :
    m_guardConnection(guardConnection),
    m_statement(statement)
 {
    if(guardConnection->isAvailable() == false) {
-      WEPA_THROW_EXCEPTION(guardConnection->asString() << " | Connection is not available");
+      COFFEE_THROW_EXCEPTION(guardConnection->asString() << " | Connection is not available");
    }
 
    guardConnection.linkStatement();

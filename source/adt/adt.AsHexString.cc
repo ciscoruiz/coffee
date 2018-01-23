@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -35,13 +35,13 @@
 #include <ctype.h>
 #include <stdio.h>
 
-#include <wepa/config/defines.hpp>
+#include <coffee/config/defines.hpp>
 
-#include <wepa/adt/AsHexString.hpp>
-#include <wepa/adt/DataBlock.hpp>
+#include <coffee/adt/AsHexString.hpp>
+#include <coffee/adt/DataBlock.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 string adt::AsHexString::apply (const int number)
    noexcept
@@ -63,7 +63,7 @@ string adt::AsHexString::apply (const Integer64 number)
    noexcept
 {
    char aux [24];
-#ifdef __wepa64__
+#ifdef __coffee64__
    sprintf (aux, "0x%lx", number);
 #else
    sprintf (aux, "0x%llx", number);
@@ -76,7 +76,7 @@ string adt::AsHexString::apply (const Unsigned64 number)
    noexcept
 {
    char aux [32];
-#ifdef __wepa64__
+#ifdef __coffee64__
    sprintf (aux, "0x%lx", number);
 #else
    sprintf (aux, "0x%llx", number);

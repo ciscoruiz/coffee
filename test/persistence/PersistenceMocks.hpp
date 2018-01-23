@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -36,29 +36,29 @@
 #ifndef TEST_PERSISTENCE_PERSISTENCEMOCKS_HPP_
 #define TEST_PERSISTENCE_PERSISTENCEMOCKS_HPP_
 
-#include <wepa/dbms/Database.hpp>
-#include <wepa/dbms/GuardConnection.hpp>
-#include <wepa/dbms/GuardStatement.hpp>
-#include <wepa/dbms/Statement.hpp>
-#include <wepa/dbms/DatabaseException.hpp>
+#include <coffee/dbms/Database.hpp>
+#include <coffee/dbms/GuardConnection.hpp>
+#include <coffee/dbms/GuardStatement.hpp>
+#include <coffee/dbms/Statement.hpp>
+#include <coffee/dbms/DatabaseException.hpp>
 
 #include "../dbms/MockLowLevelRecord.hpp"
 #include "../dbms/MockDatabase.hpp"
 
-#include <wepa/persistence/Loader.hpp>
-#include <wepa/persistence/Eraser.hpp>
-#include <wepa/persistence/Recorder.hpp>
-#include <wepa/persistence/Accessor.hpp>
-#include <wepa/persistence/Object.hpp>
+#include <coffee/persistence/Loader.hpp>
+#include <coffee/persistence/Eraser.hpp>
+#include <coffee/persistence/Recorder.hpp>
+#include <coffee/persistence/Accessor.hpp>
+#include <coffee/persistence/Object.hpp>
 
-namespace wepa {
+namespace coffee {
 
 namespace test_persistence {
 
 static const int IdToThrowDbException = 0;
 
-using namespace wepa::dbms;
-using namespace wepa::mock;
+using namespace coffee::dbms;
+using namespace coffee::mock;
 
 class MyReadStatement : public dbms::Statement {
 public:
@@ -135,7 +135,7 @@ private:
          result = std::make_shared<MyWriteStatement>(*this, name, expression.c_str(), actionOnError);
 
       if(!result)
-         WEPA_THROW_EXCEPTION(name << " invalid statement");
+         COFFEE_THROW_EXCEPTION(name << " invalid statement");
 
       return result;
    }

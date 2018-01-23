@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,6 +32,6 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#define BOOST_TEST_MODULE WEPA_DBMS_TEST
+#define BOOST_TEST_MODULE COFFEE_DBMS_TEST
 
 #include <boost/test/included/unit_test.hpp>

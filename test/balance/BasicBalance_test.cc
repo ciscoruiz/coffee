@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -38,24 +38,24 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/AsString.hpp>
+#include <coffee/adt/AsString.hpp>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TtyWriter.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TtyWriter.hpp>
 
-#include <wepa/balance/Resource.hpp>
-#include <wepa/balance/ResourceList.hpp>
-#include <wepa/balance/GuardResourceList.hpp>
-#include <wepa/balance/StrategyRoundRobin.hpp>
+#include <coffee/balance/Resource.hpp>
+#include <coffee/balance/ResourceList.hpp>
+#include <coffee/balance/GuardResourceList.hpp>
+#include <coffee/balance/StrategyRoundRobin.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Compiler.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Compiler.hpp>
 
 #include "TestResource.hpp"
 
-using namespace wepa;
-using namespace wepa::balance;
-using namespace wepa::test::balance;
+using namespace coffee;
+using namespace coffee::balance;
+using namespace coffee::test::balance;
 
 int MaxResources = 10;
 
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE( avoid_empties )
 
 BOOST_AUTO_TEST_CASE( count_availables )
 {
-   auto resourceList = wepa::test::balance::setup(MaxResources);
+   auto resourceList = coffee::test::balance::setup(MaxResources);
 
    GuardResourceList guard(resourceList);
 
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE( count_availables )
 
 BOOST_AUTO_TEST_CASE( dont_use_unavailables )
 {
-   auto resourceList = wepa::test::balance::setup(MaxResources);
+   auto resourceList = coffee::test::balance::setup(MaxResources);
 
    balance::StrategyRoundRobin strategy(resourceList);
 
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE( dont_use_unavailables )
 
 BOOST_AUTO_TEST_CASE (as_string)
 {
-   auto resourceList = wepa::test::balance::setup(MaxResources);
+   auto resourceList = coffee::test::balance::setup(MaxResources);
 
    if (true) {
       GuardResourceList guard(resourceList);
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE (as_string)
 
 BOOST_AUTO_TEST_CASE (as_xml)
 {
-   auto resourceList = wepa::test::balance::setup(MaxResources);
+   auto resourceList = coffee::test::balance::setup(MaxResources);
 
    if (true) {
       GuardResourceList guard(resourceList);

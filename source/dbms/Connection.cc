@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,22 +32,22 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/config/defines.hpp>
+#include <coffee/config/defines.hpp>
 
-#include <wepa/adt/DelayMeter.hpp>
-#include <wepa/adt/Microsecond.hpp>
+#include <coffee/adt/DelayMeter.hpp>
+#include <coffee/adt/Microsecond.hpp>
 
-#include <wepa/logger/TraceMethod.hpp>
+#include <coffee/logger/TraceMethod.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
 
-#include <wepa/dbms/Connection.hpp>
-#include <wepa/dbms/Database.hpp>
-#include <wepa/dbms/Statement.hpp>
+#include <coffee/dbms/Connection.hpp>
+#include <coffee/dbms/Database.hpp>
+#include <coffee/dbms/Statement.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 //-----------------------------------------------------------------------------------------------------------
 //(1) Si no tiene variables de salida => consideramos que es un update, insert o delete.
@@ -62,7 +62,7 @@ dbms::ResultCode dbms::Connection::execute(std::shared_ptr<Statement>& statement
    LOG_DEBUG("Using " << asString() << " to run " << statement->asString());
 
    if(statement->requiresCommit() == true && m_rollbackPending == true) {      //(1)
-      WEPA_THROW_EXCEPTION(asString() << " | This connection must execute a previous ROLLBACK's");
+      COFFEE_THROW_EXCEPTION(asString() << " | This connection must execute a previous ROLLBACK's");
    }
 
    ResultCode result = statement->execute(*this);
@@ -70,7 +70,7 @@ dbms::ResultCode dbms::Connection::execute(std::shared_ptr<Statement>& statement
    if(result.lostConnection() == true) {
       LOG_CRITICAL("Detected lost connection " << asString() << " while running '" << statement->getName()  << "' | " << result);
       recover();
-      WEPA_THROW_NAME_DB_EXCEPTION(statement->getName(), result);
+      COFFEE_THROW_NAME_DB_EXCEPTION(statement->getName(), result);
    }
 
    statement->measureTiming(delay);
@@ -85,7 +85,7 @@ dbms::ResultCode dbms::Connection::execute(std::shared_ptr<Statement>& statement
    if(result.successful() == false) {
       if(statement->actionOnError() == ActionOnError::Rollback) {
          m_rollbackPending = true;
-         WEPA_THROW_NAME_DB_EXCEPTION(statement->getName(), result);
+         COFFEE_THROW_NAME_DB_EXCEPTION(statement->getName(), result);
       }
    }
    else {
@@ -104,7 +104,7 @@ void dbms::Connection::commit()
    LOG_INFO(asString() << " | State before commit");
    
    if(isAvailable() == false) {
-      WEPA_THROW_EXCEPTION(asString() << " | Connection is not available");
+      COFFEE_THROW_EXCEPTION(asString() << " | Connection is not available");
    }   
    
    do_commit();
@@ -135,7 +135,7 @@ void dbms::Connection::lock()
 {
    if(isAvailable() == false) {
       if(recover() == false) {
-         WEPA_THROW_EXCEPTION(asString() << " | Connection is not available");
+         COFFEE_THROW_EXCEPTION(asString() << " | Connection is not available");
       }
    }   
    
@@ -150,7 +150,7 @@ void dbms::Connection::lock()
             m_commitPending = 1;
       }
       catch(dbms::DatabaseException& edb) {
-         WEPA_THROW_EXCEPTION(edb.what());
+         COFFEE_THROW_EXCEPTION(edb.what());
       }
    }
 

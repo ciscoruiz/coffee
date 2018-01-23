@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,28 +32,28 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
 
-#include <wepa/adt/AsHexString.hpp>
+#include <coffee/adt/AsHexString.hpp>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TraceMethod.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
 
-#include <wepa/dbms/datatype/Abstract.hpp>
+#include <coffee/dbms/datatype/Abstract.hpp>
 
-#include <wepa/persistence/Object.hpp>
-#include <wepa/persistence/Loader.hpp>
-#include <wepa/persistence/Recorder.hpp>
-#include <wepa/persistence/Eraser.hpp>
-#include <wepa/persistence/Storage.hpp>
-#include <wepa/persistence/Class.hpp>
+#include <coffee/persistence/Object.hpp>
+#include <coffee/persistence/Loader.hpp>
+#include <coffee/persistence/Recorder.hpp>
+#include <coffee/persistence/Eraser.hpp>
+#include <coffee/persistence/Storage.hpp>
+#include <coffee/persistence/Class.hpp>
 
-#include <wepa/dbms/GuardConnection.hpp>
-#include <wepa/dbms/GuardStatement.hpp>
+#include <coffee/dbms/GuardConnection.hpp>
+#include <coffee/dbms/GuardStatement.hpp>
 
-using namespace wepa;
-using namespace wepa::persistence;
+using namespace coffee;
+using namespace coffee::persistence;
 
 Storage::Storage(const std::string& name, const int maxCacheSize) :
    adt::NamedObject(name),
@@ -90,7 +90,7 @@ Accessor::TheObject Storage::load(Accessor::TheConnection& connection, Loader& l
       dbms::ResultCode resultCode = loader.apply(guardStatement, result);
 
       if(resultCode.successful() == false)
-         WEPA_THROW_NAME_DB_EXCEPTION(loader.getName(), resultCode);
+         COFFEE_THROW_NAME_DB_EXCEPTION(loader.getName(), resultCode);
 
       m_cache.set(primaryKey, result);
    }
@@ -103,12 +103,12 @@ Accessor::TheObject Storage::load(Accessor::TheConnection& connection, Loader& l
          dbms::ResultCode resultCode = loader.apply(guardStatement, result);
 
          if(resultCode.successful() == false)
-            WEPA_THROW_NAME_DB_EXCEPTION(loader.getName(), resultCode);
+            COFFEE_THROW_NAME_DB_EXCEPTION(loader.getName(), resultCode);
       }
    }
 
    if(!result) {
-      WEPA_THROW_EXCEPTION(loader.asString() << " | There is not any match for the loader");
+      COFFEE_THROW_EXCEPTION(loader.asString() << " | There is not any match for the loader");
    }
 
    LOG_DEBUG(loader << " | ObjectId=" << result->getInternalId() << " | Result=" << result->asString());
@@ -136,7 +136,7 @@ void Storage::save(dbms::GuardConnection& guardConnection, Recorder& recorder)
    dbms::ResultCode resultCode = recorder.apply(guardStatement);
 
    if(resultCode.successful() == false)
-      WEPA_THROW_NAME_DB_EXCEPTION(recorder.getName(), resultCode);
+      COFFEE_THROW_NAME_DB_EXCEPTION(recorder.getName(), resultCode);
 
    if (recorder.hasAutoCommit()) {
       guardConnection.commit();
@@ -173,7 +173,7 @@ void Storage::erase(dbms::GuardConnection& guardConnection, Eraser& eraser)
    dbms::ResultCode resultCode = eraser.apply(guardStatement);
 
    if(resultCode.successful() == false)
-      WEPA_THROW_NAME_DB_EXCEPTION(eraser.getName(), resultCode);
+      COFFEE_THROW_NAME_DB_EXCEPTION(eraser.getName(), resultCode);
 
    if (eraser.hasAutoCommit()) {
       guardConnection.commit();

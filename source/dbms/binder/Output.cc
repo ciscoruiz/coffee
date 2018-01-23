@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,15 +33,15 @@
 // Author: cisco.tierra@gmail.com
 //
 
-#include <wepa/logger/Logger.hpp>
+#include <coffee/logger/Logger.hpp>
 
-#include <wepa/dbms/datatype/Abstract.hpp>
-#include <wepa/dbms/datatype/LongBlock.hpp>
+#include <coffee/dbms/datatype/Abstract.hpp>
+#include <coffee/dbms/datatype/LongBlock.hpp>
 
-#include <wepa/dbms/binder/Output.hpp>
+#include <coffee/dbms/binder/Output.hpp>
 
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 adt::StreamString binder::Output::asString() const
    noexcept
@@ -59,7 +59,7 @@ void binder::Output::write()
    const std::shared_ptr<datatype::Abstract>& data = this->getData();
 
    if(data->getType() != datatype::Abstract::Datatype::LongBlock) {
-      WEPA_THROW_EXCEPTION("This method only works over dbms::datatype::LongBlock");
+      COFFEE_THROW_EXCEPTION("This method only works over dbms::datatype::LongBlock");
    }
 
    LOG_DEBUG(data->asString());

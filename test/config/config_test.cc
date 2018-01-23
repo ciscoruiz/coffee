@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,7 +32,7 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#define BOOST_TEST_MODULE WEPA_CONFIG_TEST
+#define BOOST_TEST_MODULE COFFEE_CONFIG_TEST
 
 #include <boost/test/included/unit_test.hpp>
 
@@ -40,11 +40,11 @@
 
 #include <limits.h>
 
-#include <wepa/config/Release.hpp>
-#include <wepa/config/defines.hpp>
+#include <coffee/config/Release.hpp>
+#include <coffee/config/defines.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 BOOST_AUTO_TEST_CASE (release)
 {

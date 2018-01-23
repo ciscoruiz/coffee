@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,20 +33,20 @@
 // Author: cisco.tierra@gmail.com
 //
 
-#include <wepa/config/SCCSRepository.hpp>
+#include <coffee/config/SCCSRepository.hpp>
 
-#include <wepa/config/SCCS.hpp>
-#include <wepa/adt/SCCS.hpp>
+#include <coffee/config/SCCS.hpp>
+#include <coffee/adt/SCCS.hpp>
 
-wepa_sccs_define_tag (adt, 1)
+coffee_sccs_define_tag (adt, 1)
 
-using namespace wepa;
+using namespace coffee;
 
 void adt::SCCS::activate()
    noexcept
 {
    config::SCCS::activate ();
 
-   config::SCCSRepository::getInstance().registerModule(wepa_sccs_use_tag(adt));
+   config::SCCSRepository::getInstance().registerModule(coffee_sccs_use_tag(adt));
 }
 

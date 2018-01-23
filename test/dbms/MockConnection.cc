@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -35,10 +35,10 @@
 #include "MockDatabase.hpp"
 #include "MockConnection.hpp"
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TraceMethod.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 mock::MockConnection::MockConnection (MockDatabase& database, const std::string& name, const char* user, const char* password) :
    dbms::Connection (database, name, user, password),
@@ -55,7 +55,7 @@ void mock::MockConnection::open()
    m_operations.clear();
 
    if(m_avoidRecovery == true) {
-      WEPA_THROW_DB_EXCEPTION(dbms::ResultCode(getDatabase(), MockDatabase::LostConnection));
+      COFFEE_THROW_DB_EXCEPTION(dbms::ResultCode(getDatabase(), MockDatabase::LostConnection));
    }
 
    ++ m_openCounter;
@@ -76,7 +76,7 @@ void mock::MockConnection::do_commit()
    LOG_THIS_METHOD();
 
    if (m_isOpen == false) {
-      WEPA_THROW_EXCEPTION(asString() << " is not open");
+      COFFEE_THROW_EXCEPTION(asString() << " is not open");
    }
 
    m_commitCounter ++;
@@ -116,7 +116,7 @@ mock::MockLowLevelContainer& mock::MockConnection::getContainer()
    throw(adt::RuntimeException)
 {
    if (m_isOpen == false) {
-      WEPA_THROW_EXCEPTION("Connection " << getName() << " is not available");
+      COFFEE_THROW_EXCEPTION("Connection " << getName() << " is not available");
    }
 
    return std::ref(m_container);

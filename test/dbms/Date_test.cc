@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -37,11 +37,11 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/dbms/datatype/Date.hpp>
-#include <wepa/dbms/datatype/Integer.hpp>
+#include <coffee/dbms/datatype/Date.hpp>
+#include <coffee/dbms/datatype/Integer.hpp>
 
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 
 // See http://www.mbari.org/staff/rich/utccalc.htm
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(date_downcast)
 
    BOOST_REQUIRE_EQUAL(abs.hasValue(), true);
 
-   const datatype::Date& other = wepa_datatype_downcast(datatype::Date, abs);
+   const datatype::Date& other = coffee_datatype_downcast(datatype::Date, abs);
 
    const char* format = "%d/%m/%YT%H:%M:%S";
    std::string str_date("01/01/1800T12:30:50");
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(date_downcast)
 
    datatype::Integer zzz("zzz");
 
-   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::Date, zzz), dbms::InvalidDataException);
+   BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::Date, zzz), dbms::InvalidDataException);
 }
 
 BOOST_AUTO_TEST_CASE(date_clone)

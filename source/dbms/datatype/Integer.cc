@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,10 +32,10 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/dbms/datatype/Integer.hpp>
+#include <coffee/dbms/datatype/Integer.hpp>
 
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 datatype::Integer::Integer (const char* name, const Constraint::_v constraint) :
    datatype::Abstract (name, Datatype::Integer, sizeof (int), constraint),
@@ -70,7 +70,7 @@ adt::StreamString datatype::Integer::asString () const
 int datatype::Integer::do_compare (const datatype::Abstract& other) const
    throw (adt::RuntimeException)
 {
-   const Integer& _other = wepa_datatype_downcast(Integer, other);
+   const Integer& _other = coffee_datatype_downcast(Integer, other);
 
    return this->m_value - _other.m_value;
 }

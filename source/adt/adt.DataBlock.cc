@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,16 +33,16 @@
 // Author: cisco.tierra@gmail.com
 //
 
-#include <wepa/adt/DataBlock.hpp>
+#include <coffee/adt/DataBlock.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 char adt::DataBlock::at (const size_t index) const
    throw (adt::RuntimeException)
 {
    if (index >= size ())  {
-      WEPA_THROW_EXCEPTION ("Index " << index << " out of range [0," << size () << ")");
+      COFFEE_THROW_EXCEPTION ("Index " << index << " out of range [0," << size () << ")");
    }
 
    return std::string::at (index);
@@ -51,7 +51,7 @@ char adt::DataBlock::at (const size_t index) const
 char& adt::DataBlock::at (const size_t index) throw (adt::RuntimeException)
 {
    if (index >= size ()) {
-      WEPA_THROW_EXCEPTION ("Index " << index << " out of range [0," << size () << ")");
+      COFFEE_THROW_EXCEPTION ("Index " << index << " out of range [0," << size () << ")");
    }
 
    return std::string::at (index);

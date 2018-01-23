@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -40,24 +40,24 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/AsString.hpp>
+#include <coffee/adt/AsString.hpp>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TtyWriter.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TtyWriter.hpp>
 
-#include <wepa/balance/Resource.hpp>
-#include <wepa/balance/GuardResourceList.hpp>
-#include <wepa/balance/StrategyByRange.hpp>
-#include <wepa/balance/StrategyRoundRobin.hpp>
+#include <coffee/balance/Resource.hpp>
+#include <coffee/balance/GuardResourceList.hpp>
+#include <coffee/balance/StrategyByRange.hpp>
+#include <coffee/balance/StrategyRoundRobin.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Compiler.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Compiler.hpp>
 
 #include "TestResource.hpp"
 
-using namespace wepa;
-using namespace wepa::balance;
-using namespace wepa::test::balance;
+using namespace coffee;
+using namespace coffee::balance;
+using namespace coffee::test::balance;
 
 namespace ByRangeTest {
    typedef std::map <int, int> CounterContainer;
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(byrange_bad_limits)
 {
    balance::StrategyByRange mainStrategy;
 
-   auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources);
+   auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources);
    std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
    std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
    BOOST_REQUIRE_THROW (mainStrategy.addRange (10, 0, foo), adt::RuntimeException);
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(byrange_overlapping)
 {
    balance::StrategyByRange mainStrategy;
 
-   auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources);
+   auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources);
    std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
    std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
 
@@ -137,21 +137,21 @@ BOOST_AUTO_TEST_CASE(byrange_sharing)
    balance::StrategyByRange mainStrategy;
 
    {
-      auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources);
+      auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources);
       std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
       std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
       mainStrategy.addRange(100, 200, foo);
    }
 
    {
-      auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources, 100);
+      auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources, 100);
       std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
       std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
       mainStrategy.addRange(205, 350, foo);
    }
 
    {
-      auto resourceList = wepa::test::balance::setup(ByRangeTest::MaxResources, 1000);
+      auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources, 1000);
       std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
       std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
       mainStrategy.addRange(351, 450, foo);

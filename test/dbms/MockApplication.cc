@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -36,11 +36,11 @@
 
 #include <iostream>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TraceMethod.hpp>
-#include <wepa/logger/TtyWriter.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
+#include <coffee/logger/TtyWriter.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 mock::MockApplication::MockApplication (const char* title) : app::Application ("MockApp", title, "0.0")
 {

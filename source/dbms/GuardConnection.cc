@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,12 +32,12 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/logger/Logger.hpp>
+#include <coffee/logger/Logger.hpp>
 
-#include <wepa/dbms/Connection.hpp>
-#include <wepa/dbms/GuardConnection.hpp>
+#include <coffee/dbms/Connection.hpp>
+#include <coffee/dbms/GuardConnection.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 dbms::GuardConnection::GuardConnection(std::shared_ptr<Connection> connection)  throw (adt::RuntimeException) :
    m_connection (connection),

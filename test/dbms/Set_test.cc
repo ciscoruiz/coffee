@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -31,15 +31,15 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
-#include <wepa/dbms/datatype/Set.hpp>
-#include <wepa/dbms/datatype/Integer.hpp>
-#include <wepa/dbms/datatype/String.hpp>
-#include <wepa/dbms/datatype/Float.hpp>
+#include <coffee/dbms/datatype/Set.hpp>
+#include <coffee/dbms/datatype/Integer.hpp>
+#include <coffee/dbms/datatype/String.hpp>
+#include <coffee/dbms/datatype/Float.hpp>
 
 #include <boost/test/unit_test.hpp>
 
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 BOOST_AUTO_TEST_CASE(set_already_defined)
 {

@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -37,11 +37,11 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/dbms/datatype/String.hpp>
-#include <wepa/dbms/datatype/Integer.hpp>
+#include <coffee/dbms/datatype/String.hpp>
+#include <coffee/dbms/datatype/Integer.hpp>
 
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 BOOST_AUTO_TEST_CASE(string_is_nulleable)
 {
@@ -59,8 +59,8 @@ BOOST_AUTO_TEST_CASE(string_is_nulleable)
 
    column.setValue("hello world");
    BOOST_REQUIRE_EQUAL(column.hasValue(), true);
-   BOOST_REQUIRE_EQUAL(column.getSize(), wepa_strlen("hello world"));
-   BOOST_REQUIRE_EQUAL(strncmp(column.getValue(), "hello world", wepa_strlen("hello world")), 0);
+   BOOST_REQUIRE_EQUAL(column.getSize(), coffee_strlen("hello world"));
+   BOOST_REQUIRE_EQUAL(strncmp(column.getValue(), "hello world", coffee_strlen("hello world")), 0);
 
    column.clear();
    BOOST_REQUIRE_EQUAL(column.hasValue(), false);
@@ -87,8 +87,8 @@ BOOST_AUTO_TEST_CASE(string_is_not_nulleable)
 
    column.setValue("bye");
    BOOST_REQUIRE_EQUAL(column.hasValue(), true);
-   BOOST_REQUIRE_EQUAL(column.getSize(), wepa_strlen("bye"));
-   BOOST_REQUIRE_EQUAL(strncmp(column.getValue(), "bye", wepa_strlen("bye")), 0);
+   BOOST_REQUIRE_EQUAL(column.getSize(), coffee_strlen("bye"));
+   BOOST_REQUIRE_EQUAL(strncmp(column.getValue(), "bye", coffee_strlen("bye")), 0);
 
    column.clear();
    BOOST_REQUIRE_EQUAL(column.hasValue(), true);
@@ -106,14 +106,14 @@ BOOST_AUTO_TEST_CASE(string_downcast)
 
    datatype::Abstract& abs = column;
 
-   const datatype::String& other = wepa_datatype_downcast(datatype::String, abs);
+   const datatype::String& other = coffee_datatype_downcast(datatype::String, abs);
    column.setValue("123");
 
    BOOST_REQUIRE_EQUAL(other == column, true);
 
    datatype::Integer zzz("zzz");
 
-   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::String, zzz), dbms::InvalidDataException);
+   BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::String, zzz), dbms::InvalidDataException);
 }
 
 BOOST_AUTO_TEST_CASE(string_clone)

@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -40,20 +40,20 @@
 #include <mutex>
 #include <thread>
 
-#include <wepa/adt/RuntimeException.hpp>
+#include <coffee/adt/RuntimeException.hpp>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TraceMethod.hpp>
-#include <wepa/logger/TtyWriter.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
+#include <coffee/logger/TtyWriter.hpp>
 
-#include <wepa/persistence/Repository.hpp>
-#include <wepa/persistence/Storage.hpp>
-#include <wepa/persistence/Class.hpp>
+#include <coffee/persistence/Repository.hpp>
+#include <coffee/persistence/Storage.hpp>
+#include <coffee/persistence/Class.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Compiler.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Compiler.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 BOOST_AUTO_TEST_CASE (persistence_repository_repeat)
 {

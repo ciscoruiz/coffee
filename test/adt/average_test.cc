@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,11 +34,11 @@
 //
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/Average.hpp>
+#include <coffee/adt/Average.hpp>
 
 #include <limits.h>
 
-using namespace wepa;
+using namespace coffee;
 
 BOOST_AUTO_TEST_CASE( avg_basic)
 {

@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -37,11 +37,11 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/dbms/datatype/LongBlock.hpp>
-#include <wepa/dbms/datatype/Integer.hpp>
+#include <coffee/dbms/datatype/LongBlock.hpp>
+#include <coffee/dbms/datatype/Integer.hpp>
 
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 
 BOOST_AUTO_TEST_CASE (longblock_is_nulleable)
@@ -93,9 +93,9 @@ BOOST_AUTO_TEST_CASE (longblock_downcast)
 
    datatype::Abstract& abs = column;
 
-   auto other = wepa_datatype_downcast(datatype::LongBlock, abs);
+   auto other = coffee_datatype_downcast(datatype::LongBlock, abs);
 
    datatype::Integer zzz ("zzz");
 
-   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::LongBlock, zzz), dbms::InvalidDataException);
+   BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::LongBlock, zzz), dbms::InvalidDataException);
 }

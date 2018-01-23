@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -36,12 +36,12 @@
 
 #include <unistd.h>
 
-#include <wepa/adt/DelayMeter.hpp>
-#include <wepa/adt/Second.hpp>
-#include <wepa/adt/Millisecond.hpp>
-#include <wepa/adt/Microsecond.hpp>
+#include <coffee/adt/DelayMeter.hpp>
+#include <coffee/adt/Second.hpp>
+#include <coffee/adt/Millisecond.hpp>
+#include <coffee/adt/Microsecond.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 BOOST_AUTO_TEST_CASE( delaymeter_seconds )
 {

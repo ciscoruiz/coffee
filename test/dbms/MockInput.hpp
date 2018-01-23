@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,12 +32,12 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_mock_MockInput_hpp
-#define __wepa_mock_MockInput_hpp
+#ifndef __coffee_mock_MockInput_hpp
+#define __coffee_mock_MockInput_hpp
 
-#include <wepa/dbms/binder/Input.hpp>
+#include <coffee/dbms/binder/Input.hpp>
 
-namespace wepa {
+namespace coffee {
 namespace mock {
 
 class MockInput : public dbms::binder::Input {
@@ -52,6 +52,6 @@ private:
 
 
 } /* namespace mock */
-} /* namespace wepa */
+} /* namespace coffee */
 
 #endif

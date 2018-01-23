@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -38,16 +38,16 @@
 #include <iostream>
 #include <boost/filesystem.hpp>
 
-#include <wepa/adt/DataBlock.hpp>
-#include <wepa/adt/AsString.hpp>
+#include <coffee/adt/DataBlock.hpp>
+#include <coffee/adt/AsString.hpp>
 
-#include <wepa/xml/Document.hpp>
-#include <wepa/xml/DTD.hpp>
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/SCCS.hpp>
-#include <wepa/xml/Compiler.hpp>
+#include <coffee/xml/Document.hpp>
+#include <coffee/xml/DTD.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/SCCS.hpp>
+#include <coffee/xml/Compiler.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 xml::Document::Document () :
    Wrapper ()
@@ -126,18 +126,18 @@ void xml::Document::parseFile (const boost::filesystem::path& file)
    throw (adt::RuntimeException)
 {
    if (boost::filesystem::exists (file) == false) {
-      WEPA_THROW_EXCEPTION("File '" << file.c_str () << "' does not exist");
+      COFFEE_THROW_EXCEPTION("File '" << file.c_str () << "' does not exist");
    }
 
    if (setHandler (xmlParseFile (file.c_str ())) == NULL)
-      WEPA_THROW_EXCEPTION("Some errors were found while parsing filename '" << file.c_str () << "'");
+      COFFEE_THROW_EXCEPTION("Some errors were found while parsing filename '" << file.c_str () << "'");
 }
 
 void xml::Document::parseMemory (const adt::DataBlock& buffer)
    throw (adt::RuntimeException)
 {
    if (setHandler (xmlParseMemory(buffer.data (), buffer.size ())) == NULL)
-      WEPA_THROW_EXCEPTION("Some errors were found while parsing memory: " << adt::AsString::apply (buffer));
+      COFFEE_THROW_EXCEPTION("Some errors were found while parsing memory: " << adt::AsString::apply (buffer));
 }
 
 void xml::Document::extractNodes (_xmlDoc* handler)
@@ -197,12 +197,12 @@ void xml::Document::compile (xml::Compiler& compiler) const
    Handler handler = getHandler();
 
    if (xmlTextWriterStartDocument(compiler, (const char*) handler->version, (const char*) handler->encoding, NULL) < 0)
-      WEPA_THROW_EXCEPTION("Document " << getName() << " could not start document");
+      COFFEE_THROW_EXCEPTION("Document " << getName() << " could not start document");
 
    if (m_root.get() != NULL)
       m_root.get ()->compile (compiler);
 
    if (xmlTextWriterEndDocument(compiler) < 0)
-      WEPA_THROW_EXCEPTION("Document " << getName() << " could not start document");
+      COFFEE_THROW_EXCEPTION("Document " << getName() << " could not start document");
 }
 

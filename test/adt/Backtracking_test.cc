@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -38,9 +38,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/pattern/backtracking/Solver.hpp>
+#include <coffee/adt/pattern/backtracking/Solver.hpp>
 
-using namespace wepa::adt::pattern::backtracking;
+using namespace coffee::adt::pattern::backtracking;
 
 class AddUpIsANumber : public Solver <int> {
 public:
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE (addup_is_ten)
 
    BOOST_REQUIRE_EQUAL (step->getValue(), 1);
 
-   BOOST_REQUIRE_THROW (solver.getNextStep(10), wepa::adt::RuntimeException);
+   BOOST_REQUIRE_THROW (solver.getNextStep(10), coffee::adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE (addup_without_solution)

@@ -4,7 +4,7 @@ prefix = ARGUMENTS.get ('prefix', "/usr/local")
 usr_local_headers = os.path.join (prefix, "include")
 usr_local_lib = os.path.join (prefix, "lib")
 
-target_usr_local_headers = os.path.join (usr_local_headers, "wepa")
+target_usr_local_headers = os.path.join (usr_local_headers, "coffee")
 
 release = ARGUMENTS.get ('release', 0)
 
@@ -73,7 +73,7 @@ env.Alias ("install-lib", usr_local_lib)
 
 
 local_includes = os.path.join (current_directory, "include")
-directory_headers = Glob (local_includes, "wepa")
+directory_headers = Glob (local_includes, "coffee")
 env.Install (target_usr_local_headers, directory_headers)
 
 target_usr_local_headers = os.path.join (prefix, "include")

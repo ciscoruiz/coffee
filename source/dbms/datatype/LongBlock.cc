@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,11 +32,11 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/dbms/datatype/LongBlock.hpp>
-#include <wepa/adt/AsHexString.hpp>
+#include <coffee/dbms/datatype/LongBlock.hpp>
+#include <coffee/adt/AsHexString.hpp>
 
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 datatype::LongBlock::LongBlock (const char* name, const Constraint::_v constraint) :
    datatype::Abstract (name, Datatype::LongBlock, 0, constraint),
@@ -70,7 +70,7 @@ adt::StreamString datatype::LongBlock::asString () const
 {
    adt::StreamString result ("datatype.LongBlock { ");
    result += datatype::Abstract::asString ();
-   result << " | Buffer: " << adt::AsHexString::apply(wepa_ptrnumber_cast (getBuffer()));
+   result << " | Buffer: " << adt::AsHexString::apply(coffee_ptrnumber_cast (getBuffer()));
    result << " | MaxSize: " << getMaxSize();
    result += " | Size: ";
    if (this->hasValue () == true)
@@ -83,6 +83,6 @@ adt::StreamString datatype::LongBlock::asString () const
 int datatype::LongBlock::do_compare (const datatype::Abstract& other) const
    throw (adt::RuntimeException)
 {
-   WEPA_THROW_EXCEPTION(asString () << " | Can not apply");
+   COFFEE_THROW_EXCEPTION(asString () << " | Can not apply");
    return 0;
 }

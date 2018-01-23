@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,19 +32,19 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include "../../include/wepa/app/Engine.hpp"
+#include "../../include/coffee/app/Engine.hpp"
 
 #include <algorithm>
 
-#include <wepa/logger/Logger.hpp>
+#include <coffee/logger/Logger.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
 
-#include <wepa/app/Application.hpp>
+#include <coffee/app/Application.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 void app::Engine::addPredecessor(const char* engineName)
    noexcept
@@ -71,7 +71,7 @@ void app::Engine::initialize()
          Application::engine_iterator pp = a_app.engine_find(name.c_str());
 
          if(pp == a_app.engine_end()) {
-            WEPA_THROW_EXCEPTION(asString() << " requires '" << name << "' which was not defined");
+            COFFEE_THROW_EXCEPTION(asString() << " requires '" << name << "' which was not defined");
          }
 
          auto predecessor = a_app.engine(pp);
@@ -82,7 +82,7 @@ void app::Engine::initialize()
          }
 
          if(predecessor->isStarting()) {
-            WEPA_THROW_EXCEPTION(asString() << " has loop with requirement '" << name << "'");
+            COFFEE_THROW_EXCEPTION(asString() << " has loop with requirement '" << name << "'");
          }
 
          predecessor->initialize();

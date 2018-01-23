@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,14 +34,14 @@
 //
 #include <stdio.h>
 
-#include <wepa/dbms/datatype/TimeStamp.hpp>
+#include <coffee/dbms/datatype/TimeStamp.hpp>
 
-#include <wepa/config/defines.hpp>
+#include <coffee/config/defines.hpp>
 
 
 using namespace std;
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 datatype::TimeStamp::TimeStamp (const char* name, const Constraint::_v constraint)  :
    Date (name, datatype::Abstract::Datatype::TimeStamp, constraint),

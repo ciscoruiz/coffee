@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -37,12 +37,12 @@
 
 #include <libxml/parser.h>
 
-#include <wepa/logger/Logger.hpp>
+#include <coffee/logger/Logger.hpp>
 
-#include <wepa/xml/DTD.hpp>
-#include <wepa/xml/Document.hpp>
+#include <coffee/xml/DTD.hpp>
+#include <coffee/xml/Document.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 char xml::DTD::st_text [1024] = "";
 
@@ -72,17 +72,17 @@ void xml::DTD::validate (const xml::Document* document) const
    throw (adt::RuntimeException)
 {
    if (getHandler () == NULL)
-      WEPA_THROW_EXCEPTION("Method xml::DTD::initialize was not called");
+      COFFEE_THROW_EXCEPTION("Method xml::DTD::initialize was not called");
 
    if (document->getHandler () == NULL)
-      WEPA_THROW_EXCEPTION("XML document was not parsed");
+      COFFEE_THROW_EXCEPTION("XML document was not parsed");
 
    xmlValidCtxtPtr context = const_cast <xmlValidCtxtPtr> (m_context);
    xml::Document::Handler doc = const_cast <xml::Document::Handler> (document->getHandler ());
    Handler dtd = const_cast <Handler> (getHandler ());
 
    if (xmlValidateDtd (context, doc, dtd) == 0)
-      WEPA_THROW_EXCEPTION("Document " << document->getName () << " does not match with DTD " << getName ());
+      COFFEE_THROW_EXCEPTION("Document " << document->getName () << " does not match with DTD " << getName ());
 }
 
 /* static */
@@ -109,7 +109,7 @@ void xml::DTD::callbackWarningHandler (void *ctx,  const char *msg, ...)
 {
    va_list ap;
 
-   if (wepa::logger::Logger::wantsToProcess (wepa::logger::Level::Warning)) {
+   if (coffee::logger::Logger::wantsToProcess (coffee::logger::Level::Warning)) {
       va_start(ap, msg);
       vsprintf (st_text, msg, ap);
 

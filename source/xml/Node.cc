@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -35,10 +35,10 @@
 #include <libxml/tree.h>
 #include <libxml/xmlwriter.h>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Compiler.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Compiler.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 xml::Node::Node (const char* name) : Wrapper ()
 {
@@ -63,7 +63,7 @@ const std::string& xml::Node::getText () const
    throw (adt::RuntimeException)
 {
    if (hasText() == false) {
-      WEPA_THROW_EXCEPTION ("Node '" << getName () << "' does not have any TEXT item");
+      COFFEE_THROW_EXCEPTION ("Node '" << getName () << "' does not have any TEXT item");
    }
 
    return m_text.getValue ();
@@ -75,7 +75,7 @@ void xml::Node::addAttribute (Attribute* attribute)
    auto rr = m_attributes.insert(attribute);
 
    if (rr.second ==  false)
-      WEPA_THROW_EXCEPTION(attribute->getName () << " is already defined in node '" << getName () << "'");
+      COFFEE_THROW_EXCEPTION(attribute->getName () << " is already defined in node '" << getName () << "'");
 }
 
 const xml::Node& xml::Node::lookupChild (const char* name) const
@@ -84,7 +84,7 @@ const xml::Node& xml::Node::lookupChild (const char* name) const
    const Node* result = NULL;
 
    if ((result = searchChild (name)) == NULL) {
-      WEPA_THROW_EXCEPTION("Child '" << name << "' is not registered in node '" << getName () << "'");
+      COFFEE_THROW_EXCEPTION("Child '" << name << "' is not registered in node '" << getName () << "'");
    }
 
    return std::ref (*result);
@@ -107,7 +107,7 @@ const xml::Node& xml::Node::childAt (const size_t ii) const
    throw (adt::RuntimeException)
 {
    if (ii >= children_size()) {
-      WEPA_THROW_EXCEPTION("There is not any child at position: " << ii);
+      COFFEE_THROW_EXCEPTION("There is not any child at position: " << ii);
    }
 
    return get_child (child_begin () + ii);
@@ -119,7 +119,7 @@ xml::Node& xml::Node::lookupChild (const char* name)
    Node* result = NULL;
 
    if ((result = searchChild (name)) == NULL) {
-      WEPA_THROW_EXCEPTION("Child '" << name << "' is not registered in node '" << getName () << "'");
+      COFFEE_THROW_EXCEPTION("Child '" << name << "' is not registered in node '" << getName () << "'");
    }
 
    return std::ref (*result);
@@ -142,7 +142,7 @@ xml::Node& xml::Node::childAt (const size_t ii)
    throw (adt::RuntimeException)
 {
    if (ii >= children_size()) {
-      WEPA_THROW_EXCEPTION("There is not any child at position: " << ii);
+      COFFEE_THROW_EXCEPTION("There is not any child at position: " << ii);
    }
 
    return get_child (child_begin () + ii);
@@ -152,7 +152,7 @@ xml::Node& xml::Node::createChild (const char* name)
    throw (adt::RuntimeException)
 {
    if (getHandler() == NULL)
-      WEPA_THROW_EXCEPTION("Can not create a child on an empty XML node");
+      COFFEE_THROW_EXCEPTION("Can not create a child on an empty XML node");
 
    xml::Node* newChild = new xml::Node (xmlNewChild(getHandler (), NULL, BAD_CAST name, NULL));
 
@@ -165,7 +165,7 @@ xml::Attribute& xml::Node::createAttribute (const char* name, const char* value)
    throw (adt::RuntimeException)
 {
    if (getHandler() == NULL)
-      WEPA_THROW_EXCEPTION("Can not create an attribute on an empty XML node");
+      COFFEE_THROW_EXCEPTION("Can not create an attribute on an empty XML node");
 
    xml::Attribute* newAttr = new xml::Attribute (xmlNewProp(getHandler (), BAD_CAST name, BAD_CAST value));
 
@@ -178,7 +178,7 @@ void xml::Node::createText (const char* text)
    throw (adt::RuntimeException)
 {
    if (getHandler() == NULL)
-      WEPA_THROW_EXCEPTION("Can not create an attribute on an empty XML node");
+      COFFEE_THROW_EXCEPTION("Can not create an attribute on an empty XML node");
 
    Handler textNode = xmlNewText (BAD_CAST text);
 
@@ -192,7 +192,7 @@ const xml::Attribute& xml::Node::lookupAttribute (const char* name) const
    const Attribute* result = NULL;
 
    if ((result = searchAttribute (name)) == NULL) {
-      WEPA_THROW_EXCEPTION("Attribute '" << name << "' is not registered in node '" << getName () << "'");
+      COFFEE_THROW_EXCEPTION("Attribute '" << name << "' is not registered in node '" << getName () << "'");
    }
 
    return std::ref (*result);
@@ -217,7 +217,7 @@ xml::Attribute& xml::Node::lookupAttribute (const char* name)
    Attribute* result = NULL;
 
    if ((result = searchAttribute (name)) == NULL) {
-      WEPA_THROW_EXCEPTION("Attribute '" << name << "' is not registered in node '" << getName () << "'");
+      COFFEE_THROW_EXCEPTION("Attribute '" << name << "' is not registered in node '" << getName () << "'");
    }
 
    return std::ref (*result);
@@ -252,7 +252,7 @@ void xml::Node::compile (xml::Compiler& compiler) const
          rc = xmlTextWriterStartElementNS(compiler, BAD_CAST (nameSpace->prefix), name, BAD_CAST (nameSpace->href));
 
       if (rc < 0)
-         WEPA_THROW_EXCEPTION("Can not compile node " << getName ());
+         COFFEE_THROW_EXCEPTION("Can not compile node " << getName ());
 
       for (const_attribute_iterator ii = attribute_begin(), maxii = attribute_end (); ii != maxii; ++ ii) {
          const Attribute& attribute = get_attribute(ii);
@@ -265,7 +265,7 @@ void xml::Node::compile (xml::Compiler& compiler) const
       }
 
       if (xmlTextWriterEndElement (compiler) < 0)
-         WEPA_THROW_EXCEPTION("Can not compile node " << getName ());
+         COFFEE_THROW_EXCEPTION("Can not compile node " << getName ());
    }
    else {
       const unsigned char* text = BAD_CAST (compiler.encode (m_text.getValue()));
@@ -276,7 +276,7 @@ void xml::Node::compile (xml::Compiler& compiler) const
          rc = xmlTextWriterWriteElementNS(compiler, BAD_CAST (nameSpace->prefix), name, BAD_CAST (nameSpace->href), text);
 
       if (rc < 0)
-         WEPA_THROW_EXCEPTION("Can not compile node " << getName ());
+         COFFEE_THROW_EXCEPTION("Can not compile node " << getName ());
    }
 }
 

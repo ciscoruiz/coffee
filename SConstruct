@@ -1,8 +1,11 @@
 import os
 
-prefix = ARGUMENTS.get ('prefix', "/usr/local")
-usr_local_headers = os.path.join (prefix, "include")
-usr_local_lib = os.path.join (prefix, "lib")
+usr_local_headers = ARGUMENTS.get('usr-local-header', '/usr/local/include')
+usr_local_lib = ARGUMENTS.get('usr-local-lib', '/usr/local/lib')
+
+user_cpp_compiler = ARGUMENTS.get('cpp-compiler', None)
+user_cpp_path = ARGUMENTS.get('cpp-path', None)
+user_lib_path = ARGUMENTS.get('lib-path', None)
 
 target_usr_local_headers = os.path.join (usr_local_headers, "coffee")
 
@@ -14,7 +17,17 @@ current_directory = Dir ('.').abspath;
 
 # CPPPATH will be relative to src/<target>
 source_headers = os.path.join (current_directory, "include")
-env.Append (CPPPATH = [source_headers, usr_local_headers])
+
+if user_cpp_compiler is not None:
+   env['CXX'] = user_cpp_compiler
+
+cpp_paths = [source_headers, usr_local_headers]
+
+if user_cpp_path is not None:
+   for path in user_cpp_path.split(','):
+      cpp_paths.append(path)
+
+env.Append (CPPPATH = cpp_paths)
 env.Append (CCFLAGS = '-D__GXX_EXPERIMENTAL_CXX0X__ -std=c++11')
 env.Append (LIBS = [''])
 
@@ -23,7 +36,13 @@ if int(release):
    env.Append (VARIANT = 'release')
 else:
    env.Append (CCFLAGS = '-g -O0 -D_DEBUG')
-   env.Append (LIBPATH = os.path.join (current_directory, "debug"))
+   lib_paths = [os.path.join (current_directory, "debug")]
+
+   if user_lib_path is not None:
+      for path in user_lib_path.split(','):
+         lib_paths.append(path)
+
+   env.Append (LIBPATH = lib_paths)
    env.Append (VARIANT = 'debug')
 
 libraries = [];
@@ -67,7 +86,6 @@ for test in tests:
 
 env.Alias ('test', [run_tests] )
 
-usr_local_lib = os.path.join (prefix, "lib")
 env.Install (usr_local_lib, libraries)
 env.Alias ("install-lib", usr_local_lib)
 
@@ -76,7 +94,6 @@ local_includes = os.path.join (current_directory, "include")
 directory_headers = Glob (local_includes, "coffee")
 env.Install (target_usr_local_headers, directory_headers)
 
-target_usr_local_headers = os.path.join (prefix, "include")
 env.Alias ("install-headers", target_usr_local_headers )
 
 env.Alias ("install", ['install-lib', 'install-headers'])

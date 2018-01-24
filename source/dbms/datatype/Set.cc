@@ -32,6 +32,7 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+#include <utility>
 
 #include <coffee/dbms/datatype/Set.hpp>
 
@@ -44,11 +45,23 @@
 
 using namespace coffee;
 
+dbms::datatype::Set::Set(const Set& other)
+{
+   for (auto ii : other.m_creationOrder) {
+	   insert(data(ii));
+   }
+}
+
 void dbms::datatype::Set::insert(std::shared_ptr<Abstract> data) throw (adt::RuntimeException) {
    if (m_datas.find(data->getName()) != end()) {
       COFFEE_THROW_EXCEPTION(data->getName() << " already defined");
    }
-   m_datas[data->getName()] = data;
+
+   auto result = m_datas.insert(Datas::value_type(data->getName(), data));
+
+   if (result.second) {
+	   m_creationOrder.push_back(result.first);
+   }
 }
 
 std::shared_ptr<dbms::datatype::Abstract>& dbms::datatype::Set::find(const std::string& name)
@@ -83,8 +96,9 @@ dbms::datatype::Set& dbms::datatype::Set::operator=(const Set& other)
    }
 
    m_datas.clear();
-   for (auto ii = other.begin(), maxii = other.end(); ii != maxii; ++ ii) {
-      insert(data(ii));
+   m_creationOrder.clear();
+   for (auto ii : other.m_creationOrder) {
+	   insert(data(ii));
    }
 
    return *this;
@@ -106,10 +120,10 @@ int dbms::datatype::Set::compare(const Set& other) const
    int compareCounter = 0;
    int result = 0;
 
-   for(auto& ii : m_datas) {
+   for (auto ii : m_creationOrder) {
       ++ compareCounter;
 
-      result = ii.second->compare(other.find(ii.first));
+      result = Set::data(ii)->compare(other.find(Set::name(ii)));
 
       if (result != 0)
          break;

@@ -87,4 +87,3 @@ adt::StreamString persistence::PrimaryKey::asString() const noexcept
 
    return result += "}";
 }
-

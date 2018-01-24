@@ -36,6 +36,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 #include <coffee/adt/RuntimeException.hpp>
 
@@ -61,9 +62,10 @@ public:
    typedef std::unordered_map<std::string, std::shared_ptr<Abstract> > Datas;
    typedef Datas::iterator data_iterator;
    typedef Datas::const_iterator const_data_iterator;
+   typedef std::vector<data_iterator> CreationOrderAccess;
 
    Set() {;}
-   Set(const Set& other) : m_datas(other.m_datas) {;}
+   Set(const Set& other);
 
    virtual ~Set() {
       m_datas.clear();
@@ -111,6 +113,7 @@ public:
 
 private:
    Datas m_datas;
+   CreationOrderAccess m_creationOrder;
 };
 
 }

@@ -67,23 +67,20 @@ public:
    };
 
    PrimaryKey(const PrimaryKeyBuilder& builder);
+   PrimaryKey (const PrimaryKey& other) : dbms::datatype::Set(other) {;}
 
    PrimaryKey& operator= (const PrimaryKey& other) throw (adt::Exception) { Set::operator=(other); return *this; }
-
    bool operator== (const PrimaryKey& other) const throw (adt::RuntimeException) { return compare(other) == 0; }
    bool operator< (const PrimaryKey& other) const throw (adt::RuntimeException){ return compare(other) < 0; }
-
    bool matches(const PrimaryKey& other) const noexcept;
 
    size_t hash() const noexcept;
 
    operator adt::StreamString () const noexcept { return asString (); }
    adt::StreamString asString () const noexcept;
-
-private:
-   PrimaryKey (const PrimaryKey& other) = delete;
 };
 
 } /* namespace persistence */
 } /* namespace coffee */
+
 #endif

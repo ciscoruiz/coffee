@@ -1,6 +1,6 @@
 // COFFEE - COmpany eFFEEctive Platform
 //
-// (c) Copyright 2018 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/coffee
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -63,34 +63,34 @@ class Compiler;
 
 class Document : public Wrapper <_xmlDoc> {
 public:
-   Document ();
-   virtual ~Document ();
+   Document();
+   virtual ~Document();
 
-   void parse (const boost::filesystem::path& path) throw (adt::RuntimeException);
-   void parse (const adt::DataBlock& buffer) throw (adt::RuntimeException);
-   void parse (const char* buffer, const size_t size) throw (adt::RuntimeException);
+   void parse(const boost::filesystem::path& path) throw(adt::RuntimeException);
+   void parse(const adt::DataBlock& buffer) throw(adt::RuntimeException);
+   void parse(const char* buffer, const size_t size) throw(adt::RuntimeException);
 
-   void parse (const boost::filesystem::path& path, const DTD& dtd) throw (adt::RuntimeException);
-   void parse (const adt::DataBlock& buffer, const DTD& dtd) throw (adt::RuntimeException);
-   void parse (const char* buffer, const size_t size, const DTD& dtd) throw (adt::RuntimeException);
+   void parse(const boost::filesystem::path& path, const DTD& dtd) throw(adt::RuntimeException);
+   void parse(const adt::DataBlock& buffer, const DTD& dtd) throw(adt::RuntimeException);
+   void parse(const char* buffer, const size_t size, const DTD& dtd) throw(adt::RuntimeException);
 
    const Node* getRoot() const noexcept { return m_root.get(); }
-   Node* getRoot () noexcept { return m_root.get(); }
+   Node* getRoot() noexcept { return m_root.get(); }
 
 private:
    std::shared_ptr <Node> m_root;
 
-   void parseFile (const boost::filesystem::path& path) throw (adt::RuntimeException);
-   void parseMemory (const adt::DataBlock& buffer) throw (adt::RuntimeException);
+   void parseFile(const boost::filesystem::path& path) throw(adt::RuntimeException);
+   void parseMemory(const adt::DataBlock& buffer) throw(adt::RuntimeException);
 
-   void extractNodes (_xmlDoc* handler) throw (adt::RuntimeException);
+   void extractNodes(_xmlDoc* handler) throw(adt::RuntimeException);
 
    static const char* nameExtractor(const Handler handler) noexcept;
 
-   static void extractNodes (xml::Node& node) throw (adt::RuntimeException);
-   static void extractAttributes (xml::Node& node) throw (adt::RuntimeException);
+   static void extractNodes(std::shared_ptr<xml::Node>& node) throw(adt::RuntimeException);
+   static void extractAttributes(std::shared_ptr<xml::Node>& node) throw(adt::RuntimeException);
 
-   void compile (Compiler& compiler) const throw (adt::RuntimeException);
+   void compile(Compiler& compiler) const throw(adt::RuntimeException);
 
    friend class Compiler;
 };

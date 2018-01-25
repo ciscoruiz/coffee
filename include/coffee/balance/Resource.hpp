@@ -35,6 +35,8 @@
 #ifndef __coffee_balance_Resource_hpp
 #define __coffee_balance_Resource_hpp
 
+#include <memory>
+
 #include <coffee/adt/NamedObject.hpp>
 #include <coffee/adt/RuntimeException.hpp>
 
@@ -57,7 +59,7 @@ public:
    operator adt::StreamString () const noexcept { return asString (); }
 
    virtual adt::StreamString asString () const noexcept;
-   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
+   virtual std::shared_ptr<xml::Node> asXML (std::shared_ptr<xml::Node>& parent) const noexcept;
 
 protected:
    Resource(const std::string& name) : adt::NamedObject(name) {;}

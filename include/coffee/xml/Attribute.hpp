@@ -51,6 +51,7 @@ class Compile;
 
 class Attribute : public Wrapper <_xmlAttr> {
 public:
+   Attribute (_xmlAttr* handler);
    virtual ~Attribute () {;}
 
    void setValue (const char* value) throw (adt::RuntimeException);
@@ -65,8 +66,6 @@ public:
 
 private:
    mutable Content m_value;
-
-   Attribute (_xmlAttr* handler);
 
    static const char* nameExtractor (const Handler handler) noexcept;
 

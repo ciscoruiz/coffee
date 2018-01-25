@@ -1,6 +1,6 @@
 // COFFEE - COmpany eFFEEctive Platform
 //
-// (c) Copyright 2018 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/coffee
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -44,24 +44,22 @@
 using namespace coffee;
 
 //virtual
-adt::StreamString balance::Resource::asString () const
+adt::StreamString balance::Resource::asString() const
    noexcept
 {
-   adt::StreamString result ("balance::Resource {");
+   adt::StreamString result("balance::Resource {");
    result += adt::NamedObject::asString();
    result += " } | Available = ";
-   result += adt::AsString::apply(isAvailable ());
-   return result.append ("}");
+   result += adt::AsString::apply(isAvailable());
+   return result.append("}");
 }
 
 //virtual
-xml::Node& balance::Resource::asXML (xml::Node& parent) const
+std::shared_ptr<xml::Node> balance::Resource::asXML(std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild ("balance.Resource");
-
-   result.createAttribute("Name", this->getName());
-   result.createAttribute ("IsAvailable", isAvailable());
-
-   return std::ref (result);
+   std::shared_ptr<xml::Node> result = parent->createChild("balance.Resource");
+   result->createAttribute("Name", this->getName());
+   result->createAttribute("IsAvailable", isAvailable());
+   return result;
 }

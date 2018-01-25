@@ -146,15 +146,15 @@ adt::StreamString balance::ResourceList::asString () const
 }
 
 //virtual
-xml::Node& balance::ResourceList::asXML (xml::Node& parent) const
+std::shared_ptr<xml::Node> balance::ResourceList::asXML (std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild (this->getName());
+   std::shared_ptr<xml::Node> result = parent->createChild(this->getName());
 
    GuardResourceList fakeGuard(*this);
    for (const_resource_iterator ii = resource_begin(fakeGuard), maxii = resource_end(fakeGuard); ii != maxii; ++ ii) {
       resource(ii)->asXML(result);
    }
 
-   return std::ref (result);
+   return result;
 }

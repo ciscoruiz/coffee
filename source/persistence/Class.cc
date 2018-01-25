@@ -77,11 +77,10 @@ adt::StreamString persistence::Class::asString() const noexcept {
    return result << " }";
 }
 
-xml::Node& persistence::Class::asXML(xml::Node& parent) const noexcept
+std::shared_ptr<xml::Node> persistence::Class::asXML(std::shared_ptr<xml::Node>& parent) const noexcept
 {
-   xml::Node& result = parent.createChild("persistence.Class");
-   result.createAttribute("Name", this->getName());
-
+   std::shared_ptr<xml::Node> result = parent->createChild("persistence.Class");
+   result->createAttribute("Name", this->getName());
    return result;
 }
 

@@ -35,7 +35,7 @@
 #ifndef __coffee_xml_Wrapper_hpp
 #define __coffee_xml_Wrapper_hpp
 
-#include <boost/function.hpp>
+#include <functional>
 
 #include <coffee/adt/RuntimeException.hpp>
 
@@ -47,9 +47,9 @@ class Compiler;
 
 template <typename _Handler> class  Wrapper {
 public:
-   typedef boost::function <void (_Handler*)> Deleter;
+   typedef std::function <void (_Handler*)> Deleter;
    typedef _Handler* Handler;
-   typedef boost::function <const char* (const Handler)> NameExtractor;
+   typedef std::function <const char* (const Handler)> NameExtractor;
 
    virtual ~Wrapper () {
       releaseHandler ();

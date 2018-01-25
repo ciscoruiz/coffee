@@ -177,7 +177,7 @@ public:
       \param parent Nodo XML del que debe colgar la informacion.
       @return un documento XML con la informacion referente a esta instancia.
    */
-   virtual xml::Node& asXML(xml::Node& parent) const noexcept;
+   virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
    operator adt::StreamString() const noexcept { return asString(); }
 

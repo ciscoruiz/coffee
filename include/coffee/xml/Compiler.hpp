@@ -35,6 +35,8 @@
 #ifndef __coffee_xml_Compiler_hpp
 #define __coffee_xml_Compiler_hpp
 
+#include <memory>
+
 #include <coffee/adt/RuntimeException.hpp>
 #include <coffee/adt/DataBlock.hpp>
 
@@ -54,8 +56,8 @@ public:
    Compiler ();
    virtual ~Compiler ();
 
-   std::string apply (const Document& document) throw (adt::RuntimeException);
-   std::string apply (const Node& node) throw (adt::RuntimeException);
+   std::string apply (std::shared_ptr<Document> document) throw (adt::RuntimeException);
+   std::string apply (const std::shared_ptr<Node>& node) throw (adt::RuntimeException);
 
    const char* encode (const char* text) throw (adt::RuntimeException);
    const char* encode (const std::string& text) throw (adt::RuntimeException) { return encode (text.c_str ()); }

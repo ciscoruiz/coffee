@@ -1,6 +1,6 @@
 // COFFEE - COmpany eFFEEctive Platform
 //
-// (c) Copyright 2018 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/coffee
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -37,6 +37,7 @@
 
 #include <iostream>
 #include <boost/filesystem.hpp>
+#include <memory>
 
 #include <coffee/adt/DataBlock.hpp>
 #include <coffee/adt/AsString.hpp>
@@ -49,127 +50,124 @@
 
 using namespace coffee;
 
-xml::Document::Document () :
-   Wrapper ()
+xml::Document::Document() :
+   Wrapper()
 {
-   xml::SCCS::activate ();
+   xml::SCCS::activate();
 
    setDeleter(xmlFreeDoc);
    setNameExtractor(nameExtractor);
 }
 
 //virtual
-xml::Document::~Document ()
+xml::Document::~Document()
 {
 }
 
 // static
-const char* xml::Document::nameExtractor (const Handler handler)
+const char* xml::Document::nameExtractor(const Handler handler)
    noexcept
 {
-   return (const char*) (handler->name);
+   return(const char*)(handler->name);
 }
 
-void xml::Document::parse (const boost::filesystem::path& file)
-   throw (adt::RuntimeException)
+void xml::Document::parse(const boost::filesystem::path& file)
+   throw(adt::RuntimeException)
 {
    releaseHandler();
-   parseFile (file);
-   extractNodes (getHandler ());
+   parseFile(file);
+   extractNodes(getHandler());
 
    xmlCleanupParser();
 }
 
-void xml::Document::parse (const adt::DataBlock& buffer)
-   throw (adt::RuntimeException)
+void xml::Document::parse(const adt::DataBlock& buffer)
+   throw(adt::RuntimeException)
 {
    releaseHandler();
-   parseMemory (buffer);
-   extractNodes (getHandler ());
+   parseMemory(buffer);
+   extractNodes(getHandler());
 
    xmlCleanupParser();
 }
 
-void xml::Document::parse (const char* buffer, const size_t size)
-   throw (adt::RuntimeException)
+void xml::Document::parse(const char* buffer, const size_t size)
+   throw(adt::RuntimeException)
 {
-   const adt::DataBlock data (buffer, size);
-   parse (data);
+   const adt::DataBlock data(buffer, size);
+   parse(data);
 }
 
-void xml::Document::parse (const boost::filesystem::path& file, const DTD& dtd)
-   throw (adt::RuntimeException)
+void xml::Document::parse(const boost::filesystem::path& file, const DTD& dtd)
+   throw(adt::RuntimeException)
 {
    releaseHandler();
-   parseFile (file);
+   parseFile(file);
    dtd.validate(this);
-   extractNodes (getHandler ());
+   extractNodes(getHandler());
 }
 
-void xml::Document::parse (const adt::DataBlock& buffer, const DTD& dtd)
-   throw (adt::RuntimeException)
+void xml::Document::parse(const adt::DataBlock& buffer, const DTD& dtd)
+   throw(adt::RuntimeException)
 {
    releaseHandler();
-   parseMemory (buffer);
+   parseMemory(buffer);
    dtd.validate(this);
-   extractNodes (getHandler ());
+   extractNodes(getHandler());
 }
 
-void xml::Document::parse (const char* buffer, const size_t size, const DTD& dtd)
-   throw (adt::RuntimeException)
+void xml::Document::parse(const char* buffer, const size_t size, const DTD& dtd)
+   throw(adt::RuntimeException)
 {
-   const adt::DataBlock data (buffer, size);
-   parse (data, dtd);
+   const adt::DataBlock data(buffer, size);
+   parse(data, dtd);
 }
 
-void xml::Document::parseFile (const boost::filesystem::path& file)
-   throw (adt::RuntimeException)
+void xml::Document::parseFile(const boost::filesystem::path& file)
+   throw(adt::RuntimeException)
 {
-   if (boost::filesystem::exists (file) == false) {
-      COFFEE_THROW_EXCEPTION("File '" << file.c_str () << "' does not exist");
+   if(boost::filesystem::exists(file) == false) {
+      COFFEE_THROW_EXCEPTION("File '" << file.c_str() << "' does not exist");
    }
 
-   if (setHandler (xmlParseFile (file.c_str ())) == NULL)
-      COFFEE_THROW_EXCEPTION("Some errors were found while parsing filename '" << file.c_str () << "'");
+   if(setHandler(xmlParseFile(file.c_str())) == NULL)
+      COFFEE_THROW_EXCEPTION("Some errors were found while parsing filename '" << file.c_str() << "'");
 }
 
-void xml::Document::parseMemory (const adt::DataBlock& buffer)
-   throw (adt::RuntimeException)
+void xml::Document::parseMemory(const adt::DataBlock& buffer)
+   throw(adt::RuntimeException)
 {
-   if (setHandler (xmlParseMemory(buffer.data (), buffer.size ())) == NULL)
-      COFFEE_THROW_EXCEPTION("Some errors were found while parsing memory: " << adt::AsString::apply (buffer));
+   if(setHandler(xmlParseMemory(buffer.data(), buffer.size())) == NULL)
+      COFFEE_THROW_EXCEPTION("Some errors were found while parsing memory: " << adt::AsString::apply(buffer));
 }
 
-void xml::Document::extractNodes (_xmlDoc* handler)
-   throw (adt::RuntimeException)
+void xml::Document::extractNodes(_xmlDoc* handler)
+   throw(adt::RuntimeException)
 {
    xmlNodePtr root = xmlDocGetRootElement(handler);
 
-   xml::Node* node = new xml::Node (root);
-
-   m_root.reset (node);
-
-   extractNodes(*m_root);
-   extractAttributes (*m_root);
+   m_root = std::make_shared<xml::Node>(root);
+   extractNodes(m_root);
+   extractAttributes(m_root);
 }
 
 // static
-void xml::Document::extractNodes (xml::Node& node)
-   throw (adt::RuntimeException)
+void xml::Document::extractNodes(std::shared_ptr<xml::Node>& node)
+   throw(adt::RuntimeException)
 {
-   xml::Node::Handler handler = node.getHandler()->children;
-   xml::Node* child;
+   xml::Node::Handler handler = node->getHandler()->children;
+   std::shared_ptr<xml::Node> child;
 
-   while (handler != NULL) {
-      switch (handler->type) {
+   while(handler != NULL) {
+      switch(handler->type) {
       case XML_ELEMENT_NODE:
-         child = new xml::Node (handler);
-         node.addChild(child);
-         extractNodes(*child);
-         extractAttributes(*child);
+         child = std::make_shared<xml::Node>(handler);
+         node->addChild(child);
+         extractNodes(child);
+         extractAttributes(child);
          break;
       case XML_TEXT_NODE:
-         node.setText ((const char*) (handler->content));
+         node->setText((const char*)(handler->content));
          break;
       }
 
@@ -178,31 +176,31 @@ void xml::Document::extractNodes (xml::Node& node)
 }
 
 //static
-void xml::Document::extractAttributes (xml::Node& node)
-   throw (adt::RuntimeException)
+void xml::Document::extractAttributes(std::shared_ptr<xml::Node>& node)
+   throw(adt::RuntimeException)
 {
-   xmlAttrPtr xmlAttribute = node.getHandler()->properties;
+   xmlAttrPtr xmlAttribute = node->getHandler()->properties;
 
-   while (xmlAttribute != NULL) {
-      node.addAttribute(new xml::Attribute (xmlAttribute));
+   while(xmlAttribute != NULL) {
+      node->addAttribute(std::make_shared<xml::Attribute>(xmlAttribute));
       xmlAttribute = xmlAttribute->next;
    }
 }
 
-void xml::Document::compile (xml::Compiler& compiler) const
-   throw (adt::RuntimeException)
+void xml::Document::compile(xml::Compiler& compiler) const
+   throw(adt::RuntimeException)
 {
    Compiler::Handler compilerHandler = compiler.getHandler();
 
    Handler handler = getHandler();
 
-   if (xmlTextWriterStartDocument(compiler, (const char*) handler->version, (const char*) handler->encoding, NULL) < 0)
+   if(xmlTextWriterStartDocument(compiler,(const char*) handler->version,(const char*) handler->encoding, NULL) < 0)
       COFFEE_THROW_EXCEPTION("Document " << getName() << " could not start document");
 
-   if (m_root.get() != NULL)
-      m_root.get ()->compile (compiler);
+   if(m_root)
+      m_root->compile(compiler);
 
-   if (xmlTextWriterEndDocument(compiler) < 0)
+   if(xmlTextWriterEndDocument(compiler) < 0)
       COFFEE_THROW_EXCEPTION("Document " << getName() << " could not start document");
 }
 

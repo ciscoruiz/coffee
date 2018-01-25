@@ -1,6 +1,6 @@
 // COFFEE - COmpany eFFEEctive Platform
 //
-// (c) Copyright 2018 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/coffee
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -42,9 +42,9 @@
 using namespace coffee;
 
 //virtual
-adt::StreamString balance::Strategy::asString () const noexcept
+adt::StreamString balance::Strategy::asString() const noexcept
 {
-   adt::StreamString result ("balance.Strategy { ");
+   adt::StreamString result("balance.Strategy { ");
    result += adt::NamedObject::asString();
    result += "|";
    result += m_resources->asString();
@@ -53,9 +53,9 @@ adt::StreamString balance::Strategy::asString () const noexcept
 }
 
 //virtual
-xml::Node& balance::Strategy::asXML (xml::Node& parent) const noexcept
+std::shared_ptr<xml::Node> balance::Strategy::asXML(std::shared_ptr<xml::Node>& parent) const noexcept
 {
-   xml::Node& result = parent.createChild (this->getName());
+   std::shared_ptr<xml::Node> result = parent->createChild(this->getName());
    m_resources->asXML(result);
-   return std::ref (result);
+   return result;
 }

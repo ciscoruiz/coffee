@@ -156,20 +156,20 @@ adt::StreamString Statement::asString() const
    return result += " }";
 }
 
-xml::Node& dbms::Statement::asXML(xml::Node& parent) const
+std::shared_ptr<xml::Node> dbms::Statement::asXML(std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild("dbms.Statement");
+   std::shared_ptr<xml::Node> result = parent->createChild("dbms.Statement");
 
    adt::Microsecond avgT = m_measureTiming;
-   result.createAttribute("Name", m_name);
+   result->createAttribute("Name", m_name);
 
-   xml::Node& node = result.createChild("Timing");
-   node.createAttribute("N", m_measureTiming.size());
-   node.createAttribute("Accumulator", m_measureTiming.getAccumulator());
-   node.createAttribute("Timing", m_measureTiming.value().asString());
+   std::shared_ptr<xml::Node> node = result->createChild("Timing");
+   node->createAttribute("N", m_measureTiming.size());
+   node->createAttribute("Accumulator", m_measureTiming.getAccumulator());
+   node->createAttribute("Timing", m_measureTiming.value().asString());
 
-   result.createChild("Expression").createText(m_expression);
+   result->createChild("Expression")->createText(m_expression);
 
    return result;
 }

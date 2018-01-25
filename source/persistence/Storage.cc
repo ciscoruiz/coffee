@@ -195,19 +195,19 @@ adt::StreamString Storage::asString() const
    return result += " }";
 }
 
-xml::Node& Storage::asXML(xml::Node& parent) const
+std::shared_ptr<xml::Node> Storage::asXML(std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild("persistence.Storage");
+   std::shared_ptr<xml::Node> result = parent->createChild("persistence.Storage");
 
-   result.createAttribute("Name", adt::NamedObject::getName());
-   xml::Node& access = result.createChild("Access");
-   access.createAttribute("Hit", m_hitCounter);
-   access.createAttribute("Fault", m_faultCounter);
+   result->createAttribute("Name", adt::NamedObject::getName());
+   std::shared_ptr<xml::Node> access = result->createChild("Access");
+   access->createAttribute("Hit", m_hitCounter);
+   access->createAttribute("Fault", m_faultCounter);
 
-   xml::Node& cache = result.createChild("Cache(LRU)");
-   access.createAttribute("Size", adt::AsString::apply((int) m_cache.size()));
+   std::shared_ptr<xml::Node> cache = result->createChild("Cache(LRU)");
+   access->createAttribute("Size", adt::AsString::apply((int) m_cache.size()));
 
-   return std::ref(result);
+   return result;
 }
 

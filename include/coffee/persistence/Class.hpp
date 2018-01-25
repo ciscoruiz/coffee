@@ -66,9 +66,9 @@ public:
 
    adt::StreamString asString() const noexcept;
       
-   std::shared_ptr<Object> createObject(const std::shared_ptr<PrimaryKey>& primaryKey) const throw (adt::RuntimeException);
+   std::shared_ptr<Object> createObject(const std::shared_ptr<PrimaryKey>& primaryKey) const throw(adt::RuntimeException);
 
-   xml::Node& asXML(xml::Node& parent) const noexcept;
+   std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
    Class(const Class&) = delete;
 

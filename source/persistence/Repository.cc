@@ -80,12 +80,12 @@ adt::StreamString persistence::Repository::asString() const
    return result += " }";
 }
 
-xml::Node& persistence::Repository::asXML(xml::Node& parent) const
+std::shared_ptr<xml::Node> persistence::Repository::asXML(std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild("persistence.Repository");
+   std::shared_ptr<xml::Node> result = parent->createChild("persistence.Repository");
 
-   result.createAttribute("Name", getName());
+   result->createAttribute("Name", getName());
 
    for(const_storage_iterator ii = storage_begin(), maxii = storage_end(); ii != maxii; ++ ii)  {
       storage(ii)->asXML(result);

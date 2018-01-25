@@ -1,6 +1,6 @@
 // COFFEE - COmpany eFFEEctive Platform
 //
-// (c) Copyright 2018 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/coffee
 //
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -42,118 +42,118 @@
 using namespace coffee;
 
 xml::Compiler::Compiler() :
-   m_encoding (NULL),
-   m_encodedBuffer (NULL),
-   m_encodedReservedSize (0)
+   m_encoding(NULL),
+   m_encodedBuffer(NULL),
+   m_encodedReservedSize(0)
 {
-   setHandler (NULL);
-   setDeleter (xmlFreeTextWriter);
+   setHandler(NULL);
+   setDeleter(xmlFreeTextWriter);
 }
 
 xml::Compiler::~Compiler()
 {
-   if (m_encodedBuffer)
-      xmlFree (m_encodedBuffer);
+   if(m_encodedBuffer)
+      xmlFree(m_encodedBuffer);
 }
 
-std::string xml::Compiler::apply (const Document& document)
-   throw (adt::RuntimeException)
+std::string xml::Compiler::apply(std::shared_ptr<Document> document)
+   throw(adt::RuntimeException)
 {
    Buffer buffer;
 
-   setHandler (xmlNewTextWriterMemory (buffer, 0));
-   setEncoding ((const char*) document.getHandler()->encoding);
+   setHandler(xmlNewTextWriterMemory(buffer, 0));
+   setEncoding((const char*) document->getHandler()->encoding);
 
    try {
-      document.compile(*this);
+      document->compile(*this);
    }
-   catch (adt::RuntimeException&) {
+   catch(adt::RuntimeException&) {
       releaseHandler();
       throw;
    }
 
    releaseHandler();
 
-   return std::string (buffer.getValue());
+   return std::string(buffer.getValue());
 }
 
-std::string xml::Compiler::apply (const Node& node)
-   throw (adt::RuntimeException)
+std::string xml::Compiler::apply(const std::shared_ptr<Node>& node)
+   throw(adt::RuntimeException)
 {
    Buffer buffer;
 
-   setHandler (xmlNewTextWriterMemory (buffer, 0));
+   setHandler(xmlNewTextWriterMemory(buffer, 0));
 
    try {
-      node.compile(*this);
+      node->compile(*this);
    }
-   catch (adt::RuntimeException&) {
+   catch(adt::RuntimeException&) {
       releaseHandler();
       throw;
    }
 
    releaseHandler();
 
-   return std::string (buffer.getValue());
+   return std::string(buffer.getValue());
 }
 
-xml::Compiler::Buffer::Buffer ()
+xml::Compiler::Buffer::Buffer()
 {
-   setHandler (xmlBufferCreate());
-   setDeleter (xmlBufferFree);
+   setHandler(xmlBufferCreate());
+   setDeleter(xmlBufferFree);
 }
 
-const char* xml::Compiler::Buffer::getValue () const
+const char* xml::Compiler::Buffer::getValue() const
    noexcept
 {
-   return (const char*) getHandler ()->content;
+   return(const char*) getHandler()->content;
 }
 
-const char* xml::Compiler::encode (const char* text)
-   throw (adt::RuntimeException)
+const char* xml::Compiler::encode(const char* text)
+   throw(adt::RuntimeException)
 {
    bool needEncode  = false;
 
-   if (m_encoding == NULL)
+   if(m_encoding == NULL)
       return text;
 
-   for (const char* ww = text; *ww != 0; ++ ww) {
-      if (isascii (*ww) == false) {
+   for(const char* ww = text; *ww != 0; ++ ww) {
+      if(isascii(*ww) == false) {
          needEncode = true;
          break;
       }
    }
 
-   if (needEncode == false )
+   if(needEncode == false )
       return text;
 
    xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler(m_encoding);
 
-   if (handler == NULL) {
+   if(handler == NULL) {
       COFFEE_THROW_EXCEPTION("Encoding '" << m_encoding << "' was not found");
    }
 
-   int size = strlen (text) + 1;
+   int size = coffee_strlen(text) + 1;
    int outputSize = size * 2 + 1;
    int inputSize = size - 1;
 
-   if (m_encodedReservedSize < outputSize) {
-      if (m_encodedBuffer != NULL) {
-         xmlFree (m_encodedBuffer);
+   if(m_encodedReservedSize < outputSize) {
+      if(m_encodedBuffer != NULL) {
+         xmlFree(m_encodedBuffer);
          m_encodedBuffer = NULL;
       }
-      m_encodedBuffer = (char*) xmlMalloc (m_encodedReservedSize = outputSize);
+      m_encodedBuffer =(char*) xmlMalloc(m_encodedReservedSize = outputSize);
    }
 
    int rc = 0;
 
-   rc = handler->input ((xmlChar*) m_encodedBuffer, &outputSize, (const xmlChar *) text, &inputSize);
+   rc = handler->input((xmlChar*) m_encodedBuffer, &outputSize,(const xmlChar *) text, &inputSize);
 
-   if (rc < 0) {
+   if(rc < 0) {
       COFFEE_THROW_EXCEPTION("Can not encoding '" << text << "applying '" << m_encoding << "'");
    }
 
-//   m_encodedBuffer = (char*) xmlRealloc (m_encodedBuffer, outputSize + 1);
+//   m_encodedBuffer =(char*) xmlRealloc(m_encodedBuffer, outputSize + 1);
    m_encodedBuffer [outputSize] = 0;
 
    return m_encodedBuffer;

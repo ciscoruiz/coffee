@@ -280,26 +280,26 @@ adt::StreamString dbms::Database::asString() const
    return result += " }";
 }
 
-xml::Node& dbms::Database::asXML(xml::Node& parent) const
+std::shared_ptr<xml::Node> dbms::Database::asXML(std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild("dbms.Database");
+   std::shared_ptr<xml::Node> result = parent->createChild("dbms.Database");
 
    app::Engine::asXML(result);
 
-   result.createAttribute("Type",(m_type == Type::Local) ? "Local": "Remote");
+   result->createAttribute("Type",(m_type == Type::Local) ? "Local": "Remote");
 
    if(m_type != Type::Local)
-      result.createAttribute("Name", m_name);
+      result->createAttribute("Name", m_name);
 
    if(m_statementTranslator)
-      result.createAttribute("Translator", m_statementTranslator->getName());
+      result->createAttribute("Translator", m_statementTranslator->getName());
 
-   xml::Node& connections = result. createChild("Connections");
+   std::shared_ptr<xml::Node> connections = result->createChild("Connections");
    for(const_connection_iterator ii = connection_begin(), maxii = connection_end(); ii != maxii; ii ++)
       connection(ii)->asXML(connections);
 
-   xml::Node& statements = result. createChild("Statements");
+   std::shared_ptr<xml::Node> statements = result->createChild("Statements");
    for(const_statement_iterator ii = statement_begin(), maxii = statement_end(); ii != maxii; ii ++)
       statement(ii)->asXML(statements);
 

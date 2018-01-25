@@ -126,7 +126,7 @@ public:
 
    virtual adt::StreamString asString() const noexcept;
 
-   virtual xml::Node& asXML(xml::Node& parent) const noexcept;
+   virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
    Database& operator=(const Database&) = delete;
    Database(const Database&) = delete;

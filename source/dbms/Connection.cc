@@ -214,19 +214,19 @@ adt::StreamString dbms::Connection::asString() const
    return result += " }";
 }
 
-xml::Node& dbms::Connection::asXML(xml::Node& parent) const
+std::shared_ptr<xml::Node> dbms::Connection::asXML(std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild("dbms.Connection");
+   std::shared_ptr<xml::Node> result = parent->createChild("dbms.Connection");
 
    balance::Resource::asXML(result);
 
-   result.createAttribute("User", m_user);
-   result.createAttribute("AccessingCounter", m_accesingCounter);
-   result.createAttribute("LockingCounter", m_lockingCounter);
-   result.createAttribute("MaxCommitPending", m_maxCommitPending);
-   result.createAttribute("CommitPending", m_commitPending);
-   result.createAttribute("RollbackPending", m_rollbackPending);
+   result->createAttribute("User", m_user);
+   result->createAttribute("AccessingCounter", m_accesingCounter);
+   result->createAttribute("LockingCounter", m_lockingCounter);
+   result->createAttribute("MaxCommitPending", m_maxCommitPending);
+   result->createAttribute("CommitPending", m_commitPending);
+   result->createAttribute("RollbackPending", m_rollbackPending);
 
    return result;
 }

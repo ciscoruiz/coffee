@@ -39,55 +39,55 @@ class GuardConnection;
 */
 class Connection : public balance::Resource {
 public:
-   const Database& getDatabase () const noexcept { return m_dbmsDatabase; }
+   const Database& getDatabase() const noexcept { return m_dbmsDatabase; }
 
-   const std::string& getUser () const noexcept { return m_user; }
+   const std::string& getUser() const noexcept { return m_user; }
 
-   const std::string& getPassword () const noexcept { return m_password; }
+   const std::string& getPassword() const noexcept { return m_password; }
 
-   operator adt::StreamString () const noexcept { return asString (); }
+   operator adt::StreamString() const noexcept { return asString(); }
 
-   virtual adt::StreamString asString () const noexcept;
+   virtual adt::StreamString asString() const noexcept;
 
-   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
+   virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
-   Connection (const Connection&) = delete;
-   Connection& operator= (const Connection&) = delete;
+   Connection(const Connection&) = delete;
+   Connection& operator=(const Connection&) = delete;
 
 protected:
    const Database& m_dbmsDatabase;
    std::string m_user; /**< Nombre del usuario */
    std::string m_password; /**< Clave de acceso del usuario. */
 
-   Connection (const Database& dbmsDatabase, const std::string& name, const char* user, const char* password) :
-      balance::Resource (name),
-      m_dbmsDatabase (dbmsDatabase),
-      m_user (user),
-      m_password (password),
-      m_lockingCounter (0),
-      m_commitPending (0),
-      m_rollbackPending (false),
-      m_maxCommitPending (0),
-      m_accesingCounter (0)
+   Connection(const Database& dbmsDatabase, const std::string& name, const char* user, const char* password) :
+      balance::Resource(name),
+      m_dbmsDatabase(dbmsDatabase),
+      m_user(user),
+      m_password(password),
+      m_lockingCounter(0),
+      m_commitPending(0),
+      m_rollbackPending(false),
+      m_maxCommitPending(0),
+      m_accesingCounter(0)
    {}
 
-   int setMaxCommitPending (const int maxCommitPending) noexcept {
+   int setMaxCommitPending(const int maxCommitPending) noexcept {
       const int result = m_maxCommitPending;
       m_maxCommitPending = maxCommitPending;
       return result;
    }
 
-   void clearMaxCommitPending () noexcept { m_maxCommitPending = 0;}
+   void clearMaxCommitPending() noexcept { m_maxCommitPending = 0;}
 
-   void resetRollbackPending () noexcept { m_rollbackPending =  false; }
+   void resetRollbackPending() noexcept { m_rollbackPending =  false; }
 
-   void activateRollbackPending () noexcept { m_rollbackPending = true; }
+   void activateRollbackPending() noexcept { m_rollbackPending = true; }
 
-   ResultCode execute (std::shared_ptr<Statement>& statement) throw (adt::RuntimeException, DatabaseException);
+   ResultCode execute(std::shared_ptr<Statement>& statement) throw(adt::RuntimeException, DatabaseException);
 
-   void commit () throw (adt::RuntimeException, DatabaseException);
+   void commit() throw(adt::RuntimeException, DatabaseException);
 
-   void rollback () noexcept;
+   void rollback() noexcept;
 
 private:
    int m_commitPending; // Numero de sentencias a las que no se han fijado cambios.
@@ -97,16 +97,16 @@ private:
    unsigned int m_accesingCounter;
    std::mutex m_mutex;
 
-   void lock () throw (adt::RuntimeException);
-   void unlock () noexcept;
-   bool recover () noexcept;
+   void lock() throw(adt::RuntimeException);
+   void unlock() noexcept;
+   bool recover() noexcept;
    bool reachMaxCommitPending() const noexcept { return m_maxCommitPending > 0 && m_commitPending >= m_maxCommitPending; }
 
-   virtual bool do_beginTransaction () throw (adt::RuntimeException, DatabaseException) { return false;}
-   virtual void do_commit () throw (adt::RuntimeException, DatabaseException) = 0;
-   virtual void do_rollback () noexcept = 0;
-   virtual void open () throw (DatabaseException) = 0;
-   virtual void close () noexcept = 0;
+   virtual bool do_beginTransaction() throw(adt::RuntimeException, DatabaseException) { return false;}
+   virtual void do_commit() throw(adt::RuntimeException, DatabaseException) = 0;
+   virtual void do_rollback() noexcept = 0;
+   virtual void open() throw(DatabaseException) = 0;
+   virtual void close() noexcept = 0;
 
    friend class Database;
    friend class GuardConnection;

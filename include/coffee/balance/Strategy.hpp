@@ -57,7 +57,7 @@ public:
    virtual std::shared_ptr<Resource> apply(GuardResourceList& guard) throw (ResourceUnavailableException) = 0;
 
    virtual adt::StreamString asString () const noexcept;
-   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
+   virtual std::shared_ptr<xml::Node> asXML (std::shared_ptr<xml::Node>& parent) const noexcept;
 
    std::shared_ptr<ResourceList>& getResourceList() { return m_resources; }
 

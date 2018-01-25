@@ -76,17 +76,17 @@ adt::StreamString app::Runnable::asString () const
 }
 
 // virtual
-xml::Node& app::Runnable::asXML (xml::Node& parent) const
+std::shared_ptr<xml::Node> app::Runnable::asXML (std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild("Runnable");
+   std::shared_ptr<xml::Node> result = parent->createChild("Runnable");
 
-   result.createAttribute ("Reference", adt::AsHexString::apply (coffee_ptrnumber_cast (this)));
+   result->createAttribute ("Reference", adt::AsHexString::apply (coffee_ptrnumber_cast (this)));
 
    if (m_name != NULL)
-      result.createAttribute ("Name", *m_name);
+      result->createAttribute ("Name", *m_name);
 
-   result.createAttribute ("Status", flagsAsString());
+   result->createAttribute ("Status", flagsAsString());
 
    return result;
 }

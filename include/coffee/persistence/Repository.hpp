@@ -62,7 +62,7 @@ public:
 
    adt::StreamString asString() const noexcept;
 
-   xml::Node& asXML(xml::Node& parent) const noexcept;
+   std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
    Repository(const Repository&) = delete;
 

@@ -105,13 +105,11 @@ adt::StreamString app::Engine::asString() const
    return result += " }";
 }
 
-xml::Node& app::Engine::asXML(xml::Node& parent) const
+std::shared_ptr<xml::Node> app::Engine::asXML(std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild("app.Engine");
-
+   std::shared_ptr<xml::Node> result = parent->createChild("app.Engine");
    Runnable::asXML(result);
-
    return result;
 }
 

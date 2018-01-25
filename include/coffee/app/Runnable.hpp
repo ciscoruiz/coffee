@@ -1,6 +1,6 @@
 // COFFEE - COmpany eFFEEctive Platform
 //
-// (c) Copyright 2018 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/coffee
 //
@@ -23,17 +23,19 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
 //
 #ifndef _coffee_app_Runnable_h
 #define _coffee_app_Runnable_h
+
+#include <memory>
 
 #include <coffee/adt/RuntimeException.hpp>
 #include <coffee/adt/AsString.hpp>
@@ -60,33 +62,33 @@ public:
    /**
     * Destructor.
     */
-   virtual ~Runnable () { delete m_name;}
+   virtual ~Runnable() { delete m_name;}
 
    // Accesores
    /**
       Devuelve el nombre l�gico de esta instancia.
       @return El nombre l�gico de esta instancia.
    */
-   const char* getName() const noexcept { return (m_name == NULL) ? NULL: m_name->c_str (); }
+   const char* getName() const noexcept { return(m_name == NULL) ? NULL: m_name->c_str(); }
 
    /**
     * Devuelve \em true si est� instancia est� parada o \em false en otro caso.
     */
-   bool isStopped () const noexcept { return m_statusFlags == StatusFlags::Stopped; }
+   bool isStopped() const noexcept { return m_statusFlags == StatusFlags::Stopped; }
 
    /**
       Devuelve \em true si la instancia esta comenzando su ejecucion o \em false en otro caso.
       \return \em true si la instancia esta comenzando su ejecucion o \em false en otro caso.
       \since NemesisRD.core 1.2.30
    */
-   bool isStarting () const noexcept { return (m_statusFlags & StatusFlags::Starting) != 0; }
+   bool isStarting() const noexcept { return(m_statusFlags & StatusFlags::Starting) != 0; }
 
    /**
       Devuelve \em true si la instancia esta en ejecucion o \em false en otro caso.
       \return \em true si la instancia esta en ejecucion o \em false en otro caso.
       \since NemesisRD.core 1.2.30
    */
-   bool isRunning () const noexcept { return (m_statusFlags & StatusFlags::Running) != 0; }
+   bool isRunning() const noexcept { return(m_statusFlags & StatusFlags::Running) != 0; }
 
    /**
       Devuelve el valor del indicador de parada.
@@ -94,100 +96,100 @@ public:
       \warning La implementacion particular del metodo run deberia comprobar este valor
       periodicamente.
    */
-   bool isWaitingStop () const noexcept { return (m_statusFlags & StatusFlags::WaitingStop) != 0; }
+   bool isWaitingStop() const noexcept { return(m_statusFlags & StatusFlags::WaitingStop) != 0; }
 
    /**
     * Solicita la parada de esta instancia. Invocar� al m�todo virtual puro \em do_requestStop.
     */
-   void requestStop () throw (adt::RuntimeException);
+   void requestStop() throw(adt::RuntimeException);
 
    /**
       Devuelve una cadena con la informacion relevante de este objeto.
       \return Una cadena con la informacion relevante de este objeto.
    */
-   virtual adt::StreamString asString () const noexcept;
+   virtual adt::StreamString asString() const noexcept;
 
    /**
       Devuelve un documento XML con la informacion mas relevante de esta instancia.
       \param parent Nodo XML del que colgar la informacion referente a esta instancia.
       \return Un documento XML con la informacion mas relevante de esta instancia.
    */
-   virtual xml::Node& asXML (xml::Node& parent) const noexcept;
+   virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
 protected:
    /**
      Constructor.
      @param name Nombre l�gico de esta instancia.
    */
-   explicit Runnable (const std::string& name) : m_name (new std::string (name)), m_statusFlags (StatusFlags::Stopped) {;}
+   explicit Runnable(const std::string& name) : m_name(new std::string(name)), m_statusFlags(StatusFlags::Stopped) {;}
 
    /**
      Constructor.
      @param name Nombre l�gico de esta clase.
    */
-   explicit Runnable (const char* name) : m_name (new std::string (name)), m_statusFlags (StatusFlags::Stopped) {;}
+   explicit Runnable(const char* name) : m_name(new std::string(name)), m_statusFlags(StatusFlags::Stopped) {;}
 
    /**
     * Constructor vac�o.
     */
-   Runnable () : m_name (NULL), m_statusFlags (StatusFlags::Stopped) {;}
+   Runnable() : m_name(NULL), m_statusFlags(StatusFlags::Stopped) {;}
 
    /**
     * Activa el flag de estado recibido como par�metro
     */
-   void activate (const StatusFlags::_v statusFlag) noexcept { m_statusFlags |= statusFlag; }
+   void activate(const StatusFlags::_v statusFlag) noexcept { m_statusFlags |= statusFlag; }
 
    /**
     * Activa el flag de estado recibido como par�metro
     */
-   void deactivate (const StatusFlags::_v statusFlag) noexcept { m_statusFlags &= ~statusFlag; }
+   void deactivate(const StatusFlags::_v statusFlag) noexcept { m_statusFlags &= ~statusFlag; }
 
    /**
     * Establece directamente el estado de esta instancia.
     * \internal.
     */
-//   void setStatusFlags (const int status) noexcept { a_statusFlags = status; }
+//   void setStatusFlags(const int status) noexcept { a_statusFlags = status; }
 
    /**
     * Establece los flags que indica que esta instancia est� arrancando.
     */
-   void statusStarting () noexcept { m_statusFlags = StatusFlags::Starting; }
+   void statusStarting() noexcept { m_statusFlags = StatusFlags::Starting; }
 
    /**
     * Establece los flags que indica que ha recibido una solicitud de parada y
     * est� a la espera de realizar las operaciones necesarias.
     */
-   void statusWaitingStop () noexcept { m_statusFlags |= StatusFlags::WaitingStop;  }
+   void statusWaitingStop() noexcept { m_statusFlags |= StatusFlags::WaitingStop;  }
 
    /**
     * Establece los flags que indica que esta instancia est� en ejecuci�n.
     */
-   void statusRunning () noexcept {
-      deactivate (StatusFlags::Starting);
-      activate (StatusFlags::Running);
+   void statusRunning() noexcept {
+      deactivate(StatusFlags::Starting);
+      activate(StatusFlags::Running);
    }
 
    /**
     * Establece los flags que indica que esta instancia ha terminado su ejecuci�n.
     */
-   void statusStopped () noexcept { m_statusFlags = StatusFlags::Stopped; }
+   void statusStopped() noexcept { m_statusFlags = StatusFlags::Stopped; }
 
    /**
     * Inicializa el estado de esta instancia.
     * \internal.
     */
-   void clearStatusFlags () noexcept { m_statusFlags = StatusFlags::Stopped; }
+   void clearStatusFlags() noexcept { m_statusFlags = StatusFlags::Stopped; }
 
    /**
     * M�todo virtual que pueden usar las clases heredadas para particular su proceso de solicitud de parada.
     */
-   virtual void do_requestStop () throw (adt::RuntimeException) {;}
+   virtual void do_requestStop() throw(adt::RuntimeException) {;}
 
 private:
    const std::string* m_name;
    int m_statusFlags;
 
-   std::string flagsAsString () const noexcept;
+   std::string flagsAsString() const noexcept;
 };
 
 }

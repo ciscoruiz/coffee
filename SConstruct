@@ -49,7 +49,12 @@ libraries = [];
 
 source = os.path.join (current_directory, "source")
 sources = Glob(source + '/*')
-for source in sources:
+
+sources=["adt", "config", "logger", "xml", "app", "balance", "dbms", "persistence"]
+
+for module in sources:
+   source = os.path.join (os.path.join(current_directory, 'source'), module)
+   print source
    ss = str (source)
    ss += '/SConstruct'
    compile_library = SConscript (ss, exports='env')

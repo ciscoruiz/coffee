@@ -74,8 +74,8 @@ public:
    void parse(const adt::DataBlock& buffer, const DTD& dtd) throw(adt::RuntimeException);
    void parse(const char* buffer, const size_t size, const DTD& dtd) throw(adt::RuntimeException);
 
-   const Node* getRoot() const noexcept { return m_root.get(); }
-   Node* getRoot() noexcept { return m_root.get(); }
+   const std::shared_ptr<Node> getRoot() const noexcept { return m_root; }
+   std::shared_ptr<Node> getRoot() noexcept { return m_root; }
 
 private:
    std::shared_ptr <Node> m_root;

@@ -105,11 +105,6 @@ public:
    std::shared_ptr<Attribute> lookupAttribute(const std::string& name) const throw(adt::RuntimeException) { return lookupAttribute(name.c_str()); }
    std::shared_ptr<Attribute> searchAttribute(const std::string& name) const noexcept { return searchAttribute(name.c_str()); }
 
-   std::shared_ptr<Attribute> lookupAttribute(const char* name) throw(adt::RuntimeException);
-   std::shared_ptr<Attribute> searchAttribute(const char* name) noexcept;
-   std::shared_ptr<Attribute> lookupAttribute(const std::string& name) throw(adt::RuntimeException) { return lookupAttribute(name.c_str()); }
-   std::shared_ptr<Attribute> searchAttribute(const std::string& name) noexcept { return searchAttribute(name.c_str()); }
-
    child_iterator child_begin() noexcept { return m_children.begin(); }
    child_iterator child_end() noexcept { return m_children.end(); }
    static std::shared_ptr<Node>& get_child(child_iterator ii) noexcept { return std::ref(*ii); }

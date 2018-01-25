@@ -134,11 +134,8 @@ BOOST_AUTO_TEST_CASE (as_xml)
       myResource->setAvailable(false);
    }
 
-   xml::Node root ("root");
-
+   std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("root");
    resourceList->asXML(root);
-
    xml::Compiler compiler;
-
    std::cout << compiler.apply(root) << std::endl;
 }

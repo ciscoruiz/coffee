@@ -56,7 +56,7 @@ public:
    Compiler ();
    virtual ~Compiler ();
 
-   std::string apply (std::shared_ptr<Document> document) throw (adt::RuntimeException);
+   std::string apply (const Document& document) throw (adt::RuntimeException);
    std::string apply (const std::shared_ptr<Node>& node) throw (adt::RuntimeException);
 
    const char* encode (const char* text) throw (adt::RuntimeException);

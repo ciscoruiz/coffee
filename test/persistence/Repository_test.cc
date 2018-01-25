@@ -82,7 +82,9 @@ BOOST_AUTO_TEST_CASE (persistence_repository_as)
 
    xml::Node myNode ("root");
 
-   xml::Node& info = repository.asXML(myNode);
+   std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("root");
 
-   BOOST_REQUIRE_EQUAL (info.children_size(), 2);
+   auto info = repository.asXML(root);
+
+   BOOST_REQUIRE_EQUAL (info->children_size(), 2);
 }

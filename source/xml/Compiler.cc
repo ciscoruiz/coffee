@@ -56,16 +56,16 @@ xml::Compiler::~Compiler()
       xmlFree(m_encodedBuffer);
 }
 
-std::string xml::Compiler::apply(std::shared_ptr<Document> document)
+std::string xml::Compiler::apply(const Document& document)
    throw(adt::RuntimeException)
 {
    Buffer buffer;
 
    setHandler(xmlNewTextWriterMemory(buffer, 0));
-   setEncoding((const char*) document->getHandler()->encoding);
+   setEncoding((const char*) document.getHandler()->encoding);
 
    try {
-      document->compile(*this);
+      document.compile(*this);
    }
    catch(adt::RuntimeException&) {
       releaseHandler();

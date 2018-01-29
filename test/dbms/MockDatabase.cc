@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -36,10 +36,10 @@
 
 #include "MockDatabase.hpp"
 
-using namespace wepa;
+using namespace coffee;
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TtyWriter.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TtyWriter.hpp>
 
 mock::MockDatabase::MockDatabase(app::Application& app) :
    dbms::Database(app, "map", app.getTitle().c_str())
@@ -51,7 +51,7 @@ mock::MockDatabase::MockDatabase(app::Application& app) :
 mock::MockDatabase::MockDatabase (const char* name) :
    dbms::Database("map", name)
 {
-   logger::Logger::initialize(new logger::TtyWriter);
+   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
 
    std::shared_ptr<dbms::ErrorCodeInterpreter> eci = std::make_shared<MockErrorCodeInterpreter>();
    setErrorCodeInterpreter(eci);

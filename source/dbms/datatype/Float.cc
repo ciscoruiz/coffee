@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,13 +32,13 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/AsString.hpp>
+#include <coffee/adt/StreamString.hpp>
+#include <coffee/adt/AsString.hpp>
 
-#include <wepa/dbms/datatype/Float.hpp>
+#include <coffee/dbms/datatype/Float.hpp>
 
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 datatype::Float::Float (const char* name, const Constraint::_v constraint, const char* format) :
    datatype::Abstract (name, Datatype::Float, sizeof (float), constraint),
@@ -77,7 +77,7 @@ adt::StreamString datatype::Float::asString () const
 int datatype::Float::do_compare (const datatype::Abstract& other) const
    throw (adt::RuntimeException)
 {
-   const Float& _other = wepa_datatype_downcast(Float, other);
+   const Float& _other = coffee_datatype_downcast(Float, other);
 
    double rr = this->m_value - _other.m_value;
 

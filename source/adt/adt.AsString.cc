@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -35,13 +35,13 @@
 #include <ctype.h>
 #include <stdio.h>
 
-#include <wepa/config/defines.hpp>
+#include <coffee/config/defines.hpp>
 
-#include <wepa/adt/AsString.hpp>
-#include <wepa/adt/DataBlock.hpp>
+#include <coffee/adt/AsString.hpp>
+#include <coffee/adt/DataBlock.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 string adt::AsString::apply (const int number, const char* format)
    noexcept
@@ -54,44 +54,27 @@ string adt::AsString::apply (const int number, const char* format)
 string adt::AsString::apply (const unsigned int number)
    noexcept
 {
-   char aux [16];
-   sprintf (aux, "%u", number);
-   return string (aux);
+   return to_string(number);
 }
 
-#ifndef __wepa64__
+#ifndef __coffee64__
 string adt::AsString::apply (const long number)
    noexcept
 {
-   char aux [32];
-   sprintf (aux, "%ld", number);
-   return string (aux);
+   return to_string(number);
 }
 #endif
 
 string adt::AsString::apply (const Integer64 number)
    noexcept
 {
-   char aux [24];
-#ifdef __wepa64__
-   sprintf (aux, "%ld", number);
-#else
-   sprintf (aux, "%lld", number);
-#endif
-
-   return string (aux);
+   return to_string(number);
 }
 
 string adt::AsString::apply (const Unsigned64 number)
    noexcept
 {
-   char aux [32];
-#ifdef __wepa64__
-   sprintf (aux, "%lu", number);
-#else
-   sprintf (aux, "%llu", number);
-#endif
-   return string (aux);
+   return to_string(number);
 }
 
 string adt::AsString::apply (const float number, const char* format)

@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -40,16 +40,17 @@
 #include <unordered_map>
 #include <map>
 
-#include <wepa/adt/pattern/lru/Cache.hpp>
-#include <wepa/adt/AsString.hpp>
+#include <coffee/adt/pattern/lru/Cache.hpp>
+#include <coffee/adt/AsString.hpp>
+#include <coffee/adt/AsHexString.hpp>
 
-#include <wepa/dbms/datatype/Integer.hpp>
-#include <wepa/dbms/datatype/String.hpp>
+#include <coffee/dbms/datatype/Integer.hpp>
+#include <coffee/dbms/datatype/String.hpp>
 
-#include <wepa/persistence/PrimaryKey.hpp>
-#include <wepa/persistence/PrimaryKeyBuilder.hpp>
+#include <coffee/persistence/PrimaryKey.hpp>
+#include <coffee/persistence/PrimaryKeyBuilder.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 BOOST_AUTO_TEST_CASE(persistence_primary_key_compare)
 {
@@ -92,26 +93,74 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_compare)
       p21->setValue(0);
    }
 
-   BOOST_REQUIRE_EQUAL(pk0 < pk1, true);
-   BOOST_REQUIRE_EQUAL(pk0 < pk2, true);
-   BOOST_REQUIRE_EQUAL(pk0 > pk1, false);
-   BOOST_REQUIRE_EQUAL(pk0 > pk2, false);
+   BOOST_REQUIRE_EQUAL(pk0->compare(pk1) < 0, true);
+   BOOST_REQUIRE_EQUAL(pk0->compare(pk2) < 0, true);
+   BOOST_REQUIRE_EQUAL(pk0->compare(pk1) > 0, false);
+   BOOST_REQUIRE_EQUAL(pk0->compare(pk2) > 0, false);
 
-   BOOST_REQUIRE_EQUAL(pk1 < pk0, false);
-   BOOST_REQUIRE_EQUAL(pk1 < pk2, true);
-   BOOST_REQUIRE_EQUAL(pk1 > pk0, true);
-   BOOST_REQUIRE_EQUAL(pk1 > pk2, false);
+   BOOST_REQUIRE_EQUAL(pk1->compare(pk0) < 0, false);
+   BOOST_REQUIRE_EQUAL(pk1->compare(pk2) < 0, true);
+   BOOST_REQUIRE_EQUAL(pk1->compare(pk0) > 0, true);
+   BOOST_REQUIRE_EQUAL(pk1->compare(pk2) > 0, false);
 
-   BOOST_REQUIRE_EQUAL(pk2 < pk0, false);
-   BOOST_REQUIRE_EQUAL(pk2 < pk1, false);
-   BOOST_REQUIRE_EQUAL(pk2 > pk0, true);
-   BOOST_REQUIRE_EQUAL(pk2 > pk1, true);
+   BOOST_REQUIRE_EQUAL(pk2->compare(pk0) < 0, false);
+   BOOST_REQUIRE_EQUAL(pk2->compare(pk1) < 0, false);
+   BOOST_REQUIRE_EQUAL(pk2->compare(pk0) > 0, true);
+   BOOST_REQUIRE_EQUAL(pk2->compare(pk1) > 0, true);
 
    p00->setValue(1);
    p01->setValue(1);
 
    BOOST_REQUIRE_EQUAL(pk0->compare(pk1), 0);
    BOOST_REQUIRE_NE(pk0->compare(pk2), 0);
+}
+
+
+// See https://stackoverflow.com/questions/17572583/boost-check-fails-to-compile-operator-for-custom-types
+namespace boost {
+namespace test_tools {
+namespace tt_detail {
+   template<> struct print_log_value<persistence::PrimaryKey> {
+      void operator()( std::ostream& os, persistence::PrimaryKey const& ts)
+      {
+          os << ts.asString();
+      }
+   };
+}}}
+
+BOOST_AUTO_TEST_CASE(persistence_primary_key_copy_constructor)
+{
+   persistence::PrimaryKeyBuilder builder;
+
+   for (int ii = 0; ii < 25; ++ ii) {
+      auto field = std::make_shared<dbms::datatype::Integer>(adt::AsHexString::apply(ii));
+      builder.add(field);
+   }
+
+   persistence::PrimaryKey firstKey(builder);
+   persistence::PrimaryKey secondKey(firstKey);
+
+   BOOST_REQUIRE_EQUAL(firstKey, secondKey);
+}
+
+BOOST_AUTO_TEST_CASE(persistence_primary_key_assignmet_operator)
+{
+   persistence::PrimaryKeyBuilder builder;
+
+   for (int ii = 0; ii < 25; ++ ii) {
+      auto field = std::make_shared<dbms::datatype::Integer>(adt::AsHexString::apply(ii));
+      builder.add(field);
+   }
+
+   persistence::PrimaryKey firstKey(builder);
+
+   persistence::PrimaryKeyBuilder otherBuilder;
+   builder.add(std::make_shared<dbms::datatype::String>("string", 16));
+   persistence::PrimaryKey secondKey(otherBuilder);
+
+   secondKey = firstKey;
+
+   BOOST_REQUIRE_EQUAL(firstKey, secondKey);
 }
 
 BOOST_AUTO_TEST_CASE(persistence_primary_key_map)

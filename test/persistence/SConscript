@@ -5,9 +5,9 @@ Import ('env')
 boost_library = { 'LIBS' : 'boost_unit_test_framework' }
 env.MergeFlags (boost_library)
 
-# Set wepa_dbms twice to avoid linker dependences
-wepa_library = { 'LIBS' : [  'wepa_config', 'wepa_adt', 'wepa_logger', 'wepa_xml', 'wepa_app', 'wepa_balance', 'wepa_dbms',  'wepa_persistence', 'wepa_dbms', 'wepa_app'  ] }
-env.MergeFlags (wepa_library)
+# Set coffee_dbms twice to avoid linker dependences
+coffee_library = { 'LIBS' : [  'coffee_config', 'coffee_adt', 'coffee_logger', 'coffee_xml', 'coffee_app', 'coffee_balance', 'coffee_dbms',  'coffee_persistence', 'coffee_dbms', 'coffee_app'  ] }
+env.MergeFlags (coffee_library)
 
 pwd = Dir ('.').abspath;
 current_directory = str (pwd);
@@ -15,6 +15,6 @@ current_directory = str (pwd);
 libpath = current_directory.replace ('test/', 'source/');
 env.Append (LIBPATH = [libpath])
 
-result = env.Program ('wepa_persistence_test', Glob ('*.cc'))
+result = env.Program ('coffee_persistence_test', Glob ('*.cc'))
 
 Return ('result')

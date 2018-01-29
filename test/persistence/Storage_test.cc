@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -37,30 +37,30 @@
 #include <thread>
 #include <iostream>
 
-#include <wepa/adt/Second.hpp>
+#include <coffee/adt/Second.hpp>
 
-#include <wepa/logger/TraceMethod.hpp>
-#include <wepa/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
+#include <coffee/logger/Logger.hpp>
 
-#include <wepa/persistence/Repository.hpp>
-#include <wepa/persistence/Storage.hpp>
-#include <wepa/persistence/Loader.hpp>
-#include <wepa/persistence/Recorder.hpp>
-#include <wepa/persistence/Eraser.hpp>
-#include <wepa/persistence/Object.hpp>
-#include <wepa/persistence/Class.hpp>
-#include <wepa/persistence/PrimaryKeyBuilder.hpp>
-#include <wepa/persistence/ClassBuilder.hpp>
+#include <coffee/persistence/Repository.hpp>
+#include <coffee/persistence/Storage.hpp>
+#include <coffee/persistence/Loader.hpp>
+#include <coffee/persistence/Recorder.hpp>
+#include <coffee/persistence/Eraser.hpp>
+#include <coffee/persistence/Object.hpp>
+#include <coffee/persistence/Class.hpp>
+#include <coffee/persistence/PrimaryKeyBuilder.hpp>
+#include <coffee/persistence/ClassBuilder.hpp>
 
-#include <wepa/dbms/Database.hpp>
-#include <wepa/dbms/GuardConnection.hpp>
-#include <wepa/dbms/GuardStatement.hpp>
-#include <wepa/dbms/Statement.hpp>
+#include <coffee/dbms/Database.hpp>
+#include <coffee/dbms/GuardConnection.hpp>
+#include <coffee/dbms/GuardStatement.hpp>
+#include <coffee/dbms/Statement.hpp>
 
-#include <wepa/dbms/datatype/Integer.hpp>
-#include <wepa/dbms/datatype/String.hpp>
-#include <wepa/dbms/datatype/Float.hpp>
-#include <wepa/dbms/datatype/Date.hpp>
+#include <coffee/dbms/datatype/Integer.hpp>
+#include <coffee/dbms/datatype/String.hpp>
+#include <coffee/dbms/datatype/Float.hpp>
+#include <coffee/dbms/datatype/Date.hpp>
 
 #include "../dbms/MockDatabase.hpp"
 #include "../dbms/MockLowLevelRecord.hpp"
@@ -68,8 +68,8 @@
 
 #include "PersistenceMocks.hpp"
 
-using namespace wepa;
-using namespace wepa::mock;
+using namespace coffee;
+using namespace coffee::mock;
 
 struct Fixture {
    test_persistence::MyDatabase database;

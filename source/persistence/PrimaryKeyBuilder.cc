@@ -1,9 +1,9 @@
 /*
- * // WEPA - Write Excellent Professional Applications
+ * // COFFEE - COmpany eFFEEctive Platform
  * //
  * // (c) Copyright 2018 Francisco Ruiz Rayo
  * //
- * // https://github.com/ciscoruiz/wepa
+ * // https://github.com/ciscoruiz/coffee
  * //
  * // Redistribution and use in source and binary forms, with or without
  * // modification, are permitted provided that the following conditions are
@@ -35,16 +35,16 @@
  * //
  * 
  */
-#include <wepa/persistence/PrimaryKeyBuilder.hpp>
-#include <wepa/persistence/Class.hpp>
+#include <coffee/persistence/PrimaryKeyBuilder.hpp>
+#include <coffee/persistence/Class.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 std::shared_ptr<persistence::PrimaryKey> persistence::PrimaryKeyBuilder::build() const
       throw (adt::RuntimeException)
 {
    if (empty()) {
-      WEPA_THROW_EXCEPTION("PrimaryKeyBuilder does not define any component");
+      COFFEE_THROW_EXCEPTION("PrimaryKeyBuilder does not define any component");
    }
 
    return std::make_shared<persistence::PrimaryKey>(*this);

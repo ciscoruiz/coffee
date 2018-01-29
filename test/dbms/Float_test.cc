@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -37,11 +37,11 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/dbms/datatype/Float.hpp>
-#include <wepa/dbms/datatype/Integer.hpp>
+#include <coffee/dbms/datatype/Float.hpp>
+#include <coffee/dbms/datatype/Integer.hpp>
 
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 
 BOOST_AUTO_TEST_CASE(float_is_nulleable)
@@ -88,14 +88,14 @@ BOOST_AUTO_TEST_CASE(float_downcast)
 
    BOOST_REQUIRE_EQUAL(abs.hasValue(), true);
 
-   const datatype::Float& other = wepa_datatype_downcast(datatype::Float, abs);
+   const datatype::Float& other = coffee_datatype_downcast(datatype::Float, abs);
    column.setValue(0.0006);
 
    BOOST_REQUIRE_EQUAL(other == column, true);
 
    datatype::Integer zzz("zzz");
 
-   BOOST_REQUIRE_THROW(wepa_datatype_downcast(datatype::Float, zzz), dbms::InvalidDataException);
+   BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::Float, zzz), dbms::InvalidDataException);
 }
 
 BOOST_AUTO_TEST_CASE(float_clone)

@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -39,33 +39,33 @@
 #include <mutex>
 #include <thread>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TraceMethod.hpp>
-#include <wepa/logger/TtyWriter.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
+#include <coffee/logger/TtyWriter.hpp>
 
 #include "MockApplication.hpp"
 #include "MockDatabase.hpp"
 #include "MockLowLevelRecord.hpp"
 
-#include <wepa/dbms/Statement.hpp>
-#include <wepa/dbms/GuardConnection.hpp>
-#include <wepa/dbms/GuardStatement.hpp>
-#include <wepa/dbms/StatementTranslator.hpp>
-#include <wepa/dbms/FailRecoveryHandler.hpp>
-#include <wepa/dbms/Database.hpp>
+#include <coffee/dbms/Statement.hpp>
+#include <coffee/dbms/GuardConnection.hpp>
+#include <coffee/dbms/GuardStatement.hpp>
+#include <coffee/dbms/StatementTranslator.hpp>
+#include <coffee/dbms/FailRecoveryHandler.hpp>
+#include <coffee/dbms/Database.hpp>
 
-#include <wepa/dbms/datatype/Integer.hpp>
-#include <wepa/dbms/datatype/String.hpp>
-#include <wepa/dbms/datatype/Float.hpp>
-#include <wepa/dbms/datatype/Date.hpp>
+#include <coffee/dbms/datatype/Integer.hpp>
+#include <coffee/dbms/datatype/String.hpp>
+#include <coffee/dbms/datatype/Float.hpp>
+#include <coffee/dbms/datatype/Date.hpp>
 
-namespace wepa {
+namespace coffee {
 
 namespace test_dbms {
 
 static const int IdToThrowDbException = 666;
 
-using namespace wepa::dbms;
+using namespace coffee::dbms;
 
 class MyStatement : public Statement {
 protected:
@@ -131,7 +131,7 @@ private:
          result = std::make_shared<MyWriteStatement>(*this, name, expression.c_str(), actionOnError);
 
       if (!result)
-         WEPA_THROW_EXCEPTION(name << " invalid statement");
+         COFFEE_THROW_EXCEPTION(name << " invalid statement");
 
       return result;
    }
@@ -165,9 +165,9 @@ private:
 }
 }
 
-using namespace wepa;
-using namespace wepa::dbms;
-using namespace wepa::mock;
+using namespace coffee;
+using namespace coffee::dbms;
+using namespace coffee::mock;
 
 test_dbms::MyReadStatement::MyReadStatement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
    MyStatement(database, name, expression, actionOnError),
@@ -196,7 +196,7 @@ dbms::ResultCode test_dbms::MyReadStatement::do_execute(dbms::Connection& connec
    m_selection.clear();
    for(auto ii : _connection.getContainer()) {
 
-      if(ii.second.m_id >= wepa_datatype_downcast(dbms::datatype::Integer, m_datas[0])->getValue()) {
+      if(ii.second.m_id >= coffee_datatype_downcast(dbms::datatype::Integer, m_datas[0])->getValue()) {
          m_selection.push_back(ii.second);
       }
    }
@@ -215,19 +215,19 @@ bool test_dbms::MyReadStatement::do_fetch() throw(adt::RuntimeException, Databas
 
    const MockLowLevelRecord& record = m_selection [m_index ++];
 
-   wepa_datatype_downcast(dbms::datatype::Integer, m_datas[0])->setValue(record.m_id);
-   wepa_datatype_downcast(dbms::datatype::String, m_datas[1])->setValue(record.m_name);
+   coffee_datatype_downcast(dbms::datatype::Integer, m_datas[0])->setValue(record.m_id);
+   coffee_datatype_downcast(dbms::datatype::String, m_datas[1])->setValue(record.m_name);
 
-   auto integer = wepa_datatype_downcast(dbms::datatype::Integer, m_datas[2]);
+   auto integer = coffee_datatype_downcast(dbms::datatype::Integer, m_datas[2]);
    
    if(record.m_integer == -1)
       integer->isNull();
    else
       integer->setValue(record.m_integer);
 
-   wepa_datatype_downcast(dbms::datatype::Float, m_datas[3])->setValue(record.m_float);
+   coffee_datatype_downcast(dbms::datatype::Float, m_datas[3])->setValue(record.m_float);
 
-   auto time = wepa_datatype_downcast(dbms::datatype::Date, m_datas[4]);
+   auto time = coffee_datatype_downcast(dbms::datatype::Date, m_datas[4]);
 
    if(record.m_time == 0)
       time->isNull();
@@ -262,7 +262,7 @@ dbms::ResultCode test_dbms::MyWriteStatement::do_execute(dbms::Connection& conne
 
    MockLowLevelRecord record;
 
-   record.m_id = wepa_datatype_downcast(dbms::datatype::Integer, m_datas[0])->getValue();
+   record.m_id = coffee_datatype_downcast(dbms::datatype::Integer, m_datas[0])->getValue();
 
    if(record.m_id == test_dbms::IdToThrowDbException) {
       result.initialize(MyDatabase::NotFound, NULL);
@@ -270,14 +270,14 @@ dbms::ResultCode test_dbms::MyWriteStatement::do_execute(dbms::Connection& conne
    }
 
    if(opCode != mock::MockConnection::Delete) {
-      record.m_name = wepa_datatype_downcast(dbms::datatype::String, m_datas[1])->getValue();
+      record.m_name = coffee_datatype_downcast(dbms::datatype::String, m_datas[1])->getValue();
 
-      auto integer = wepa_datatype_downcast(dbms::datatype::Integer, m_datas[2]);
+      auto integer = coffee_datatype_downcast(dbms::datatype::Integer, m_datas[2]);
       record.m_integer =(integer->hasValue()) ? integer->getValue(): -1;
 
-      record.m_float = wepa_datatype_downcast(dbms::datatype::Float, m_datas[3])->getValue();
+      record.m_float = coffee_datatype_downcast(dbms::datatype::Float, m_datas[3])->getValue();
 
-      auto time = wepa_datatype_downcast(dbms::datatype::Date, m_datas[4]);
+      auto time = coffee_datatype_downcast(dbms::datatype::Date, m_datas[4]);
       record.m_time = (time->hasValue()) ? time->getValue(): 0;
    }
 
@@ -334,7 +334,7 @@ BOOST_AUTO_TEST_CASE(dbms_define_structure)
 
    BOOST_REQUIRE_THROW(database.findStatement("zzzz"), adt::RuntimeException);
 
-   adt::StreamString xxx = connection->operator wepa::adt::StreamString();
+   adt::StreamString xxx = connection->operator coffee::adt::StreamString();
 
    BOOST_REQUIRE_NE(xxx.find("CommitCounter"), std::string::npos);
 }
@@ -375,31 +375,31 @@ BOOST_AUTO_TEST_CASE(dbms_write_and_read_and_delete)
 
       BOOST_REQUIRE_THROW(writer.getInputData(10), adt::RuntimeException);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
       writer.execute();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database.container_size(), 0);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
       writer.execute();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
       BOOST_REQUIRE_EQUAL(database.container_size(), 0);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
       resultCode = writer.execute();
 
       BOOST_REQUIRE_EQUAL(resultCode.getNumericCode(), test_dbms::MyDatabase::Successful);
@@ -422,8 +422,8 @@ BOOST_AUTO_TEST_CASE(dbms_write_and_read_and_delete)
       dbms::GuardStatement reader(guard, stReader);
       BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
 
-      auto id = wepa_datatype_downcast(datatype::Integer, reader.getInputData(0));
-      const auto integer = wepa_datatype_downcast(datatype::Integer, reader.getOutputData(1));
+      auto id = coffee_datatype_downcast(datatype::Integer, reader.getInputData(0));
+      const auto integer = coffee_datatype_downcast(datatype::Integer, reader.getOutputData(1));
 
       id->setValue(5);
       BOOST_REQUIRE_NO_THROW(resultCode = reader.execute());
@@ -445,7 +445,7 @@ BOOST_AUTO_TEST_CASE(dbms_write_and_read_and_delete)
 
       BOOST_REQUIRE_EQUAL(counter, 2);
 
-      id = wepa_datatype_downcast(datatype::Integer, reader.getInputData(0));
+      id = coffee_datatype_downcast(datatype::Integer, reader.getInputData(0));
       id->setValue(1111);
 
       resultCode = reader.execute();
@@ -462,7 +462,7 @@ BOOST_AUTO_TEST_CASE(dbms_write_and_read_and_delete)
 
       dbms::GuardStatement eraser(guard, stEraser);
 
-      auto id = wepa_datatype_downcast(datatype::Integer, eraser.getInputData(0));
+      auto id = coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0));
 
       id->setValue(6);
       resultCode = eraser.execute();
@@ -501,25 +501,25 @@ BOOST_AUTO_TEST_CASE(dbms_write_rollback)
 
       BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
       writer.execute();
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
       writer.execute();
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
       writer.execute();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
@@ -533,21 +533,21 @@ BOOST_AUTO_TEST_CASE(dbms_write_rollback)
       dbms::GuardConnection guard(conn0);
       dbms::GuardStatement writer(guard, rollbackWriter);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(8);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 8");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(8 * 8);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(8.8);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("8/8/2008T08:08:08", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(8);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 8");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(8 * 8);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(8.8);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("8/8/2008T08:08:08", "%d/%m/%YT%H:%M");
       writer.execute();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database.container_size(), 3);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the test_dbms::IdToThrowDbException");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(test_dbms::IdToThrowDbException * test_dbms::IdToThrowDbException);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(3.3);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("3/3/2003T03:03:03", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the test_dbms::IdToThrowDbException");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(test_dbms::IdToThrowDbException * test_dbms::IdToThrowDbException);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(3.3);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("3/3/2003T03:03:03", "%d/%m/%YT%H:%M");
 
       BOOST_REQUIRE_THROW(writer.execute(), dbms::DatabaseException);
    }
@@ -576,25 +576,25 @@ BOOST_AUTO_TEST_CASE(dbms_write_norollback)
 
       BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
       writer.execute();
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
       writer.execute();
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
       writer.execute();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
@@ -614,21 +614,21 @@ BOOST_AUTO_TEST_CASE(dbms_write_norollback)
       dbms::GuardConnection guard(conn0);
       dbms::GuardStatement writer(guard, noRollbackWriter);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(8);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 8");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(8 * 8);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(8.8);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("8/8/2008T08:08:08", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(8);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 8");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(8 * 8);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(8.8);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("8/8/2008T08:08:08", "%d/%m/%YT%H:%M");
       writer.execute();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database.container_size(), 3);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the test_dbms::IdToThrowDbException");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(test_dbms::IdToThrowDbException * test_dbms::IdToThrowDbException);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(3.3);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("3/3/2003T03:03:03", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the test_dbms::IdToThrowDbException");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(test_dbms::IdToThrowDbException * test_dbms::IdToThrowDbException);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(3.3);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("3/3/2003T03:03:03", "%d/%m/%YT%H:%M");
 
       BOOST_REQUIRE_NO_THROW(resultCode = writer.execute());
 
@@ -665,26 +665,26 @@ BOOST_AUTO_TEST_CASE(dbms_erase_rollback)
 
       BOOST_REQUIRE_THROW(writer.getInputData(10), adt::RuntimeException);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
       writer.execute();
 
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
       writer.execute();
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
       writer.execute();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
@@ -700,13 +700,13 @@ BOOST_AUTO_TEST_CASE(dbms_erase_rollback)
       dbms::GuardConnection guard(conn0);
       dbms::GuardStatement eraser(guard, rollbackEraser);
 
-      wepa_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(6);
+      coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(6);
       eraser.execute();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database.container_size(), 3);
 
-      wepa_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
+      coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
       BOOST_REQUIRE_THROW(eraser.execute(), dbms::DatabaseException);
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
@@ -738,26 +738,26 @@ BOOST_AUTO_TEST_CASE(dbms_erase_norollback)
 
       BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
       writer.execute();
 
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
       writer.execute();
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
       writer.execute();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
@@ -773,13 +773,13 @@ BOOST_AUTO_TEST_CASE(dbms_erase_norollback)
       dbms::GuardConnection guard(conn0);
       dbms::GuardStatement eraser(guard, noRollbackEraser);
 
-      wepa_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(2);
+      coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(2);
       eraser.execute();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database.container_size(), 3);
 
-      wepa_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
+      coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
       BOOST_REQUIRE_NO_THROW(resultCode = eraser.execute());
 
       BOOST_REQUIRE_EQUAL(resultCode.successful(), false);
@@ -813,11 +813,11 @@ BOOST_AUTO_TEST_CASE(dbms_set_max_commit)
       BOOST_REQUIRE_EQUAL(connection.setMaxCommitPending(5), 0);
 
       for(int ii = 1; ii <= 15; ++ ii) {
-         wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-         wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-         wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-         wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-         wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
+         coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
+         coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
+         coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
+         coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
+         coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
          BOOST_REQUIRE_NO_THROW(writer.execute());
       }
 
@@ -835,11 +835,11 @@ BOOST_AUTO_TEST_CASE(dbms_set_max_commit)
       connection.clearMaxCommitPending();
 
       for(int ii = 16; ii <= 30; ++ ii) {
-         wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-         wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-         wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-         wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-         wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
+         coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
+         coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
+         coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
+         coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
+         coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
          BOOST_REQUIRE_NO_THROW(writer.execute());
       }
    }
@@ -869,21 +869,21 @@ BOOST_AUTO_TEST_CASE(dbms_break_detected_executing)
       BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 0);
 
       int ii = 1;
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
       BOOST_REQUIRE_NO_THROW(writer.execute());
 
       conn0->manualBreak();
 
       ii = 2;
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
 
       // It will detect the lost connection but it will try to recover and it will get it.
       BOOST_REQUIRE_THROW(writer.execute(), dbms::DatabaseException);
@@ -917,11 +917,11 @@ BOOST_AUTO_TEST_CASE(dbms_break_detected_locking)
       BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 0);
 
       int ii = 1;
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
       BOOST_REQUIRE_NO_THROW(writer.execute());
    }
 
@@ -936,11 +936,11 @@ BOOST_AUTO_TEST_CASE(dbms_break_detected_locking)
       BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 1);
 
       int ii = 2;
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
 
       BOOST_REQUIRE_NO_THROW(writer.execute());
    }
@@ -969,11 +969,11 @@ BOOST_AUTO_TEST_CASE(dbms_break_detected_locking)
       BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 2);
 
       int ii = 3;
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
 
       BOOST_REQUIRE_NO_THROW(writer.execute());
    }
@@ -1005,22 +1005,22 @@ BOOST_AUTO_TEST_CASE(dbms_break_unrecovery_executing)
       BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 0);
 
       int ii = 1;
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
       BOOST_REQUIRE_NO_THROW(writer.execute());
 
       conn0->manualBreak();
       conn0->avoidRecovery();
 
       ii = 2;
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
 
       // It will detect the lost connection but it will try to recover and it will get it.
       BOOST_REQUIRE_THROW(writer.execute(), dbms::DatabaseException);
@@ -1058,11 +1058,11 @@ BOOST_AUTO_TEST_CASE(dbms_break_unrecovery_locking)
       BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 0);
 
       int ii = 1;
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
       BOOST_REQUIRE_NO_THROW(writer.execute());
    }
 
@@ -1099,21 +1099,21 @@ BOOST_AUTO_TEST_CASE(dbms_dealing_with_nulls)
          dbms::GuardConnection guard(conn0);
          dbms::GuardStatement writer(guard, stWriter);
 
-         wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(20);
-         wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 20");
-         wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->isNull();
-         wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(20.20);
-         wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+         coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(20);
+         coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 20");
+         coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->isNull();
+         coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(20.20);
+         coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
          writer.execute();
 
          BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
          BOOST_REQUIRE_EQUAL(database.container_size(), 0);
 
-         wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(25);
-         wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 25");
-         wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(25 * 25);
-         wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(25.25);
-         wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->isNull();
+         coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(25);
+         coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 25");
+         coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(25 * 25);
+         coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(25.25);
+         coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->isNull();
          ResultCode resultCode = writer.execute();
 
          BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
@@ -1139,9 +1139,9 @@ BOOST_AUTO_TEST_CASE(dbms_dealing_with_nulls)
       dbms::GuardStatement reader(guard, stReader);
       BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
 
-      auto id = wepa_datatype_downcast(datatype::Integer, reader.getInputData(0));
-      auto integer = wepa_datatype_downcast(datatype::Integer, reader.getOutputData(1));
-      auto date = wepa_datatype_downcast(datatype::Date, reader.getOutputData(3));
+      auto id = coffee_datatype_downcast(datatype::Integer, reader.getInputData(0));
+      auto integer = coffee_datatype_downcast(datatype::Integer, reader.getOutputData(1));
+      auto date = coffee_datatype_downcast(datatype::Date, reader.getOutputData(3));
 
       id->setValue(0);
       resultCode = reader.execute();
@@ -1183,21 +1183,21 @@ BOOST_AUTO_TEST_CASE(dbms_without_app)
       dbms::GuardConnection guard(conn0);
       dbms::GuardStatement writer(guard, stWriter);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(20);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 20");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->isNull();
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(20.20);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(20);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 20");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->isNull();
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(20.20);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
       writer.execute();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database.container_size(), 0);
 
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(25);
-      wepa_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 25");
-      wepa_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(25 * 25);
-      wepa_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(25.25);
-      wepa_datatype_downcast(datatype::Date, writer.getInputData(4))->isNull();
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(25);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 25");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(25 * 25);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(25.25);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->isNull();
       ResultCode resultCode = writer.execute();
 
       BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);

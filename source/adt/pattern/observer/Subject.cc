@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,11 +33,11 @@
 // Author: cisco.tierra@gmail.com
 //
 
-#include <wepa/adt/pattern/observer/Subject.hpp>
-#include <wepa/adt/pattern/observer/Observer.hpp>
-#include <wepa/logger/Logger.hpp>
+#include <coffee/adt/pattern/observer/Subject.hpp>
+#include <coffee/adt/pattern/observer/Observer.hpp>
+#include <coffee/logger/Logger.hpp>
 
-using namespace wepa::adt::pattern;
+using namespace coffee::adt::pattern;
 
 //static
 const observer::Event observer::Subject::AllEvents(-1, 0xffffffff);
@@ -60,7 +60,7 @@ void observer::Subject::subscribeObserver(std::shared_ptr<Observer>& observer, c
    }
 
    if (observer->isSubscribed()) {
-      WEPA_THROW_EXCEPTION(observer->asString() << " already subscribed");
+      COFFEE_THROW_EXCEPTION(observer->asString() << " already subscribed");
    }
 
    m_observers.insert(std::make_pair(observerName, Subscription(observer, event.getBitMask())));
@@ -87,7 +87,7 @@ observer::Event observer::Subject::registerEvent(const Event::Id id)
    throw(RuntimeException)
 {
    if (m_events.size() >= sizeof(Event::BitMask) * 8) {
-      WEPA_THROW_EXCEPTION("Too many events for " << asString());
+      COFFEE_THROW_EXCEPTION("Too many events for " << asString());
    }
 
    Event search(id, 0);
@@ -112,7 +112,7 @@ observer::Event observer::Subject::lookupEvent(const Event::Id id) const
    if ((ii = m_events.find(search)) != event_end())
       return event(ii);
 
-   WEPA_THROW_EXCEPTION("EventId=" << id << " was not registered");
+   COFFEE_THROW_EXCEPTION("EventId=" << id << " was not registered");
 
    // To avoid warning about no return value
    return search;

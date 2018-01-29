@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,20 +32,20 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/app/Runnable.hpp>
-#include <wepa/logger/Logger.hpp>
+#include <coffee/app/Runnable.hpp>
+#include <coffee/logger/Logger.hpp>
 
-#include <wepa/config/defines.hpp>
+#include <coffee/config/defines.hpp>
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/AsString.hpp>
-#include <wepa/adt/AsHexString.hpp>
+#include <coffee/adt/StreamString.hpp>
+#include <coffee/adt/AsString.hpp>
+#include <coffee/adt/AsHexString.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 void app::Runnable::requestStop ()
    throw (adt::RuntimeException)
@@ -62,9 +62,9 @@ void app::Runnable::requestStop ()
 adt::StreamString app::Runnable::asString () const
    noexcept
 {
-   adt::StreamString result ("wepa::app::Runnable { Reference: ");
+   adt::StreamString result ("coffee::app::Runnable { Reference: ");
 
-   result << adt::AsHexString::apply (wepa_ptrnumber_cast (this));
+   result << adt::AsHexString::apply (coffee_ptrnumber_cast (this));
 
    if (m_name != NULL) {
       result << " | Name: " << *m_name;
@@ -76,17 +76,17 @@ adt::StreamString app::Runnable::asString () const
 }
 
 // virtual
-xml::Node& app::Runnable::asXML (xml::Node& parent) const
+std::shared_ptr<xml::Node> app::Runnable::asXML (std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild("Runnable");
+   std::shared_ptr<xml::Node> result = parent->createChild("Runnable");
 
-   result.createAttribute ("Reference", adt::AsHexString::apply (wepa_ptrnumber_cast (this)));
+   result->createAttribute ("Reference", adt::AsHexString::apply (coffee_ptrnumber_cast (this)));
 
    if (m_name != NULL)
-      result.createAttribute ("Name", *m_name);
+      result->createAttribute ("Name", *m_name);
 
-   result.createAttribute ("Status", flagsAsString());
+   result->createAttribute ("Status", flagsAsString());
 
    return result;
 }

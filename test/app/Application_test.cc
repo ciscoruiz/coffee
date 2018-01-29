@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -38,19 +38,19 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TtyWriter.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TtyWriter.hpp>
 
-#include <wepa/app/Application.hpp>
-#include <wepa/app/Engine.hpp>
+#include <coffee/app/Application.hpp>
+#include <coffee/app/Engine.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 class SmallestApplication : public app::Application {
 public:
    SmallestApplication() : app::Application("SmallerApplication", "This is the title", "1.0") {
-      logger::Logger::initialize(new logger::TtyWriter);
+      logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
    }
 
    void run() throw(adt::RuntimeException) {;}

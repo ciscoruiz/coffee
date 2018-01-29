@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,15 +32,15 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/persistence/Repository.hpp>
-#include <wepa/persistence/Storage.hpp>
+#include <coffee/persistence/Repository.hpp>
+#include <coffee/persistence/Storage.hpp>
 
-#include <wepa/logger/Logger.hpp>
+#include <coffee/logger/Logger.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 std::shared_ptr<persistence::Storage> persistence::Repository::createStorage(const std::string& ident, const int maxCacheSize)
    throw(adt::RuntimeException)
@@ -48,7 +48,7 @@ std::shared_ptr<persistence::Storage> persistence::Repository::createStorage(con
    storage_iterator ii = m_storages.find(ident);
 
    if(ii != m_storages.end()) {
-      WEPA_THROW_EXCEPTION("Ident=" << ident << " has already been used");
+      COFFEE_THROW_EXCEPTION("Ident=" << ident << " has already been used");
    }
 
    std::shared_ptr<Storage> result = std::make_shared<Storage>(ident, maxCacheSize);
@@ -65,7 +65,7 @@ std::shared_ptr<persistence::Storage>& persistence::Repository::findStorage(cons
    storage_iterator ii = m_storages.find(ident);
 
    if(ii == m_storages.end()) {
-      WEPA_THROW_EXCEPTION("ID=" << ident << " has not been defined yet");
+      COFFEE_THROW_EXCEPTION("ID=" << ident << " has not been defined yet");
    }
 
    return std::ref(Repository::storage(ii));
@@ -80,12 +80,12 @@ adt::StreamString persistence::Repository::asString() const
    return result += " }";
 }
 
-xml::Node& persistence::Repository::asXML(xml::Node& parent) const
+std::shared_ptr<xml::Node> persistence::Repository::asXML(std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild("persistence.Repository");
+   std::shared_ptr<xml::Node> result = parent->createChild("persistence.Repository");
 
-   result.createAttribute("Name", getName());
+   result->createAttribute("Name", getName());
 
    for(const_storage_iterator ii = storage_begin(), maxii = storage_end(); ii != maxii; ++ ii)  {
       storage(ii)->asXML(result);

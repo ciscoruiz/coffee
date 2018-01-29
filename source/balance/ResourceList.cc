@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,23 +32,23 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/balance/Resource.hpp>
-#include <wepa/balance/ResourceList.hpp>
-#include <wepa/balance/GuardResourceList.hpp>
+#include <coffee/balance/Resource.hpp>
+#include <coffee/balance/ResourceList.hpp>
+#include <coffee/balance/GuardResourceList.hpp>
 
 #include <mutex>
 
-#include <wepa/adt/AsString.hpp>
+#include <coffee/adt/AsString.hpp>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TraceMethod.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
 
-#include <wepa/balance/SCCS.hpp>
+#include <coffee/balance/SCCS.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 void balance::ResourceList::initialize ()
    throw (adt::RuntimeException)
@@ -79,10 +79,10 @@ void balance::ResourceList::initialize ()
 bool balance::ResourceList::add (const std::shared_ptr<Resource>& resource)
    throw (adt::RuntimeException)
 {
-    logger::TraceMethod tm (logger::Level::Local7, WEPA_FILE_LOCATION);
+    logger::TraceMethod tm (logger::Level::Local7, COFFEE_FILE_LOCATION);
 
    if (!resource) {
-      WEPA_THROW_EXCEPTION(asString() << " can not add an empty resource");
+      COFFEE_THROW_EXCEPTION(asString() << " can not add an empty resource");
    }
 
    bool result = true;
@@ -146,15 +146,15 @@ adt::StreamString balance::ResourceList::asString () const
 }
 
 //virtual
-xml::Node& balance::ResourceList::asXML (xml::Node& parent) const
+std::shared_ptr<xml::Node> balance::ResourceList::asXML (std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild (this->getName());
+   std::shared_ptr<xml::Node> result = parent->createChild(this->getName());
 
    GuardResourceList fakeGuard(*this);
    for (const_resource_iterator ii = resource_begin(fakeGuard), maxii = resource_end(fakeGuard); ii != maxii; ++ ii) {
       resource(ii)->asXML(result);
    }
 
-   return std::ref (result);
+   return result;
 }

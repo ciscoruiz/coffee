@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -38,26 +38,26 @@
 #include <string>
 #include <algorithm>
 
-#include <wepa/config/defines.hpp>
+#include <coffee/config/defines.hpp>
 
-#include <wepa/logger/TraceMethod.hpp>
-#include <wepa/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
+#include <coffee/logger/Logger.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
 
-#include <wepa/dbms/Statement.hpp>
-#include <wepa/dbms/Connection.hpp>
+#include <coffee/dbms/Statement.hpp>
+#include <coffee/dbms/Connection.hpp>
 
-#include <wepa/dbms/FailRecoveryHandler.hpp>
-#include <wepa/dbms/StatementTranslator.hpp>
-#include <wepa/dbms/SCCS.hpp>
+#include <coffee/dbms/FailRecoveryHandler.hpp>
+#include <coffee/dbms/StatementTranslator.hpp>
+#include <coffee/dbms/SCCS.hpp>
 
-#include <wepa/dbms/internal/DummyApplication.hpp>
-#include "../../include/wepa/dbms/Database.hpp"
+#include <coffee/dbms/internal/DummyApplication.hpp>
+#include "../../include/coffee/dbms/Database.hpp"
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 
 dbms::Database::Database(app::Application& app, const char* className, const char* dbmsName) :
@@ -93,7 +93,7 @@ void dbms::Database::externalStop()
    app::Application& dummy = internal::DummyApplication::getInstance();
 
    if(&dummy != &application) {
-      WEPA_THROW_EXCEPTION(asString() << " | This method can't be applied to a database with associated application");
+      COFFEE_THROW_EXCEPTION(asString() << " | This method can't be applied to a database with associated application");
    }
 
    stop();
@@ -119,7 +119,7 @@ void dbms::Database::do_initialize()
    }
 
    if(counter == 0 && error == true) {
-      WEPA_THROW_EXCEPTION(asString() << " | There is not connection available");
+      COFFEE_THROW_EXCEPTION(asString() << " | There is not connection available");
    }
 
    LOG_INFO(asString() << " | It is initialized");
@@ -152,17 +152,17 @@ void dbms::Database::do_stop()
 std::shared_ptr<dbms::Connection> dbms::Database::createConnection(const char* name, const char* user, const char* password)
    throw(adt::RuntimeException, dbms::DatabaseException)
 {
-   logger::TraceMethod ttmm(logger::Level::Local7, WEPA_FILE_LOCATION);
+   logger::TraceMethod ttmm(logger::Level::Local7, COFFEE_FILE_LOCATION);
 
    LOG_DEBUG("Name=" << name << " | User=" << user);
 
    if(m_connections.size() >= MaxConnection) {
-      WEPA_THROW_EXCEPTION(asString() << " Can not create more than " << MaxConnection);
+      COFFEE_THROW_EXCEPTION(asString() << " Can not create more than " << MaxConnection);
    }
 
    for(connection_iterator ii = connection_begin(), maxii = connection_end(); ii != maxii; ii ++) {
       if(connection(ii)->getName() == name) {
-         WEPA_THROW_EXCEPTION(asString() << " | Connection=" << name << " is already defined");
+         COFFEE_THROW_EXCEPTION(asString() << " | Connection=" << name << " is already defined");
       }
    }
 
@@ -194,7 +194,7 @@ std::shared_ptr<dbms::Connection> dbms::Database::createConnection(const char* n
 std::shared_ptr<dbms::Connection>& dbms::Database::findConnection(const char* name)
    throw(adt::RuntimeException)
 {
-   logger::TraceMethod ttmm(logger::Level::Local7, WEPA_FILE_LOCATION);
+   logger::TraceMethod ttmm(logger::Level::Local7, COFFEE_FILE_LOCATION);
 
    LOG_DEBUG("Name=" << name);
 
@@ -204,19 +204,19 @@ std::shared_ptr<dbms::Connection>& dbms::Database::findConnection(const char* na
       }
    }
 
-   WEPA_THROW_EXCEPTION(asString() << " | Connection='" << name << "' is not defined");
+   COFFEE_THROW_EXCEPTION(asString() << " | Connection='" << name << "' is not defined");
 }
 
 std::shared_ptr<dbms::Statement> dbms::Database::createStatement(const char* name, const char* expression, const ActionOnError::_v actionOnError)
    throw(adt::RuntimeException)
 {
-   logger::TraceMethod ttmm(logger::Level::Local7, WEPA_FILE_LOCATION);
+   logger::TraceMethod ttmm(logger::Level::Local7, COFFEE_FILE_LOCATION);
 
    LOG_DEBUG("Name=" << name);
 
    for(statement_iterator ii = statement_begin(), maxii = statement_end(); ii != maxii; ++ ii) {
       if(statement(ii)->getName() == name)
-         WEPA_THROW_EXCEPTION("Sentence '" << name << "' is already defined");
+         COFFEE_THROW_EXCEPTION("Sentence '" << name << "' is already defined");
    }
 
    if(m_statementTranslator)
@@ -236,7 +236,7 @@ std::shared_ptr<dbms::Statement> dbms::Database::createStatement(const char* nam
 std::shared_ptr<dbms::Statement>& dbms::Database::findStatement(const char* name)
    throw(adt::RuntimeException)
 {
-   logger::TraceMethod ttmm(logger::Level::Local7, WEPA_FILE_LOCATION);
+   logger::TraceMethod ttmm(logger::Level::Local7, COFFEE_FILE_LOCATION);
 
    Statement* result(NULL);
 
@@ -248,7 +248,7 @@ std::shared_ptr<dbms::Statement>& dbms::Database::findStatement(const char* name
       }
    }
 
-   WEPA_THROW_EXCEPTION("Statement '" << name << "' was not found");
+   COFFEE_THROW_EXCEPTION("Statement '" << name << "' was not found");
 }
 
 void dbms::Database::notifyRecoveryFail(dbms::Connection& connection) const
@@ -280,26 +280,26 @@ adt::StreamString dbms::Database::asString() const
    return result += " }";
 }
 
-xml::Node& dbms::Database::asXML(xml::Node& parent) const
+std::shared_ptr<xml::Node> dbms::Database::asXML(std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild("dbms.Database");
+   std::shared_ptr<xml::Node> result = parent->createChild("dbms.Database");
 
    app::Engine::asXML(result);
 
-   result.createAttribute("Type",(m_type == Type::Local) ? "Local": "Remote");
+   result->createAttribute("Type",(m_type == Type::Local) ? "Local": "Remote");
 
    if(m_type != Type::Local)
-      result.createAttribute("Name", m_name);
+      result->createAttribute("Name", m_name);
 
    if(m_statementTranslator)
-      result.createAttribute("Translator", m_statementTranslator->getName());
+      result->createAttribute("Translator", m_statementTranslator->getName());
 
-   xml::Node& connections = result. createChild("Connections");
+   std::shared_ptr<xml::Node> connections = result->createChild("Connections");
    for(const_connection_iterator ii = connection_begin(), maxii = connection_end(); ii != maxii; ii ++)
       connection(ii)->asXML(connections);
 
-   xml::Node& statements = result. createChild("Statements");
+   std::shared_ptr<xml::Node> statements = result->createChild("Statements");
    for(const_statement_iterator ii = statement_begin(), maxii = statement_end(); ii != maxii; ii ++)
       statement(ii)->asXML(statements);
 

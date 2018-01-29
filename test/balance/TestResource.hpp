@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,21 +32,21 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef _wepa_test_balance_TestResource_hpp
-#define _wepa_test_balance_TestResource_hpp
+#ifndef _coffee_test_balance_TestResource_hpp
+#define _coffee_test_balance_TestResource_hpp
 
-#include <wepa/balance/Resource.hpp>
-#include <wepa/adt/AsString.hpp>
+#include <coffee/balance/Resource.hpp>
+#include <coffee/adt/AsString.hpp>
 
-#include <wepa/balance/ResourceList.hpp>
+#include <coffee/balance/ResourceList.hpp>
 
-namespace wepa {
+namespace coffee {
 
 namespace test {
 
 namespace balance {
 
-class TestResource : public wepa::balance::Resource {
+class TestResource : public coffee::balance::Resource {
 public:
    TestResource (const int key) :
       Resource (adt::StreamString ("TestResource-").append (adt::AsString::apply (key, "%02d"))),
@@ -56,9 +56,9 @@ public:
    void setAvailable (const bool available) noexcept { m_available = available; }
    int getKey () const noexcept { return m_key; }
 
-   static std::shared_ptr<TestResource> cast(std::shared_ptr<wepa::balance::Resource>& resource) { return std::dynamic_pointer_cast<TestResource>(resource); }
-   static std::shared_ptr<TestResource> cast(const std::shared_ptr<wepa::balance::Resource>& resource) { return std::dynamic_pointer_cast<TestResource>(resource); }
-   static std::shared_ptr<TestResource> cast_copy(std::shared_ptr<wepa::balance::Resource> resource) { return std::dynamic_pointer_cast<TestResource>(resource); }
+   static std::shared_ptr<TestResource> cast(std::shared_ptr<coffee::balance::Resource>& resource) { return std::dynamic_pointer_cast<TestResource>(resource); }
+   static std::shared_ptr<TestResource> cast(const std::shared_ptr<coffee::balance::Resource>& resource) { return std::dynamic_pointer_cast<TestResource>(resource); }
+   static std::shared_ptr<TestResource> cast_copy(std::shared_ptr<coffee::balance::Resource> resource) { return std::dynamic_pointer_cast<TestResource>(resource); }
 
 private:
    const int m_key;
@@ -68,11 +68,11 @@ private:
    void initialize () throw (adt::RuntimeException) { m_available = true; }
 };
 
-inline std::shared_ptr<wepa::balance::ResourceList> setup(const int maxResource, const int firstId = 0)
+inline std::shared_ptr<coffee::balance::ResourceList> setup(const int maxResource, const int firstId = 0)
 {
-   std::shared_ptr<wepa::balance::ResourceList> result = std::make_shared<wepa::balance::ResourceList>("TestResources");
+   std::shared_ptr<coffee::balance::ResourceList> result = std::make_shared<coffee::balance::ResourceList>("TestResources");
 
-   logger::Logger::initialize(new logger::TtyWriter);
+   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
 
    int id = firstId;
    for (int ii = 0; ii < maxResource; ++ ii) {

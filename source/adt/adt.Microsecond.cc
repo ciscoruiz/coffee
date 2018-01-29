@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -36,13 +36,13 @@
 #include <sys/time.h>
 #include <stdlib.h>
 
-#include <wepa/adt/AsString.hpp>
-#include <wepa/adt/Millisecond.hpp>
-#include <wepa/adt/Second.hpp>
-#include <wepa/adt/Microsecond.hpp>
+#include <coffee/adt/AsString.hpp>
+#include <coffee/adt/Millisecond.hpp>
+#include <coffee/adt/Second.hpp>
+#include <coffee/adt/Microsecond.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 #define implement_operator(op) \
    bool adt::Microsecond::operator op (const adt::Millisecond& other) const \
@@ -105,7 +105,7 @@ adt::Microsecond adt::Microsecond::fromString (const std::string& value)
    throw (adt::RuntimeException)
 {
    if (value.find (" us") == string::npos)
-      WEPA_THROW_EXCEPTION ("String: " << value << " is not a valid microsecond expression");
+      COFFEE_THROW_EXCEPTION ("String: " << value << " is not a valid microsecond expression");
 
    return Microsecond (atoll (value.c_str ()));
 }

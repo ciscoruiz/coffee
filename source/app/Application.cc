@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
-// (c) Copyright 2018 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -23,11 +23,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
@@ -38,6 +38,7 @@
 #include <fstream>
 #include <unistd.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <time.h>
 #include <unistd.h>
@@ -45,57 +46,57 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 
-#include <wepa/config/Release.hpp>
-#include <wepa/config/SCCSRepository.hpp>
-#include <wepa/config/defines.hpp>
+#include <coffee/config/Release.hpp>
+#include <coffee/config/SCCSRepository.hpp>
+#include <coffee/config/defines.hpp>
 
-#include <wepa/adt/RuntimeException.hpp>
+#include <coffee/adt/RuntimeException.hpp>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TraceMethod.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Attribute.hpp>
-#include <wepa/xml/Compiler.hpp>
-#include <wepa/xml/SCCS.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
+#include <coffee/xml/Compiler.hpp>
+#include <coffee/xml/SCCS.hpp>
 
-#include <wepa/app/Application.hpp>
-#include <wepa/app/SCCS.hpp>
-#include <wepa/app/Engine.hpp>
+#include <coffee/app/Application.hpp>
+#include <coffee/app/SCCS.hpp>
+#include <coffee/app/Engine.hpp>
 
 using namespace std;
-using namespace wepa;
-using namespace wepa::adt;
+using namespace coffee;
+using namespace coffee::adt;
 
 //static
 app::Application* app::Application::m_this = nullptr;
 
-app::Application::Application (const char* shortName, const char* title, const char* version, const char* date, const char* time) :
-   Runnable (shortName),
-   a_version (version),
-   a_title (title),
-   a_enableGPL (false)
+app::Application::Application(const char* shortName, const char* title, const char* version, const char* date, const char* time) :
+   Runnable(shortName),
+   a_version(version),
+   a_title(title),
+   a_enableGPL(false)
 {
-   sigset (SIGUSR1, handlerUserSignal);
-   sigset (SIGUSR2, handlerUserSignal);
-   sigset (SIGTERM, handlerSignalTerminate);
-   sigignore (SIGINT);
+   sigset(SIGUSR1, handlerUserSignal);
+   sigset(SIGUSR2, handlerUserSignal);
+   sigset(SIGTERM, handlerSignalTerminate);
+   sigignore(SIGINT);
 
-   app::SCCS::activate ();
+   app::SCCS::activate();
    xml::SCCS::activate();
 
-   a_version += config::Release::getArchitecture ();
+   a_version += config::Release::getArchitecture();
 
-   a_pid = getpid ();
+   a_pid = getpid();
 
-   if (m_this == nullptr)
+   if(m_this == nullptr)
       m_this = this;
 
-   cout << getName () << " - " << a_title << ". Version " << a_version << endl;
-   if (date || time) {
+   cout << getName() << " - " << a_title << ". Version " << a_version << endl;
+   if(date || time) {
       cout << "Release date: ";
-      if (date) cout << date << " ";
-      if (time) cout << time;
+      if(date) cout << date << " ";
+      if(time) cout << time;
       cout << endl;
    }
    cout << "(c) Copyright 2018 by Francisco Ruiz." << endl << endl;
@@ -103,18 +104,18 @@ app::Application::Application (const char* shortName, const char* title, const c
 
 app::Application::~Application()
 {
-   if (m_this == this) {
+   if(m_this == this) {
       m_this = nullptr;
    }
    a_engines.clear();
 }
 
-app::Application::engine_iterator app::Application::engine_find (const char* className)
+app::Application::engine_iterator app::Application::engine_find(const char* className)
    noexcept
 {
-   for (engine_iterator ii = engine_begin (), maxii = engine_end (); ii != maxii; ii ++) {
-      auto engine = Application::engine (ii);
-      if (wepa_strcmp (className, engine->getClassName ()) == 0)
+   for(engine_iterator ii = engine_begin(), maxii = engine_end(); ii != maxii; ii ++) {
+      auto engine = Application::engine(ii);
+      if(coffee_strcmp(className, engine->getClassName()) == 0)
          return ii;
    }
 
@@ -122,25 +123,25 @@ app::Application::engine_iterator app::Application::engine_find (const char* cla
 }
 
 /**
- * (1) Si se ejecuta el metodo clone evita que los hijos que termina se queden como zombies.
+ *(1) Si se ejecuta el metodo clone evita que los hijos que termina se queden como zombies.
  */
-void app::Application::start ()
-   throw (RuntimeException)
+void app::Application::start()
+   throw(RuntimeException)
 {
-   LOG_THIS_METHOD ();
+   LOG_THIS_METHOD();
 
    config::SCCSRepository& moduleManager = config::SCCSRepository::getInstance();
 
-   if (isRunning() == true) {
-      WEPA_THROW_EXCEPTION(asString () << " | Already running");
+   if(isRunning() == true) {
+      COFFEE_THROW_EXCEPTION(asString() << " | Already running");
    }
 
-   if (sigset (SIGCHLD, handlerChildTerminate) != 0) {
-      LOG_ERROR (asString () << " | Can not install child termination handler | Error=" << strerror (errno) );
+   if(sigset(SIGCHLD, handlerChildTerminate) != 0) {
+      LOG_ERROR(asString() << " | Can not install child termination handler | Error=" << strerror(errno) );
    }
 
    try {
-      if (a_enableGPL == true) {
+      if(a_enableGPL == true) {
          cout << "This program is free software: you can redistribute it and/or modify" << endl;
          cout << "it under the terms of the GNU General Public License as published by" << endl;
          cout << "the Free Software Foundation, either version 3 of the License, or" << endl;
@@ -155,16 +156,16 @@ void app::Application::start ()
          cout << "along with this program.  If not, see <http://www.gnu.org/licenses/>." << endl << endl;
       }
 
-      cout << "WEPA - Write Excellent Professional Applications. Version " << config::Release::getVersion () << endl;
+      cout << "COFFEE - COmpany eFFEEctive Platform. Version " << config::Release::getVersion() << endl;
       cout << "Developed by Francisco Ruiz" << endl;
       cout << "Release date: " << __DATE__ << " " << __TIME__ << endl;
       cout << "(c) Copyright 2018,2014 by Francisco Ruiz." << endl << endl;
 
-      initialize ();
+      initialize();
 
       cout << "Loading modules ...." << endl;
-      for (config::SCCSRepository::const_entry_iterator ii = moduleManager.entry_begin (), maxii = moduleManager.entry_end (); ii != maxii; ++ ii) {
-         cout << "\t Module " << config::SCCSRepository::module_name (ii) << endl;
+      for(config::SCCSRepository::const_entry_iterator ii = moduleManager.entry_begin(), maxii = moduleManager.entry_end(); ii != maxii; ++ ii) {
+         cout << "\t Module " << config::SCCSRepository::module_name(ii) << endl;
       }
       cout << endl;
 
@@ -173,51 +174,51 @@ void app::Application::start ()
       startEngines();
 
       statusRunning();
-      run ();
+      run();
       statusStopped();
 
-      stopEngines ();
+      stopEngines();
    }
-   catch (adt::RuntimeException& ex) {
+   catch(adt::RuntimeException& ex) {
       logger::Logger::write(ex);
       statusStopped();
-      stopEngines ();
+      stopEngines();
       throw;
    }
 
-   cout << getName () << " finished ..." << endl << endl;
+   cout << getName() << " finished ..." << endl << endl;
 }
 
-void app::Application::startEngines ()
-   throw (RuntimeException)
+void app::Application::startEngines()
+   throw(RuntimeException)
 {
-   LOG_THIS_METHOD ();
+   LOG_THIS_METHOD();
 
-   for (engine_iterator ii = engine_begin (); ii != engine_end (); ii ++) {
-      auto engine = Application::engine (ii);
-      LOG_INFO ("Initializing engine | " <<  engine->asString ());
-      engine->initialize ();
+   for(engine_iterator ii = engine_begin(); ii != engine_end(); ii ++) {
+      auto engine = Application::engine(ii);
+      LOG_INFO("Initializing engine | " <<  engine->asString());
+      engine->initialize();
    }
 }
 
-void app::Application::stopEngines ()
+void app::Application::stopEngines()
    noexcept
 {
-   LOG_THIS_METHOD ();
+   LOG_THIS_METHOD();
 
-   for (engine_iterator ii = engine_begin (); ii != engine_end (); ii ++) {
-      auto engine = Application::engine (ii);
+   for(engine_iterator ii = engine_begin(); ii != engine_end(); ii ++) {
+      auto engine = Application::engine(ii);
 
-      if (engine->isStopped() == true)
+      if(engine->isStopped() == true)
          continue;
 
-      LOG_INFO ("Finalizing engine | " <<  engine->asString ());
+      LOG_INFO("Finalizing engine | " <<  engine->asString());
 
       try {
-         engine->stop ();
+         engine->stop();
       }
-      catch (RuntimeException& ex) {
-         logger::Logger::write (ex);
+      catch(RuntimeException& ex) {
+         logger::Logger::write(ex);
       }
    }
 }
@@ -227,77 +228,77 @@ void app::Application::stopEngines ()
  * haya solicitado la parada de la aplicaci�n.
  */
 // virtual
-void app::Application::do_requestStop ()
-   throw (RuntimeException)
+void app::Application::do_requestStop()
+   throw(RuntimeException)
 {
-   LOG_THIS_METHOD ();
+   LOG_THIS_METHOD();
 
-   for (engine_iterator ii = engine_begin (), maxii = engine_end (); ii != maxii; ii ++) {
-      auto engine = Application::engine (ii);
+   for(engine_iterator ii = engine_begin(), maxii = engine_end(); ii != maxii; ii ++) {
+      auto engine = Application::engine(ii);
 
-      LOG_INFO ("Request stop for engine | " <<  engine->asString ());
+      LOG_INFO("Request stop for engine | " <<  engine->asString());
 
       try {
-         engine->requestStop ();
+         engine->requestStop();
       }
-      catch (RuntimeException& ex) {
-         logger::Logger::write (ex);
-         exit (-1);
+      catch(RuntimeException& ex) {
+         logger::Logger::write(ex);
+         exit(-1);
       }
    }
 }
 
 //---------------------------------------------------------------------------------------
-// (1) Se invoca desde los constructores de los enginees => no se puede invocar a
+//(1) Se invoca desde los constructores de los enginees => no se puede invocar a
 // ningn m�odo virtual => obliga a que est� definidos antes de comenzar la
 // ejecucin de la aplicacin => se inicilizar� en el Application::start ya que en
 // ese momento los objetos est� completamente creados.
 //---------------------------------------------------------------------------------------
-void app::Application::attach (std::shared_ptr<Engine> engine)
-   throw (RuntimeException)
+void app::Application::attach(std::shared_ptr<Engine> engine)
+   throw(RuntimeException)
 {
-   if (!engine)
-      WEPA_THROW_EXCEPTION ("Can not associate a NULL engine");
+   if(!engine)
+      COFFEE_THROW_EXCEPTION("Can not associate a NULL engine");
 
    auto ii = engine_find(engine->getName());
 
-   if (ii != engine_end()) {
-      LOG_INFO (engine->asString () << " | Already defined") ;
+   if(ii != engine_end()) {
+      LOG_INFO(engine->asString() << " | Already defined") ;
       return;
    }
 
-   LOG_DEBUG ("Registering " << engine->asString ());
+   LOG_DEBUG("Registering " << engine->asString());
 
-   a_engines.push_back (engine);
+   a_engines.push_back(engine);
 
-   if (isRunning ()) {
-      LOG_INFO ("Initializing engine | " << engine->asString ());
-      engine->initialize ();
+   if(isRunning()) {
+      LOG_INFO("Initializing engine | " << engine->asString());
+      engine->initialize();
    }
 }
 
-void app::Application::writeContext (const std::string& file)
-   throw (RuntimeException)
+void app::Application::writeContext(const std::string& file)
+   throw(RuntimeException)
 {
    ofstream out;
 
-   out.open (file.c_str ());
+   out.open(file.c_str());
 
-   if (out.is_open () == false) {
-      WEPA_THROW_EXCEPTION("Can not open file'" << file << "'");
+   if(out.is_open() == false) {
+      COFFEE_THROW_EXCEPTION("Can not open file'" << file << "'");
    }
 
-   LOG_NOTICE ("File: " << file);
+   LOG_NOTICE("File: " << file);
 
-   xml::Node root ("Context");
+   std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("Context");
 
-   asXML (root);
+   asXML(root);
 
    xml::Compiler compiler;
 
-   out << compiler.apply (root) << std::endl;
+   out << compiler.apply(root) << std::endl;
 
-   out.close ();
+   out.close();
 }
 
 adt::StreamString app::Application::asString() const noexcept
@@ -308,88 +309,88 @@ adt::StreamString app::Application::asString() const noexcept
    return result += " }";
 }
 
-xml::Node& app::Application::asXML (xml::Node& root) const
+std::shared_ptr<xml::Node> app::Application::asXML(std::shared_ptr<xml::Node>& root) const
    noexcept
 {
-   xml::Node& app = root.createChild ("app.Application");
+   std::shared_ptr<xml::Node> result = root->createChild("app.Application");
 
-   app.createAttribute ("Version", getVersion ());
-   app.createAttribute ("pid", getPid ());
+   result->createAttribute("Version", getVersion());
+   result->createAttribute("pid", getPid());
 
    config::SCCSRepository& moduleManager = config::SCCSRepository::getInstance();
 
-   xml::Node& modules = app.createChild ("app.Modules");
-   for (config::SCCSRepository::const_entry_iterator ii = moduleManager.entry_begin (), maxii = moduleManager.entry_end (); ii != maxii; ii ++) {
-      xml::Node& xmlModule = modules.createChild ("Module");
-      xmlModule.createAttribute ("Name", config::SCCSRepository::module_name (ii));
+   std::shared_ptr<xml::Node> modules = result->createChild("result->Modules");
+   for(config::SCCSRepository::const_entry_iterator ii = moduleManager.entry_begin(), maxii = moduleManager.entry_end(); ii != maxii; ii ++) {
+      std::shared_ptr<xml::Node> xmlModule = modules->createChild("Module");
+      xmlModule->createAttribute("Name", config::SCCSRepository::module_name(ii));
    }
 
-   xml::Node& engines = app.createChild ("app.Engines");
-   for (const_engine_iterator ii = engine_begin (), maxii = engine_end (); ii != maxii; ii ++)
-      engine (ii)->asXML (engines);
+   std::shared_ptr<xml::Node> engines = result->createChild("result->Engines");
+   for(const_engine_iterator ii = engine_begin(), maxii = engine_end(); ii != maxii; ii ++)
+      engine(ii)->asXML(engines);
 
-   return app;
+   return result;
 }
 
 // virtual
-void app::Application::signalUSR1 ()
-   throw (RuntimeException)
+void app::Application::signalUSR1()
+   throw(RuntimeException)
 {
-   adt::StreamString fileName ("/var/tmp/nemesis.context.");
-   writeContext (fileName << AsString::apply (getPid (), "%05d"));
+   adt::StreamString fileName("/var/tmp/nemesis.context.");
+   writeContext(fileName << AsString::apply(getPid(), "%05d"));
 }
 
 // virtual
-void app::Application::signalUSR2 ()
-   throw (RuntimeException)
+void app::Application::signalUSR2()
+   throw(RuntimeException)
 {
-   logger::Level::_v original = logger::Logger::getLevel ();
+   logger::Level::_v original = logger::Logger::getLevel();
 
-   int currentLevel = (int) original + 1;
+   int currentLevel =(int) original + 1;
 
-   if (currentLevel > logger::Level::Debug)
+   if(currentLevel > logger::Level::Debug)
       currentLevel = logger::Level::Error;
 
-   logger::Logger::setLevel ((logger::Level::_v) currentLevel);
+   logger::Logger::setLevel((logger::Level::_v) currentLevel);
 
-   string msg ("Do not worry about level of this line | Original level: ");
-   msg += logger::Level::enumName (original);
+   string msg("Do not worry about level of this line | Original level: ");
+   msg += logger::Level::enumName(original);
    msg += " | Current level: ";
-   msg += logger::Level::enumName (logger::Logger::getLevel());
+   msg += logger::Level::enumName(logger::Logger::getLevel());
 
-   logger::Logger::write (logger::Logger::getLevel(), msg, WEPA_FILE_LOCATION);
+   logger::Logger::write(logger::Logger::getLevel(), msg, COFFEE_FILE_LOCATION);
 }
 
 // static
-void app::Application::handlerUserSignal (int signalID)
+void app::Application::handlerUserSignal(int signalID)
    noexcept
 {
    try {
-      if (m_this != nullptr) {
-         if (signalID == SIGUSR1)
-            m_this->signalUSR1 ();
+      if(m_this != nullptr) {
+         if(signalID == SIGUSR1)
+            m_this->signalUSR1();
          else
-            m_this->signalUSR2 ();
+            m_this->signalUSR2();
       }
    }
-   catch (adt::RuntimeException& ex) {
-      logger::Logger::write (ex);
+   catch(adt::RuntimeException& ex) {
+      logger::Logger::write(ex);
    }
 }
 
 // static
-void app::Application::handlerSignalTerminate (int)
+void app::Application::handlerSignalTerminate(int)
    noexcept
 {
    try {
-      if (m_this != nullptr) {
-         LOG_WARN (m_this->asString () << " | Received SIGTERM signal");
-         m_this->requestStop ();
+      if(m_this != nullptr) {
+         LOG_WARN(m_this->asString() << " | Received SIGTERM signal");
+         m_this->requestStop();
       }
    }
-   catch (adt::RuntimeException& ex) {
-      logger::Logger::write (ex);
-      exit (EXIT_SUCCESS);
+   catch(adt::RuntimeException& ex) {
+      logger::Logger::write(ex);
+      exit(EXIT_SUCCESS);
    }
 }
 
@@ -398,11 +399,11 @@ void app::Application::handlerSignalTerminate (int)
  * elimina de la lista de procesos hijos.
  */
 // static
-void app::Application::handlerChildTerminate (int sig)
+void app::Application::handlerChildTerminate(int sig)
    noexcept
 {
-   if (sig == SIGCHLD) {
+   if(sig == SIGCHLD) {
       int status;
-      pid_t pid = wait (&status);
+      pid_t pid = wait(&status);
    }
 }

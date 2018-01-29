@@ -4,7 +4,7 @@ sources = Glob('*.cc')
 
 env.Append (CCFLAGS = '-I/usr/include/libxml2')
 
-result = env.StaticLibrary ('wepa_xml', sources);
+result = env.StaticLibrary ('coffee_xml', sources);
 
 Return ('result')
 

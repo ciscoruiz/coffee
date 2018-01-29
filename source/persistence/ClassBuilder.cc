@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -31,16 +31,16 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
-#include <wepa/persistence/ClassBuilder.hpp>
-#include <wepa/persistence/PrimaryKey.hpp>
+#include <coffee/persistence/ClassBuilder.hpp>
+#include <coffee/persistence/PrimaryKey.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 persistence::ClassBuilder& persistence::ClassBuilder::set(std::shared_ptr<PrimaryKey>& primaryKey)
 throw (adt::RuntimeException)
 {
    if (m_primaryKey) {
-      WEPA_THROW_EXCEPTION(m_className << " primary key already added");
+      COFFEE_THROW_EXCEPTION(m_className << " primary key already added");
    }
 
    m_primaryKey = primaryKey;
@@ -51,22 +51,22 @@ std::shared_ptr<persistence::Class> persistence::ClassBuilder::build() const
       throw (adt::RuntimeException)
 {
    if (!m_primaryKey || m_primaryKey->empty()) {
-      WEPA_THROW_EXCEPTION(m_className << " does not define a valid primary key");
+      COFFEE_THROW_EXCEPTION(m_className << " does not define a valid primary key");
    }
 
    if (empty()) {
-      WEPA_THROW_EXCEPTION(m_className << " does not define any member");
+      COFFEE_THROW_EXCEPTION(m_className << " does not define any member");
    }
 
    for (const_data_iterator ii = begin(), maxii = end(); ii != maxii; ++ ii) {
       if (m_primaryKey->constains(name(ii)) == true) {
-         WEPA_THROW_EXCEPTION(m_className << " member " << name(ii) << " already used as a member in the primary key");
+         COFFEE_THROW_EXCEPTION(m_className << " member " << name(ii) << " already used as a member in the primary key");
       }
    }
 
    for (const_data_iterator ii = m_primaryKey->begin(), maxii = m_primaryKey->end(); ii != maxii; ++ ii) {
       if (constains(name(ii)) == true) {
-         WEPA_THROW_EXCEPTION(m_className << " member " << name(ii) << " already used as a member class");
+         COFFEE_THROW_EXCEPTION(m_className << " member " << name(ii) << " already used as a member class");
       }
    }
 

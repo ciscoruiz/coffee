@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,14 +32,14 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __wepa_mock_MockApplication_hpp
-#define __wepa_mock_MockApplication_hpp
+#ifndef __coffee_mock_MockApplication_hpp
+#define __coffee_mock_MockApplication_hpp
 
 #include <mutex>
 
-#include <wepa/app/Application.hpp>
+#include <coffee/app/Application.hpp>
 
-namespace wepa {
+namespace coffee {
 namespace mock {
 
 class MockApplication : public app::Application {
@@ -55,5 +55,5 @@ private:
 };
 
 } /* namespace mock */
-} /* namespace wepa */
+} /* namespace coffee */
 #endif

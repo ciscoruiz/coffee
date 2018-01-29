@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,19 +32,19 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/persistence/Class.hpp>
-#include <wepa/persistence/ClassBuilder.hpp>
-#include <wepa/persistence/Object.hpp>
-#include <wepa/persistence/PrimaryKey.hpp>
+#include <coffee/persistence/Class.hpp>
+#include <coffee/persistence/ClassBuilder.hpp>
+#include <coffee/persistence/Object.hpp>
+#include <coffee/persistence/PrimaryKey.hpp>
 
-#include <wepa/logger/Logger.hpp>
+#include <coffee/logger/Logger.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
 
-#include <wepa/dbms/datatype/Abstract.hpp>
+#include <coffee/dbms/datatype/Abstract.hpp>
 
-using namespace wepa;
+using namespace coffee;
 
 persistence::Class::Class(const ClassBuilder& classBuilder) :
      adt::NamedObject(classBuilder.getClassName())
@@ -58,7 +58,7 @@ std::shared_ptr<persistence::Object> persistence::Class::createObject(const std:
    throw (adt::RuntimeException)
 {
    if (!m_primaryKey->matches(*primaryKey.get())) {
-      WEPA_THROW_EXCEPTION(asString() << " primary key does not matches with class");
+      COFFEE_THROW_EXCEPTION(asString() << " primary key does not matches with class");
    }
 
     dbms::datatype::Set members;
@@ -77,11 +77,10 @@ adt::StreamString persistence::Class::asString() const noexcept {
    return result << " }";
 }
 
-xml::Node& persistence::Class::asXML(xml::Node& parent) const noexcept
+std::shared_ptr<xml::Node> persistence::Class::asXML(std::shared_ptr<xml::Node>& parent) const noexcept
 {
-   xml::Node& result = parent.createChild("persistence.Class");
-   result.createAttribute("Name", this->getName());
-
+   std::shared_ptr<xml::Node> result = parent->createChild("persistence.Class");
+   result->createAttribute("Name", this->getName());
    return result;
 }
 

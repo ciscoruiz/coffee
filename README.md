@@ -1,4 +1,5 @@
-wepa
+COFFEE
 ====
 
-WEPA is the acronym for "Write Excellent Professional Applications"
+COFFEE is the acronym for "COmpany eFFEEctive Platform"
+

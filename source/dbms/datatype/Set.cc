@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 //(c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,23 +32,36 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+#include <utility>
 
-#include <wepa/dbms/datatype/Set.hpp>
+#include <coffee/dbms/datatype/Set.hpp>
 
-#include <wepa/dbms/datatype/Date.hpp>
-#include <wepa/dbms/datatype/Float.hpp>
-#include <wepa/dbms/datatype/Integer.hpp>
-#include <wepa/dbms/datatype/LongBlock.hpp>
-#include <wepa/dbms/datatype/ShortBlock.hpp>
-#include <wepa/dbms/datatype/String.hpp>
+#include <coffee/dbms/datatype/Date.hpp>
+#include <coffee/dbms/datatype/Float.hpp>
+#include <coffee/dbms/datatype/Integer.hpp>
+#include <coffee/dbms/datatype/LongBlock.hpp>
+#include <coffee/dbms/datatype/ShortBlock.hpp>
+#include <coffee/dbms/datatype/String.hpp>
 
-using namespace wepa;
+using namespace coffee;
+
+dbms::datatype::Set::Set(const Set& other)
+{
+   for (auto ii : other.m_creationOrder) {
+	   insert(data(ii));
+   }
+}
 
 void dbms::datatype::Set::insert(std::shared_ptr<Abstract> data) throw (adt::RuntimeException) {
    if (m_datas.find(data->getName()) != end()) {
-      WEPA_THROW_EXCEPTION(data->getName() << " already defined");
+      COFFEE_THROW_EXCEPTION(data->getName() << " already defined");
    }
-   m_datas[data->getName()] = data;
+
+   auto result = m_datas.insert(Datas::value_type(data->getName(), data));
+
+   if (result.second) {
+	   m_creationOrder.push_back(result.first);
+   }
 }
 
 std::shared_ptr<dbms::datatype::Abstract>& dbms::datatype::Set::find(const std::string& name)
@@ -57,7 +70,7 @@ std::shared_ptr<dbms::datatype::Abstract>& dbms::datatype::Set::find(const std::
    auto ii = m_datas.find(name);
 
    if (ii == end()) {
-      WEPA_THROW_EXCEPTION(name << " is not defined");
+      COFFEE_THROW_EXCEPTION(name << " is not defined");
    }
 
    return data(ii);
@@ -69,7 +82,7 @@ const std::shared_ptr<dbms::datatype::Abstract>& dbms::datatype::Set::find(const
    auto ii = m_datas.find(name);
 
    if (ii == end()) {
-      WEPA_THROW_EXCEPTION(name << " is not defined");
+      COFFEE_THROW_EXCEPTION(name << " is not defined");
    }
 
    return data(ii);
@@ -83,8 +96,9 @@ dbms::datatype::Set& dbms::datatype::Set::operator=(const Set& other)
    }
 
    m_datas.clear();
-   for (auto ii = other.begin(), maxii = other.end(); ii != maxii; ++ ii) {
-      insert(data(ii));
+   m_creationOrder.clear();
+   for (auto ii : other.m_creationOrder) {
+	   insert(data(ii));
    }
 
    return *this;
@@ -98,7 +112,7 @@ int dbms::datatype::Set::compare(const Set& other) const
    }
 
    if (size() != other.size()) {
-      WEPA_THROW_EXCEPTION(
+      COFFEE_THROW_EXCEPTION(
          "Can not compare sets with different number of components | N-Size=" << size() << " | other-Size=" << other.size()
       );
    }
@@ -106,17 +120,17 @@ int dbms::datatype::Set::compare(const Set& other) const
    int compareCounter = 0;
    int result = 0;
 
-   for(auto& ii : m_datas) {
+   for (auto ii : m_creationOrder) {
       ++ compareCounter;
 
-      result = ii.second->compare(other.find(ii.first));
+      result = Set::data(ii)->compare(other.find(Set::name(ii)));
 
       if (result != 0)
          break;
    }
 
    if (compareCounter != size() && result == 0) {
-      WEPA_THROW_EXCEPTION("Only " << compareCounter << " from " << size() << " components were compared");
+      COFFEE_THROW_EXCEPTION("Only " << compareCounter << " from " << size() << " components were compared");
    }
 
    return result;
@@ -140,20 +154,20 @@ bool dbms::datatype::Set::operator==(const Set& other) const
 int dbms::datatype::Set::getInteger(const std::string& columnName) const
    throw(dbms::InvalidDataException)
 {
-   auto member = wepa_datatype_downcast(dbms::datatype::Integer,find(columnName));
+   auto member = coffee_datatype_downcast(dbms::datatype::Integer,find(columnName));
    return member->getValue();
 }
 
 std::string dbms::datatype::Set::getString(const std::string& columnName)
    const throw(adt::RuntimeException, dbms::InvalidDataException)
 {
-   auto member = wepa_datatype_downcast(dbms::datatype::String,find(columnName));
+   auto member = coffee_datatype_downcast(dbms::datatype::String,find(columnName));
    return std::string(member->getValue());
 }
 
 float dbms::datatype::Set::getFloat(const std::string& columnName) const throw(dbms::InvalidDataException)
 {
-   auto member = wepa_datatype_downcast(dbms::datatype::Float,find(columnName));
+   auto member = coffee_datatype_downcast(dbms::datatype::Float,find(columnName));
    return member->getFloatValue();
 }
 
@@ -162,33 +176,33 @@ const adt::DataBlock& dbms::datatype::Set::getDataBlock(const std::string& colum
    auto abstractMember = find(columnName);
 
    if(abstractMember->getType() == dbms::datatype::Abstract::Datatype::LongBlock)
-      return wepa_datatype_downcast(dbms::datatype::LongBlock, abstractMember)->getValue();
+      return coffee_datatype_downcast(dbms::datatype::LongBlock, abstractMember)->getValue();
    else
-      return wepa_datatype_downcast(dbms::datatype::ShortBlock, abstractMember)->getValue();
+      return coffee_datatype_downcast(dbms::datatype::ShortBlock, abstractMember)->getValue();
 }
 
 const adt::Second& dbms::datatype::Set::getDate(const std::string& columnName) const throw(dbms::InvalidDataException)
 {
-   auto member = wepa_datatype_downcast(dbms::datatype::Date,find(columnName));
+   auto member = coffee_datatype_downcast(dbms::datatype::Date,find(columnName));
    return member->getValue();
 }
 
 void dbms::datatype::Set::setInteger(const std::string& columnName, const int value) throw(dbms::InvalidDataException)
 {
-   auto member = wepa_datatype_downcast(dbms::datatype::Integer,find(columnName));
+   auto member = coffee_datatype_downcast(dbms::datatype::Integer,find(columnName));
    member->setValue(value);
 }
 
 void dbms::datatype::Set::setString(const std::string& columnName, const std::string& value)
    throw(adt::RuntimeException, dbms::InvalidDataException)
 {
-   auto member = wepa_datatype_downcast(dbms::datatype::String,find(columnName));
+   auto member = coffee_datatype_downcast(dbms::datatype::String,find(columnName));
    member->setValue(value);
 }
 
 void dbms::datatype::Set::setFloat(const std::string& columnName, const float value) throw(dbms::InvalidDataException)
 {
-   auto member = wepa_datatype_downcast(dbms::datatype::Float,find(columnName));
+   auto member = coffee_datatype_downcast(dbms::datatype::Float,find(columnName));
    member->setValue(value);
 }
 
@@ -197,14 +211,14 @@ void dbms::datatype::Set::setDataBlock(const std::string& columnName, const adt:
    auto abstractMember = find(columnName);
 
    if(abstractMember->getType() == dbms::datatype::Abstract::Datatype::LongBlock)
-      wepa_datatype_downcast(dbms::datatype::LongBlock, abstractMember)->setValue(value);
+      coffee_datatype_downcast(dbms::datatype::LongBlock, abstractMember)->setValue(value);
    else
-      wepa_datatype_downcast(dbms::datatype::ShortBlock, abstractMember)->setValue(value);
+      coffee_datatype_downcast(dbms::datatype::ShortBlock, abstractMember)->setValue(value);
 }
 
 void dbms::datatype::Set::setDate(const std::string& columnName, const adt::Second& value)
    throw(adt::RuntimeException, dbms::InvalidDataException)
 {
-   auto member = wepa_datatype_downcast(dbms::datatype::Date,find(columnName));
+   auto member = coffee_datatype_downcast(dbms::datatype::Date,find(columnName));
    member->setValue(value);
 }

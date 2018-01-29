@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include <sys/utsname.h>
 
-#include <wepa/config/Release.hpp>
-#include <wepa/config/defines.hpp>
+#include <coffee/config/Release.hpp>
+#include <coffee/config/defines.hpp>
 
 using namespace std;
-using namespace wepa;
+using namespace coffee;
 
 string config::Release::getVersion () noexcept
 {
-   static const int version = WEPA_VERSION;
+   static const int version = COFFEE_VERSION;
 
    string result;
    int mainVersion = (version & 0xff0000) >> 16;
@@ -46,9 +46,9 @@ string config::Release::getArchitecture () noexcept
    result += un.sysname;
    result += ' ';
 
-   char* release = wepa_strchr (un.release, '.');              // (1)
+   char* release = coffee_strchr (un.release, '.');              // (1)
    if (release != NULL)
-      if ((release = wepa_strchr (release + 1, '.')) != NULL)
+      if ((release = coffee_strchr (release + 1, '.')) != NULL)
          *release = 0;
 
    result += un.release;

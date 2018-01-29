@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,22 +32,23 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/logger/DefaultFormatter.hpp>
+#include <coffee/logger/DefaultFormatter.hpp>
 
-#include <wepa/adt/StreamString.hpp>
-#include <wepa/adt/Second.hpp>
+#include <coffee/adt/StreamString.hpp>
+#include <coffee/adt/Second.hpp>
 
-using namespace wepa;
-using namespace wepa::logger;
+using namespace coffee;
+using namespace coffee::logger;
 
-const adt::StreamString& DefaultFormatter::do_apply (const Elements& elements, adt::StreamString& output)
+std::string DefaultFormatter::apply (const Elements& elements)
    noexcept
 {
    auto second = adt::Second::getLocalTime ();
 
-   output.clear ();
+   adt::StreamString output;
+
    output << "[" << second.asDateTime() << "] ";
-   output << Level::enumNameEx(elements.level) << " | ";
+   output << Level::enumName(elements.level) << " | ";
    output << elements.function << " [" << elements.file << "(" << elements.lineno << ")]: ";
    output << elements.input;
 

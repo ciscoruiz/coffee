@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,10 +32,18 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/logger/Level.hpp>
+#include <coffee/logger/Level.hpp>
 
-auto_enum_assign(wepa::logger::Level) = {
-  "Emergency", "Alert", "Critical", "Error", "Warning", "Notice", "Information", "Debug",
-  "Local0", "Local1", "Local2", "Local3", "Local4", "Local5", "Local6", "Local7", NULL
-};
+using namespace coffee;
 
+//static
+const char* logger::Level::enumName(const Level::_v level)
+   noexcept
+{
+   static const char* names[] = {
+     "Emergency", "Alert", "Critical", "Error", "Warning", "Notice", "Information", "Debug",
+     "Local0", "Local1", "Local2", "Local3", "Local4", "Local5", "Local6", "Local7"
+   };
+
+   return (level == Level::None) ? "None": names[level];
+}

@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -40,24 +40,24 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <wepa/adt/AsString.hpp>
+#include <coffee/adt/AsString.hpp>
 
-#include <wepa/logger/Logger.hpp>
-#include <wepa/logger/TtyWriter.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TtyWriter.hpp>
 
-#include <wepa/balance/Resource.hpp>
-#include <wepa/balance/StrategyIndexed.hpp>
-#include <wepa/balance/GuardResourceList.hpp>
-#include <wepa/balance/ResourceList.hpp>
+#include <coffee/balance/Resource.hpp>
+#include <coffee/balance/StrategyIndexed.hpp>
+#include <coffee/balance/GuardResourceList.hpp>
+#include <coffee/balance/ResourceList.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Compiler.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Compiler.hpp>
 
 #include "TestResource.hpp"
 
-using namespace wepa;
-using namespace wepa::balance;
-using namespace wepa::test::balance;
+using namespace coffee;
+using namespace coffee::balance;
+using namespace coffee::test::balance;
 
 namespace IndexedTest {
    typedef std::map <int, int> CounterContainer;
@@ -95,7 +95,7 @@ namespace IndexedTest {
 
 BOOST_AUTO_TEST_CASE( inx_dont_use_unavailables )
 {
-   auto resourceList = wepa::test::balance::setup(IndexedTest::MaxResources);
+   auto resourceList = coffee::test::balance::setup(IndexedTest::MaxResources);
 
    balance::StrategyIndexed strategy(resourceList);
 
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE( inx_dont_use_unavailables )
 
 BOOST_AUTO_TEST_CASE( inx_balance_quality)
 {
-   auto resourceList = wepa::test::balance::setup(IndexedTest::MaxResources);
+   auto resourceList = coffee::test::balance::setup(IndexedTest::MaxResources);
 
    balance::StrategyIndexed strategy(resourceList);
    IndexedTest::CounterContainer counterContainer;
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE( inx_balance_quality)
 
 BOOST_AUTO_TEST_CASE( inx_balance_multithread )
 {
-   auto resourceList = wepa::test::balance::setup(IndexedTest::MaxResources);
+   auto resourceList = coffee::test::balance::setup(IndexedTest::MaxResources);
 
    balance::StrategyIndexed strategy(resourceList);
    IndexedTest::CounterContainer counterContainer;

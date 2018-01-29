@@ -1,8 +1,8 @@
-// WEPA - Write Excellent Professional Applications
+// COFFEE - COmpany eFFEEctive Platform
 //
 // (c) Copyright 2018 Francisco Ruiz Rayo
 //
-// https://github.com/ciscoruiz/wepa
+// https://github.com/ciscoruiz/coffee
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,16 +32,16 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <wepa/persistence/Object.hpp>
-#include <wepa/persistence/PrimaryKey.hpp>
+#include <coffee/persistence/Object.hpp>
+#include <coffee/persistence/PrimaryKey.hpp>
 
-#include <wepa/adt/AsHexString.hpp>
+#include <coffee/adt/AsHexString.hpp>
 
-#include <wepa/persistence/Class.hpp>
-#include <wepa/persistence/PrimaryKey.hpp>
+#include <coffee/persistence/Class.hpp>
+#include <coffee/persistence/PrimaryKey.hpp>
 
 
-using namespace wepa;
+using namespace coffee;
 
 persistence::Object::Object(const Class& clazz, const std::shared_ptr<PrimaryKey>& primaryKey, const dbms::datatype::Set& members) :
    dbms::datatype::Set(members),
@@ -51,7 +51,7 @@ persistence::Object::Object(const Class& clazz, const std::shared_ptr<PrimaryKey
 
 std::string persistence::Object::getInternalId () const noexcept
 {
-   return adt::AsHexString::apply (wepa_ptrnumber_cast(this));
+   return adt::AsHexString::apply (coffee_ptrnumber_cast(this));
 }
 
 adt::StreamString persistence::Object::asString() const noexcept

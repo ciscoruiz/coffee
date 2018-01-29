@@ -1,20 +1,20 @@
-// WEPA - Write Excellent Professional Applications
-#include <wepa/logger/TraceMethod.hpp>
+// COFFEE - COmpany eFFEEctive Platform
+#include <coffee/logger/TraceMethod.hpp>
 
-#include <wepa/xml/Node.hpp>
-#include <wepa/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
 
-#include <wepa/dbms/Statement.hpp>
+#include <coffee/dbms/Statement.hpp>
 
-#include <wepa/dbms/binder/Input.hpp>
-#include <wepa/dbms/binder/Output.hpp>
+#include <coffee/dbms/binder/Input.hpp>
+#include <coffee/dbms/binder/Output.hpp>
 
-#include <wepa/dbms/datatype/Abstract.hpp>
-#include <wepa/dbms/Database.hpp>
+#include <coffee/dbms/datatype/Abstract.hpp>
+#include <coffee/dbms/Database.hpp>
 
 using namespace std;
-using namespace wepa;
-using namespace wepa::dbms;
+using namespace coffee;
+using namespace coffee::dbms;
 
 // virtual
 Statement::~Statement()
@@ -29,7 +29,7 @@ void Statement::createBinderInput(std::shared_ptr<datatype::Abstract> data)
    std::shared_ptr<binder::Input> result = m_database.allocateInputBind(data);
 
    if(!result)
-      WEPA_THROW_EXCEPTION(data->asString() << " | Data returned a null binder");
+      COFFEE_THROW_EXCEPTION(data->asString() << " | Data returned a null binder");
 
    m_inputBinds.push_back(result);
 }
@@ -38,7 +38,7 @@ std::shared_ptr<datatype::Abstract>& Statement::getInputData(const GuardStatemen
    throw(adt::RuntimeException)
 {
    if(pos >= input_size()) {  
-      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << input_size() << ")");
+      COFFEE_THROW_EXCEPTION(pos << " is out of range [0," << input_size() << ")");
    }
 
    return m_inputBinds[pos]->getData();   
@@ -48,7 +48,7 @@ const std::shared_ptr<datatype::Abstract>& Statement::getInputData(const int pos
    throw(adt::RuntimeException)
 {
    if(pos >= input_size()) {
-      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << input_size() << ")");
+      COFFEE_THROW_EXCEPTION(pos << " is out of range [0," << input_size() << ")");
    }
 
    return m_inputBinds[pos]->getData();
@@ -59,7 +59,7 @@ const std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const GuardS
    throw(adt::RuntimeException)
 {
    if(pos >= output_size()) {
-      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << ")");
+      COFFEE_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << ")");
    }
 
    return m_outputBinds[pos]->getData();
@@ -75,7 +75,7 @@ std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const int pos)
    throw(adt::RuntimeException)
 {
    if(pos >= output_size()) {
-      WEPA_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << ")");
+      COFFEE_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << ")");
    }
 
    return m_outputBinds[pos]->getData();
@@ -87,7 +87,7 @@ void Statement::createBinderOutput(std::shared_ptr<datatype::Abstract> data)
    std::shared_ptr<binder::Output> result = m_database.allocateOutputBind(data);
 
    if(!result)
-      WEPA_THROW_EXCEPTION(data->asString() << " | Data returned a null binder");
+      COFFEE_THROW_EXCEPTION(data->asString() << " | Data returned a null binder");
 
    m_outputBinds.push_back(result);
 }
@@ -156,20 +156,20 @@ adt::StreamString Statement::asString() const
    return result += " }";
 }
 
-xml::Node& dbms::Statement::asXML(xml::Node& parent) const
+std::shared_ptr<xml::Node> dbms::Statement::asXML(std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   xml::Node& result = parent.createChild("dbms.Statement");
+   std::shared_ptr<xml::Node> result = parent->createChild("dbms.Statement");
 
    adt::Microsecond avgT = m_measureTiming;
-   result.createAttribute("Name", m_name);
+   result->createAttribute("Name", m_name);
 
-   xml::Node& node = result.createChild("Timing");
-   node.createAttribute("N", m_measureTiming.size());
-   node.createAttribute("Accumulator", m_measureTiming.getAccumulator());
-   node.createAttribute("Timing", m_measureTiming.value().asString());
+   std::shared_ptr<xml::Node> node = result->createChild("Timing");
+   node->createAttribute("N", m_measureTiming.size());
+   node->createAttribute("Accumulator", m_measureTiming.getAccumulator());
+   node->createAttribute("Timing", m_measureTiming.value().asString());
 
-   result.createChild("Expression").createText(m_expression);
+   result->createChild("Expression")->createText(m_expression);
 
    return result;
 }

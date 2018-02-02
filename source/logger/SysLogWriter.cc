@@ -38,10 +38,10 @@
 
 using namespace coffee;
 
-logger::SysLogWriter::SysLogWriter (const std::string& ident, const int options) :
+logger::SysLogWriter::SysLogWriter (const std::string& ident, const OptionBuilder& builder) :
    logger::Writer ("SysLogWriter"),
    m_ident(ident),
-   m_options(options)
+   m_options(builder.build())
 {
 }
 
@@ -62,3 +62,33 @@ void logger::SysLogWriter::apply (const Level::_v level, const std::string& line
    syslog(level, "%s", line.c_str());
 }
 
+logger::SysLogWriter::OptionBuilder& logger::SysLogWriter::OptionBuilder::showPid() noexcept
+{
+	flags += LOG_PID;
+	return *this;
+}
+
+logger::SysLogWriter::OptionBuilder& logger::SysLogWriter::OptionBuilder::consoleWhenError() noexcept
+{
+	flags += LOG_CONS;
+	return *this;
+}
+
+
+logger::SysLogWriter::OptionBuilder& logger::SysLogWriter::OptionBuilder::delayOpen() noexcept
+{
+	flags += LOG_ODELAY;
+	return *this;
+}
+
+logger::SysLogWriter::OptionBuilder& logger::SysLogWriter::OptionBuilder::noDelayOpen() noexcept
+{
+	flags += LOG_NDELAY;
+	return *this;
+}
+
+logger::SysLogWriter::OptionBuilder& logger::SysLogWriter::OptionBuilder::logToStdErr() noexcept
+{
+   flags += LOG_PERROR;
+   return *this;
+}

@@ -128,7 +128,7 @@ private:
       if (ii->second == last_value())
          return ii->second;
       
-      const std::pair<_Key,_Value>& backup = qa_pairKV(ii);
+      std::pair<_Key,_Value> backup = qa_pairKV(ii);
       m_values.erase(ii->second);
       m_values.push_back(backup);
       return ii->second = last_value();

@@ -28,7 +28,7 @@ if user_cpp_path is not None:
       cpp_paths.append(path)
 
 env.Append (CPPPATH = cpp_paths)
-env.Append (CCFLAGS = '-D__GXX_EXPERIMENTAL_CXX0X__ -std=c++11')
+env.Append (CCFLAGS = '-std=c++11')
 env.Append (LIBS = [''])
 
 if int(release):

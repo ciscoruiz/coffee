@@ -119,14 +119,13 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_compare)
 // See https://stackoverflow.com/questions/17572583/boost-check-fails-to-compile-operator-for-custom-types
 namespace boost {
 namespace test_tools {
-namespace tt_detail {
    template<> struct print_log_value<persistence::PrimaryKey> {
       void operator()( std::ostream& os, persistence::PrimaryKey const& ts)
       {
           os << ts.asString();
       }
    };
-}}}
+}}
 
 BOOST_AUTO_TEST_CASE(persistence_primary_key_copy_constructor)
 {

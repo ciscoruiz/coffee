@@ -44,7 +44,9 @@ using namespace coffee::logger;
 
 BOOST_AUTO_TEST_CASE (syslog_test)
 {
-   auto writer = std::make_shared<SysLogWriter>("SysLogTest", LOG_CONS | LOG_NOWAIT);
+   SysLogWriter::OptionBuilder option;
+
+   auto writer = std::make_shared<SysLogWriter>("SysLogTest", option.consoleWhenError().noDelayOpen());
    Logger::initialize (writer);
 
    Logger::setLevel(Level::Debug);

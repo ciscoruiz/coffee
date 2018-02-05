@@ -32,7 +32,7 @@ public:
       \warning Antes de usarse debe asignarse a algun otro ResultCode obtenido mediante la invocacion
       a coffee::dbms::Connection::execute.
    */
-   ResultCode() : m_errorCodeInterpreter(), m_numericCode(0), m_errorText(NULL) {;}
+   ResultCode() : m_errorCodeInterpreter(), m_numericCode(0) {;}
 
    /**
       Constructor vacio.
@@ -64,23 +64,17 @@ public:
       @param other Instancia de la que copiar los datos.
    */
    ResultCode(const ResultCode& other)  :
-      m_errorText(NULL),
-      m_errorCodeInterpreter(other.m_errorCodeInterpreter)
+      m_errorCodeInterpreter(other.m_errorCodeInterpreter),
+      m_numericCode(other.m_numericCode),
+      m_errorText(other.m_errorText)
+
    {
-      initialize(other.m_numericCode, other.m_errorText);
    }   
    
    /**
       Destructor.
    */
-   virtual ~ResultCode() { if(m_errorText != NULL) free(m_errorText); }
-
-   void initialize(const int numericCode, const char* errorText)
-      noexcept
-   {
-      m_numericCode = numericCode;
-      copy(errorText);
-   }
+   virtual ~ResultCode() { }
 
    /**
       Devuelve el codigo de error del ultimo comando ejecutado contra la base de datos.   
@@ -92,25 +86,20 @@ public:
       Devuelve el texto del error del ultimo comando ejecutado contra la base de datos.
       @return El texto del error del ultimo comando ejecutado contra la base de datos.
    */
-   const char* getErrorText() const noexcept { return(m_errorText != NULL) ? m_errorText: ""; }
+   const std::string& getErrorText() const noexcept { return m_errorText; }
+   
+   ResultCode& operator =(const ResultCode& other)
+       noexcept
+    {
+       if(this != &other) {
+          m_errorCodeInterpreter = other.m_errorCodeInterpreter;
+          m_numericCode = other.m_numericCode;
+          m_errorText = other.m_errorText;
+       }
 
-   // Operadores
-   /**
-      Operador copia.      
-      @param resultCode Instancia a copiar.
-      @return Una instancia de si mismo.
-   */      
-   ResultCode& operator =(const ResultCode& resultCode)
-      noexcept
-   {
-      if(this != &resultCode) {
-         m_errorCodeInterpreter = resultCode.m_errorCodeInterpreter;
-         initialize(resultCode.m_numericCode, resultCode.m_errorText);
-      }
-   
-      return *this;
-   }
-   
+       return *this;
+    }
+
    /**
       Devuelve \em true si las condiciones de busqueda de la ultimo operacion
       no han sido satisfechas por ningun registro o \em false en otro caso.      
@@ -155,15 +144,10 @@ public:
    */
    adt::StreamString asString() const noexcept;
 
-protected:
-   static const int MaxErrorLen = 512;
-
 private:
    std::shared_ptr<ErrorCodeInterpreter> m_errorCodeInterpreter;
    int m_numericCode;
-   char* m_errorText;
-   
-   void copy(const char* text) noexcept;
+   std::string m_errorText;
 };
 
 }

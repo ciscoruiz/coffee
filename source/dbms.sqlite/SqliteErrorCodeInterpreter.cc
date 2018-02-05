@@ -32,25 +32,34 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __coffee_mock_MockOutput_hpp
-#define __coffee_mock_MockOutput_hpp
+#include <sqlite3.h>
 
-#include <coffee/dbms/binder/Output.hpp>
+#include <coffee/dbms.sqlite/SqliteErrorCodeInterpreter.hpp>
 
-namespace coffee {
-namespace mock {
+using namespace coffee;
+using namespace coffee::dbms;
 
-class MockOutput : public dbms::binder::Output {
-public:
-   explicit MockOutput(std::shared_ptr<dbms::datatype::Abstract>& abstract) : dbms::binder::Output(abstract) {;}
+bool sqlite::SqliteErrorCodeInterpreter::notFound(const int errorCode) const
+   throw(adt::RuntimeException)
+{
+   return errorCode == SQLITE_NOTFOUND;
+}
 
-private:
-   void do_prepare(dbms::Statement& statement, const int pos) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-   void do_release(dbms::Statement& statement) noexcept {;}
-   void do_decode(dbms::Statement& statement, const int pos) throw(adt::RuntimeException) {;}
-   void do_write(const std::shared_ptr<dbms::datatype::LongBlock>&) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-};
+bool sqlite::SqliteErrorCodeInterpreter::successful(const int errorCode) const
+   throw(adt::RuntimeException)
+{
+   return errorCode == SQLITE_OK;
+}
 
-} /* namespace mock */
-} /* namespace coffee */
-#endif
+bool sqlite::SqliteErrorCodeInterpreter::locked(const int errorCode) const
+   throw(adt::RuntimeException)
+{
+   return errorCode == SQLITE_LOCKED;
+}
+
+bool sqlite::SqliteErrorCodeInterpreter::lostConnection(const int errorCode) const
+   throw(adt::RuntimeException)
+{
+   return errorCode == SQLITE_NOTADB || errorCode == SQLITE_CORRUPT;
+}
+

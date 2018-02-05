@@ -32,25 +32,49 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __coffee_mock_MockOutput_hpp
-#define __coffee_mock_MockOutput_hpp
+#include <memory>
 
-#include <coffee/dbms/binder/Output.hpp>
+#include <coffee/dbms.sqlite/SqliteDatabase.hpp>
+#include <coffee/dbms.sqlite/SqliteConnection.hpp>
+#include <coffee/dbms.sqlite/SqliteStatement.hpp>
+#include <coffee/dbms.sqlite/SqliteInputBinder.hpp>
+#include <coffee/dbms.sqlite/SqliteOutputBinder.hpp>
+#include <coffee/dbms.sqlite/SqliteErrorCodeInterpreter.hpp>
 
-namespace coffee {
-namespace mock {
+using namespace coffee;
+using namespace coffee::dbms;
 
-class MockOutput : public dbms::binder::Output {
-public:
-   explicit MockOutput(std::shared_ptr<dbms::datatype::Abstract>& abstract) : dbms::binder::Output(abstract) {;}
+sqlite::SqliteDatabase::SqliteDatabase(const boost::filesystem::path& dbFile) :
+   Database("SQLite3", dbFile.c_str())
+{
+   setErrorCodeInterpreter(std::make_shared<sqlite::SqliteErrorCodeInterpreter>());
+}
 
-private:
-   void do_prepare(dbms::Statement& statement, const int pos) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-   void do_release(dbms::Statement& statement) noexcept {;}
-   void do_decode(dbms::Statement& statement, const int pos) throw(adt::RuntimeException) {;}
-   void do_write(const std::shared_ptr<dbms::datatype::LongBlock>&) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-};
+sqlite::SqliteDatabase::~SqliteDatabase()
+{
+}
 
-} /* namespace mock */
-} /* namespace coffee */
-#endif
+std::shared_ptr<Connection> sqlite::SqliteDatabase::allocateConnection(const std::string& name, const char* user, const char* password)
+   throw(adt::RuntimeException)
+{
+   return std::make_shared<sqlite::SqliteConnection>(*this, name, user, password);
+}
+
+std::shared_ptr<Statement> sqlite::SqliteDatabase::allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
+   throw(adt::RuntimeException)
+{
+   return std::make_shared<sqlite::SqliteStatement>(*this, name, expression, actionOnError);
+}
+
+std::shared_ptr<binder::Input> sqlite::SqliteDatabase::allocateInputBind(std::shared_ptr<datatype::Abstract> data) const
+   throw(adt::RuntimeException)
+{
+   return std::make_shared<sqlite::SqliteInputBinder>(data);
+}
+
+std::shared_ptr<binder::Output> sqlite::SqliteDatabase::allocateOutputBind(std::shared_ptr<datatype::Abstract> data) const
+   throw(adt::RuntimeException)
+{
+   return std::make_shared<sqlite::SqliteOutputBinder>(data);
+}
+

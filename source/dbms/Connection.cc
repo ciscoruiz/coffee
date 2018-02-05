@@ -65,17 +65,17 @@ dbms::ResultCode dbms::Connection::execute(std::shared_ptr<Statement>& statement
       COFFEE_THROW_EXCEPTION(asString() << " | This connection must execute a previous ROLLBACK's");
    }
 
+   if (!statement->isPrepared(*this)) {
+      statement->prepare(*this);
+      statement->m_isPrepared = true;
+   }
+
    ResultCode result = statement->execute(*this);
 
    if(result.lostConnection() == true) {
       LOG_CRITICAL("Detected lost connection " << asString() << " while running '" << statement->getName()  << "' | " << result);
       recover();
       COFFEE_THROW_NAME_DB_EXCEPTION(statement->getName(), result);
-   }
-
-   if (!statement->m_isPrepared) {
-      statement->prepare(*this);
-      statement->m_isPrepared = true;
    }
 
    statement->measureTiming(delay);

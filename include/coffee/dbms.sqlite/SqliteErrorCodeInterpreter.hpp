@@ -32,25 +32,28 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __coffee_mock_MockOutput_hpp
-#define __coffee_mock_MockOutput_hpp
+#ifndef _coffee_dbms_sqlite_SqliteErrorCodeInterpreter_hpp_
+#define _coffee_dbms_sqlite_SqliteErrorCodeInterpreter_hpp_
 
-#include <coffee/dbms/binder/Output.hpp>
+#include <coffee/dbms/ErrorCodeInterpreter.hpp>
 
 namespace coffee {
-namespace mock {
+namespace dbms {
+namespace sqlite {
 
-class MockOutput : public dbms::binder::Output {
+class SqliteErrorCodeInterpreter : public ErrorCodeInterpreter {
 public:
-   explicit MockOutput(std::shared_ptr<dbms::datatype::Abstract>& abstract) : dbms::binder::Output(abstract) {;}
+   SqliteErrorCodeInterpreter() {;}
 
 private:
-   void do_prepare(dbms::Statement& statement, const int pos) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-   void do_release(dbms::Statement& statement) noexcept {;}
-   void do_decode(dbms::Statement& statement, const int pos) throw(adt::RuntimeException) {;}
-   void do_write(const std::shared_ptr<dbms::datatype::LongBlock>&) throw(adt::RuntimeException, dbms::DatabaseException) {;}
+   bool notFound(const int errorCode) const throw(adt::RuntimeException);
+   bool successful(const int errorCode) const throw(adt::RuntimeException);
+   bool locked(const int errorCode) const throw(adt::RuntimeException);
+   bool lostConnection(const int errorCode) const throw(adt::RuntimeException);
 };
 
-} /* namespace mock */
+} /* namespace sqlite */
+} /* namespace dbms */
 } /* namespace coffee */
+
 #endif

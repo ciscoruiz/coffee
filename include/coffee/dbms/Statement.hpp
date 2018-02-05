@@ -236,6 +236,7 @@ protected:
 
    int input_size() const noexcept { return m_inputBinds.size(); }
    int output_size() const noexcept { return m_outputBinds.size(); }
+   virtual bool isPrepared(Connection&) const noexcept { return m_isPrepared; }
 
    std::shared_ptr<datatype::Abstract>& getInputData(const GuardStatement&, const int pos) throw(adt::RuntimeException);
    std::shared_ptr<datatype::Abstract>& getOutputData(const GuardStatement&, const int pos) throw(adt::RuntimeException);

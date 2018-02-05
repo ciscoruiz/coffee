@@ -253,8 +253,7 @@ dbms::ResultCode test_dbms::MyWriteStatement::do_execute(dbms::Connection& conne
 
    if(connection.isAvailable() == false) {
       LOG_DEBUG(connection << " | Connection is not available");
-      result.initialize(MyDatabase::LostConnection, NULL);
-      return result;
+      return dbms::ResultCode(connection.getDatabase(), MyDatabase::LostConnection);
    }
 
    mock::MockConnection::OpCode opCode =(getExpression() == "write") ? mock::MockConnection::Write: mock::MockConnection::Delete;
@@ -264,8 +263,7 @@ dbms::ResultCode test_dbms::MyWriteStatement::do_execute(dbms::Connection& conne
    record.m_id = coffee_datatype_downcast(dbms::datatype::Integer, m_datas[0])->getValue();
 
    if(record.m_id == test_dbms::IdToThrowDbException) {
-      result.initialize(MyDatabase::NotFound, NULL);
-      return result;
+      return dbms::ResultCode(connection.getDatabase(), MyDatabase::NotFound);
    }
 
    if(opCode != mock::MockConnection::Delete) {

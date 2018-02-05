@@ -212,8 +212,6 @@ std::shared_ptr<dbms::Statement> dbms::Database::createStatement(const char* nam
 {
    logger::TraceMethod ttmm(logger::Level::Local7, COFFEE_FILE_LOCATION);
 
-   LOG_DEBUG("Name=" << name);
-
    for(statement_iterator ii = statement_begin(), maxii = statement_end(); ii != maxii; ++ ii) {
       if(statement(ii)->getName() == name)
          COFFEE_THROW_EXCEPTION("Sentence '" << name << "' is already defined");

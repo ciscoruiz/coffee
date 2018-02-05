@@ -32,25 +32,51 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __coffee_mock_MockOutput_hpp
-#define __coffee_mock_MockOutput_hpp
+#ifndef _coffee_dbms_sqlite_SqliteDatabase_hpp_
+#define _coffee_dbms_sqlite_SqliteDatabase_hpp_
 
-#include <coffee/dbms/binder/Output.hpp>
+#include <boost/filesystem.hpp>
+
+#include <coffee/dbms/Database.hpp>
+#include <coffee/dbms/ErrorCodeInterpreter.hpp>
 
 namespace coffee {
-namespace mock {
 
-class MockOutput : public dbms::binder::Output {
+namespace dbms  {
+
+namespace sqlite {
+
+class SqliteDatabase : public Database {
 public:
-   explicit MockOutput(std::shared_ptr<dbms::datatype::Abstract>& abstract) : dbms::binder::Output(abstract) {;}
+   SqliteDatabase(const boost::filesystem::path& dbFile);
+   ~SqliteDatabase();
 
 private:
-   void do_prepare(dbms::Statement& statement, const int pos) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-   void do_release(dbms::Statement& statement) noexcept {;}
-   void do_decode(dbms::Statement& statement, const int pos) throw(adt::RuntimeException) {;}
-   void do_write(const std::shared_ptr<dbms::datatype::LongBlock>&) throw(adt::RuntimeException, dbms::DatabaseException) {;}
+   class SqliteErrorCodeInterpreter : public dbms::ErrorCodeInterpreter {
+   public:
+      SqliteErrorCodeInterpreter() {;}
+   private:
+      bool notFound(const int errorCode) const throw(adt::RuntimeException);
+      bool successful(const int errorCode) const throw(adt::RuntimeException);
+      bool locked(const int errorCode) const throw(adt::RuntimeException);
+      bool lostConnection(const int errorCode) const throw(adt::RuntimeException);
+   };
+
+   std::shared_ptr<Connection> allocateConnection(const std::string& name, const char* user, const char* password)
+      throw(adt::RuntimeException);
+
+   std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
+      throw(adt::RuntimeException);
+
+   std::shared_ptr<binder::Input> allocateInputBind(std::shared_ptr<datatype::Abstract> data) const
+      throw(adt::RuntimeException);
+   std::shared_ptr<binder::Output> allocateOutputBind(std::shared_ptr<datatype::Abstract> data) const
+      throw(adt::RuntimeException);
+
 };
 
-} /* namespace mock */
-} /* namespace coffee */
+}
+}
+}
+
 #endif

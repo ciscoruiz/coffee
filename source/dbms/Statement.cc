@@ -115,9 +115,10 @@ ResultCode Statement::execute(Connection& connection)
 {
    LOG_THIS_METHOD();
 
+   int pos = 0;
    for(auto& ii : m_inputBinds) {
       LOG_DEBUG(ii->asString());
-      ii->do_encode();
+      ii->do_encode(*this, pos ++);
    }
 
    ResultCode result = do_execute(connection);
@@ -135,8 +136,9 @@ bool Statement::fetch()
    bool result;
 
    if((result = do_fetch()) == true) {
+      int pos = 0;
       for(auto& oo : m_outputBinds) {
-         oo->do_decode();
+         oo->do_decode(*this, pos ++);
          LOG_DEBUG(oo->asString());
       }
    }

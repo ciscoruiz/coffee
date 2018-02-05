@@ -32,25 +32,37 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __coffee_mock_MockOutput_hpp
-#define __coffee_mock_MockOutput_hpp
+#ifndef _coffee_dbms_sqlite_SqliteConnection_hpp_
+#define _coffee_dbms_sqlite_SqliteConnection_hpp_
 
-#include <coffee/dbms/binder/Output.hpp>
+#include <sqlite3.h>
+#include <coffee/dbms/Connection.hpp>
 
 namespace coffee {
-namespace mock {
+namespace dbms {
+namespace sqlite {
 
-class MockOutput : public dbms::binder::Output {
+class SqliteConnection : public Connection {
 public:
-   explicit MockOutput(std::shared_ptr<dbms::datatype::Abstract>& abstract) : dbms::binder::Output(abstract) {;}
+   SqliteConnection(const Database& dbmsDatabase, const std::string& name, const char* user, const char* password);
+   virtual ~SqliteConnection();
+
+   ::sqlite3* getImpl() { return impl; }
+
+   void execute(const char* statement) throw(adt::RuntimeException, DatabaseException);
 
 private:
-   void do_prepare(dbms::Statement& statement, const int pos) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-   void do_release(dbms::Statement& statement) noexcept {;}
-   void do_decode(dbms::Statement& statement, const int pos) throw(adt::RuntimeException) {;}
-   void do_write(const std::shared_ptr<dbms::datatype::LongBlock>&) throw(adt::RuntimeException, dbms::DatabaseException) {;}
+   ::sqlite3* impl;
+
+   void open() throw(DatabaseException);
+   void close() noexcept;
+   bool isAvailable () const noexcept  { return impl != nullptr;  }
+   void do_commit() throw(adt::RuntimeException, DatabaseException) { execute("COMMIT"); }
+   void do_rollback() noexcept;
 };
 
-} /* namespace mock */
+} /* namespace sqlite */
+} /* namespace dbms */
 } /* namespace coffee */
+
 #endif

@@ -26,7 +26,7 @@ protected:
    explicit Input(std::shared_ptr<datatype::Abstract>& value) : Binder(value) {;}
 
 private:
-   void do_decode() throw(adt::RuntimeException) {;}
+   void do_decode(Statement& statement, const int pos) throw(adt::RuntimeException) {}
 };
 
 }

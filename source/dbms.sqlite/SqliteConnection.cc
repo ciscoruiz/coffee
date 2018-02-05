@@ -32,25 +32,65 @@
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __coffee_mock_MockOutput_hpp
-#define __coffee_mock_MockOutput_hpp
+#include <coffee/logger/Logger.hpp>
 
-#include <coffee/dbms/binder/Output.hpp>
+#include <coffee/dbms/Database.hpp>
 
-namespace coffee {
-namespace mock {
+#include <coffee/dbms.sqlite/SqliteConnection.hpp>
 
-class MockOutput : public dbms::binder::Output {
-public:
-   explicit MockOutput(std::shared_ptr<dbms::datatype::Abstract>& abstract) : dbms::binder::Output(abstract) {;}
+using namespace coffee;
+using namespace coffee::dbms;
 
-private:
-   void do_prepare(dbms::Statement& statement, const int pos) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-   void do_release(dbms::Statement& statement) noexcept {;}
-   void do_decode(dbms::Statement& statement, const int pos) throw(adt::RuntimeException) {;}
-   void do_write(const std::shared_ptr<dbms::datatype::LongBlock>&) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-};
+sqlite::SqliteConnection::SqliteConnection(const Database& database, const std::string& name, const char* user, const char* password) :
+   Connection(database, name, user, password),
+   impl(nullptr)
+{
+}
 
-} /* namespace mock */
-} /* namespace coffee */
-#endif
+sqlite::SqliteConnection::~SqliteConnection()
+{
+   close();
+}
+
+void sqlite::SqliteConnection::open()
+   throw(DatabaseException)
+{
+   int rc = sqlite3_open(getDatabase().getName().c_str(), &impl);
+}
+
+void sqlite::SqliteConnection::close()
+   noexcept
+{
+   if (impl != nullptr) {
+      sqlite3_close(impl);
+   }
+}
+
+void sqlite::SqliteConnection::execute(const char* statement)
+   throw(adt::RuntimeException, DatabaseException)
+{
+   if (impl == nullptr) {
+      COFFEE_THROW_EXCEPTION(asString() << " was not open");
+   }
+
+   char* errorMessage = 0;
+
+   const int rc = sqlite3_exec(impl, statement, NULL, 0, &errorMessage);
+
+   if (rc != SQLITE_OK) {
+      ResultCode resultCode(getDatabase(), rc, errorMessage);
+      sqlite3_free(errorMessage);
+      COFFEE_THROW_DB_EXCEPTION(resultCode);
+   }
+}
+
+void sqlite::SqliteConnection::do_rollback()
+   noexcept
+{
+   try {
+      execute("ROLLBACK");
+   }
+   catch (adt::Exception& ex) {
+      logger::Logger::write(ex);
+   }
+}

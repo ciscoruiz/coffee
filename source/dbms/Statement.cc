@@ -92,12 +92,12 @@ void Statement::createBinderOutput(std::shared_ptr<datatype::Abstract> data)
    m_outputBinds.push_back(result);
 }
 
-void Statement::prepare()
+void Statement::prepare(Connection& connection)
    throw(adt::RuntimeException, DatabaseException)
 {
    LOG_THIS_METHOD();
 
-   do_prepare();
+   do_prepare(connection);
 
    int pos = 0;
    for(auto& ii : m_inputBinds) {

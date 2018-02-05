@@ -86,6 +86,7 @@ protected:
 
 private:
    mock::MockLowLevelRecord m_record;
+   void do_prepare(dbms::Connection& connection) throw(adt::RuntimeException, DatabaseException) {;}
 };
 
 class MyReadStatement : public MyStatement {
@@ -96,7 +97,6 @@ private:
    std::vector <mock::MockLowLevelRecord> m_selection;
    int m_index;
 
-   void do_prepare() throw(adt::RuntimeException, DatabaseException) {;}
    ResultCode do_execute(Connection& connection) throw(adt::RuntimeException, DatabaseException);
    bool do_fetch() throw(adt::RuntimeException, DatabaseException);
 };
@@ -106,7 +106,6 @@ public:
    MyWriteStatement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError);
 
 private:
-   void do_prepare() throw(adt::RuntimeException, DatabaseException) {;}
    ResultCode do_execute(Connection& connection) throw(adt::RuntimeException, DatabaseException);
    bool do_fetch() throw(adt::RuntimeException, DatabaseException) { return false; }
 };

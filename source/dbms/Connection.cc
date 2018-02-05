@@ -73,6 +73,11 @@ dbms::ResultCode dbms::Connection::execute(std::shared_ptr<Statement>& statement
       COFFEE_THROW_NAME_DB_EXCEPTION(statement->getName(), result);
    }
 
+   if (!statement->m_isPrepared) {
+      statement->prepare(*this);
+      statement->m_isPrepared = true;
+   }
+
    statement->measureTiming(delay);
 
    if(result.successful() == false && result.notFound() == false) {

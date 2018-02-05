@@ -81,7 +81,7 @@ private:
    std::shared_ptr<datatype::String> m_name;
    mock::MockLowLevelRecord m_selection;
 
-   void do_prepare() throw(adt::RuntimeException, dbms::DatabaseException) {;}
+   void do_prepare(dbms::Connection& connection) throw(adt::RuntimeException, dbms::DatabaseException) {;}
    dbms::ResultCode do_execute(dbms::Connection& connection) throw(adt::RuntimeException, dbms::DatabaseException);
    bool do_fetch() throw(adt::RuntimeException, dbms::DatabaseException);
 };
@@ -102,7 +102,7 @@ private:
    std::shared_ptr<datatype::String> m_name;
    mock::MockLowLevelRecord m_selection;
 
-   void do_prepare() throw(adt::RuntimeException, dbms::DatabaseException) {;}
+   void do_prepare(dbms::Connection& connection) throw(adt::RuntimeException, dbms::DatabaseException) {;}
    dbms::ResultCode do_execute(dbms::Connection& connection) throw(adt::RuntimeException, dbms::DatabaseException);
    bool do_fetch() throw(adt::RuntimeException, dbms::DatabaseException) { return false; }
 };

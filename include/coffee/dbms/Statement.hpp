@@ -207,7 +207,8 @@ protected:
       m_expression(expression),
       m_actionOnError(actionOnError),
       m_measureTiming("Timing", "us"),
-      m_requiresCommit(false)
+      m_requiresCommit(false),
+      m_isPrepared(false)
    {
    }
 
@@ -228,7 +229,8 @@ protected:
       m_expression(expression),
       m_actionOnError(actionOnError),
       m_measureTiming("Timing", "us"),
-      m_requiresCommit(false)
+      m_requiresCommit(false),
+      m_isPrepared(false)
    {
    }
 
@@ -252,11 +254,12 @@ private:
    adt::Average <adt::Microsecond> m_measureTiming;
    bool m_requiresCommit;
    std::mutex m_mutex;
+   bool m_isPrepared;
 
    void measureTiming(const adt::DelayMeter <adt::Microsecond>& delay) noexcept { m_measureTiming += delay.getValue(); }
 
-   void prepare() throw(adt::RuntimeException, DatabaseException);
-   virtual void do_prepare() throw(adt::RuntimeException, DatabaseException) = 0;
+   void prepare(Connection& connection) throw(adt::RuntimeException, DatabaseException);
+   virtual void do_prepare(Connection& connection) throw(adt::RuntimeException, DatabaseException) = 0;
 
    ResultCode execute(Connection& connection) throw(adt::RuntimeException, DatabaseException);
    virtual ResultCode do_execute(Connection& connection) throw(adt::RuntimeException, DatabaseException) = 0;

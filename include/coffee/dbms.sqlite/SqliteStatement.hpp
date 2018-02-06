@@ -55,6 +55,7 @@ private:
    ::sqlite3_stmt* impl;
    Connection* owner;
    bool fetchIsDone;
+   const bool isASelect;
 
    bool isPrepared(Connection&) const noexcept;
    void do_prepare(Connection& connection) throw(adt::RuntimeException, DatabaseException);

@@ -32,11 +32,12 @@
 //
 // Author: cisco.tierra@gmail.com
 //
+#include <coffee/adt/StreamString.hpp>
+
 #include <coffee/dbms/ResultCode.hpp>
 
 #include <coffee/dbms.sqlite/SqliteStatement.hpp>
 #include <coffee/dbms.sqlite/SqliteConnection.hpp>
-//#include <coffee/dbms.sqlite/SqliteDatabase.hpp>
 
 using namespace coffee;
 using namespace coffee::dbms;
@@ -45,7 +46,8 @@ sqlite::SqliteStatement::SqliteStatement(const Database& database, const char* n
    Statement(database, name, expression, actionOnError),
    impl(nullptr),
    owner(nullptr),
-   fetchIsDone(false)
+   fetchIsDone(false),
+   isASelect(adt::StreamString(expression).toLower().find("select") != std::string::npos)
 {
 }
 
@@ -98,12 +100,21 @@ ResultCode sqlite::SqliteStatement::do_execute(Connection& connection)
       COFFEE_THROW_DB_EXCEPTION(resultCode);
    }
 
-   if (sqlite3_step(impl)== SQLITE_DONE) {
-      rc = SQLITE_NOTFOUND;
-      fetchIsDone = false;
+   rc = sqlite3_step(impl);
+
+   if (isASelect) {
+      if (rc == SQLITE_DONE) {
+         rc = SQLITE_NOTFOUND;
+         fetchIsDone = false;
+      }
+      else {
+         rc = SQLITE_OK;
+         fetchIsDone = true;
+      }
    }
    else {
-      fetchIsDone = true;
+      if (rc == SQLITE_DONE)
+         rc = SQLITE_OK;
    }
 
    return dbms::ResultCode(connection.getDatabase(), rc);

@@ -43,16 +43,18 @@
 using namespace std;
 using namespace coffee;
 
-void adt::StreamString::toUpper ()
+adt::StreamString& adt::StreamString::toUpper ()
    noexcept
 {
    std::transform(begin(), end(), begin(), (int(*)(int)) toupper);
+   return *this;
 }
 
-void adt::StreamString::toLower ()
+adt::StreamString& adt::StreamString::toLower ()
    noexcept
 {
    std::transform(begin(), end(), begin(), (int(*)(int)) tolower);
+   return *this;
 }
 
 adt::StreamString& adt::StreamString::operator<< (const char vv)

@@ -50,6 +50,8 @@
 #include <coffee/dbms/Statement.hpp>
 #include <coffee/dbms/datatype/String.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
+#include <coffee/dbms/datatype/Float.hpp>
+#include <coffee/dbms/datatype/LongBlock.hpp>
 
 using namespace coffee;
 
@@ -88,6 +90,25 @@ struct StatementCountAgeGreater {
    std::shared_ptr<dbms::Statement> statement;
 };
 
+struct StatementBlob {
+   StatementBlob(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
+      const char* sql = "select id, myfloat, mydata from btest where id == ?";
+
+      id = std::make_shared<dbms::datatype::Integer>("id");
+      myfloat = std::make_shared<dbms::datatype::Float>("float");
+      mydata = std::make_shared<dbms::datatype::LongBlock>("data", dbms::datatype::Constraint::CanBeNull);
+
+      statement = database.createStatement("select_blob", sql);
+      statement->createBinderInput(id);
+      statement->createBinderOutput(id);
+      statement->createBinderOutput(myfloat);
+      statement->createBinderOutput(mydata);
+   }
+   std::shared_ptr<dbms::datatype::Integer> id;
+   std::shared_ptr<dbms::datatype::Float> myfloat;
+   std::shared_ptr<dbms::datatype::LongBlock> mydata;
+   std::shared_ptr<dbms::Statement> statement;
+};
 
 struct SqliteFixture {
    static  boost::filesystem::path dbPath;
@@ -105,10 +126,15 @@ struct SqliteFixture {
       const char* sql = " \
          BEGIN TRANSACTION; \
          CREATE TABLE employee (Name varchar(20),Dept varchar(20),jobTitle varchar(20), age integer); \
+         create table btest(ID INTEGER, myfloat float, MyData BLOB); \
+         \
          INSERT INTO employee VALUES('Fred Flinstone','Quarry Worker','Rock Digger', 30); \
          INSERT INTO employee VALUES('Wilma Flinstone','Finance','Analyst', 40); \
          INSERT INTO employee VALUES('Barney Rubble','Sales','Neighbor', 50); \
          INSERT INTO employee VALUES('Betty Rubble','IT','Neighbor', 60); \
+         \
+         INSERT INTO btest(ID, myfloat) values (11, 0.11); \
+         INSERT INTO btest(ID, myfloat, mydata) values (22, 0.22, '123456789-12345'); \
          COMMIT; "; \
 
       BOOST_REQUIRE_NO_THROW(std::dynamic_pointer_cast<dbms::sqlite::SqliteConnection>(connection)->execute(sql));
@@ -189,7 +215,76 @@ BOOST_FIXTURE_TEST_CASE(sqlite_no_select, SqliteFixture)
    BOOST_REQUIRE(!guardStament.fetch());
 }
 
-BOOST_FIXTURE_TEST_CASE(sqlite_rebind_select, SqliteFixture)
+BOOST_FIXTURE_TEST_CASE(sqlite_insert, SqliteFixture)
+{
+   StatementCountAgeGreater ageCounter(database, connection);
+
+   const char* sql = "INSERT INTO employee VALUES(?, ?, ?, ?)";
+
+   auto name = std::make_shared<dbms::datatype::String>("name", 20);
+   auto dept = std::make_shared<dbms::datatype::String>("dept", 20);
+   auto job = std::make_shared<dbms::datatype::String>("jobTitle", 20);
+   auto age = std::make_shared<dbms::datatype::Integer>("age");
+
+   auto insert = database.createStatement("insert_employee", sql);
+   insert->createBinderInput(name);
+   insert->createBinderInput(dept);
+   insert->createBinderInput(job);
+   insert->createBinderInput(age);
+
+   {
+      dbms::GuardConnection guardConnection(connection);
+      dbms::GuardStatement guardStament(guardConnection, insert);
+
+      name->setValue("new-name");
+      dept->setValue("new-dept");
+      job->setValue("new-job");
+      age->setValue(31);
+
+      dbms::ResultCode rc = guardStament.execute();
+
+      BOOST_REQUIRE(rc.successful());
+   }
+
+   auto secondConnection = database.createConnection("second", "user:second", "none");
+
+   {
+      dbms::GuardConnection guardConnection(secondConnection);
+      dbms::GuardStatement guardStament(guardConnection, ageCounter.statement);
+      ageCounter.inputId->setValue(30);
+      dbms::ResultCode resultCode = guardStament.execute();
+      BOOST_REQUIRE(resultCode.successful());
+      BOOST_REQUIRE(guardStament.fetch());
+      BOOST_REQUIRE_EQUAL(ageCounter.outputId->getValue(), 3 + 1);
+   }
+}
+
+BOOST_FIXTURE_TEST_CASE(sqlite_float, SqliteFixture)
+{
+   StatementBlob fullStatement(database, connection);
+
+   dbms::GuardConnection guardConnection(connection);
+   dbms::GuardStatement guardStament(guardConnection, fullStatement.statement);
+   fullStatement.id->setValue(11);
+   dbms::ResultCode resultCode = guardStament.execute();
+   BOOST_REQUIRE(resultCode.successful());
+   BOOST_REQUIRE(guardStament.fetch());
+   BOOST_REQUIRE_CLOSE(fullStatement.myfloat->getValue(), 0.11, 0.1);
+   BOOST_REQUIRE(!fullStatement.mydata->hasValue());
+
+   fullStatement.id->setValue(22);
+   resultCode = guardStament.execute();
+   BOOST_REQUIRE(resultCode.successful());
+   BOOST_REQUIRE(guardStament.fetch());
+   BOOST_REQUIRE_CLOSE(fullStatement.myfloat->getValue(), 0.22, 0.1);
+
+   const adt::DataBlock& dbBlob = fullStatement.mydata->getValue();
+   adt::DataBlock expected("123456789-12345", 15);
+   BOOST_REQUIRE_EQUAL(dbBlob.size(), expected.size());
+   BOOST_REQUIRE_EQUAL(memcmp(dbBlob.data(), expected.data(), expected.size()), 0);
+}
+
+BOOST_FIXTURE_TEST_CASE(sqlite_rebind_sentence, SqliteFixture)
 {
    StatementCountAgeGreater fullStatement(database, connection);
 
@@ -219,6 +314,36 @@ BOOST_FIXTURE_TEST_CASE(sqlite_rebind_select, SqliteFixture)
       BOOST_REQUIRE(guardStament.fetch());
       BOOST_REQUIRE_EQUAL(fullStatement.outputId->getValue(), 0);
    }
-
 }
+
+
+BOOST_FIXTURE_TEST_CASE(sqlite_reuse_sentence, SqliteFixture)
+{
+   StatementCountAgeGreater ageCounter(database, connection);
+
+   {
+      dbms::GuardConnection guardConnection(connection);
+      dbms::GuardStatement guardStament(guardConnection, ageCounter.statement);
+
+      ageCounter.inputId->setValue(10);
+      dbms::ResultCode resultCode = guardStament.execute();
+      BOOST_REQUIRE(resultCode.successful());
+      BOOST_REQUIRE(guardStament.fetch());
+      BOOST_REQUIRE_EQUAL(ageCounter.outputId->getValue(), 4);
+   }
+
+   auto secondConnection = database.createConnection("second", "user:second", "none");
+
+   {
+      dbms::GuardConnection guardConnection(secondConnection);
+      dbms::GuardStatement guardStament(guardConnection, ageCounter.statement);
+
+      ageCounter.inputId->setValue(30);
+      dbms::ResultCode resultCode = guardStament.execute();
+      BOOST_REQUIRE(resultCode.successful());
+      BOOST_REQUIRE(guardStament.fetch());
+      BOOST_REQUIRE_EQUAL(ageCounter.outputId->getValue(), 3);
+   }
+}
+
 

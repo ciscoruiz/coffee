@@ -57,7 +57,8 @@ private:
    void open() throw(DatabaseException);
    void close() noexcept;
    bool isAvailable () const noexcept  { return impl != nullptr;  }
-   void do_commit() throw(adt::RuntimeException, DatabaseException) { execute("COMMIT"); }
+   bool do_beginTransaction() throw(adt::RuntimeException, DatabaseException) { execute("BEGIN TRANSACTION;"); return true;}
+   void do_commit() throw(adt::RuntimeException, DatabaseException) { execute("COMMIT;"); }
    void do_rollback() noexcept;
 };
 

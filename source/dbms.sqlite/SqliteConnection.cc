@@ -73,6 +73,8 @@ void sqlite::SqliteConnection::execute(const char* statement)
       COFFEE_THROW_EXCEPTION(asString() << " was not open");
    }
 
+   LOG_DEBUG(statement);
+
    char* errorMessage = 0;
 
    const int rc = sqlite3_exec(impl, statement, NULL, 0, &errorMessage);

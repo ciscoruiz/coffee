@@ -56,6 +56,12 @@ void sqlite::SqliteConnection::open()
    throw(DatabaseException)
 {
    int rc = sqlite3_open(getDatabase().getName().c_str(), &impl);
+
+   if (rc != SQLITE_OK) {
+      close();
+      ResultCode resultCode(getDatabase(), rc);
+      COFFEE_THROW_DB_EXCEPTION(resultCode);
+   }
 }
 
 void sqlite::SqliteConnection::close()
@@ -63,6 +69,7 @@ void sqlite::SqliteConnection::close()
 {
    if (impl != nullptr) {
       sqlite3_close(impl);
+      impl = nullptr;
    }
 }
 

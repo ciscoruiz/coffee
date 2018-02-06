@@ -153,8 +153,15 @@ BOOST_FIXTURE_TEST_CASE(sqlite_create_db, SqliteFixture)
    BOOST_REQUIRE_EQUAL(secondConnection->isAvailable(), true);
 }
 
-// See http://www.yolinux.com/TUTORIALS/SQLite.html
+BOOST_AUTO_TEST_CASE(sqlite_invalid_access)
+{
+   dbms::sqlite::SqliteDatabase database("/root");
+   auto connection = database.createConnection("first", "user:first", "none");
+   BOOST_REQUIRE_THROW(database.externalInitialize(), adt::RuntimeException);
+   BOOST_REQUIRE(!connection->isAvailable());
+}
 
+// See http://www.yolinux.com/TUTORIALS/SQLite.html
 BOOST_FIXTURE_TEST_CASE(sqlite_multi_select, SqliteFixture)
 {
    StatementAgeGreater fullStatement(database, connection);

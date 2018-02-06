@@ -50,7 +50,7 @@ libraries = [];
 source = os.path.join (current_directory, "source")
 sources = Glob(source + '/*')
 
-sources=["adt", "config", "logger", "xml", "app", "balance", "dbms", "persistence"]
+sources=["adt", "config", "logger", "xml", "app", "balance", "dbms", "dbms.sqlite", "persistence"]
 
 for module in sources:
    source = os.path.join (os.path.join(current_directory, 'source'), module)

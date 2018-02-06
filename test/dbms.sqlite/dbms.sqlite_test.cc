@@ -1,6 +1,6 @@
 // COFFEE - COmpany eFFEEctive Platform
 //
-//(c) Copyright 2018 Francisco Ruiz Rayo
+// (c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/coffee
 //
@@ -23,34 +23,15 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
 //
-#ifndef __coffee_mock_MockOutput_hpp
-#define __coffee_mock_MockOutput_hpp
+#define BOOST_TEST_MODULE COFFEE_DBMS_SQLITE_TEST
 
-#include <coffee/dbms/binder/Output.hpp>
-
-namespace coffee {
-namespace mock {
-
-class MockOutput : public dbms::binder::Output {
-public:
-   explicit MockOutput(std::shared_ptr<dbms::datatype::Abstract>& abstract) : dbms::binder::Output(abstract) {;}
-
-private:
-   void do_prepare(dbms::Statement& statement, const int pos) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-   void do_release(dbms::Statement& statement) noexcept {;}
-   void do_decode(dbms::Statement& statement, const int pos) throw(adt::RuntimeException) {;}
-   void do_write(const std::shared_ptr<dbms::datatype::LongBlock>&) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-};
-
-} /* namespace mock */
-} /* namespace coffee */
-#endif
+#include <boost/test/included/unit_test.hpp>

@@ -88,12 +88,12 @@ public:
    /**
     * Convert to upper case.
     */
-   void toUpper () noexcept;
+   adt::StreamString& toUpper () noexcept;
 
    /**
     * Convert to lower case.
     */
-   void toLower () noexcept;
+   adt::StreamString& toLower () noexcept;
 
    StreamString& operator = (const char vv) noexcept { std::string::clear (); return operator<< (vv); }
    StreamString& operator = (const char* vv) noexcept { std::string::clear (); return operator<< (vv); }

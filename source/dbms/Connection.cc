@@ -65,6 +65,11 @@ dbms::ResultCode dbms::Connection::execute(std::shared_ptr<Statement>& statement
       COFFEE_THROW_EXCEPTION(asString() << " | This connection must execute a previous ROLLBACK's");
    }
 
+   if (!statement->isPrepared(*this)) {
+      statement->prepare(*this);
+      statement->m_isPrepared = true;
+   }
+
    ResultCode result = statement->execute(*this);
 
    if(result.lostConnection() == true) {

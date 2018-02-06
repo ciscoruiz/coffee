@@ -94,8 +94,7 @@ dbms::ResultCode test_persistence::MyWriteStatement::do_execute(dbms::Connection
    record.m_id =(coffee_datatype_downcast(dbms::datatype::Integer, getInputData(0))->getValue());
 
    if(record.m_id == IdToThrowDbException) {
-      result.initialize(MyDatabase::NotFound, NULL);
-      return result;
+      return dbms::ResultCode(getDatabase(),MyDatabase::NotFound);
    }
 
    if(opCode != mock::MockConnection::Delete) {

@@ -44,12 +44,12 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="wepa-neon.null.449606621" name="wepa-neon"/>
+		<project id="coffee-neon.null.449606621" name="coffee-neon"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Default">
-			<resource resourceType="PROJECT" workspacePath="/wepa-neon"/>
+			<resource resourceType="PROJECT" workspacePath="/coffee-neon"/>
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>

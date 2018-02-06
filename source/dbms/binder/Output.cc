@@ -47,23 +47,7 @@ adt::StreamString binder::Output::asString() const
    noexcept
 {
    adt::StreamString result("binder.Output {");
-
    result += getData()->asString();
-
    return result += "}";
 }
 
-void binder::Output::write()
-   throw(adt::RuntimeException, DatabaseException)
-{
-   const std::shared_ptr<datatype::Abstract>& data = this->getData();
-
-   if(data->getType() != datatype::Abstract::Datatype::LongBlock) {
-      COFFEE_THROW_EXCEPTION("This method only works over dbms::datatype::LongBlock");
-   }
-
-   LOG_DEBUG(data->asString());
-
-   do_write(std::static_pointer_cast<datatype::LongBlock>(data));
-
-}

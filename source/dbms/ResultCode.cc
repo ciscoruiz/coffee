@@ -42,23 +42,21 @@ using namespace coffee;
 
 dbms::ResultCode::ResultCode(const dbms::Database& database, const int opCode) :
    m_errorCodeInterpreter(database.getErrorCodeInterpreter()),
-   m_errorText(NULL),
    m_numericCode(opCode)
 {
 }
 
 dbms::ResultCode::ResultCode(const std::shared_ptr<Database>& database, const int opCode) :
    m_errorCodeInterpreter(database->getErrorCodeInterpreter()),
-   m_errorText(NULL),
    m_numericCode(opCode)
 {
 }
 
 dbms::ResultCode::ResultCode(const dbms::Database& database, const int numericCode, const char* errorText) :
    m_errorCodeInterpreter(database.getErrorCodeInterpreter()),
-   m_errorText(NULL)
+   m_numericCode(numericCode),
+   m_errorText(errorText)
 {
-   initialize(numericCode, errorText);
 }
 
 bool dbms::ResultCode::notFound() const
@@ -97,36 +95,6 @@ bool dbms::ResultCode::lostConnection() const
    return m_errorCodeInterpreter->lostConnection(m_numericCode);
 }
 
-//
-// No usamos la std::string porque la gran mayor�a de las veces la ejecuci�n de las sentencias SQL ser�
-// correcta => no har� falta reservar ninguna memoria.
-//
-void dbms::ResultCode::copy(const char* text)
-   noexcept
-{
-   if(text == NULL) {
-      if(m_errorText != NULL) {
-         free(m_errorText);
-         m_errorText = NULL;
-      }
-   }
-   else {
-      char* aux;
-      if((aux = coffee_strchr((char*) text, '\n')) != NULL)
-         *aux = 0;
-
-      const int textLen = coffee_strlen(text);
-      
-      if(m_errorText == NULL)
-         m_errorText = strdup(text);
-      else if(coffee_strlen(m_errorText) >= textLen)
-         coffee_strcpy(m_errorText, text);
-      else {
-         free(m_errorText);
-         m_errorText = strdup(text);
-      }
-   }
-}
 
 adt::StreamString dbms::ResultCode::asString() const
    noexcept
@@ -148,7 +116,7 @@ adt::StreamString dbms::ResultCode::asString() const
 
    result << "(" << m_numericCode << ")";
 
-   if (m_errorText != NULL) {
+   if (!m_errorText.empty()) {
       result << " | Comment=" << m_errorText;
    }
 

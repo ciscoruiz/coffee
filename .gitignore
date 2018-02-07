@@ -18,3 +18,10 @@ release
 *.log
 *.old
 /Default/
+libs/
+
+# Files and directories generated for cmake 
+Makefile
+cmake_install.cmake
+CMakeFiles/
+CMakeCache.txt

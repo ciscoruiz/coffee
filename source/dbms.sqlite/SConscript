@@ -1,9 +1,0 @@
-Import ('env')
-
-sources = Glob('*.cc')
-sources.extend (Glob('binder/*.cc'))
-
-result = env.StaticLibrary ('coffee_dbms_sqlite', sources);
-
-Return ('result')
-

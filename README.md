@@ -13,7 +13,7 @@ You should have to use a g++ with support for c++11.
 And should have installed the next packages:
 
 ```bash
-sudo apt-get install scons
+sudo apt install cmake
 sudo apt-get install libxml2-dev
 sudo apt-get install libboost-filesystem-dev
 sudo apt-get install libboost-test-dev

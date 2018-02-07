@@ -14,3 +14,13 @@ add_subdirectory(source/dbms)
 add_subdirectory(source/dbms.sqlite)
 add_subdirectory(source/persistence)
 
+add_subdirectory(test/config)
+add_subdirectory(test/adt)
+add_subdirectory(test/xml)
+add_subdirectory(test/logger)
+add_subdirectory(test/balance)
+add_subdirectory(test/app)
+add_subdirectory(test/dbms)
+add_subdirectory(test/dbms.sqlite)
+add_subdirectory(test/persistence)
+

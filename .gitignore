@@ -22,7 +22,8 @@ libs/
 
 # Files and directories generated for cmake 
 Makefile
-cmake_install.cmake
+*.cmake
 CMakeFiles/
 CMakeCache.txt
 test_*
+Testing/

@@ -1,8 +1,11 @@
 project(test_coffee_dbms_sqlite)
 
-cmake_minimum_required(VERSION 3.5)
-
 file(GLOB SOURCES "*.cc")
+
+if (COFFEE_SQLITE3_PATH)
+include_directories(${COFFEE_SQLITE3_PATH}/include)
+link_directories(${COFFEE_SQLITE3_PATH}/lib)
+endif()
 
 add_executable(test_coffee_dbms_sqlite ${SOURCES})
 

@@ -1,7 +1,5 @@
 project(test_coffee_xml)
 
-cmake_minimum_required(VERSION 3.5)
-
 file(GLOB SOURCES "*.cc")
 
 add_executable(test_coffee_xml ${SOURCES})

@@ -4,6 +4,16 @@ set(CMAKE_CXX_STANDARD 11)
 
 cmake_minimum_required(VERSION 3.5)
 
+if (COFFEE_BOOST_PATH)
+include_directories(${COFFEE_BOOST_PATH}/include)
+link_directories(${COFFEE_BOOST_PATH}/lib)
+endif()
+
+if (COFFEE_XML_PATH)
+include_directories(${COFFEE_XML_PATH}/include/libxml)
+link_directories(${COFFEE_XML_PATH}/lib)
+endif()
+
 add_subdirectory(source/config)
 add_subdirectory(source/adt)
 add_subdirectory(source/xml)

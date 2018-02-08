@@ -1,17 +1,22 @@
 project(coffee)
 
-set(CMAKE_CXX_STANDARD 11)
+
+if (CMAKE_VERSION VERSION_LESS "3.1")
+   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+else()
+   set(CMAKE_CXX_STANDARD 11)
+endif()
 
 cmake_minimum_required(VERSION 2.8)
 
 if (COFFEE_BOOST_PATH)
-include_directories(${COFFEE_BOOST_PATH}/include)
-link_directories(${COFFEE_BOOST_PATH}/lib)
+  include_directories(${COFFEE_BOOST_PATH}/include)
+  link_directories(${COFFEE_BOOST_PATH}/lib)
 endif()
 
 if (COFFEE_XML_PATH)
-include_directories(${COFFEE_XML_PATH}/include/libxml2)
-link_directories(${COFFEE_XML_PATH}/lib)
+  include_directories(${COFFEE_XML_PATH}/include/libxml2)
+  link_directories(${COFFEE_XML_PATH}/lib)
 endif()
 
 add_subdirectory(source/config)

@@ -2,7 +2,7 @@ project(coffee)
 
 set(CMAKE_CXX_STANDARD 11)
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 2.8)
 
 if (COFFEE_BOOST_PATH)
 include_directories(${COFFEE_BOOST_PATH}/include)

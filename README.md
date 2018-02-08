@@ -6,6 +6,20 @@ COFFEE is the acronym for "COmpany eFFEEctive platform"
 
 This project is a set of common libraries which help to improve productivity while developing from medium to huge C++ projects.
 
+This framework contains a set of modules to boost productivity while developing C++ applications. The modules are:
+
+| Module | Comment|
+|--------|--------|
+| coffee.config | Low level macros defines to support different architectures. |
+| coffee.adt | Defines **A**bstract **D**ata **T**ypes commonly used, some patterns (LRU Cache, Backtracking general algorihtm, observer) and more. |
+| coffee.xml | Defines and high level interface to work with XML documents. |
+| coffee.logger | Best logging system you will see. If defines a fast common interfaces for lots of ways of write logs and formatters. |
+| coffee.balance | Module for share load between a set of resources, it implements three different strategies and it does easy to write your own. A database connection will be a resource inherited from this kind of resource. |
+| coffee.app | Define classes to make easy to run an application with lots of modules. It deal with internal dependencias between engines. And engines is a large functionality which depends on other engines. An example of engine could be one database or one communication system. |
+| coffee.dbms | **D**ata**B**ase **M**anager **S**ystem. It defines a common interface for work with any database you need (MySQL, PostgreSQL and more). |
+| coffee.dbms.sqlite | Module to work with SQLite3 database. |
+| coffee.persistence | High Level of classes to work over a database without has to deal with SQL sentences, transactions and so on, it will work with classes, primrary keys and object that will be read/write from the DBMS. |
+
 ### Prerequisites
 
 You should have to use a g++ with support for c++11.
@@ -17,13 +31,26 @@ sudo apt-get install cmake
 sudo apt-get install libxml2-dev
 sudo apt-get install libboost-filesystem-dev
 sudo apt-get install libboost-test-dev
+sudo apt-get install libsqlite3-dev:amd64
+sudo apt-get install sqlite sqlite3   
+   
 ```
 For now it should be very simple.
 
 ### Installation
 
-You can run "scons" from the coffee directory to create libraries or "scons test" to create libraries and 
-run unit test over that libraries.
+Go to the root source directory and run
+
+```
+cmake .
+``` 
+it will create the needed infraestructure to generate all modules by calling **make**.
+
+You can run the next command to see the list of target you can use with **make**. 
+
+```
+make help
+``` 
 
 ## License
 

@@ -39,8 +39,8 @@ private:
 
    virtual void do_prepare(Statement& statement, const int pos) throw(adt::RuntimeException, DatabaseException) = 0;
    virtual void do_release(Statement& statement) noexcept = 0;
-   virtual void do_encode() throw(adt::RuntimeException) = 0;
-   virtual void do_decode() throw(adt::RuntimeException) = 0;
+   virtual void do_encode(Statement& statement, const int pos) throw(adt::RuntimeException, DatabaseException) = 0;
+   virtual void do_decode(Statement& statement, const int pos) throw(adt::RuntimeException) = 0;
 
    friend class coffee::dbms::Statement;
 };

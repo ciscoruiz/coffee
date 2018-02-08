@@ -1,8 +1,0 @@
-Import ('env')
-
-sources = Glob('*.cc')
-
-result = env.StaticLibrary ('coffee_balance', sources);
-
-Return ('result')
-

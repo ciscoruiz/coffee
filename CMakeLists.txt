@@ -10,7 +10,7 @@ link_directories(${COFFEE_BOOST_PATH}/lib)
 endif()
 
 if (COFFEE_XML_PATH)
-include_directories(${COFFEE_XML_PATH}/include/libxml)
+include_directories(${COFFEE_XML_PATH}/include/libxml2)
 link_directories(${COFFEE_XML_PATH}/lib)
 endif()
 

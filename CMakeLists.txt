@@ -41,6 +41,8 @@ add_subdirectory(test/dbms)
 add_subdirectory(test/dbms.sqlite)
 add_subdirectory(test/persistence)
 
+include(CTest)
+
 add_test(test_coffee_config test/config/test_coffee_config)
 add_test(test_coffee_adt test/adt/test_coffee_adt)
 add_test(test_coffee_xml test/xml/test_coffee_xml)

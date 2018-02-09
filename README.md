@@ -1,5 +1,7 @@
 # COFFEE
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/765adc76c848465ba47a244973ef654a)](https://app.codacy.com/app/cisco.tierra/coffee?utm_source=github.com&utm_medium=referral&utm_content=ciscoruiz/coffee&utm_campaign=badger)
+
 COFFEE is the acronym for "COmpany eFFEEctive platform"
 
 ## Getting started 

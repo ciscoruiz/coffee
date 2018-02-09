@@ -121,8 +121,6 @@ BOOST_AUTO_TEST_CASE(date_is_nulleable)
    BOOST_REQUIRE_EQUAL(time_t->tm_mon, 9);
    BOOST_REQUIRE_EQUAL(time_t->tm_mday, 25);
 
-   BOOST_REQUIRE_EQUAL(column.getValue(), adt::Second(1382662810));
-
    column.clear();
    BOOST_REQUIRE_EQUAL(column.hasValue(), false);
 }

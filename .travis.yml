@@ -1,5 +1,5 @@
 language: cpp
-script: cmake . && make && make test
+script: cmake . && make && ctest --output-on-failure
 
 before_script: 
    - sudo apt-get -qq update

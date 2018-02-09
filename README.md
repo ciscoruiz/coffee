@@ -6,6 +6,8 @@
 
 [![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)](https://GitHub.com/Naereen/ama)
 
+[![Build Status](https://travis-ci.org/ciscoruiz/coffee.svg?branch=master)](https://travis-ci.org/ciscoruiz/coffee)
+
 COFFEE is the acronym for "COmpany eFFEEctive platform"
 
 ## Getting started 

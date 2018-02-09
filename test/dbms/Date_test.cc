@@ -57,7 +57,6 @@ BOOST_AUTO_TEST_CASE(date_setter_second)
    BOOST_REQUIRE_EQUAL(localTime->tm_mday, 31);
    BOOST_REQUIRE_EQUAL(localTime->tm_mon, 0);
    BOOST_REQUIRE_EQUAL(localTime->tm_year, 1987 - 1900);
-   BOOST_REQUIRE_EQUAL(localTime->tm_hour, 17); // This test was written under GMT+1
    BOOST_REQUIRE_EQUAL(localTime->tm_min, 59);
    BOOST_REQUIRE_EQUAL(localTime->tm_sec, 59);
 

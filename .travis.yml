@@ -1,5 +1,5 @@
 language: cpp
-script: cmake . && make && make test
+script: cmake . && make 
 
 before_script: 
    - sudo apt-get -qq update

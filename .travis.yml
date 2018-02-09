@@ -1,3 +1,12 @@
 language: cpp
 script: cmake . && make && make test
 
+apt:
+  packages:
+    - libxml2-dev
+    - libboost-filesystem-dev
+    - libboost-test-dev
+    - libsqlite3-dev:amd64
+    - sqlite
+    - sqlite3
+    

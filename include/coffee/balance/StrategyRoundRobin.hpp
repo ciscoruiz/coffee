@@ -35,9 +35,6 @@
 #ifndef __coffee_balance_StrategyRoundRobin_hpp
 #define __coffee_balance_StrategyRoundRobin_hpp
 
-// It will not be available into std until c++17
-#include <boost/optional.hpp>
-
 #include "Strategy.hpp"
 #include "ResourceList.hpp"
 
@@ -53,7 +50,19 @@ public:
    std::shared_ptr<Resource> apply() throw (ResourceUnavailableException);
 
 private:
-   boost::optional<ResourceList::resource_iterator> m_position;
+   class Position {
+   public:
+      Position() : valid(false) {;}
+
+      operator bool() { return valid; }
+      Position& operator=(ResourceList::resource_iterator other)  { iterator = other; valid = true; return *this; }
+      ResourceList::resource_iterator value() { return iterator; }
+
+   private:
+      bool valid;
+      ResourceList::resource_iterator iterator;
+   };
+   Position m_position;
 
    std::shared_ptr<Resource> apply(GuardResourceList& guard) throw (ResourceUnavailableException);
 };

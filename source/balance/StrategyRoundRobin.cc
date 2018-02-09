@@ -65,7 +65,7 @@ std::shared_ptr<balance::Resource> balance::StrategyRoundRobin::apply (GuardReso
    ResourceList::resource_iterator ww;
    ResourceList::resource_iterator end;
 
-   ww = end = *m_position;
+   ww = end = m_position.value();
 
    do {
       std::shared_ptr<Resource>& w = ResourceList::resource(ww);

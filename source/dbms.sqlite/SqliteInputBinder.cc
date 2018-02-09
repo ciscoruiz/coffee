@@ -86,7 +86,7 @@ void sqlite::SqliteInputBinder::do_encode(Statement& statement, const int pos)
       case dbms::datatype::Abstract::Datatype::LongBlock:
          {
             auto longBlock = coffee_datatype_downcast(datatype::LongBlock, data)->getValue();
-            rc = sqlite3_bind_blob64(impl, pos + 1, (void*)longBlock.data(), longBlock.size(), NULL);
+            rc = sqlite3_bind_blob(impl, pos + 1, (void*)longBlock.data(), longBlock.size(), NULL);
          }
          break;
       case dbms::datatype::Abstract::Datatype::Date:

@@ -48,14 +48,6 @@ datatype::ShortBlock::ShortBlock (const char* name, const int maxSize, const Con
    datatype::Abstract::setBuffer ((void*) m_value.data ());
 }
 
-datatype::ShortBlock::ShortBlock (const std::string& name, const int maxSize, const Constraint::_v constraint) :
-   datatype::Abstract (name, Datatype::ShortBlock, maxSize, constraint),
-   m_value ()
-{
-   m_value.reserve(maxSize);
-   datatype::Abstract::setBuffer ((void*) m_value.data ());
-}
-
 datatype::ShortBlock::ShortBlock (const ShortBlock& other) :
    datatype::Abstract (other),
    m_value ()

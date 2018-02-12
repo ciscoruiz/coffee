@@ -46,12 +46,6 @@ dbms::ResultCode::ResultCode(const dbms::Database& database, const int opCode) :
 {
 }
 
-dbms::ResultCode::ResultCode(const std::shared_ptr<Database>& database, const int opCode) :
-   m_errorCodeInterpreter(database->getErrorCodeInterpreter()),
-   m_numericCode(opCode)
-{
-}
-
 dbms::ResultCode::ResultCode(const dbms::Database& database, const int numericCode, const char* errorText) :
    m_errorCodeInterpreter(database.getErrorCodeInterpreter()),
    m_numericCode(numericCode),
@@ -101,17 +95,19 @@ adt::StreamString dbms::ResultCode::asString() const
 {
    adt::StreamString result("dbms.ResultCode { Status=");
 
-   if (successful()) {
-      result << "Successful";
-   }
-   else if (notFound()) {
-      result << "Not-Found";
-   }
-   else if (locked()) {
-      result << "Locked";
-   }
-   else if (lostConnection()) {
-      result << "Lost-Connection";
+   if (m_errorCodeInterpreter) {
+      if (successful()) {
+         result << "Successful";
+      }
+      else if (notFound()) {
+         result << "Not-Found";
+      }
+      else if (locked()) {
+         result << "Locked";
+      }
+      else if (lostConnection()) {
+         result << "Lost-Connection";
+      }
    }
 
    result << "(" << m_numericCode << ")";

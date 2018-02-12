@@ -19,7 +19,8 @@ namespace datatype {
 class Float : public datatype::Abstract {
 public:
    explicit Float (const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull, const char* format="%f");
-   explicit Float (const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull, const char* format="%f");
+   explicit Float (const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull, const char* format="%f") : 
+      Float(name.c_str(), constraint, format){;}
    Float (const Float& other);
 
    float getFloatValue () const throw (adt::RuntimeException) { return getValue (); }

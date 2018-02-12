@@ -61,7 +61,7 @@ namespace datatype {
 class LongBlock : public datatype::Abstract {
 public:
    explicit LongBlock(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull);
-   explicit LongBlock(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull);
+   explicit LongBlock(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) : LongBlock(name.c_str(), constraint) {;}
    LongBlock(const LongBlock& other);
    ~LongBlock() {;}
 

@@ -195,7 +195,7 @@ bool dbms::Connection::recover()
       open();
       result = true;
    }
-   catch(DatabaseException& edbms) {
+   catch(adt::Exception& edbms) {
       logger::Logger::write(edbms);
       m_dbmsDatabase.notifyRecoveryFail(*this);
    }

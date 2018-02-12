@@ -83,9 +83,9 @@ bool dbms::GuardStatement::fetch()
    return m_statement->fetch();
 }
 
-void dbms::GuardStatement::setRequiresCommit(const bool requiresCommit) noexcept
+bool dbms::GuardStatement::setRequiresCommit(const bool requiresCommit) noexcept
 {
-   m_statement->setRequiresCommit(requiresCommit);
+   return m_statement->setRequiresCommit(requiresCommit);
 }
 
 

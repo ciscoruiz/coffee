@@ -42,13 +42,6 @@ public:
    explicit ResultCode(const Database& database, const int opCode);
 
    /**
-      Constructor vacio.
-      \warning Antes de usarse debe asignarse a algun otro ResultCode obtenido mediante la invocacion
-      a coffee::dbms::Connection::execute.
-   */
-   explicit ResultCode(const std::shared_ptr<Database>& database, const int opCode);
-
-   /**
       Constructor.
 
       \param numericCode Codigo de error asociado a la ultima operacion realizada contra la base de datos.

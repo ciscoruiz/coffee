@@ -44,12 +44,6 @@ datatype::LongBlock::LongBlock (const char* name, const Constraint::_v constrain
 {
    datatype::Abstract::setBuffer ((void*) NULL);
 }
-datatype::LongBlock::LongBlock (const std::string& name, const Constraint::_v constraint) :
-   datatype::Abstract (name, Datatype::LongBlock, 0, constraint),
-   m_value ()
-{
-   datatype::Abstract::setBuffer ((void*) NULL);
-}
 
 datatype::LongBlock::LongBlock (const LongBlock& other) :
    datatype::Abstract (other),

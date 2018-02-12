@@ -31,10 +31,15 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
+#include <coffee/adt/Second.hpp>
+#include <coffee/adt/DataBlock.hpp>
+
 #include <coffee/dbms/datatype/Set.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
 #include <coffee/dbms/datatype/String.hpp>
 #include <coffee/dbms/datatype/Float.hpp>
+#include <coffee/dbms/datatype/Date.hpp>
+#include <coffee/dbms/datatype/LongBlock.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -69,6 +74,38 @@ BOOST_AUTO_TEST_CASE(set_constains)
 
   BOOST_REQUIRE_EQUAL(set.constains("integer"), true);
   BOOST_REQUIRE_EQUAL(set.constains("integer2"), false);
+}
+
+BOOST_AUTO_TEST_CASE(set_access)
+{
+   datatype::Set set;
+
+   adt::Second second = adt::Second::getLocalTime();
+
+   set.insert(std::make_shared<datatype::Integer>("integer"));
+   set.insert(std::make_shared<datatype::String>("string", 16));
+   set.insert(std::make_shared<datatype::Float>("float"));
+   set.insert(std::make_shared<datatype::Date>("date"));
+   set.insert(std::make_shared<datatype::LongBlock>("longblock"));
+
+   const int maxSize = 1024;
+   char* buffer = new char[maxSize];
+   adt::DataBlock data(buffer, maxSize);
+
+   set.setInteger("integer", 123);
+   set.setString("string", "hello");
+   set.setFloat("float", 0.123);
+   set.setDate("date", second);
+   set.setDataBlock("longblock", data);
+
+   BOOST_REQUIRE_EQUAL(set.getInteger("integer"), 123);
+   BOOST_REQUIRE_EQUAL(set.getString("string"), "hello");
+   BOOST_REQUIRE_CLOSE(set.getFloat("float"), 0.123, 0.001);
+   BOOST_REQUIRE_EQUAL(set.getDate("date"), second);
+
+   const adt::DataBlock& read = set.getDataBlock("longblock");
+
+   BOOST_REQUIRE (memcmp(read.data(), buffer, maxSize) == 0);
 }
 
 BOOST_AUTO_TEST_CASE(set_operator_compare)
@@ -119,7 +156,23 @@ BOOST_AUTO_TEST_CASE(set_operator_less)
   BOOST_REQUIRE_EQUAL(other < set, true);
 }
 
-BOOST_AUTO_TEST_CASE(set_compare_different_members_numbers)
+BOOST_AUTO_TEST_CASE(set_self)
+{
+  datatype::Set set;
+
+  set = set;
+
+  set.insert(std::make_shared<datatype::Integer>("integer"));
+  set.insert(std::make_shared<datatype::String>("string", 16));
+  set.insert(std::make_shared<datatype::Float>("float"));
+  set.setInteger("integer", 123);
+  set.setString("string", "hello");
+  set.setFloat("float", 0.123);
+
+  BOOST_REQUIRE(set == set);
+}
+
+BOOST_AUTO_TEST_CASE(set_compare_different_no_members_numbers)
 {
   datatype::Set set;
 
@@ -133,9 +186,15 @@ BOOST_AUTO_TEST_CASE(set_compare_different_members_numbers)
   datatype::Set other;
   other.insert(std::make_shared<datatype::Integer>("integer"));
   other.insert(std::make_shared<datatype::String>("string", 16));
+  set.setInteger("integer", 123);
+  set.setString("string", "hello");
 
   BOOST_REQUIRE_THROW(set.compare(other), adt::RuntimeException);
   BOOST_REQUIRE_EQUAL(set == other, false);
+
+  BOOST_REQUIRE_THROW(other.compare(set), adt::RuntimeException);
+  BOOST_REQUIRE_EQUAL(other == set, false);
+
 }
 
 BOOST_AUTO_TEST_CASE(set_compare_different_members_names)
@@ -162,3 +221,4 @@ BOOST_AUTO_TEST_CASE(set_compare_different_members_names)
   BOOST_REQUIRE_EQUAL(set == other, false);
   BOOST_REQUIRE_EQUAL(other == set, false);
 }
+

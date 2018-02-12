@@ -35,6 +35,9 @@
 #include <limits.h>
 
 #include <iostream>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
 
 #include <boost/test/unit_test.hpp>
 
@@ -56,6 +59,44 @@ public:
    void run() throw(adt::RuntimeException) {;}
 };
 
+class ParallelApplication : public app::Application {
+public:
+   ParallelApplication() : app::Application("ParallelApplication", "It will wait till condition", "1.0"),
+      stopNow(false)
+   {
+      logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
+   }
+
+   void terminateApplication() { stopNow = true; waitForStop.notify_all(); }
+
+private:
+   std::mutex mutex;
+   std::condition_variable waitForStop;
+   bool stopNow;
+
+   void run() throw(adt::RuntimeException) {
+      std::unique_lock <std::mutex> guard (mutex);
+      while(!stopNow) {
+         waitForStop.wait(guard);
+      }
+   }
+
+   void do_requestStop() throw(adt::RuntimeException) {
+      try {
+         app::Application::do_requestStop();
+         terminateApplication();
+      }
+      catch(adt::RuntimeException&) {
+         terminateApplication();
+         throw;
+      }
+   }
+};
+
+void parallelRun(app::Application& app) {
+   app.start();
+}
+
 class MyEngine : public app::Engine {
 public:
    MyEngine(app::Application& application, const char* name) : Engine(application, name), m_initilized(0), m_stopped(0) {;}
@@ -73,6 +114,24 @@ private:
    void do_stop() throw(adt::RuntimeException) { ++ m_stopped;}
 };
 
+class NoStopEngine : public app::Engine {
+public:
+   NoStopEngine(app::Application& application, const char* name) : app::Engine(application, name) {;}
+
+private:
+   void do_initialize() throw(adt::RuntimeException) {;}
+   void do_stop() throw(adt::RuntimeException) { COFFEE_THROW_EXCEPTION("I dont want to stop"); }
+};
+
+class NoRequestStopEngine : public app::Engine {
+public:
+   NoRequestStopEngine(app::Application& application, const char* name) : app::Engine(application, name) {;}
+
+private:
+   void do_initialize() throw(adt::RuntimeException) {;}
+   void do_requestStop() throw(adt::RuntimeException) { COFFEE_THROW_EXCEPTION("I dont accept request stop"); }
+   void do_stop() throw(adt::RuntimeException) { ; }
+};
 
 BOOST_AUTO_TEST_CASE( smallest_application )
 { 
@@ -85,6 +144,7 @@ BOOST_AUTO_TEST_CASE( smallest_application )
    application.start();
 
    BOOST_REQUIRE_EQUAL(application.getPid(), getpid());
+   BOOST_REQUIRE_EQUAL(application.getVersion().find("1.0/"), 0);
 
    BOOST_REQUIRE_EQUAL(application.engine_find("00") != application.engine_end(), true);
 
@@ -147,4 +207,132 @@ BOOST_AUTO_TEST_CASE( interdependence_predecessor )
    BOOST_REQUIRE_EQUAL(application.isStopped(), true);
    BOOST_REQUIRE_EQUAL(application.isRunning(), false);
 }
+
+BOOST_AUTO_TEST_CASE( iterator_engine )
+{
+   SmallestApplication application;
+
+   application.attach(std::make_shared<MyEngine>(application, "00"));
+   application.attach(std::make_shared<MyEngine>(application, "01"));
+   application.attach(std::make_shared<MyEngine>(application, "02"));
+   application.attach(std::make_shared<MyEngine>(application, "03"));
+   application.attach(std::make_shared<MyEngine>(application, "04"));
+
+   BOOST_REQUIRE_NO_THROW(application.start());
+
+   const SmallestApplication& constApplication(application);
+
+   auto ii = application.engine_begin();
+   auto maxii = application.engine_end();
+
+   app::Application::const_engine_iterator jj = constApplication.engine_begin();
+   app::Application::const_engine_iterator  maxjj =  constApplication.engine_end();
+
+   while (ii != maxii) {
+	   BOOST_REQUIRE_EQUAL (app::Application::engine(ii)->asString(), app::Application::engine(jj)->asString());
+	   BOOST_REQUIRE(jj != maxjj);
+	   ++ ii;
+	   ++ jj;
+   }
+}
+
+BOOST_AUTO_TEST_CASE( app_already_run )
+{
+   ParallelApplication application;
+
+   auto thread = std::thread(parallelRun, std::ref(application));
+
+   usleep(5000);
+   BOOST_CHECK_THROW(application.start(), adt::RuntimeException);
+   application.requestStop();
+   thread.join();
+}
+
+BOOST_AUTO_TEST_CASE( app_stop_engines )
+{
+   ParallelApplication application;
+   auto engine = std::make_shared<MyEngine>(application, "00");
+   application.attach(engine);
+
+   auto thread = std::thread(parallelRun, std::ref(application));
+   usleep(5000);
+   BOOST_CHECK(application.isRunning());
+
+   BOOST_CHECK(engine->isRunning());
+   BOOST_CHECK_EQUAL(engine->getInitializedCounter(), 1);
+   BOOST_CHECK_EQUAL(engine->getStoppedCounter(), 0);
+
+   application.requestStop();
+
+   usleep(5000);
+
+   BOOST_CHECK(engine->isStopped());
+   BOOST_CHECK_EQUAL(engine->getInitializedCounter(), 1);
+   BOOST_CHECK_EQUAL(engine->getStoppedCounter(), 1);
+
+   thread.join();
+}
+
+BOOST_AUTO_TEST_CASE( app_null_engine )
+{
+   std::shared_ptr<MyEngine> engine;
+   SmallestApplication application;
+   BOOST_REQUIRE_THROW(application.attach(engine), adt::RuntimeException);
+}
+
+BOOST_AUTO_TEST_CASE( app_already_defined )
+{
+   SmallestApplication application;
+   application.attach(std::make_shared<MyEngine>(application, "00"));
+   auto iiprev = application.engine_begin();
+   auto iimaxprev = application.engine_end();
+
+   application.attach(std::make_shared<MyEngine>(application, "00"));
+   BOOST_REQUIRE(iiprev == application.engine_begin());
+   BOOST_REQUIRE(iimaxprev == application.engine_end());
+}
+
+BOOST_AUTO_TEST_CASE( app_unstoppable_stop_engines )
+{
+   ParallelApplication application;
+
+   auto engine = std::make_shared<NoStopEngine>(application, "00");
+   application.attach(engine);
+   application.attach(std::make_shared<NoStopEngine>(application, "01"));
+   application.attach(std::make_shared<NoStopEngine>(application, "02"));
+
+   auto thread = std::thread(parallelRun, std::ref(application));
+   usleep(5000);
+   BOOST_CHECK(application.isRunning());
+
+   application.terminateApplication();
+
+   thread.join();
+
+   BOOST_CHECK(application.isStopped());
+   BOOST_CHECK(engine->isStopped());
+}
+
+BOOST_AUTO_TEST_CASE( app_unstoppable_requeststop_engines )
+{
+   ParallelApplication application;
+
+   auto engine = std::make_shared<NoRequestStopEngine>(application, "00");
+   application.attach(engine);
+   application.attach(std::make_shared<NoRequestStopEngine>(application, "01"));
+   application.attach(std::make_shared<NoRequestStopEngine>(application, "02"));
+
+   auto thread = std::thread(parallelRun, std::ref(application));
+   usleep(50000);
+   BOOST_CHECK(application.isRunning());
+   BOOST_CHECK(engine->isRunning());
+
+   BOOST_CHECK_THROW(application.requestStop(), adt::RuntimeException);
+
+   thread.join();
+
+   BOOST_CHECK(application.isStopped());
+   BOOST_CHECK(engine->isStopped());
+}
+
 

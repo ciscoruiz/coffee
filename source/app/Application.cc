@@ -71,11 +71,10 @@ using namespace coffee::adt;
 //static
 app::Application* app::Application::m_this = nullptr;
 
-app::Application::Application(const char* shortName, const char* title, const char* version, const char* date, const char* time) :
+app::Application::Application(const char* shortName, const char* title, const char* version) :
    Runnable(shortName),
    a_version(version),
-   a_title(title),
-   a_enableGPL(false)
+   a_title(title)
 {
    sigset(SIGUSR1, handlerUserSignal);
    sigset(SIGUSR2, handlerUserSignal);
@@ -93,12 +92,6 @@ app::Application::Application(const char* shortName, const char* title, const ch
       m_this = this;
 
    cout << getName() << " - " << a_title << ". Version " << a_version << endl;
-   if(date || time) {
-      cout << "Release date: ";
-      if(date) cout << date << " ";
-      if(time) cout << time;
-      cout << endl;
-   }
    cout << "(c) Copyright 2018 by Francisco Ruiz." << endl << endl;
 }
 
@@ -141,21 +134,6 @@ void app::Application::start()
    }
 
    try {
-      if(a_enableGPL == true) {
-         cout << "This program is free software: you can redistribute it and/or modify" << endl;
-         cout << "it under the terms of the GNU General Public License as published by" << endl;
-         cout << "the Free Software Foundation, either version 3 of the License, or" << endl;
-         cout << "(at your option) any later version." << endl << endl;
-
-         cout << "This program is distributed in the hope that it will be useful," << endl;
-         cout << "but WITHOUT ANY WARRANTY; without even the implied warranty of" << endl;
-         cout << "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the" << endl;
-         cout << "GNU General Public License for more details." << endl << endl;
-
-         cout << "You should have received a copy of the GNU General Public License" << endl;
-         cout << "along with this program.  If not, see <http://www.gnu.org/licenses/>." << endl << endl;
-      }
-
       cout << "COFFEE - COmpany eFFEEctive Platform. Version " << config::Release::getVersion() << endl;
       cout << "Developed by Francisco Ruiz" << endl;
       cout << "Release date: " << __DATE__ << " " << __TIME__ << endl;
@@ -233,18 +211,27 @@ void app::Application::do_requestStop()
 {
    LOG_THIS_METHOD();
 
+   adt::StreamString ss("Some engines do not accept the request stop { ");
+   bool exception = false;
+
    for(engine_iterator ii = engine_begin(), maxii = engine_end(); ii != maxii; ii ++) {
       auto engine = Application::engine(ii);
 
-      LOG_INFO("Request stop for engine | " <<  engine->asString());
+      LOG_INFO("Send stop for engine | " <<  engine->asString());
 
       try {
          engine->requestStop();
       }
       catch(RuntimeException& ex) {
          logger::Logger::write(ex);
-         exit(-1);
+         ss << engine->getName() << " ";
+         exception = true;
       }
+   }
+
+   if (exception) {
+      ss << "}";
+      COFFEE_THROW_EXCEPTION(ss);
    }
 }
 

@@ -58,18 +58,17 @@ BOOST_AUTO_TEST_CASE( datablock_copy )
 {
    const char* pp = "hello xxx";
 
-   adt::DataBlock var (pp, strlen (pp));
+   adt::DataBlock var (pp, strlen (pp) + 1);
 
-   BOOST_REQUIRE_EQUAL (var.size (), strlen (pp));
+   BOOST_REQUIRE_EQUAL (var.size (), strlen (pp) + 1);
 
    adt::DataBlock other (var);
 
    BOOST_REQUIRE_EQUAL (strcmp (other.data(), pp), 0);
 
    adt::DataBlock copy;
-
    copy = var;
-   BOOST_REQUIRE_EQUAL (strcmp (copy.data(), pp), 0);
+   BOOST_REQUIRE(copy == var);
 }
 
 BOOST_AUTO_TEST_CASE( datablock_buffer )
@@ -140,5 +139,7 @@ BOOST_AUTO_TEST_CASE( datablock_out_of_range )
    BOOST_CHECK_THROW (var [10] = 0, adt::RuntimeException);
 
    const adt::DataBlock copy (var);
-   BOOST_CHECK_THROW (var [10] == 0, adt::RuntimeException);
+   BOOST_CHECK_THROW (copy [10] == 0, adt::RuntimeException);
+   BOOST_CHECK_THROW (copy.at(10), adt::RuntimeException);
+
 }

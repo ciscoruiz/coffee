@@ -54,6 +54,8 @@ public:
    Connection(const Connection&) = delete;
    Connection& operator=(const Connection&) = delete;
 
+   int getCommitPendingCounter() const noexcept { return m_commitPending; }
+
 protected:
    const Database& m_dbmsDatabase;
    std::string m_user; /**< Nombre del usuario */

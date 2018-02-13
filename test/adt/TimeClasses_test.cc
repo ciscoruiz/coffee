@@ -150,6 +150,16 @@ BOOST_AUTO_TEST_CASE( TimeClasses_millisecond_from_string )
    BOOST_REQUIRE_EQUAL ( guide.asString(), "10 ms");
 }
 
+BOOST_AUTO_TEST_CASE( TimeClasses_millisecond_compare )
+{
+   adt::Millisecond start(adt::Millisecond::getTime());
+   usleep(5000);
+   adt::Millisecond after(adt::Millisecond::getTime());
+   BOOST_REQUIRE(start < after);
+   BOOST_REQUIRE(after > start);
+   BOOST_REQUIRE(start != after);
+}
+
 BOOST_AUTO_TEST_CASE( TimeClasses_microsecond_from_string )
 {
    adt::Microsecond guide(LLONG_MAX);
@@ -166,6 +176,16 @@ BOOST_AUTO_TEST_CASE( TimeClasses_microsecond_from_string )
 
    guide = 10;
    BOOST_REQUIRE_EQUAL ( guide.asString(), "10 us");
+}
+
+BOOST_AUTO_TEST_CASE( TimeClasses_microsecond_compare )
+{
+   adt::Microsecond start(adt::Microsecond::getTime());
+   usleep(5000);
+   adt::Microsecond after(adt::Microsecond::getTime());
+   BOOST_REQUIRE(start < after);
+   BOOST_REQUIRE(after > start);
+   BOOST_REQUIRE(start != after);
 }
 
 BOOST_AUTO_TEST_CASE( TimeClasses_excep_from_string )

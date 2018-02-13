@@ -36,6 +36,7 @@
 #define _coffee_adt_DataBlock_h
 
 #include <string>
+#include <string.h>
 
 #include <coffee/adt/RuntimeException.hpp>
 #include <coffee/config/defines.hpp>
@@ -81,7 +82,7 @@ public:
      Copy Constructor.
      @param other Datablock to copy.
    */
-   DataBlock (const DataBlock& other) noexcept : std::string (other) {;}
+   DataBlock (const DataBlock& other) noexcept : std::string (other.data(), other.size()) {;}
 
    /**
       Destructor.
@@ -103,12 +104,14 @@ public:
 
    char& operator[] (const size_type index) throw (RuntimeException) { return at (index); }
 
-//
-// You can execute "g++ -E -dM -std=c++0x -x c++ /dev/null" to see list of macros 
-// See: http://stackoverflow.com/questions/2958398/gnu-c-how-to-check-when-std-c0x-is-in-effect
-   #ifdef __GXX_EXPERIMENTAL_CXX0X__
-      DataBlock& operator=(const DataBlock&) = default;
-   #endif
+   bool operator==(const DataBlock& other) const noexcept {
+      return size() == other.size() ? (memcmp(data(), other.data(), size()) == 0): false;
+   }
+
+   DataBlock& operator=(const DataBlock& other) noexcept {
+      this->assign(other);
+      return *this;
+   }
 };
 
 }

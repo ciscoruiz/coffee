@@ -21,7 +21,8 @@ namespace datatype {
 class String : public datatype::Abstract {
 public:
    explicit String(const char* name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull);
-   explicit String(const std::string& name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull);
+   explicit String(const std::string& name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull) : 
+      String(name.c_str(), maxSize, constraint) {;}
    String(const String& other);
    ~String() { delete [] m_value; }
 
@@ -42,8 +43,6 @@ public:
    operator adt::StreamString() const noexcept { return asString(); }
 
    adt::StreamString asString() const noexcept;
-
-   const char* className() noexcept { return "dbms::datatype::String"; }
 
    size_t hash() const noexcept { return std::hash<std::string>{}(m_value); }
 

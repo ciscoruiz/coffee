@@ -76,10 +76,6 @@ void sqlite::SqliteConnection::close()
 void sqlite::SqliteConnection::execute(const char* statement)
    throw(adt::RuntimeException, DatabaseException)
 {
-   if (impl == nullptr) {
-      COFFEE_THROW_EXCEPTION(asString() << " was not open");
-   }
-
    LOG_DEBUG(statement);
 
    char* errorMessage = 0;

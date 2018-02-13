@@ -23,7 +23,8 @@ namespace datatype {
 class TimeStamp : public Date {
 public:
    explicit TimeStamp(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull);
-   explicit TimeStamp(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull, const char* format=NULL);
+   explicit TimeStamp(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) :TimeStamp(name.c_str(), constraint) {;}
+
    TimeStamp(const datatype::TimeStamp& other);
 
    int getFractionalSecond() const noexcept { return m_fractionalSecond; }
@@ -31,8 +32,6 @@ public:
    void setFractionalSecond(const int fsec) noexcept { m_fractionalSecond = fsec; }
 
    std::shared_ptr<Abstract> clone() const noexcept { return std::make_shared<TimeStamp>(*this); }
-
-   const char* className() noexcept { return "dbms::datatype::TimeStamp"; }
 
    coffee_declare_datatype_downcast(TimeStamp)
 

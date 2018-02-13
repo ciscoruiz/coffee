@@ -134,8 +134,6 @@ public:
 
    type_t getValue () const noexcept { return m_value; }
 
-   timeval* getTimeVal (timeval& tv) const noexcept;
-
    static Millisecond getTime () noexcept;
 
    std::string asString () const noexcept;

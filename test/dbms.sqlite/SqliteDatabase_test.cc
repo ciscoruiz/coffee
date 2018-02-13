@@ -110,6 +110,20 @@ struct StatementBlob {
    std::shared_ptr<dbms::Statement> statement;
 };
 
+struct StatementSyntaxError {
+   StatementSyntaxError(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
+      const char* sql = "select age where employee where age > ?";
+      input = std::make_shared<dbms::datatype::Integer>("age");
+      output = std::make_shared<dbms::datatype::Integer>("age");
+      statement = database.createStatement("syntax_error", sql);
+      statement->createBinderInput(input);
+      statement->createBinderOutput(output);
+   };
+   std::shared_ptr<dbms::datatype::Integer> input;
+   std::shared_ptr<dbms::datatype::Integer> output;
+   std::shared_ptr<dbms::Statement> statement;
+};
+
 struct SqliteFixture {
    static  boost::filesystem::path dbPath;
 
@@ -153,6 +167,13 @@ BOOST_FIXTURE_TEST_CASE(sqlite_create_db, SqliteFixture)
    BOOST_REQUIRE_EQUAL(secondConnection->isAvailable(), true);
 }
 
+BOOST_AUTO_TEST_CASE(sqlite_connection_noopen)
+{
+   dbms::sqlite::SqliteDatabase database("/root");
+   auto connection = database.createConnection("closed", "user:first", "none");
+   BOOST_REQUIRE_THROW(dbms::GuardConnection guard(connection), adt::RuntimeException);
+}
+
 BOOST_AUTO_TEST_CASE(sqlite_invalid_access)
 {
    dbms::sqlite::SqliteDatabase database("/root");
@@ -165,7 +186,6 @@ BOOST_AUTO_TEST_CASE(sqlite_invalid_access)
 BOOST_FIXTURE_TEST_CASE(sqlite_multi_select, SqliteFixture)
 {
    StatementAgeGreater fullStatement(database, connection);
-
    dbms::GuardConnection guardConnection(connection);
    dbms::GuardStatement guardStament(guardConnection, fullStatement.statement);
 
@@ -323,7 +343,6 @@ BOOST_FIXTURE_TEST_CASE(sqlite_rebind_sentence, SqliteFixture)
    }
 }
 
-
 BOOST_FIXTURE_TEST_CASE(sqlite_reuse_sentence, SqliteFixture)
 {
    StatementCountAgeGreater ageCounter(database, connection);
@@ -353,4 +372,11 @@ BOOST_FIXTURE_TEST_CASE(sqlite_reuse_sentence, SqliteFixture)
    }
 }
 
+BOOST_FIXTURE_TEST_CASE(sqlite_syntax_error, SqliteFixture)
+{
+   StatementSyntaxError syntaxError(database, connection);
 
+   dbms::GuardConnection guardConnection(connection);
+   dbms::GuardStatement guardStament(guardConnection, syntaxError.statement);
+   BOOST_REQUIRE_THROW(guardStament.execute(), dbms::DatabaseException);
+}

@@ -61,7 +61,7 @@ namespace datatype {
 class LongBlock : public datatype::Abstract {
 public:
    explicit LongBlock(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull);
-   explicit LongBlock(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull);
+   explicit LongBlock(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) : LongBlock(name.c_str(), constraint) {;}
    LongBlock(const LongBlock& other);
    ~LongBlock() {;}
 
@@ -79,8 +79,6 @@ public:
 
    adt::StreamString asString() const noexcept;
    
-   const char* className() noexcept { return "dbms::datatype::LongBlock"; }
-
    size_t hash() const noexcept { return m_value.size(); }
 
    coffee_declare_datatype_downcast(LongBlock)

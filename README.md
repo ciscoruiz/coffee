@@ -4,6 +4,8 @@
 [![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)](https://GitHub.com/Naereen/ama)
 [![Build Status](https://travis-ci.org/ciscoruiz/coffee.svg?branch=master)](https://travis-ci.org/ciscoruiz/coffee)
 [![Build Status](https://semaphoreci.com/api/v1/ciscoruiz/coffee/branches/develop/badge.svg)](https://semaphoreci.com/ciscoruiz/coffee)
+[![codecov](https://codecov.io/gh/ciscoruiz/coffee/branch/master/graph/badge.svg)](https://codecov.io/gh/ciscoruiz/coffee)
+
 
 COFFEE is the acronym for "COmpany eFFEEctive platform"
 

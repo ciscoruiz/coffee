@@ -20,13 +20,12 @@ namespace binder {
  */
 class Input : public Binder {
 public:
+   virtual void do_encode(Statement& statement, const int pos) throw(adt::RuntimeException, DatabaseException) = 0;
+
    adt::StreamString asString() const noexcept;
 
 protected:
    explicit Input(std::shared_ptr<datatype::Abstract>& value) : Binder(value) {;}
-
-private:
-   void do_decode(Statement& statement, const int pos) throw(adt::RuntimeException) {}
 };
 
 }

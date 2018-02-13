@@ -70,7 +70,7 @@ public:
 
    bool fetch() throw(adt::RuntimeException, DatabaseException);
 
-   void setRequiresCommit(const bool requiresCommit) noexcept;
+   bool setRequiresCommit(const bool requiresCommit) noexcept;
 
 private:
    GuardConnection& m_guardConnection;

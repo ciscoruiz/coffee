@@ -160,3 +160,18 @@ BOOST_AUTO_TEST_CASE( StreamString_string_int64 )
    BOOST_REQUIRE_EQUAL(result, "MAX_LONG:18446744073709551615");
 }
 
+BOOST_AUTO_TEST_CASE( StreamString_string_null )
+{
+   adt::StreamString result(adt::StreamString::Flag::ShowNull);
+
+   result << "text=" << (const char*) NULL;
+   BOOST_REQUIRE_EQUAL(result, "text=<null>");
+}
+
+BOOST_AUTO_TEST_CASE( StreamString_string_double )
+{
+   adt::StreamString result;
+
+   result << "double=" << (double) 0.000123;
+   BOOST_REQUIRE_EQUAL(result, "double=1.230000e-04");
+}

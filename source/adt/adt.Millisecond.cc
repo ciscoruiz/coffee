@@ -59,18 +59,6 @@ adt::Millisecond adt::Millisecond::getTime ()
    return result;
 }
 
-timeval* adt::Millisecond::getTimeVal (timeval& tv) const
-   noexcept
-{
-   if (m_value < 0)
-      return NULL;
-
-   tv.tv_sec = m_value / 1000;
-   tv.tv_usec = (m_value % 1000) * 1000;
-
-   return &tv;
-}
-
 string adt::Millisecond::asString () const
    noexcept
 {

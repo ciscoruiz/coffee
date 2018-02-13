@@ -167,3 +167,13 @@ BOOST_AUTO_TEST_CASE(compile_iso)
 
    BOOST_REQUIRE_EQUAL(str, "<the_root><level00 Name=\"J&#xF6;rg1\" Other=\"B&#xFC;&#xF6;rg&#xE4;\"/><level01>Jörg2</level01></the_root>");
 }
+
+BOOST_AUTO_TEST_CASE(compare_attribute)
+{
+   std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("the root");
+
+   auto attr00 = root->createAttribute("attr00", "This is the char");
+   auto attr01 = root->createAttribute("attr01", 1024);
+
+   BOOST_REQUIRE(*attr00 < *attr01);
+}

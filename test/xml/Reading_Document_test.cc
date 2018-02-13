@@ -162,6 +162,12 @@ BOOST_FIXTURE_TEST_CASE(const_find_child_byname, XmlFixture)
    BOOST_REQUIRE(!found);
 
    BOOST_REQUIRE_THROW(root->lookupChild("not_found"), adt::RuntimeException);
+
+   const Node& constRoot = *root;
+   BOOST_REQUIRE_NO_THROW(constRoot.lookupChild("child_one"));
+   BOOST_REQUIRE(constRoot.searchChild("child_two"));
+   BOOST_REQUIRE_THROW(constRoot.lookupChild("not_found"), adt::RuntimeException);
+   BOOST_REQUIRE(!constRoot.searchChild("not_found"));
 }
 
 BOOST_FIXTURE_TEST_CASE(locate_child_by_pos, XmlFixture)
@@ -183,6 +189,10 @@ BOOST_FIXTURE_TEST_CASE(locate_child_by_pos, XmlFixture)
 
    BOOST_REQUIRE_THROW(root->childAt(-1), adt::RuntimeException);
    BOOST_REQUIRE_THROW(root->childAt(10), adt::RuntimeException);
+
+   const Node& constRoot = *root;
+   BOOST_REQUIRE_THROW(constRoot.childAt(-1), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(constRoot.childAt(10), adt::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(const_iterate_attr, XmlFixture)
@@ -221,9 +231,14 @@ BOOST_FIXTURE_TEST_CASE(locate_attr_by_name, XmlFixture)
    }
 
    BOOST_REQUIRE_THROW(root->lookupAttribute("not_found"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(root->getText(), adt::RuntimeException);
 
    std::shared_ptr<xml::Attribute> found = root->searchAttribute("not_found");
    BOOST_REQUIRE(!found);
+
+   const Node& constRoot = *root;
+   BOOST_REQUIRE_THROW(constRoot.lookupAttribute("not_found"), adt::RuntimeException);
+   BOOST_REQUIRE(!constRoot.searchAttribute("not_found"));
 }
 
 BOOST_FIXTURE_TEST_CASE(locate_attr_duplicate, XmlFixture)
@@ -291,6 +306,21 @@ BOOST_AUTO_TEST_CASE(file_document)
    }
 }
 
+BOOST_AUTO_TEST_CASE(file_notexisting_document)
+{
+   boost::filesystem::path coffeePath(boost::filesystem::current_path());
+
+   boost::filesystem::path xmlPath(coffeePath.native() + "does_not_exist.xml");
+
+   boost::filesystem::path file(xmlPath);
+
+   Document doc;
+
+   BOOST_REQUIRE(doc.getHandler() == NULL);
+
+   BOOST_REQUIRE_THROW(doc.parse(file), adt::RuntimeException);
+}
+
 BOOST_AUTO_TEST_CASE(compile_document)
 {
    const char* buffer = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node attr_aaa=\"text one\" attr_bbb=\"text two\" attr_ccc=\"text three\"/>\n";
@@ -314,13 +344,11 @@ BOOST_AUTO_TEST_CASE(compile_document_iso)
 {
    const char* buffer = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node>Jörg</root_node>\n";
 
-   adt::DataBlock content(buffer, strlen(buffer) + 1);
-
    Document doc;
 
    BOOST_REQUIRE(doc.getHandler() == NULL);
 
-   doc.parse(content);
+   doc.parse(buffer, coffee_strlen(buffer));
 
    Compiler compiler;
 
@@ -328,3 +356,4 @@ BOOST_AUTO_TEST_CASE(compile_document_iso)
 
    BOOST_REQUIRE_EQUAL(str, buffer);
 }
+

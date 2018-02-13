@@ -98,8 +98,6 @@ public:
    virtual std::shared_ptr<Abstract> clone() const noexcept = 0;
    virtual size_t hash() const noexcept = 0;
 
-   virtual const char* className() noexcept = 0;
-
 protected:
    explicit Abstract(const char* name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
       m_name(name),

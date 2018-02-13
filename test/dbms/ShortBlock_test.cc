@@ -115,3 +115,18 @@ BOOST_AUTO_TEST_CASE (shortblock_downcast)
 
    BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::ShortBlock, zzz), dbms::InvalidDataException);
 }
+
+BOOST_AUTO_TEST_CASE (shortblock_clone)
+{
+   datatype::ShortBlock column ("not_nulleable", 1025);
+
+   const char* buffer = new char[1024];
+   adt::DataBlock memory(buffer, 1024);
+
+   column.setValue(memory);
+
+   auto clone = coffee_datatype_downcast(datatype::ShortBlock, column.clone());
+
+   BOOST_REQUIRE(clone->getValue() == column.getValue());
+   BOOST_REQUIRE(clone->getBuffer() != column.getBuffer());
+}

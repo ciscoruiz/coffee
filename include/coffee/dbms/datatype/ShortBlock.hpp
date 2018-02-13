@@ -45,8 +45,6 @@ public:
 
    adt::StreamString asString () const noexcept;
 
-   const char* className() noexcept { return "dbms::datatype::ShortBlock"; }
-
    size_t hash() const noexcept { return m_value.size(); }
 
    coffee_declare_datatype_downcast(ShortBlock)

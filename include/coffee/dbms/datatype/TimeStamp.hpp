@@ -33,8 +33,6 @@ public:
 
    std::shared_ptr<Abstract> clone() const noexcept { return std::make_shared<TimeStamp>(*this); }
 
-   const char* className() noexcept { return "dbms::datatype::TimeStamp"; }
-
    coffee_declare_datatype_downcast(TimeStamp)
 
 private:

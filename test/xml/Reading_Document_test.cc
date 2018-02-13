@@ -168,6 +168,7 @@ BOOST_FIXTURE_TEST_CASE(const_find_child_byname, XmlFixture)
    BOOST_REQUIRE(constRoot.searchChild("child_two"));
    BOOST_REQUIRE_THROW(constRoot.lookupChild("not_found"), adt::RuntimeException);
    BOOST_REQUIRE(!constRoot.searchChild("not_found"));
+   BOOST_REQUIRE_NO_THROW(constRoot.childAt(0));
 }
 
 BOOST_FIXTURE_TEST_CASE(locate_child_by_pos, XmlFixture)

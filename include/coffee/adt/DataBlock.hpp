@@ -36,6 +36,7 @@
 #define _coffee_adt_DataBlock_h
 
 #include <string>
+#include <string.h>
 
 #include <coffee/adt/RuntimeException.hpp>
 #include <coffee/config/defines.hpp>
@@ -103,6 +104,9 @@ public:
 
    char& operator[] (const size_type index) throw (RuntimeException) { return at (index); }
 
+   bool operator==(const DataBlock& other) const noexcept {
+      return size() == other.size() ? (memcmp(data(), other.data(), size()) == 0): false;
+   }
 //
 // You can execute "g++ -E -dM -std=c++0x -x c++ /dev/null" to see list of macros 
 // See: http://stackoverflow.com/questions/2958398/gnu-c-how-to-check-when-std-c0x-is-in-effect

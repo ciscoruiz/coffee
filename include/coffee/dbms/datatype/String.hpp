@@ -44,8 +44,6 @@ public:
 
    adt::StreamString asString() const noexcept;
 
-   const char* className() noexcept { return "dbms::datatype::String"; }
-
    size_t hash() const noexcept { return std::hash<std::string>{}(m_value); }
 
    coffee_declare_datatype_downcast(String)

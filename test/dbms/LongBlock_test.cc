@@ -112,4 +112,5 @@ BOOST_AUTO_TEST_CASE (longblock_clone)
    auto clone = coffee_datatype_downcast(datatype::LongBlock, column.clone());
 
    BOOST_REQUIRE(clone->getValue() == column.getValue());
+   BOOST_REQUIRE(clone->getValue().data() != column.getValue().data());
 }

@@ -82,7 +82,7 @@ public:
      Copy Constructor.
      @param other Datablock to copy.
    */
-   DataBlock (const DataBlock& other) noexcept : std::string (other) {;}
+   DataBlock (const DataBlock& other) noexcept : std::string (other.data(), other.size()) {;}
 
    /**
       Destructor.
@@ -107,12 +107,11 @@ public:
    bool operator==(const DataBlock& other) const noexcept {
       return size() == other.size() ? (memcmp(data(), other.data(), size()) == 0): false;
    }
-//
-// You can execute "g++ -E -dM -std=c++0x -x c++ /dev/null" to see list of macros 
-// See: http://stackoverflow.com/questions/2958398/gnu-c-how-to-check-when-std-c0x-is-in-effect
-   #ifdef __GXX_EXPERIMENTAL_CXX0X__
-      DataBlock& operator=(const DataBlock&) = default;
-   #endif
+
+   DataBlock& operator=(const DataBlock& other) noexcept {
+      this->assign(other);
+      return *this;
+   }
 };
 
 }

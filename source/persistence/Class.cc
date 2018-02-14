@@ -36,6 +36,7 @@
 #include <coffee/persistence/ClassBuilder.hpp>
 #include <coffee/persistence/Object.hpp>
 #include <coffee/persistence/PrimaryKey.hpp>
+#include <coffee/persistence/PrimaryKeyBuilder.hpp>
 
 #include <coffee/logger/Logger.hpp>
 
@@ -52,6 +53,18 @@ persistence::Class::Class(const ClassBuilder& classBuilder) :
 {
    m_primaryKey = classBuilder.getPrimaryKey();
    m_members = classBuilder;
+}
+
+std::shared_ptr<persistence::PrimaryKey> persistence::Class::createPrimaryKey() const
+   throw ()
+{
+   PrimaryKeyBuilder builder;
+
+   for (auto ii = m_primaryKey->begin(), maxii = m_primaryKey->end(); ii != maxii; ++ ii) {
+      builder.add(PrimaryKey::data(ii)->clone());
+   }
+
+   return builder.build();
 }
 
 std::shared_ptr<persistence::Object> persistence::Class::createObject(const std::shared_ptr<PrimaryKey>& primaryKey) const

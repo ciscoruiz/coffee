@@ -49,10 +49,15 @@ using namespace coffee::dbms;
 BOOST_AUTO_TEST_CASE(set_already_defined)
 {
   datatype::Set set;
-
   set.insert(std::make_shared<datatype::Integer>("integer"));
-
   BOOST_REQUIRE_THROW(set.insert(std::make_shared<datatype::Integer>("integer")), adt::RuntimeException);
+}
+
+BOOST_AUTO_TEST_CASE(set_empty_field)
+{
+  datatype::Set set;
+  std::shared_ptr<datatype::Integer> data;
+  BOOST_REQUIRE_THROW(set.insert(data), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(set_find)

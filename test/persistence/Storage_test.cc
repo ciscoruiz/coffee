@@ -39,6 +39,9 @@
 
 #include <coffee/adt/Second.hpp>
 
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
+
 #include <coffee/logger/TraceMethod.hpp>
 #include <coffee/logger/Logger.hpp>
 
@@ -416,3 +419,55 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_erase_commit_pending, Fixture)
    BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), commitCounter);
 }
 
+BOOST_FIXTURE_TEST_CASE(persistence_storage_type_mismatch_primarykey, Fixture)
+{
+   {
+      test_persistence::MockCustomerLoader myLoader(readerStatement, primaryKeyForFind, customerClass);
+      primaryKeyForFind->setInteger("id", 6);
+      BOOST_REQUIRE_NO_THROW(storage->load(connection, myLoader));
+   }
+   {
+      persistence::PrimaryKeyBuilder pkBuilder;
+      pkBuilder.add(std::make_shared<dbms::datatype::String>("id", 64));
+      auto unmatchesPrimaryKey = pkBuilder.build();
+      unmatchesPrimaryKey->setString("id", "unused");
+
+      test_persistence::MockCustomerLoader myLoader(readerStatement, unmatchesPrimaryKey, customerClass);
+      BOOST_REQUIRE_THROW(storage->load(connection, myLoader), adt::RuntimeException);
+   }
+}
+
+BOOST_FIXTURE_TEST_CASE(persistence_storage_size_mismatch_primarykey, Fixture)
+{
+   {
+      test_persistence::MockCustomerLoader myLoader(readerStatement, primaryKeyForFind, customerClass);
+      primaryKeyForFind->setInteger("id", 6);
+      BOOST_REQUIRE_NO_THROW(storage->load(connection, myLoader));
+   }
+   {
+      persistence::PrimaryKeyBuilder pkBuilder;
+      pkBuilder.add(std::make_shared<dbms::datatype::String>("id", 64));
+      pkBuilder.add(std::make_shared<dbms::datatype::String>("other", 64));
+      auto unmatchesPrimaryKey = pkBuilder.build();
+      unmatchesPrimaryKey->setString("id", "unused");
+      unmatchesPrimaryKey->setString("other", "unused");
+
+      test_persistence::MockCustomerLoader myLoader(readerStatement, unmatchesPrimaryKey, customerClass);
+      BOOST_REQUIRE_THROW(storage->load(connection, myLoader), adt::RuntimeException);
+   }
+}
+
+BOOST_AUTO_TEST_CASE(persistence_storage_empty_pkbuilder)
+{
+   persistence::PrimaryKeyBuilder builder;
+   BOOST_REQUIRE_THROW(builder.build(), adt::RuntimeException);
+}
+
+BOOST_FIXTURE_TEST_CASE(persistence_storage_showclass, Fixture)
+{
+   auto root = std::make_shared<xml::Node>("root");
+   auto xmlNode = customerClass->asXML(root);
+
+   BOOST_REQUIRE_EQUAL(xmlNode->getName(), "persistence.Class");
+   BOOST_REQUIRE_EQUAL(xmlNode->lookupAttribute("Name")->getValue(), "customer");
+}

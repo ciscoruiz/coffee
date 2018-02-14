@@ -53,6 +53,10 @@ dbms::datatype::Set::Set(const Set& other)
 }
 
 void dbms::datatype::Set::insert(std::shared_ptr<Abstract> data) throw (adt::RuntimeException) {
+   if (!data) {
+      COFFEE_THROW_EXCEPTION("data must be initialized");
+   }
+
    if (m_datas.find(data->getName()) != end()) {
       COFFEE_THROW_EXCEPTION(data->getName() << " already defined");
    }

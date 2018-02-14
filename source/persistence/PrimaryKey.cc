@@ -53,12 +53,12 @@ bool persistence::PrimaryKey::matches(const PrimaryKey& other) const
       return false;
 
    for (const_data_iterator ii = begin(), maxii = end(); ii != maxii; ii ++) {
-      if (other.constains(PrimaryKey::name(ii)) == false)
-         return false;
-   }
+      const_data_iterator oo = other.search(PrimaryKey::name(ii));
 
-   for (const_data_iterator ii = other.begin(), maxii = other.end(); ii != maxii; ii ++) {
-      if (constains(PrimaryKey::name(ii)) == false)
+      if (oo == other.end())
+         return false;
+
+      if (PrimaryKey::data(oo)->getType() != PrimaryKey::data(ii)->getType())
          return false;
    }
 

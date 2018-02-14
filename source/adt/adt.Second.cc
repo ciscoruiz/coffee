@@ -133,3 +133,19 @@ adt::Second adt::Second::fromString (const std::string& value)
    return adt::Second (atol (value.c_str()));
 }
 
+//static
+adt::Second adt::Second::fromString(const std::string& text, const char* format)
+   throw(RuntimeException)
+{
+   tm gmtime;
+   const char* aux;
+
+   if (strptime(text.c_str(), format, &gmtime) == NULL) {
+      COFFEE_THROW_EXCEPTION(text << " is not valid expression for " << format);
+   }
+
+   time_t now = time(NULL);
+   tm* localtm = localtime(&now);
+   return Second(mktime(&gmtime) + localtm->tm_gmtoff);
+}
+

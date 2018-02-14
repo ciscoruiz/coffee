@@ -59,7 +59,7 @@ public:
 
       @see #asDateTime
    */
-   static const int DateTimeSizeString = 21;
+   static const int DateTimeSizeString = 64;
 
    /**
     * Constructor
@@ -172,6 +172,8 @@ public:
 
    static Second fromString (const std::string& value) throw (RuntimeException);
 
+   static Second fromString(const std::string& text, const char* format) throw(RuntimeException);
+
 private:
    type_t m_value;
 
@@ -179,6 +181,7 @@ private:
    friend class Microsecond;
 
    friend class Second operator + (const Second& left, const Second& right) noexcept;
+   friend class Second operator + (const Second& left, const int right) noexcept;
    friend class Second operator - (const Second& left, const Second& right) noexcept;
    friend class Second operator / (const Second& left, const Second& right) noexcept;
    friend class Second operator / (const Second& left, const int right) noexcept;
@@ -189,6 +192,12 @@ inline Second operator + (const Second& left, const Second& right)
    noexcept
 {
    return Second (left.m_value + right.m_value);
+}
+
+inline Second operator + (const Second& left, const int right)
+   noexcept
+{
+   return Second (left.m_value + right);
 }
 
 inline Second operator - (const Second& left, const Second& right)

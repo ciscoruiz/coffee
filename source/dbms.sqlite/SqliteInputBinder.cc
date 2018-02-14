@@ -71,7 +71,7 @@ void sqlite::SqliteInputBinder::do_encode(Statement& statement, const int pos)
       case dbms::datatype::Abstract::Datatype::String:
          {
             const char* text = coffee_datatype_downcast(datatype::String, data)->getValue();
-            rc = sqlite3_bind_text(impl, pos + 1, text, coffee_strlen(text), NULL);
+            rc = sqlite3_bind_text(impl, pos + 1, text, coffee_strlen(text), SQLITE_TRANSIENT);
          }
          break;
       case dbms::datatype::Abstract::Datatype::Float:
@@ -80,19 +80,20 @@ void sqlite::SqliteInputBinder::do_encode(Statement& statement, const int pos)
       case dbms::datatype::Abstract::Datatype::ShortBlock:
          {
             auto shortBlock = coffee_datatype_downcast(datatype::ShortBlock, data)->getValue();
-            rc = sqlite3_bind_blob(impl, pos + 1, (void*)shortBlock.data(), shortBlock.size(), NULL);
+            rc = sqlite3_bind_blob(impl, pos + 1, (void*)shortBlock.data(), shortBlock.size(), SQLITE_TRANSIENT);
          }
          break;
       case dbms::datatype::Abstract::Datatype::LongBlock:
          {
             auto longBlock = coffee_datatype_downcast(datatype::LongBlock, data)->getValue();
-            rc = sqlite3_bind_blob(impl, pos + 1, (void*)longBlock.data(), longBlock.size(), NULL);
+            rc = sqlite3_bind_blob(impl, pos + 1, (void*)longBlock.data(), longBlock.size(), SQLITE_TRANSIENT);
          }
          break;
       case dbms::datatype::Abstract::Datatype::Date:
          {
             auto date = coffee_datatype_downcast(datatype::Date, data)->getValue();
-            rc = sqlite3_bind_int64(impl, pos + 1, date.getTime().getValue());
+            const std::string text = date.asDateTime("%Y-%m-%d %H:%M:%S");
+            rc = sqlite3_bind_text(impl, pos + 1, text.c_str(), text.length(), SQLITE_TRANSIENT);
          }
          break;
       case dbms::datatype::Abstract::Datatype::TimeStamp:

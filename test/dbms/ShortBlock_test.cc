@@ -128,5 +128,4 @@ BOOST_AUTO_TEST_CASE (shortblock_clone)
    auto clone = coffee_datatype_downcast(datatype::ShortBlock, column.clone());
 
    BOOST_REQUIRE(clone->getValue() == column.getValue());
-   BOOST_REQUIRE(clone->getBuffer() != column.getBuffer());
 }

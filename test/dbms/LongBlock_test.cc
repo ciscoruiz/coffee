@@ -112,5 +112,21 @@ BOOST_AUTO_TEST_CASE (longblock_clone)
    auto clone = coffee_datatype_downcast(datatype::LongBlock, column.clone());
 
    BOOST_REQUIRE(clone->getValue() == column.getValue());
-   BOOST_REQUIRE(clone->getValue().data() != column.getValue().data());
 }
+
+BOOST_AUTO_TEST_CASE (longblock_clone_innerscope)
+{
+   std::shared_ptr<datatype::LongBlock> clone;
+
+   {
+      datatype::LongBlock column ("not_nulleable");
+      adt::DataBlock memory("1234", 4);
+      column.setValue(memory);
+      clone = coffee_datatype_downcast(datatype::LongBlock, column.clone());
+   }
+
+   BOOST_REQUIRE(clone->getValue().size() == 4);
+   BOOST_REQUIRE(memcmp(clone->getValue().data(), "1234", 4) == 0);
+}
+
+

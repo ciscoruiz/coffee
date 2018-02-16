@@ -160,7 +160,7 @@ struct InsertAllType {
 
 struct SelectAllType {
    SelectAllType(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
-      const char* sql = "select id, the_float, the_date, the_blob from all_types";
+      const char* sql = "select id, the_float, the_date, the_blob from all_types order by id";
       id = std::make_shared<dbms::datatype::Integer>("id");
       theFloat = std::make_shared<dbms::datatype::Float>("the_float", dbms::datatype::Constraint::CanBeNull);
       theDate = std::make_shared<dbms::datatype::Date>("the_date", dbms::datatype::Constraint::CanBeNull);
@@ -208,6 +208,9 @@ struct SqliteFixture {
          COMMIT; "; \
 
       BOOST_REQUIRE_NO_THROW(std::dynamic_pointer_cast<dbms::sqlite::SqliteConnection>(connection)->execute(sql));
+   }
+   ~SqliteFixture() {
+      database.externalStop();
    }
 
    dbms::sqlite::SqliteDatabase database;

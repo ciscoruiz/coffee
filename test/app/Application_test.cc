@@ -41,6 +41,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <coffee/adt/Semaphore.hpp>
+
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TtyWriter.hpp>
 
@@ -62,22 +64,26 @@ public:
 class ParallelApplication : public app::Application {
 public:
    ParallelApplication() : app::Application("ParallelApplication", "It will wait till condition", "1.0"),
+      semaphoreForRun(0),
       stopNow(false)
    {
       logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
    }
 
-   void terminateApplication() { stopNow = true; waitForStop.notify_all(); }
+   void waitForRun() { semaphoreForRun.wait(); }
+   void terminateApplication() { stopNow = true; conditionForStop.notify_all(); }
 
 private:
+   adt::Semaphore semaphoreForRun;
    std::mutex mutex;
-   std::condition_variable waitForStop;
+   std::condition_variable conditionForStop;
    bool stopNow;
 
    void run() throw(adt::RuntimeException) {
+      semaphoreForRun.signal();
       std::unique_lock <std::mutex> guard (mutex);
       while(!stopNow) {
-         waitForStop.wait(guard);
+         conditionForStop.wait(guard);
       }
    }
 
@@ -242,7 +248,7 @@ BOOST_AUTO_TEST_CASE( app_already_run )
 
    auto thread = std::thread(parallelRun, std::ref(application));
 
-   usleep(5000);
+   application.waitForRun();
    BOOST_CHECK_THROW(application.start(), adt::RuntimeException);
    application.requestStop();
    thread.join();
@@ -255,7 +261,7 @@ BOOST_AUTO_TEST_CASE( app_stop_engines )
    application.attach(engine);
 
    auto thread = std::thread(parallelRun, std::ref(application));
-   usleep(5000);
+   application.waitForRun();
    BOOST_CHECK(application.isRunning());
 
    BOOST_CHECK(engine->isRunning());
@@ -263,14 +269,12 @@ BOOST_AUTO_TEST_CASE( app_stop_engines )
    BOOST_CHECK_EQUAL(engine->getStoppedCounter(), 0);
 
    application.requestStop();
-
-   usleep(5000);
+   thread.join();
 
    BOOST_CHECK(engine->isStopped());
    BOOST_CHECK_EQUAL(engine->getInitializedCounter(), 1);
    BOOST_CHECK_EQUAL(engine->getStoppedCounter(), 1);
 
-   thread.join();
 }
 
 BOOST_AUTO_TEST_CASE( app_null_engine )
@@ -302,7 +306,7 @@ BOOST_AUTO_TEST_CASE( app_unstoppable_stop_engines )
    application.attach(std::make_shared<NoStopEngine>(application, "02"));
 
    auto thread = std::thread(parallelRun, std::ref(application));
-   usleep(5000);
+   application.waitForRun();
    BOOST_CHECK(application.isRunning());
 
    application.terminateApplication();
@@ -323,7 +327,7 @@ BOOST_AUTO_TEST_CASE( app_unstoppable_requeststop_engines )
    application.attach(std::make_shared<NoRequestStopEngine>(application, "02"));
 
    auto thread = std::thread(parallelRun, std::ref(application));
-   usleep(50000);
+   application.waitForRun();
    BOOST_CHECK(application.isRunning());
    BOOST_CHECK(engine->isRunning());
 

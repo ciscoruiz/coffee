@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE( asstring_bool )
 BOOST_AUTO_TEST_CASE( asstring_datablock )
 {
    string result;
-   char* buffer = new char[1024];
+   char buffer[1024];
    adt::DataBlock value (buffer, 1024);
 
    result = adt::AsString::apply(value);

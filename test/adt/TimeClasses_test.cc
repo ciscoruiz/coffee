@@ -215,9 +215,11 @@ BOOST_AUTO_TEST_CASE( TimeClasses_fromstring)
 
    adt::Second now = adt::Second::getTime();
 
-   const std::string dateString = now.asDateTime(format);
-
-   BOOST_REQUIRE_EQUAL(adt::Second::fromString(dateString, format), now);
+   for (int ii = 0; ii < 100; ++ ii) {
+      adt::Second newTime = now + (rand() % 1000);
+      const std::string dateString = newTime.asDateTime(format);
+      BOOST_REQUIRE_EQUAL(adt::Second::fromString(dateString, format), newTime);
+   }
 }
 
 BOOST_AUTO_TEST_CASE( TimeClasses_fromstring_bad_format)
@@ -230,3 +232,4 @@ BOOST_AUTO_TEST_CASE( TimeClasses_fromstring_bad_format)
 
    BOOST_REQUIRE_THROW (adt::Second::fromString(dateString, "invalid-format"), adt::RuntimeException);
 }
+

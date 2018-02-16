@@ -23,6 +23,8 @@ SET(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-co
 
 SET(CMAKE_EXE_LINKER_FLAGS_COVERAGE "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage -lgcov")
 
+set(MEMORYCHECK_COMMAND_OPTIONS "--leak-check=full -v")
+set(MEMORYCHECK_SUPPRESSIONS_FILE ${PROJECT_SOURCE_DIR}/valgrind-suppression.txt)
 
 add_subdirectory(source/config)
 add_subdirectory(source/adt)

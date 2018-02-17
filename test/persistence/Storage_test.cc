@@ -65,9 +65,9 @@
 #include <coffee/dbms/datatype/Float.hpp>
 #include <coffee/dbms/datatype/Date.hpp>
 
-#include "../dbms/MockDatabase.hpp"
-#include "../dbms/MockLowLevelRecord.hpp"
-#include "../dbms/MockConnection.hpp"
+#include <MockDatabase.hpp>
+#include <MockLowLevelRecord.hpp>
+#include <MockConnection.hpp>
 
 #include "PersistenceMocks.hpp"
 

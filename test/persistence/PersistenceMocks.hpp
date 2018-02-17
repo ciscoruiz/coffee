@@ -42,8 +42,8 @@
 #include <coffee/dbms/Statement.hpp>
 #include <coffee/dbms/DatabaseException.hpp>
 
-#include "../dbms/MockLowLevelRecord.hpp"
-#include "../dbms/MockDatabase.hpp"
+#include "../dbms.mock/MockLowLevelRecord.hpp"
+#include "../dbms.mock/MockDatabase.hpp"
 
 #include <coffee/persistence/Loader.hpp>
 #include <coffee/persistence/Eraser.hpp>

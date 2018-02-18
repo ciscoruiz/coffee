@@ -53,11 +53,19 @@ cmake .
 ``` 
 it will create the needed infraestructure to generate all modules by calling **make**.
 
-You can run the next command to see the list of target you can use with **make**. 
+You can run the next command to compile libraries and program with Unit Tests
 
 ```
-make help
+make 
 ``` 
+
+And the next command will run the unit tests:
+
+```
+make test
+``` 
+
+You can see more commands in the Travis CI configuration file .travis.yml
 
 ## License
 

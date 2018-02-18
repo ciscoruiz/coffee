@@ -134,7 +134,7 @@ void app::Application::start()
    }
 
    try {
-      cout << "COFFEE - COmpany eFFEEctive Platform. Version " << config::Release::getVersion() << endl;
+      cout << "COFFEE - COmpany eFFEEctive platform. Version " << config::Release::getVersion() << endl;
       cout << "Developed by Francisco Ruiz" << endl;
       cout << "Release date: " << __DATE__ << " " << __TIME__ << endl;
       cout << "(c) Copyright 2018,2014 by Francisco Ruiz." << endl << endl;

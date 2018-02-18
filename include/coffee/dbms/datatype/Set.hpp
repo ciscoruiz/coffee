@@ -90,6 +90,7 @@ public:
    const_data_iterator end() const noexcept { return m_datas.end(); }
    static const std::string& name(const_data_iterator ii) { return ii->first; }
    static const std::shared_ptr<Abstract>& data(const_data_iterator ii) { return ii->second; }
+   const_data_iterator search(const std::string& name) const noexcept { return m_datas.find(name); }
 
    Set& operator=(const Set& other) noexcept;
 

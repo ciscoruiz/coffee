@@ -37,7 +37,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <coffee/dbms/datatype/Date.hpp>
+#include <coffee/dbms/datatype/TimeStamp.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
 
 using namespace coffee;
@@ -45,12 +45,12 @@ using namespace coffee::dbms;
 
 
 // See http://www.mbari.org/staff/rich/utccalc.htm
-BOOST_AUTO_TEST_CASE(date_setter_second)
+BOOST_AUTO_TEST_CASE(timestamp_setter_second)
 {
-   adt::Second date_01_31_1987_23_59_59(539110799);
-   datatype::Date column("from_number");
+   adt::Second timestamp_01_31_1987_23_59_59(539110799);
+   datatype::TimeStamp column("from_number");
 
-   column.setValue(date_01_31_1987_23_59_59);
+   column.setValue(timestamp_01_31_1987_23_59_59);
 
    tm* localTime = column.getLocalTime();
 
@@ -63,14 +63,14 @@ BOOST_AUTO_TEST_CASE(date_setter_second)
    BOOST_REQUIRE_EQUAL(column.getValue(), 539110799);
 }
 
-BOOST_AUTO_TEST_CASE(date_setter_text)
+BOOST_AUTO_TEST_CASE(timestamp_setter_text)
 {
-   datatype::Date column("from_text");
+   datatype::TimeStamp column("from_text");
 
-   std::string str_date("31/01/1996T22:17:10");
+   std::string str_TimeStamp("31/01/1996T22:17:10");
 
    try {
-      column.setValue(str_date, "%d/%m/%YT%T");
+      column.setValue(str_TimeStamp, "%d/%m/%YT%T");
 
       tm* localTime = column.getLocalTime();
 
@@ -88,9 +88,9 @@ BOOST_AUTO_TEST_CASE(date_setter_text)
    BOOST_REQUIRE_THROW(column.setValue("12:10", "%d/%m/%YT%T"), adt::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(date_is_nulleable)
+BOOST_AUTO_TEST_CASE(timestamp_is_nulleable)
 {
-   datatype::Date column("date_is_nulleable", datatype::Constraint::CanBeNull);
+   datatype::TimeStamp column("timestamp_is_nulleable", datatype::Constraint::CanBeNull);
 
    const char* format = "%d/%m/%YT%H:%M:%S";
 
@@ -99,8 +99,8 @@ BOOST_AUTO_TEST_CASE(date_is_nulleable)
    column.clear();
    BOOST_REQUIRE_EQUAL(column.hasValue(), false);
 
-   std::string str_date("01/01/1800T12:30:50");
-   column.setValue(str_date, format);
+   std::string str_TimeStamp("01/01/1800T12:30:50");
+   column.setValue(str_TimeStamp, format);
    BOOST_REQUIRE_EQUAL(column.hasValue(), true);
 
    BOOST_REQUIRE_NO_THROW(column.setValue("01/01/2000T00:00:00", format));
@@ -110,9 +110,9 @@ BOOST_AUTO_TEST_CASE(date_is_nulleable)
    BOOST_REQUIRE_THROW(column.getValue(), adt::RuntimeException);
    BOOST_REQUIRE_THROW(column.getLocalTime(), adt::RuntimeException);
 
-   str_date = "25/10/2013T02:00:10";
+   str_TimeStamp = "25/10/2013T02:00:10";
 
-   column.setValue(str_date, "%d/%m/%YT%H:%M:%S");
+   column.setValue(str_TimeStamp, "%d/%m/%YT%H:%M:%S");
    BOOST_REQUIRE_EQUAL(column.hasValue(), true);
 
    const tm* time_t = column.getLocalTime();
@@ -124,9 +124,9 @@ BOOST_AUTO_TEST_CASE(date_is_nulleable)
    BOOST_REQUIRE_EQUAL(column.hasValue(), false);
 }
 
-BOOST_AUTO_TEST_CASE(date_is_not_nulleable)
+BOOST_AUTO_TEST_CASE(timestamp_is_not_nulleable)
 {
-   datatype::Date column("not_nulleable", datatype::Constraint::CanNotBeNull);
+   datatype::TimeStamp column("not_nulleable", datatype::Constraint::CanNotBeNull);
 
    BOOST_REQUIRE_EQUAL(column.hasValue(), true);
 
@@ -138,31 +138,31 @@ BOOST_AUTO_TEST_CASE(date_is_not_nulleable)
    BOOST_REQUIRE_EQUAL(column.getValue(), 0);
 }
 
-BOOST_AUTO_TEST_CASE(date_downcast)
+BOOST_AUTO_TEST_CASE(timestamp_downcast)
 {
-   datatype::Date column("not_nulleable", datatype::Constraint::CanNotBeNull);
+   datatype::TimeStamp column("not_nulleable", datatype::Constraint::CanNotBeNull);
 
    datatype::Abstract& abs = column;
 
    BOOST_REQUIRE_EQUAL(abs.hasValue(), true);
 
-   const datatype::Date& other = coffee_datatype_downcast(datatype::Date, abs);
+   const datatype::TimeStamp& other = coffee_datatype_downcast(datatype::TimeStamp, abs);
 
    const char* format = "%d/%m/%YT%H:%M:%S";
-   std::string str_date("01/01/1800T12:30:50");
-   column.setValue(str_date, format);
+   std::string str_TimeStamp("01/01/1800T12:30:50");
+   column.setValue(str_TimeStamp, format);
 
    BOOST_REQUIRE_EQUAL(other == column, true);
 
    datatype::Integer zzz("zzz");
 
-   BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::Date, zzz), dbms::InvalidDataException);
+   BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::TimeStamp, zzz), dbms::InvalidDataException);
 }
 
-BOOST_AUTO_TEST_CASE(date_clone)
+BOOST_AUTO_TEST_CASE(timestamp_clone)
 {
-   datatype::Date cannotBeNull("cannotBeNull", datatype::Constraint::CanNotBeNull);
-   datatype::Date canBeNull("canBeNull", datatype::Constraint::CanBeNull);
+   datatype::TimeStamp cannotBeNull("cannotBeNull", datatype::Constraint::CanNotBeNull);
+   datatype::TimeStamp canBeNull("canBeNull", datatype::Constraint::CanBeNull);
 
    BOOST_REQUIRE_EQUAL(cannotBeNull.hasValue(), true);
    BOOST_REQUIRE_EQUAL(canBeNull.hasValue(), false);
@@ -193,3 +193,14 @@ BOOST_AUTO_TEST_CASE(date_clone)
    BOOST_REQUIRE_EQUAL(notnull->compare(canBeNull), -20);
 }
 
+BOOST_AUTO_TEST_CASE(timestamp_fractional)
+{
+   datatype::TimeStamp data("timestamp");
+   adt::Second now = adt::Second::getLocalTime();
+   data.setValue(now);
+   data.setFractionalSecond(100);
+
+   datatype::TimeStamp copy(data);
+   BOOST_REQUIRE(copy.getValue() == now);
+   BOOST_REQUIRE(copy.getFractionalSecond() == 100);
+}

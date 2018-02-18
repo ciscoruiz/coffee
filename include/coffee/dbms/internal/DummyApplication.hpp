@@ -58,8 +58,6 @@ private:
    static DummyApplication st_this;
 
    void run () throw (adt::RuntimeException) {;}
-   void attach (app::Engine*) throw (adt::RuntimeException) {;}
-
 };
 
 

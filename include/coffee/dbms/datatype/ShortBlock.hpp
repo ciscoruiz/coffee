@@ -27,7 +27,9 @@ namespace datatype {
 class ShortBlock : public datatype::Abstract {
 public:
    explicit ShortBlock (const char* name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull);
-   explicit ShortBlock (const std::string& name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull);
+   explicit ShortBlock (const std::string& name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull) : 
+      ShortBlock(name.c_str(), maxSize, constraint) {;}
+
    ShortBlock (const ShortBlock& other);
    ~ShortBlock () {;}
 
@@ -42,8 +44,6 @@ public:
    operator adt::StreamString () const noexcept { return asString (); }
 
    adt::StreamString asString () const noexcept;
-
-   const char* className() noexcept { return "dbms::datatype::ShortBlock"; }
 
    size_t hash() const noexcept { return m_value.size(); }
 

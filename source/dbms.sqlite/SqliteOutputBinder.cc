@@ -89,8 +89,8 @@ void sqlite::SqliteOutputBinder::do_decode(Statement& statement, const int pos)
       break;
    case dbms::datatype::Abstract::Datatype::Date:
       {
-         adt::Second second(sqlite3_column_int64(impl, pos));
-         coffee_datatype_downcast(datatype::Date, data)->setValue(second);
+         const std::string date = (const char*) sqlite3_column_text(impl, pos);
+         coffee_datatype_downcast(datatype::Date, data)->setValue(adt::Second::fromString(date, "%Y-%m-%d %H:%M:%S"));
       }
       break;
    case dbms::datatype::Abstract::Datatype::TimeStamp:

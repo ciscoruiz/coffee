@@ -1,6 +1,6 @@
 // COFFEE - COmpany eFFEEctive Platform
 //
-// (c) Copyright 2018 Francisco Ruiz Rayo
+//(c) Copyright 2018 Francisco Ruiz Rayo
 //
 // https://github.com/ciscoruiz/coffee
 //
@@ -23,34 +23,31 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 // OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT
 // LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: cisco.tierra@gmail.com
 //
-#include <stdio.h>
+#include <coffee/adt/Semaphore.hpp>
 
-#include <coffee/dbms/datatype/TimeStamp.hpp>
-
-#include <coffee/config/defines.hpp>
-
-
-using namespace std;
 using namespace coffee;
-using namespace coffee::dbms;
 
-datatype::TimeStamp::TimeStamp (const char* name, const Constraint::_v constraint)  :
-   Date (name, datatype::Abstract::Datatype::TimeStamp, constraint),
-   m_fractionalSecond (0)
-{;}
-
-datatype::TimeStamp::TimeStamp (const datatype::TimeStamp& other) :
-   Date (other),
-   m_fractionalSecond (other.m_fractionalSecond)
+void adt::Semaphore::wait() noexcept
 {
+   std::unique_lock <std::mutex> guard (mutex);
+   while (counter == 0) {
+      condition.wait(guard);
+   }
+}
+
+void adt::Semaphore::signal() noexcept
+{
+   std::unique_lock <std::mutex> guard (mutex);
+   ++ counter;
+   condition.notify_all();
 }
 

@@ -37,6 +37,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <coffee/config/defines.hpp>
+
 #include <coffee/adt/AsString.hpp>
 #include <coffee/adt/Second.hpp>
 #include <coffee/adt/Millisecond.hpp>
@@ -90,11 +92,11 @@ string adt::Second::asDateTime (const char* format) const
    struct tm* tt = localtime (&time);
 
    if (tt == nullptr) {
-	   COFFEE_THROW_EXCEPTION(m_value << " is a bad time");
+      COFFEE_THROW_EXCEPTION(m_value << " is a bad time");
    }
 
    if (strftime (aux, sizeof (aux), format, tt) == 0) {
-	   COFFEE_THROW_EXCEPTION(m_value << "is a bad date");
+      COFFEE_THROW_EXCEPTION(m_value << "is a bad date");
    }
 
    return string(aux);
@@ -131,5 +133,20 @@ adt::Second adt::Second::fromString (const std::string& value)
       COFFEE_THROW_EXCEPTION ("String: " << value << " is not a valid second expression");
 
    return adt::Second (atol (value.c_str()));
+}
+
+//static
+adt::Second adt::Second::fromString(const std::string& text, const char* format)
+   throw(RuntimeException)
+{
+   tm tt;
+   const char* aux;
+
+   coffee_memset(&tt, 0, sizeof(tt));
+   if (strptime(text.c_str(), format, &tt) == NULL) {
+      COFFEE_THROW_EXCEPTION(text << " is not valid expression for " << format);
+   }
+
+   return Second(mktime(&tt));
 }
 

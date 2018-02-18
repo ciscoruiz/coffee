@@ -1,12 +1,11 @@
 # COFFEE
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/765adc76c848465ba47a244973ef654a)](https://app.codacy.com/app/cisco.tierra/coffee?utm_source=github.com&utm_medium=referral&utm_content=ciscoruiz/coffee&utm_campaign=badger)
-
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
-
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/765adc76c848465ba47a244973ef654a)](https://app.codacy.com/app/cisco.tierra/coffee?utm_source=github.com&utm_medium=referral&utm_content=ciscoruiz/coffee&utm_campaign=badger)[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 [![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)](https://GitHub.com/Naereen/ama)
-
 [![Build Status](https://travis-ci.org/ciscoruiz/coffee.svg?branch=master)](https://travis-ci.org/ciscoruiz/coffee)
+[![Build Status](https://semaphoreci.com/api/v1/ciscoruiz/coffee/branches/develop/badge.svg)](https://semaphoreci.com/ciscoruiz/coffee)
+[![codecov](https://codecov.io/gh/ciscoruiz/coffee/branch/master/graph/badge.svg)](https://codecov.io/gh/ciscoruiz/coffee)
+
 
 COFFEE is the acronym for "COmpany eFFEEctive platform"
 
@@ -54,11 +53,19 @@ cmake .
 ``` 
 it will create the needed infraestructure to generate all modules by calling **make**.
 
-You can run the next command to see the list of target you can use with **make**. 
+You can run the next command to compile libraries and program with Unit Tests
 
 ```
-make help
+make 
 ``` 
+
+And the next command will run the unit tests:
+
+```
+make test
+``` 
+
+You can see more commands in the Travis CI configuration file .travis.yml
 
 ## License
 

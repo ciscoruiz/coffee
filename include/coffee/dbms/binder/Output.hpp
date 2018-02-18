@@ -26,13 +26,11 @@ namespace binder {
 */
 class Output : public Binder {
 public:
+   virtual void do_decode(Statement& statement, const int pos) throw(adt::RuntimeException) = 0;
    adt::StreamString asString() const noexcept;
 
 protected:
-   Output(std::shared_ptr<datatype::Abstract>& value) : Binder(value) {;}
-
-private:
-   void do_encode(Statement& statement, const int pos) throw(adt::RuntimeException) {;}
+   explicit Output(std::shared_ptr<datatype::Abstract>& value) : Binder(value) {;}
 };
 
 }

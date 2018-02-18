@@ -43,13 +43,11 @@ namespace sqlite {
 
 class SqliteOutputBinder: public binder::Output {
 public:
-   SqliteOutputBinder(std::shared_ptr<datatype::Abstract>& value) : binder::Output(value) {;}
+   explicit SqliteOutputBinder(std::shared_ptr<datatype::Abstract>& value) : binder::Output(value) {;}
    virtual ~SqliteOutputBinder() {;}
 
 private:
    void do_prepare(Statement& statement, const int pos) throw(adt::RuntimeException, DatabaseException) {;}
-   void do_release(Statement& statement) noexcept {;}
-
    void do_decode(Statement& statement, const int pos) throw(adt::RuntimeException);
    void do_write(const std::shared_ptr<datatype::LongBlock>&) throw(adt::RuntimeException, dbms::DatabaseException) {;}
 };

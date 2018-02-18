@@ -77,6 +77,13 @@ BOOST_AUTO_TEST_CASE(string_is_nulleable)
    BOOST_REQUIRE_THROW(column.setValue("size out of range"), adt::RuntimeException);
 }
 
+BOOST_AUTO_TEST_CASE(string_nulleable_asstring)
+{
+   datatype::String column("nulleable", 16, datatype::Constraint::CanBeNull);
+   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
+   BOOST_REQUIRE_EQUAL(column.asString(), "datatype.String { datatype.Abstract { Name: nulleable | Null: true | Constraint: CanBeNull } | MaxSize: 16 | Value: <null> }");
+}
+
 BOOST_AUTO_TEST_CASE(string_is_not_nulleable)
 {
    datatype::String column("not_nulleable", 4, datatype::Constraint::CanNotBeNull);
@@ -148,3 +155,5 @@ BOOST_AUTO_TEST_CASE(string_clone)
 
    BOOST_REQUIRE_LT(notnull->compare(canBeNull), 0);
 }
+
+

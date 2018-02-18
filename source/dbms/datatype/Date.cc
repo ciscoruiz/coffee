@@ -54,23 +54,7 @@ datatype::Date::Date (const char* name, const Constraint::_v constraint) :
    m_value = 0;
 }
 
-datatype::Date::Date (const string& name, const Constraint::_v constraint) :
-   datatype::Abstract (name, Datatype::Date, MaxDateSize, constraint)
-{
-   datatype::Abstract::setBuffer (m_buffer);
-   m_buffer [0] = 0;
-   m_value = 0;
-}
-
 datatype::Date::Date (const char* name, const datatype::Abstract::Datatype::_v type,  const Constraint::_v constraint) :
-   datatype::Abstract (name, type, MaxDateSize, constraint)
-{
-   datatype::Abstract::setBuffer (m_buffer);
-   m_buffer [0] = 0;
-   m_value = 0;
-}
-
-datatype::Date::Date (const string& name, const datatype::Abstract::Datatype::_v type,  const Constraint::_v constraint) :
    datatype::Abstract (name, type, MaxDateSize, constraint)
 {
    datatype::Abstract::setBuffer (m_buffer);

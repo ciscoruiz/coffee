@@ -38,6 +38,7 @@
 #include <coffee/app/Application.hpp>
 #include <coffee/dbms/Database.hpp>
 #include <coffee/dbms/ErrorCodeInterpreter.hpp>
+#include <coffee/dbms/datatype/Abstract.hpp>
 
 #include "MockInput.hpp"
 #include "MockOutput.hpp"
@@ -88,12 +89,18 @@ private:
    std::shared_ptr<dbms::binder::Input> allocateInputBind(std::shared_ptr<dbms::datatype::Abstract> data) const
       throw(adt::RuntimeException)
    {
+      if (std::string("give-me-null") == data->getName())
+         return std::shared_ptr<MockInput>();
+
       return std::make_shared<MockInput>(data);
    }
 
    std::shared_ptr<dbms::binder::Output> allocateOutputBind(std::shared_ptr<dbms::datatype::Abstract> data) const
       throw(adt::RuntimeException)
    {
+      if (std::string("give-me-null") == data->getName())
+         return std::shared_ptr<MockOutput>();
+
       return std::make_shared<MockOutput>(data);
    }
 

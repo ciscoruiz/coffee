@@ -1,7 +1,22 @@
 language: cpp
-script: cmake . && make 
+script: cmake . && make && ctest --output-on-failure
 
 before_script: 
    - sudo apt-get -qq update
    - sudo apt-get install -y libxml2-dev libboost-filesystem-dev libboost-test-dev libsqlite3-dev:amd64 sqlite sqlite3
+
    
+#
+# Build Matrix
+# 
+matrix: 
+    include:
+
+    - os: linux
+      env:
+        - TEST="Codecov"
+      script:
+        - cmake -DCMAKE_BUILD_TYPE=COVERAGE 
+        - make --jobs=4 && make test
+        - bash <(curl -s https://codecov.io/bash)
+

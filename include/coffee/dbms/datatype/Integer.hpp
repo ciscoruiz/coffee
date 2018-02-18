@@ -18,7 +18,7 @@ namespace datatype {
 class Integer : public datatype::Abstract {
 public:
    explicit Integer(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull);
-   explicit Integer(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull);
+   explicit Integer(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) : Integer(name.c_str(), constraint) {;}
    Integer(const Integer& other);
 
    int getValue() const throw(adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
@@ -37,8 +37,6 @@ public:
    operator adt::StreamString() const noexcept { return asString(); }
 
    adt::StreamString asString() const noexcept;
-
-   const char* className() noexcept { return "dbms::datatype::Integer"; }
 
    size_t hash() const noexcept { return std::hash<int>{}(m_value); }
 

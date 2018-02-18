@@ -30,7 +30,7 @@ public:
 
    explicit Date(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) ;
 
-   explicit Date(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) ;
+   explicit Date(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) : Date(name.c_str(), constraint) {;}
 
    Date(const Date& other);
 
@@ -147,8 +147,6 @@ public:
 
    virtual adt::StreamString asString() const noexcept;
 
-   const char* className() noexcept { return "dbms::type::Date"; }
-
    Date& operator=(const Date&) = delete;
    bool operator==(const Date& other) const noexcept { return m_value == other.m_value; }
 
@@ -161,8 +159,6 @@ protected:
    char m_buffer  [MaxDateSize + 1];
 
    explicit Date(const char* name, const Datatype::_v type, const Constraint::_v constraint);
-
-   explicit Date(const std::string& name, const Datatype::_v type, const Constraint::_v constraint);
 
    void do_clear() noexcept { m_value = 0; }
 

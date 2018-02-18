@@ -48,11 +48,15 @@ using namespace coffee;
 dbms::datatype::Set::Set(const Set& other)
 {
    for (auto ii : other.m_creationOrder) {
-	   insert(data(ii));
+      insert(data(ii));
    }
 }
 
 void dbms::datatype::Set::insert(std::shared_ptr<Abstract> data) throw (adt::RuntimeException) {
+   if (!data) {
+      COFFEE_THROW_EXCEPTION("data must be initialized");
+   }
+
    if (m_datas.find(data->getName()) != end()) {
       COFFEE_THROW_EXCEPTION(data->getName() << " already defined");
    }
@@ -60,7 +64,7 @@ void dbms::datatype::Set::insert(std::shared_ptr<Abstract> data) throw (adt::Run
    auto result = m_datas.insert(Datas::value_type(data->getName(), data));
 
    if (result.second) {
-	   m_creationOrder.push_back(result.first);
+      m_creationOrder.push_back(result.first);
    }
 }
 
@@ -98,7 +102,7 @@ dbms::datatype::Set& dbms::datatype::Set::operator=(const Set& other)
    m_datas.clear();
    m_creationOrder.clear();
    for (auto ii : other.m_creationOrder) {
-	   insert(data(ii));
+      insert(data(ii));
    }
 
    return *this;
@@ -127,10 +131,6 @@ int dbms::datatype::Set::compare(const Set& other) const
 
       if (result != 0)
          break;
-   }
-
-   if (compareCounter != size() && result == 0) {
-      COFFEE_THROW_EXCEPTION("Only " << compareCounter << " from " << size() << " components were compared");
    }
 
    return result;

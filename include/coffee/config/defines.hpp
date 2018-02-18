@@ -42,7 +42,7 @@
 #endif
 #define COFFEE_FILE_LOCATION __PRETTY_FUNCTION__,__FILE__,__LINE__
 
-#define COFFEE_VERSION 0x011202
+#define COFFEE_VERSION 0x120212
 
 #if defined(__linux__) && !defined (_NO_BUILTIN)
 #define coffee_memcpy(a,b,c) __builtin_memcpy((a),(b),(c))

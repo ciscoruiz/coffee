@@ -150,6 +150,16 @@ BOOST_AUTO_TEST_CASE( TimeClasses_millisecond_from_string )
    BOOST_REQUIRE_EQUAL ( guide.asString(), "10 ms");
 }
 
+BOOST_AUTO_TEST_CASE( TimeClasses_millisecond_compare )
+{
+   adt::Millisecond start(adt::Millisecond::getTime());
+   usleep(5000);
+   adt::Millisecond after(adt::Millisecond::getTime());
+   BOOST_REQUIRE(start < after);
+   BOOST_REQUIRE(after > start);
+   BOOST_REQUIRE(start != after);
+}
+
 BOOST_AUTO_TEST_CASE( TimeClasses_microsecond_from_string )
 {
    adt::Microsecond guide(LLONG_MAX);
@@ -168,6 +178,16 @@ BOOST_AUTO_TEST_CASE( TimeClasses_microsecond_from_string )
    BOOST_REQUIRE_EQUAL ( guide.asString(), "10 us");
 }
 
+BOOST_AUTO_TEST_CASE( TimeClasses_microsecond_compare )
+{
+   adt::Microsecond start(adt::Microsecond::getTime());
+   usleep(5000);
+   adt::Microsecond after(adt::Microsecond::getTime());
+   BOOST_REQUIRE(start < after);
+   BOOST_REQUIRE(after > start);
+   BOOST_REQUIRE(start != after);
+}
+
 BOOST_AUTO_TEST_CASE( TimeClasses_excep_from_string )
 {
    BOOST_CHECK_THROW (adt::Second::fromString("10 xx"), adt::RuntimeException);
@@ -178,10 +198,9 @@ BOOST_AUTO_TEST_CASE( TimeClasses_excep_from_string )
 BOOST_AUTO_TEST_CASE( TimeClasses_as_date_time )
 {
    adt::Second sec (INT_MAX);
-   std::string str;
-
-   str = sec.asDateTime();
-   BOOST_REQUIRE_EQUAL (str, "19/01/2038 04:14:07");
+   std::string str = sec.asDateTime();
+   BOOST_REQUIRE(str.find("19/01/2038 ") != std::string::npos);
+   BOOST_REQUIRE(str.find(":14:07") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_CASE( TimeClasses_bad_time )
@@ -189,3 +208,28 @@ BOOST_AUTO_TEST_CASE( TimeClasses_bad_time )
 	adt::Second sec (LONG_MAX);
 	BOOST_CHECK_THROW (sec.asDateTime(), adt::RuntimeException);
 }
+
+BOOST_AUTO_TEST_CASE( TimeClasses_fromstring)
+{
+   const char* format = "%Y-%m-%d %H:%M:%S";
+
+   adt::Second now = adt::Second::getTime();
+
+   for (int ii = 0; ii < 100; ++ ii) {
+      adt::Second newTime = now + (rand() % 1000);
+      const std::string dateString = newTime.asDateTime(format);
+      BOOST_REQUIRE_EQUAL(adt::Second::fromString(dateString, format), newTime);
+   }
+}
+
+BOOST_AUTO_TEST_CASE( TimeClasses_fromstring_bad_format)
+{
+   const char* format = "%Y-%m-%d %H:%M:%S";
+
+   adt::Second now = adt::Second::getTime();
+
+   const std::string dateString = now.asDateTime(format);
+
+   BOOST_REQUIRE_THROW (adt::Second::fromString(dateString, "invalid-format"), adt::RuntimeException);
+}
+

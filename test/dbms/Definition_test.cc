@@ -43,6 +43,8 @@
 #include <coffee/logger/TraceMethod.hpp>
 #include <coffee/logger/TtyWriter.hpp>
 
+#include <coffee/xml/Node.hpp>
+
 #include "MockApplication.hpp"
 #include "MockDatabase.hpp"
 #include "MockLowLevelRecord.hpp"
@@ -456,7 +458,6 @@ BOOST_AUTO_TEST_CASE(dbms_write_and_read_and_delete)
 
    if(true) {
       dbms::GuardConnection guard(conn0);
-
       dbms::GuardStatement eraser(guard, stEraser);
 
       auto id = coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0));
@@ -1218,59 +1219,125 @@ BOOST_AUTO_TEST_CASE(dbms_without_app)
    BOOST_REQUIRE_EQUAL(database.isRunning(), false);
 }
 
-/*
-BOOST_AUTO_TEST_CASE(dbms_link_guards)
+BOOST_AUTO_TEST_CASE(dbms_null_binder_allocated)
 {
-   MockApplication application("dbms_link_guards");
+   test_dbms::MyDatabase database("dbms_null_binder_allocated");
 
-   std::shared_ptr<test_dbms::MyDatabase> database = std::make_shared<test_dbms::MyDatabase>(application);
+   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
 
-   application.attach(database);
+   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
 
-   std::shared_ptr<dbms::Connection> conn0;
-   std::shared_ptr<dbms::Statement> st0;
-   std::shared_ptr<dbms::Statement> st1;
-
-   BOOST_REQUIRE_NO_THROW(conn0 = database->createConnection("0", "0", "0"));
-   BOOST_REQUIRE_NO_THROW(st0 = database->createStatement("zero", "write"));
-   BOOST_REQUIRE_NO_THROW(st1 = database->createStatement("one", "write"));
-
-   std::shared_ptr<std::thread> tr;
-
-   {
-      std::lock_guard<std::mutex> guard(application.m_termination);
-
-      tr = std::make_shared<std::thread>(std::ref(application));
-      usleep(400);
-
-      BOOST_REQUIRE_EQUAL(application.isRunning(), true);
-      BOOST_REQUIRE_EQUAL(database->isRunning(), true);
-
-      if(true) {
-         dbms::GuardConnection guardConnection(conn0);
-
-         BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 0);
-
-         if(true) {
-            dbms::GuardStatement guardSt0(guardConnection, st0);
-
-            BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 1);
-
-            if(true) {
-               dbms::GuardStatement guardSt1(guardConnection, st1);
-               BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 2);
-            }
-
-            BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 1);
-         }
-
-         BOOST_REQUIRE_EQUAL(guardConnection.getCountLinkedStatement(), 0);
-      }
-
-      LOG_DEBUG("Enables termination");
-   }
-
-   tr->join();
+   auto statement = database.createStatement("one", "read");
+   auto id = std::make_shared<datatype::Integer>("give-me-null");
+   BOOST_REQUIRE_THROW(statement->createBinderInput(id), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(statement->createBinderOutput(id), adt::RuntimeException);
 }
 
-*/
+BOOST_AUTO_TEST_CASE(dbms_input_binder_out_range)
+{
+   test_dbms::MyDatabase database("dbms_null_binder_allocated");
+   auto stWriter = database.createStatement("the_write", "write");
+   auto stReader = database.createStatement("the_read", "read");
+   auto conn0 = database.createConnection("0", "0", "0");
+
+   dbms::GuardConnection guard(conn0);
+   dbms::GuardStatement writer(guard, stWriter);
+   BOOST_REQUIRE_THROW(writer.getInputData(100), adt::RuntimeException);
+
+   dbms::GuardStatement reader(guard, stReader);
+   BOOST_REQUIRE_THROW(reader.getOutputData(100), adt::RuntimeException);
+}
+
+BOOST_AUTO_TEST_CASE(dbms_resultcode_without_interpreter)
+{
+   test_dbms::MyDatabase database("none");
+   std::shared_ptr<dbms::ErrorCodeInterpreter> empty;
+   database.setErrorCodeInterpreter(empty);
+   dbms::ResultCode resultCode(database, 100);
+
+   BOOST_REQUIRE_THROW(resultCode.successful(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(resultCode.notFound(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(resultCode.locked(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(resultCode.lostConnection(), adt::RuntimeException);
+}
+
+BOOST_AUTO_TEST_CASE(dbms_resultcode_asstring)
+{
+   test_dbms::MyDatabase database("none");
+   dbms::ResultCode resultCode(database, 100, "text");
+
+   BOOST_REQUIRE_EQUAL(resultCode.asString(), "dbms.ResultCode { Status=(100) | Comment=text }");
+}
+
+BOOST_AUTO_TEST_CASE(dbms_database_asXML)
+{
+   test_dbms::MyDatabase database("dbms_without_app");
+
+   database.createConnection("connection0", "user0", "password0");
+   database.createStatement("the_write", "write");
+   database.createStatement("the_read", "read");
+
+   auto node = std::make_shared<xml::Node>("root");
+   std::shared_ptr<xml::Node> result = database.asXML(node);
+
+   BOOST_REQUIRE_EQUAL(result->children_size(), 3);
+}
+
+BOOST_AUTO_TEST_CASE(dbms_noauto_commit)
+{
+   test_dbms::MyDatabase database("dbms_write_and_read_and_delete");
+
+   database.externalInitialize();
+
+   std::shared_ptr<mock::MockConnection> conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
+   auto stWriter = database.createStatement("the_write", "write");
+   ResultCode resultCode;
+
+   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+
+   if (true) {
+      dbms::GuardConnection guard(conn0);
+      dbms::GuardStatement writer(guard, stWriter);
+
+      BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
+
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+      writer.execute();
+
+      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(database.container_size(), 0);
+      BOOST_REQUIRE_EQUAL(conn0->getCommitPendingCounter(), 1);
+   }
+
+   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(database.container_size(), 1);
+   BOOST_REQUIRE_EQUAL(conn0->getCommitPendingCounter(), 0);
+
+   if (true) {
+      dbms::GuardConnection guard(conn0);
+      dbms::GuardStatement writer(guard, stWriter);
+
+      // Avoiding commit will be rejected due to sentence with output parameter => it is an insert
+      BOOST_REQUIRE(writer.setRequiresCommit(false));
+
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(3);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 3");
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 3);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.3);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("3/2/2002T02:02:02", "%d/%m/%YT%H:%M");
+      writer.execute();
+
+      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(conn0->getCommitPendingCounter(), 1);
+   }
+
+   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(database.container_size(), 2);
+   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 2);
+}
+
+

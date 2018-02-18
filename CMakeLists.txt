@@ -1,6 +1,5 @@
 project(coffee)
 
-
 if (CMAKE_VERSION VERSION_LESS "3.1")
    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 else()
@@ -18,6 +17,14 @@ if (COFFEE_XML_PATH)
   include_directories(${COFFEE_XML_PATH}/include/libxml2)
   link_directories(${COFFEE_XML_PATH}/lib)
 endif()
+
+set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
+SET(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage -fno-inline -fno-inline-small-functions -fno-default-inline")
+
+SET(CMAKE_EXE_LINKER_FLAGS_COVERAGE "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage -lgcov")
+
+set(MEMORYCHECK_COMMAND_OPTIONS "--leak-check=full -v")
+set(MEMORYCHECK_SUPPRESSIONS_FILE ${PROJECT_SOURCE_DIR}/valgrind-suppression.txt)
 
 add_subdirectory(source/config)
 add_subdirectory(source/adt)
@@ -37,9 +44,12 @@ add_subdirectory(test/xml)
 add_subdirectory(test/logger)
 add_subdirectory(test/balance)
 add_subdirectory(test/app)
+add_subdirectory(test/dbms.mock)
 add_subdirectory(test/dbms)
 add_subdirectory(test/dbms.sqlite)
 add_subdirectory(test/persistence)
+
+include(CTest)
 
 add_test(test_coffee_config test/config/test_coffee_config)
 add_test(test_coffee_adt test/adt/test_coffee_adt)

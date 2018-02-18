@@ -80,7 +80,7 @@ public:
       \param date Fecha de realizacion del enginee. Normalmente sera el contenido de la macro __DATE__.
       \param time Hora de realizacion del enginee. Normalmente sera el contenido de la macro __TIME__.
    */
-   Application(const char* shortName, const char* title, const char* version, const char* date = NULL, const char* time = NULL);
+   Application(const char* shortName, const char* title, const char* version);
 
    /**
       Destructor.
@@ -111,12 +111,6 @@ public:
       @return El pid asignado por el sistema operativo a la aplicacion que estamos ejecutando.
    */
    pid_t getPid() const noexcept { return a_pid; }
-
-   /**
-      Activa la salida por pantalla del mensaje referente a la licencia GPL 3.0.
-      \warning Para que tenga efecto debe ser invocado antes de ejecutar el metodo Application::start.
-   */
-   void activateGeneralPublicLicense() noexcept { a_enableGPL = true; }
 
    /**
       Devuelve la instancia del enginee que corresponde con el nombre recibido.
@@ -234,7 +228,6 @@ private:
    const std::string a_title;
    Engines a_engines;
    pid_t a_pid;
-   bool a_enableGPL;
 
    void startEngines() throw(adt::RuntimeException);
    void stopEngines() noexcept;

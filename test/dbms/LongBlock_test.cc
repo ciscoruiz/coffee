@@ -99,3 +99,34 @@ BOOST_AUTO_TEST_CASE (longblock_downcast)
 
    BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::LongBlock, zzz), dbms::InvalidDataException);
 }
+
+BOOST_AUTO_TEST_CASE (longblock_clone)
+{
+   datatype::LongBlock column ("not_nulleable");
+
+   const char* buffer = new char[1024];
+   adt::DataBlock memory(buffer, 1024);
+
+   column.setValue(memory);
+
+   auto clone = coffee_datatype_downcast(datatype::LongBlock, column.clone());
+
+   BOOST_REQUIRE(clone->getValue() == column.getValue());
+}
+
+BOOST_AUTO_TEST_CASE (longblock_clone_innerscope)
+{
+   std::shared_ptr<datatype::LongBlock> clone;
+
+   {
+      datatype::LongBlock column ("not_nulleable");
+      adt::DataBlock memory("1234", 4);
+      column.setValue(memory);
+      clone = coffee_datatype_downcast(datatype::LongBlock, column.clone());
+   }
+
+   BOOST_REQUIRE(clone->getValue().size() == 4);
+   BOOST_REQUIRE(memcmp(clone->getValue().data(), "1234", 4) == 0);
+}
+
+

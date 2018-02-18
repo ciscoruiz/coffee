@@ -52,6 +52,8 @@
 #include <coffee/dbms/datatype/Integer.hpp>
 #include <coffee/dbms/datatype/Float.hpp>
 #include <coffee/dbms/datatype/LongBlock.hpp>
+#include <coffee/dbms/datatype/ShortBlock.hpp>
+#include <coffee/dbms/datatype/Date.hpp>
 
 using namespace coffee;
 
@@ -90,6 +92,17 @@ struct StatementCountAgeGreater {
    std::shared_ptr<dbms::Statement> statement;
 };
 
+struct StatementCountAllTypes {
+   StatementCountAllTypes(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
+      const char* sql = "select count(*) from all_types";
+      counter = std::make_shared<dbms::datatype::Integer>("counter");
+      statement = database.createStatement("count_all_types", sql);
+      statement->createBinderOutput(counter);
+   }
+   std::shared_ptr<dbms::datatype::Integer> counter;
+   std::shared_ptr<dbms::Statement> statement;
+};
+
 struct StatementBlob {
    StatementBlob(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "select id, myfloat, mydata from btest where id == ?";
@@ -110,6 +123,62 @@ struct StatementBlob {
    std::shared_ptr<dbms::Statement> statement;
 };
 
+struct StatementSyntaxError {
+   StatementSyntaxError(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
+      const char* sql = "select age where employee where age > ?";
+      input = std::make_shared<dbms::datatype::Integer>("age");
+      output = std::make_shared<dbms::datatype::Integer>("age");
+      statement = database.createStatement("syntax_error", sql);
+      statement->createBinderInput(input);
+      statement->createBinderOutput(output);
+   };
+   std::shared_ptr<dbms::datatype::Integer> input;
+   std::shared_ptr<dbms::datatype::Integer> output;
+   std::shared_ptr<dbms::Statement> statement;
+};
+
+struct InsertAllType {
+   InsertAllType(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
+      const char* sql = "insert into all_types(id, the_float, the_date, the_blob) values (?, ?, ?, ?);";
+      id = std::make_shared<dbms::datatype::Integer>("id");
+      theFloat = std::make_shared<dbms::datatype::Float>("the_float", dbms::datatype::Constraint::CanBeNull);
+      theDate = std::make_shared<dbms::datatype::Date>("the_date", dbms::datatype::Constraint::CanBeNull);
+      theBlob = std::make_shared<dbms::datatype::ShortBlock>("the_blob", 128, dbms::datatype::Constraint::CanBeNull);
+      statement = database.createStatement("insert_all_types", sql);
+      statement->createBinderInput(id);
+      statement->createBinderInput(theFloat);
+      statement->createBinderInput(theDate);
+      statement->createBinderInput(theBlob);
+   }
+
+   std::shared_ptr<dbms::datatype::Integer> id;
+   std::shared_ptr<dbms::datatype::Float> theFloat;
+   std::shared_ptr<dbms::datatype::Date> theDate;
+   std::shared_ptr<dbms::datatype::ShortBlock> theBlob;
+   std::shared_ptr<dbms::Statement> statement;
+};
+
+struct SelectAllType {
+   SelectAllType(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
+      const char* sql = "select id, the_float, the_date, the_blob from all_types order by id";
+      id = std::make_shared<dbms::datatype::Integer>("id");
+      theFloat = std::make_shared<dbms::datatype::Float>("the_float", dbms::datatype::Constraint::CanBeNull);
+      theDate = std::make_shared<dbms::datatype::Date>("the_date", dbms::datatype::Constraint::CanBeNull);
+      theBlob = std::make_shared<dbms::datatype::ShortBlock>("the_blob", 128, dbms::datatype::Constraint::CanBeNull);
+      statement = database.createStatement("select_all_types", sql);
+      statement->createBinderOutput(id);
+      statement->createBinderOutput(theFloat);
+      statement->createBinderOutput(theDate);
+      statement->createBinderOutput(theBlob);
+   }
+
+   std::shared_ptr<dbms::datatype::Integer> id;
+   std::shared_ptr<dbms::datatype::Float> theFloat;
+   std::shared_ptr<dbms::datatype::Date> theDate;
+   std::shared_ptr<dbms::datatype::ShortBlock> theBlob;
+   std::shared_ptr<dbms::Statement> statement;
+};
+
 struct SqliteFixture {
    static  boost::filesystem::path dbPath;
 
@@ -127,6 +196,7 @@ struct SqliteFixture {
          BEGIN TRANSACTION; \
          CREATE TABLE employee (Name varchar(20),Dept varchar(20),jobTitle varchar(20), age integer); \
          create table btest(ID INTEGER, myfloat float, MyData BLOB); \
+         create table all_types (id integer primary key, the_float float, the_date date, the_blob blob); \
          \
          INSERT INTO employee VALUES('Fred Flinstone','Quarry Worker','Rock Digger', 30); \
          INSERT INTO employee VALUES('Wilma Flinstone','Finance','Analyst', 40); \
@@ -139,10 +209,12 @@ struct SqliteFixture {
 
       BOOST_REQUIRE_NO_THROW(std::dynamic_pointer_cast<dbms::sqlite::SqliteConnection>(connection)->execute(sql));
    }
+   ~SqliteFixture() {
+      database.externalStop();
+   }
 
    dbms::sqlite::SqliteDatabase database;
    std::shared_ptr<dbms::Connection> connection;
-
 };
 
 boost::filesystem::path SqliteFixture::dbPath("/tmp/sqlite_test.db");
@@ -151,6 +223,13 @@ BOOST_FIXTURE_TEST_CASE(sqlite_create_db, SqliteFixture)
 {
    auto secondConnection = database.createConnection("second", "user:second", "none");
    BOOST_REQUIRE_EQUAL(secondConnection->isAvailable(), true);
+}
+
+BOOST_AUTO_TEST_CASE(sqlite_connection_noopen)
+{
+   dbms::sqlite::SqliteDatabase database("/root");
+   auto connection = database.createConnection("closed", "user:first", "none");
+   BOOST_REQUIRE_THROW(dbms::GuardConnection guard(connection), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(sqlite_invalid_access)
@@ -165,7 +244,6 @@ BOOST_AUTO_TEST_CASE(sqlite_invalid_access)
 BOOST_FIXTURE_TEST_CASE(sqlite_multi_select, SqliteFixture)
 {
    StatementAgeGreater fullStatement(database, connection);
-
    dbms::GuardConnection guardConnection(connection);
    dbms::GuardStatement guardStament(guardConnection, fullStatement.statement);
 
@@ -323,7 +401,6 @@ BOOST_FIXTURE_TEST_CASE(sqlite_rebind_sentence, SqliteFixture)
    }
 }
 
-
 BOOST_FIXTURE_TEST_CASE(sqlite_reuse_sentence, SqliteFixture)
 {
    StatementCountAgeGreater ageCounter(database, connection);
@@ -353,4 +430,91 @@ BOOST_FIXTURE_TEST_CASE(sqlite_reuse_sentence, SqliteFixture)
    }
 }
 
+BOOST_FIXTURE_TEST_CASE(sqlite_syntax_error, SqliteFixture)
+{
+   StatementSyntaxError syntaxError(database, connection);
 
+   dbms::GuardConnection guardConnection(connection);
+   dbms::GuardStatement guardStament(guardConnection, syntaxError.statement);
+   BOOST_REQUIRE_THROW(guardStament.execute(), dbms::DatabaseException);
+}
+
+
+BOOST_FIXTURE_TEST_CASE(sqlite_rollback, SqliteFixture)
+{
+   InsertAllType insert(database, connection);
+   StatementCountAllTypes count(database, connection);
+
+   {
+      dbms::GuardConnection guardConnection(connection);
+      dbms::GuardStatement guardStament(guardConnection, insert.statement);
+      insert.id->setValue(100);
+      insert.theBlob->isNull();
+      insert.theFloat->isNull();
+      insert.theDate->setValue(adt::Second::getLocalTime());
+      BOOST_REQUIRE_NO_THROW(guardStament.execute());
+   }
+
+   {
+      dbms::GuardConnection guardConnection(connection);
+      dbms::GuardStatement guardStament(guardConnection, count.statement);
+      BOOST_REQUIRE_NO_THROW(guardStament.execute());
+      BOOST_REQUIRE(guardStament.fetch());
+      BOOST_REQUIRE_EQUAL(count.counter->getValue(), 1);
+   }
+
+   {
+      dbms::GuardConnection guardConnection(connection);
+      dbms::GuardStatement guardStament(guardConnection, insert.statement);
+      insert.id->setValue(100);
+      BOOST_REQUIRE_THROW(guardStament.execute(), dbms::DatabaseException);
+   }
+}
+
+BOOST_FIXTURE_TEST_CASE(sqlite_insert_all_types, SqliteFixture)
+{
+   auto now = adt::Second::getTime();
+
+   InsertAllType insert(database, connection);
+   StatementCountAllTypes count(database, connection);
+   SelectAllType select(database, connection);
+
+   {
+      dbms::GuardConnection guardConnection(connection);
+      dbms::GuardStatement guardStament(guardConnection, insert.statement);
+
+      for (int ii = 0; ii < 10; ++ ii) {
+         insert.id->setValue(ii);
+         insert.theFloat->setValue(10.11 * ii);
+         insert.theDate->setValue(now + ii);
+         insert.theBlob->setValue(adt::DataBlock((const char*) &now, sizeof(now)));
+         BOOST_REQUIRE_NO_THROW(guardStament.execute());
+      }
+   }
+
+   {
+      dbms::GuardConnection guardConnection(connection);
+      dbms::GuardStatement guardStament(guardConnection, count.statement);
+      BOOST_REQUIRE_NO_THROW(guardStament.execute());
+      BOOST_REQUIRE(guardStament.fetch());
+      BOOST_REQUIRE_EQUAL(count.counter->getValue(), 10);
+   }
+
+   {
+      dbms::GuardConnection guardConnection(connection);
+      dbms::GuardStatement guardStament(guardConnection, select.statement);
+
+      BOOST_REQUIRE_NO_THROW(guardStament.execute());
+
+      int counter = 0;
+      while (guardStament.fetch()) {
+         BOOST_REQUIRE_EQUAL(select.id->getValue(), counter);
+         BOOST_REQUIRE_CLOSE(select.theFloat->getValue(), 10.11 * counter, 0.1);
+         BOOST_REQUIRE_EQUAL(select.theDate->getValue(), now + counter);
+         BOOST_REQUIRE(select.theBlob->getValue() == adt::DataBlock((const char*) &now, sizeof(now)));
+         counter ++;
+      }
+
+      BOOST_REQUIRE_EQUAL(counter, 10);
+   }
+}

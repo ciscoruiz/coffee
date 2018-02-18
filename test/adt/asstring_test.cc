@@ -127,11 +127,18 @@ BOOST_AUTO_TEST_CASE( asstring_bool )
 BOOST_AUTO_TEST_CASE( asstring_datablock )
 {
    string result;
-   adt::DataBlock value ("hello world", 11);
+   char buffer[1024];
+   adt::DataBlock value (buffer, 1024);
 
    result = adt::AsString::apply(value);
 
    cout << result << endl;
 
    BOOST_REQUIRE_GT (result.size (), 0);
+}
+
+BOOST_AUTO_TEST_CASE( asstring_double )
+{
+   string result = adt::AsString::apply(123.127, "%.02f");
+   BOOST_REQUIRE_EQUAL(result, "123.13");
 }

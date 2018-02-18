@@ -1,0 +1,2 @@
+valgrind --leak-check=full --gen-suppressions=all --log-file=./valgrind-suppression.txt test/adt/test_coffee_adt <executable>
+

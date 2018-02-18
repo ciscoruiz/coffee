@@ -44,13 +44,6 @@ datatype::Integer::Integer (const char* name, const Constraint::_v constraint) :
    datatype::Abstract::setBuffer (&m_value);
 }
 
-datatype::Integer::Integer (const std::string& name, const Constraint::_v constraint) :
-   datatype::Abstract (name, Datatype::Integer, sizeof (int), constraint),
-   m_value (0)
-{
-   datatype::Abstract::setBuffer (&m_value);
-}
-
 datatype::Integer::Integer (const Integer& other) :
    datatype::Abstract (other),
    m_value (other.m_value)

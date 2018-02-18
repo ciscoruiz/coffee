@@ -52,17 +52,6 @@ const std::shared_ptr<datatype::Abstract>& Statement::getInputData(const int pos
    }
 
    return m_inputBinds[pos]->getData();
-
-}
-
-const std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const GuardStatement&, const int pos) const
-   throw(adt::RuntimeException)
-{
-   if(pos >= output_size()) {
-      COFFEE_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << ")");
-   }
-
-   return m_outputBinds[pos]->getData();
 }
 
 std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const GuardStatement&, const int pos)

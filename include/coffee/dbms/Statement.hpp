@@ -125,7 +125,7 @@ public:
       mediante la llamada #setRequiresCommit
       \since NemesisRD.dbms 1.5.2.
    */
-   bool requiresCommit() const noexcept { return(m_requiresCommit == true) ||(m_outputBinds.empty() == true); }
+   bool requiresCommit() const noexcept { return (m_requiresCommit == true) || (m_outputBinds.empty() == true); }
 
    /**
       Establece el parametro de entrada de la sentencia SQL.Cada una de las variables de entrada indicadas
@@ -240,7 +240,6 @@ protected:
 
    std::shared_ptr<datatype::Abstract>& getInputData(const GuardStatement&, const int pos) throw(adt::RuntimeException);
    std::shared_ptr<datatype::Abstract>& getOutputData(const GuardStatement&, const int pos) throw(adt::RuntimeException);
-   const std::shared_ptr<datatype::Abstract>& getOutputData(const GuardStatement&, const int pos) const throw(adt::RuntimeException);
 
    const std::shared_ptr<datatype::Abstract>& getInputData(const int pos) const throw(adt::RuntimeException);
    std::shared_ptr<datatype::Abstract>& getOutputData(const int pos) throw(adt::RuntimeException);
@@ -265,7 +264,7 @@ private:
    ResultCode execute(Connection& connection) throw(adt::RuntimeException, DatabaseException);
    virtual ResultCode do_execute(Connection& connection) throw(adt::RuntimeException, DatabaseException) = 0;
 
-   void setRequiresCommit(const bool requiresCommit) noexcept { m_requiresCommit = requiresCommit; }
+   bool setRequiresCommit(const bool value) noexcept { m_requiresCommit = value; return requiresCommit(); }
 
    bool fetch() throw(adt::RuntimeException, DatabaseException);
    virtual bool do_fetch() throw(adt::RuntimeException, DatabaseException) = 0;

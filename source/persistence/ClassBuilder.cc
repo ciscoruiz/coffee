@@ -50,7 +50,7 @@ throw (adt::RuntimeException)
 std::shared_ptr<persistence::Class> persistence::ClassBuilder::build() const
       throw (adt::RuntimeException)
 {
-   if (!m_primaryKey || m_primaryKey->empty()) {
+   if (!m_primaryKey) {
       COFFEE_THROW_EXCEPTION(m_className << " does not define a valid primary key");
    }
 
@@ -61,12 +61,6 @@ std::shared_ptr<persistence::Class> persistence::ClassBuilder::build() const
    for (const_data_iterator ii = begin(), maxii = end(); ii != maxii; ++ ii) {
       if (m_primaryKey->constains(name(ii)) == true) {
          COFFEE_THROW_EXCEPTION(m_className << " member " << name(ii) << " already used as a member in the primary key");
-      }
-   }
-
-   for (const_data_iterator ii = m_primaryKey->begin(), maxii = m_primaryKey->end(); ii != maxii; ++ ii) {
-      if (constains(name(ii)) == true) {
-         COFFEE_THROW_EXCEPTION(m_className << " member " << name(ii) << " already used as a member class");
       }
    }
 

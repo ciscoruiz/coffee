@@ -107,10 +107,6 @@ Accessor::TheObject Storage::load(Accessor::TheConnection& connection, Loader& l
       }
    }
 
-   if(!result) {
-      COFFEE_THROW_EXCEPTION(loader.asString() << " | There is not any match for the loader");
-   }
-
    LOG_DEBUG(loader << " | ObjectId=" << result->getInternalId() << " | Result=" << result->asString());
 
    return result;

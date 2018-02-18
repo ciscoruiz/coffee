@@ -46,19 +46,11 @@ datatype::String::String (const char* name, const int maxSize, const Constraint:
    coffee_memset (m_value, 0, maxSize + 1);
 }
 
-datatype::String::String (const std::string& name, const int maxSize, const Constraint::_v constraint) :
-   datatype::Abstract (name, Datatype::String, maxSize, constraint)
-{
-   datatype::Abstract::setBuffer (m_value = new char [maxSize + 1]);
-   coffee_memset (m_value, 0, maxSize + 1);
-}
-
 datatype::String::String (const String& other) :
    datatype::Abstract (other)
 {
    const int maxSize = getMaxSize ();
    datatype::Abstract::setBuffer (m_value = new char [maxSize + 1]);
-
    coffee_memcpy (m_value, other.m_value, maxSize);
 }
 
@@ -80,24 +72,6 @@ void datatype::String::setValue (const char* str)
    }
 
    this->isNotNull();
-}
-
-char* datatype::String::strip (char *str)
-   noexcept
-{
-   int len;
-
-   if (str == NULL || (len = coffee_strlen (str)) == 0)
-      return str;
-
-   register int end = len - 1;
-
-   while (end >= 0 && str [end] == ' ') end --;
-
-   if (end >= 0)
-      str [++ end] = 0;
-
-   return str;
 }
 
 adt::StreamString datatype::String::asString () const

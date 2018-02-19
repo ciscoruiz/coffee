@@ -66,7 +66,7 @@ public:
       size_t operator()(const std::shared_ptr<PrimaryKey>& primaryKey) const { return primaryKey->hash(); }
    };
 
-   PrimaryKey(const PrimaryKeyBuilder& builder);
+   explicit PrimaryKey(const PrimaryKeyBuilder& builder);
    PrimaryKey (const PrimaryKey& other) : dbms::datatype::Set(other) {;}
 
    PrimaryKey& operator= (const PrimaryKey& other) throw (adt::Exception) { Set::operator=(other); return *this; }

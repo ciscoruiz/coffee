@@ -72,8 +72,8 @@ public:
 
    typedef AttributeContainer::const_iterator const_attribute_iterator;
 
-   Node(const char* name);
-   Node(_xmlNode* xmlNode);
+   explicit Node(const char* name);
+   explicit Node(_xmlNode* xmlNode);
    ~Node() {;}
 
    std::shared_ptr<Node> lookupChild(const char* name) const throw(adt::RuntimeException);

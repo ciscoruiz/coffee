@@ -111,8 +111,8 @@ class MyDatabase : public mock::MockDatabase {
 public:
    static const int PreloadRegisterCounter;
 
-   MyDatabase(app::Application& app) : mock::MockDatabase(app) { fillup(); }
-   MyDatabase(const char* name) : mock::MockDatabase(name) { fillup(); }
+   explicit MyDatabase(app::Application& app) : mock::MockDatabase(app) { fillup(); }
+   explicit MyDatabase(const char* name) : mock::MockDatabase(name) { fillup(); }
 
 private:
    void fillup() {
@@ -143,7 +143,7 @@ private:
 
 class CustomerObjectWrapper {
 public:
-   CustomerObjectWrapper(std::shared_ptr<persistence::Object> object) : m_object(object) { }
+   explicit CustomerObjectWrapper(std::shared_ptr<persistence::Object> object) : m_object(object) { }
 
    int getId() const throw(dbms::InvalidDataException) { return m_object->getPrimaryKey()->getInteger("id"); }
    std::string getName() const throw(dbms::InvalidDataException) { return m_object->getString("name"); }

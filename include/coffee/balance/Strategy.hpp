@@ -65,7 +65,7 @@ protected:
    std::shared_ptr<ResourceList> m_resources;
 
    Strategy(const std::string& name, std::shared_ptr<ResourceList>& resources) : adt::NamedObject(name), m_resources(resources) {;}
-   Strategy(const std::string& name) : adt::NamedObject(name) {;}
+   explicit Strategy(const std::string& name) : adt::NamedObject(name) {;}
    void setResourceList(std::shared_ptr<ResourceList>& resources) { m_resources = resources; }
 };
 

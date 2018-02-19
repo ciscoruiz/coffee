@@ -49,7 +49,7 @@ namespace persistence {
 
 class ClassBuilder : public dbms::datatype::Set {
 public:
-   ClassBuilder(const std::string& className) : m_className (className) {;}
+   explicit ClassBuilder(const std::string& className) : m_className (className) {;}
    
    ClassBuilder& set(std::shared_ptr<PrimaryKey>& primaryKey) throw (adt::RuntimeException);
    

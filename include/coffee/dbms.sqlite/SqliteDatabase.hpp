@@ -48,7 +48,7 @@ namespace sqlite {
 
 class SqliteDatabase : public Database {
 public:
-   SqliteDatabase(const boost::filesystem::path& dbFile);
+   explicit SqliteDatabase(const boost::filesystem::path& dbFile);
    ~SqliteDatabase();
 
 private:

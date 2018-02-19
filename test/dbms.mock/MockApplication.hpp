@@ -46,7 +46,7 @@ class MockApplication : public app::Application {
 public:
    std::mutex m_termination;
 
-   MockApplication(const char* title);
+   explicit MockApplication(const char* title);
 
    void operator()();
 

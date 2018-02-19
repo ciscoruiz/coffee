@@ -52,8 +52,8 @@ class MockDatabase : public dbms::Database {
 public:
    enum ErrorCode { NotFound, Successful, Lock, LostConnection };
 
-   MockDatabase(app::Application& app);
-   MockDatabase(const char* name);
+   explicit MockDatabase(app::Application& app);
+   explicit MockDatabase(const char* name);
 
    void add(const mock::MockLowLevelRecord& record) noexcept {
       m_container [record.m_id] = record;

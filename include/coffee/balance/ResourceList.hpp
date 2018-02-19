@@ -60,7 +60,7 @@ public:
    typedef resource_container::iterator resource_iterator;
    typedef resource_container::const_iterator const_resource_iterator;
 
-   ResourceList(const char* name) : adt::NamedObject(name) {;}
+   explicit ResourceList(const char* name) : adt::NamedObject(name) {;}
    virtual ~ResourceList() { m_resources.clear(); }
 
    bool add(const std::shared_ptr<Resource>& resource) throw(adt::RuntimeException);

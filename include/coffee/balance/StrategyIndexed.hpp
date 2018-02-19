@@ -44,7 +44,7 @@ class GuardResourceList;
 
 class StrategyIndexed : public Strategy {
 public:
-   StrategyIndexed (std::shared_ptr<ResourceList>& resources) :
+   explicit StrategyIndexed (std::shared_ptr<ResourceList>& resources) :
       balance::Strategy("balance::Indexed", resources),
       m_key(0)
    {

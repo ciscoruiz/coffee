@@ -65,7 +65,7 @@ void app::Engine::initialize()
    statusStarting();
 
    try {
-      for(iterator ii = begin(), maxii = end(); ii != maxii; ii ++) {
+      for(iterator ii = begin(), maxii = end(); ii != maxii; ++ ii) {
          const std::string& name = data(ii);
 
          Application::engine_iterator pp = a_app.engine_find(name.c_str());

@@ -77,7 +77,7 @@ public:
       virtual void apply(const TreeNode<_T>& treeNode, const int depth) const noexcept = 0;
    };
 
-   TreeNode(const _T& value) : m_value(value){;}
+   explicit TreeNode(const _T& value) : m_value(value){;}
    TreeNode(const _T& value, const shared_tree_node& predeccesor) :  m_value(value), m_predeccesor(predeccesor) {;}
    virtual ~TreeNode() { m_successors.clear(); }
 

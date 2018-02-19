@@ -114,8 +114,8 @@ private:
 
 class MyDatabase : public mock::MockDatabase {
 public:
-   MyDatabase(app::Application& app) : mock::MockDatabase(app) {;}
-   MyDatabase(const char* name) : mock::MockDatabase(name) {;}
+   explicit MyDatabase(app::Application& app) : mock::MockDatabase(app) {;}
+   explicit MyDatabase(const char* name) : mock::MockDatabase(name) {;}
 
 private:
    mock::MockLowLevelContainer m_container;

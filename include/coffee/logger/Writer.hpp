@@ -49,7 +49,7 @@ public:
    virtual ~Writer() {;}
 
 protected:
-   Writer(const std::string& name) : m_name(name) {;}
+   explicit Writer(const std::string& name) : m_name(name) {;}
 
    virtual bool wantsToProcess(const Level::_v level) const noexcept;
 

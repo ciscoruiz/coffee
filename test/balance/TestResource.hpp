@@ -48,7 +48,7 @@ namespace balance {
 
 class TestResource : public coffee::balance::Resource {
 public:
-   TestResource (const int key) :
+   explicit TestResource (const int key) :
       Resource (adt::StreamString ("TestResource-").append (adt::AsString::apply (key, "%02d"))),
       m_key (key),
       m_available (false) {;}

@@ -63,7 +63,7 @@ public:
    virtual ~Formatter () {;}
 
 protected:
-   Formatter (const std::string& name) : adt::NamedObject (name) {;}
+   explicit Formatter (const std::string& name) : adt::NamedObject (name) {;}
 
    virtual std::string apply (const Elements& elements) noexcept = 0;
 

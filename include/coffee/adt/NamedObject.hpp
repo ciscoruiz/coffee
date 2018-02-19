@@ -60,7 +60,7 @@ public:
   virtual StreamString asString () const noexcept { StreamString result ("adt.NamedObject { Name: "); return result << m_name << " }"; }
 
 protected:
-   NamedObject (const std::string& name) : m_name (name) {;}
+  explicit NamedObject (const std::string& name) : m_name (name) {;}
 
 private:
    const std::string m_name;

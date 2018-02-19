@@ -62,7 +62,7 @@ public:
    virtual std::shared_ptr<xml::Node> asXML (std::shared_ptr<xml::Node>& parent) const noexcept;
 
 protected:
-   Resource(const std::string& name) : adt::NamedObject(name) {;}
+   explicit Resource(const std::string& name) : adt::NamedObject(name) {;}
 
 };
 

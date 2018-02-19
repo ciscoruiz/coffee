@@ -48,15 +48,15 @@ class GuardResourceList {
    typedef std::lock_guard<std::mutex> lock_guard;
 
 public:
-   GuardResourceList(std::shared_ptr<ResourceList>& resourceList);
-   GuardResourceList(std::mutex& mutex) : m_lock(new lock_guard(mutex)) {}
+   explicit GuardResourceList(std::shared_ptr<ResourceList>& resourceList);
+   explicit GuardResourceList(std::mutex& mutex) : m_lock(new lock_guard(mutex)) {}
    ~GuardResourceList() { m_lock.reset(); }
 
 private:
    std::unique_ptr<lock_guard> m_lock;
 
    // Need it for Fake-Guard
-   GuardResourceList(const ResourceList& resourceList) {}
+   explicit GuardResourceList(const ResourceList& resourceList) {}
 
    friend class ResourceList;
 };

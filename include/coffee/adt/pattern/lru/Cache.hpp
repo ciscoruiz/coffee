@@ -55,7 +55,7 @@ public:
    typedef std::unordered_map<_Key, pair_iterator, _Hash, _Pred> QuickAccess;
    typedef typename QuickAccess::iterator qa_iterator;
 
-   Cache(const int maxSize) : m_maxSize(maxSize){;}
+   explicit Cache(const int maxSize) : m_maxSize(maxSize){;}
    ~Cache() {
       m_values.clear();
       m_quickAccess.clear();

@@ -60,7 +60,7 @@ public:
     * Constructor.
     * \param flag Set how to manage the null value.
     */
-   StreamString (const Flag::_v flag = Flag::None) : a_flags (flag) {;}
+   explicit StreamString (const Flag::_v flag = Flag::None) : a_flags (flag) {;}
 
    /**
     * Constructor.

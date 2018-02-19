@@ -60,7 +60,7 @@ class PrimaryKey;
 
 class Class : public adt::NamedObject {
 public:
-   Class(const ClassBuilder& classBuilder);
+   explicit Class(const ClassBuilder& classBuilder);
 
    virtual ~Class() {;}
 

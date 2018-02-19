@@ -45,7 +45,7 @@ class GuardResourceList;
 
 class StrategyRoundRobin : public Strategy {
 public:
-   StrategyRoundRobin (std::shared_ptr<ResourceList>& resources) : Strategy("balance::RoundRobin", resources) {;}
+   explicit StrategyRoundRobin (std::shared_ptr<ResourceList>& resources) : Strategy("balance::RoundRobin", resources) {;}
 
    std::shared_ptr<Resource> apply() throw (ResourceUnavailableException);
 

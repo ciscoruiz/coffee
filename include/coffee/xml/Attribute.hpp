@@ -51,7 +51,7 @@ class Compile;
 
 class Attribute : public Wrapper <_xmlAttr> {
 public:
-   Attribute (_xmlAttr* handler);
+   explicit Attribute (_xmlAttr* handler);
    virtual ~Attribute () {;}
 
    void setValue (const char* value) throw (adt::RuntimeException);

@@ -74,7 +74,7 @@ public:
    }
 
 protected:
-   Subject(const std::string& name) : NamedObject(name) {;}
+   explicit Subject(const std::string& name) : NamedObject(name) {;}
 
    Event registerEvent(const Event::Id id) throw(RuntimeException);
    Event lookupEvent(const Event::Id id) const throw(RuntimeException);

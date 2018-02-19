@@ -73,7 +73,7 @@ public:
 
 protected:
    Wrapper () : m_handler (NULL), m_deleter (NULL), m_nameExtractor (NULL) {}
-   Wrapper (Handler handler) : m_handler (handler), m_deleter (NULL), m_nameExtractor (NULL) {}
+   explicit Wrapper (Handler handler) : m_handler (handler), m_deleter (NULL), m_nameExtractor (NULL) {}
 
    void setDeleter (Deleter deleter) noexcept { m_deleter = deleter; }
    void setNameExtractor (NameExtractor nameExtractor) noexcept { m_nameExtractor = nameExtractor; }

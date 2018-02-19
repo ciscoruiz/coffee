@@ -143,14 +143,6 @@ protected:
    */
    void stop() throw(adt::RuntimeException) { statusStopped(); do_stop(); }
 
-   /**
-      metodo que debemos implementar en la clase heredada para implementar el proceso de parada de
-      esta clase. Se invocara automaticamente desde el ncleo de NemesisRD.
-
-      Este metodo implementa un metodo de parada no controlada.
-   */
-   virtual void kill() noexcept { stop(); }
-
 private:
    typedef std::vector <std::string>::iterator iterator;
 

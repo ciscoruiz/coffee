@@ -52,7 +52,7 @@ public:
       \param name Nombre logico de esta instancia.
       \param measure Unidad de medida. Solo se usa a efecto de salida de datos.
    */
-   Average(const char* name) : a_name(name), a_measure(""), a_accumulator(0), a_n(0) {;}
+   explicit Average(const char* name) : a_name(name), a_measure(""), a_accumulator(0), a_n(0) {;}
 
    /**
       Devuelve el indicador de validez de esta media.

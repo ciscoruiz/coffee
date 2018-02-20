@@ -1,6 +1,5 @@
-// COFFEE - COmpany eFFEEctive Platform
-#ifndef _wepm_dbms_ResultCode_h
-#define _wepm_dbms_ResultCode_h
+#ifndef _coffee_dbms_ResultCode_h
+#define _coffee_dbms_ResultCode_h
 
 #include <string>
 #include <memory>

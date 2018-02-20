@@ -1,4 +1,3 @@
-// COFFEE - COmpany eFFEEctive Platform
 #ifndef _wepm_dbms_Database_h
 #define _wepm_dbms_Database_h
 

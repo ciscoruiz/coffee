@@ -1,4 +1,3 @@
-// COFFEE - COmpany eFFEEctive Platform
 #ifndef _wepm_dbms_DatabaseException_hpp
 #define _wepm_dbms_DatabaseException_hpp
 

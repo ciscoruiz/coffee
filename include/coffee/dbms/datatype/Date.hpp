@@ -1,6 +1,5 @@
-// COFFEE - COmpany eFFEEctive Platform
-#ifndef _coffee_dbms_type_Date_h
-#define _coffee_dbms_type_Date_h
+#ifndef _coffee_dbms_datatype_Date_h
+#define _coffee_dbms_datatype_Date_h
 
 #include <time.h>
 

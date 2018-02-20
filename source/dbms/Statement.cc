@@ -1,14 +1,11 @@
-// COFFEE - COmpany eFFEEctive Platform
 #include <coffee/logger/TraceMethod.hpp>
 
 #include <coffee/xml/Node.hpp>
 #include <coffee/xml/Attribute.hpp>
 
 #include <coffee/dbms/Statement.hpp>
-
 #include <coffee/dbms/binder/Input.hpp>
 #include <coffee/dbms/binder/Output.hpp>
-
 #include <coffee/dbms/datatype/Abstract.hpp>
 #include <coffee/dbms/Database.hpp>
 

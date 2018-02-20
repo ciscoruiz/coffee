@@ -1,4 +1,3 @@
-// COFFEE - COmpany eFFEEctive Platform
 #ifndef _coffee_dbms_datatype_TimeStamp_h
 #define _coffee_dbms_datatype_TimeStamp_h
 

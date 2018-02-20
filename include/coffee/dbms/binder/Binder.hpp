@@ -1,6 +1,5 @@
-// COFFEE - COmpany eFFEEctive Platform
-#ifndef _wepm_dbms_binder_Binder_h
-#define _wepm_dbms_binder_Binder_h
+#ifndef _coffee_dbms_binder_Binder_h
+#define _coffee_dbms_binder_Binder_h
 
 #include <functional>
 #include <memory>

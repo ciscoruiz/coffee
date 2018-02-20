@@ -1,4 +1,3 @@
-// COFFEE - COmpany eFFEEctive Platform
 #ifndef _coffee_dbms_bind_Input_h
 #define _coffee_dbms_bind_Input_h
 

@@ -1,4 +1,3 @@
-// COFFEE - COmpany eFFEEctive Platform
 #ifndef _coffee_dbms_datatype_ShortBlock_h
 #define _coffee_dbms_datatype_ShortBlock_h
 

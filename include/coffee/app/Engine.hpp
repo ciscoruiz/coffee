@@ -92,7 +92,7 @@ public:
       Devuelve el nombre de esta clase indicado en el constructor.
       \return El nombre de la clase indicado en el constructor.
    */
-   const char* getClassName() const noexcept { return getName(); }
+   const std::string& getClassName() const noexcept { return getName(); }
 
    operator adt::StreamString() const noexcept { return asString(); }
 

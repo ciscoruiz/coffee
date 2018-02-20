@@ -92,7 +92,7 @@ public:
       Devuelve el nombre corto indicado en el constructor.
       \return El nombre corto indicado en el constructor.
    */
-   const char* getShortName() const noexcept { return getName(); }
+   const std::string& getShortName() const noexcept { return getName(); }
 
    /**
       Devuelve la version indicado en el contructor de esta aplicacion.
@@ -117,7 +117,7 @@ public:
       \return La instancia del enginee que corresponde con el nombre recibido. Puede ser NULL si no
       hay ningun enginee asociado a la �ta aplicacion que corresponda con el nombre.
    */
-   engine_iterator engine_find(const char* className) noexcept;
+   engine_iterator engine_find(const std::string& className) noexcept;
 
    /**
       Inicializa los elementos propios de nuestra aplicacio, invoca al metodo #initialize

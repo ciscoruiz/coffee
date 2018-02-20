@@ -62,14 +62,14 @@ public:
    /**
     * Destructor.
     */
-   virtual ~Runnable() { delete m_name;}
+   virtual ~Runnable() { ;}
 
    // Accesores
    /**
       Devuelve el nombre l�gico de esta instancia.
       @return El nombre l�gico de esta instancia.
    */
-   const char* getName() const noexcept { return(m_name == NULL) ? NULL: m_name->c_str(); }
+   const std::string& getName() const noexcept { return m_name; }
 
    /**
     * Devuelve \em true si est� instancia est� parada o \em false en otro caso.
@@ -121,18 +121,18 @@ protected:
      Constructor.
      @param name Nombre l�gico de esta instancia.
    */
-   explicit Runnable(const std::string& name) : m_name(new std::string(name)), m_statusFlags(StatusFlags::Stopped) {;}
+   explicit Runnable(const std::string& name) : m_name(name), m_statusFlags(StatusFlags::Stopped) {;}
 
    /**
      Constructor.
      @param name Nombre l�gico de esta clase.
    */
-   explicit Runnable(const char* name) : m_name(new std::string(name)), m_statusFlags(StatusFlags::Stopped) {;}
+   explicit Runnable(const char* name) : m_name(name), m_statusFlags(StatusFlags::Stopped) {;}
 
    /**
     * Constructor vac�o.
     */
-   Runnable() : m_name(NULL), m_statusFlags(StatusFlags::Stopped) {;}
+   Runnable() : m_name(""), m_statusFlags(StatusFlags::Stopped) {;}
 
    /**
     * Activa el flag de estado recibido como par�metro
@@ -186,7 +186,7 @@ protected:
    virtual void do_requestStop() throw(adt::RuntimeException) {;}
 
 private:
-   const std::string* m_name;
+   const std::string m_name;
    int m_statusFlags;
 
    std::string flagsAsString() const noexcept;

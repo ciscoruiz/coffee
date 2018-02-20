@@ -103,12 +103,12 @@ app::Application::~Application()
    a_engines.clear();
 }
 
-app::Application::engine_iterator app::Application::engine_find(const char* className)
+app::Application::engine_iterator app::Application::engine_find(const std::string& className)
    noexcept
 {
    for(engine_iterator ii = engine_begin(), maxii = engine_end(); ii != maxii; ii ++) {
       auto engine = Application::engine(ii);
-      if(coffee_strcmp(className, engine->getClassName()) == 0)
+      if(engine->getClassName() == className)
          return ii;
    }
 

@@ -1,37 +1,26 @@
-// COFFEE - COmpany eFFEEctive Platform
+// MIT License
+// 
+// Copyright (c) 2018 Francisco Ruiz (francisco.ruiz.rayo@gmail.com)
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 //
-// (c) Copyright 2018 Francisco Ruiz Rayo
-//
-// https://github.com/ciscoruiz/coffee
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-//     * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
-// in the documentation and/or other materials provided with the
-// distribution.
-//     * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: cisco.tierra@gmail.com
-//
+
 #include <boost/test/unit_test.hpp>
 
 #include <coffee/adt/RuntimeException.hpp>
@@ -73,7 +62,7 @@ BOOST_AUTO_TEST_CASE( RuntimeException_asString )
    }
    catch (adt::RuntimeException& ex) {
       BOOST_REQUIRE ( strcmp ("this is goo", ex.what ()) == 0 );
-      BOOST_REQUIRE(ex.asString ().find("RuntimeException_test.cc(43): int goo()] this is goo") != std::string::npos);
+      BOOST_REQUIRE(ex.asString ().find("RuntimeException_test.cc(32): int goo()] this is goo") != std::string::npos);
    }
 
    AAA aaa;
@@ -82,7 +71,7 @@ BOOST_AUTO_TEST_CASE( RuntimeException_asString )
       aaa.member (10, 'z');
    }
    catch (adt::RuntimeException& ex) {
-      BOOST_REQUIRE(ex.asString ().find("RuntimeException_test.cc(62): void AAA::member(int, char)] xx:10 zz:z") != std::string::npos);
+      BOOST_REQUIRE(ex.asString ().find("RuntimeException_test.cc(51): void AAA::member(int, char)] xx:10 zz:z") != std::string::npos);
       BOOST_REQUIRE(strcmp ("xx:10 zz:z", ex.what ()) == 0 );
    }
 
@@ -90,7 +79,7 @@ BOOST_AUTO_TEST_CASE( RuntimeException_asString )
       AAA::member2 (11.11);
    }
    catch (adt::RuntimeException& ex) {
-      BOOST_REQUIRE(ex.asString ().find("RuntimeException_test.cc(65): static void AAA::member2(float)] float: 11.110000") != std::string::npos);
+      BOOST_REQUIRE(ex.asString ().find("RuntimeException_test.cc(54): static void AAA::member2(float)] float: 11.110000") != std::string::npos);
       BOOST_REQUIRE(strcmp ("float: 11.110000", ex.what ()) == 0 );
    }
 }
@@ -107,7 +96,7 @@ BOOST_AUTO_TEST_CASE( RuntimeException_errorCode )
       hoo ();
    }
    catch (adt::RuntimeException& ex) {
-      BOOST_REQUIRE(ex.asString ().find("RuntimeException_test.cc(99): void hoo()] ErrorCode: 100 | this is hoo") != std::string::npos);
+      BOOST_REQUIRE(ex.asString ().find("RuntimeException_test.cc(88): void hoo()] ErrorCode: 100 | this is hoo") != std::string::npos);
       BOOST_REQUIRE(strcmp ("this is hoo", ex.what ()) == 0 );
    }
 }

@@ -42,6 +42,15 @@ sudo apt-get install libsqlite3-dev:amd64
 sudo apt-get install sqlite sqlite3   
    
 ```
+
+If you want to generate API doc in HTML you should install:
+
+'''
+sudo apt install doxygen
+sudo apt install graphviz
+
+'''
+
 For now it should be very simple.
 
 ### Installation

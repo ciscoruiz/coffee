@@ -70,7 +70,7 @@ public:
    
    size_t hash() const noexcept { return m_value.size(); }
 
-   coffee_declare_datatype_downcast(LongBlock)
+   coffee_declare_datatype_downcast(LongBlock);
 
 protected:
    adt::DataBlock m_value;

@@ -174,7 +174,7 @@ public:
 
    size_t hash() const noexcept { return std::hash<adt::Second::type_t>{}(m_value.getValue()); }
 
-   coffee_declare_datatype_downcast(Date)
+   coffee_declare_datatype_downcast(Date);
 
 protected:
    adt::Second m_value;

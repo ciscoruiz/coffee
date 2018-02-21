@@ -68,7 +68,7 @@ public:
 
    size_t hash() const noexcept { return std::hash<std::string>{}(m_value); }
 
-   coffee_declare_datatype_downcast(String)
+   coffee_declare_datatype_downcast(String);
 
 private:
    char* m_value;

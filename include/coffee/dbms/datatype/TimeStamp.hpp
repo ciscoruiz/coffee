@@ -55,7 +55,7 @@ public:
 
    std::shared_ptr<Abstract> clone() const noexcept { return std::make_shared<TimeStamp>(*this); }
 
-   coffee_declare_datatype_downcast(TimeStamp)
+   coffee_declare_datatype_downcast(TimeStamp);
 
 private:
    char m_anotherBuffer [MaxDateSize + 1];

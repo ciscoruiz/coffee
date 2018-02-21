@@ -74,6 +74,12 @@ And the next command will run the unit tests:
 make test
 ``` 
 
+If you have installed doxygen then you will be able to run the next command to generate API docs
+
+```
+make doc
+``` 
+
 You can see more commands in the Travis CI configuration file .travis.yml
 
 ## License

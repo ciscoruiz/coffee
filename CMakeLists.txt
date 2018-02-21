@@ -27,7 +27,7 @@ set(MEMORYCHECK_COMMAND_OPTIONS "--leak-check=full -v")
 set(MEMORYCHECK_SUPPRESSIONS_FILE ${PROJECT_SOURCE_DIR}/valgrind-suppression.txt)
 
 # first we can indicate the documentation build as an option and set it to ON by default
-option(BUILD_DOC "Build documentation" ON)
+option(BUILD_DOC "Build documentation" OFF)
 
 # Thanks to https://vicrucann.github.io/tutorials/quick-cmake-doxygen/
 # check if Doxygen is installed
@@ -42,7 +42,7 @@ if (DOXYGEN_FOUND)
     message("Doxygen build started")
 
     # note the option ALL which allows to build the docs together with the application
-    add_custom_target( doc ALL
+    add_custom_target(doc 
         COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generating API documentation with Doxygen"

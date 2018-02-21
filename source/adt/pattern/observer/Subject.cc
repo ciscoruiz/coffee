@@ -38,7 +38,7 @@ observer::Subject::~Subject()
    m_observers.clear();
 }
 
-void observer::Subject::subscribeObserver(std::shared_ptr<Observer>& observer, const Event& event)
+void observer::Subject::attach(std::shared_ptr<Observer> observer, const Event& event)
    throw(RuntimeException)
 {
    const std::string& observerName = observer->getName();
@@ -58,7 +58,7 @@ void observer::Subject::subscribeObserver(std::shared_ptr<Observer>& observer, c
    observer->update(*this, event);
 }
 
-bool observer::Subject::unsubscribeObserver(const std::string& observerName)
+bool observer::Subject::attach(const std::string& observerName)
    noexcept
 {
    const auto ii = m_observers.find(observerName);

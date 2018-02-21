@@ -34,7 +34,7 @@ namespace coffee {
 namespace adt {
 
 /**
- * @brief The AsString class. This class convert different data types into std::string.
+ * @brief The AsHexString class. This class convert different data types into std::string.
  */
 class AsHexString {
 public:

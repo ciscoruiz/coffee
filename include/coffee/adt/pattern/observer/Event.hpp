@@ -34,6 +34,10 @@ namespace observer {
 
 class Subject;
 
+/**
+ * Define the different events that a Subject can generate.
+ * Every Subject could have 32 different events.
+ */
 class Event {
 public:
    typedef int Id;
@@ -41,15 +45,41 @@ public:
 
    static const Id NullId = -1;
 
+   /**
+    * Constructor.
+    */
    Event () : m_id (NullId), m_bitMask (0) {;}
+
+   /**
+    * Constructor.
+    * \param id Event id. It must be unique for the associated Subject.
+    * \param bitMask the mask that defines the event.
+    */
    Event (const Id id, const BitMask bitMask) : m_id (id), m_bitMask (bitMask) {;}
+
+   /**
+    * Copy constructor.
+    */
    Event (const Event& other) : m_id (other.m_id), m_bitMask (other.m_bitMask) {;}
 
+   /**
+    * \return The Id of this instance.
+    */
    Id getId () const noexcept { return m_id; }
+
+   /**
+    * \return the Bitmask of this instance.
+    */
    BitMask getBitMask () const noexcept { return m_bitMask; }
 
+   /**
+    * \return \b true if the IDs of both events are the same or \b false otherwise
+    */
    bool operator== (const Event& other) const noexcept { return m_id == other.m_id; }
 
+   /**
+    * operator assignament.
+    */
    Event& operator= (const Event& other) {
       m_id = other.m_id;
       m_bitMask = other.m_bitMask;

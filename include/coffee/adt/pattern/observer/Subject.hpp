@@ -43,29 +43,72 @@ namespace observer {
 
 class Observer;
 
+/**
+ * This is the \b Subject of Observer pattern.
+ *
+ * \see https://en.wikipedia.org/wiki/Observer_pattern
+ *
+ * The Observer pattern addresses the following problems:
+ *  \li A one-to-many dependency between objects should be defined without making the objects tightly coupled.
+ *  \li It should be ensured that when one object changes state an open-ended number of dependent objects are updated automatically.
+ *  \li It should be possible that one object can notify an open-ended number of other objects.
+ *
+ *  \include PatternObserver_test.cc
+ */
 class Subject : public NamedObject {
 public:
+   /**
+    * Instance for subscription to all events.
+    */
    static const Event AllEvents;
 
+   /**
+    * Destructor
+    */
    virtual ~Subject();
 
-   void subscribeObserver(std::shared_ptr<Observer>& observer, const Event& event = AllEvents) throw(RuntimeException);
-   void subscribeObserver(std::shared_ptr<Observer>& observer, const Event::Id eventId) throw(RuntimeException) {
-      subscribeObserver(observer, lookupEvent(eventId));
-   }
-   bool unsubscribeObserver(const std::string& observerName) noexcept;
+   /**
+    * Subscribe the observer to change on this subject.
+    */
+   void attach(std::shared_ptr<Observer> observer, const Event& event = AllEvents) throw(RuntimeException);
 
+   /**
+    * Subscribe the observer to change on this subject.
+    * \warning the \b eventId parameter must be previously registered by using #registerEvent
+    */
+   void attach(std::shared_ptr<Observer> observer, const Event::Id eventId) throw(RuntimeException) {
+      attach(observer, lookupEvent(eventId));
+   }
+
+   /**
+    * \return \b true if the observer was removed from the list of observers or \b false otherwise.
+    */
+   bool attach(const std::string& observerName) noexcept;
+
+   /**
+    * \return Numbers of subscribers associated to this subject.
+    */
    size_t countObservers() const noexcept { return m_observers.size(); }
 
+   /**
+    * \return Summarize information of the subject
+    */
    virtual StreamString asString() const noexcept {
       StreamString result("pattern::observer::Subject {");
       return result << NamedObject::asString() << "}";
    }
 
 protected:
+   /**
+    * Constructor
+    */
    explicit Subject(const std::string& name) : NamedObject(name) {;}
 
+   /**
+    * \return The event which will be identified by this id.
+    */
    Event registerEvent(const Event::Id id) throw(RuntimeException);
+
    Event lookupEvent(const Event::Id id) const throw(RuntimeException);
 
    void notify(const Event::Id eventId) throw(RuntimeException) {

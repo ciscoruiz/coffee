@@ -30,10 +30,33 @@
 namespace coffee {
 namespace adt {
 
+/**
+ * A useful way to think of a semaphore as used in the real-world systems is as a record of how many units of
+ * a particular resource are available, coupled with operations to adjust that record safely (i.e. to avoid race conditions)
+ * as units are required or become free, and, if necessary, wait until a unit of the resource becomes available.
+ *
+ * \see https://en.wikipedia.org/wiki/Semaphore_(programming)
+ */
 class Semaphore {
 public:
+   /**
+    * Constructor
+    * \param _counter initial number of resources.
+    */
    explicit Semaphore(const int _counter) : counter(_counter) {;}
+
+   /**
+    * If the value of semaphore variable is not negative, decrement it by 1. If the semaphore variable is now negative,
+    * the process executing wait is blocked (i.e., added to the semaphore's queue) until the value is greater or equal to 1.
+    * Otherwise, the process continues execution, having used a unit of the resource.
+    */
    void wait() noexcept;
+
+   /**
+    * Increments the value of semaphore variable by 1. After the increment, if the pre-increment value was negative
+    * (meaning there are processes waiting for a resource), it transfers a blocked process from the semaphore's
+    * waiting queue to the ready queue.
+    */
    void signal() noexcept;
 
 private:

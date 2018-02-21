@@ -42,6 +42,11 @@ namespace backtracking {
  *
  * \see http://en.wikipedia.org/wiki/Backtracking
  * \see http://www.cs.uiuc.edu/~jeffe/teaching/algorithms/notes/02-backtracking.pdf
+ *
+ * you can see an easy example in the next code. It will show all combinations (sum ups) of numbers
+ * which will result some integer N gave as parameter.
+ *
+ * \include test/adt/Backtracking_addup_test.cc
  */
 template <typename _T> class Solver : public TreeNode<_T> {
 public:
@@ -78,13 +83,34 @@ public:
    shared_solution getSolution(const int index) const throw(RuntimeException) { return this->getNextStep(index); }
 
 protected:
+   /**
+    * \return First value to start analisys
+    */
    virtual _T getStartingPoint() const noexcept = 0;
 
+   /*
+    * \return first extension of candidate.
+    */
    virtual _T first(const int depth, _T value) const noexcept = 0;
+
+   /**
+    * \return \b true it has been finish study of solutions.
+    */
    virtual bool stop(const int depth, _T value) const noexcept = 0;
+
+   /**
+    * \return  generate the next alternative extension of a candidate, after the extension s.
+    */
    virtual _T next(const int depth, _T value) const noexcept = 0;
 
+   /**
+    * return \b true only if the partial candidate is not worth completing.
+    */
    virtual bool reject(const shared_solution& solution, const _T candidate) const noexcept = 0;
+
+   /**
+    *  \return \b true if candiate is a solution of P, and \b false otherwise.
+    */
    virtual bool accept(const shared_solution& solution, const _T candidate) const noexcept = 0;
 
 private:

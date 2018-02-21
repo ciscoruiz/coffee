@@ -31,12 +31,6 @@ namespace coffee {
 namespace adt {
 
 /**
-   Template para calcular la media de una sucesion de valores numericos.
-
-   Internamente trabaja con Microsegundos porque los m�todos que los proporcionan son
-   m�s eficientes.
-      
-   @author cisco.tierra@gmail.com.
 */
 template <class _T> class Average {
 public:
@@ -49,8 +43,7 @@ public:
 
    /**
       Constructor.
-      \param name Nombre logico de esta instancia.
-      \param measure Unidad de medida. Solo se usa a efecto de salida de datos.
+      \param name Name for this average
    */
    explicit Average(const char* name) : a_name(name), a_measure(""), a_accumulator(0), a_n(0) {;}
 

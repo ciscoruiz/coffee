@@ -29,7 +29,7 @@
 
 #include <coffee/dbms/DatabaseException.hpp>
 #include <coffee/dbms/ActionOnError.hpp>
-#include "../app/Engine.hpp"
+#include <coffee/app/Engine.hpp>
 
 namespace coffee {
 

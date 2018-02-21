@@ -59,8 +59,6 @@ public:
    virtual ~Solver() { ; }
 
    /**
-    *
-    * @param problem
     * @return Solutions for the received problem. It will erased when the Solver goes out of scope.
     */
    bool apply() noexcept {

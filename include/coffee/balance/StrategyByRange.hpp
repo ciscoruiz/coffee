@@ -55,7 +55,7 @@ public:
     * \warning Once you call this method you can not append more resources to this \em balanceIf
     * @param bottom Minimal value for this range
     * @param top Maximal value for this range
-    * @param balance Load balancing algorithm used under this range.
+    * @param strategy Load balancing algorithm used under this range.
     */
    void addRange (const int bottom, const int top, std::shared_ptr<Strategy>& strategy) throw (adt::RuntimeException);
 

@@ -53,8 +53,6 @@ public:
    public:
       /**
        * Destructor
-       * @param treeNode
-       * @param depth
        */
       virtual ~Predicate() {;}
 

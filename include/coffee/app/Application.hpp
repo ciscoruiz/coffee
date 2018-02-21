@@ -66,8 +66,6 @@ public:
       @param title Titulo de la aplicacion que aparecera al arrancar.
       @param version version de este programa. Aconsejamos el forma X.YRZZ. Donde X es la
       version principal, Y la version secundaria y ZZ es el numero de entrega realizada.
-      \param date Fecha de realizacion del enginee. Normalmente sera el contenido de la macro __DATE__.
-      \param time Hora de realizacion del enginee. Normalmente sera el contenido de la macro __TIME__.
    */
    Application(const char* shortName, const char* title, const char* version);
 
@@ -141,7 +139,7 @@ public:
 
    /**
       Devuelve el objeto sobre el que esta posicionado el iterator recibido como parametro.
-      \param ii Iterator que deberia estar comprendido entre #begin y #end.
+      \param ii Iterator que deberia estar comprendido entre #engine_begin y #engine_end.
       \return El objeto sobre el que esta posicionado el iterator recibido como parametro.
    */
    static std::shared_ptr<Engine>& engine(engine_iterator ii) noexcept { return std::ref(*ii); }
@@ -160,7 +158,7 @@ public:
 
    /**
       Devuelve el objeto sobre el que esta posicionado el iterator recibido como parametro.
-      \param ii Iterator que deberia estar comprendido entre #begin y #end.
+      \param ii Iterator que deberia estar comprendido entre #engine_begin y #engine_end.
       \return El objeto sobre el que esta posicionado el iterator recibido como parametro.
    */
    static const std::shared_ptr<Engine> engine(const_engine_iterator ii) noexcept { return std::ref(*ii); }

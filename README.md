@@ -42,6 +42,15 @@ sudo apt-get install libsqlite3-dev:amd64
 sudo apt-get install sqlite sqlite3   
    
 ```
+
+If you want to generate API doc in HTML you should install:
+
+'''
+sudo apt install doxygen
+sudo apt install graphviz
+
+'''
+
 For now it should be very simple.
 
 ### Installation
@@ -63,6 +72,12 @@ And the next command will run the unit tests:
 
 ```
 make test
+``` 
+
+If you have installed doxygen then you will be able to run the next command to generate API docs
+
+```
+make doc
 ``` 
 
 You can see more commands in the Travis CI configuration file .travis.yml

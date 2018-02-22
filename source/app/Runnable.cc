@@ -55,8 +55,10 @@ adt::StreamString app::Runnable::asString () const
 
    result << adt::AsHexString::apply (coffee_ptrnumber_cast (this));
 
-   if (!m_name.empty()) {
-      result << " | Name: " << m_name;
+   const std::string& name = getName();
+
+   if (!name.empty()) {
+      result << " | Name: " << name;
    }
 
    result << " | Status:" << flagsAsString ();
@@ -72,8 +74,10 @@ std::shared_ptr<xml::Node> app::Runnable::asXML (std::shared_ptr<xml::Node>& par
 
    result->createAttribute ("Reference", adt::AsHexString::apply (coffee_ptrnumber_cast (this)));
 
-   if (!m_name.empty())
-      result->createAttribute ("Name", m_name);
+   const std::string& name = getName();
+
+   if (!name.empty())
+      result->createAttribute ("Name", name);
 
    result->createAttribute ("Status", flagsAsString());
 

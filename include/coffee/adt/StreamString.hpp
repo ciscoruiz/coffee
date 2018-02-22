@@ -35,8 +35,9 @@ namespace coffee  {
 namespace adt {
 
 /**
+ *  This class will work with basic data as an stream of data which append to some instance.
  *  
- *
+ * \include test/adt/StreamString_test.cc
  */
 class StreamString : public std::string {
 public:
@@ -84,26 +85,114 @@ public:
     */
    adt::StreamString& toLower () noexcept;
 
+   /**
+    * Initialize this instance with the value of \b vv converted to std::string.
+    */
    StreamString& operator = (const char vv) noexcept { std::string::clear (); return operator<< (vv); }
+
+   /**
+    * Initialize this instance with the value of \b vv converted to std::string.
+    */
    StreamString& operator = (const char* vv) noexcept { std::string::clear (); return operator<< (vv); }
+
+   /**
+    * Initialize this instance with the value of \b vv converted to std::string.
+    */
    StreamString& operator = (const int vv) noexcept { std::string::clear (); return operator<< (vv); }
+
+   /**
+    * Initialize this instance with the value of \b vv converted to std::string.
+    */
    StreamString& operator = (const unsigned int vv) noexcept { std::string::clear (); return operator<< (vv); }
+
+   /**
+    * Initialize this instance with the value of \b vv converted to std::string.
+    */
    StreamString& operator = (const bool vv) noexcept { std::string::clear (); return operator<< (vv); }
+
+   /**
+    * Initialize this instance with the value of \b vv converted to std::string.
+    */
    StreamString& operator = (const Integer64 vv) noexcept { std::string::clear (); return operator<< (vv); }
+
+   /**
+    * Initialize this instance with the value of \b vv converted to std::string.
+    */
    StreamString& operator = (const Unsigned64 vv) noexcept { std::string::clear (); return operator<< (vv); }
+
+   /**
+    * Initialize this instance with the value of \b vv converted to std::string.
+    */
    StreamString& operator = (const float vv) noexcept { std::string::clear (); return operator<< (vv); }
+
+   /**
+    * Initialize this instance with the value of \b vv converted to std::string.
+    */
    StreamString& operator = (const double vv) noexcept { std::string::clear (); return operator<< (vv); }
+
+   /**
+    * Initialize this instance with the value of \b vv converted to std::string.
+    */
    StreamString& operator = (const std::string& vv) noexcept { std::string::operator= (vv); return *this; }
 
+   /**
+    * Append the value of \b vv converted to std::string into this instance.
+    * \return This instance to be able to concatenate operations of apending.
+    */
    StreamString& operator << (const char vv) noexcept;
+
+   /**
+    * Append the value of \b vv converted to std::string into this instance.
+    * \return This instance to be able to concatenate operations of apending.
+    */
    StreamString& operator << (const char* vv) noexcept;
+
+   /**
+    * Append the value of \b vv converted to std::string into this instance.
+    * \return This instance to be able to concatenate operations of apending.
+    */
    StreamString& operator << (const int vv) noexcept;
+
+   /**
+    * Append the value of \b vv converted to std::string into this instance.
+    * \return This instance to be able to concatenate operations of apending.
+    */
    StreamString& operator << (const unsigned int vv) noexcept;
+
+   /**
+    * Append the value of \b vv converted to std::string into this instance.
+    * \return This instance to be able to concatenate operations of apending.
+    */
    StreamString& operator << (const bool vv) noexcept;
+
+   /**
+    * Append the value of \b vv converted to std::string into this instance.
+    * \return This instance to be able to concatenate operations of apending.
+    */
    StreamString& operator << (const Integer64 vv) noexcept;
+
+   /**
+    * Append the value of \b vv converted to std::string into this instance.
+    * \return This instance to be able to concatenate operations of apending.
+    */
    StreamString& operator << (const Unsigned64 vv) noexcept;
+
+   /**
+    * Append the value of \b vv converted to std::string into this instance.
+    * \return This instance to be able to concatenate operations of apending.
+    */
    StreamString& operator << (const float vv) noexcept;
+
+   /**
+    * Append the value of \b vv converted to std::string into this instance.
+    * \return This instance to be able to concatenate operations of apending.
+    */
    StreamString& operator << (const double vv) noexcept;
+
+   /**
+    * Append the value of \b vv converted to std::string into this instance.
+    * \return This instance to be able to concatenate operations of apending.
+    */
    StreamString& operator << (const std::string& vv) noexcept { std::string::append (vv); return *this; }
 
 private:

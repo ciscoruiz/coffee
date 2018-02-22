@@ -38,7 +38,7 @@ namespace binder {
  * @author frr@tid.es cisco.tierra@gmail.com.
  *
  * A continuacion presentamos un ejemplo de uso detallado.
- * \include dbms.ss/oracle.ss/db_null.p/db_null.cc
+ * \include test/dbms/Definition_test.cc
  */
 class Input : public Binder {
 public:

@@ -30,17 +30,41 @@ namespace coffee {
 
 namespace adt {
 
+/**
+ * Base exception for all exception defined in this framework.
+ */
 class Exception : std::logic_error {
 public:
    using std::logic_error::what;
 
+   /**
+    * Destructor.
+    */
    virtual ~Exception () noexcept {;}
 
+   /**
+    * \return the method name from this exception was thrown.
+    */
    const char* getMethod () const noexcept { return m_fromMethod; }
+
+   /**
+    * \return the line number in file from this exception was thrown.
+    */
    const char* getFile () const noexcept { return m_fromFile; }
+
+   /**
+    * \return the line number in file from this exception was thrown.
+    */
    const unsigned getLine () const noexcept { return m_fromLine; }
 
 protected:
+   /**
+    * Constructor
+    * \param str text associated to this exception.
+    * \param fromMethod the method name from this exception was thrown.
+    * \param fromFile the line number in file from this exception was thrown.
+    * \param fromLine the line number in file from this exception was thrown.
+    */
    Exception (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
       std::logic_error (str),
       m_fromMethod (fromMethod),
@@ -48,6 +72,9 @@ protected:
       m_fromLine (fromLine)
    {;}
 
+   /**
+    * Copy Constructor
+    */
    Exception (const Exception& other) :
       std::logic_error (other),
       m_fromMethod (other.m_fromMethod),
@@ -55,6 +82,9 @@ protected:
       m_fromLine (other.m_fromLine)
    {;}
 
+   /**
+    * \return Combines method, file and number of line on that file to locate were the exception was thrown.
+    */
    std::string filePosition () const noexcept;
 
 private:

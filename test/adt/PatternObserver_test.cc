@@ -106,11 +106,11 @@ private:
    }
 };
 
-class TheNosyObserver : public observer::Observer {
+class ObserverUUAndII : public observer::Observer {
 public:
-   TheNosyObserver() : observer::Observer("TheNosyObserver"), m_ii(0), m_uu(0) {}
+   ObserverUUAndII() : observer::Observer("ObserverUUAndII"), m_ii(0), m_uu(0) {}
 
-   unsigned int getValue() const noexcept { return m_uu + m_ii; }
+   unsigned int sumUpUUAndII() const noexcept { return m_uu + m_ii; }
 
 private:
    int m_ii;
@@ -174,8 +174,7 @@ BOOST_AUTO_TEST_CASE(subscription_by_event)
    TheSubject subject;
    shared_ptr<TheObserverII> observer = make_shared<TheObserverII>();
 
-   shared_ptr<observer::Observer> base = observer;
-   subject.subscribeObserver(base, subject.getEvent(TheSubject::Events::ChangeII));
+   subject.attach(observer, subject.getEvent(TheSubject::Events::ChangeII));
 
    BOOST_REQUIRE_EQUAL(observer->getValue(), 0);
 
@@ -187,10 +186,9 @@ BOOST_AUTO_TEST_CASE(subscription_by_event)
 BOOST_AUTO_TEST_CASE(subscription_by_eventId)
 {
    TheSubject subject;
-   shared_ptr<TheObserverSS> observer= make_shared<TheObserverSS>();
+   shared_ptr<TheObserverSS> observer = make_shared<TheObserverSS>();
 
-   shared_ptr<observer::Observer> base = observer;
-   subject.subscribeObserver(base, TheSubject::Events::ChangeSS);
+   subject.attach(observer, TheSubject::Events::ChangeSS);
 
    BOOST_REQUIRE_EQUAL(observer->getValue(), initialValue);
 
@@ -204,24 +202,23 @@ BOOST_AUTO_TEST_CASE(nosy_subscription)
    TheSubject subject;
    shared_ptr<TheObserverII> iiObserver = make_shared<TheObserverII>();
 
-   shared_ptr<observer::Observer> base = iiObserver;
-   subject.subscribeObserver(base, TheSubject::Events::ChangeSS);
+   subject.attach(iiObserver, TheSubject::Events::ChangeSS);
 
    auto eventII = subject.getEvent(TheSubject::Events::ChangeII);
    auto eventUU = subject.getEvent(TheSubject::Events::ChangeUU);
    observer::Event event = eventII + eventUU;
-   shared_ptr<TheNosyObserver> nosyObserver = make_shared<TheNosyObserver>();
-   subject.subscribeObserver(base = nosyObserver, event);
+   shared_ptr<ObserverUUAndII> uuiiObserver = make_shared<ObserverUUAndII>();
+   subject.attach(uuiiObserver, event);
 
    subject.setII(100);
 
    BOOST_REQUIRE_EQUAL(iiObserver->getValue(), 0);
-   BOOST_REQUIRE_EQUAL(nosyObserver->getValue(), 100);
+   BOOST_REQUIRE_EQUAL(uuiiObserver->sumUpUUAndII(), 100);
 
    subject.setUU(10);
 
    BOOST_REQUIRE_EQUAL(iiObserver->getValue(), 0);
-   BOOST_REQUIRE_EQUAL(nosyObserver->getValue(), 110);
+   BOOST_REQUIRE_EQUAL(uuiiObserver->sumUpUUAndII(), 110);
 }
 
 BOOST_AUTO_TEST_CASE(full_update)
@@ -230,34 +227,32 @@ BOOST_AUTO_TEST_CASE(full_update)
    shared_ptr<TheObserverSS> ssObserver = make_shared<TheObserverSS>();
    shared_ptr<TheObserverII> iiObserver = make_shared<TheObserverII>();
 
-   shared_ptr<observer::Observer> base = ssObserver;
-   subject.subscribeObserver(base, TheSubject::Events::ChangeSS);
-
-   subject.subscribeObserver(base = iiObserver, TheSubject::Events::ChangeII);
+   subject.attach(ssObserver, TheSubject::Events::ChangeSS);
+   subject.attach(iiObserver, TheSubject::Events::ChangeII);
 
    auto eventII = subject.getEvent(TheSubject::Events::ChangeII);
    auto eventUU = subject.getEvent(TheSubject::Events::ChangeUU);
    observer::Event event = eventII + eventUU;
-   shared_ptr<TheNosyObserver> nosyObserver = make_shared<TheNosyObserver>();
-   subject.subscribeObserver(base = nosyObserver, event);
+   shared_ptr<ObserverUUAndII> uuiiObserver = make_shared<ObserverUUAndII>();
+   subject.attach(uuiiObserver, event);
 
    BOOST_REQUIRE_EQUAL(ssObserver->getValue(), initialValue);
 
    subject.setII(100);
 
    BOOST_REQUIRE_EQUAL(iiObserver->getValue(), 100);
-   BOOST_REQUIRE_EQUAL(nosyObserver->getValue(), 100);
+   BOOST_REQUIRE_EQUAL(uuiiObserver->sumUpUUAndII(), 100);
 
    subject.setUU(50);
 
    BOOST_REQUIRE_EQUAL(iiObserver->getValue(), 100);
-   BOOST_REQUIRE_EQUAL(nosyObserver->getValue(), 150);
+   BOOST_REQUIRE_EQUAL(uuiiObserver->sumUpUUAndII(), 150);
 
    subject.clear();
 
    BOOST_REQUIRE_EQUAL(iiObserver->getValue(), -1);
    BOOST_REQUIRE_EQUAL(ssObserver->getValue(), finalValue);
-   BOOST_REQUIRE_EQUAL(nosyObserver->getValue(), 4294967295U);
+   BOOST_REQUIRE_EQUAL(uuiiObserver->sumUpUUAndII(), 4294967295U);
 }
 
 BOOST_AUTO_TEST_CASE(optimal_subscription)
@@ -265,11 +260,10 @@ BOOST_AUTO_TEST_CASE(optimal_subscription)
    TheSubject subject;
    shared_ptr<OptimalObserver> observer = make_shared<OptimalObserver>();
 
-   shared_ptr<observer::Observer> base = observer;
    auto eventII = subject.getEvent(TheSubject::Events::ChangeII);
    auto eventUU = subject.getEvent(TheSubject::Events::ChangeUU);
    observer::Event event = eventII + eventUU;
-   subject.subscribeObserver(base, event);
+   subject.attach(observer, event);
 
    subject.setII(100);
 
@@ -295,11 +289,9 @@ BOOST_AUTO_TEST_CASE(promicuous_observer)
    TheSubject subject2;
 
    shared_ptr<NullObserver> observer = make_shared<NullObserver>();
+   subject1.attach(observer, TheSubject::Events::ChangeII);
 
-   shared_ptr<observer::Observer> base = observer;
-   subject1.subscribeObserver(base, TheSubject::Events::ChangeII);
-
-   BOOST_REQUIRE_THROW(subject2.subscribeObserver(base, TheSubject::Events::ChangeII), coffee::adt::RuntimeException);
+   BOOST_REQUIRE_THROW(subject2.attach(observer, TheSubject::Events::ChangeII), coffee::adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(observer_out_of_scope)
@@ -308,13 +300,8 @@ BOOST_AUTO_TEST_CASE(observer_out_of_scope)
 
    if (true) {
       TheSubject subject;
-
-      shared_ptr<observer::Observer> base = observer;
-      subject.subscribeObserver(base, TheSubject::Events::ChangeII);
-
+      subject.attach(observer, TheSubject::Events::ChangeII);
       BOOST_REQUIRE_EQUAL(subject.countObservers(), 1);
-
-
       BOOST_REQUIRE_EQUAL(observer->isSubscribed(), true);
    }
 

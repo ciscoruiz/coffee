@@ -52,7 +52,7 @@ public:
    explicit ResourceList(const char* name) : adt::NamedObject(name) {;}
    virtual ~ResourceList() { m_resources.clear(); }
 
-   bool add(const std::shared_ptr<Resource>& resource) throw(adt::RuntimeException);
+   bool add(std::shared_ptr<Resource> resource) throw(adt::RuntimeException);
 
    /**
     * It will call to pure virtual method \em do_initialize and do_initializer for every one of the associated resources.

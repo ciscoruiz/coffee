@@ -30,6 +30,11 @@ namespace coffee {
 
 namespace logger {
 
+/**
+ * This logger will use the syslog subsystem to write the selected traces.
+ *
+ * \include test/logger/SysLogWriter_test.cc
+ */
 class SysLogWriter : public Writer {
 public:
 	/**
@@ -44,21 +49,46 @@ public:
    public:
 	   OptionBuilder() { flags = 0; }
 
+	   /**
+	    * Activate the LOG_PID option.
+	    */
 	   OptionBuilder& showPid() noexcept;
+
+	   /**
+	    * Activate the LOG_CONS option.
+	    */
 	   OptionBuilder& consoleWhenError() noexcept;
+
+      /**
+       * Activate the LOG_ODELAY option.
+       */
 	   OptionBuilder& delayOpen() noexcept;
+
+	   /**
+	    * Activate the LOG_NDELAY option.
+	    */
 	   OptionBuilder& noDelayOpen() noexcept;
+
+	   /**
+	    * Activate the LOG_PERROR option.
+	    */
 	   OptionBuilder& logToStdErr() noexcept;
 
 	   friend class SysLogWriter;
    };
 
-   static const int MinimalSize = 256;
-   static const int NullStream;
-   static const int CheckSizePeriod;
-
+   /**
+    * Constructor.
+    * \param ident The string pointed to by ident is prepended to every message,
+    *  and is typically set to the program name is used.
+    * \param builder Instance which contains the specific options.
+    */
    SysLogWriter (const std::string& ident, const OptionBuilder& builder);
-   virtual ~SysLogWriter ();
+
+   /**
+    * Destructor.
+    */
+   ~SysLogWriter ();
 
 private:
    const std::string m_ident;

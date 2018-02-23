@@ -24,9 +24,6 @@
 #ifndef __coffee_logger_Formatter_hpp
 #define __coffee_logger_Formatter_hpp
 
-#include <coffee/adt/StreamString.hpp>
-#include <coffee/adt/NamedObject.hpp>
-
 #include <coffee/logger/Level.hpp>
 
 namespace coffee {
@@ -35,26 +32,33 @@ namespace logger {
 
 class Logger;
 
-class Formatter : public adt::NamedObject {
+/**
+ * Generic formatter to generate the final trace that will be used by the logger::Writer
+ */
+class Formatter {
 public:
-   struct Elements {
-      const Level::_v level;
-      const adt::StreamString& input;
-      const char* function;
-      const char* file;
-      const unsigned lineno;
-
-      Elements (const Level::_v _level, const adt::StreamString& _input, const char* _function, const char* _file, const unsigned _lineno) :
-         level (_level), input (_input), function (_function), file (_file), lineno (_lineno)
-      {;}
-   };
-
-   virtual ~Formatter () {;}
+   /**
+    * Destructor.
+    */
+   virtual ~Formatter() {;}
 
 protected:
-   explicit Formatter (const std::string& name) : adt::NamedObject (name) {;}
+   /**
+    * Constructor
+    */
+   Formatter() {;}
 
-   virtual std::string apply (const Elements& elements) noexcept = 0;
+   /**
+    * Pure virtual method to combine parameters into the std::string to get the final trace.
+    * \return The string to be used by writer(s).
+    *
+    * \param level Active Level with the trace was generated
+    * \param comment Contains the message to be used
+    * \param methodName method name where the trace was created
+    * \param file The file where the trace was created
+    * \param lineno The line number where the trace was created.
+    */
+   virtual std::string apply(const Level::_v level, const adt::StreamString& comment, const char* methodName, const char* file, const unsigned lineno) noexcept = 0;
 
 private:
    friend class Logger;

@@ -33,13 +33,26 @@ namespace logger {
 
 class Logger;
 
+/**
+ * Generic writer of traces.
+ */
 class Writer {
 public:
+   /**
+    * Destructor.
+    */
    virtual ~Writer() {;}
 
 protected:
+   /**
+    * constructor.
+    * \name Logical name of the Writer.
+    */
    explicit Writer(const std::string& name) : m_name(name) {;}
 
+   /**
+    * \return \b true if the writer wants to process the trace with the received level or \b false otherwise.
+    */
    virtual bool wantsToProcess(const Level::_v level) const noexcept;
 
 private:

@@ -31,8 +31,14 @@
 namespace coffee {
 namespace logger {
 
+/**
+ * Writer to write the traces on console.
+ */
 class TtyWriter : public Writer {
 public:
+   /**
+    * Constructor.
+    */
    TtyWriter () : Writer ("TtyWriter") {;}
 
 private:

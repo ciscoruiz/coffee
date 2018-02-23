@@ -42,30 +42,130 @@ namespace logger {
 class Writer;
 class Formatter;
 
+/**
+ * Facade for the logger system. Not matter the Writer nor Formatter you will always used this interface.
+ *
+ * \include test/logger/filtering_test.cc
+ */
 class Logger {
    typedef std::vector<std::shared_ptr<Writer> > Writers;
    typedef Writers::iterator writer_iterator;
 
 public:
+   /**
+    * Initialize the logger with the writer and the formatter received as parameter.
+    * \warning Before calling that method the calling of method #critical, #error, ..., #debug will have no effect.
+    */
    static void initialize(std::shared_ptr<Writer> writer, std::shared_ptr<Formatter> formatter) throw(adt::RuntimeException);
+
+   /**
+   * Initialize the logger with the writer received as parameter and the default formatter.
+   * \warning Before calling that method the calling of method #critical, @error, ..., #debug will have no effect.
+   */
    static void initialize(std::shared_ptr<Writer> writer) throw(adt::RuntimeException);
+
+   /**
+    * You can attach a undefined numbers of writers to the this Logger, and all of them will received
+    * the string composed by the formatter.
+    */
    static void add(std::shared_ptr<Writer> writer) throw (adt::RuntimeException);
 
+   /**
+    * Write the trace received.
+    * \li Call the formatter to get the final string to trace.
+    * \li Call the writer to store that string.
+    *
+    * \param level Active Level with the trace was generated
+    * \param streamString Contains the message to be used
+    * \param function method name where the trace was created
+    * \param file The file when the trace was created
+    * \param line The line number where the trace was created.
+    */
    static void write(const Level::_v level, const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept;
 
+   /**
+    * Change the current level. Only traces with a level smaller that this level will be traced.
+    */
    static void setLevel(const Level::_v level) noexcept { m_level = level; }
+
+   /**
+    * \return Get current level.
+    */
    static Level::_v getLevel() noexcept { return m_level; }
 
+   /**
+    * \return \b true if a trace using this the received level would be traced (taking account of the current level) or \b false otherwise.
+    */
    static bool isActive(const Level::_v level) noexcept { return(level <= Level::Error) ? true:(level <= m_level); }
+
+   /**
+    * \return \b true if some associated writer would process the received trace or \b false otherwise.
+    * Think about BacktraceWriter which wants to process all levels but it will not write anything till the
+    * moment a error trace is detected.
+    * \warning It is possible that a writer process some trace but it will not "write" anything by now.
+    */
    static bool wantsToProcess(const Level::_v level) noexcept;
 
+   /**
+    * Send a trace with level Level::Critical to attached writers.
+    * \warning Use this method through
+    * \code
+    *     LOG_CRITICAL(var1 << " some text " << var2 << " more text " << ... << varn);
+    * \endcode
+    */
    static void critical(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Critical, streamString, function, file, line); }
+
+   /**
+    * Send a trace with level Level::Error to attached writers.
+    * \warning Use this method through
+    * \code
+    *     LOG_ERROR(var1 << " some text " << var2 << " more text " << ... << varn);
+    * \endcode
+    */
    static void error(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Error, streamString, function, file, line); }
+
+   /**
+    * Send a trace with level Level::Warning to attached writers.
+    * \warning Use this method through
+    * \code
+    *     LOG_WARN(var1 << " some text " << var2 << " more text " << ... << varn);
+    * \endcode
+    */
    static void warning(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Warning, streamString, function, file, line); }
+
+   /**
+    * end a trace with level Level::Notice to attached writers.
+    * \warning Use this method through
+    * \code
+    *
+    *    LOG_NOTICE(var1 << " some text " << var2 << " more text " << ... << varn);
+    * \endcode
+    */
    static void notice(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Notice, streamString, function, file, line); }
+
+   /**
+    * end a trace with level Level::Information to attached writers.
+    * \warning Use this method through
+    * \code
+    *
+    *    LOG_INFO(var1 << " some text " << var2 << " more text " << ... << varn);
+    * \endcode
+    */
    static void info(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Information, streamString, function, file, line); }
+
+   /**
+    * end a trace with level Level::Debug to attached writers.
+    * \warning Use this method through
+    * \code
+    *
+    *    LOG_DEBUG(var1 << " some text " << var2 << " more text " << ... << varn);
+    * \endcode
+    */
    static void debug(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Debug, streamString, function, file, line); }
 
+   /**
+    * Send the trace of error with the information of the exception received.
+    */
    static void write(const adt::Exception& ex) {
       error(ex.what(), ex.getMethod(), ex.getFile(), ex.getLine());
    }

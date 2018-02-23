@@ -42,6 +42,9 @@ namespace balance {
 class Resource;
 class GuardResourceList;
 
+/**
+ * List of resources with exclusive access.
+ */
 class ResourceList : public adt::NamedObject  {
    typedef std::vector <std::shared_ptr<Resource> > resource_container;
 
@@ -49,9 +52,20 @@ public:
    typedef resource_container::iterator resource_iterator;
    typedef resource_container::const_iterator const_resource_iterator;
 
+   /**
+    * Constructor
+    * \param name Logical name.
+    */
    explicit ResourceList(const char* name) : adt::NamedObject(name) {;}
+
+   /**
+    * Destructor.
+    */
    virtual ~ResourceList() { m_resources.clear(); }
 
+   /**
+    * Add resource to the list. It is thread-safe.
+    */
    bool add(std::shared_ptr<Resource> resource) throw(adt::RuntimeException);
 
    /**
@@ -59,23 +73,77 @@ public:
     */
    virtual void initialize() throw(adt::RuntimeException);
 
+   /**
+    * \return resource_iterator to the first attached resource.
+    */
    resource_iterator resource_begin(GuardResourceList&) noexcept { return m_resources.begin(); }
+
+   /**
+    * \return resource_iterator to the last attached resource.
+    */
    resource_iterator resource_end(GuardResourceList&) noexcept { return m_resources.end(); }
+
+   /**
+    * Advance one position in the iterator, if this position reaches the value #resource_end then
+    * it will return to the first value #resource_begin.
+    */
    resource_iterator next(GuardResourceList&, resource_iterator ii) noexcept;
+
+   /**
+    * \return the resource addressed by the resource_iterator.
+    * \warning the value ii must be contained in [#resource_begin, #resource_end)
+    */
    static std::shared_ptr<Resource>& resource(resource_iterator ii) noexcept { return *ii; }
 
-   size_t size(GuardResourceList&) const noexcept { return m_resources.size(); }
-   size_t countAvailableResources(GuardResourceList&) const noexcept;
+   /**
+    * \return the Resource at the position received as parameter.
+    */
    std::shared_ptr<Resource>& at(GuardResourceList&, const resource_container::size_type index) { return m_resources.at(index); }
 
+   /**
+    * \return The number of resources registered in this list.
+    */
+   size_t size(GuardResourceList&) const noexcept { return m_resources.size(); }
+
+   /**
+    * \return The number of available resources.
+    */
+   size_t countAvailableResources(GuardResourceList&) const noexcept;
+
+   /**
+    * \return resource_iterator to the first attached resource.
+    */
    const_resource_iterator resource_begin(GuardResourceList&) const noexcept { return m_resources.begin(); }
+
+   /**
+    * \return resource_iterator to the last attached resource.
+    */
    const_resource_iterator resource_end(GuardResourceList&) const noexcept { return m_resources.end(); }
+
+   /**
+    * \return the resource addressed by the resource_iterator.
+    * \warning the value ii must be contained in [#resource_begin, #resource_end)
+    */
    static const std::shared_ptr<Resource>& resource(const_resource_iterator ii) noexcept { return *ii; }
+
+   /**
+    * \return the Resource at the position received as parameter.
+    */
    const std::shared_ptr<Resource>& at(GuardResourceList&, const resource_container::size_type index) const { return m_resources.at(index); }
 
+   /**
+    * \return Summarize information of this instance in a StreamString.
+    */
    operator adt::StreamString() const noexcept { return asString(); }
 
+   /**
+    * \return Summarize information of this instance in a StreamString.
+    */
    virtual adt::StreamString asString() const noexcept;
+
+   /**
+    * \return Summarize information of this instance in a coffee::xml::Node.
+    */
    virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
 private:

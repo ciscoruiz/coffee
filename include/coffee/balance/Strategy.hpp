@@ -41,20 +41,51 @@ class Resource;
 class GuardResourceList;
 class ResourceList;
 
+/**
+ * Generic strategy for selecting a resource from a ResourceList.
+ */
 class Strategy : public adt::NamedObject {
 public:
+   /**
+    * Method that will choose one Resource from the ResourceList.
+    * It will be done in exclusive access protected by the guard.
+    */
    virtual std::shared_ptr<Resource> apply(GuardResourceList& guard) throw (ResourceUnavailableException) = 0;
 
+   /**
+    * \return Summarize information of this instance in a StreamString.
+    */
    virtual adt::StreamString asString () const noexcept;
+
+   /**
+    * \return Summarize information of this instance in a coffee::xml::Node.
+    */
    virtual std::shared_ptr<xml::Node> asXML (std::shared_ptr<xml::Node>& parent) const noexcept;
 
+   /**
+    * \return The resource list associated to this instance.
+    */
    std::shared_ptr<ResourceList>& getResourceList() { return m_resources; }
 
 protected:
    std::shared_ptr<ResourceList> m_resources;
 
+   /**
+    * Constuctor.
+    * \param name Logical name.
+    * \param resources List of resources to work with.
+    */
    Strategy(const std::string& name, std::shared_ptr<ResourceList>& resources) : adt::NamedObject(name), m_resources(resources) {;}
+
+   /**
+    * Constuctor.
+    * \param name Logical name.
+    */
    explicit Strategy(const std::string& name) : adt::NamedObject(name) {;}
+
+   /**
+    * Set the resource list to work with.
+    */
    void setResourceList(std::shared_ptr<ResourceList>& resources) { m_resources = resources; }
 };
 

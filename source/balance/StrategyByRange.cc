@@ -38,7 +38,7 @@ balance::StrategyByRange::StrategyByRange() :
    setResourceList(m_unusedList);
 }
 
-void balance::StrategyByRange::addRange (const int bottom, const int top, std::shared_ptr<Strategy>& strategy)
+void balance::StrategyByRange::addRange (const int bottom, const int top, std::shared_ptr<Strategy> strategy)
    throw (adt::RuntimeException)
 {
    GuardResourceList guard(m_unusedList);

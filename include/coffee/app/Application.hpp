@@ -104,12 +104,12 @@ public:
    virtual void attach(std::shared_ptr<Engine> engine) throw(adt::RuntimeException);
 
    /**
-    * \return engine_iterator the first attached engine.
+    * \return engine_iterator to the first attached engine.
     */
    engine_iterator engine_begin() noexcept { return a_engines.begin(); }
 
    /**
-    * \return engine_iterator the last attached engine.
+    * \return engine_iterator to the last attached engine.
     */
    const_engine_iterator engine_end() const noexcept { return a_engines.end(); }
 
@@ -120,12 +120,12 @@ public:
    static std::shared_ptr<Engine>& engine(engine_iterator ii) noexcept { return std::ref(*ii); }
 
    /**
-    * \return engine_iterator the first attached engine.
+    * \return engine_iterator to the first attached engine.
     */
    const_engine_iterator engine_begin() const noexcept { return a_engines.begin(); }
 
    /**
-    * \return engine_iterator the last attached engine.
+    * \return engine_iterator to the last attached engine.
     */
    engine_iterator engine_end() noexcept { return a_engines.end(); }
 

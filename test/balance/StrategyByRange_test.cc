@@ -91,9 +91,8 @@ BOOST_AUTO_TEST_CASE(byrange_empty_strategy)
 
 BOOST_AUTO_TEST_CASE(byrange_recursive)
 {
-   std::shared_ptr<balance::StrategyByRange> mainStrategy = std::make_shared<balance::StrategyByRange>();
-   std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(mainStrategy);
-   BOOST_REQUIRE_THROW (mainStrategy->addRange (0, 10, foo), adt::RuntimeException);
+   std::shared_ptr<balance::StrategyByRange> strategy = std::make_shared<balance::StrategyByRange>();
+   BOOST_REQUIRE_THROW (strategy->addRange (0, 10, strategy), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(byrange_bad_limits)
@@ -102,8 +101,7 @@ BOOST_AUTO_TEST_CASE(byrange_bad_limits)
 
    auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources);
    std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
-   std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (10, 0, foo), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (10, 0, strategy), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(byrange_overlapping)
@@ -112,13 +110,12 @@ BOOST_AUTO_TEST_CASE(byrange_overlapping)
 
    auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources);
    std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
-   std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
 
-   mainStrategy.addRange (10, 20, foo);
+   mainStrategy.addRange (10, 20, strategy);
 
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (5, 14, foo), adt::RuntimeException);
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (5, 25, foo), adt::RuntimeException);
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (15, 25, foo), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (5, 14, strategy), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (5, 25, strategy), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (15, 25, strategy), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(byrange_sharing)
@@ -128,22 +125,19 @@ BOOST_AUTO_TEST_CASE(byrange_sharing)
    {
       auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources);
       std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
-      std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
-      mainStrategy.addRange(100, 200, foo);
+      mainStrategy.addRange(100, 200, strategy);
    }
 
    {
       auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources, 100);
       std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
-      std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
-      mainStrategy.addRange(205, 350, foo);
+      mainStrategy.addRange(205, 350, strategy);
    }
 
    {
       auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources, 1000);
       std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
-      std::shared_ptr<balance::Strategy> foo = std::static_pointer_cast<balance::Strategy>(strategy);
-      mainStrategy.addRange(351, 450, foo);
+      mainStrategy.addRange(351, 450, strategy);
    }
 
    BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(120))->getKey(), 0);

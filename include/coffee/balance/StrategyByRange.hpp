@@ -35,6 +35,15 @@ namespace balance {
 
 class GuardResourceList;
 
+/**
+ * Select a resource by using two level of selections.
+ * \li The first step will select the range that contains the strategy to be used in the selection.
+ * \li The second step will select the resource by using the strategy selected in the first step.
+ *
+ * Every range could has a different strategy of selection.
+ *
+ * \include test/balance/StrategyByRange_test.cc
+ */
 class StrategyByRange : public Strategy {
    typedef std::tuple<int, int, std::shared_ptr<Strategy> > Range;
    typedef std::vector<Range> Ranges;
@@ -55,10 +64,15 @@ public:
     * \warning Once you call this method you can not append more resources to this \em balanceIf
     * @param bottom Minimal value for this range
     * @param top Maximal value for this range
-    * @param strategy Load balancing algorithm used under this range.
+    * @param strategy Selection strategy used under this range.
     */
-   void addRange (const int bottom, const int top, std::shared_ptr<Strategy>& strategy) throw (adt::RuntimeException);
+   void addRange (const int bottom, const int top, std::shared_ptr<Strategy> strategy) throw (adt::RuntimeException);
 
+   /**
+    * \param key to be used to select the range that contains the strategy to be used.
+    * \return The selected resource.
+    * \throw It will be throw and exception in case that the received key would not be cover by any range.
+    */
    std::shared_ptr<Resource> apply(const int key) throw (ResourceUnavailableException);
 
 private:

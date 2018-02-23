@@ -31,14 +31,31 @@ namespace balance {
 
 class GuardResourceList;
 
+/**
+ * Select a resource by using a numeric value. This numeric value will be used as index in the list
+ * o resources. If the candidate resource would not be available then it will start a sequential search
+ * for the first available resource.
+ *
+ * \include test/balance/StrategyIndexed_test.cc
+ */
 class StrategyIndexed : public Strategy {
 public:
+   /**
+    * Constuctor.
+    * \param resources List of resources to work with.
+    */
    explicit StrategyIndexed (std::shared_ptr<ResourceList>& resources) :
       balance::Strategy("balance::Indexed", resources),
       m_key(0)
    {
    }
 
+   /**
+    * Select a resource by using a numeric value. This numeric value will be used as index in the list
+    * o resources. If the candidate resource would not be available then it will start a sequential search
+    * for the first available resource.
+    * \return the selected resource start to checking at the element key % #coffee::balance::ResourceList::size
+    */
    std::shared_ptr<Resource> apply(const int key) throw (ResourceUnavailableException);
 
 private:

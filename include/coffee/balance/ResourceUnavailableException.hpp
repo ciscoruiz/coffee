@@ -31,7 +31,7 @@ namespace coffee {
 namespace balance {
 
 /**
- * Defines exception used for this library.
+ * Defines exception used for this module.
  *
  * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
  */

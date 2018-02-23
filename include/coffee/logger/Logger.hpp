@@ -78,7 +78,7 @@ public:
     * \param level Active Level with the trace was generated
     * \param streamString Contains the message to be used
     * \param function method name where the trace was created
-    * \param file The file when the trace was created
+    * \param file The file where the trace was created
     * \param line The line number where the trace was created.
     */
    static void write(const Level::_v level, const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept;

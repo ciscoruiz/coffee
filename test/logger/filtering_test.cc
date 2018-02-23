@@ -31,11 +31,11 @@ using namespace coffee;
 
 class DummyFormatter : public logger::Formatter {
 public:
-   DummyFormatter() : logger::Formatter("DummyFormatter") {;}
+   DummyFormatter() {;}
 
 private:
-   std::string apply(const Elements& elements) noexcept {
-      return elements.input;
+   std::string apply(const logger::Level::_v level, const adt::StreamString& comment, const char* methodName, const char* file, const unsigned lineno) noexcept {
+      return comment;
    }
 };
 

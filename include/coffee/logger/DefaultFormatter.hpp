@@ -46,10 +46,10 @@ public:
    /**
     * Constructor.
     */
-   DefaultFormatter () : Formatter ("DefaultFormatter") {;}
+   DefaultFormatter() {;}
 
 private:
-   std::string apply (const Elements& elements) noexcept;
+   std::string apply(const Level::_v level, const adt::StreamString& comment, const char* methodName, const char* file, const unsigned lineno) noexcept;
 
 };
 

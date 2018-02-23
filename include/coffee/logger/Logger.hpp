@@ -59,7 +59,7 @@ public:
    static void initialize(std::shared_ptr<Writer> writer, std::shared_ptr<Formatter> formatter) throw(adt::RuntimeException);
 
    /**
-   * Initialize the logger with the writer received as parameter and the default formatter.
+   * Initialize the logger with the writer received as parameter and the default formatter (DefaultFormatter).
    * \warning Before calling that method the calling of method #critical, @error, ..., #debug will have no effect.
    */
    static void initialize(std::shared_ptr<Writer> writer) throw(adt::RuntimeException);

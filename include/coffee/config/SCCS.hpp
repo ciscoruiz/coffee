@@ -26,11 +26,11 @@
 #define _coffee_config_sccs_hpp_
 
 #ifndef _DEBUG
-   #define coffee_sccs_define_tag(module,release)  const char* coffee_sccs_##module = "@(#)COFFEE."#module" VERSION 1.18.02."#release"/O";
-   #define coffee_sccs_define_tag_ex(module,ex,release)  const char* coffee_sccs_##module = "@(#)COFFEE."#ex" VERSION 1.18.02."#release"/O";
+   #define coffee_sccs_define_tag(module,date)  const char* coffee_sccs_##module = "@COFFEE."#module" Release "#date"/O";
+   #define coffee_sccs_define_tag_ex(module,ex,date)  const char* coffee_sccs_##module = "@COFFEE."#ex" Release "#date"/O";
 #else
-   #define coffee_sccs_define_tag(module,release)  const char* coffee_sccs_##module = "@(#)COFFEE."#module" VERSION 1.18.02."#release"/D";
-   #define coffee_sccs_define_tag_ex(module,ex,release)  const char* coffee_sccs_##module = "@(#)COFFEE."#ex" VERSION 1.18.02."#release"/D";
+   #define coffee_sccs_define_tag(module,date)  const char* coffee_sccs_##module = "@COFFEE."#module" Release "#date"/D";
+   #define coffee_sccs_define_tag_ex(module,ex,date)  const char* coffee_sccs_##module = "@COFFEE."#ex" Release "#date"/D";
 #endif
 
 #define coffee_sccs_use_tag(module) (const char *) coffee_sccs_##module

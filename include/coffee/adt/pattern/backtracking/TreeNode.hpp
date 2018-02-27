@@ -53,8 +53,6 @@ public:
    public:
       /**
        * Destructor
-       * @param treeNode
-       * @param depth
        */
       virtual ~Predicate() {;}
 
@@ -66,24 +64,75 @@ public:
       virtual void apply(const TreeNode<_T>& treeNode, const int depth) const noexcept = 0;
    };
 
+   /**
+    * Constructor
+    * \param value Solution value associated to this node.
+    */
    explicit TreeNode(const _T& value) : m_value(value){;}
+
+   /**
+    * Constructor
+    * \param value Solution value associated to this node.
+    * \param predeccesor Previous steps associated to this node.
+    */
    TreeNode(const _T& value, const shared_tree_node& predeccesor) :  m_value(value), m_predeccesor(predeccesor) {;}
+
+   /**
+    * Destructor.
+    */
    virtual ~TreeNode() { m_successors.clear(); }
 
+   /**
+    * Append the received node as parameter as a possible next step in the solution.
+    * \param treeNode Next step in the solution
+    */
    void add(const shared_tree_node& treeNode) noexcept { m_successors.push_back(treeNode); }
 
+   /**
+    * \return the value associated to the node.
+    */
    const _T& getValue() const noexcept { return m_value; }
 
+   /**
+    * \return iterator the first solution/successor.
+    */
    successor_iterator successor_begin() noexcept { return m_successors.begin(); }
+
+   /**
+    * \return iterator to the last solution/successor.
+    */
    successor_iterator successor_end() noexcept { return m_successors.end(); }
+
+   /**
+    * \return the successor address by the iterator.
+    * \warning the value ii must be contained in [#successor_begin, #successor_end)
+    */
    static shared_tree_node& get_successor(successor_iterator ii) noexcept { return std::ref(*ii); }
 
+   /**
+    * \return iterator the first solution/successor.
+    */
    const_successor_iterator successor_begin() const noexcept { return m_successors.begin(); }
+
+   /**
+    * \return iterator to the last solution/successor.
+    */
    const_successor_iterator successor_end() const noexcept { return m_successors.end(); }
+
+   /**
+    * \return the successor address by the iterator.
+    * \warning the value ii must be contained in [#successor_begin, #successor_end)
+    */
    static const shared_tree_node& get_successor(const_successor_iterator ii) noexcept { return std::ref(*ii); }
 
+   /**
+    * \return the number of successors.
+    */
    size_t successors_size() const noexcept { return m_successors.size(); }
 
+   /**
+    * \return \b true if this node has some successor and \b false in other case.
+    */
    bool hasSuccessor() const noexcept { return m_successors.empty() == false; }
 
    const shared_tree_node getPredeccessor() const noexcept { return m_predeccesor; }

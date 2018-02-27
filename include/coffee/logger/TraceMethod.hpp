@@ -31,8 +31,36 @@ namespace coffee {
 
 namespace logger {
 
+/**
+ * Write special traces when execution on method stars and finishes.
+ *
+ * It must be use through:
+ * \code
+ * void foo(const int xx) {
+ *    LOG_THIS_METHOD();
+ *    goo(xx);
+ * }
+ *
+ * void goo(const int xx) {
+ *    LOG_THIS_METHOD();
+ *    LOG_DEBUG("The value is " << xx * xx);
+ * }
+ *
+ * \endcode
+ *
+ * This way you will be able to follow the execution of the code.
+ *
+ * These special traces are using Level::Debug an it can be used
+ * whatever you need without any kind of impact on performance.
+ */
 class TraceMethod  {
 public:
+   /**
+    * Constructor for trace with Level::Debug
+    * \param methodName method name where the trace was created
+    * \param fromFile The file when the trace was created
+    * \param fromLine The line number where the trace was created.
+    */
    TraceMethod (const char* methodName, const char* fromFile, const int fromLine) :
       m_level (Level::Debug),
       m_methodName (methodName),
@@ -43,6 +71,13 @@ public:
          Logger::write (m_level, "+++ begin +++", methodName, fromFile, fromLine);
    }
 
+   /**
+    * Constructor
+    * \param level Level used for trace this method.
+    * \param methodName method name where the trace was created
+    * \param fromFile The file when the trace was created
+    * \param fromLine The line number where the trace was created.
+    */
    TraceMethod (const Level::_v level, const char* methodName, const char* fromFile, const int fromLine) :
       m_level (level),
       m_methodName (methodName),

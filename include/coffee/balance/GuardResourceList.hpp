@@ -33,19 +33,30 @@ namespace balance {
 
 class ResourceList;
 
+/**
+ * Guard to access a ResourceList in exclusive access.
+ */
 class GuardResourceList {
-   typedef std::lock_guard<std::mutex> lock_guard;
-
 public:
+   /**
+    * Constructor.
+    * \param resourceList to be accessed in exclusive mode.
+    */
    explicit GuardResourceList(std::shared_ptr<ResourceList>& resourceList);
-   explicit GuardResourceList(std::mutex& mutex) : m_lock(new lock_guard(mutex)) {}
-   ~GuardResourceList() { m_lock.reset(); }
+
+   /**
+    * Constructor.
+    * \param mutex Mutex to be used to prepare the exclusive mode.
+    */
+   explicit GuardResourceList(std::mutex& mutex) : m_guard(mutex) {}
+
+   /**
+    * Destructor.
+    */
+   ~GuardResourceList() { ; }
 
 private:
-   std::unique_ptr<lock_guard> m_lock;
-
-   // Need it for Fake-Guard
-   explicit GuardResourceList(const ResourceList& resourceList) {}
+   std::lock_guard<std::mutex> m_guard;
 
    friend class ResourceList;
 };

@@ -30,11 +30,17 @@ namespace coffee {
 
 namespace logger {
 
+/**
+ * Different levels defines for this module
+ */
 struct Level {
    enum _v { None = -1,  Emergency, Alert, Critical, Error, Warning, Notice, Information, Debug,
       Local0, Local1, Local2, Local3, Local4, Local5, Local6, Local7
    };
 
+   /**
+    * \return a string with the name of the received level
+    */
    static const char* enumName(const Level::_v level) noexcept;
 };
 

@@ -30,18 +30,33 @@ namespace coffee {
 
 namespace logger {
 
+/**
+ * It stores traces in a file, when this file reaches the configure size it will be renamed as .old
+ * and it will empty and started again.
+ *
+ * \include test/logger/CircularTraceWriter_test.cc
+ */
 class CircularTraceWriter : public Writer {
 public:
-   static const int MinimalSize = 256;
-   static const int NullStream;
-   static const int CheckSizePeriod;
+   static const int MinimalKbSize = 256;
+   static const int NullStream ;
+   static const int CheckSizePeriod = 128; ///< The size will be check every CheckSizePeriod Lines
 
-   CircularTraceWriter (const std::string& path, const size_t maxSize);
+   /**
+    * Constructor.
+    * \param path file path to store the traces.
+    * \param maxKbSize Max size of that file expressed in KBytes.
+    */
+   CircularTraceWriter (const std::string& path, const size_t maxKbSize);
+
+   /**
+    * Destructor.
+    */
    virtual ~CircularTraceWriter () { closeStream (); }
 
    int getStream () const noexcept { return m_stream; }
    size_t getLineNo () const noexcept { return m_lineno; }
-   size_t getKbytesMaxSize () const noexcept { return m_maxSize; }
+   size_t getKbytesMaxSize () const noexcept { return m_maxKbSize; }
 
 protected:
    virtual void apply (const Level::_v level, const std::string& line) noexcept;
@@ -49,7 +64,7 @@ protected:
 
 private:
    std::string m_path;
-   size_t m_maxSize;
+   size_t m_maxKbSize;
    int m_stream;
    size_t m_lineno;
 

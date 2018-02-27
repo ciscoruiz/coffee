@@ -11,4 +11,5 @@ git config --global alias.pull "pull --rebase"
 git config --global alias.remove-commit "reset --hard HEAD^"
 git config --global alias.st "status"
 
-
+git config color.status.changed blue
+git config color.status.unchanged yellow

@@ -40,16 +40,13 @@ using namespace coffee;
 //static
 const int logger::CircularTraceWriter::NullStream = -1;
 
-//static
-const int logger::CircularTraceWriter::CheckSizePeriod = 128;
-
-logger::CircularTraceWriter::CircularTraceWriter(const std::string& path, const size_t maxSize) :
+logger::CircularTraceWriter::CircularTraceWriter(const std::string& path, const size_t maxKbSize) :
   logger::Writer ("CircularTraceWriter"),
   m_path (path),
   m_stream (NullStream),
   m_lineno (0)
 {
-   m_maxSize = std::max (size_t (MinimalSize), maxSize) * 1024;
+   m_maxKbSize = std::max (size_t (MinimalKbSize), maxKbSize) * 1024;
 }
 
 void logger::CircularTraceWriter::do_initialize() throw (adt::RuntimeException)
@@ -124,7 +121,7 @@ bool coffee::logger::CircularTraceWriter::oversizedStream()
    if (fstat (m_stream, &data) == -1)
       COFFEE_THROW_EXCEPTION("Can not get file length: " << m_path << ". Error: " << strerror(errno));
 
-   return data.st_size > m_maxSize;
+   return data.st_size > m_maxKbSize;
 }
 
 void logger::CircularTraceWriter::closeStream()

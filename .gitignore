@@ -27,3 +27,5 @@ CMakeFiles/
 CMakeCache.txt
 test_*
 Testing/
+docs/api
+coverage/

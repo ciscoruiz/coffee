@@ -27,7 +27,7 @@
 #include <memory>
 
 #include <coffee/adt/RuntimeException.hpp>
-#include <coffee/adt/AsString.hpp>
+#include <coffee/adt/NamedObject.hpp>
 #include <coffee/adt/StreamString.hpp>
 
 namespace coffee {
@@ -39,12 +39,10 @@ class Node;
 namespace app {
 
 /**
-   Clase generica para implementar clases que deben realizar una unica accion concreta durante un periodo
-   de tiempo indeterminado y que deben atender una solicitud de parada en cualquier momento.
-
-   @author cisco.tierra@gmail.com.
-*/
-class Runnable {
+ * Generic class for other classes which has to done an unique specific operation during a
+ * undefined period of time.
+ */
+class Runnable : public adt::NamedObject {
    struct StatusFlags { enum _v { Stopped = 0, Starting = 1, Running = 2, WaitingStop = 4 }; };
 
 public:
@@ -53,105 +51,82 @@ public:
     */
    virtual ~Runnable() { ;}
 
-   // Accesores
    /**
-      Devuelve el nombre l�gico de esta instancia.
-      @return El nombre l�gico de esta instancia.
-   */
-   const std::string& getName() const noexcept { return m_name; }
-
-   /**
-    * Devuelve \em true si est� instancia est� parada o \em false en otro caso.
+    * \return \b true if this instance is stopped or \b false otherwise.
     */
    bool isStopped() const noexcept { return m_statusFlags == StatusFlags::Stopped; }
 
    /**
-      Devuelve \em true si la instancia esta comenzando su ejecucion o \em false en otro caso.
-      \return \em true si la instancia esta comenzando su ejecucion o \em false en otro caso.
-      \since NemesisRD.core 1.2.30
-   */
+    * \return \b true if this instance is starting its execution or \b false otherwise.
+    */
    bool isStarting() const noexcept { return(m_statusFlags & StatusFlags::Starting) != 0; }
 
    /**
-      Devuelve \em true si la instancia esta en ejecucion o \em false en otro caso.
-      \return \em true si la instancia esta en ejecucion o \em false en otro caso.
-      \since NemesisRD.core 1.2.30
-   */
+    * \return \b true if this instance is running or \b false otherwise.
+    */
    bool isRunning() const noexcept { return(m_statusFlags & StatusFlags::Running) != 0; }
 
-   /**
-      Devuelve el valor del indicador de parada.
-      \return el valor del indicador de parada.
-      \warning La implementacion particular del metodo run deberia comprobar este valor
-      periodicamente.
-   */
+    /**
+    * \return \b true if this instance received a request for stop.
+    * \warning Any implementation of run method should check this value during its execution.
+    */
    bool isWaitingStop() const noexcept { return(m_statusFlags & StatusFlags::WaitingStop) != 0; }
 
    /**
-    * Solicita la parada de esta instancia. Invocar� al m�todo virtual puro \em do_requestStop.
+    * Process the request to stop, it will act over internal members and it will call virtual pure method do_requestStop.
     */
    void requestStop() throw(adt::RuntimeException);
 
    /**
-      Devuelve una cadena con la informacion relevante de este objeto.
-      \return Una cadena con la informacion relevante de este objeto.
-   */
+    * \return Summarize information of the instance as adt::StreamString
+    */
    virtual adt::StreamString asString() const noexcept;
 
    /**
-      Devuelve un documento XML con la informacion mas relevante de esta instancia.
-      \param parent Nodo XML del que colgar la informacion referente a esta instancia.
-      \return Un documento XML con la informacion mas relevante de esta instancia.
-   */
+    * \return Summarize information of the instance as coffee::xml::Node
+    */
    virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
 protected:
    /**
      Constructor.
-     @param name Nombre l�gico de esta instancia.
+     @param name Logic name.
    */
-   explicit Runnable(const std::string& name) : m_name(name), m_statusFlags(StatusFlags::Stopped) {;}
+   explicit Runnable(const std::string& name) : adt::NamedObject(name), m_statusFlags(StatusFlags::Stopped) {;}
 
    /**
      Constructor.
-     @param name Nombre l�gico de esta clase.
+     @param name Logic name.
    */
-   explicit Runnable(const char* name) : m_name(name), m_statusFlags(StatusFlags::Stopped) {;}
+   explicit Runnable(const char* name) : adt::NamedObject(name), m_statusFlags(StatusFlags::Stopped) {;}
 
    /**
-    * Constructor vac�o.
+    * Constructor .
     */
-   Runnable() : m_name(""), m_statusFlags(StatusFlags::Stopped) {;}
+   Runnable() : adt::NamedObject(""), m_statusFlags(StatusFlags::Stopped) {;}
 
    /**
-    * Activa el flag de estado recibido como par�metro
+    * Activates the flag received as parameter.
     */
    void activate(const StatusFlags::_v statusFlag) noexcept { m_statusFlags |= statusFlag; }
 
    /**
-    * Activa el flag de estado recibido como par�metro
+    * Deactivates the flag received as parameter.
     */
    void deactivate(const StatusFlags::_v statusFlag) noexcept { m_statusFlags &= ~statusFlag; }
 
    /**
-    * Establece directamente el estado de esta instancia.
-    * \internal.
-    */
-//   void setStatusFlags(const int status) noexcept { a_statusFlags = status; }
-
-   /**
-    * Establece los flags que indica que esta instancia est� arrancando.
+    * Set flags to indicate starting of this instance has began.
     */
    void statusStarting() noexcept { m_statusFlags = StatusFlags::Starting; }
 
    /**
-    * Establece los flags que indica que ha recibido una solicitud de parada y
-    * est� a la espera de realizar las operaciones necesarias.
+    * Set flags to indicate that this instance has received a request for stop.
     */
    void statusWaitingStop() noexcept { m_statusFlags |= StatusFlags::WaitingStop;  }
 
    /**
-    * Establece los flags que indica que esta instancia est� en ejecuci�n.
+    * Set flags to indicate this instance is running.
     */
    void statusRunning() noexcept {
       deactivate(StatusFlags::Starting);
@@ -159,7 +134,7 @@ protected:
    }
 
    /**
-    * Establece los flags que indica que esta instancia ha terminado su ejecuci�n.
+    * Set flags to indicate this instance is stopped.
     */
    void statusStopped() noexcept { m_statusFlags = StatusFlags::Stopped; }
 
@@ -170,12 +145,12 @@ protected:
    void clearStatusFlags() noexcept { m_statusFlags = StatusFlags::Stopped; }
 
    /**
-    * M�todo virtual que pueden usar las clases heredadas para particular su proceso de solicitud de parada.
+    * Pure virtual method to fine tuning operations to done in case of receive a
+    * request for stop.
     */
    virtual void do_requestStop() throw(adt::RuntimeException) {;}
 
 private:
-   const std::string m_name;
    int m_statusFlags;
 
    std::string flagsAsString() const noexcept;

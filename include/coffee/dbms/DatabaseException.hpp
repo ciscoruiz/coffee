@@ -44,6 +44,7 @@ public:
    
       @param resultCode Clase utilizada para transferir codigo de error entre el gestor de base de datos
       y nuestro programa. Entre otra informacion contiene el error ocurrido en la ultima operacion realizada.
+      @param fromMethod Method which throws the exception.
       @param fromFile Fichero en el que se provoco la situacion de error.
       @param fromLine Linea del fichero en la que se provoco la situacion de error.
    */
@@ -58,6 +59,7 @@ public:
       @param logicalName Nombre logico del elemento que genera la excepcion.
       @param resultCode Clase utilizada para transferir codigo de error entre el gestor de base de datos
       y nuestro programa. Entre otra informacion contiene el error ocurrido en la ultima operacion realizada.
+      @param fromMethod Method which throws the exception.
       @param fromFile Fichero en el que se provoco la situacion de error.
       @param fromLine Linea del fichero en la que se provoco la situacion de error.
    */

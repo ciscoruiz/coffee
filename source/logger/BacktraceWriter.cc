@@ -28,7 +28,7 @@
 using namespace coffee;
 
 //static
-const int logger::BacktraceWriter::MaxBacktrackingLength = 128;
+const int logger::BacktraceWriter::MaxBacktrackingLength = 4096;
 
 logger::BacktraceWriter::BacktraceWriter (const std::string& path, const size_t maxSize, const int backtrackingLength) :
   CircularTraceWriter(path, maxSize),

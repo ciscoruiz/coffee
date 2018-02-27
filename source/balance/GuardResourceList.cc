@@ -27,7 +27,7 @@
 using namespace coffee;
 
 balance::GuardResourceList::GuardResourceList(std::shared_ptr<ResourceList>& resourceList) :
-      m_lock(new lock_guard(resourceList->m_mutex))
+   m_guard(resourceList->m_mutex)
 {}
 
 

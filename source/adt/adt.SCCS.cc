@@ -27,7 +27,7 @@
 #include <coffee/config/SCCS.hpp>
 #include <coffee/adt/SCCS.hpp>
 
-coffee_sccs_define_tag (adt, 1)
+coffee_sccs_define_tag (adt,release-18.02.26);
 
 using namespace coffee;
 

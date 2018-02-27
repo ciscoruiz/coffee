@@ -31,12 +31,30 @@
 namespace coffee {
 namespace logger {
 
+/**
+ * This writer could be used for solve problem with heavy load.
+ *
+ * It stores N lines with different levels and it will write them only when a
+ * trace of error is detected. This way when you get and error you should get
+ * the 1024 previous lines of debugging or information previous to that error.
+ *
+ * \include test/logger/BacktraceWriter_test.cc
+ */
 class BacktraceWriter : public CircularTraceWriter {
 public:
    static const int MaxBacktrackingLength;
 
-   BacktraceWriter (const std::string& path, const size_t maxSize, const int backtrackingLength);
+   /**
+    * Constructor.
+    * \param path file path to store the traces.
+    * \param maxKbSize Max size of that file expressed in KBytes.
+    * \param backtrackingLength Max numbers of lines to show previous to an error.
+    */
+   BacktraceWriter (const std::string& path, const size_t maxKbSize, const int backtrackingLength);
 
+   /**
+    * Set the lowest level of traces to be collected. By default the lowest level would be coffee::logger::Level::Debug.
+    */
    void setLowestLeveL (const Level::_v lowestLeveL) noexcept { if (lowestLeveL > Level::Error) m_lowestLevel = lowestLeveL; }
 
 private:

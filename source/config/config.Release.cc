@@ -26,22 +26,21 @@
 
 #include <coffee/config/Release.hpp>
 #include <coffee/config/defines.hpp>
+#include <coffee/config/SCCS.hpp>
+
+#include <stdio.h>
 
 using namespace std;
 using namespace coffee;
 
+coffee_sccs_import_tag(config);
+
 string config::Release::getVersion () noexcept
 {
-   static const int version = COFFEE_VERSION;
-
-   string result;
-   int mainVersion = (version & 0xff0000) >> 16;
-   int year = (version & 0xff00) >> 8;
-   int month = (version & 0xff);
-   char aux [32];
-   sprintf (aux, "%d.%02d.%02d", mainVersion, year, month);
-   result = aux;
-   return result += getArchitecture ();
+   const char* version = coffee_strchr(coffee_sccs_use_tag(config), ' ');
+   std::string result(version + 1);
+   result += getArchitecture ();
+   return result;
 }
 
 // (1) It only will use the main OS version

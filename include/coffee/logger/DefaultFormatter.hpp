@@ -29,12 +29,27 @@
 namespace coffee {
 namespace logger {
 
+/**
+ * Default formatter use in case no other is defined. The output will look like the next lines:
+ *
+ * \code
+[23/02/2018 10:38:33] Alert | void DefaultFormatter_test::test_method() [coffee/test/logger/DefaultFormatter_test.cc(61)]:  numeric value=1
+[23/02/2018 10:38:33] Critical | void DefaultFormatter_test::test_method() [coffee/test/logger/DefaultFormatter_test.cc(61)]:  numeric value=2
+[23/02/2018 10:38:33] Error | void DefaultFormatter_test::test_method() [coffee/test/logger/DefaultFormatter_test.cc(61)]:  numeric value=3
+[23/02/2018 10:38:33] Warning | void DefaultFormatter_test::test_method() [coffee/test/logger/DefaultFormatter_test.cc(61)]:  numeric value=4
+[23/02/2018 10:38:33] Notice | void DefaultFormatter_test::test_method() [coffee/test/logger/DefaultFormatter_test.cc(61)]:  numeric value=5
+[23/02/2018 10:38:33] Information | void DefaultFormatter_test::test_method() [coffee/test/logger/DefaultFormatter_test.cc(61)]:  numeric value=6
+\endcode
+ */
 class DefaultFormatter : public Formatter {
 public:
-   DefaultFormatter () : Formatter ("DefaultFormatter") {;}
+   /**
+    * Constructor.
+    */
+   DefaultFormatter() {;}
 
 private:
-   std::string apply (const Elements& elements) noexcept;
+   std::string apply(const Level::_v level, const adt::StreamString& comment, const char* methodName, const char* file, const unsigned lineno) noexcept;
 
 };
 

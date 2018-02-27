@@ -41,15 +41,35 @@ namespace observer {
 class Event;
 class Subject;
 
+/**
+ * The responsibility of observers is to register (and unregister) themselves on a subject (to get notified of state changes)
+ * and to update their state (synchronize their state with subject's state) when they are notified.
+ */
 class Observer : public NamedObject {
 public:
+   /**
+    * \return \b true if this observer is attached to some subject or \b false otherwise.
+    */
    bool isSubscribed() const noexcept { return m_isSubscribed; }
 
 protected:
+   /**
+    * Constructor
+    * \param name Logical name.
+    */
    explicit Observer(const std::string& name) : NamedObject(name), m_isSubscribed(false) {;}
+
+   /**
+    * Destructor.
+    */
    virtual ~Observer() {;}
 
-   virtual void update(const Subject& subject, const Event&) noexcept = 0 ;
+   /**
+    * Receive notification about change in the subject.
+    * \param subject that changes its state.
+    * \param event Event information. Depending of his event the observer could read different members of the subject.
+    */
+   virtual void update(const Subject& subject, const Event& event) noexcept = 0 ;
 
 private:
    bool m_isSubscribed;

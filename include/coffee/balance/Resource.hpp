@@ -37,17 +37,41 @@ class Node;
 
 namespace balance {
 
+/**
+ * Generic resource to be shared by the different strategies.
+ *
+ * \include test/balance/TestResource.hpp
+ */
 class Resource : public adt::NamedObject {
 public:
+   /**
+    * Destructor
+    */
    virtual ~Resource () {;}
 
+   /**
+    * Initialize the resource
+    */
    virtual void initialize () throw (adt::RuntimeException) {;}
 
+   /**
+    * \return \b true is the resource is available or \b false otherwise.
+    */
    virtual bool isAvailable () const noexcept = 0;
 
+   /**
+    * \return Summarize information of this instance in a StreamString.
+    */
    operator adt::StreamString () const noexcept { return asString (); }
 
+   /**
+    * \return Summarize information of this instance in a StreamString.
+    */
    virtual adt::StreamString asString () const noexcept;
+
+   /**
+    * \return Summarize information of this instance in a coffee::xml::Node.
+    */
    virtual std::shared_ptr<xml::Node> asXML (std::shared_ptr<xml::Node>& parent) const noexcept;
 
 protected:

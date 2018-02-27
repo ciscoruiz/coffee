@@ -31,70 +31,59 @@ namespace coffee {
 namespace adt {
 
 /**
-   Template para calcular la media de una sucesion de valores numericos.
-
-   Internamente trabaja con Microsegundos porque los m�todos que los proporcionan son
-   m�s eficientes.
-      
-   @author cisco.tierra@gmail.com.
-*/
+ * Class for calculating average values for a set of values.
+ * \param _T Type of values. It should have operator=,  operator for numeric comparation and numeric operation against integers.
+ * \include test/adt/average_test.cc
+ */
 template <class _T> class Average {
 public:
    /**
       Constructor.
-      \param name Nombre logico de esta instancia. 
-      \param measure Unidad de medida. Solo se usa a efecto de salida de datos.
+      \param name Logical name. It will be use only in asString method.
+      \param measure Measure name. It will be use only in asString method.
    */
    Average(const char* name, const char* measure ) : a_name(name), a_measure(measure), a_accumulator(0), a_n(0) {;}
 
    /**
       Constructor.
-      \param name Nombre logico de esta instancia.
-      \param measure Unidad de medida. Solo se usa a efecto de salida de datos.
+      \param name Logical name. It will be use only in asString method.
    */
    explicit Average(const char* name) : a_name(name), a_measure(""), a_accumulator(0), a_n(0) {;}
 
    /**
-      Devuelve el indicador de validez de esta media.
-      \return \em true Si la media no tiene ningun valor o \em false en caso contrario.      
-   */
-   bool isEmpty() const noexcept  { return(a_n == 0); }
+    * \return \b true if the instance has any valid value or \b false otherwise.
+    */
+   bool isEmpty() const noexcept  { return (a_n == 0); }
 
    /**
-      Devuelve \em true si el valor de la media es cero, bien por no tener valores o 
-      bien porque todos ellos eran cero.
-      \return \em true el valor de la media es cero o \em false en otro caso.
-   */
+    * \return \b true if average value is zero \b false otherwise.
+    * \warning it could zero due to there is no values or because all registered values are zero.
+    */
    bool isZero() const noexcept { return a_n == 0 || a_accumulator == 0; }
 
    /**
-      Devuelve el numero de elementos de contiene la media.
-      \return el numero de elementos de contiene la media.
+    * \return Number of registered values.
    */
    int size() const noexcept { return a_n; }
 
    /**
-      Devuelve el valor acumulado.
-      \return el valor acumulado.
+    * \return Sum up of all registered values.
    */
    _T getAccumulator() const noexcept { return a_accumulator; }
 
    /**
-      Devuelve la media de la sucesion de valores numericos asociados a esta.
-      \return La media de la sucesion de valores numericos asociados a esta.      
-      \warning Antes de invocar a este operador hay que verificar que #isEmpty devuelve \em false.
-   */
+    * \return the average value of the set of registered values.
+    * \warning It will return zero if isEmpty return  \b true.
+    */
    _T value() const noexcept { return(isEmpty() == true) ? _T(0):(a_accumulator / a_n);  }
    
    /**
-      Inicializa el valor de la media.      
+    * Initialize all values for this instance.
    */
    void clear() noexcept {  a_accumulator = 0; a_n = 0; }
 
    /**
-    * Establece manualmente el valor de la estad�stica.
-    * \param value Valor que tomar� el acumulador de este instancia.
-    * \param _n valor que tomar� el conteador de esta instancia.
+    * Set values for this instance.
     */
    void setValue(const _T& value, const unsigned int _n) noexcept {
       a_accumulator = value;
@@ -102,16 +91,13 @@ public:
    }
 
    /**
-      Devuelve la media de la sucesion de valores numericos asociados a esta.
-      \return La media de la sucesion de valores numericos asociados a esta.      
-      \warning Antes de invocar a este operador hay que verificar que #isEmpty devuelve \em false.
-   */
+    * Operator conversion.
+    * \return It will return the value method,
+    */
    operator _T() const noexcept { return value(); }
 
    /**
-      Inicializa el valor de esta media.
-      \param value Valor con el que iniciar la media.
-      \return La referencia a esta instancia.
+    * Initialize the instance. It will store the first value of the set of values.
    */
    Average<_T>& operator =(const _T value)
       noexcept 
@@ -122,10 +108,8 @@ public:
    }
 
    /**
-      Contructor copia.
-      \param other Objeto del que obtener los valores.
-      \return La referencia a esta instancia.
-   */
+    * Copy constructor.
+    */
    Average<_T>& operator =(const Average<_T>& other)
       noexcept 
    {
@@ -137,10 +121,9 @@ public:
    }
 
    /**
-      Incrementa la media con el valor recibido.
-      \param v Valor con el que incrementar la media.
-      \return La referencia a esta instancia.
-   */
+    * Register a new value on the set of values.
+    * \return This instance.
+    */
    Average<_T>& operator +=(const _T& v)
       noexcept 
    {
@@ -156,10 +139,9 @@ public:
    }
 
    /**
-      Decrementa la media con el valor recibido.
-      \param v Valor con el que incrementar la media.
-      \return La referencia a esta instancia.
-   */
+    * Deegister a value on the set of values.
+    * \return This instance.
+    */
    Average<_T>& operator -=(const _T v)
       noexcept 
    {
@@ -175,8 +157,7 @@ public:
    }
 
    /**
-      Devuelve una cadena con la informacion referente a esta clase.      
-      \return Una cadena con la informacion referente a esta clase.
+    * \return Summarize information of this instance in a StreamString.
    */
    StreamString asString() const
       noexcept

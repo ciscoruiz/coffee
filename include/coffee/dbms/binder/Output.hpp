@@ -44,7 +44,7 @@ namespace binder {
    \since NemesisRD.dbms 1.4.2.
 
    A continuacion presentamos un ejemplo de uso detallado.
-   \include dbms.ss/oracle.ss/db_null.p/db_null.cc
+   \include test/dbms/Definition_test.cc
 */
 class Output : public Binder {
 public:

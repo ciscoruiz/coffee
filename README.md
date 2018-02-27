@@ -5,6 +5,7 @@
 [![Build Status](https://travis-ci.org/ciscoruiz/coffee.svg?branch=master)](https://travis-ci.org/ciscoruiz/coffee)
 [![Build Status](https://semaphoreci.com/api/v1/ciscoruiz/coffee/branches/develop/badge.svg)](https://semaphoreci.com/ciscoruiz/coffee)
 [![codecov](https://codecov.io/gh/ciscoruiz/coffee/branch/master/graph/badge.svg)](https://codecov.io/gh/ciscoruiz/coffee)
+[![Documentation](https://codedocs.xyz/ciscoruiz/coffee.svg)](https://codedocs.xyz/ciscoruiz/coffee/annotated.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 COFFEE is the acronym for "COmpany eFFEEctive platform"
@@ -42,6 +43,14 @@ sudo apt-get install libsqlite3-dev:amd64
 sudo apt-get install sqlite sqlite3   
    
 ```
+
+If you want to generate API doc in HTML you should install:
+
+```bash
+sudo apt install doxygen
+sudo apt install graphviz
+```
+
 For now it should be very simple.
 
 ### Installation
@@ -63,6 +72,12 @@ And the next command will run the unit tests:
 
 ```
 make test
+``` 
+
+If you have installed doxygen then you will be able to run the next command to generate API docs
+
+```
+make doc
 ``` 
 
 You can see more commands in the Travis CI configuration file .travis.yml

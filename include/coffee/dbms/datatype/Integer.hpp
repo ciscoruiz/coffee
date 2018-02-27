@@ -62,7 +62,7 @@ public:
 
    size_t hash() const noexcept { return std::hash<int>{}(m_value); }
 
-   coffee_declare_datatype_downcast(Integer)
+   coffee_declare_datatype_downcast(Integer);
 
 private:
    int m_value;

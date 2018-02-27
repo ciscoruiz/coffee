@@ -111,7 +111,7 @@ public:
       Devuelve \em true si la sentencia requiere la invocacion a \em commit o \em rollback
       tras su ejecucion. Puede devolver \em true por tratarse de una sentencia que no tiene variables
       de salida(insert, update o delete) o bien porque se haya activado el indicador correspondiente
-      mediante la llamada #setRequiresCommit
+      mediante la llamada GuardStatement::setRequiresCommit
       \since NemesisRD.dbms 1.5.2.
    */
    bool requiresCommit() const noexcept { return (m_requiresCommit == true) || (m_outputBinds.empty() == true); }
@@ -186,9 +186,9 @@ protected:
       \param database Base de datos sobre la que se define la sentencia.
       \param name Nombre logico de la sentencia.
       \param expression Sentencia SQL asociada a esta clase.
-      \param isCritical Si vale \em true indica que si la ejecucion de esta sentencia falla al desbloquear
       la conexion con la que ejecutamos esta sentencia se invocara a Connection::rollback, en otro caso
       aunque falle se invocara a Connection::commit. Solo aplicara en sentencias que no sean de seleccion.
+      \param actionOnError Action to do in case of statement execution fails.
    */
    Statement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
       m_database(database),
@@ -207,10 +207,7 @@ protected:
       \param database Base de datos sobre la que se define la sentencia.
       \param name Nombre logico de la sentencia.
       \param expression Sentencia SQL asociada a esta clase.
-      \param isCritical Si vale \em true indica que si la ejecucion de esta sentencia falla al desbloquear
-      la conexion con la que ejecutamos esta sentencia se invocara a Connection::rollback, en otro caso
-      aunque falle se invocara a Connection::commit. Solo aplicara en cuenta en sentencias que no
-      sean de seleccion.
+      \param actionOnError Action to do in case of statement execution fails.
    */
    Statement(const Database& database, const char* name, const std::string& expression, const ActionOnError::_v actionOnError) :
       m_database(database),

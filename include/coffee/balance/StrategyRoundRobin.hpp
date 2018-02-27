@@ -32,15 +32,35 @@ namespace balance {
 
 class GuardResourceList;
 
+/**
+ * Select a resource by using a Round Robin technique. If the candidate resource would not be available
+ * then it will start a sequential search for the first available resource.
+ *
+ * \include test/balance/StrategyRoundRobin_test.cc
+ *
+ */
 class StrategyRoundRobin : public Strategy {
 public:
+   /**
+    * Constuctor.
+    * \param resources List of resources to work with.
+    */
    explicit StrategyRoundRobin (std::shared_ptr<ResourceList>& resources) : Strategy("balance::RoundRobin", resources) {;}
 
+   /**
+    * Select a resource by using a Round Robin technique. If the candidate resource would not be available
+    * will start a sequential search for the first available resource.
+    * \return the selected resource.
+    */
    std::shared_ptr<Resource> apply() throw (ResourceUnavailableException);
 
 private:
    class Position {
    public:
+      /**
+       * Constuctor.
+       * \param resources List of resources to work with.
+       */
       Position() : valid(false) {;}
 
       operator bool() { return valid; }

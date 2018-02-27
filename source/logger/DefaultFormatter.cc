@@ -29,7 +29,7 @@
 using namespace coffee;
 using namespace coffee::logger;
 
-std::string DefaultFormatter::apply (const Elements& elements)
+std::string DefaultFormatter::apply (const Level::_v level, const adt::StreamString& comment, const char* methodName, const char* file, const unsigned lineno)
    noexcept
 {
    auto second = adt::Second::getLocalTime ();
@@ -37,9 +37,9 @@ std::string DefaultFormatter::apply (const Elements& elements)
    adt::StreamString output;
 
    output << "[" << second.asDateTime() << "] ";
-   output << Level::enumName(elements.level) << " | ";
-   output << elements.function << " [" << elements.file << "(" << elements.lineno << ")]: ";
-   output << elements.input;
+   output << Level::enumName(level) << " | ";
+   output << methodName << " [" << file << "(" << lineno << ")]: ";
+   output << comment;
 
    return output;
 }

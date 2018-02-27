@@ -34,12 +34,17 @@ namespace coffee {
 namespace adt {
 
 /**
- * Defines exception used for this library.
+ * Defines exception used all around this framework.
  *
  * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
+ *
+ * \include test/adt/RuntimeException_test.cc
  */
 class RuntimeException : public Exception {
 public:
+   /**
+    * Default value for the error code member.
+    */
    static const int NullErrorCode = -1;
 
    RuntimeException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
@@ -52,10 +57,19 @@ public:
       m_errorCode (other.m_errorCode)
    {;}
 
+   /**
+    * \return Error Code associated to this instance.
+    */
    int getErrorCode () const noexcept { return m_errorCode; }
 
+   /**
+    * Set the error code associated to this instance.
+    */
    void setErrorCode (const int errorCode) noexcept { m_errorCode = errorCode; }
 
+   /**
+    * \return Summarize information of this instance in a StreamString.
+   */
    std::string asString () const noexcept;
 
 private:
@@ -65,7 +79,14 @@ private:
 }
 }
 
+/**
+ * Throws an exception of type RuntimeException fetching the location where it is thrown.
+ */
 #define COFFEE_THROW_EXCEPTION(msg) do { coffee::adt::StreamString __str; __str << msg; throw coffee::adt::RuntimeException (__str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
+
+/**
+ * Throws an exception of type \b name fetching the location where it is thrown.
+ */
 #define COFFEE_THROW_NAMED_EXCEPTION(name,msg) do { coffee::adt::StreamString __str; __str << msg; throw name(__str, __PRETTY_FUNCTION__, __FILE__, __LINE__); } while (false)
 
 

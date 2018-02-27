@@ -26,28 +26,19 @@
 
 #include <coffee/config/Release.hpp>
 #include <coffee/config/defines.hpp>
+#include <coffee/config/SCCS.hpp>
 
 #include <stdio.h>
 
 using namespace std;
 using namespace coffee;
 
+coffee_sccs_import_tag(config);
+
 string config::Release::getVersion () noexcept
 {
-   static const char month_names[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
-
-   // https://stackoverflow.com/questions/1765014/convert-string-from-date-into-a-time-t
-   char s_month[4];
-   int day, year;
-
-   sscanf(__DATE__, "%s %d %d", s_month, &day, &year);
-
-   const char* index = coffee_strstr(month_names, s_month);
-   const int month = (index != NULL) ? ((index - month_names)/3) + 1: 0;
-
-   char version[24];
-   sprintf(version, "%02d.%02d.%02d", year - 2000, month, day);
-   std::string result(version);
+   const char* version = coffee_strchr(coffee_sccs_use_tag(config), ' ');
+   std::string result(version + 1);
    result += getArchitecture ();
    return result;
 }

@@ -81,7 +81,6 @@ app::Application::Application(const char* shortName, const char* title, const ch
       m_this = this;
 
    cout << getName() << " - " << a_title << ". Version " << a_version << endl;
-   cout << "(c) Copyright 2018 by Francisco Ruiz." << endl << endl;
 }
 
 app::Application::~Application()
@@ -123,8 +122,7 @@ void app::Application::start()
    }
 
    try {
-      cout << "COFFEE - COmpany eFFEEctive platform. Version " << config::Release::getVersion() << endl;
-      cout << "Developed by Francisco Ruiz" << endl;
+      cout << "COFFEE - COmpany eFFEEctive platform. " << config::Release::getVersion() << endl;
       cout << "Release date: " << __DATE__ << " " << __TIME__ << endl;
       cout << "(c) Copyright 2018,2014 by Francisco Ruiz." << endl << endl;
 

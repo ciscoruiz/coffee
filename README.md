@@ -5,7 +5,7 @@
 [![Build Status](https://travis-ci.org/ciscoruiz/coffee.svg?branch=master)](https://travis-ci.org/ciscoruiz/coffee)
 [![Build Status](https://semaphoreci.com/api/v1/ciscoruiz/coffee/branches/develop/badge.svg)](https://semaphoreci.com/ciscoruiz/coffee)
 [![codecov](https://codecov.io/gh/ciscoruiz/coffee/branch/master/graph/badge.svg)](https://codecov.io/gh/ciscoruiz/coffee)
-[![Documentation](https://codedocs.xyz/ciscoruiz/coffee.svg)](https://codedocs.xyz/ciscoruiz/coffee/annotated.html)
+[![Documentation](https://codedocs.xyz/ciscoruiz/coffee.svg)](https://codedocs.xyz/ciscoruiz/coffee/index.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 COFFEE is the acronym for "COmpany eFFEEctive platform"
@@ -47,8 +47,8 @@ sudo apt-get install sqlite sqlite3
 If you want to generate API doc in HTML you should install:
 
 ```bash
-sudo apt install doxygen
-sudo apt install graphviz
+sudo apt-get install doxygen
+sudo apt-get install graphviz
 ```
 
 For now it should be very simple.

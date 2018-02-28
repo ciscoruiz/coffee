@@ -59,16 +59,6 @@ void balance::StrategyByRange::addRange (const int bottom, const int top, std::s
       }
    }
 
-   range_iterator ii;
-
-   if ((ii = findRange(guard, bottom)) != range_end()) {
-      COFFEE_THROW_EXCEPTION(std::get<2>(range(ii))->asString () << " has overlapping with " << strategy->asString());
-   }
-
-   if ((ii = findRange(guard, top)) != range_end()) {
-      COFFEE_THROW_EXCEPTION(std::get<2>(range(ii))->asString () << " has overlapping with " << strategy->asString());
-   }
-
    auto range = std::make_tuple(top, bottom, strategy);
 
    LOG_DEBUG ("Range (" <<  bottom << "," << top << "): " << strategy->asString () << " has been created");

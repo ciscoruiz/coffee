@@ -58,7 +58,7 @@ void observer::Subject::attach(std::shared_ptr<Observer> observer, const Event& 
    observer->update(*this, event);
 }
 
-bool observer::Subject::attach(const std::string& observerName)
+bool observer::Subject::detach(const std::string& observerName)
    noexcept
 {
    const auto ii = m_observers.find(observerName);
@@ -66,6 +66,7 @@ bool observer::Subject::attach(const std::string& observerName)
    if (ii == m_observers.end())
       return false;
 
+   get_observer(ii)->isSubscribed(false);
    m_observers.erase(ii);
 
    return true;

@@ -83,7 +83,7 @@ public:
    /**
     * \return \b true if the observer was removed from the list of observers or \b false otherwise.
     */
-   bool attach(const std::string& observerName) noexcept;
+   bool detach(const std::string& observerName) noexcept;
 
    /**
     * \return Numbers of subscribers associated to this subject.

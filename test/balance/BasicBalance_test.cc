@@ -74,30 +74,36 @@ BOOST_AUTO_TEST_CASE( count_availables )
    BOOST_REQUIRE_EQUAL(resourceList->countAvailableResources(guard), MaxResources / 2);
 }
 
-BOOST_AUTO_TEST_CASE( dont_use_unavailables )
+BOOST_AUTO_TEST_CASE( error_while_initialize )
 {
-   auto resourceList = coffee::test::balance::setup(MaxResources);
+   std::shared_ptr<coffee::balance::ResourceList> resourceList = std::make_shared<coffee::balance::ResourceList>("TestResources");
 
-   balance::StrategyRoundRobin strategy(resourceList);
+   resourceList->add(std::make_shared<TestResource>(0));
+   resourceList->add(std::make_shared<UnusableResource>());
+   resourceList->add(std::make_shared<TestResource>(1));
 
-   if (true) {
-      GuardResourceList guard(resourceList);
-      std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, 0));
-      myResource->setAvailable(false);
-   }
+   resourceList->initialize();
 
-   std::shared_ptr<TestResource> myResource = TestResource::cast_copy(strategy.apply());
-   BOOST_REQUIRE_EQUAL (myResource->getKey(), 1);
+   GuardResourceList guard(resourceList);
 
-   if (true) {
-      GuardResourceList guard(resourceList);
-      for (auto ii = resourceList->resource_begin(guard), maxii = resourceList->resource_end(guard); ii != maxii; ++ ii) {
-         std::shared_ptr<TestResource> myResource = TestResource::cast(ResourceList::resource(ii));
-         myResource->setAvailable(false);
-      }
-   }
+   BOOST_REQUIRE_EQUAL(resourceList->countAvailableResources(guard), 2);
+}
 
-   BOOST_REQUIRE_THROW (strategy.apply(), ResourceUnavailableException);
+BOOST_AUTO_TEST_CASE( initialize_empty_list )
+{
+   std::shared_ptr<coffee::balance::ResourceList> resourceList = std::make_shared<coffee::balance::ResourceList>("TestResources");
+   BOOST_REQUIRE_NO_THROW(resourceList->initialize());
+}
+
+BOOST_AUTO_TEST_CASE( initialize_without_available_resources )
+{
+   std::shared_ptr<coffee::balance::ResourceList> resourceList = std::make_shared<coffee::balance::ResourceList>("TestResources");
+   resourceList->add(std::make_shared<UnusableResource>());
+   resourceList->add(std::make_shared<UnusableResource>());
+   BOOST_REQUIRE_NO_THROW(resourceList->initialize());
+
+   GuardResourceList guard(resourceList);
+   BOOST_REQUIRE_EQUAL(resourceList->countAvailableResources(guard), 0);
 }
 
 BOOST_AUTO_TEST_CASE (as_string)
@@ -128,3 +134,4 @@ BOOST_AUTO_TEST_CASE (as_xml)
    xml::Compiler compiler;
    std::cout << compiler.apply(root) << std::endl;
 }
+

@@ -53,7 +53,6 @@ namespace ByRangeTest {
    typedef CounterContainer::iterator counter_iterator;
 
    static int MaxResources = 13;
-   static int MaxLoop = 5;
 
    void incrementUse (CounterContainer& counterContainer, const std::shared_ptr<Resource>& resource)
    {
@@ -116,6 +115,7 @@ BOOST_AUTO_TEST_CASE(byrange_overlapping)
    BOOST_REQUIRE_THROW (mainStrategy.addRange (5, 14, strategy), adt::RuntimeException);
    BOOST_REQUIRE_THROW (mainStrategy.addRange (5, 25, strategy), adt::RuntimeException);
    BOOST_REQUIRE_THROW (mainStrategy.addRange (15, 25, strategy), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (11, 19, strategy), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(byrange_sharing)

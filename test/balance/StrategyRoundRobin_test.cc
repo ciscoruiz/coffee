@@ -122,6 +122,13 @@ BOOST_AUTO_TEST_CASE( rr_balance_quality)
    }
 }
 
+BOOST_AUTO_TEST_CASE( rr_empty_list )
+{
+   std::shared_ptr<coffee::balance::ResourceList> emptyList = std::make_shared<coffee::balance::ResourceList>("EmptyList");
+   balance::StrategyRoundRobin strategy(emptyList);
+   BOOST_REQUIRE_THROW (strategy.apply(), ResourceUnavailableException);
+}
+
 BOOST_AUTO_TEST_CASE( rr_balance_multithread )
 {
    auto resourceList = coffee::test::balance::setup(RoundRobinTest::MaxResources);
@@ -153,3 +160,4 @@ BOOST_AUTO_TEST_CASE( rr_balance_multithread )
       BOOST_REQUIRE_EQUAL (ii->second, RoundRobinTest::MaxLoop);
    }
 }
+

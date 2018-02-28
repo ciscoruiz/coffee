@@ -22,11 +22,13 @@
 //
 
 #include <limits.h>
+#include <signal.h>
 
 #include <iostream>
 #include <mutex>
 #include <thread>
 #include <condition_variable>
+#include <csignal>
 
 #include <boost/test/unit_test.hpp>
 
@@ -37,6 +39,9 @@
 
 #include <coffee/app/Application.hpp>
 #include <coffee/app/Engine.hpp>
+
+#include <coffee/xml/Document.hpp>
+#include <coffee/xml/Node.hpp>
 
 using namespace std;
 using namespace coffee;
@@ -141,7 +146,7 @@ BOOST_AUTO_TEST_CASE( smallest_application )
    BOOST_REQUIRE_EQUAL(application.getPid(), getpid());
    BOOST_REQUIRE_EQUAL(application.getVersion().find("1.0/"), 0);
 
-   BOOST_REQUIRE_EQUAL(application.engine_find("00") != application.engine_end(), true);
+   BOOST_REQUIRE(application.engine_find("00") != application.engine_end());
 
    BOOST_REQUIRE_EQUAL(engine->getInitializedCounter(), 1);
    BOOST_REQUIRE_EQUAL(engine->getStoppedCounter(), 1);
@@ -176,6 +181,17 @@ BOOST_AUTO_TEST_CASE( undefined_predecessor )
 
    BOOST_REQUIRE_EQUAL(application.isStopped(), true);
    BOOST_REQUIRE_EQUAL(application.isRunning(), false);
+}
+
+BOOST_AUTO_TEST_CASE( repeat_predecessor )
+{
+   SmallestApplication application;
+
+   std::shared_ptr<MyEngine> engine = std::make_shared<MyEngine>(application, "00");
+   engine->setPredecessor("SomeRepeatedName");
+   engine->setPredecessor("SomeRepeatedName");
+
+   BOOST_REQUIRE_NO_THROW(application.start());
 }
 
 BOOST_AUTO_TEST_CASE( interdependence_predecessor )
@@ -328,4 +344,116 @@ BOOST_AUTO_TEST_CASE( app_unstoppable_requeststop_engines )
    BOOST_CHECK(engine->isStopped());
 }
 
+BOOST_AUTO_TEST_CASE( engine_attach_after_running )
+{
+   ParallelApplication application;
+
+   std::shared_ptr<MyEngine> engine = std::make_shared<MyEngine>(application, "00");
+   application.attach(engine);
+
+   auto thread = std::thread(parallelRun, std::ref(application));
+
+   application.waitForRun();
+   BOOST_CHECK(application.isRunning());
+   BOOST_CHECK(engine->isRunning());
+
+   std::shared_ptr<MyEngine> secondEngine = std::make_shared<MyEngine>(application, "01");
+   BOOST_CHECK(!secondEngine->isRunning());
+
+   application.attach(secondEngine);
+   BOOST_CHECK(secondEngine->isRunning());
+
+   BOOST_CHECK_NO_THROW(application.requestStop());
+   thread.join();
+}
+
+BOOST_AUTO_TEST_CASE( app_logger_level_change_onair )
+{
+   ParallelApplication application;
+
+   std::shared_ptr<MyEngine> engine = std::make_shared<MyEngine>(application, "00");
+   application.attach(engine);
+
+   auto thread = std::thread(parallelRun, std::ref(application));
+
+   logger::Logger::setLevel(logger::Level::Information);
+
+   application.waitForRun();
+   BOOST_CHECK(application.isRunning());
+   BOOST_CHECK(engine->isRunning());
+
+   std::raise(SIGUSR2);
+   BOOST_CHECK_EQUAL(logger::Logger::getLevel(), logger::Level::Debug);
+
+   std::raise(SIGUSR2);
+   BOOST_CHECK_EQUAL(logger::Logger::getLevel(), logger::Level::Error);
+
+   std::raise(SIGUSR2);
+   BOOST_CHECK_EQUAL(logger::Logger::getLevel(), logger::Level::Warning);
+
+   BOOST_CHECK_NO_THROW(application.requestStop());
+   thread.join();
+}
+
+struct CleanContextFilename {
+   CleanContextFilename() {
+      remove(application.getOutputContextFilename().c_str());
+
+   }
+   ~CleanContextFilename() {
+      remove(application.getOutputContextFilename().c_str());
+   }
+
+   ParallelApplication application;
+};
+
+BOOST_FIXTURE_TEST_CASE( app_write_context, CleanContextFilename )
+{
+   remove(application.getOutputContextFilename().c_str());
+
+   application.attach(std::make_shared<MyEngine>(application, "00"));
+   application.attach(std::make_shared<MyEngine>(application, "01"));
+
+   auto thread = std::thread(parallelRun, std::ref(application));
+
+   application.waitForRun();
+   BOOST_CHECK(application.isRunning());
+
+   std::raise(SIGUSR1);
+
+   xml::Document document;
+
+   BOOST_CHECK_NO_THROW(document.parse(application.getOutputContextFilename()));
+
+   auto root = document.getRoot();
+
+   auto app = root->lookupChild("app.Application");
+   auto engines = app->lookupChild("Engines");
+
+   BOOST_CHECK_EQUAL(engines->childAt(0)->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "00");
+   BOOST_CHECK_EQUAL(engines->childAt(1)->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "01");
+
+   BOOST_CHECK_NO_THROW(application.requestStop());
+   thread.join();
+}
+
+BOOST_FIXTURE_TEST_CASE( app_cannot_write_context, CleanContextFilename )
+{
+   application.setOutputContextFilename("/root/file-without-access.context");
+
+   application.attach(std::make_shared<MyEngine>(application, "00"));
+   application.attach(std::make_shared<MyEngine>(application, "01"));
+
+   auto thread = std::thread(parallelRun, std::ref(application));
+
+   application.waitForRun();
+   BOOST_CHECK(application.isRunning());
+
+   std::raise(SIGUSR1);
+
+   BOOST_CHECK_NO_THROW(application.requestStop());
+   thread.join();
+
+   BOOST_REQUIRE_THROW(boost::filesystem::exists(application.getOutputContextFilename()), std::runtime_error);
+}
 

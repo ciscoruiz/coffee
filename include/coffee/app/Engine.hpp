@@ -123,21 +123,7 @@ private:
    iterator end() noexcept { return a_predecessors.end(); }
    const std::string& data(iterator ii) noexcept { return *ii; }
 
-   /**
-      metodo que debemos implementar si la clase heredada necesita algn tipo de inicializacin.
-      Este metodo se invocara automaticamente desde coffee::Application::start.
-   */
    virtual void do_initialize() throw(adt::RuntimeException) = 0;
-
-   /**
-      Metodo que debemos implementar en la clase heredada para tratar el proceso de parada de
-      esta clase.
-      Este metodo debe implementar un metodo de parada controlada. Se invocara automaticamente
-      desde el ncleo de NemesisRD.
-
-      La mayor�a de las veces ser� la re-implementaci�n del m�todo coffee::Runnable::do_requestStop
-      el que realice las acciones necesarias para parar un enginee.
-   */
    virtual void do_stop() throw(adt::RuntimeException) = 0;
 
    friend class Application;

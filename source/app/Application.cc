@@ -62,8 +62,10 @@ app::Application* app::Application::m_this = nullptr;
 
 app::Application::Application(const char* shortName, const char* title, const char* version) :
    Runnable(shortName),
-   a_version(version),
-   a_title(title)
+   a_version(std::string(version) + config::Release::getArchitecture()),
+   a_title(title),
+   a_pid(getpid()),
+   a_outputContextFilename(adt::StreamString("/tmp/coffee.context.").append(AsString::apply(a_pid, "%05d")).append(".xml"))
 {
    sigset(SIGUSR1, handlerUserSignal);
    sigset(SIGUSR2, handlerUserSignal);
@@ -72,10 +74,6 @@ app::Application::Application(const char* shortName, const char* title, const ch
 
    app::SCCS::activate();
    xml::SCCS::activate();
-
-   a_version += config::Release::getArchitecture();
-
-   a_pid = getpid();
 
    if(m_this == nullptr)
       m_this = this;
@@ -188,10 +186,6 @@ void app::Application::stopEngines()
    }
 }
 
-/**
- * Se invocar� porque se haya recibido la se�al de parada o porque alg�n enginee de la aplicaci�n
- * haya solicitado la parada de la aplicaci�n.
- */
 // virtual
 void app::Application::do_requestStop()
    throw(RuntimeException)
@@ -222,12 +216,6 @@ void app::Application::do_requestStop()
    }
 }
 
-//---------------------------------------------------------------------------------------
-//(1) Se invoca desde los constructores de los enginees => no se puede invocar a
-// ningn m�odo virtual => obliga a que est� definidos antes de comenzar la
-// ejecucin de la aplicacin => se inicilizar� en el Application::start ya que en
-// ese momento los objetos est� completamente creados.
-//---------------------------------------------------------------------------------------
 void app::Application::attach(std::shared_ptr<Engine> engine)
    throw(RuntimeException)
 {
@@ -251,7 +239,7 @@ void app::Application::attach(std::shared_ptr<Engine> engine)
    }
 }
 
-void app::Application::writeContext(const std::string& file)
+void app::Application::writeContext(const boost::filesystem::path& file)
    throw(RuntimeException)
 {
    ofstream out;
@@ -259,10 +247,10 @@ void app::Application::writeContext(const std::string& file)
    out.open(file.c_str());
 
    if(out.is_open() == false) {
-      COFFEE_THROW_EXCEPTION("Can not open file'" << file << "'");
+      COFFEE_THROW_EXCEPTION("Can not open file'" << file.c_str() << "'");
    }
 
-   LOG_NOTICE("File: " << file);
+   LOG_NOTICE("File: " << file.c_str());
 
    std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("Context");
 
@@ -293,13 +281,13 @@ std::shared_ptr<xml::Node> app::Application::asXML(std::shared_ptr<xml::Node>& r
 
    config::SCCSRepository& moduleManager = config::SCCSRepository::getInstance();
 
-   std::shared_ptr<xml::Node> modules = result->createChild("result->Modules");
+   std::shared_ptr<xml::Node> modules = result->createChild("Modules");
    for(config::SCCSRepository::const_entry_iterator ii = moduleManager.entry_begin(), maxii = moduleManager.entry_end(); ii != maxii; ii ++) {
       std::shared_ptr<xml::Node> xmlModule = modules->createChild("Module");
       xmlModule->createAttribute("Name", config::SCCSRepository::module_name(ii));
    }
 
-   std::shared_ptr<xml::Node> engines = result->createChild("result->Engines");
+   std::shared_ptr<xml::Node> engines = result->createChild("Engines");
    for(const_engine_iterator ii = engine_begin(), maxii = engine_end(); ii != maxii; ii ++)
       engine(ii)->asXML(engines);
 
@@ -310,8 +298,7 @@ std::shared_ptr<xml::Node> app::Application::asXML(std::shared_ptr<xml::Node>& r
 void app::Application::signalUSR1()
    throw(RuntimeException)
 {
-   adt::StreamString fileName("/var/tmp/nemesis.context.");
-   writeContext(fileName << AsString::apply(getPid(), "%05d"));
+   writeContext(a_outputContextFilename);
 }
 
 // virtual
@@ -368,10 +355,6 @@ void app::Application::handlerSignalTerminate(int)
    }
 }
 
-/**
- * Se recoge el estado de terminacion del hijo para que no se quede considerado como un zombie y se
- * elimina de la lista de procesos hijos.
- */
 // static
 void app::Application::handlerChildTerminate(int sig)
    noexcept

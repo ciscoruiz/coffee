@@ -28,6 +28,8 @@
 #include <vector>
 #include <memory>
 
+#include <boost/filesystem.hpp>
+
 #include <coffee/adt/RuntimeException.hpp>
 
 #include <coffee/app/Runnable.hpp>
@@ -89,6 +91,16 @@ public:
    pid_t getPid() const noexcept { return a_pid; }
 
    /**
+    * The the path where it would write the context.
+    */
+   void setOutputContextFilename(const boost::filesystem::path& outputContextFilename) noexcept { this->a_outputContextFilename = outputContextFilename; }
+
+   /**
+    * \return The context path where it would write the context.
+    */
+   const boost::filesystem::path& getOutputContextFilename() const noexcept { return a_outputContextFilename; }
+
+   /**
     * \return the engine_iterator addresses the engine received as parameter or #engine_end if the name is not found.
     */
    engine_iterator engine_find(const std::string& className) noexcept;
@@ -138,7 +150,7 @@ public:
    /**
     * Write the context as a coffee::xml::Node into the path indicated by file.
     */
-   void writeContext(const std::string& file) throw(adt::RuntimeException);
+   void writeContext(const boost::filesystem::path& file) throw(adt::RuntimeException);
 
    /**
     * This virtual method will give us the opportunity to initialize custom resources of
@@ -168,7 +180,7 @@ protected:
    virtual void do_requestStop() throw(adt::RuntimeException);
 
    /**
-    * Handler for signal USR1
+    * Handler for signal USR1, it will write the context into file #getContextPath.
     */
    virtual void signalUSR1() throw(adt::RuntimeException);
 
@@ -182,10 +194,11 @@ protected:
 private:
    static Application* m_this;
 
-   std::string a_version;
+   const std::string a_version;
    const std::string a_title;
+   const pid_t a_pid;
+   boost::filesystem::path a_outputContextFilename;
    Engines a_engines;
-   pid_t a_pid;
 
    void startEngines() throw(adt::RuntimeException);
    void stopEngines() noexcept;

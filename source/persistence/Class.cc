@@ -63,13 +63,13 @@ std::shared_ptr<persistence::Object> persistence::Class::createObject(const std:
       COFFEE_THROW_EXCEPTION(asString() << " primary key does not matches with class");
    }
 
-    dbms::datatype::Set members;
+   dbms::datatype::Set members;
 
-    for(dbms::datatype::Set::const_data_iterator ii = m_members.begin(), maxii = m_members.end(); ii != maxii; ++ ii) {
-       members.insert(dbms::datatype::Set::data(ii)->clone());
-    }
+   for(dbms::datatype::Set::const_data_iterator ii = m_members.begin(), maxii = m_members.end(); ii != maxii; ++ ii) {
+      members.insert(dbms::datatype::Set::data(ii)->clone());
+   }
 
-    return std::make_shared<Object>(*this, primaryKey, members);
+   return std::make_shared<Object>(*this, primaryKey, members);
 }
 
 adt::StreamString persistence::Class::asString() const noexcept {

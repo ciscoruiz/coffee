@@ -72,3 +72,42 @@ BOOST_AUTO_TEST_CASE(persistence_class)
 
    BOOST_REQUIRE(object->getInternalId() != object2->getInternalId());
 }
+
+BOOST_AUTO_TEST_CASE(persistence_object_asstring)
+{
+   persistence::PrimaryKeyBuilder pkBuilder;
+   pkBuilder.add(std::make_shared<dbms::datatype::Integer>("id")).add(std::make_shared<dbms::datatype::String>("id2", 64));
+   std::shared_ptr<persistence::PrimaryKey> fixedPrimaryKey = pkBuilder.build();
+
+   persistence::ClassBuilder classBuilder("the-class");
+   classBuilder.set(fixedPrimaryKey).add(std::make_shared<dbms::datatype::String>("name", 64));
+   classBuilder.add(std::make_shared<dbms::datatype::Date>("date"));
+   classBuilder.add(std::make_shared<dbms::datatype::Float>("the-float", dbms::datatype::Constraint::CanBeNull));
+
+   std::shared_ptr<persistence::Class> clazz = classBuilder.build();
+
+   auto pkObject = clazz->createPrimaryKey();
+   BOOST_REQUIRE_NO_THROW(pkObject->setInteger("id", 111));
+   BOOST_REQUIRE_NO_THROW(pkObject->setString("id2", "zzz"));
+
+   auto object = clazz->createObject(pkObject);
+
+   const char* lines[] = {
+      "persistence.Object { ClassName=the-class | persistence.PrimaryKey { ",
+      "datatype.Integer { datatype.Abstract { Name=id | IsNull=false | Constraint=CanNotBeNull } | Value=111 },",
+      "datatype.String { datatype.Abstract { Name=id2 | IsNull=false | Constraint=CanNotBeNull } | MaxSize=64 | Value='zzz' }} | ",
+      "Members={ ",
+      "datatype.String { datatype.Abstract { Name=name | IsNull=false | Constraint=CanNotBeNull } | MaxSize=64 | Value='' },",
+      "datatype.Float { datatype.Abstract { Name=the-float | IsNull=true | Constraint=CanBeNull } },",
+      "datatype.Date { datatype.Abstract { Name=date | IsNull=false | Constraint=CanNotBeNull } | Value='0 sec' }} }",
+      nullptr
+   };
+
+   adt::StreamString ss;
+   int ii = 0;
+   while(lines[ii] != nullptr) {
+      ss << lines[ii ++];
+   }
+
+   BOOST_REQUIRE_EQUAL(object->asString(), ss);
+}

@@ -69,9 +69,13 @@ adt::StreamString persistence::PrimaryKey::asString() const noexcept
 {
    adt::StreamString result("persistence.PrimaryKey { ");
 
+   bool first = true;
    for (const_data_iterator ii = begin(), maxii = end(); ii != maxii; ++ ii) {
+      if (first == false) {
+         result += ",";
+      }
       result += data(ii)->asString();
-      result += "  ";
+      first = false;
    }
 
    return result += "}";

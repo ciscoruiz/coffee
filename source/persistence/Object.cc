@@ -49,11 +49,14 @@ adt::StreamString persistence::Object::asString() const noexcept
    result << m_class.getName();
    result << " | " << m_primaryKey->asString();
    
-   result << " | Members={";
+   result << " | Members={ ";
+   bool first = true;
    for(auto& member : *this) {
-      if(!member.second) {
-         result << "," << member.second->getName();
+      if (first == false) {
+         result += ",";
       }
+      result << member.second->asString();
+      first = false;
    }
    return result << "} }";
 }

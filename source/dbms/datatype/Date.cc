@@ -115,12 +115,10 @@ adt::StreamString datatype::Date::asString () const
 
    adt::StreamString result ("datatype.Date { ");
    result << dbms::datatype::Abstract::asString ();
-   result += " | Value: ";
 
-   if (this->hasValue () == true)
-      result << "'" << m_value.asString () << "'";
-   else
-      result += "<null>";
+   if (this->hasValue () == true) {
+      result << " | Value=" << "'" << m_value.asString () << "'";
+   }
 
    return result += " }";
 }

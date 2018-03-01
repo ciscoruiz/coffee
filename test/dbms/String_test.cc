@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(string_nulleable_asstring)
 {
    datatype::String column("nulleable", 16, datatype::Constraint::CanBeNull);
    BOOST_REQUIRE_EQUAL(column.hasValue(), false);
-   BOOST_REQUIRE_EQUAL(column.asString(), "datatype.String { datatype.Abstract { Name: nulleable | Null: true | Constraint: CanBeNull } | MaxSize: 16 | Value: <null> }");
+   BOOST_REQUIRE_EQUAL(column.asString(), "datatype.String { datatype.Abstract { Name=nulleable | IsNull=true | Constraint=CanBeNull } | MaxSize=16 }");
 }
 
 BOOST_AUTO_TEST_CASE(string_is_not_nulleable)

@@ -51,7 +51,11 @@ adt::StreamString datatype::Float::asString () const
 {
    adt::StreamString result;
    result <<  "datatype.Float { " << datatype::Abstract::asString ();
-   result <<  " | Value: " << adt::AsString::apply (m_value, m_format);
+
+   if (this->hasValue () == true) {
+      result << " | Value=" << adt::AsString::apply (m_value, m_format);
+   }
+
    return result += " }";
 }
 

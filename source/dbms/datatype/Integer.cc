@@ -45,7 +45,9 @@ adt::StreamString datatype::Integer::asString () const
 {
    adt::StreamString result;
    result << "datatype.Integer { " << datatype::Abstract::asString ();
-   result <<  " | Value: " << m_value;
+   if (this->hasValue () == true) {
+      result << " | Value=" << m_value;
+   }
    return result += " }";
 }
 

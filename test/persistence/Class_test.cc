@@ -94,20 +94,19 @@ BOOST_AUTO_TEST_CASE(persistence_object_asstring)
 
    const char* lines[] = {
       "persistence.Object { ClassName=the-class | persistence.PrimaryKey { ",
-      "datatype.Integer { datatype.Abstract { Name=id | IsNull=false | Constraint=CanNotBeNull } | Value=111 },",
-      "datatype.String { datatype.Abstract { Name=id2 | IsNull=false | Constraint=CanNotBeNull } | MaxSize=64 | Value='zzz' }} | ",
+      "datatype.Integer { datatype.Abstract { Name=id | IsNull=false | Constraint=CanNotBeNull } | Value=111 }",
+      "datatype.String { datatype.Abstract { Name=id2 | IsNull=false | Constraint=CanNotBeNull } | MaxSize=64 | Value='zzz' }",
       "Members={ ",
-      "datatype.String { datatype.Abstract { Name=name | IsNull=false | Constraint=CanNotBeNull } | MaxSize=64 | Value='' },",
-      "datatype.Float { datatype.Abstract { Name=the-float | IsNull=true | Constraint=CanBeNull } },",
-      "datatype.Date { datatype.Abstract { Name=date | IsNull=false | Constraint=CanNotBeNull } | Value='0 sec' }} }",
+      "datatype.String { datatype.Abstract { Name=name | IsNull=false | Constraint=CanNotBeNull } | MaxSize=64 | Value='' }",
+      "datatype.Float { datatype.Abstract { Name=the-float | IsNull=true | Constraint=CanBeNull } }",
+      "datatype.Date { datatype.Abstract { Name=date | IsNull=false | Constraint=CanNotBeNull } | Value='0 sec' }}",
       nullptr
    };
 
-   adt::StreamString ss;
+   const std::string str = object->asString();
+
    int ii = 0;
    while(lines[ii] != nullptr) {
-      ss << lines[ii ++];
+      BOOST_REQUIRE(str.find(lines[ii ++]) != std::string::npos);
    }
-
-   BOOST_REQUIRE_EQUAL(object->asString(), ss);
 }

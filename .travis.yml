@@ -17,6 +17,6 @@ matrix:
         - TEST="Codecov"
       script:
         - cmake -DCMAKE_BUILD_TYPE=COVERAGE 
-        - make --jobs=4 && make test
+        - make --jobs=4 && ctest --output-on-failure
         - bash <(curl -s https://codecov.io/bash)
 

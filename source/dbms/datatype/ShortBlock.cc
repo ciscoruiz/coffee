@@ -61,14 +61,12 @@ adt::StreamString datatype::ShortBlock::asString () const
 {
    adt::StreamString result ("datatype.ShortBlock { ");
    result += datatype::Abstract::asString ();
-   result << " | Buffer: " << adt::AsHexString::apply(coffee_ptrnumber_cast (getBuffer()));
-   result << " | MaxSize: " << getMaxSize();
-   result += " | Value: ";
+   result << " | MaxSize=" << getMaxSize();
 
-   if (this->hasValue() == true)
-      result << adt::AsString::apply (m_value);
-   else
-      result += "(null)";
+   if (hasValue()) {
+      result << " | Buffer=" << adt::AsHexString::apply(coffee_ptrnumber_cast (getBuffer()));
+      result << " | Size=" << m_value.size ();
+   }
 
    return result += " }";
 }

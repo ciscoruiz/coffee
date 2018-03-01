@@ -54,7 +54,15 @@ private:
    bool m_available;
 
    bool isAvailable () const noexcept { return m_available; }
-   void initialize () throw (adt::RuntimeException) { m_available = true; }
+   virtual void initialize () throw (adt::RuntimeException) { m_available = true; }
+};
+
+class UnusableResource  : public TestResource {
+public:
+   UnusableResource() :  TestResource(555){;}
+
+private:
+   void initialize () throw (adt::RuntimeException) { setAvailable(false); COFFEE_THROW_EXCEPTION("Can not initialize resource"); }
 };
 
 inline std::shared_ptr<coffee::balance::ResourceList> setup(const int maxResource, const int firstId = 0)

@@ -53,13 +53,13 @@ adt::StreamString datatype::LongBlock::asString () const
 {
    adt::StreamString result ("datatype.LongBlock { ");
    result += datatype::Abstract::asString ();
-   result << " | Buffer: " << adt::AsHexString::apply(coffee_ptrnumber_cast (getBuffer()));
-   result << " | MaxSize: " << getMaxSize();
-   result += " | Size: ";
-   if (this->hasValue () == true)
-      result << m_value.size ();
-   else
-      result += "(null)";
+   result << " | MaxSize=" << getMaxSize();
+
+   if (hasValue()) {
+      result << " | Buffer=" << adt::AsHexString::apply(coffee_ptrnumber_cast (getBuffer()));
+      result << " | Size=" << m_value.size ();
+   }
+
    return result += " }";
 }
 

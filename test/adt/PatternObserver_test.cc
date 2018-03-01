@@ -197,6 +197,44 @@ BOOST_AUTO_TEST_CASE(subscription_by_eventId)
    BOOST_REQUIRE_EQUAL(observer->getValue(), "Wow!");
 }
 
+BOOST_AUTO_TEST_CASE(observer_detach)
+{
+   shared_ptr<NullObserver> observer = make_shared<NullObserver>();
+
+   TheSubject subject;
+   subject.attach(observer, TheSubject::Events::ChangeII);
+   BOOST_REQUIRE(observer->isSubscribed() == true);
+
+   BOOST_REQUIRE(subject.detach(observer->getName()) == true);
+   BOOST_REQUIRE(observer->isSubscribed() == false);
+}
+
+BOOST_AUTO_TEST_CASE(observer_isnot_attached)
+{
+   TheSubject subject;
+   BOOST_REQUIRE(subject.detach("undefinedObserver") == false);
+}
+
+BOOST_AUTO_TEST_CASE(observer_repeat_attach)
+{
+   shared_ptr<NullObserver> observer = make_shared<NullObserver>();
+
+   TheSubject subject;
+   subject.attach(observer, TheSubject::Events::ChangeII);
+   BOOST_REQUIRE(subject.countObservers() == 1);
+
+   subject.attach(observer, TheSubject::Events::ChangeII);
+   BOOST_REQUIRE(subject.countObservers() == 1);
+}
+
+BOOST_AUTO_TEST_CASE(observer_undefined_event)
+{
+   shared_ptr<NullObserver> observer = make_shared<NullObserver>();
+
+   TheSubject subject;
+   BOOST_REQUIRE_THROW(subject.attach(observer, 10000), RuntimeException);
+}
+
 BOOST_AUTO_TEST_CASE(nosy_subscription)
 {
    TheSubject subject;
@@ -307,4 +345,3 @@ BOOST_AUTO_TEST_CASE(observer_out_of_scope)
 
    BOOST_REQUIRE_EQUAL(observer->isSubscribed(), false);
 }
-

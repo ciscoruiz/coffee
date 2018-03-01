@@ -68,13 +68,10 @@ adt::StreamString datatype::String::asString () const
 {
    adt::StreamString result ("datatype.String { ");
    result += datatype::Abstract::asString ();
-   result << " | MaxSize: " << getMaxSize();
-   result += " | Value: ";
+   result << " | MaxSize=" << getMaxSize();
 
    if (this->hasValue () == true)
-      result << "'" << m_value << "'";
-   else
-      result += "<null>";
+      result << " | Value=" << "'" << m_value << "'";
 
    return result += " }";
 }

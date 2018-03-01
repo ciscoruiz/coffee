@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include "../../include/coffee/app/Engine.hpp"
+#include <coffee/app/Engine.hpp>
 
 #include <algorithm>
 

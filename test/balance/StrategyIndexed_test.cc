@@ -130,6 +130,13 @@ BOOST_AUTO_TEST_CASE( inx_balance_quality)
    }
 }
 
+BOOST_AUTO_TEST_CASE( inx_empty_list )
+{
+   std::shared_ptr<coffee::balance::ResourceList> emptyList = std::make_shared<coffee::balance::ResourceList>("EmptyList");
+   balance::StrategyIndexed strategy(emptyList);
+   BOOST_REQUIRE_THROW (strategy.apply(0), ResourceUnavailableException);
+}
+
 BOOST_AUTO_TEST_CASE( inx_balance_multithread )
 {
    auto resourceList = coffee::test::balance::setup(IndexedTest::MaxResources);

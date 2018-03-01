@@ -35,9 +35,9 @@ adt::StreamString datatype::Abstract::asString () const
 {
    adt::StreamString result;
 
-   result << "datatype.Abstract { Name: " << m_name;
-   result << " | Null: " << m_isNull;
-   result << " | Constraint: " << ((m_constraint == Constraint::CanBeNull) ? "CanBeNull": "CanNotBeNull");
+   result << "datatype.Abstract { Name=" << m_name;
+   result << " | IsNull=" << m_isNull;
+   result << " | Constraint=" << ((m_constraint == Constraint::CanBeNull) ? "CanBeNull": "CanNotBeNull");
 
    return result += " }";
 }

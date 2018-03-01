@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(persistence_object_asstring)
       "Members={ ",
       "datatype.String { datatype.Abstract { Name=name | IsNull=false | Constraint=CanNotBeNull } | MaxSize=64 | Value='' }",
       "datatype.Float { datatype.Abstract { Name=the-float | IsNull=true | Constraint=CanBeNull } }",
-      "datatype.Date { datatype.Abstract { Name=date | IsNull=false | Constraint=CanNotBeNull } | Value='0 sec' }}",
+      "datatype.Date { datatype.Abstract { Name=date | IsNull=false | Constraint=CanNotBeNull } | Value='0 sec' }",
       nullptr
    };
 

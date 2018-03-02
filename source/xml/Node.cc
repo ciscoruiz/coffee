@@ -33,16 +33,14 @@ xml::Node::Node(const char* name) : Wrapper()
 {
    setHandler(xmlNewNode(NULL, BAD_CAST name));
    setDeleter(xmlFreeNode);
-   setNameExtractor(nameExtractor);
 }
 
 xml::Node::Node(_xmlNode* handler) : Wrapper(handler)
 {
-   setNameExtractor(nameExtractor);
 }
 
 // static
-const char* xml::Node::nameExtractor(const Handler handler)
+const char* xml::Node::readName(const Handler handler) const
    noexcept
 {
    return(const char*)(handler->name);

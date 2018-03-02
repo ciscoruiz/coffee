@@ -33,10 +33,9 @@ using namespace coffee;
 
 xml::Attribute::Attribute (_xmlAttr* handler) : Wrapper (handler)
 {
-   setNameExtractor(nameExtractor);
 }
 
-const char* xml::Attribute::nameExtractor (const Handler handler)
+const char* xml::Attribute::readName(const Handler handler) const
    noexcept
 {
    return (const char*) (handler->name);
@@ -66,8 +65,8 @@ const std::string& xml::Attribute::getValue () const
 bool xml::Attribute::operator < (const Attribute& left) const
    noexcept
 {
-   const char* thisName = nameExtractor (getHandler());
-   const char* leftName = nameExtractor (left.getHandler());
+   const char* thisName = readName(getHandler());
+   const char* leftName = readName(left.getHandler());
 
    if (thisName == NULL && leftName == NULL)
       return false;

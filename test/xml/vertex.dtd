@@ -1,0 +1,6 @@
+<!ELEMENT Intersect (First,Second)>
+<!ELEMENT First (Vertex+)>
+<!ELEMENT Second (Vertex+)> 
+<!ELEMENT Vertex EMPTY> 
+<!ATTLIST Vertex X CDATA #REQUIRED> 
+<!ATTLIST Vertex Y CDATA #REQUIRED>

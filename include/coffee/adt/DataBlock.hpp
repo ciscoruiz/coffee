@@ -60,6 +60,12 @@ public:
    DataBlock () {;}
 
    /**
+    * Constructor
+    * \param buffer Address to memory buffer which constains a C-string.
+    */
+   explicit DataBlock(const char* buffer) : std::string(buffer) {;}
+
+   /**
      Constructor.
 
      @param buffer Address to the memory buffer.

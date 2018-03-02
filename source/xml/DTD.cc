@@ -23,9 +23,13 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <fstream>
 
 #include <libxml/parser.h>
 
+#include <coffee/adt/DataBlock.hpp>
 #include <coffee/logger/Logger.hpp>
 
 #include <coffee/xml/DTD.hpp>
@@ -33,45 +37,71 @@
 
 using namespace coffee;
 
-char xml::DTD::st_text [1024] = "";
-
 xml::DTD::DTD () : Wrapper ()
 {
-   m_context = (xmlValidCtxtPtr) xmlMalloc (sizeof (xmlValidCtxt));
-   m_context->error = callbackErrorHandler;
-   m_context->warning = callbackWarningHandler;
-
    setDeleter (xmlFreeDtd);
-   setNameExtractor(nameExtractor);
 }
 
 xml::DTD::~DTD()
 {
-   xmlFree (m_context);
 }
 
-//static
-const char* xml::DTD::nameExtractor(const Handler handler)
-   noexcept
+void xml::DTD::initialize (const boost::filesystem::path& filename)
+   throw (adt::RuntimeException)
 {
-   return (const char*) handler->name;
+   _xmlDtd* result = nullptr;
+
+   int stream;
+
+   LOG_DEBUG ("Initializing DTD with file " << filename.c_str());
+
+   if ((stream = open (filename.c_str(), O_RDONLY)) == -1) {
+      COFFEE_THROW_EXCEPTION("Could not open to read " << filename.c_str());
+   }
+
+   close (stream);
+
+   if ((result = xmlParseDTD (NULL, BAD_CAST(filename.c_str()))) == NULL) {
+      COFFEE_THROW_EXCEPTION(filename.c_str() << " does not contains a valid DTD");
+   }
+
+   setHandler(result);
 }
 
-void xml::DTD::validate (const xml::Document* document) const
+void xml::DTD::initialize (const adt::DataBlock& buffer)
+   throw (adt::RuntimeException)
+{
+   char filename[] = "/tmp/mytemp.XXXXXX";
+   int fd = mkstemp(filename);
+   write(fd, buffer.data(), buffer.size());
+   close(fd);
+
+   try {
+      const boost::filesystem::path file(filename);
+      initialize(file);
+      std::remove(filename);
+   }
+   catch(adt::RuntimeException&) {
+      std::remove(filename);
+      throw;
+   }
+}
+
+void xml::DTD::validate (xml::Document& document) const
    throw (adt::RuntimeException)
 {
    if (getHandler () == NULL)
       COFFEE_THROW_EXCEPTION("Method xml::DTD::initialize was not called");
 
-   if (document->getHandler () == NULL)
-      COFFEE_THROW_EXCEPTION("XML document was not parsed");
-
-   xmlValidCtxtPtr context = const_cast <xmlValidCtxtPtr> (m_context);
-   xml::Document::Handler doc = const_cast <xml::Document::Handler> (document->getHandler ());
-   Handler dtd = const_cast <Handler> (getHandler ());
-
-   if (xmlValidateDtd (context, doc, dtd) == 0)
-      COFFEE_THROW_EXCEPTION("Document " << document->getName () << " does not match with DTD " << getName ());
+   // See http://forums.devx.com/showthread.php?158033-Get-output-from-libxml2
+   xmlValidCtxt context;
+   char buffer[1024];
+   coffee_memset(&context, 0, sizeof(context));
+   context.userData=&buffer;
+   context.error = callbackErrorHandler;
+   context.warning = callbackWarningHandler;
+   if (xmlValidateDtd (&context, document.getHandler(), getHandler()) == 0)
+      COFFEE_THROW_EXCEPTION("Document " << document.getName() << " does not match with DTD ");
 }
 
 /* static */
@@ -79,17 +109,10 @@ void xml::DTD::callbackErrorHandler (void *ctx,  const char *msg, ...)
    noexcept
 {
    va_list ap;
-
    va_start (ap, msg);
-   vsprintf (st_text, msg, ap);
-
-   for (char* aux = st_text; *aux; aux ++)
-      if (*aux == '\n')
-         *aux = ' ';
-
+   vsprintf ((char*) ctx, msg, ap);
    va_end (ap);
-
-   LOG_ERROR (st_text);
+   LOG_ERROR ((char*)ctx);
 }
 
 /* static */
@@ -97,16 +120,8 @@ void xml::DTD::callbackWarningHandler (void *ctx,  const char *msg, ...)
    noexcept
 {
    va_list ap;
-
-   if (coffee::logger::Logger::wantsToProcess (coffee::logger::Level::Warning)) {
-      va_start(ap, msg);
-      vsprintf (st_text, msg, ap);
-
-      for (char* aux = st_text; *aux; aux ++)
-         if (*aux == '\n')
-            *aux = ' ';
-      va_end (ap);
-
-      LOG_WARN(st_text);
-   }
+   va_start(ap, msg);
+   vsprintf ((char*) ctx, msg, ap);
+   va_end (ap);
+   LOG_ERROR ((char*)ctx);
 }

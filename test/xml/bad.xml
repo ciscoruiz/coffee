@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Intersecta>
+   <First>
+      <Vertex X= "1" Y="3"/>
+      <Vertex X="4" Y="6"/>
+      <Vertex X="7" Y="3"/>
+   </First>
+   <Second>
+      <Vertex X="3" Y="2"/>
+      <Vertex X="7" Y="6"/>
+      <Vertex X="11" Y="2"/>
+

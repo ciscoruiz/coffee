@@ -28,6 +28,9 @@
 
 using namespace coffee;
 
+// static
+const std::string xml::Content::WithoutName = "no-name";
+
 void xml::Content::setValue (const char* value)
    noexcept
 {

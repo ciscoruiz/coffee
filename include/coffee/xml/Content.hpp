@@ -32,6 +32,8 @@ namespace xml {
 
 class Content {
 public:
+   static const std::string WithoutName;
+
    Content () {;}
    virtual ~Content () { clear (); }
 

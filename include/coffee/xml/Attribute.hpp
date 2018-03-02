@@ -56,7 +56,7 @@ public:
 private:
    mutable Content m_value;
 
-   static const char* nameExtractor (const Handler handler) noexcept;
+   const char* readName(const Handler handler) const noexcept;
 
    void compile (Compiler& compiler) const throw (adt::RuntimeException);
 

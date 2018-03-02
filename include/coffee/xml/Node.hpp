@@ -120,7 +120,7 @@ private:
    void addChild(std::shared_ptr<Node> child) noexcept { m_children.push_back(child); }
    void addAttribute(std::shared_ptr<Attribute> attribute) throw(adt::RuntimeException);
 
-   static const char* nameExtractor(const Handler handler) noexcept;
+   const char* readName(const Handler handler) const noexcept;
 
    void compile(Compiler& compiler) const throw(adt::RuntimeException);
 

@@ -53,9 +53,6 @@ struct XmlFixture {
 
 };
 
-//BOOST_FIXTURE_TEST_CASE(persistence_storage_read, Fixture)
-
-
 BOOST_FIXTURE_TEST_CASE(simpliest_memory, XmlFixture)
 {
    const char* buffer = "<?xml version='1.0' encoding='ISO-8859-1'?> <one_node><param>the text</param><param>the text</param></one_node>";
@@ -311,39 +308,51 @@ BOOST_AUTO_TEST_CASE(file_notexisting_document)
    BOOST_REQUIRE_THROW(doc.parse(file), adt::RuntimeException);
 }
 
+BOOST_AUTO_TEST_CASE(file_bad_document)
+{
+   boost::filesystem::path coffeePath(boost::filesystem::current_path());
+   boost::filesystem::path xmlPath(coffeePath.native() + "/test/xml/bad.xml");
+
+   Document doc;
+
+   BOOST_REQUIRE_THROW(doc.parse(xmlPath), adt::RuntimeException);
+}
+
+BOOST_AUTO_TEST_CASE(memory_bad_document)
+{
+   const adt::DataBlock content("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node attr_aaa=\"text one\" attr_bbb=");
+
+   Document doc;
+
+   BOOST_REQUIRE_THROW(doc.parse(content), adt::RuntimeException);
+}
+
 BOOST_AUTO_TEST_CASE(compile_document)
 {
-   const char* buffer = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node attr_aaa=\"text one\" attr_bbb=\"text two\" attr_ccc=\"text three\"/>\n";
-
-   adt::DataBlock content(buffer, strlen(buffer) + 1);
-
+   const adt::DataBlock content("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node attr_aaa=\"text one\" attr_bbb=\"text two\" attr_ccc=\"text three\"/>\n");
    Document doc;
 
    BOOST_REQUIRE(doc.getHandler() == NULL);
 
-   doc.parse(content);
-
    Compiler compiler;
 
-   std::string str = compiler.apply(doc);
+   std::string str = compiler.apply(doc.parse(content));
 
-   BOOST_REQUIRE_EQUAL(str, buffer);
+   BOOST_REQUIRE_EQUAL(str, content.data());
 }
 
 BOOST_AUTO_TEST_CASE(compile_document_iso)
 {
-   const char* buffer = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node>Jörg</root_node>\n";
+   const adt::DataBlock content("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node>Jörg</root_node>\n");
 
    Document doc;
 
    BOOST_REQUIRE(doc.getHandler() == NULL);
 
-   doc.parse(buffer, coffee_strlen(buffer));
-
    Compiler compiler;
 
-   std::string str = compiler.apply(doc);
+   std::string str = compiler.apply(doc.parse(content));
 
-   BOOST_REQUIRE_EQUAL(str, buffer);
+   BOOST_REQUIRE_EQUAL(str, content.data());
 }
 

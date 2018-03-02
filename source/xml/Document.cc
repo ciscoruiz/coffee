@@ -31,6 +31,8 @@
 #include <coffee/adt/DataBlock.hpp>
 #include <coffee/adt/AsString.hpp>
 
+#include <coffee/logger/Logger.hpp>
+
 #include <coffee/xml/Document.hpp>
 #include <coffee/xml/DTD.hpp>
 #include <coffee/xml/Node.hpp>
@@ -43,9 +45,7 @@ xml::Document::Document() :
    Wrapper()
 {
    xml::SCCS::activate();
-
    setDeleter(xmlFreeDoc);
-   setNameExtractor(nameExtractor);
 }
 
 //virtual
@@ -53,63 +53,52 @@ xml::Document::~Document()
 {
 }
 
-// static
-const char* xml::Document::nameExtractor(const Handler handler)
+const char* xml::Document::readName(const Handler handler) const
    noexcept
 {
-   return(const char*)(handler->name);
+   return (handler->URL != NULL) ? (const char*)(handler->URL): Content::WithoutName.c_str();
 }
 
-void xml::Document::parse(const boost::filesystem::path& file)
+const xml::Document& xml::Document::parse(const boost::filesystem::path& file)
    throw(adt::RuntimeException)
 {
    releaseHandler();
    parseFile(file);
    extractNodes(getHandler());
-
    xmlCleanupParser();
+   return *this;
 }
 
-void xml::Document::parse(const adt::DataBlock& buffer)
+const xml::Document& xml::Document::parse(const adt::DataBlock& buffer)
    throw(adt::RuntimeException)
 {
    releaseHandler();
    parseMemory(buffer);
    extractNodes(getHandler());
-
    xmlCleanupParser();
+   return *this;
 }
 
-void xml::Document::parse(const char* buffer, const size_t size)
-   throw(adt::RuntimeException)
-{
-   const adt::DataBlock data(buffer, size);
-   parse(data);
-}
-
-void xml::Document::parse(const boost::filesystem::path& file, const DTD& dtd)
+const xml::Document& xml::Document::parse(const boost::filesystem::path& file, const DTD& dtd)
    throw(adt::RuntimeException)
 {
    releaseHandler();
    parseFile(file);
-   dtd.validate(this);
+   dtd.validate(*this);
    extractNodes(getHandler());
+   xmlCleanupParser();
+   return *this;
 }
 
-void xml::Document::parse(const adt::DataBlock& buffer, const DTD& dtd)
+const xml::Document& xml::Document::parse(const adt::DataBlock& buffer, const DTD& dtd)
    throw(adt::RuntimeException)
 {
    releaseHandler();
    parseMemory(buffer);
-   dtd.validate(this);
+   dtd.validate(*this);
    extractNodes(getHandler());
-}
-
-void xml::Document::parse(const char* buffer, const size_t size, const DTD& dtd)
-   throw(adt::RuntimeException)
-{
-   const adt::DataBlock data(buffer, size);
-   parse(data, dtd);
+   xmlCleanupParser();
+   return *this;
 }
 
 void xml::Document::parseFile(const boost::filesystem::path& file)
@@ -118,6 +107,8 @@ void xml::Document::parseFile(const boost::filesystem::path& file)
    if(boost::filesystem::exists(file) == false) {
       COFFEE_THROW_EXCEPTION("File '" << file.c_str() << "' does not exist");
    }
+
+   LOG_DEBUG("Parsing XML " << file.c_str());
 
    if(setHandler(xmlParseFile(file.c_str())) == NULL)
       COFFEE_THROW_EXCEPTION("Some errors were found while parsing filename '" << file.c_str() << "'");

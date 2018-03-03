@@ -99,9 +99,6 @@ public:
    */
    const std::string& getName() const noexcept { return m_name; }
 
-   void externalInitialize() throw(adt::RuntimeException);
-   void externalStop() throw(adt::RuntimeException);
-
    void setFailRecoveryHandler(std::shared_ptr<FailRecoveryHandler> failRecoveryHandler)
       noexcept
    {
@@ -156,14 +153,16 @@ public:
 protected:
    /**
       Contructor.
-      \param app Instancia de la aplicaci�n sobre la que corre.
-      \param rdbmsName Nombre del RDMS que gestiona esta base de datos.
-      \param dbmsName Nombre de la base de datos.
+      \param app Application instance which will start database
+      \param rdbmsName RDBMS name for this database.
+      \param dbmsName Logical name from this instance of the database.
    */
    Database(app::Application& app, const char* rdbmsName, const char* dbmsName);
 
-   Database(const char* rdbmsName, const char* dbmsName);
-
+   /**
+    * This method will be called when some layer detect some fault in the connection
+    * received as parameter.
+    */
    void notifyRecoveryFail(Connection& connection) const throw(adt::RuntimeException);
 
    /**

@@ -33,8 +33,8 @@
 using namespace coffee;
 using namespace coffee::dbms;
 
-sqlite::SqliteDatabase::SqliteDatabase(const boost::filesystem::path& dbFile) :
-   Database("SQLite3", dbFile.c_str())
+sqlite::SqliteDatabase::SqliteDatabase(app::Application& application, const boost::filesystem::path& dbFile) :
+   Database(application, "SQLite3", dbFile.c_str())
 {
    setErrorCodeInterpreter(std::make_shared<sqlite::SqliteErrorCodeInterpreter>());
 }

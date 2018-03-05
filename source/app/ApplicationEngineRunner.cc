@@ -1,17 +1,17 @@
 // MIT License
-// 
+//
 // Copyright (c) 2018 Francisco Ruiz (francisco.ruiz.rayo@gmail.com)
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,11 +21,42 @@
 // SOFTWARE.
 //
 
-#include <coffee/dbms/internal/DummyApplication.hpp>
+#include <coffee/app/ApplicationEngineRunner.hpp>
+
+#include <coffee/config/SCCS.hpp>
 
 using namespace coffee;
 
-// static
-dbms::internal::DummyApplication dbms::internal::DummyApplication::st_this;
+coffee_sccs_import_tag(app);
 
+app::ApplicationEngineRunner::ApplicationEngineRunner(const char* shortName):
+    app::Application(shortName, "Application for run attached engines", coffee_sccs_use_tag(app)),
+    semaphoreForRun(0),
+    stopNow(false)
+ {
+ }
 
+void app::ApplicationEngineRunner::run()
+   throw(adt::RuntimeException)
+{
+   semaphoreForRun.signal();
+   std::unique_lock <std::mutex> guard (mutex);
+   while(!stopNow) {
+      conditionForStop.wait(guard);
+   }
+}
+
+void app::ApplicationEngineRunner::do_requestStop()
+   throw(adt::RuntimeException)
+{
+   try {
+      app::Application::do_requestStop();
+      stopNow = true;
+      conditionForStop.notify_all();
+   }
+   catch(adt::RuntimeException&) {
+      stopNow = true;
+      conditionForStop.notify_all();
+      throw;
+   }
+}

@@ -37,7 +37,7 @@
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TtyWriter.hpp>
 
-#include <coffee/app/Application.hpp>
+#include <coffee/app/ApplicationEngineRunner.hpp>
 #include <coffee/app/Engine.hpp>
 
 #include <coffee/xml/Document.hpp>
@@ -53,44 +53,6 @@ public:
    }
 
    void run() throw(adt::RuntimeException) {;}
-};
-
-class ParallelApplication : public app::Application {
-public:
-   ParallelApplication() : app::Application("ParallelApplication", "It will wait till condition", "1.0"),
-      semaphoreForRun(0),
-      stopNow(false)
-   {
-      logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
-   }
-
-   void waitForRun() { semaphoreForRun.wait(); }
-   void terminateApplication() { stopNow = true; conditionForStop.notify_all(); }
-
-private:
-   adt::Semaphore semaphoreForRun;
-   std::mutex mutex;
-   std::condition_variable conditionForStop;
-   bool stopNow;
-
-   void run() throw(adt::RuntimeException) {
-      semaphoreForRun.signal();
-      std::unique_lock <std::mutex> guard (mutex);
-      while(!stopNow) {
-         conditionForStop.wait(guard);
-      }
-   }
-
-   void do_requestStop() throw(adt::RuntimeException) {
-      try {
-         app::Application::do_requestStop();
-         terminateApplication();
-      }
-      catch(adt::RuntimeException&) {
-         terminateApplication();
-         throw;
-      }
-   }
 };
 
 void parallelRun(app::Application& app) {
@@ -249,11 +211,11 @@ BOOST_AUTO_TEST_CASE( iterator_engine )
 
 BOOST_AUTO_TEST_CASE( app_already_run )
 {
-   ParallelApplication application;
+   app::ApplicationEngineRunner application("app_already_run");
 
    auto thread = std::thread(parallelRun, std::ref(application));
 
-   application.waitForRun();
+   application.waitUntilRunning();
    BOOST_CHECK_THROW(application.start(), adt::RuntimeException);
    application.requestStop();
    thread.join();
@@ -261,12 +223,12 @@ BOOST_AUTO_TEST_CASE( app_already_run )
 
 BOOST_AUTO_TEST_CASE( app_stop_engines )
 {
-   ParallelApplication application;
+   app::ApplicationEngineRunner application("app_stop_engines");
    auto engine = std::make_shared<MyEngine>(application, "00");
    application.attach(engine);
 
    auto thread = std::thread(parallelRun, std::ref(application));
-   application.waitForRun();
+   application.waitUntilRunning();
    BOOST_CHECK(application.isRunning());
 
    BOOST_CHECK(engine->isRunning());
@@ -303,7 +265,7 @@ BOOST_AUTO_TEST_CASE( app_already_defined )
 
 BOOST_AUTO_TEST_CASE( app_unstoppable_stop_engines )
 {
-   ParallelApplication application;
+   app::ApplicationEngineRunner application("app_unstoppable_stop_engines");
 
    auto engine = std::make_shared<NoStopEngine>(application, "00");
    application.attach(engine);
@@ -311,10 +273,10 @@ BOOST_AUTO_TEST_CASE( app_unstoppable_stop_engines )
    application.attach(std::make_shared<NoStopEngine>(application, "02"));
 
    auto thread = std::thread(parallelRun, std::ref(application));
-   application.waitForRun();
+   application.waitUntilRunning();
    BOOST_CHECK(application.isRunning());
 
-   application.terminateApplication();
+   application.requestStop();
 
    thread.join();
 
@@ -324,7 +286,7 @@ BOOST_AUTO_TEST_CASE( app_unstoppable_stop_engines )
 
 BOOST_AUTO_TEST_CASE( app_unstoppable_requeststop_engines )
 {
-   ParallelApplication application;
+   app::ApplicationEngineRunner application("app_unstoppable_requeststop_engines");
 
    auto engine = std::make_shared<NoRequestStopEngine>(application, "00");
    application.attach(engine);
@@ -332,7 +294,7 @@ BOOST_AUTO_TEST_CASE( app_unstoppable_requeststop_engines )
    application.attach(std::make_shared<NoRequestStopEngine>(application, "02"));
 
    auto thread = std::thread(parallelRun, std::ref(application));
-   application.waitForRun();
+   application.waitUntilRunning();
    BOOST_CHECK(application.isRunning());
    BOOST_CHECK(engine->isRunning());
 
@@ -346,14 +308,14 @@ BOOST_AUTO_TEST_CASE( app_unstoppable_requeststop_engines )
 
 BOOST_AUTO_TEST_CASE( engine_attach_after_running )
 {
-   ParallelApplication application;
+   app::ApplicationEngineRunner application("engine_attach_after_running");
 
    std::shared_ptr<MyEngine> engine = std::make_shared<MyEngine>(application, "00");
    application.attach(engine);
 
    auto thread = std::thread(parallelRun, std::ref(application));
 
-   application.waitForRun();
+   application.waitUntilRunning();
    BOOST_CHECK(application.isRunning());
    BOOST_CHECK(engine->isRunning());
 
@@ -369,7 +331,7 @@ BOOST_AUTO_TEST_CASE( engine_attach_after_running )
 
 BOOST_AUTO_TEST_CASE( app_logger_level_change_onair )
 {
-   ParallelApplication application;
+   app::ApplicationEngineRunner application("app_logger_level_change_onair");
 
    std::shared_ptr<MyEngine> engine = std::make_shared<MyEngine>(application, "00");
    application.attach(engine);
@@ -378,7 +340,7 @@ BOOST_AUTO_TEST_CASE( app_logger_level_change_onair )
 
    logger::Logger::setLevel(logger::Level::Information);
 
-   application.waitForRun();
+   application.waitUntilRunning();
    BOOST_CHECK(application.isRunning());
    BOOST_CHECK(engine->isRunning());
 
@@ -396,7 +358,7 @@ BOOST_AUTO_TEST_CASE( app_logger_level_change_onair )
 }
 
 struct CleanContextFilename {
-   CleanContextFilename() {
+   CleanContextFilename() : application("AppDownloadContext") {
       remove(application.getOutputContextFilename().c_str());
 
    }
@@ -404,19 +366,17 @@ struct CleanContextFilename {
       remove(application.getOutputContextFilename().c_str());
    }
 
-   ParallelApplication application;
+   app::ApplicationEngineRunner application;
 };
 
 BOOST_FIXTURE_TEST_CASE( app_write_context, CleanContextFilename )
 {
-   remove(application.getOutputContextFilename().c_str());
-
    application.attach(std::make_shared<MyEngine>(application, "00"));
    application.attach(std::make_shared<MyEngine>(application, "01"));
 
    auto thread = std::thread(parallelRun, std::ref(application));
 
-   application.waitForRun();
+   application.waitUntilRunning();
    BOOST_CHECK(application.isRunning());
 
    std::raise(SIGUSR1);
@@ -446,7 +406,7 @@ BOOST_FIXTURE_TEST_CASE( app_cannot_write_context, CleanContextFilename )
 
    auto thread = std::thread(parallelRun, std::ref(application));
 
-   application.waitForRun();
+   application.waitUntilRunning();
    BOOST_CHECK(application.isRunning());
 
    std::raise(SIGUSR1);

@@ -39,7 +39,7 @@ using namespace coffee;
 void app::Runnable::requestStop ()
    throw (adt::RuntimeException)
 {
-   if (isWaitingStop () == true)
+   if (isWaitingStop () || isStopped())
       return;
 
    do_requestStop ();

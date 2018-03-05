@@ -37,7 +37,8 @@ namespace sqlite {
 
 class SqliteDatabase : public Database {
 public:
-   explicit SqliteDatabase(const boost::filesystem::path& dbFile);
+   static std::shared_ptr<SqliteDatabase> instantiate(app::Application& application, const boost::filesystem::path& dbFile)
+      throw(adt::RuntimeException);
    ~SqliteDatabase();
 
 private:
@@ -50,6 +51,8 @@ private:
       bool locked(const int errorCode) const throw(adt::RuntimeException);
       bool lostConnection(const int errorCode) const throw(adt::RuntimeException);
    };
+
+   explicit SqliteDatabase(app::Application& application, const boost::filesystem::path& dbFile);
 
    std::shared_ptr<Connection> allocateConnection(const std::string& name, const char* user, const char* password)
       throw(adt::RuntimeException);

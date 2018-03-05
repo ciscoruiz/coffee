@@ -59,15 +59,14 @@
 #include <MockConnection.hpp>
 
 #include "PersistenceMocks.hpp"
+#include "MockDatabaseFixture.hpp"
 
 using namespace coffee;
 using namespace coffee::mock;
 
-struct Fixture {
-   test_persistence::MyDatabase database;
+struct Fixture : public MockDatabaseFixture<test_persistence::MyDatabase>  {
    persistence::Repository repository;
 
-   std::shared_ptr<dbms::Connection> connection;
    std::shared_ptr<dbms::Statement> readerStatement;
    std::shared_ptr<dbms::Statement> writerStatement;
    std::shared_ptr<dbms::Statement> eraserStatement;
@@ -76,14 +75,14 @@ struct Fixture {
    std::shared_ptr<persistence::Class> customerClass;
    std::shared_ptr<persistence::PrimaryKey> primaryKeyForFind;
 
-   Fixture() : database ("dbName"), repository("repoName") {
-      connection = database.createConnection("default", "user", "password");
-      readerStatement = database.createStatement("read_only", "read");
-      writerStatement = database.createStatement("writer", "write");
-      eraserStatement = database.createStatement("eraser", "delete");
+   Fixture() : MockDatabaseFixture<test_persistence::MyDatabase>("Storage-test"),
+      repository("repoName")
+   {
+      readerStatement = database->createStatement("read_only", "read");
+      writerStatement = database->createStatement("writer", "write");
+      eraserStatement = database->createStatement("eraser", "delete");
 
-      BOOST_REQUIRE_NO_THROW(database.externalInitialize());
-      BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+      BOOST_REQUIRE(database->isRunning());
 
       storage = repository.createStorage("default", persistence::Storage::DefaultMaxCacheSize);
 
@@ -95,7 +94,12 @@ struct Fixture {
       persistence::ClassBuilder classBuilder("customer");
       classBuilder.set(primaryKeyCustomer).add(std::make_shared<dbms::datatype::String>("name", 64));
       customerClass = classBuilder.build();
+
+      mockDatabase = std::dynamic_pointer_cast<test_persistence::MyDatabase>(database);
    }
+
+   std::shared_ptr<test_persistence::MyDatabase> mockDatabase;
+
 };
 
 BOOST_FIXTURE_TEST_CASE(persistence_storage_read, Fixture)
@@ -154,7 +158,7 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_reload, Fixture)
    newSix.m_name = "only odd id's will be reloaded";
    newSix.m_float = 0.123;
    newSix.m_integer = 6 * 6;
-   database.update(newSix);
+   database->update(newSix);
 
    {
       test_persistence::CustomerObjectWrapper customer(storage->load(connection, myLoader));
@@ -183,7 +187,7 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_reload_erased, Fixture)
       BOOST_REQUIRE_EQUAL(storage->getHitCounter(), 0);
    }
 
-   database.erase(6);
+   database->erase(6);
 
    {
       BOOST_REQUIRE_THROW(storage->load(connection, myLoader), dbms::DatabaseException);
@@ -208,7 +212,7 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_noreload_erased, Fixture)
       BOOST_REQUIRE_EQUAL(storage->getHitCounter(), 0);
    }
 
-   database.erase(7);
+   database->erase(7);
 
    {
       BOOST_REQUIRE_NO_THROW(storage->load(connection, myLoader));
@@ -238,7 +242,7 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_noreload, Fixture)
    newSix.m_name = "even id will not be reload";
    newSix.m_float = 0.123;
    newSix.m_integer = 6 * 6;
-   database.update(newSix);
+   database->update(newSix);
 
    {
       test_persistence::CustomerObjectWrapper customer(storage->load(connection, myLoader));
@@ -264,7 +268,7 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_read_not_found, Fixture)
 
 BOOST_FIXTURE_TEST_CASE(persistence_storage_write, Fixture)
 {
-   BOOST_REQUIRE_EQUAL(database.container_size(), test_persistence::MyDatabase::PreloadRegisterCounter);
+   BOOST_REQUIRE_EQUAL(mockDatabase->container_size(), test_persistence::MyDatabase::PreloadRegisterCounter);
 
    if (true) {
       primaryKeyForFind->setInteger("id", 5555);
@@ -278,7 +282,7 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_write, Fixture)
       storage->save(connection, recorder);
    }
 
-   BOOST_REQUIRE_EQUAL(database.container_size(), test_persistence::MyDatabase::PreloadRegisterCounter + 1);
+   BOOST_REQUIRE_EQUAL(mockDatabase->container_size(), test_persistence::MyDatabase::PreloadRegisterCounter + 1);
 
    BOOST_REQUIRE_EQUAL(storage->getFaultCounter(), 0);
    BOOST_REQUIRE_EQUAL(storage->getHitCounter(), 0);
@@ -307,7 +311,7 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_erase_preloaded, Fixture)
       BOOST_REQUIRE_EQUAL(storage->getHitCounter(), 0);
    }
 
-   BOOST_REQUIRE_EQUAL(database.container_size(), test_persistence::MyDatabase::PreloadRegisterCounter);
+   BOOST_REQUIRE_EQUAL(mockDatabase->container_size(), test_persistence::MyDatabase::PreloadRegisterCounter);
 
    if (true) {
       primaryKeyForFind->setInteger("id", 6);
@@ -321,7 +325,7 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_erase_preloaded, Fixture)
       BOOST_REQUIRE_EQUAL(storage->getHitCounter(), 1);
    }
 
-   BOOST_REQUIRE_EQUAL(database.container_size(), test_persistence::MyDatabase::PreloadRegisterCounter - 1);
+   BOOST_REQUIRE_EQUAL(mockDatabase->container_size(), test_persistence::MyDatabase::PreloadRegisterCounter - 1);
 
    BOOST_REQUIRE_THROW(storage->load(connection, myLoader), dbms::DatabaseException);
 
@@ -332,7 +336,7 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_erase_preloaded, Fixture)
 
 BOOST_FIXTURE_TEST_CASE(persistence_storage_erase_noloaded, Fixture)
 {
-   BOOST_REQUIRE_EQUAL(database.container_size(), test_persistence::MyDatabase::PreloadRegisterCounter);
+   BOOST_REQUIRE_EQUAL(mockDatabase->container_size(), test_persistence::MyDatabase::PreloadRegisterCounter);
 
    primaryKeyForFind->setInteger("id", 6);
    test_persistence::MockCustomerEraser eraser(eraserStatement, primaryKeyForFind);
@@ -344,7 +348,7 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_erase_noloaded, Fixture)
    BOOST_REQUIRE_EQUAL(storage->getFaultCounter(), 1);
    BOOST_REQUIRE_EQUAL(storage->getHitCounter(), 0);
 
-   BOOST_REQUIRE_EQUAL(database.container_size(), test_persistence::MyDatabase::PreloadRegisterCounter - 1);
+   BOOST_REQUIRE_EQUAL(mockDatabase->container_size(), test_persistence::MyDatabase::PreloadRegisterCounter - 1);
 
    test_persistence::MockCustomerLoader myLoader(readerStatement, primaryKeyForFind, customerClass);
 
@@ -377,7 +381,7 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_save_commit_pending, Fixture)
       }
    }
 
-   BOOST_REQUIRE_EQUAL(database.container_size(), test_persistence::MyDatabase::PreloadRegisterCounter + (maxCommitPending * commitCounter));
+   BOOST_REQUIRE_EQUAL(mockDatabase->container_size(), test_persistence::MyDatabase::PreloadRegisterCounter + (maxCommitPending * commitCounter));
 
    auto mockConnection = std::dynamic_pointer_cast<mock::MockConnection>(connection);
 
@@ -401,7 +405,7 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_erase_commit_pending, Fixture)
       }
    }
 
-   BOOST_REQUIRE_EQUAL(database.container_size(), test_persistence::MyDatabase::PreloadRegisterCounter + 10 - maxId);
+   BOOST_REQUIRE_EQUAL(mockDatabase->container_size(), test_persistence::MyDatabase::PreloadRegisterCounter + 10 - maxId);
 
    auto mockConnection = std::dynamic_pointer_cast<mock::MockConnection>(connection);
 

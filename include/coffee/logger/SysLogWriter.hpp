@@ -44,8 +44,6 @@ public:
    class OptionBuilder {
 	   int flags;
 
-	   int build() const { return flags; }
-
    public:
 	   OptionBuilder() { flags = 0; }
 
@@ -73,6 +71,11 @@ public:
 	    * Activate the LOG_PERROR option.
 	    */
 	   OptionBuilder& logToStdErr() noexcept;
+
+	   /**
+	    * \return the Flags used by the SysLogWriter.
+	    */
+      int build() const { return flags; }
 
 	   friend class SysLogWriter;
    };

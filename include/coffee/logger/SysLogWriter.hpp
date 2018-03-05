@@ -97,7 +97,7 @@ private:
    const std::string m_ident;
    const int m_options;
 
-   void do_initialize () throw (adt::RuntimeException);
+   void initialize () throw (adt::RuntimeException);
    void apply (const Level::_v level, const std::string& line) noexcept;
 };
 

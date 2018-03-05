@@ -60,11 +60,7 @@ private:
 
    Writer(const Writer&);
 
-   void initialize() throw(adt::RuntimeException) {
-      do_initialize();
-   }
-
-   virtual void do_initialize() throw(adt::RuntimeException) = 0;
+   virtual void initialize() throw(adt::RuntimeException) = 0;
    virtual void apply(const Level::_v level, const std::string& line) noexcept = 0;
 
    friend class Logger;

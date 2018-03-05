@@ -50,7 +50,7 @@ private:
    unsigned int m_counters [logger::Level::Local7 + 1];
    unsigned int m_total;
 
-   void do_initialize() throw(adt::RuntimeException){
+   void initialize() throw(adt::RuntimeException){
       memset(&m_counters, 0, sizeof(m_counters));
       m_total = 0;
    }

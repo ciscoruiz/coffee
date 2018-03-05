@@ -44,7 +44,7 @@ private:
       std::cout << line << std::endl;
       ++ m_counter;
    }
-   void do_initialize () throw (adt::RuntimeException) {;}
+   void initialize () throw (adt::RuntimeException) {;}
 };
 
 

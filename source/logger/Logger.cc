@@ -27,6 +27,7 @@
 #include <coffee/logger/DefaultFormatter.hpp>
 #include <coffee/logger/Level.hpp>
 #include <coffee/logger/SCCS.hpp>
+#include <coffee/logger/CircularTraceWriter.hpp>
 
 using namespace coffee;
 

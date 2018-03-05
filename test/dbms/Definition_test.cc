@@ -346,6 +346,9 @@ BOOST_AUTO_TEST_CASE(dbms_translator)
    database->setStatementTranslator(std::make_shared<test_dbms::MyTranslator>());
    auto st1 = database->createStatement("one", "read");
    BOOST_REQUIRE_EQUAL(st1->getExpression(), "READ");
+
+   std::string str = database->asString();
+   BOOST_REQUIRE(str.find("MyTranslator") != std::string::npos);
 }
 
 struct DbmsDefineAndRun : public MockDatabaseFixture<test_dbms::MyDatabase> {

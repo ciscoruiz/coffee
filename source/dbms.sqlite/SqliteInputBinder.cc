@@ -87,10 +87,8 @@ void sqlite::SqliteInputBinder::do_encode(Statement& statement, const int pos)
          break;
       case dbms::datatype::Abstract::Datatype::TimeStamp:
          {
-            auto timeStamp = coffee_datatype_downcast(datatype::TimeStamp, data);
-            adt::Millisecond ms = timeStamp->getValue().getTime();
-            ms += adt::Millisecond(timeStamp->getFractionalSecond());
-            rc = sqlite3_bind_int64(impl, pos + 1, ms.getValue());
+            adt::Second timeStamp = coffee_datatype_downcast(datatype::TimeStamp, data)->getValue();
+            rc = sqlite3_bind_int64(impl, pos + 1, timeStamp);
          }
          break;
       }

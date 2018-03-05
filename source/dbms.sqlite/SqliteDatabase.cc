@@ -23,6 +23,8 @@
 
 #include <memory>
 
+#include <coffee/app/Application.hpp>
+
 #include <coffee/dbms.sqlite/SqliteDatabase.hpp>
 #include <coffee/dbms.sqlite/SqliteConnection.hpp>
 #include <coffee/dbms.sqlite/SqliteStatement.hpp>
@@ -32,6 +34,15 @@
 
 using namespace coffee;
 using namespace coffee::dbms;
+
+//static
+std::shared_ptr<sqlite::SqliteDatabase> sqlite::SqliteDatabase::instantiate(app::Application& application, const boost::filesystem::path& dbFile)
+   throw(adt::RuntimeException)
+{
+   std::shared_ptr<SqliteDatabase> result(new SqliteDatabase(application, dbFile));
+   application.attach(result);
+   return result;
+}
 
 sqlite::SqliteDatabase::SqliteDatabase(app::Application& application, const boost::filesystem::path& dbFile) :
    Database(application, "SQLite3", dbFile.c_str())

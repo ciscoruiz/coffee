@@ -100,10 +100,17 @@ class MyDatabase : public mock::MockDatabase {
 public:
    static const int PreloadRegisterCounter;
 
-   explicit MyDatabase(app::Application& app) : mock::MockDatabase(app) { fillup(); }
-   explicit MyDatabase(const char* name) : mock::MockDatabase(name) { fillup(); }
+   static std::shared_ptr<MyDatabase> instantiate(app::Application& application)
+      throw(adt::RuntimeException)
+   {
+      std::shared_ptr<MyDatabase> result(new MyDatabase(application));
+      application.attach(result);
+      return result;
+   }
 
 private:
+   explicit MyDatabase(app::Application& app) : mock::MockDatabase(app) { fillup(); }
+
    void fillup() {
       mock::MockLowLevelRecord record;
       for(int ii = 0; ii < PreloadRegisterCounter; ++ ii) {

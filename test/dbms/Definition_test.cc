@@ -36,6 +36,7 @@
 
 #include "MockDatabase.hpp"
 #include "MockLowLevelRecord.hpp"
+#include "MockDatabaseFixture.hpp"
 
 #include <coffee/app/ApplicationEngineRunner.hpp>
 
@@ -347,22 +348,9 @@ BOOST_AUTO_TEST_CASE(dbms_translator)
    BOOST_REQUIRE_EQUAL(st1->getExpression(), "READ");
 }
 
-struct DbmsDefineAndRun {
-   DbmsDefineAndRun() : app("MyApplication"){
-      database = test_dbms::MyDatabase::instantiate(app);
-      thr = std::thread(parallelRun, std::ref(app));
-      app.waitUntilRunning();
-      BOOST_REQUIRE(database->isRunning());
-      connection = std::dynamic_pointer_cast<mock::MockConnection>(database->createConnection("0", "0", "0"));
-   }
-
-   ~DbmsDefineAndRun() {
-      app.requestStop();
-      thr.join();
-   }
-
-   static void parallelRun(app::Application& app) {
-      app.start();
+struct DbmsDefineAndRun : public MockDatabaseFixture<test_dbms::MyDatabase> {
+   DbmsDefineAndRun() : MockDatabaseFixture<test_dbms::MyDatabase>("Definition_test") {
+      mockConnection = std::dynamic_pointer_cast<mock::MockConnection>(connection);
    }
 
    dbms::ResultCode  writeRecord(dbms::GuardStatement& writer, const int id) throw (dbms::DatabaseException) {
@@ -389,18 +377,15 @@ struct DbmsDefineAndRun {
          BOOST_REQUIRE_NO_THROW(writeRecord(writer, 5));
          BOOST_REQUIRE_NO_THROW(writeRecord(writer, 6));
 
-         BOOST_REQUIRE_EQUAL(connection->operation_size(), 3);
+         BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 3);
          BOOST_REQUIRE_EQUAL(database->container_size(), 0);
       }
 
-      BOOST_REQUIRE_EQUAL(connection->getCommitCounter(), 1);
-      BOOST_REQUIRE_EQUAL(connection->getRollbackCounter(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getRollbackCounter(), 0);
    }
 
-   app::ApplicationEngineRunner app;
-   std::shared_ptr<test_dbms::MyDatabase> database;
-   std::shared_ptr<mock::MockConnection> connection;
-   std::thread thr;
+   std::shared_ptr<mock::MockConnection> mockConnection;
 };
 
 BOOST_FIXTURE_TEST_CASE(dbms_write_and_read, DbmsDefineAndRun)
@@ -418,17 +403,17 @@ BOOST_FIXTURE_TEST_CASE(dbms_write_and_read, DbmsDefineAndRun)
       BOOST_REQUIRE_THROW(writer.getInputData(10), adt::RuntimeException);
 
       BOOST_REQUIRE_NO_THROW(writeRecord(writer, 2));
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database->container_size(), 0);
 
       BOOST_REQUIRE_NO_THROW(writeRecord(writer, 5));
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 2);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 2);
       BOOST_REQUIRE_EQUAL(database->container_size(), 0);
 
       BOOST_REQUIRE_NO_THROW(resultCode = writeRecord(writer, 6));
       BOOST_REQUIRE_EQUAL(resultCode.getNumericCode(), test_dbms::MyDatabase::Successful);
       BOOST_REQUIRE_EQUAL(resultCode.successful(), true);
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 3);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 3);
       BOOST_REQUIRE_EQUAL(database->container_size(), 0);
    }
    catch(adt::Exception& ex) {
@@ -436,9 +421,9 @@ BOOST_FIXTURE_TEST_CASE(dbms_write_and_read, DbmsDefineAndRun)
       BOOST_REQUIRE_EQUAL(true, false);
    }
 
-   BOOST_REQUIRE_EQUAL(connection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
    BOOST_REQUIRE_EQUAL(database->container_size(), 3);
-   BOOST_REQUIRE_EQUAL(connection->getCommitCounter(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1);
 
    if(true) {
       dbms::GuardConnection guard(connection);
@@ -479,7 +464,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_write_and_read, DbmsDefineAndRun)
    }
 
    BOOST_REQUIRE_EQUAL(database->container_size(), 3);
-   BOOST_REQUIRE_EQUAL(connection->getCommitCounter(), 1); // There was not commit due to reader operation
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1); // There was not commit due to reader operation
 }
 
 BOOST_FIXTURE_TEST_CASE(dbms_write_and_delete, DbmsDefineAndRun)
@@ -490,12 +475,12 @@ BOOST_FIXTURE_TEST_CASE(dbms_write_and_delete, DbmsDefineAndRun)
 
    BOOST_REQUIRE_NO_THROW(populate(stWriter));
 
-   BOOST_REQUIRE_EQUAL(connection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
    BOOST_REQUIRE_EQUAL(database->container_size(), 3);
-   BOOST_REQUIRE_EQUAL(connection->getCommitCounter(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1);
 
    BOOST_REQUIRE_EQUAL(database->container_size(), 3);
-   BOOST_REQUIRE_EQUAL(connection->getCommitCounter(), 1); // There was not commit due to reader operation
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1); // There was not commit due to reader operation
 
    if(true) {
       dbms::GuardConnection guard(connection);
@@ -507,19 +492,19 @@ BOOST_FIXTURE_TEST_CASE(dbms_write_and_delete, DbmsDefineAndRun)
       resultCode = eraser.execute();
       BOOST_REQUIRE_EQUAL(resultCode.successful(), true);
 
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database->container_size(), 3);
 
       id->setValue(2);
       resultCode = eraser.execute();
       BOOST_REQUIRE_EQUAL(resultCode.successful(), true);
 
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 2);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 2);
       BOOST_REQUIRE_EQUAL(database->container_size(), 3);
    }
 
    BOOST_REQUIRE_EQUAL(database->container_size(), 1);
-   BOOST_REQUIRE_EQUAL(connection->getCommitCounter(), 2);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 2);
 }
 
 BOOST_FIXTURE_TEST_CASE(dbms_write_rollback, DbmsDefineAndRun)
@@ -534,16 +519,16 @@ BOOST_FIXTURE_TEST_CASE(dbms_write_rollback, DbmsDefineAndRun)
       dbms::GuardStatement writer(guard, rollbackWriter);
 
       BOOST_REQUIRE_NO_THROW(writeRecord(writer, 8));
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database->container_size(), 3);
 
       BOOST_REQUIRE_THROW(writeRecord(writer, test_dbms::IdToThrowDbException), dbms::DatabaseException);
    }
 
-   BOOST_REQUIRE_EQUAL(connection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
    BOOST_REQUIRE_EQUAL(database->container_size(), 3);
-   BOOST_REQUIRE_EQUAL(connection->getCommitCounter(), 1);
-   BOOST_REQUIRE_EQUAL(connection->getRollbackCounter(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->getRollbackCounter(), 1);
 }
 
 
@@ -559,20 +544,20 @@ BOOST_FIXTURE_TEST_CASE(dbms_write_norollback, DbmsDefineAndRun)
       dbms::GuardStatement writer(guard, noRollbackWriter);
 
       BOOST_REQUIRE_NO_THROW(writeRecord(writer, 9));
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database->container_size(), 3);
 
       BOOST_REQUIRE_NO_THROW(resultCode = writeRecord(writer, test_dbms::IdToThrowDbException));
 
       BOOST_REQUIRE_EQUAL(resultCode.successful(), false);
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database->container_size(), 3);
    }
 
-   BOOST_REQUIRE_EQUAL(connection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
    BOOST_REQUIRE_EQUAL(database->container_size(), 4);
-   BOOST_REQUIRE_EQUAL(connection->getCommitCounter(), 2);
-   BOOST_REQUIRE_EQUAL(connection->getRollbackCounter(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 2);
+   BOOST_REQUIRE_EQUAL(mockConnection->getRollbackCounter(), 0);
 }
 
 BOOST_FIXTURE_TEST_CASE(dbms_erase_rollback, DbmsDefineAndRun)
@@ -591,20 +576,20 @@ BOOST_FIXTURE_TEST_CASE(dbms_erase_rollback, DbmsDefineAndRun)
       coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(6);
       eraser.execute();
 
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database->container_size(), 3);
 
       coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
       BOOST_REQUIRE_THROW(eraser.execute(), dbms::DatabaseException);
 
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database->container_size(), 3);
    }
 
-   BOOST_REQUIRE_EQUAL(connection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
    BOOST_REQUIRE_EQUAL(database->container_size(), 3);
-   BOOST_REQUIRE_EQUAL(connection->getCommitCounter(), 1);
-   BOOST_REQUIRE_EQUAL(connection->getRollbackCounter(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->getRollbackCounter(), 1);
 }
 
 BOOST_FIXTURE_TEST_CASE(dbms_erase_norollback, DbmsDefineAndRun)
@@ -622,7 +607,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_erase_norollback, DbmsDefineAndRun)
       coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(2);
       eraser.execute();
 
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database->container_size(), 3);
 
       coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
@@ -630,14 +615,14 @@ BOOST_FIXTURE_TEST_CASE(dbms_erase_norollback, DbmsDefineAndRun)
 
       BOOST_REQUIRE_EQUAL(resultCode.successful(), false);
       BOOST_REQUIRE_EQUAL(resultCode.notFound(), true);
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database->container_size(), 3);
    }
 
-   BOOST_REQUIRE_EQUAL(connection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
    BOOST_REQUIRE_EQUAL(database->container_size(), 2);
-   BOOST_REQUIRE_EQUAL(connection->getCommitCounter(), 2);
-   BOOST_REQUIRE_EQUAL(connection->getRollbackCounter(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 2);
+   BOOST_REQUIRE_EQUAL(mockConnection->getRollbackCounter(), 0);
 }
 
 BOOST_FIXTURE_TEST_CASE(dbms_set_max_commit, DbmsDefineAndRun)
@@ -655,9 +640,9 @@ BOOST_FIXTURE_TEST_CASE(dbms_set_max_commit, DbmsDefineAndRun)
          BOOST_REQUIRE_NO_THROW(writeRecord(writer, ii));
       }
 
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 0);
-      BOOST_REQUIRE_EQUAL(connection->getCommitCounter(), 3);
-      BOOST_REQUIRE_EQUAL(connection->getRollbackCounter(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 3);
+      BOOST_REQUIRE_EQUAL(mockConnection->getRollbackCounter(), 0);
    }
 
    BOOST_REQUIRE_EQUAL(database->container_size(), 15);
@@ -673,9 +658,9 @@ BOOST_FIXTURE_TEST_CASE(dbms_set_max_commit, DbmsDefineAndRun)
       }
    }
 
-   BOOST_REQUIRE_EQUAL(connection->getCommitCounter(), 4);
-   BOOST_REQUIRE_EQUAL(connection->getRollbackCounter(), 0);
-   BOOST_REQUIRE_EQUAL(connection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 4);
+   BOOST_REQUIRE_EQUAL(mockConnection->getRollbackCounter(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
    BOOST_REQUIRE_EQUAL(database->container_size(), 30);
 }
 
@@ -687,23 +672,23 @@ BOOST_FIXTURE_TEST_CASE(dbms_break_detected_executing, DbmsDefineAndRun)
       GuardConnection guard(connection);
       GuardStatement writer(guard, stWriter);
 
-      BOOST_REQUIRE_EQUAL(connection->getOpenCounter(), 1);
-      BOOST_REQUIRE_EQUAL(connection->getCloseCounter(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 0);
 
       BOOST_REQUIRE_NO_THROW(writeRecord(writer, 1));
 
-      connection->manualBreak();
+      mockConnection->manualBreak();
 
       // It will detect the lost connection but it will try to recover and it will get it.
       BOOST_REQUIRE_THROW(writeRecord(writer, 2),  dbms::DatabaseException);
 
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 0);
-      BOOST_REQUIRE_EQUAL(connection->getOpenCounter(), 2);
-      BOOST_REQUIRE_EQUAL(connection->getCloseCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 2);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 1);
    }
 
    // It will recover the connection after it will detect
-   BOOST_REQUIRE_EQUAL(connection->isAvailable(), true);
+   BOOST_REQUIRE_EQUAL(mockConnection->isAvailable(), true);
    BOOST_REQUIRE_EQUAL(database->container_size(), 0);
 }
 
@@ -715,53 +700,53 @@ BOOST_FIXTURE_TEST_CASE(dbms_break_detected_while_locking, DbmsDefineAndRun)
       GuardConnection guard(connection);
       GuardStatement writer(guard, stWriter);
 
-      BOOST_REQUIRE_EQUAL(connection->getOpenCounter(), 1);
-      BOOST_REQUIRE_EQUAL(connection->getCloseCounter(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 0);
 
       BOOST_REQUIRE_NO_THROW(writeRecord(writer, 1));
    }
 
-   connection->manualBreak();
+   mockConnection->manualBreak();
 
    if(true) {
       // It will detect the lost connection but it will try to recover and it will get it.
       GuardConnection guard(connection);
       GuardStatement writer(guard, stWriter);
 
-      BOOST_REQUIRE_EQUAL(connection->getOpenCounter(), 2);
-      BOOST_REQUIRE_EQUAL(connection->getCloseCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 2);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 1);
 
       BOOST_REQUIRE_NO_THROW(writeRecord(writer, 2));
    }
 
    // It will recover the connection after it will detect
-   BOOST_REQUIRE_EQUAL(connection->isAvailable(), true);
+   BOOST_REQUIRE_EQUAL(mockConnection->isAvailable(), true);
    BOOST_REQUIRE_EQUAL(database->container_size(), 2);
 
    if(true) {
       // It will detect the lost connection but it will try to recover and it will get it.
       GuardConnection guard(connection);
 
-      connection->manualBreak();
+      mockConnection->manualBreak();
 
       BOOST_REQUIRE_THROW(GuardStatement writer(guard, stWriter), adt::RuntimeException);
 
-      BOOST_REQUIRE_EQUAL(connection->getOpenCounter(), 2);
-      BOOST_REQUIRE_EQUAL(connection->getCloseCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 2);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 1);
    }
 
    if(true) {
       GuardConnection guard(connection);
       GuardStatement writer(guard, stWriter);
 
-      BOOST_REQUIRE_EQUAL(connection->getOpenCounter(), 3);
-      BOOST_REQUIRE_EQUAL(connection->getCloseCounter(), 2);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 3);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 2);
 
       BOOST_REQUIRE_NO_THROW(writeRecord(writer, 3));
    }
 
    // It will recover the connection after it will detect
-   BOOST_REQUIRE_EQUAL(connection->isAvailable(), true);
+   BOOST_REQUIRE_EQUAL(mockConnection->isAvailable(), true);
    BOOST_REQUIRE_EQUAL(database->container_size(), 3);
 }
 
@@ -776,25 +761,25 @@ BOOST_FIXTURE_TEST_CASE(dbms_break_unrecovery_executing, DbmsDefineAndRun)
       GuardConnection guard(connection);
       GuardStatement writer(guard, stWriter);
 
-      BOOST_REQUIRE_EQUAL(connection->getOpenCounter(), 1);
-      BOOST_REQUIRE_EQUAL(connection->getCloseCounter(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 0);
 
       BOOST_REQUIRE_NO_THROW(writeRecord(writer, 1));
 
-      connection->manualBreak();
-      connection->avoidRecovery();
+      mockConnection->manualBreak();
+      mockConnection->avoidRecovery();
 
       // It will detect the lost connection but it will try to recover and it will get it.
       BOOST_REQUIRE_THROW(writeRecord(writer, 2), dbms::DatabaseException);
 
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 0);
-      BOOST_REQUIRE_EQUAL(connection->getOpenCounter(), 1);
-      BOOST_REQUIRE_EQUAL(connection->getCloseCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 1);
       BOOST_REQUIRE_EQUAL(recoveryHandler->thisWasUsed(), 1);
    }
 
    // It will recover the connection after it will detect
-   BOOST_REQUIRE_EQUAL(connection->isAvailable(), false);
+   BOOST_REQUIRE_EQUAL(mockConnection->isAvailable(), false);
    BOOST_REQUIRE_EQUAL(database->container_size(), 0);
 }
 
@@ -809,24 +794,24 @@ BOOST_FIXTURE_TEST_CASE(dbms_break_unrecovery_while_locking, DbmsDefineAndRun)
       GuardConnection guard(connection);
       GuardStatement writer(guard, stWriter);
 
-      BOOST_REQUIRE_EQUAL(connection->getOpenCounter(), 1);
-      BOOST_REQUIRE_EQUAL(connection->getCloseCounter(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 0);
 
       BOOST_REQUIRE_NO_THROW(writeRecord(writer, 1));
    }
 
-   connection->manualBreak();
-   connection->avoidRecovery();
+   mockConnection->manualBreak();
+   mockConnection->avoidRecovery();
 
    if(true) {
       BOOST_REQUIRE_THROW(GuardConnection guard(connection), adt::RuntimeException);
-      BOOST_REQUIRE_EQUAL(connection->getOpenCounter(), 1);
-      BOOST_REQUIRE_EQUAL(connection->getCloseCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 1);
       BOOST_REQUIRE_EQUAL(recoveryHandler->thisWasUsed(), 1);
    }
 
    // It will recover the connection after it will detect
-   BOOST_REQUIRE_EQUAL(connection->isAvailable(), false);
+   BOOST_REQUIRE_EQUAL(mockConnection->isAvailable(), false);
    BOOST_REQUIRE_EQUAL(database->container_size(), 1);
 }
 
@@ -848,7 +833,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_dealing_with_nulls, DbmsDefineAndRun)
          coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
          writer.execute();
 
-         BOOST_REQUIRE_EQUAL(connection->operation_size(), 1);
+         BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
          BOOST_REQUIRE_EQUAL(database->container_size(), 0);
 
          coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(25);
@@ -858,12 +843,12 @@ BOOST_FIXTURE_TEST_CASE(dbms_dealing_with_nulls, DbmsDefineAndRun)
          coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->isNull();
          ResultCode resultCode = writer.execute();
 
-         BOOST_REQUIRE_EQUAL(connection->operation_size(), 2);
+         BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 2);
          BOOST_REQUIRE_EQUAL(database->container_size(), 0);
 
          BOOST_REQUIRE_EQUAL(resultCode.getNumericCode(), test_dbms::MyDatabase::Successful);
          BOOST_REQUIRE_EQUAL(resultCode.successful(), true);
-         BOOST_REQUIRE_EQUAL(connection->operation_size(), 2);
+         BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 2);
          BOOST_REQUIRE_EQUAL(database->container_size(), 0);
       }
       catch(adt::Exception& ex) {
@@ -871,9 +856,9 @@ BOOST_FIXTURE_TEST_CASE(dbms_dealing_with_nulls, DbmsDefineAndRun)
       }
    }
 
-   BOOST_REQUIRE_EQUAL(connection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
    BOOST_REQUIRE_EQUAL(database->container_size(), 2);
-   BOOST_REQUIRE_EQUAL(connection->getCommitCounter(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1);
 
    if(true) {
       dbms::GuardConnection guard(connection);
@@ -985,14 +970,14 @@ BOOST_FIXTURE_TEST_CASE(dbms_noauto_commit, DbmsDefineAndRun)
 
       BOOST_REQUIRE_NO_THROW(writeRecord(writer, 2));
 
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
       BOOST_REQUIRE_EQUAL(database->container_size(), 0);
-      BOOST_REQUIRE_EQUAL(connection->getCommitPendingCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCommitPendingCounter(), 1);
    }
 
-   BOOST_REQUIRE_EQUAL(connection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
    BOOST_REQUIRE_EQUAL(database->container_size(), 1);
-   BOOST_REQUIRE_EQUAL(connection->getCommitPendingCounter(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitPendingCounter(), 0);
 
    if (true) {
       dbms::GuardConnection guard(connection);
@@ -1003,11 +988,11 @@ BOOST_FIXTURE_TEST_CASE(dbms_noauto_commit, DbmsDefineAndRun)
 
       BOOST_REQUIRE_NO_THROW(writeRecord(writer, 3));
 
-      BOOST_REQUIRE_EQUAL(connection->operation_size(), 1);
-      BOOST_REQUIRE_EQUAL(connection->getCommitPendingCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCommitPendingCounter(), 1);
    }
 
-   BOOST_REQUIRE_EQUAL(connection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
    BOOST_REQUIRE_EQUAL(database->container_size(), 2);
-   BOOST_REQUIRE_EQUAL(connection->getCommitCounter(), 2);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 2);
 }

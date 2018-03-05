@@ -29,6 +29,9 @@
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TtyWriter.hpp>
+#include <coffee/logger/TraceMethod.hpp>
+
+#include <coffee/app/ApplicationEngineRunner.hpp>
 
 #include <coffee/dbms.sqlite/SqliteDatabase.hpp>
 #include <coffee/dbms.sqlite/SqliteConnection.hpp>
@@ -47,14 +50,14 @@
 using namespace coffee;
 
 struct StatementAgeGreater {
-   StatementAgeGreater(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
+   StatementAgeGreater(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "select Name, age from employee where age > ?";
 
       inputId = std::make_shared<dbms::datatype::Integer>("age");
       outputId = std::make_shared<dbms::datatype::Integer>("age");
       outputName = std::make_shared<dbms::datatype::String>("name", 20);
 
-      statement = database.createStatement("greater_age", sql);
+      statement = database->createStatement("greater_age", sql);
       statement->createBinderInput(inputId);
       statement->createBinderOutput(outputName);
       statement->createBinderOutput(outputId);
@@ -66,13 +69,13 @@ struct StatementAgeGreater {
 };
 
 struct StatementCountAgeGreater {
-   StatementCountAgeGreater(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
+   StatementCountAgeGreater(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "select count(*) from employee where age > ?";
 
       inputId = std::make_shared<dbms::datatype::Integer>("age");
       outputId = std::make_shared<dbms::datatype::Integer>("count");
 
-      statement = database.createStatement("count_greater_age", sql);
+      statement = database->createStatement("count_greater_age", sql);
       statement->createBinderInput(inputId);
       statement->createBinderOutput(outputId);
    }
@@ -82,10 +85,10 @@ struct StatementCountAgeGreater {
 };
 
 struct StatementCountAllTypes {
-   StatementCountAllTypes(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
+   StatementCountAllTypes(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "select count(*) from all_types";
       counter = std::make_shared<dbms::datatype::Integer>("counter");
-      statement = database.createStatement("count_all_types", sql);
+      statement = database->createStatement("count_all_types", sql);
       statement->createBinderOutput(counter);
    }
    std::shared_ptr<dbms::datatype::Integer> counter;
@@ -93,14 +96,14 @@ struct StatementCountAllTypes {
 };
 
 struct StatementBlob {
-   StatementBlob(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
+   StatementBlob(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "select id, myfloat, mydata from btest where id == ?";
 
       id = std::make_shared<dbms::datatype::Integer>("id");
       myfloat = std::make_shared<dbms::datatype::Float>("float");
       mydata = std::make_shared<dbms::datatype::LongBlock>("data", dbms::datatype::Constraint::CanBeNull);
 
-      statement = database.createStatement("select_blob", sql);
+      statement = database->createStatement("select_blob", sql);
       statement->createBinderInput(id);
       statement->createBinderOutput(id);
       statement->createBinderOutput(myfloat);
@@ -113,11 +116,11 @@ struct StatementBlob {
 };
 
 struct StatementSyntaxError {
-   StatementSyntaxError(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
+   StatementSyntaxError(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "select age where employee where age > ?";
       input = std::make_shared<dbms::datatype::Integer>("age");
       output = std::make_shared<dbms::datatype::Integer>("age");
-      statement = database.createStatement("syntax_error", sql);
+      statement = database->createStatement("syntax_error", sql);
       statement->createBinderInput(input);
       statement->createBinderOutput(output);
    };
@@ -127,13 +130,13 @@ struct StatementSyntaxError {
 };
 
 struct InsertAllType {
-   InsertAllType(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
+   InsertAllType(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "insert into all_types(id, the_float, the_date, the_blob) values (?, ?, ?, ?);";
       id = std::make_shared<dbms::datatype::Integer>("id");
       theFloat = std::make_shared<dbms::datatype::Float>("the_float", dbms::datatype::Constraint::CanBeNull);
       theDate = std::make_shared<dbms::datatype::Date>("the_date", dbms::datatype::Constraint::CanBeNull);
       theBlob = std::make_shared<dbms::datatype::ShortBlock>("the_blob", 128, dbms::datatype::Constraint::CanBeNull);
-      statement = database.createStatement("insert_all_types", sql);
+      statement = database->createStatement("insert_all_types", sql);
       statement->createBinderInput(id);
       statement->createBinderInput(theFloat);
       statement->createBinderInput(theDate);
@@ -148,13 +151,13 @@ struct InsertAllType {
 };
 
 struct SelectAllType {
-   SelectAllType(dbms::Database& database, std::shared_ptr<dbms::Connection>& connection) {
+   SelectAllType(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "select id, the_float, the_date, the_blob from all_types order by id";
       id = std::make_shared<dbms::datatype::Integer>("id");
       theFloat = std::make_shared<dbms::datatype::Float>("the_float", dbms::datatype::Constraint::CanBeNull);
       theDate = std::make_shared<dbms::datatype::Date>("the_date", dbms::datatype::Constraint::CanBeNull);
       theBlob = std::make_shared<dbms::datatype::ShortBlock>("the_blob", 128, dbms::datatype::Constraint::CanBeNull);
-      statement = database.createStatement("select_all_types", sql);
+      statement = database->createStatement("select_all_types", sql);
       statement->createBinderOutput(id);
       statement->createBinderOutput(theFloat);
       statement->createBinderOutput(theDate);
@@ -168,16 +171,23 @@ struct SelectAllType {
    std::shared_ptr<dbms::Statement> statement;
 };
 
-struct SqliteFixture {
+static void sqliteParallelRun(coffee::app::Application& app) {
+   app.start();
+}
+
+struct SqliteFixture  {
    static  boost::filesystem::path dbPath;
 
-   SqliteFixture() : database (dbPath) {
+   SqliteFixture() : app ("SqliteApplication"){
       logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
       logger::Logger::setLevel(logger::Level::Debug);
 
+      database = dbms::sqlite::SqliteDatabase::instantiate(app, dbPath);
+      thr = std::thread(sqliteParallelRun, std::ref(app));
+      app.waitUntilRunning();
+      BOOST_REQUIRE(database->isRunning());
       boost::filesystem::remove(dbPath);
-      connection = database.createConnection("first", "user:first", "none");
-      BOOST_REQUIRE_NO_THROW(database.externalInitialize());
+      connection = database->createConnection("first", "user:first", "none");
       BOOST_REQUIRE_EQUAL(boost::filesystem::exists(dbPath), true);
       BOOST_REQUIRE_EQUAL(connection->isAvailable(), true);
 
@@ -199,10 +209,13 @@ struct SqliteFixture {
       BOOST_REQUIRE_NO_THROW(std::dynamic_pointer_cast<dbms::sqlite::SqliteConnection>(connection)->execute(sql));
    }
    ~SqliteFixture() {
-      database.externalStop();
+      app.requestStop();
+      thr.join();
    }
 
-   dbms::sqlite::SqliteDatabase database;
+   app::ApplicationEngineRunner app;
+   std::shared_ptr<dbms::sqlite::SqliteDatabase> database;
+   std::thread thr;
    std::shared_ptr<dbms::Connection> connection;
 };
 
@@ -210,28 +223,44 @@ boost::filesystem::path SqliteFixture::dbPath("/tmp/sqlite_test.db");
 
 BOOST_FIXTURE_TEST_CASE(sqlite_create_db, SqliteFixture)
 {
-   auto secondConnection = database.createConnection("second", "user:second", "none");
+   LOG_THIS_METHOD();
+   auto secondConnection = database->createConnection("second", "user:second", "none");
    BOOST_REQUIRE_EQUAL(secondConnection->isAvailable(), true);
 }
 
-BOOST_AUTO_TEST_CASE(sqlite_connection_noopen)
-{
-   dbms::sqlite::SqliteDatabase database("/root");
-   auto connection = database.createConnection("closed", "user:first", "none");
-   BOOST_REQUIRE_THROW(dbms::GuardConnection guard(connection), adt::RuntimeException);
-}
+struct SqliteFixtureBadPath  {
+   static  boost::filesystem::path dbBadPath;
 
-BOOST_AUTO_TEST_CASE(sqlite_invalid_access)
+   SqliteFixtureBadPath() : app ("SqliteApplication-Badpath"){
+      database = dbms::sqlite::SqliteDatabase::instantiate(app, dbBadPath);
+      thr = std::thread(sqliteParallelRun, std::ref(app));
+      app.waitUntilRunning();
+   }
+
+   ~SqliteFixtureBadPath() {
+      app.requestStop();
+      thr.join();
+   }
+
+   app::ApplicationEngineRunner app;
+   std::shared_ptr<dbms::sqlite::SqliteDatabase> database;
+   std::thread thr;
+};
+
+boost::filesystem::path SqliteFixtureBadPath::dbBadPath("/root");
+
+BOOST_FIXTURE_TEST_CASE(sqlite_connection_badpath, SqliteFixtureBadPath)
 {
-   dbms::sqlite::SqliteDatabase database("/root");
-   auto connection = database.createConnection("first", "user:first", "none");
-   BOOST_REQUIRE_THROW(database.externalInitialize(), adt::RuntimeException);
-   BOOST_REQUIRE(!connection->isAvailable());
+   LOG_THIS_METHOD();
+   BOOST_REQUIRE(database->isRunning());
+   std::shared_ptr<dbms::Connection> connection;
+   BOOST_REQUIRE_THROW(connection = database->createConnection("closed", "user:first", "none"), dbms::DatabaseException);
 }
 
 // See http://www.yolinux.com/TUTORIALS/SQLite.html
 BOOST_FIXTURE_TEST_CASE(sqlite_multi_select, SqliteFixture)
 {
+   LOG_THIS_METHOD();
    StatementAgeGreater fullStatement(database, connection);
    dbms::GuardConnection guardConnection(connection);
    dbms::GuardStatement guardStament(guardConnection, fullStatement.statement);
@@ -253,6 +282,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_multi_select, SqliteFixture)
 
 BOOST_FIXTURE_TEST_CASE(sqlite_unique_select, SqliteFixture)
 {
+   LOG_THIS_METHOD();
    StatementAgeGreater fullStatement(database, connection);
 
    dbms::GuardConnection guardConnection(connection);
@@ -276,6 +306,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_unique_select, SqliteFixture)
 
 BOOST_FIXTURE_TEST_CASE(sqlite_no_select, SqliteFixture)
 {
+   LOG_THIS_METHOD();
    StatementAgeGreater fullStatement(database, connection);
 
    dbms::GuardConnection guardConnection(connection);
@@ -291,6 +322,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_no_select, SqliteFixture)
 
 BOOST_FIXTURE_TEST_CASE(sqlite_insert, SqliteFixture)
 {
+   LOG_THIS_METHOD();
    StatementCountAgeGreater ageCounter(database, connection);
 
    const char* sql = "INSERT INTO employee VALUES(?, ?, ?, ?)";
@@ -300,7 +332,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_insert, SqliteFixture)
    auto job = std::make_shared<dbms::datatype::String>("jobTitle", 20);
    auto age = std::make_shared<dbms::datatype::Integer>("age");
 
-   auto insert = database.createStatement("insert_employee", sql);
+   auto insert = database->createStatement("insert_employee", sql);
    insert->createBinderInput(name);
    insert->createBinderInput(dept);
    insert->createBinderInput(job);
@@ -320,7 +352,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_insert, SqliteFixture)
       BOOST_REQUIRE(rc.successful());
    }
 
-   auto secondConnection = database.createConnection("second", "user:second", "none");
+   auto secondConnection = database->createConnection("second", "user:second", "none");
 
    {
       dbms::GuardConnection guardConnection(secondConnection);
@@ -335,6 +367,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_insert, SqliteFixture)
 
 BOOST_FIXTURE_TEST_CASE(sqlite_float, SqliteFixture)
 {
+   LOG_THIS_METHOD();
    StatementBlob fullStatement(database, connection);
 
    dbms::GuardConnection guardConnection(connection);
@@ -360,6 +393,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_float, SqliteFixture)
 
 BOOST_FIXTURE_TEST_CASE(sqlite_rebind_sentence, SqliteFixture)
 {
+   LOG_THIS_METHOD();
    StatementCountAgeGreater fullStatement(database, connection);
 
    dbms::GuardConnection guardConnection(connection);
@@ -392,6 +426,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_rebind_sentence, SqliteFixture)
 
 BOOST_FIXTURE_TEST_CASE(sqlite_reuse_sentence, SqliteFixture)
 {
+   LOG_THIS_METHOD();
    StatementCountAgeGreater ageCounter(database, connection);
 
    {
@@ -405,7 +440,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_reuse_sentence, SqliteFixture)
       BOOST_REQUIRE_EQUAL(ageCounter.outputId->getValue(), 4);
    }
 
-   auto secondConnection = database.createConnection("second", "user:second", "none");
+   auto secondConnection = database->createConnection("second", "user:second", "none");
 
    {
       dbms::GuardConnection guardConnection(secondConnection);
@@ -421,6 +456,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_reuse_sentence, SqliteFixture)
 
 BOOST_FIXTURE_TEST_CASE(sqlite_syntax_error, SqliteFixture)
 {
+   LOG_THIS_METHOD();
    StatementSyntaxError syntaxError(database, connection);
 
    dbms::GuardConnection guardConnection(connection);
@@ -431,6 +467,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_syntax_error, SqliteFixture)
 
 BOOST_FIXTURE_TEST_CASE(sqlite_rollback, SqliteFixture)
 {
+   LOG_THIS_METHOD();
    InsertAllType insert(database, connection);
    StatementCountAllTypes count(database, connection);
 
@@ -462,6 +499,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_rollback, SqliteFixture)
 
 BOOST_FIXTURE_TEST_CASE(sqlite_insert_all_types, SqliteFixture)
 {
+   LOG_THIS_METHOD();
    auto now = adt::Second::getTime();
 
    InsertAllType insert(database, connection);

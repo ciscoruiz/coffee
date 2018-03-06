@@ -21,28 +21,61 @@
 // SOFTWARE.
 //
 
-#ifndef __coffee_mock_MockApplication_hpp
-#define __coffee_mock_MockApplication_hpp
+
+#ifndef _coffee_app_ApplicationEngineRunner_hpp_
+#define _coffee_app_ApplicationEngineRunner_hpp_
 
 #include <mutex>
+#include <thread>
+#include <condition_variable>
+
+#include <coffee/adt/Semaphore.hpp>
 
 #include <coffee/app/Application.hpp>
 
 namespace coffee {
-namespace mock {
 
-class MockApplication : public app::Application {
+namespace xml {
+class Node;
+}
+
+namespace app {
+
+class Engine;
+
+/**
+ * Starts all engines attached to this instance and wait for requestStop, then
+ * it will stop all engines before finished execution.
+ *
+ * \warning Application::start method should be called from a thread different
+ * from which it will call to the requestStop method.
+ */
+class ApplicationEngineRunner : public Application {
 public:
-   std::mutex m_termination;
+   /**
+      Constructor.
+      @param shortName Logical name.
+   */
+   ApplicationEngineRunner(const char* shortName);
 
-   explicit MockApplication(const char* title);
-
-   void operator()();
+   /**
+    * Once you call start method from a thread you have to wait for the application really start
+    * its execution.
+    */
+   void waitUntilRunning() { semaphoreForRun.wait(); }
 
 private:
+   adt::Semaphore semaphoreForRun;
+   std::mutex mutex;
+   std::condition_variable conditionForStop;
+   bool stopNow;
+
    void run() throw(adt::RuntimeException);
+   void do_requestStop() throw(adt::RuntimeException);
 };
 
-} /* namespace mock */
-} /* namespace coffee */
+}
+}
+
 #endif
+

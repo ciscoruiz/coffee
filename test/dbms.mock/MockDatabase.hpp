@@ -42,7 +42,6 @@ public:
    enum ErrorCode { NotFound, Successful, Lock, LostConnection };
 
    explicit MockDatabase(app::Application& app);
-   explicit MockDatabase(const char* name);
 
    void add(const mock::MockLowLevelRecord& record) noexcept {
       m_container [record.m_id] = record;

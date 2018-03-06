@@ -44,8 +44,6 @@ public:
    class OptionBuilder {
 	   int flags;
 
-	   int build() const { return flags; }
-
    public:
 	   OptionBuilder() { flags = 0; }
 
@@ -74,6 +72,11 @@ public:
 	    */
 	   OptionBuilder& logToStdErr() noexcept;
 
+	   /**
+	    * \return the Flags used by the SysLogWriter.
+	    */
+      int build() const { return flags; }
+
 	   friend class SysLogWriter;
    };
 
@@ -94,7 +97,7 @@ private:
    const std::string m_ident;
    const int m_options;
 
-   void do_initialize () throw (adt::RuntimeException);
+   void initialize () throw (adt::RuntimeException);
    void apply (const Level::_v level, const std::string& line) noexcept;
 };
 

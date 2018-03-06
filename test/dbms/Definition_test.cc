@@ -34,9 +34,11 @@
 
 #include <coffee/xml/Node.hpp>
 
-#include "MockApplication.hpp"
 #include "MockDatabase.hpp"
 #include "MockLowLevelRecord.hpp"
+#include "MockDatabaseFixture.hpp"
+
+#include <coffee/app/ApplicationEngineRunner.hpp>
 
 #include <coffee/dbms/Statement.hpp>
 #include <coffee/dbms/GuardConnection.hpp>
@@ -104,9 +106,15 @@ private:
 class MyDatabase : public mock::MockDatabase {
 public:
    explicit MyDatabase(app::Application& app) : mock::MockDatabase(app) {;}
-   explicit MyDatabase(const char* name) : mock::MockDatabase(name) {;}
+
+   static std::shared_ptr<MyDatabase> instantiate(app::Application& app) noexcept {
+      auto result = std::make_shared<MyDatabase>(app);
+      app.attach(result);
+      return result;
+   }
 
 private:
+
    mock::MockLowLevelContainer m_container;
 
    std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
@@ -297,30 +305,29 @@ const char* test_dbms::MyTranslator::apply(const char* statement)
 
 BOOST_AUTO_TEST_CASE(dbms_define_structure)
 {
-   MockApplication application("dbms_define_structure");
+   app::ApplicationEngineRunner application("dbms_define_structure");
 
-   test_dbms::MyDatabase database(application);
+   auto database = test_dbms::MyDatabase::instantiate(application);
+   auto connection = database->createConnection("0", "0", "0");
 
-   auto connection = database.createConnection("0", "0", "0");
+   BOOST_REQUIRE_THROW(database->createConnection("0", "bis0", "bis0"), adt::RuntimeException);
 
-   BOOST_REQUIRE_THROW(database.createConnection("0", "bis0", "bis0"), adt::RuntimeException);
-
-   auto findConnection = database.findConnection("0");
+   auto findConnection = database->findConnection("0");
 
    BOOST_REQUIRE_EQUAL(connection.get(), findConnection.get());
 
-   BOOST_REQUIRE_THROW(database.findConnection("zzzz"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(database->findConnection("zzzz"), adt::RuntimeException);
 
-   auto statement = database.createStatement("one", "write");
+   auto statement = database->createStatement("one", "write");
 
-   BOOST_REQUIRE_THROW(database.createStatement("one", "write"), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(database.createStatement("the_null", "null"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(database->createStatement("one", "write"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(database->createStatement("the_null", "null"), adt::RuntimeException);
 
-   auto findStatement = database.findStatement("one");
+   auto findStatement = database->findStatement("one");
 
    BOOST_REQUIRE_EQUAL(statement.get(), findStatement.get());
 
-   BOOST_REQUIRE_THROW(database.findStatement("zzzz"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(database->findStatement("zzzz"), adt::RuntimeException);
 
    adt::StreamString xxx = connection->operator coffee::adt::StreamString();
 
@@ -329,83 +336,100 @@ BOOST_AUTO_TEST_CASE(dbms_define_structure)
 
 BOOST_AUTO_TEST_CASE(dbms_translator)
 {
-   MockApplication application("dbms_define_structure");
+   app::ApplicationEngineRunner application("dbms_define_structure");
 
-   test_dbms::MyDatabase database(application);
+   auto database = test_dbms::MyDatabase::instantiate(application);
 
-   auto st0 = database.createStatement("zero", "read");
+   auto st0 = database->createStatement("zero", "read");
    BOOST_REQUIRE_EQUAL(st0->getExpression(), "read");
 
-   database.setStatementTranslator(std::make_shared<test_dbms::MyTranslator>());
-   auto st1 = database.createStatement("one", "read");
+   database->setStatementTranslator(std::make_shared<test_dbms::MyTranslator>());
+   auto st1 = database->createStatement("one", "read");
    BOOST_REQUIRE_EQUAL(st1->getExpression(), "READ");
+
+   std::string str = database->asString();
+   BOOST_REQUIRE(str.find("MyTranslator") != std::string::npos);
 }
 
-BOOST_AUTO_TEST_CASE(dbms_write_and_read_and_delete)
+struct DbmsDefineAndRun : public MockDatabaseFixture<test_dbms::MyDatabase> {
+   DbmsDefineAndRun() : MockDatabaseFixture<test_dbms::MyDatabase>("Definition_test") {
+      mockConnection = std::dynamic_pointer_cast<mock::MockConnection>(connection);
+   }
+
+   dbms::ResultCode  writeRecord(dbms::GuardStatement& writer, const int id) throw (dbms::DatabaseException) {
+      adt::StreamString name("the ");
+      name << id;
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(id);
+      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue(name);
+      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(id * id);
+      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue((float) id * 1.1);
+      char buffer[64];
+      sprintf(buffer, "%d/%d/%dT%02d:%02d", 1 + id % 28, 1 + id % 11, 2000 + id, id % 12, id % 60);
+      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(buffer, "%d/%m/%YT%H:%M");
+      return writer.execute();
+   }
+
+   void populate(std::shared_ptr<dbms::Statement>& statement) throw (dbms::DatabaseException) {
+      if(true) {
+         dbms::GuardConnection guard(connection);
+         dbms::GuardStatement writer(guard, statement);
+
+         BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
+
+         BOOST_REQUIRE_NO_THROW(writeRecord(writer, 2));
+         BOOST_REQUIRE_NO_THROW(writeRecord(writer, 5));
+         BOOST_REQUIRE_NO_THROW(writeRecord(writer, 6));
+
+         BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 3);
+         BOOST_REQUIRE_EQUAL(database->container_size(), 0);
+      }
+
+      BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getRollbackCounter(), 0);
+   }
+
+   std::shared_ptr<mock::MockConnection> mockConnection;
+};
+
+BOOST_FIXTURE_TEST_CASE(dbms_write_and_read, DbmsDefineAndRun)
 {
-   test_dbms::MyDatabase database("dbms_write_and_read_and_delete");
-
-   database.externalInitialize();
-
-   std::shared_ptr<mock::MockConnection> conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
-   auto stWriter = database.createStatement("the_write", "write");
-   auto stReader = database.createStatement("the_read", "read");
-   auto stEraser = database.createStatement("the_erase", "delete");
+   auto stWriter = database->createStatement("the_write", "write");
+   auto stReader = database->createStatement("the_read", "read");
    ResultCode resultCode;
 
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
-
    try {
-      dbms::GuardConnection guard(conn0);
+      dbms::GuardConnection guard(connection);
       dbms::GuardStatement writer(guard, stWriter);
 
       BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
 
       BOOST_REQUIRE_THROW(writer.getInputData(10), adt::RuntimeException);
 
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
-      writer.execute();
+      BOOST_REQUIRE_NO_THROW(writeRecord(writer, 2));
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(database->container_size(), 0);
 
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 0);
+      BOOST_REQUIRE_NO_THROW(writeRecord(writer, 5));
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 2);
+      BOOST_REQUIRE_EQUAL(database->container_size(), 0);
 
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 0);
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
-      resultCode = writer.execute();
-
+      BOOST_REQUIRE_NO_THROW(resultCode = writeRecord(writer, 6));
       BOOST_REQUIRE_EQUAL(resultCode.getNumericCode(), test_dbms::MyDatabase::Successful);
       BOOST_REQUIRE_EQUAL(resultCode.successful(), true);
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 3);
+      BOOST_REQUIRE_EQUAL(database->container_size(), 0);
    }
    catch(adt::Exception& ex) {
       logger::Logger::write(ex);
       BOOST_REQUIRE_EQUAL(true, false);
    }
 
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 3);
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 3);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1);
 
    if(true) {
-      dbms::GuardConnection guard(conn0);
+      dbms::GuardConnection guard(connection);
 
       dbms::GuardStatement reader(guard, stReader);
       BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
@@ -442,11 +466,27 @@ BOOST_AUTO_TEST_CASE(dbms_write_and_read_and_delete)
       BOOST_REQUIRE_EQUAL(reader.fetch(), false);
    }
 
-   BOOST_REQUIRE_EQUAL(database.container_size(), 3);
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1); // There was not commit due to reader operation
+   BOOST_REQUIRE_EQUAL(database->container_size(), 3);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1); // There was not commit due to reader operation
+}
+
+BOOST_FIXTURE_TEST_CASE(dbms_write_and_delete, DbmsDefineAndRun)
+{
+   auto stWriter = database->createStatement("the_write", "write");
+   auto stEraser = database->createStatement("the_erase", "delete");
+   ResultCode resultCode;
+
+   BOOST_REQUIRE_NO_THROW(populate(stWriter));
+
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 3);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1);
+
+   BOOST_REQUIRE_EQUAL(database->container_size(), 3);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1); // There was not commit due to reader operation
 
    if(true) {
-      dbms::GuardConnection guard(conn0);
+      dbms::GuardConnection guard(connection);
       dbms::GuardStatement eraser(guard, stEraser);
 
       auto id = coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0));
@@ -455,635 +495,338 @@ BOOST_AUTO_TEST_CASE(dbms_write_and_read_and_delete)
       resultCode = eraser.execute();
       BOOST_REQUIRE_EQUAL(resultCode.successful(), true);
 
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 3);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(database->container_size(), 3);
 
       id->setValue(2);
       resultCode = eraser.execute();
       BOOST_REQUIRE_EQUAL(resultCode.successful(), true);
 
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 3);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 2);
+      BOOST_REQUIRE_EQUAL(database->container_size(), 3);
    }
 
-   BOOST_REQUIRE_EQUAL(database.container_size(), 1);
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 2);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 2);
 }
 
-BOOST_AUTO_TEST_CASE(dbms_write_rollback)
+BOOST_FIXTURE_TEST_CASE(dbms_write_rollback, DbmsDefineAndRun)
 {
-   test_dbms::MyDatabase database("dbms_write_rollback");
-
-   database.externalInitialize();
-
-   auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
-   auto rollbackWriter = database.createStatement("rollback_write", "write");
+   auto rollbackWriter = database->createStatement("rollback_write", "write");
    ResultCode resultCode;
 
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+   BOOST_REQUIRE_NO_THROW(populate(rollbackWriter));
 
    if(true) {
-      dbms::GuardConnection guard(conn0);
+      dbms::GuardConnection guard(connection);
       dbms::GuardStatement writer(guard, rollbackWriter);
 
-      BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
+      BOOST_REQUIRE_NO_THROW(writeRecord(writer, 8));
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(database->container_size(), 3);
 
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 0);
+      BOOST_REQUIRE_THROW(writeRecord(writer, test_dbms::IdToThrowDbException), dbms::DatabaseException);
    }
 
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
-   BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 0);
-
-   if(true) {
-      dbms::GuardConnection guard(conn0);
-      dbms::GuardStatement writer(guard, rollbackWriter);
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(8);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 8");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(8 * 8);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(8.8);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("8/8/2008T08:08:08", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 3);
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the test_dbms::IdToThrowDbException");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(test_dbms::IdToThrowDbException * test_dbms::IdToThrowDbException);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(3.3);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("3/3/2003T03:03:03", "%d/%m/%YT%H:%M");
-
-      BOOST_REQUIRE_THROW(writer.execute(), dbms::DatabaseException);
-   }
-
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 3);
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
-   BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 3);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->getRollbackCounter(), 1);
 }
 
-BOOST_AUTO_TEST_CASE(dbms_write_norollback)
+
+BOOST_FIXTURE_TEST_CASE(dbms_write_norollback, DbmsDefineAndRun)
 {
-   test_dbms::MyDatabase database("dbms_write_norollback");
-
-   database.externalInitialize();
-
-   auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
-   auto noRollbackWriter = database.createStatement("no_rollback_write", "write", dbms::ActionOnError::Ignore);
+   auto noRollbackWriter = database->createStatement("no_rollback_write", "write", dbms::ActionOnError::Ignore);
    ResultCode resultCode;
 
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+   BOOST_REQUIRE_NO_THROW(populate(noRollbackWriter));
 
    if(true) {
-      dbms::GuardConnection guard(conn0);
+      dbms::GuardConnection guard(connection);
       dbms::GuardStatement writer(guard, noRollbackWriter);
 
-      BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
+      BOOST_REQUIRE_NO_THROW(writeRecord(writer, 9));
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(database->container_size(), 3);
 
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 0);
-   }
-
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
-   BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 0);
-
-
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 3);
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
-   BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 0);
-
-   if(true) {
-      dbms::GuardConnection guard(conn0);
-      dbms::GuardStatement writer(guard, noRollbackWriter);
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(8);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 8");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(8 * 8);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(8.8);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("8/8/2008T08:08:08", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 3);
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the test_dbms::IdToThrowDbException");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(test_dbms::IdToThrowDbException * test_dbms::IdToThrowDbException);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(3.3);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("3/3/2003T03:03:03", "%d/%m/%YT%H:%M");
-
-      BOOST_REQUIRE_NO_THROW(resultCode = writer.execute());
+      BOOST_REQUIRE_NO_THROW(resultCode = writeRecord(writer, test_dbms::IdToThrowDbException));
 
       BOOST_REQUIRE_EQUAL(resultCode.successful(), false);
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 3);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(database->container_size(), 3);
    }
 
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 4);
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 2);
-   BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 4);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 2);
+   BOOST_REQUIRE_EQUAL(mockConnection->getRollbackCounter(), 0);
 }
 
-BOOST_AUTO_TEST_CASE(dbms_erase_rollback)
+BOOST_FIXTURE_TEST_CASE(dbms_erase_rollback, DbmsDefineAndRun)
 {
-   test_dbms::MyDatabase database("dbms_erase_rollback");
-
-   database.externalInitialize();
-
-   auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
-   auto stWriter = database.createStatement("writer", "write");
-   auto rollbackEraser = database.createStatement("rollback_eraser", "delete");
-   auto noRollbackEraser = database.createStatement("no_rollback_eraser", "delete", dbms::ActionOnError::Ignore);
+   auto stWriter = database->createStatement("writer", "write");
+   auto rollbackEraser = database->createStatement("rollback_eraser", "delete");
+   auto noRollbackEraser = database->createStatement("no_rollback_eraser", "delete", dbms::ActionOnError::Ignore);
    ResultCode resultCode;
 
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+   BOOST_REQUIRE_NO_THROW(populate(stWriter));
 
    if(true) {
-      dbms::GuardConnection guard(conn0);
-      dbms::GuardStatement writer(guard, stWriter);
-
-      BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
-
-      BOOST_REQUIRE_THROW(writer.getInputData(10), adt::RuntimeException);
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 0);
-   }
-
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 3);
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
-   BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 0);
-
-   if(true) {
-      dbms::GuardConnection guard(conn0);
+      dbms::GuardConnection guard(connection);
       dbms::GuardStatement eraser(guard, rollbackEraser);
 
       coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(6);
       eraser.execute();
 
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 3);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(database->container_size(), 3);
 
       coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
       BOOST_REQUIRE_THROW(eraser.execute(), dbms::DatabaseException);
 
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 3);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(database->container_size(), 3);
    }
 
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 3);
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
-   BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 3);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->getRollbackCounter(), 1);
 }
 
-BOOST_AUTO_TEST_CASE(dbms_erase_norollback)
+BOOST_FIXTURE_TEST_CASE(dbms_erase_norollback, DbmsDefineAndRun)
 {
-   test_dbms::MyDatabase database("dbms_erase_norollback");
-
-   database.externalInitialize();
-
-   auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
-   auto stWriter = database.createStatement("writer", "write");
-   auto noRollbackEraser = database.createStatement("no_rollback_eraser", "delete", dbms::ActionOnError::Ignore);
+   auto stWriter = database->createStatement("writer", "write");
+   auto noRollbackEraser = database->createStatement("no_rollback_eraser", "delete", dbms::ActionOnError::Ignore);
    ResultCode resultCode;
 
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+   BOOST_REQUIRE_NO_THROW(populate(stWriter));
 
    if(true) {
-      dbms::GuardConnection guard(conn0);
-      dbms::GuardStatement writer(guard, stWriter);
-
-      BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(5);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 5");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(5 * 5);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(5.5);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("5/5/2005T05:05:05", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(6);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 6");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(6 * 6);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(6.6);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("6/6/2006T06:06:06", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 3);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 0);
-   }
-
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 3);
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
-   BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 0);
-
-   if(true) {
-      dbms::GuardConnection guard(conn0);
+      dbms::GuardConnection guard(connection);
       dbms::GuardStatement eraser(guard, noRollbackEraser);
 
       coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(2);
       eraser.execute();
 
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 3);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(database->container_size(), 3);
 
       coffee_datatype_downcast(datatype::Integer, eraser.getInputData(0))->setValue(test_dbms::IdToThrowDbException);
       BOOST_REQUIRE_NO_THROW(resultCode = eraser.execute());
 
       BOOST_REQUIRE_EQUAL(resultCode.successful(), false);
       BOOST_REQUIRE_EQUAL(resultCode.notFound(), true);
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 3);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(database->container_size(), 3);
    }
 
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 2);
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 2);
-   BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 2);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 2);
+   BOOST_REQUIRE_EQUAL(mockConnection->getRollbackCounter(), 0);
 }
 
-BOOST_AUTO_TEST_CASE(dbms_set_max_commit)
+BOOST_FIXTURE_TEST_CASE(dbms_set_max_commit, DbmsDefineAndRun)
 {
-   test_dbms::MyDatabase database("dbms_set_max_commit");
-
-   database.externalInitialize();
-
-   auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
-   auto stWriter = database.createStatement("the_write", "write");
-   auto stReader = database.createStatement("the_read", "read");
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+   auto stWriter = database->createStatement("the_write", "write");
+   auto stReader = database->createStatement("the_read", "read");
 
    if(true) {
-      GuardConnection connection(conn0);
-      GuardStatement writer(connection, stWriter);
+      GuardConnection guard(connection);
+      GuardStatement writer(guard, stWriter);
 
-      BOOST_REQUIRE_EQUAL(connection.setMaxCommitPending(5), 0);
+      BOOST_REQUIRE_EQUAL(guard.setMaxCommitPending(5), 0);
 
       for(int ii = 1; ii <= 15; ++ ii) {
-         coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-         coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-         coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-         coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-         coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
-         BOOST_REQUIRE_NO_THROW(writer.execute());
+         BOOST_REQUIRE_NO_THROW(writeRecord(writer, ii));
       }
 
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-      BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 3);
-      BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 3);
+      BOOST_REQUIRE_EQUAL(mockConnection->getRollbackCounter(), 0);
    }
 
-   BOOST_REQUIRE_EQUAL(database.container_size(), 15);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 15);
 
    if(true) {
-      GuardConnection connection(conn0);
-      GuardStatement writer(connection, stWriter);
+      GuardConnection guard(connection);
+      GuardStatement writer(guard, stWriter);
 
-      connection.clearMaxCommitPending();
+      guard.clearMaxCommitPending();
 
       for(int ii = 16; ii <= 30; ++ ii) {
-         coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-         coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-         coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-         coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-         coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
-         BOOST_REQUIRE_NO_THROW(writer.execute());
+         BOOST_REQUIRE_NO_THROW(writeRecord(writer, ii));
       }
    }
 
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 4);
-   BOOST_REQUIRE_EQUAL(conn0->getRollbackCounter(), 0);
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 30);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 4);
+   BOOST_REQUIRE_EQUAL(mockConnection->getRollbackCounter(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 30);
 }
 
-BOOST_AUTO_TEST_CASE(dbms_break_detected_executing)
+BOOST_FIXTURE_TEST_CASE(dbms_break_detected_executing, DbmsDefineAndRun)
 {
-   test_dbms::MyDatabase database("dbms_break_detected_executing");
-
-   database.externalInitialize();
-
-   auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
-   auto stWriter = database.createStatement("the_write", "write");
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+   auto stWriter = database->createStatement("the_write", "write");
 
    if(true) {
-      GuardConnection connection(conn0);
-      GuardStatement writer(connection, stWriter);
+      GuardConnection guard(connection);
+      GuardStatement writer(guard, stWriter);
 
-      BOOST_REQUIRE_EQUAL(conn0->getOpenCounter(), 1);
-      BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 0);
 
-      int ii = 1;
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
-      BOOST_REQUIRE_NO_THROW(writer.execute());
+      BOOST_REQUIRE_NO_THROW(writeRecord(writer, 1));
 
-      conn0->manualBreak();
-
-      ii = 2;
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
+      mockConnection->manualBreak();
 
       // It will detect the lost connection but it will try to recover and it will get it.
-      BOOST_REQUIRE_THROW(writer.execute(), dbms::DatabaseException);
+      BOOST_REQUIRE_THROW(writeRecord(writer, 2),  dbms::DatabaseException);
 
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-      BOOST_REQUIRE_EQUAL(conn0->getOpenCounter(), 2);
-      BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 2);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 1);
    }
 
    // It will recover the connection after it will detect
-   BOOST_REQUIRE_EQUAL(conn0->isAvailable(), true);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->isAvailable(), true);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 0);
 }
 
-BOOST_AUTO_TEST_CASE(dbms_break_detected_locking)
+BOOST_FIXTURE_TEST_CASE(dbms_break_detected_while_locking, DbmsDefineAndRun)
 {
-   test_dbms::MyDatabase database("dbms_break_detected_locking");
-
-   database.externalInitialize();
-
-   auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
-   auto stWriter = database.createStatement("the_write", "write");
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+   auto stWriter = database->createStatement("the_write", "write");
 
    if(true) {
-      GuardConnection connection(conn0);
-      GuardStatement writer(connection, stWriter);
+      GuardConnection guard(connection);
+      GuardStatement writer(guard, stWriter);
 
-      BOOST_REQUIRE_EQUAL(conn0->getOpenCounter(), 1);
-      BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 0);
 
-      int ii = 1;
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
-      BOOST_REQUIRE_NO_THROW(writer.execute());
+      BOOST_REQUIRE_NO_THROW(writeRecord(writer, 1));
    }
 
-   conn0->manualBreak();
+   mockConnection->manualBreak();
 
    if(true) {
       // It will detect the lost connection but it will try to recover and it will get it.
-      GuardConnection connection(conn0);
-      GuardStatement writer(connection, stWriter);
+      GuardConnection guard(connection);
+      GuardStatement writer(guard, stWriter);
 
-      BOOST_REQUIRE_EQUAL(conn0->getOpenCounter(), 2);
-      BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 2);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 1);
 
-      int ii = 2;
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
-
-      BOOST_REQUIRE_NO_THROW(writer.execute());
+      BOOST_REQUIRE_NO_THROW(writeRecord(writer, 2));
    }
 
    // It will recover the connection after it will detect
-   BOOST_REQUIRE_EQUAL(conn0->isAvailable(), true);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 2);
+   BOOST_REQUIRE_EQUAL(mockConnection->isAvailable(), true);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 2);
 
    if(true) {
       // It will detect the lost connection but it will try to recover and it will get it.
-      GuardConnection connection(conn0);
+      GuardConnection guard(connection);
 
-      conn0->manualBreak();
+      mockConnection->manualBreak();
 
-      BOOST_REQUIRE_THROW(GuardStatement writer(connection, stWriter), adt::RuntimeException);
+      BOOST_REQUIRE_THROW(GuardStatement writer(guard, stWriter), adt::RuntimeException);
 
-      BOOST_REQUIRE_EQUAL(conn0->getOpenCounter(), 2);
-      BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 2);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 1);
    }
 
    if(true) {
-      GuardConnection connection(conn0);
-      GuardStatement writer(connection, stWriter);
+      GuardConnection guard(connection);
+      GuardStatement writer(guard, stWriter);
 
-      BOOST_REQUIRE_EQUAL(conn0->getOpenCounter(), 3);
-      BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 2);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 3);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 2);
 
-      int ii = 3;
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
-
-      BOOST_REQUIRE_NO_THROW(writer.execute());
+      BOOST_REQUIRE_NO_THROW(writeRecord(writer, 3));
    }
 
    // It will recover the connection after it will detect
-   BOOST_REQUIRE_EQUAL(conn0->isAvailable(), true);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 3);
+   BOOST_REQUIRE_EQUAL(mockConnection->isAvailable(), true);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 3);
 }
 
-BOOST_AUTO_TEST_CASE(dbms_break_unrecovery_executing)
+BOOST_FIXTURE_TEST_CASE(dbms_break_unrecovery_executing, DbmsDefineAndRun)
 {
-   test_dbms::MyDatabase database("dbms_break_unrecovery_executing");
-
-   database.externalInitialize();
-
    std::shared_ptr<test_dbms::MyRecoveryHandler> recoveryHandler = std::make_shared<test_dbms::MyRecoveryHandler>();
-   database.setFailRecoveryHandler(recoveryHandler);
+   database->setFailRecoveryHandler(recoveryHandler);
 
-   auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
-   auto stWriter = database.createStatement("the_write", "write");
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+   auto stWriter = database->createStatement("the_write", "write");
 
    if(true) {
-      GuardConnection connection(conn0);
-      GuardStatement writer(connection, stWriter);
+      GuardConnection guard(connection);
+      GuardStatement writer(guard, stWriter);
 
-      BOOST_REQUIRE_EQUAL(conn0->getOpenCounter(), 1);
-      BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 0);
 
-      int ii = 1;
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
-      BOOST_REQUIRE_NO_THROW(writer.execute());
+      BOOST_REQUIRE_NO_THROW(writeRecord(writer, 1));
 
-      conn0->manualBreak();
-      conn0->avoidRecovery();
-
-      ii = 2;
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
+      mockConnection->manualBreak();
+      mockConnection->avoidRecovery();
 
       // It will detect the lost connection but it will try to recover and it will get it.
-      BOOST_REQUIRE_THROW(writer.execute(), dbms::DatabaseException);
+      BOOST_REQUIRE_THROW(writeRecord(writer, 2), dbms::DatabaseException);
 
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-      BOOST_REQUIRE_EQUAL(conn0->getOpenCounter(), 1);
-      BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 1);
       BOOST_REQUIRE_EQUAL(recoveryHandler->thisWasUsed(), 1);
    }
 
    // It will recover the connection after it will detect
-   BOOST_REQUIRE_EQUAL(conn0->isAvailable(), false);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->isAvailable(), false);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 0);
 }
 
-BOOST_AUTO_TEST_CASE(dbms_break_unrecovery_locking)
+BOOST_FIXTURE_TEST_CASE(dbms_break_unrecovery_while_locking, DbmsDefineAndRun)
 {
-   test_dbms::MyDatabase database("dbms_break_unrecovery_locking");
-
-   database.externalInitialize();
-
    std::shared_ptr<test_dbms::MyRecoveryHandler> recoveryHandler = std::make_shared<test_dbms::MyRecoveryHandler>();
-   database.setFailRecoveryHandler(recoveryHandler);
+   database->setFailRecoveryHandler(recoveryHandler);
 
-   auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
-   auto stWriter = database.createStatement("the_write", "write");
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
+   auto stWriter = database->createStatement("the_write", "write");
 
    if(true) {
-      GuardConnection connection(conn0);
-      GuardStatement writer(connection, stWriter);
+      GuardConnection guard(connection);
+      GuardStatement writer(guard, stWriter);
 
-      BOOST_REQUIRE_EQUAL(conn0->getOpenCounter(), 1);
-      BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 0);
 
-      int ii = 1;
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(ii);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the ii");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(ii * ii);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(100 / ii);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(adt::Second(ii));
-      BOOST_REQUIRE_NO_THROW(writer.execute());
+      BOOST_REQUIRE_NO_THROW(writeRecord(writer, 1));
    }
 
-   conn0->manualBreak();
-   conn0->avoidRecovery();
+   mockConnection->manualBreak();
+   mockConnection->avoidRecovery();
 
    if(true) {
-      BOOST_REQUIRE_THROW(GuardConnection connection(conn0), adt::RuntimeException);
-      BOOST_REQUIRE_EQUAL(conn0->getOpenCounter(), 1);
-      BOOST_REQUIRE_EQUAL(conn0->getCloseCounter(), 1);
+      BOOST_REQUIRE_THROW(GuardConnection guard(connection), adt::RuntimeException);
+      BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 1);
       BOOST_REQUIRE_EQUAL(recoveryHandler->thisWasUsed(), 1);
    }
 
    // It will recover the connection after it will detect
-   BOOST_REQUIRE_EQUAL(conn0->isAvailable(), false);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->isAvailable(), false);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 1);
 }
 
-BOOST_AUTO_TEST_CASE(dbms_dealing_with_nulls)
+BOOST_FIXTURE_TEST_CASE(dbms_dealing_with_nulls, DbmsDefineAndRun)
 {
-   test_dbms::MyDatabase database("dbms_dealing_with_nulls");
-
-   database.externalInitialize();
-
-   auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
-   auto stWriter = database.createStatement("the_write", "write");
-   auto stReader = database.createStatement("the_read", "read");
+   auto stWriter = database->createStatement("the_write", "write");
+   auto stReader = database->createStatement("the_read", "read");
    ResultCode resultCode;
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
 
    if(true) {
       try {
-         dbms::GuardConnection guard(conn0);
+         dbms::GuardConnection guard(connection);
          dbms::GuardStatement writer(guard, stWriter);
 
          coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(20);
@@ -1093,8 +836,8 @@ BOOST_AUTO_TEST_CASE(dbms_dealing_with_nulls)
          coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
          writer.execute();
 
-         BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
-         BOOST_REQUIRE_EQUAL(database.container_size(), 0);
+         BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
+         BOOST_REQUIRE_EQUAL(database->container_size(), 0);
 
          coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(25);
          coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 25");
@@ -1103,25 +846,25 @@ BOOST_AUTO_TEST_CASE(dbms_dealing_with_nulls)
          coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->isNull();
          ResultCode resultCode = writer.execute();
 
-         BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
-         BOOST_REQUIRE_EQUAL(database.container_size(), 0);
+         BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 2);
+         BOOST_REQUIRE_EQUAL(database->container_size(), 0);
 
          BOOST_REQUIRE_EQUAL(resultCode.getNumericCode(), test_dbms::MyDatabase::Successful);
          BOOST_REQUIRE_EQUAL(resultCode.successful(), true);
-         BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
-         BOOST_REQUIRE_EQUAL(database.container_size(), 0);
+         BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 2);
+         BOOST_REQUIRE_EQUAL(database->container_size(), 0);
       }
       catch(adt::Exception& ex) {
          logger::Logger::write(ex);
       }
    }
 
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 2);
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 2);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 1);
 
    if(true) {
-      dbms::GuardConnection guard(conn0);
+      dbms::GuardConnection guard(connection);
 
       dbms::GuardStatement reader(guard, stReader);
       BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
@@ -1153,70 +896,11 @@ BOOST_AUTO_TEST_CASE(dbms_dealing_with_nulls)
    }
 }
 
-BOOST_AUTO_TEST_CASE(dbms_without_app)
-{
-   test_dbms::MyDatabase database("dbms_without_app");
-
-   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
-
-   auto conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
-   auto stWriter = database.createStatement("the_write", "write");
-   auto stReader = database.createStatement("the_read", "read");
-   ResultCode resultCode;
-
-   try {
-      dbms::GuardConnection guard(conn0);
-      dbms::GuardStatement writer(guard, stWriter);
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(20);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 20");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->isNull();
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(20.20);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
-      writer.execute();
-
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 0);
-
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(25);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 25");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(25 * 25);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(25.25);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->isNull();
-      ResultCode resultCode = writer.execute();
-
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 0);
-
-      BOOST_REQUIRE_EQUAL(resultCode.getNumericCode(), test_dbms::MyDatabase::Successful);
-      BOOST_REQUIRE_EQUAL(resultCode.successful(), true);
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 2);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 0);
-   }
-   catch(adt::Exception& ex) {
-      logger::Logger::write(ex);
-      BOOST_REQUIRE_EQUAL(std::string("none"), ex.what());
-   }
-
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 2);
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 1);
-
-   BOOST_REQUIRE_NO_THROW(database.externalStop());
-   BOOST_REQUIRE_EQUAL(database.isRunning(), false);
-}
-
 BOOST_AUTO_TEST_CASE(dbms_null_binder_allocated)
 {
-   test_dbms::MyDatabase database("dbms_null_binder_allocated");
-
-   BOOST_REQUIRE_NO_THROW(database.externalInitialize());
-
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
-
-   auto statement = database.createStatement("one", "read");
+   app::ApplicationEngineRunner application("dbms_null_binder_allocated");
+   auto database = test_dbms::MyDatabase::instantiate(application);
+   auto statement = database->createStatement("one", "read");
    auto id = std::make_shared<datatype::Integer>("give-me-null");
    BOOST_REQUIRE_THROW(statement->createBinderInput(id), adt::RuntimeException);
    BOOST_REQUIRE_THROW(statement->createBinderOutput(id), adt::RuntimeException);
@@ -1224,12 +908,13 @@ BOOST_AUTO_TEST_CASE(dbms_null_binder_allocated)
 
 BOOST_AUTO_TEST_CASE(dbms_input_binder_out_range)
 {
-   test_dbms::MyDatabase database("dbms_null_binder_allocated");
-   auto stWriter = database.createStatement("the_write", "write");
-   auto stReader = database.createStatement("the_read", "read");
-   auto conn0 = database.createConnection("0", "0", "0");
+   app::ApplicationEngineRunner application("dbms_input_binder_out_range");
+   auto database = test_dbms::MyDatabase::instantiate(application);
+   auto stWriter = database->createStatement("the_write", "write");
+   auto stReader = database->createStatement("the_read", "read");
+   auto connection = database->createConnection("0", "0", "0");
 
-   dbms::GuardConnection guard(conn0);
+   dbms::GuardConnection guard(connection);
    dbms::GuardStatement writer(guard, stWriter);
    BOOST_REQUIRE_THROW(writer.getInputData(100), adt::RuntimeException);
 
@@ -1239,10 +924,11 @@ BOOST_AUTO_TEST_CASE(dbms_input_binder_out_range)
 
 BOOST_AUTO_TEST_CASE(dbms_resultcode_without_interpreter)
 {
-   test_dbms::MyDatabase database("none");
+   app::ApplicationEngineRunner application("dbms_resultcode_without_interpreter");
+   auto database = test_dbms::MyDatabase::instantiate(application);
    std::shared_ptr<dbms::ErrorCodeInterpreter> empty;
-   database.setErrorCodeInterpreter(empty);
-   dbms::ResultCode resultCode(database, 100);
+   database->setErrorCodeInterpreter(empty);
+   dbms::ResultCode resultCode(*database, 100);
 
    BOOST_REQUIRE_THROW(resultCode.successful(), adt::RuntimeException);
    BOOST_REQUIRE_THROW(resultCode.notFound(), adt::RuntimeException);
@@ -1252,81 +938,64 @@ BOOST_AUTO_TEST_CASE(dbms_resultcode_without_interpreter)
 
 BOOST_AUTO_TEST_CASE(dbms_resultcode_asstring)
 {
-   test_dbms::MyDatabase database("none");
-   dbms::ResultCode resultCode(database, 100, "text");
+   app::ApplicationEngineRunner application("dbms_resultcode_asstring");
+   auto database = test_dbms::MyDatabase::instantiate(application);
+   dbms::ResultCode resultCode(*database, 100, "text");
 
    BOOST_REQUIRE_EQUAL(resultCode.asString(), "dbms.ResultCode { Status=(100) | Comment=text }");
 }
 
 BOOST_AUTO_TEST_CASE(dbms_database_asXML)
 {
-   test_dbms::MyDatabase database("dbms_without_app");
+   app::ApplicationEngineRunner application("dbms_database_asXML");
+   auto database = test_dbms::MyDatabase::instantiate(application);
 
-   database.createConnection("connection0", "user0", "password0");
-   database.createStatement("the_write", "write");
-   database.createStatement("the_read", "read");
+   database->createConnection("connection0", "user0", "password0");
+   database->createStatement("the_write", "write");
+   database->createStatement("the_read", "read");
 
    auto node = std::make_shared<xml::Node>("root");
-   std::shared_ptr<xml::Node> result = database.asXML(node);
+   std::shared_ptr<xml::Node> result = database->asXML(node);
 
    BOOST_REQUIRE_EQUAL(result->children_size(), 3);
 }
 
-BOOST_AUTO_TEST_CASE(dbms_noauto_commit)
+BOOST_FIXTURE_TEST_CASE(dbms_noauto_commit, DbmsDefineAndRun)
 {
-   test_dbms::MyDatabase database("dbms_write_and_read_and_delete");
-
-   database.externalInitialize();
-
-   std::shared_ptr<mock::MockConnection> conn0 = std::dynamic_pointer_cast<mock::MockConnection>(database.createConnection("0", "0", "0"));
-   auto stWriter = database.createStatement("the_write", "write");
+   auto stWriter = database->createStatement("the_write", "write");
    ResultCode resultCode;
 
-   BOOST_REQUIRE_EQUAL(database.isRunning(), true);
-
    if (true) {
-      dbms::GuardConnection guard(conn0);
+      dbms::GuardConnection guard(connection);
       dbms::GuardStatement writer(guard, stWriter);
 
       BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
 
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(2);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 2");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 2);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.2);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("2/2/2002T02:02:02", "%d/%m/%YT%H:%M");
-      writer.execute();
+      BOOST_REQUIRE_NO_THROW(writeRecord(writer, 2));
 
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
-      BOOST_REQUIRE_EQUAL(database.container_size(), 0);
-      BOOST_REQUIRE_EQUAL(conn0->getCommitPendingCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(database->container_size(), 0);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCommitPendingCounter(), 1);
    }
 
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 1);
-   BOOST_REQUIRE_EQUAL(conn0->getCommitPendingCounter(), 0);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 1);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitPendingCounter(), 0);
 
    if (true) {
-      dbms::GuardConnection guard(conn0);
+      dbms::GuardConnection guard(connection);
       dbms::GuardStatement writer(guard, stWriter);
 
-      // Avoiding commit will be rejected due to sentence with output parameter => it is an insert
+      // Avoiding commit will be rejected due to sentence with input parameter => it is an insert
       BOOST_REQUIRE(writer.setRequiresCommit(false));
 
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(3);
-      coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue("the 3");
-      coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(2 * 3);
-      coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue(2.3);
-      coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue("3/2/2002T02:02:02", "%d/%m/%YT%H:%M");
-      writer.execute();
+      BOOST_REQUIRE_NO_THROW(writeRecord(writer, 3));
 
-      BOOST_REQUIRE_EQUAL(conn0->operation_size(), 1);
-      BOOST_REQUIRE_EQUAL(conn0->getCommitPendingCounter(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
+      BOOST_REQUIRE_EQUAL(mockConnection->getCommitPendingCounter(), 1);
    }
 
-   BOOST_REQUIRE_EQUAL(conn0->operation_size(), 0);
-   BOOST_REQUIRE_EQUAL(database.container_size(), 2);
-   BOOST_REQUIRE_EQUAL(conn0->getCommitCounter(), 2);
+   BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 0);
+   BOOST_REQUIRE_EQUAL(database->container_size(), 2);
+   BOOST_REQUIRE_EQUAL(mockConnection->getCommitCounter(), 2);
 }
-
-

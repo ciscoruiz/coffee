@@ -29,7 +29,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-
+#include <fstream>
 #include <iostream>
 
 #include <coffee/adt/Microsecond.hpp>
@@ -42,56 +42,62 @@
 using namespace coffee;
 using namespace coffee::logger;
 
+struct CircularTraceFixture {
+   CircularTraceFixture() {
+      unlink ("trace.log");
+      unlink ("trace.log.old");
 
-class TraceObserver : public adt::pattern::observer::Observer {
-public:
-   TraceObserver () : adt::pattern::observer::Observer ("TraceObserver") , m_initCounter (0) {;}
+      Logger::setLevel(Level::Debug);
 
-   int getInitCounter () const throw () { return m_initCounter; }
+   }
+   ~CircularTraceFixture() {
+      unlink ("trace.log");
+      unlink ("trace.log.old");
+   }
 
-private:
-   int m_initCounter;
-
-   void update (const adt::pattern::observer::Event&) throw () {
-      ++ m_initCounter;
+   void fillup(std::shared_ptr<CircularTraceWriter>& writer) {
+      std::string value (1024, 'x');
+      int loop = writer->getKbytesMaxSize() / value.size ();
+      std::cout << "It will need " << loop << " loops to initialize the file trace" << std::endl;
+      for (int ii = 0; ii < loop; ++ ii) {
+         LOG_DEBUG(ii << " " << value);
+      }
    }
 };
 
-BOOST_AUTO_TEST_CASE( CircularTraceWriter_oversized_file )
+BOOST_FIXTURE_TEST_CASE(CircularTraceWriter_oversized_file, CircularTraceFixture)
 {
-   unlink ("trace.log");
-   unlink ("trace.log.old");
-
    auto writer = std::make_shared<CircularTraceWriter>("trace.log", 128);
    Logger::initialize (writer);
 
-   Logger::setLevel(Level::Debug);
-
    BOOST_REQUIRE_NE (writer->getStream(), CircularTraceWriter::NullStream);
 
-   std::string value (1024, 'x');
-
-   int loop = writer->getKbytesMaxSize() / value.size ();
-
-   std::cout << "It will need " << loop << " loops to initialize the file trace" << std::endl;
-
-   for (int ii = 0; ii < loop; ++ ii) {
-      LOG_DEBUG(ii << " " << value);
-   }
-
+   BOOST_REQUIRE_NO_THROW(fillup(writer));
    LOG_DEBUG ("This line will generate an oversized file while the size is measured");
+   BOOST_REQUIRE_EQUAL(writer->getLoops(), 1);
 
-   for (int ii = 0; ii < loop; ++ ii) {
-      LOG_DEBUG(ii << " " << value);
-   }
-
+   BOOST_REQUIRE_NO_THROW(fillup(writer));
    LOG_DEBUG ("This line will generate an oversized file while the size is measured");
-
-   BOOST_REQUIRE_EQUAL (writer->getLineNo(), loop * 2 + 2);
+   BOOST_REQUIRE_EQUAL(writer->getLoops(), 2);
 
    int stream = open ("trace.log.old", O_RDWR | O_CREAT | O_EXCL, S_IRUSR |S_IWUSR | S_IRGRP| S_IROTH);
 
    BOOST_REQUIRE (stream == -1 && errno == EEXIST);
+}
+
+BOOST_FIXTURE_TEST_CASE(CircularTraceWriter_startwith_oversized_file, CircularTraceFixture)
+{
+   std::ofstream create("trace.log");
+   create.close();
+   BOOST_REQUIRE_EQUAL(truncate("trace.log", (CircularTraceWriter::MinimalKbSize + 1) * 1024), 0);
+
+   std::shared_ptr<CircularTraceWriter> writer = std::make_shared<CircularTraceWriter>("trace.log", 128);
+   BOOST_REQUIRE_NO_THROW(Logger::initialize (writer));
+   BOOST_REQUIRE_EQUAL(writer->getLoops(), 1);
+
+   fillup(writer);
+   LOG_DEBUG ("This line will generate an oversized file while the size is measured");
+   BOOST_REQUIRE_EQUAL(writer->getLoops(), 2);
 }
 
 BOOST_AUTO_TEST_CASE( CircularTraceWriter_can_not_write )
@@ -117,7 +123,7 @@ BOOST_AUTO_TEST_CASE( CircularTraceWriter_can_not_write )
    BOOST_REQUIRE_EQUAL (writer->getLineNo(), 4);
 }
 
-BOOST_AUTO_TEST_CASE (circular_performance_measure_test)
+BOOST_FIXTURE_TEST_CASE(circular_performance_measure_test, CircularTraceFixture)
 {
    auto writer = std::make_shared<CircularTraceWriter>("trace.log", 4096);
 
@@ -147,5 +153,5 @@ BOOST_AUTO_TEST_CASE (circular_performance_measure_test)
 
    adt::Microsecond end = adt::Microsecond::getTime();
 
-   std::cout << "Delay: " << end - init << " ms" << std::endl << std::endl;
+   std::cout << "Delay(CircularTraceWriter): " << end - init << " ms" << std::endl << std::endl;
 }

@@ -42,8 +42,7 @@
 #include <coffee/dbms/StatementTranslator.hpp>
 #include <coffee/dbms/SCCS.hpp>
 
-#include <coffee/dbms/internal/DummyApplication.hpp>
-#include "../../include/coffee/dbms/Database.hpp"
+#include <coffee/dbms/Database.hpp>
 
 using namespace std;
 using namespace coffee;
@@ -59,33 +58,10 @@ dbms::Database::Database(app::Application& app, const char* className, const cha
    dbms::SCCS::activate();
 }
 
-dbms::Database::Database(const char* rdbmsName, const char* dbmsName) :
-   dbms::Database(internal::DummyApplication::getInstance(), rdbmsName, dbmsName)
-{;}
-
 dbms::Database::~Database()
 {
    if(this->isStopped() == false)
       stop();
-}
-
-void dbms::Database::externalInitialize()
-   throw(adt::RuntimeException)
-{
-   initialize();
-}
-
-void dbms::Database::externalStop()
-   throw(adt::RuntimeException)
-{
-   app::Application& application(getApplication());
-   app::Application& dummy = internal::DummyApplication::getInstance();
-
-   if(&dummy != &application) {
-      COFFEE_THROW_EXCEPTION(asString() << " | This method can't be applied to a database with associated application");
-   }
-
-   stop();
 }
 
 void dbms::Database::do_initialize()

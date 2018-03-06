@@ -34,7 +34,19 @@
 using namespace coffee;
 using namespace coffee::logger;
 
-BOOST_AUTO_TEST_CASE (backtraking_test)
+struct BackTraceFixture {
+   BackTraceFixture() {
+      unlink ("backtrace.log");
+      unlink ("backtrace.log.old");
+
+   }
+   ~BackTraceFixture() {
+      unlink ("backtrace.log");
+      unlink ("backtrace.log.old");
+   }
+};
+
+BOOST_FIXTURE_TEST_CASE (backtraking_test, BackTraceFixture)
 {
    int backtrackingLength = 5;
 
@@ -54,7 +66,7 @@ BOOST_AUTO_TEST_CASE (backtraking_test)
    BOOST_REQUIRE_EQUAL(writer->getLineNo(), backtrackingLength + 1);
 }
 
-BOOST_AUTO_TEST_CASE (backtraking_down_lowest_level_test)
+BOOST_FIXTURE_TEST_CASE (backtraking_down_lowest_level_test, BackTraceFixture)
 {
    int backtrackingLength = 5;
 
@@ -76,7 +88,7 @@ BOOST_AUTO_TEST_CASE (backtraking_down_lowest_level_test)
    BOOST_REQUIRE_EQUAL(writer->getLineNo(), backtrackingLength);
 }
 
-BOOST_AUTO_TEST_CASE (backtraking_up_lowest_level_test)
+BOOST_FIXTURE_TEST_CASE (backtraking_up_lowest_level_test, BackTraceFixture)
 {
    int backtrackingLength = 5;
 
@@ -98,7 +110,7 @@ BOOST_AUTO_TEST_CASE (backtraking_up_lowest_level_test)
    BOOST_REQUIRE_EQUAL(writer->getLineNo(), 3);
 }
 
-BOOST_AUTO_TEST_CASE (backtraking_change_level_test)
+BOOST_FIXTURE_TEST_CASE (backtraking_change_level_test, BackTraceFixture)
 {
    int backtrackingLength = 5;
 
@@ -120,7 +132,7 @@ BOOST_AUTO_TEST_CASE (backtraking_change_level_test)
    BOOST_REQUIRE_EQUAL(writer->getLineNo(), backtrackingLength + 1);
 }
 
-BOOST_AUTO_TEST_CASE (backtraking_performance_measure_test)
+BOOST_FIXTURE_TEST_CASE (backtraking_performance_measure_test, BackTraceFixture)
 {
    int backtrackingLength = 32;
 
@@ -152,5 +164,5 @@ BOOST_AUTO_TEST_CASE (backtraking_performance_measure_test)
 
    adt::Microsecond end = adt::Microsecond::getTime();
 
-   std::cout << "Delay: " << end - init << " ms" << std::endl << std::endl;
+   std::cout << "Delay(BacktraceWriter): " << end - init << " ms" << std::endl << std::endl;
 }

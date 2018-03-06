@@ -84,9 +84,8 @@ void sqlite::SqliteOutputBinder::do_decode(Statement& statement, const int pos)
       break;
    case dbms::datatype::Abstract::Datatype::TimeStamp:
       {
-         adt::Millisecond msecond(sqlite3_column_int64(impl, pos));
-         coffee_datatype_downcast(datatype::TimeStamp, data)->setValue(adt::Second(msecond));
-         coffee_datatype_downcast(datatype::TimeStamp, data)->setFractionalSecond(msecond / 1000);
+         adt::Second seconds(sqlite3_column_int64(impl, pos));
+         coffee_datatype_downcast(datatype::TimeStamp, data)->setValue(seconds);
       }
       break;
    }

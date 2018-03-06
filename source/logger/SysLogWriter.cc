@@ -39,7 +39,7 @@ logger::SysLogWriter::~SysLogWriter ()
    closelog();
 }
 
-void logger::SysLogWriter::do_initialize ()
+void logger::SysLogWriter::initialize ()
    throw (adt::RuntimeException)
 {
    openlog(m_ident.c_str(), LOG_USER, m_options);

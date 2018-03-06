@@ -42,7 +42,7 @@ public:
    TtyWriter () : Writer ("TtyWriter") {;}
 
 private:
-   void do_initialize () throw (adt::RuntimeException) {;}
+   void initialize () throw (adt::RuntimeException) {;}
    void apply (const Level::_v level, const std::string& line) noexcept {
       std::cout << line << std::endl;
    }

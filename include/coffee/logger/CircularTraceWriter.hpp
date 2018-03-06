@@ -57,6 +57,7 @@ public:
    int getStream () const noexcept { return m_stream; }
    size_t getLineNo () const noexcept { return m_lineno; }
    size_t getKbytesMaxSize () const noexcept { return m_maxKbSize; }
+   unsigned int getLoops() const noexcept { return m_loops; }
 
 protected:
    virtual void apply (const Level::_v level, const std::string& line) noexcept;
@@ -67,8 +68,9 @@ private:
    size_t m_maxKbSize;
    int m_stream;
    size_t m_lineno;
+   unsigned int m_loops;
 
-   void do_initialize () throw (adt::RuntimeException);
+   void initialize () throw (adt::RuntimeException);
 
    void openStream () throw (adt::RuntimeException);
    bool oversizedStream () throw (adt::RuntimeException);

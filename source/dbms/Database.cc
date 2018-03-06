@@ -49,7 +49,7 @@ using namespace coffee;
 
 
 dbms::Database::Database(app::Application& app, const char* className, const char* dbmsName) :
-   app::Engine(app, className),
+   app::Service(app, className),
    m_name((dbmsName == NULL) ? "local": dbmsName),
    m_type((dbmsName == NULL) ? Type::Local: Type::Remote),
    m_failRecoveryHandler(NULL),
@@ -226,7 +226,7 @@ adt::StreamString dbms::Database::asString() const
 {
    adt::StreamString result("dbms::Database { ");
 
-   result << app::Engine::asString();
+   result << app::Service::asString();
 
    if(m_type == Type::Local)
       result += " | Type: Local";
@@ -246,7 +246,7 @@ std::shared_ptr<xml::Node> dbms::Database::asXML(std::shared_ptr<xml::Node>& par
 {
    std::shared_ptr<xml::Node> result = parent->createChild("dbms.Database");
 
-   app::Engine::asXML(result);
+   app::Service::asXML(result);
 
    result->createAttribute("Type",(m_type == Type::Local) ? "Local": "Remote");
 

@@ -41,28 +41,29 @@ class Node;
 
 namespace app {
 
-class Engine;
-
 /**
- * Starts all engines attached to this instance and wait for requestStop, then
- * it will stop all engines before finished execution.
+ * Starts all services attached to this instance and wait for requestStop, then
+ * it will stop all services before finished execution.
  *
  * \warning Application::start method should be called from a thread different
  * from which it will call to the requestStop method.
+ *
+ * \include Application_test.cc
+ *
  */
-class ApplicationEngineRunner : public Application {
+class ApplicationServiceStarter : public Application {
 public:
    /**
       Constructor.
       @param shortName Logical name.
    */
-   ApplicationEngineRunner(const char* shortName);
+   ApplicationServiceStarter(const char* shortName);
 
    /**
     * Once you call start method from a thread you have to wait for the application really start
     * its execution.
     */
-   void waitUntilRunning() { semaphoreForRun.wait(); }
+   void waitUntilRunning() noexcept { semaphoreForRun.wait(); }
 
 private:
    adt::Semaphore semaphoreForRun;

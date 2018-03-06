@@ -43,7 +43,7 @@ namespace app {
  * undefined period of time.
  */
 class Runnable : public adt::NamedObject {
-   struct StatusFlags { enum _v { Stopped = 0, Starting = 1, Running = 2, WaitingStop = 4 }; };
+   struct StatusFlags { enum _v { Stopped = 0, Starting = 1, Running = 2, WaitingStop = 4, StoppedWithError = 8 }; };
 
 public:
    /**
@@ -54,7 +54,12 @@ public:
    /**
     * \return \b true if this instance is stopped or \b false otherwise.
     */
-   bool isStopped() const noexcept { return m_statusFlags == StatusFlags::Stopped; }
+   bool isStopped() const noexcept { return m_statusFlags == StatusFlags::Stopped || m_statusFlags == StatusFlags::StoppedWithError; }
+
+   /**
+    * \return \b true if this instance had and error during stop processing or \b false otherwise.
+    */
+   bool isStoppedWithError() const noexcept { return(m_statusFlags & StatusFlags::StoppedWithError) != 0; }
 
    /**
     * \return \b true if this instance is starting its execution or \b false otherwise.
@@ -139,6 +144,11 @@ protected:
    void statusStopped() noexcept { m_statusFlags = StatusFlags::Stopped; }
 
    /**
+    * Set flags to indicate this instance is stopped.
+    */
+   void statusStoppedWithErrors() noexcept { m_statusFlags = StatusFlags::StoppedWithError; }
+
+   /**
     * Inicializa el estado de esta instancia.
     * \internal.
     */
@@ -148,7 +158,7 @@ protected:
     * Pure virtual method to fine tuning operations to done in case of receive a
     * request for stop.
     */
-   virtual void do_requestStop() throw(adt::RuntimeException) {;}
+   virtual void do_requestStop() throw(adt::RuntimeException);
 
 private:
    int m_statusFlags;

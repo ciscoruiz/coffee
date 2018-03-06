@@ -29,7 +29,7 @@
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TtyWriter.hpp>
 
-#include <coffee/app/ApplicationEngineRunner.hpp>
+#include <coffee/app/ApplicationServiceStarter.hpp>
 
 #include <coffee/dbms.sqlite/SqliteDatabase.hpp>
 #include <coffee/dbms.sqlite/SqliteConnection.hpp>
@@ -224,7 +224,7 @@ struct SqliteFixture  {
       thr.join();
    }
 
-   app::ApplicationEngineRunner app;
+   app::ApplicationServiceStarter app;
    std::shared_ptr<dbms::sqlite::SqliteDatabase> database;
    std::thread thr;
    std::shared_ptr<dbms::Connection> connection;
@@ -252,7 +252,7 @@ struct SqliteFixtureBadPath  {
       thr.join();
    }
 
-   app::ApplicationEngineRunner app;
+   app::ApplicationServiceStarter app;
    std::shared_ptr<dbms::sqlite::SqliteDatabase> database;
    std::thread thr;
 };

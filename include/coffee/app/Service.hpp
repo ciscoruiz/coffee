@@ -21,8 +21,8 @@
 // SOFTWARE.
 //
 
-#ifndef _coffee_app_Engine_h
-#define _coffee_app_Engine_h
+#ifndef _coffee_app_Service_h
+#define _coffee_app_Service_h
 
 #include <vector>
 
@@ -42,27 +42,26 @@ namespace app {
 class Application;
 
 /**
- * Every engine has a very clear task to do, and it is associated and managed by
+ * Every Service has a very clear task to do, and it is associated and managed by
  * some application.
  *
- * This way by passing the applicatio instance we will have access to all engines
+ * This way by passing the application instance we will have access to all services
  * associated to this application.
- *
  */
-class Engine : public Runnable  {
+class Service : public Runnable  {
 public:
    /**
       Destructor.
    */
-   virtual ~Engine() {;}
+   virtual ~Service() {;}
 
    /**
-    * \return the application associated to this engine.
+    * \return the application associated to this service.
     */
    Application& getApplication() noexcept { return a_app; }
 
    /**
-    * \return Logical name of this engine.
+    * \return Logical name of this service.
     */
    const std::string& getClassName() const noexcept { return getName(); }
 
@@ -84,21 +83,21 @@ public:
 protected:
    /**
     * Constructor.
-    * \param app Application owner of this engine.
-    * \param className Logical name of this engine.
+    * \param app Application owner of this service.
+    * \param className Logical name of this service.
     */
-   Engine(Application& app, const char* className) :
+   Service(Application& app, const char* className) :
       Runnable(className),
       a_app(app)
    {
    }
 
    /**
-    * Set the name of a engine that must be initialized before this engine.
-    * \param engineName Engine that must be initialized before this engine.
-    * \warning It will not have any effect it this engine has been initialized before calling this method.
+    * Set the name of a service that must be initialized before this service.
+    * \param serviceName Service that must be initialized before this service.
+    * \warning It will not have any effect it this service has been initialized before calling this method.
     */
-   void addPredecessor(const char* engineName) noexcept;
+   void addPredecessor(const char* serviceName) noexcept;
 
    /**
     * This method should be implemented to specialize the initialization of this instance.
@@ -108,9 +107,12 @@ protected:
 
    /**
     * This method should be implemented to specialize the finalization of this instance.
-    * This method will be called from coffee::app::Application::stopEngines method.
+    * This method will be called from coffee::app::Application::requestStop method.
+    *
+    * The service will activate app::Runnable::StatusFlags::StoppedWithError in case of this
+    * method will throw an exception.
     */
-   void stop() throw(adt::RuntimeException) { statusStopped(); do_stop(); }
+   void stop() throw(adt::RuntimeException);
 
 private:
    typedef std::vector <std::string>::iterator iterator;
@@ -118,7 +120,7 @@ private:
    Application& a_app;
    std::vector <std::string> a_predecessors;
 
-   Engine(const Engine& other);
+   Service(const Service& other);
    iterator begin() noexcept { return a_predecessors.begin(); }
    iterator end() noexcept { return a_predecessors.end(); }
    const std::string& data(iterator ii) noexcept { return *ii; }

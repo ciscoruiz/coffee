@@ -48,6 +48,9 @@ void app::Runnable::requestStop ()
 }
 
 //virtual
+void app::Runnable::do_requestStop() throw(adt::RuntimeException) {;}
+
+//virtual
 adt::StreamString app::Runnable::asString () const
    noexcept
 {
@@ -101,6 +104,9 @@ std::string app::Runnable::flagsAsString () const
 
       if (isStarting() == true)
          result += " Starting";
+
+      if (isStoppedWithError() == true)
+         result += " Stopped with error";
    }
 
    return result;

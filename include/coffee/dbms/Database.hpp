@@ -29,7 +29,7 @@
 
 #include <coffee/dbms/DatabaseException.hpp>
 #include <coffee/dbms/ActionOnError.hpp>
-#include <coffee/app/Engine.hpp>
+#include "../app/Service.hpp"
 
 namespace coffee {
 
@@ -60,7 +60,7 @@ class ErrorCodeInterpreter;
 
    @author cisco.tierra@gmail.com.
 */
-class Database : public app::Engine {
+class Database : public app::Service {
 protected:
    typedef std::vector<std::shared_ptr <Connection> > connection_container;
    typedef connection_container::iterator connection_iterator;

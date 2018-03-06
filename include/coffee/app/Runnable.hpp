@@ -148,7 +148,7 @@ protected:
     * Pure virtual method to fine tuning operations to done in case of receive a
     * request for stop.
     */
-   virtual void do_requestStop() throw(adt::RuntimeException) {;}
+   virtual void do_requestStop() throw(adt::RuntimeException);
 
 private:
    int m_statusFlags;

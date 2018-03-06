@@ -21,8 +21,6 @@
 // SOFTWARE.
 //
 
-#include <coffee/app/Engine.hpp>
-
 #include <algorithm>
 
 #include <coffee/logger/Logger.hpp>
@@ -31,11 +29,12 @@
 #include <coffee/xml/Attribute.hpp>
 
 #include <coffee/app/Application.hpp>
+#include <coffee/app/Service.hpp>
 
 using namespace std;
 using namespace coffee;
 
-void app::Engine::addPredecessor(const char* engineName)
+void app::Service::addPredecessor(const char* engineName)
    noexcept
 {
    const std::string name(engineName);
@@ -48,7 +47,7 @@ void app::Engine::addPredecessor(const char* engineName)
    LOG_DEBUG(asString() << " requires " << name);
 }
 
-void app::Engine::initialize()
+void app::Service::initialize()
    throw(adt::RuntimeException)
 {
    statusStarting();
@@ -57,13 +56,13 @@ void app::Engine::initialize()
       for(iterator ii = begin(), maxii = end(); ii != maxii; ++ ii) {
          const std::string& name = data(ii);
 
-         Application::engine_iterator pp = a_app.engine_find(name.c_str());
+         Application::service_iterator pp = a_app.service_find(name.c_str());
 
-         if(pp == a_app.engine_end()) {
+         if(pp == a_app.service_end()) {
             COFFEE_THROW_EXCEPTION(asString() << " requires '" << name << "' which was not defined");
          }
 
-         auto predecessor = a_app.engine(pp);
+         auto predecessor = a_app.service(pp);
 
          if(predecessor->isRunning() == true) {
             LOG_DEBUG("Predecessor '" << name << "' already running");
@@ -86,7 +85,7 @@ void app::Engine::initialize()
    }
 }
 
-adt::StreamString app::Engine::asString() const
+adt::StreamString app::Service::asString() const
    noexcept
 {
    adt::StreamString result("app::Engine { ");
@@ -94,7 +93,7 @@ adt::StreamString app::Engine::asString() const
    return result += " }";
 }
 
-std::shared_ptr<xml::Node> app::Engine::asXML(std::shared_ptr<xml::Node>& parent) const
+std::shared_ptr<xml::Node> app::Service::asXML(std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
    std::shared_ptr<xml::Node> result = parent->createChild("app.Engine");

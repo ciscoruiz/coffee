@@ -48,6 +48,9 @@ void app::Runnable::requestStop ()
 }
 
 //virtual
+void app::Runnable::do_requestStop() throw(adt::RuntimeException) {;}
+
+//virtual
 adt::StreamString app::Runnable::asString () const
    noexcept
 {

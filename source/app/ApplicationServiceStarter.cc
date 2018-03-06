@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <coffee/app/ApplicationEngineRunner.hpp>
+#include "../../include/coffee/app/ApplicationServiceStarter.hpp"
 
 #include <coffee/config/SCCS.hpp>
 
@@ -29,14 +29,14 @@ using namespace coffee;
 
 coffee_sccs_import_tag(app);
 
-app::ApplicationEngineRunner::ApplicationEngineRunner(const char* shortName):
+app::ApplicationServiceStarter::ApplicationServiceStarter(const char* shortName):
     app::Application(shortName, "Application for run attached engines", coffee_sccs_use_tag(app)),
     semaphoreForRun(0),
     stopNow(false)
  {
  }
 
-void app::ApplicationEngineRunner::run()
+void app::ApplicationServiceStarter::run()
    throw(adt::RuntimeException)
 {
    semaphoreForRun.signal();
@@ -46,7 +46,7 @@ void app::ApplicationEngineRunner::run()
    }
 }
 
-void app::ApplicationEngineRunner::do_requestStop()
+void app::ApplicationServiceStarter::do_requestStop()
    throw(adt::RuntimeException)
 {
    try {

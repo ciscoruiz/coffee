@@ -47,6 +47,9 @@ namespace app {
  *
  * \warning Application::start method should be called from a thread different
  * from which it will call to the requestStop method.
+ *
+ * \include Application_test.cc
+ *
  */
 class ApplicationServiceStarter : public Application {
 public:

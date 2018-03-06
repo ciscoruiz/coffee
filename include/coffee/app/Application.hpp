@@ -48,6 +48,8 @@ class Service;
  * This abstraction manage all resources needed to run our application.
  *
  * It maintains the list of services needed to run our application.
+ *
+ * \include Application_test.cc
 */
 class Application : public Runnable {
 public:
@@ -179,7 +181,7 @@ protected:
    virtual void do_requestStop() throw(adt::RuntimeException);
 
    /**
-    * Handler for signal USR1, it will write the context into file #getContextPath.
+    * Handler for signal USR1, it will write the context into file #getOutputContextFilename.
     */
    virtual void signalUSR1() throw(adt::RuntimeException);
 

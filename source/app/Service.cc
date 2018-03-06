@@ -85,10 +85,23 @@ void app::Service::initialize()
    }
 }
 
+void app::Service::stop()
+   throw(adt::RuntimeException)
+{
+   statusStopped();
+   try {
+      do_stop();
+   }
+   catch(adt::RuntimeException&) {
+      statusStoppedWithErrors();
+      throw;
+   }
+}
+
 adt::StreamString app::Service::asString() const
    noexcept
 {
-   adt::StreamString result("app::Engine { ");
+   adt::StreamString result("app.Service { ");
    result += Runnable::asString();
    return result += " }";
 }
@@ -96,7 +109,7 @@ adt::StreamString app::Service::asString() const
 std::shared_ptr<xml::Node> app::Service::asXML(std::shared_ptr<xml::Node>& parent) const
    noexcept
 {
-   std::shared_ptr<xml::Node> result = parent->createChild("app.Engine");
+   std::shared_ptr<xml::Node> result = parent->createChild("app.Service");
    Runnable::asXML(result);
    return result;
 }

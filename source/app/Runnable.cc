@@ -104,6 +104,9 @@ std::string app::Runnable::flagsAsString () const
 
       if (isStarting() == true)
          result += " Starting";
+
+      if (isStoppedWithError() == true)
+         result += " Stopped with error";
    }
 
    return result;

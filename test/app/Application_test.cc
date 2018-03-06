@@ -78,23 +78,6 @@ private:
 void MyService::do_initialize() throw(adt::RuntimeException){ ++ m_initilized;}
 void MyService::do_stop() throw(adt::RuntimeException) { ++ m_stopped;}
 
-class NoStopService : public app::Service {
-public:
-   NoStopService(app::Application& application, const char* name) : app::Service(application, name) {;}
-
-private:
-   void do_initialize() throw(adt::RuntimeException);
-   void do_stop() throw(adt::RuntimeException);
-};
-
-void NoStopService::do_initialize() throw(adt::RuntimeException) {;}
-
-void NoStopService::do_stop()
-   throw(adt::RuntimeException)
-{
-   COFFEE_THROW_EXCEPTION("I dont want to stop");
-}
-
 BOOST_AUTO_TEST_CASE( smallest_application )
 { 
    SmallestApplication application;
@@ -202,10 +185,10 @@ BOOST_AUTO_TEST_CASE( iterator_service )
    app::Application::const_service_iterator  maxjj =  constApplication.service_end();
 
    while (ii != maxii) {
-	   BOOST_REQUIRE_EQUAL (app::Application::service(ii)->asString(), app::Application::service(jj)->asString());
-	   BOOST_REQUIRE(jj != maxjj);
-	   ++ ii;
-	   ++ jj;
+       BOOST_REQUIRE_EQUAL (app::Application::service(ii)->asString(), app::Application::service(jj)->asString());
+       BOOST_REQUIRE(jj != maxjj);
+       ++ ii;
+       ++ jj;
    }
 }
 
@@ -296,6 +279,23 @@ struct ApplicationFixture {
    bool externalStop;
 };
 
+class NoStopService : public app::Service {
+public:
+   NoStopService(app::Application& application, const char* name) : app::Service(application, name) {;}
+
+private:
+   void do_initialize() throw(adt::RuntimeException);
+   void do_stop() throw(adt::RuntimeException);
+};
+
+void NoStopService::do_initialize() throw(adt::RuntimeException) {;}
+
+void NoStopService::do_stop()
+   throw(adt::RuntimeException)
+{
+   COFFEE_THROW_EXCEPTION("I dont want to stop");
+}
+
 BOOST_FIXTURE_TEST_CASE( app_unstoppable_stop_services, ApplicationFixture)
 {
    auto service = std::make_shared<NoStopService>(application, "00");
@@ -303,9 +303,11 @@ BOOST_FIXTURE_TEST_CASE( app_unstoppable_stop_services, ApplicationFixture)
    application.attach(std::make_shared<NoStopService>(application, "01"));
    application.attach(std::make_shared<NoStopService>(application, "02"));
 
-   BOOST_CHECK_THROW(application.requestStop(), adt::RuntimeException);
+   BOOST_CHECK_NO_THROW(application.requestStop());
    thr.join();
    externalStop = true;
+
+   BOOST_CHECK(service->isStoppedWithError() == true);
 }
 
 class NoAcceptRequestStopService : public app::Service {
@@ -330,8 +332,8 @@ void NoAcceptRequestStopService::do_stop() throw(adt::RuntimeException) { ; }
 
 BOOST_FIXTURE_TEST_CASE( app_unstoppable_requeststop_services, ApplicationFixture)
 {
-   auto service = std::make_shared<NoAcceptRequestStopService>(application, "00");
-   application.attach(service);
+   auto service00 = std::make_shared<NoAcceptRequestStopService>(application, "00");
+   application.attach(service00);
    application.attach(std::make_shared<NoAcceptRequestStopService>(application, "01"));
    application.attach(std::make_shared<NoAcceptRequestStopService>(application, "02"));
 

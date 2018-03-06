@@ -107,9 +107,12 @@ protected:
 
    /**
     * This method should be implemented to specialize the finalization of this instance.
-    * This method will be called from coffee::app::Application::stopServices method.
+    * This method will be called from coffee::app::Application::requestStop method.
+    *
+    * The service will activate app::Runnable::StatusFlags::StoppedWithError in case of this
+    * method will throw an exception.
     */
-   void stop() throw(adt::RuntimeException) { statusStopped(); do_stop(); }
+   void stop() throw(adt::RuntimeException);
 
 private:
    typedef std::vector <std::string>::iterator iterator;

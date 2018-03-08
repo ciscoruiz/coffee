@@ -51,7 +51,6 @@ using namespace coffee;
 dbms::Database::Database(app::Application& app, const char* className, const char* dbmsName) :
    app::Service(app, className),
    m_name((dbmsName == NULL) ? "local": dbmsName),
-   m_type((dbmsName == NULL) ? Type::Local: Type::Remote),
    m_failRecoveryHandler(NULL),
    m_statementTranslator(NULL)
 {
@@ -227,13 +226,7 @@ adt::StreamString dbms::Database::asString() const
    adt::StreamString result("dbms::Database { ");
 
    result << app::Service::asString();
-
-   if(m_type == Type::Local)
-      result += " | Type: Local";
-   else {
-      result += " | Type: Remote | Name: ";
-      result += m_name;
-   }
+   result << " | Name=" << m_name;
 
    if(m_statementTranslator)
       result << " | StatementTranslator=" << m_statementTranslator->getName();
@@ -248,10 +241,7 @@ std::shared_ptr<xml::Node> dbms::Database::asXML(std::shared_ptr<xml::Node>& par
 
    app::Service::asXML(result);
 
-   result->createAttribute("Type",(m_type == Type::Local) ? "Local": "Remote");
-
-   if(m_type != Type::Local)
-      result->createAttribute("Name", m_name);
+   result->createAttribute("Name", m_name);
 
    if(m_statementTranslator)
       result->createAttribute("Translator", m_statementTranslator->getName());

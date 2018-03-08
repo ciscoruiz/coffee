@@ -65,11 +65,23 @@ protected:
    virtual ~Observer() {;}
 
    /**
+    * Receive notification to be aware that was attached to the received subject.
+    * \param subject that changes its state.
+    */
+   virtual void attached(const Subject& subject) noexcept = 0 ;
+
+   /**
     * Receive notification about change in the subject.
     * \param subject that changes its state.
     * \param event Event information. Depending of his event the observer could read different members of the subject.
     */
    virtual void update(const Subject& subject, const Event& event) noexcept = 0 ;
+
+   /**
+    * Receive notification to be aware that was detached from the received subject.
+    * \param subject that changes its state.
+    */
+   virtual void detached(const Subject& subject) noexcept {;}
 
 private:
    bool m_isSubscribed;

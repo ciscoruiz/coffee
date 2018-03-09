@@ -113,8 +113,9 @@ public:
    }
 
 private:
-
    mock::MockLowLevelContainer m_container;
+
+   void do_stop() throw(adt::RuntimeException) {;}
 
    std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
       throw(adt::RuntimeException)

@@ -185,7 +185,7 @@ protected:
       Elimina las conexiones definidas sobre esta base de datos. Este metodo se invocaria automaticamente
       desde el nucleo de NemesisRD.
    */
-   virtual void do_stop() noexcept;
+   virtual void do_stop() throw(adt::RuntimeException);
 
    /**
       Devuelve un iterator al comienzo de la lista de conexiones establecidas con esta base de datos.

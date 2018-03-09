@@ -59,8 +59,6 @@ dbms::Database::Database(app::Application& app, const char* className, const cha
 
 dbms::Database::~Database()
 {
-   if(this->isStopped() == false)
-      stop();
 }
 
 void dbms::Database::do_initialize()
@@ -90,7 +88,7 @@ void dbms::Database::do_initialize()
 }
 
 void dbms::Database::do_stop()
-   noexcept
+   throw(adt::RuntimeException)
 {
    LOG_THIS_METHOD();
 

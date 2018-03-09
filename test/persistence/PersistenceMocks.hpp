@@ -135,6 +135,8 @@ private:
 
       return result;
    }
+
+   void do_stop() throw(adt::RuntimeException) {;}
 };
 
 class CustomerObjectWrapper {

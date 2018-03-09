@@ -220,7 +220,7 @@ struct SqliteFixture  {
       BOOST_REQUIRE_NO_THROW(std::dynamic_pointer_cast<dbms::sqlite::SqliteConnection>(connection)->execute(sql));
    }
    ~SqliteFixture() {
-      app.requestStop();
+      app.stop();
       thr.join();
    }
 
@@ -248,7 +248,7 @@ struct SqliteFixtureBadPath  {
    }
 
    ~SqliteFixtureBadPath() {
-      app.requestStop();
+      app.stop();
       thr.join();
    }
 

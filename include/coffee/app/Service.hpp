@@ -105,15 +105,6 @@ protected:
     */
    void initialize() throw(adt::RuntimeException);
 
-   /**
-    * This method should be implemented to specialize the finalization of this instance.
-    * This method will be called from coffee::app::Application::requestStop method.
-    *
-    * The service will activate app::Runnable::StatusFlags::StoppedWithError in case of this
-    * method will throw an exception.
-    */
-   void stop() throw(adt::RuntimeException);
-
 private:
    typedef std::vector <std::string>::iterator iterator;
 
@@ -126,7 +117,6 @@ private:
    const std::string& data(iterator ii) noexcept { return *ii; }
 
    virtual void do_initialize() throw(adt::RuntimeException) = 0;
-   virtual void do_stop() throw(adt::RuntimeException) = 0;
 
    friend class Application;
 };

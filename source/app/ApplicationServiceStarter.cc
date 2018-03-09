@@ -46,11 +46,11 @@ void app::ApplicationServiceStarter::run()
    }
 }
 
-void app::ApplicationServiceStarter::do_requestStop()
+void app::ApplicationServiceStarter::do_stop()
    throw(adt::RuntimeException)
 {
    try {
-      app::Application::do_requestStop();
+      app::Application::do_stop();
       stopNow = true;
       conditionForStop.notify_all();
    }

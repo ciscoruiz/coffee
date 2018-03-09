@@ -85,19 +85,6 @@ void app::Service::initialize()
    }
 }
 
-void app::Service::stop()
-   throw(adt::RuntimeException)
-{
-   statusStopped();
-   try {
-      do_stop();
-   }
-   catch(adt::RuntimeException&) {
-      statusStoppedWithErrors();
-      throw;
-   }
-}
-
 adt::StreamString app::Service::asString() const
    noexcept
 {

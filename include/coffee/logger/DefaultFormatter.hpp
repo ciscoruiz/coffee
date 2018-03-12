@@ -25,6 +25,7 @@
 #define __coffee_logger_DefaultFormatter_hpp
 
 #include <coffee/logger/Formatter.hpp>
+#include <memory>
 
 namespace coffee {
 namespace logger {
@@ -47,6 +48,13 @@ public:
     * Constructor.
     */
    DefaultFormatter() {;}
+
+   /**
+    * Fast shared creator
+    */
+   static std::shared_ptr<DefaultFormatter> instantiate() {
+      return std::make_shared<DefaultFormatter>();
+   }
 
 private:
    std::string apply(const Level::_v level, const adt::StreamString& comment, const char* methodName, const char* file, const unsigned lineno) noexcept;

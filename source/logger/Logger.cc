@@ -57,7 +57,7 @@ void logger::Logger::initialize(std::shared_ptr<Writer> writer, std::shared_ptr<
 void logger::Logger::initialize(std::shared_ptr<Writer> writer)
    throw(adt::RuntimeException)
 {
-   initialize(writer, std::make_shared<DefaultFormatter>());
+   initialize(writer, DefaultFormatter::instantiate());
 }
 
 //static

@@ -37,6 +37,7 @@ std::string DefaultFormatter::apply (const Level::_v level, const adt::StreamStr
    adt::StreamString output;
 
    output << "[" << second.asDateTime() << "] ";
+   output << "[thr=" << pthread_self() << "] ";
    output << Level::enumName(level) << " | ";
    output << methodName << " [" << file << "(" << lineno << ")]: ";
    output << comment;

@@ -50,6 +50,7 @@ public:
 
    void activate(std::shared_ptr<TimeEvent> timeEvent) throw(adt::RuntimeException);
    bool cancel(std::shared_ptr<TimeEvent> timeEvent) noexcept;
+   bool empty() noexcept;
 
    adt::StreamString asString() const noexcept;
 

@@ -24,6 +24,8 @@
 #ifndef _coffee_adt_pattern_observer_Event_hpp
 #define _coffee_adt_pattern_observer_Event_hpp
 
+#include <coffee/adt/StreamString.hpp>
+
 namespace coffee {
 
 namespace adt {
@@ -63,6 +65,11 @@ public:
    Event(const Event& other) : m_id(other.m_id) {;}
 
    /**
+    * Destructor
+    */
+   virtual ~Event() {;}
+
+   /**
     * \return The Id of this instance.
     */
    Id getId() const noexcept { return m_id; }
@@ -80,6 +87,14 @@ public:
       return *this;
    }
 
+   /**
+    * \return Summarize information of the subject
+    */
+   virtual adt::StreamString asString() const noexcept {
+      adt::StreamString result("pattern::observer::Event {");
+      result << "Id=" << m_id;
+      return result << "}";
+   }
 private:
    Id m_id;
 

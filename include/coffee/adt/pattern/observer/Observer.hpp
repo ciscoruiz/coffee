@@ -48,6 +48,11 @@ class Subject;
 class Observer : public NamedObject {
 public:
    /**
+    * Destructor.
+    */
+   virtual ~Observer() {;}
+
+   /**
     * \return \b true if this observer is attached to some subject or \b false otherwise.
     */
    bool isSubscribed() const noexcept { return m_isSubscribed; }
@@ -58,11 +63,6 @@ protected:
     * \param name Logical name.
     */
    explicit Observer(const std::string& name) : NamedObject(name), m_isSubscribed(false) {;}
-
-   /**
-    * Destructor.
-    */
-   virtual ~Observer() {;}
 
    /**
     * Receive notification to be aware that was attached to the received subject.

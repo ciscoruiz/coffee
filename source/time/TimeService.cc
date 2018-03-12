@@ -25,6 +25,8 @@
 
 #include <coffee/adt/Microsecond.hpp>
 
+#include <coffee/logger/Logger.hpp>
+
 #include <coffee/time/TimeService.hpp>
 #include <coffee/time/SCCS.hpp>
 
@@ -57,6 +59,10 @@ time::TimeService::TimeService(app::Application& application, const adt::Millise
 
 time::TimeService::~TimeService()
 {
+   if (!events.empty()) {
+      LOG_WARN("There were " << events.size() << " events on air");
+   }
+
    delete [] timeTable;
 }
 
@@ -136,6 +142,8 @@ void time::TimeService::store(std::shared_ptr<TimeEvent> timeEvent, std::unique_
    target->push_front(timeEvent);
    Location location(target, target->begin());
    events[timeEvent->getId()] = location;
+
+   LOG_DEBUG("Now=" << adt::Millisecond::getTime().asString() << " | CurrentQuantum=" << currentQuantum << " | IndexQuantum=" << indexQuantum << " | " << timeEvent->asString());
 }
 
 bool time::TimeService::cancel(std::shared_ptr<TimeEvent> timeEvent)
@@ -156,6 +164,13 @@ bool time::TimeService::cancel(std::shared_ptr<TimeEvent> timeEvent)
    return true;
 }
 
+bool time::TimeService::empty()
+   noexcept
+{
+   std::unique_lock<std::mutex> guard(mutex);
+   return events.empty();
+}
+
 adt::StreamString time::TimeService::asString() const
    noexcept
 {
@@ -173,6 +188,8 @@ void time::TimeService::produce(time::TimeService& timeService)
 {
    adt::Microsecond timeToWait(timeService.resolution);
    int tickCounter = 0;
+
+   LOG_LOCAL7("TimetoWait=" << timeToWait.asString());
 
    while (timeService.isRunning()) {
       usleep(timeToWait);
@@ -200,8 +217,11 @@ void time::TimeService::consume(TimeService& timeService)
 
       Quantum& timedout = timeService.timeTable[timeService.currentQuantum];
 
+      LOG_LOCAL7("Now=" << adt::Millisecond::getTime().asString() << " | CurrentQuantum=" << timeService.currentQuantum);
+
       for (quantum_iterator ii = timedout.begin(), maxii = timedout.end(); ii != maxii; ++ ii) {
          std::shared_ptr<TimeEvent> timeEvent = *ii;
+         LOG_LOCAL7(timeEvent->asString());
          timeService.notify(*timeEvent);
          timeService.events.erase(timeEvent->getId());
 

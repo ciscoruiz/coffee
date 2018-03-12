@@ -40,6 +40,16 @@ public:
 
    virtual bool isPeriodical() const noexcept = 0;
 
+   /**
+    * \return Summarize information of the subject
+    */
+   virtual adt::StreamString asString() const noexcept {
+      adt::StreamString result("time.TimeEvent {");
+      result << Event::asString();
+      result << " | Timeout=" << timeout.asString();
+      return result << "}";
+   }
+
 protected:
    TimeEvent(const Id id, const adt::Millisecond& _timeout) : adt::pattern::observer::Event(id), timeout(_timeout) {;}
 

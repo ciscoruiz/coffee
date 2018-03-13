@@ -21,37 +21,30 @@
 // SOFTWARE.
 //
 
-#ifndef _coffee_dbms_FailRecoveryHandler_hpp
-#define _coffee_dbms_FailRecoveryHandler_hpp
 
-#include <coffee/adt/RuntimeException.hpp>
-  
-namespace coffee {
+#include <coffee/config/SCCSRepository.hpp>
 
-namespace dbms {
+#include <coffee/config/SCCS.hpp>
+#include <coffee/adt/SCCS.hpp>
+#include <coffee/xml/SCCS.hpp>
+#include <coffee/logger/SCCS.hpp>
+#include <coffee/app/SCCS.hpp>
 
-class Connection;
+#include <coffee/time/SCCS.hpp>
 
-/**
- * Interface to implement to recover a database connection that could not being restored in
- * a easy way.
-*/
-class FailRecoveryHandler {
-public:
-   /**
-    * Destructor.
-    */
-   virtual ~FailRecoveryHandler() {;}
-   /**
-    * This method shold be implemented to describe the process to recover a lost databse connection.
-   */
-   virtual void apply (const Connection& connection) throw (adt::RuntimeException) = 0;
-};
+coffee_sccs_define_tag (time,release-18.03.06);
 
+using namespace coffee;
+
+void time::SCCS::activate()
+   noexcept
+{
+   config::SCCS::activate ();
+   adt::SCCS::activate ();
+   xml::SCCS::activate ();
+   logger::SCCS::activate();
+   app::SCCS::activate();
+
+   config::SCCSRepository::getInstance().registerModule(coffee_sccs_use_tag(time));
 }
-}
-
-#endif
-
-
 

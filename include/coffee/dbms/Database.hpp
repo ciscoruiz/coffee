@@ -21,15 +21,15 @@
 // SOFTWARE.
 //
 
-#ifndef _wepm_dbms_Database_h
-#define _wepm_dbms_Database_h
+#ifndef _coffee_dbms_Database_h
+#define _coffee_dbms_Database_h
 
 #include <vector>
 #include <memory>
 
 #include <coffee/dbms/DatabaseException.hpp>
 #include <coffee/dbms/ActionOnError.hpp>
-#include "../app/Service.hpp"
+#include <coffee/app/Service.hpp>
 
 namespace coffee {
 
@@ -53,12 +53,7 @@ class StatementTranslator;
 class ErrorCodeInterpreter;
 
 /**
-   Clase que modela la interaccion entre la base y nuestra aplicacion.
-
-   A diferencia de la plataforma SDP original NemesisRD.dbms permite la conexion simultanea con cualquier
-   numero de base de datos.
-
-   @author cisco.tierra@gmail.com.
+   Class for modeling access to any kind of Database
 */
 class Database : public app::Service {
 protected:
@@ -70,14 +65,9 @@ protected:
 
 public:
    /**
-      Numero maximo de conexiones que podemos crear.
-   */
+    * Max number of connections
+    */
    static const int MaxConnection = 32;
-
-   /**
-      Formas de conexion a la base de datos.
-   */
-   struct Type { enum _v { Local, Remote }; };
 
    typedef connection_container::const_iterator const_connection_iterator; /**<Iterador para acceder a las conexiones de esta base de datos */
    typedef statement_container::const_iterator const_statement_iterator; /**<Iterador para acceder a las conexiones de esta base de datos */
@@ -88,45 +78,62 @@ public:
    virtual ~Database();
 
    /**
-      Devuelve el tipo de conexion de esta base de datos.
-      \return El tipo de conexion de esta base de datos.
-   */
-   const Type::_v getType() const noexcept { return m_type; }
-
-   /**
-      Devuelve el nombre de la base de datos indicado en el constructor.
-      \return El nombre de la base de datos indicado en el constructor.
-   */
+    * \return The logical name for this instance.
+    */
    const std::string& getName() const noexcept { return m_name; }
 
+   /**
+    * Set the instance to call when a database connection is lost.
+    */
    void setFailRecoveryHandler(std::shared_ptr<FailRecoveryHandler> failRecoveryHandler)
       noexcept
    {
       m_failRecoveryHandler = failRecoveryHandler;
    }
 
+   /**
+    * Set the instance for do statement translator.
+    */
    void setStatementTranslator(std::shared_ptr<StatementTranslator> statementTranslator)
       noexcept
    {
       m_statementTranslator = statementTranslator;
    }
 
+   /**
+    * Set the instance for error code interpreter.
+    */
    void setErrorCodeInterpreter(std::shared_ptr<ErrorCodeInterpreter> errorCodeInterpreter)
       noexcept
    {
       m_errorCodeInterpreter = errorCodeInterpreter;
    }
 
+   /**
+    * \return the instance of error code interpreter associated to this database.
+    */
    const std::shared_ptr<ErrorCodeInterpreter>& getErrorCodeInterpreter() const noexcept { return m_errorCodeInterpreter; }
 
+   /**
+    * Create a new connection.
+    */
    std::shared_ptr<Connection> createConnection(const char* name, const char* user, const char* password)
       throw(adt::RuntimeException, DatabaseException);
+
+   /**
+    * Create a new connection.
+    */
    std::shared_ptr<Connection> createConnection(const std::string& name, const char* user, const char* password)
       throw(adt::RuntimeException, DatabaseException)
    {
       return createConnection(name.c_str(), user, password);
    }
+
+   /**
+    * \return the connection that matches with the received name or throws an exception in case of there is not any connection with that name.
+    */
    std::shared_ptr<Connection>& findConnection(const char* name) throw(adt::RuntimeException);
+
    const_connection_iterator connection_begin() const noexcept { return m_connections.begin(); }
    const_connection_iterator connection_end() const noexcept { return m_connections.end(); }
    static const std::shared_ptr<Connection>& connection(const_connection_iterator ii) noexcept { return std::ref(*ii); }
@@ -138,6 +145,7 @@ public:
    {
       return createStatement(name, expression.c_str(), actionOnError);
    }
+
    std::shared_ptr<Statement>& findStatement(const char* name) throw(adt::RuntimeException);
    const_statement_iterator statement_begin() const noexcept { return m_statements.begin(); }
    const_statement_iterator statement_end() const noexcept { return m_statements.end(); }
@@ -177,7 +185,7 @@ protected:
       Elimina las conexiones definidas sobre esta base de datos. Este metodo se invocaria automaticamente
       desde el nucleo de NemesisRD.
    */
-   virtual void do_stop() noexcept;
+   virtual void do_stop() throw(adt::RuntimeException);
 
    /**
       Devuelve un iterator al comienzo de la lista de conexiones establecidas con esta base de datos.
@@ -227,7 +235,6 @@ private:
    const std::string m_name;
    connection_container m_connections;
    statement_container m_statements;
-   const Type::_v m_type;
    mutable std::shared_ptr<FailRecoveryHandler> m_failRecoveryHandler;
    std::shared_ptr<StatementTranslator> m_statementTranslator;
    std::shared_ptr<ErrorCodeInterpreter> m_errorCodeInterpreter;

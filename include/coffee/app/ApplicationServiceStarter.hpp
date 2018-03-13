@@ -72,7 +72,7 @@ private:
    bool stopNow;
 
    void run() throw(adt::RuntimeException);
-   void do_requestStop() throw(adt::RuntimeException);
+   void do_stop() throw(adt::RuntimeException);
 };
 
 }

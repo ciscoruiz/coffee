@@ -27,7 +27,7 @@ template <class _T> struct MockDatabaseFixture {
    }
 
    virtual ~MockDatabaseFixture() {
-       app.requestStop();
+       app.stop();
        thr.join();
     }
 

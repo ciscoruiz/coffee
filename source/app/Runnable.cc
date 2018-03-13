@@ -36,19 +36,23 @@
 using namespace std;
 using namespace coffee;
 
-void app::Runnable::requestStop ()
+bool app::Runnable::stop ()
    throw (adt::RuntimeException)
 {
-   if (isWaitingStop () || isStopped())
-      return;
+   if (isStopped())
+      return false;
 
-   do_requestStop ();
+   try {
+      do_stop ();
+      m_statusFlags = StatusFlags::Stopped;
+   }
+   catch (adt::RuntimeException& ex) {
+      m_statusFlags = StatusFlags::StoppedWithError;
+      throw;
+   }
 
-   m_statusFlags |= StatusFlags::WaitingStop;
+   return true;
 }
-
-//virtual
-void app::Runnable::do_requestStop() throw(adt::RuntimeException) {;}
 
 //virtual
 adt::StreamString app::Runnable::asString () const
@@ -96,9 +100,6 @@ std::string app::Runnable::flagsAsString () const
       result += " Stopped";
    }
    else {
-      if (isWaitingStop () == true)
-         result += " WaitingStop";
-
       if (isRunning() == true)
          result += " Running";
 

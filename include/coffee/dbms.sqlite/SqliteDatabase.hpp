@@ -65,6 +65,7 @@ private:
    std::shared_ptr<binder::Output> allocateOutputBind(std::shared_ptr<datatype::Abstract> data) const
       throw(adt::RuntimeException);
 
+   void do_stop() throw(adt::RuntimeException) {;}
 };
 
 }

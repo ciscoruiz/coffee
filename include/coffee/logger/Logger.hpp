@@ -236,7 +236,7 @@ private:
    do {\
    if(coffee::logger::Logger::wantsToProcess(coffee::logger::Level::Local7)) { \
       coffee::adt::StreamString msg; \
-      coffee::logger::Logger::debug(msg << args, COFFEE_LOG_LOCATION); \
+      coffee::logger::Logger::write(coffee::logger::Level::Local7, msg << args, COFFEE_LOG_LOCATION); \
    } \
    } while(false);
 

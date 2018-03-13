@@ -122,29 +122,31 @@ void app::Application::start()
       cout << "(c) Copyright 2018,2014 by Francisco Ruiz." << endl << endl;
 
       initialize();
-
-      cout << "Loading modules ...." << endl;
-      for(config::SCCSRepository::const_entry_iterator ii = moduleManager.entry_begin(), maxii = moduleManager.entry_end(); ii != maxii; ++ ii) {
-         cout << "\t Module " << config::SCCSRepository::module_name(ii) << endl;
-      }
-      cout << endl;
-
-      statusStarting();
-
-      startServices();
-
-      statusRunning();
-      run();
-      statusStopped();
-
-      stopServices();
    }
    catch(adt::RuntimeException& ex) {
       logger::Logger::write(ex);
-      statusStopped();
-      stopServices();
       throw;
    }
+
+   cout << "Loading modules ...." << endl;
+   for(config::SCCSRepository::const_entry_iterator ii = moduleManager.entry_begin(), maxii = moduleManager.entry_end(); ii != maxii; ++ ii) {
+      cout << "\t Module " << config::SCCSRepository::module_name(ii) << endl;
+   }
+   cout << endl;
+
+   try {
+      statusStarting();
+      startServices();
+      statusRunning();
+      run();
+   }
+   catch(adt::RuntimeException& ex) {
+      logger::Logger::write(ex);
+      stop();
+      throw;
+   }
+
+   stop();
 
    cout << getName() << " finished ..." << endl << endl;
 }
@@ -161,30 +163,8 @@ void app::Application::startServices()
    }
 }
 
-void app::Application::stopServices()
-   noexcept
-{
-   LOG_THIS_METHOD();
-
-   for(service_iterator ii = service_begin(); ii != service_end(); ii ++) {
-      auto service = Application::service(ii);
-
-      if(service->isStopped() == true)
-         continue;
-
-      LOG_INFO("Stopping service | " <<  service->asString());
-
-      try {
-         service->stop();
-      }
-      catch(RuntimeException& ex) {
-         logger::Logger::write(ex);
-      }
-   }
-}
-
 // virtual
-void app::Application::do_requestStop()
+void app::Application::do_stop()
    throw(RuntimeException)
 {
    LOG_THIS_METHOD();
@@ -198,7 +178,7 @@ void app::Application::do_requestStop()
       LOG_INFO("Send stop for service | " <<  service->asString());
 
       try {
-         service->requestStop();
+         service->stop();
       }
       catch(RuntimeException& ex) {
          logger::Logger::write(ex);
@@ -343,7 +323,7 @@ void app::Application::handlerSignalTerminate(int)
    try {
       if(m_this != nullptr) {
          LOG_WARN(m_this->asString() << " | Received SIGTERM signal");
-         m_this->requestStop();
+         m_this->stop();
       }
    }
    catch(adt::RuntimeException& ex) {

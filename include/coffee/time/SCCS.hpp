@@ -21,37 +21,19 @@
 // SOFTWARE.
 //
 
-#ifndef _coffee_dbms_FailRecoveryHandler_hpp
-#define _coffee_dbms_FailRecoveryHandler_hpp
 
-#include <coffee/adt/RuntimeException.hpp>
-  
+#ifndef _coffee_time_sccs_hpp_
+#define _coffee_time_sccs_hpp_
+
 namespace coffee {
+namespace time {
 
-namespace dbms {
-
-class Connection;
-
-/**
- * Interface to implement to recover a database connection that could not being restored in
- * a easy way.
-*/
-class FailRecoveryHandler {
+class SCCS {
 public:
-   /**
-    * Destructor.
-    */
-   virtual ~FailRecoveryHandler() {;}
-   /**
-    * This method shold be implemented to describe the process to recover a lost databse connection.
-   */
-   virtual void apply (const Connection& connection) throw (adt::RuntimeException) = 0;
+   static void activate () noexcept;
 };
 
 }
 }
 
-#endif
-
-
-
+#endif /* _coffee_time_sccs_hpp_ */

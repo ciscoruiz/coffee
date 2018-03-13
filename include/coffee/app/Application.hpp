@@ -178,7 +178,7 @@ protected:
    /**
     * Virtual method to capture the request stop.
     */
-   virtual void do_requestStop() throw(adt::RuntimeException);
+   virtual void do_stop() throw(adt::RuntimeException);
 
    /**
     * Handler for signal USR1, it will write the context into file #getOutputContextFilename.
@@ -202,7 +202,6 @@ private:
    Services a_services;
 
    void startServices() throw(adt::RuntimeException);
-   void stopServices() noexcept;
    void sendSignalToChilds(const int signal) noexcept;
 
    static void handlerUserSignal(int) noexcept;

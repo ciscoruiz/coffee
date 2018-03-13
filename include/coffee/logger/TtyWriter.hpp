@@ -41,6 +41,13 @@ public:
     */
    TtyWriter () : Writer ("TtyWriter") {;}
 
+   /**
+    * Fast shared creator
+    */
+   static std::shared_ptr<TtyWriter> instantiate() {
+      return std::make_shared<TtyWriter>();
+   }
+
 private:
    void initialize () throw (adt::RuntimeException) {;}
    void apply (const Level::_v level, const std::string& line) noexcept {

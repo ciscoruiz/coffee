@@ -21,37 +21,6 @@
 // SOFTWARE.
 //
 
-#ifndef _coffee_dbms_FailRecoveryHandler_hpp
-#define _coffee_dbms_FailRecoveryHandler_hpp
+#define BOOST_TEST_MODULE COFFEE_TIME_TEST
 
-#include <coffee/adt/RuntimeException.hpp>
-  
-namespace coffee {
-
-namespace dbms {
-
-class Connection;
-
-/**
- * Interface to implement to recover a database connection that could not being restored in
- * a easy way.
-*/
-class FailRecoveryHandler {
-public:
-   /**
-    * Destructor.
-    */
-   virtual ~FailRecoveryHandler() {;}
-   /**
-    * This method shold be implemented to describe the process to recover a lost databse connection.
-   */
-   virtual void apply (const Connection& connection) throw (adt::RuntimeException) = 0;
-};
-
-}
-}
-
-#endif
-
-
-
+#include <boost/test/included/unit_test.hpp>

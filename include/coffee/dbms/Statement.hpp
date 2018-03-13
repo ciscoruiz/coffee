@@ -27,11 +27,11 @@
 #include <vector>
 #include <mutex>
 #include <memory>
+#include <chrono>
 
 #include <coffee/adt/RuntimeException.hpp>
 #include <coffee/adt/Average.hpp>
 #include <coffee/adt/Microsecond.hpp>
-#include <coffee/adt/DelayMeter.hpp>
 
 #include <coffee/dbms/DatabaseException.hpp>
 #include <coffee/dbms/ResultCode.hpp>
@@ -195,7 +195,7 @@ protected:
       m_name(name),
       m_expression(expression),
       m_actionOnError(actionOnError),
-      m_measureTiming("Timing", "us"),
+      m_elapsedTime("Timing", "us"),
       m_requiresCommit(false),
       m_isPrepared(false)
    {
@@ -214,7 +214,7 @@ protected:
       m_name(name),
       m_expression(expression),
       m_actionOnError(actionOnError),
-      m_measureTiming("Timing", "us"),
+      m_elapsedTime("ElapsedTime", "us"),
       m_requiresCommit(false),
       m_isPrepared(false)
    {
@@ -237,12 +237,12 @@ private:
    Inputs m_inputBinds;  /**< Lista de variables de entrada */
    Outputs m_outputBinds; /**< Lista de variables de salida */
    const ActionOnError::_v m_actionOnError;
-   adt::Average <adt::Microsecond> m_measureTiming;
+   adt::Average <long> m_elapsedTime;
    bool m_requiresCommit;
    std::mutex m_mutex;
    bool m_isPrepared;
 
-   void measureTiming(const adt::DelayMeter <adt::Microsecond>& delay) noexcept { m_measureTiming += delay.getValue(); }
+   void registerElapsedTime(const std::chrono::microseconds& elapsedTime) noexcept;
 
    void prepare(Connection& connection) throw(adt::RuntimeException, DatabaseException);
    virtual void do_prepare(Connection& connection) throw(adt::RuntimeException, DatabaseException) = 0;

@@ -28,7 +28,6 @@
 
 #include <coffee/adt/pattern/observer/Observer.hpp>
 #include <coffee/adt/Average.hpp>
-#include <coffee/adt/DelayMeter.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TtyWriter.hpp>

@@ -127,3 +127,26 @@ std::string adt::AsString::apply (const DataBlock& dataBlock, const int characte
    result += "  ";
    return result += characters;
 }
+
+std::string adt::AsString::apply(const std::chrono::seconds& value)
+   noexcept
+{
+   std::string result(AsString::apply(value.count()));
+   return result += " sec";
+}
+
+std::string adt::AsString::apply(const std::chrono::milliseconds& value)
+   noexcept
+{
+   std::string result(AsString::apply(value.count()));
+   return result += " ms";
+}
+
+std::string adt::AsString::apply(const std::chrono::microseconds& value)
+   noexcept
+{
+   std::string result(AsString::apply(value.count()));
+   return result += " us";
+}
+
+

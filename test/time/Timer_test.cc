@@ -36,29 +36,30 @@
 #include <coffee/time/TimeService.hpp>
 #include <coffee/time/TimeEvent.hpp>
 
-using namespace coffee;
-
 #include "TimeFixture.hpp"
 
+using namespace coffee;
+using std::chrono::milliseconds;
+
 struct ShortTimeFixture : public TimeFixture {
-   static const adt::Millisecond MaxShortDuration;
-   static const adt::Millisecond ShortResolution;
+   static const milliseconds MaxShortDuration;
+   static const milliseconds ShortResolution;
 
    ShortTimeFixture() : TimeFixture(MaxShortDuration, ShortResolution) {;}
 };
 
-const adt::Millisecond ShortTimeFixture::MaxShortDuration(1000);
-const adt::Millisecond ShortTimeFixture::ShortResolution(50);
+const milliseconds ShortTimeFixture::MaxShortDuration(1000);
+const milliseconds ShortTimeFixture::ShortResolution(50);
 
 struct LongTimeFixture : public TimeFixture {
-   static const adt::Millisecond MaxLongDuration;
-   static const adt::Millisecond LongResolution;
+   static const milliseconds MaxLongDuration;
+   static const milliseconds LongResolution;
 
    LongTimeFixture() : TimeFixture(MaxLongDuration, LongResolution) {;}
 };
 
-const adt::Millisecond LongTimeFixture::MaxLongDuration(5000);
-const adt::Millisecond LongTimeFixture::LongResolution(100);
+const milliseconds LongTimeFixture::MaxLongDuration(5000);
+const milliseconds LongTimeFixture::LongResolution(100);
 
 using Subject = coffee::adt::pattern::observer::Subject;
 using Event = coffee::adt::pattern::observer::Event;
@@ -71,13 +72,13 @@ public:
    {;}
    virtual ~TimerObserver() {;}
 
-   bool receiveTimedouts(std::shared_ptr<coffee::time::TimeService>& timeService, const adt::Millisecond& maxWait) noexcept;
-   const adt::Average<adt::Millisecond>& getAvgDeviation() const noexcept { return avgDeviation; }
+   bool receiveTimedouts(std::shared_ptr<coffee::time::TimeService>& timeService, const milliseconds& maxWait) noexcept;
+   const adt::Average<milliseconds>& getAvgDeviation() const noexcept { return avgDeviation; }
 
 private:
    std::mutex mutex;
    std::condition_variable conditionForStop;
-   adt::Average<adt::Millisecond> avgDeviation;
+   adt::Average<milliseconds> avgDeviation;
 
    void attached(const Subject& subject) noexcept { }
    void update(const Subject& subject, const Event& event) noexcept {
@@ -90,10 +91,10 @@ private:
    void detached(const Subject& subject) noexcept {  }
 };
 
-bool TimerObserver::receiveTimedouts(std::shared_ptr<coffee::time::TimeService>& timeService, const adt::Millisecond& maxWait)
+bool TimerObserver::receiveTimedouts(std::shared_ptr<coffee::time::TimeService>& timeService, const milliseconds& maxWait)
    noexcept
 {
-   std::chrono::milliseconds ww(maxWait.getValue() * 2);
+   milliseconds ww(maxWait * 2);
 
    std::unique_lock <std::mutex> guard(mutex);
 
@@ -107,8 +108,8 @@ bool TimerObserver::receiveTimedouts(std::shared_ptr<coffee::time::TimeService>&
    return true;
 }
 
-const adt::Millisecond TimeFixture::time100ms(100);
-const adt::Millisecond TimeFixture::time200ms(200);
+const milliseconds TimeFixture::time100ms(100);
+const milliseconds TimeFixture::time200ms(200);
 
 BOOST_FIXTURE_TEST_CASE(timer_first_case, ShortTimeFixture)
 {
@@ -118,10 +119,10 @@ BOOST_FIXTURE_TEST_CASE(timer_first_case, ShortTimeFixture)
 BOOST_AUTO_TEST_CASE(timer_activate_service_stopped)
 {
    app::ApplicationServiceStarter app("timer_activate_service_stopped");
-   std::shared_ptr<time::TimeService> timeService = time::TimeService::instantiate(app, adt::Millisecond(1000), adt::Millisecond(200));
+   std::shared_ptr<time::TimeService> timeService = time::TimeService::instantiate(app, milliseconds(1000), milliseconds(200));
    BOOST_REQUIRE(app.isStopped());
    BOOST_REQUIRE(timeService->isStopped());
-   auto timer = time::Timer::instantiate(100, adt::Millisecond(100));
+   auto timer = time::Timer::instantiate(100, milliseconds(100));
    BOOST_REQUIRE_THROW(timeService->activate(timer), adt::RuntimeException);
 }
 
@@ -133,26 +134,26 @@ BOOST_FIXTURE_TEST_CASE(timer_empty, ShortTimeFixture)
 
 BOOST_FIXTURE_TEST_CASE(timer_zero_timeout, ShortTimeFixture)
 {
-   auto timer = time::Timer::instantiate(100, adt::Millisecond(0));
+   auto timer = time::Timer::instantiate(100, milliseconds(0));
    BOOST_REQUIRE_THROW(timeService->activate(timer), adt::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(timer_over_maxtimeout, ShortTimeFixture)
 {
-   auto timer = time::Timer::instantiate(100, adt::Millisecond(1500));
+   auto timer = time::Timer::instantiate(100, milliseconds(1500));
    BOOST_REQUIRE_THROW(timeService->activate(timer), adt::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(timer_below_resolution, ShortTimeFixture)
 {
-   auto timer = time::Timer::instantiate(100, adt::Millisecond(10));
+   auto timer = time::Timer::instantiate(100, milliseconds(10));
    BOOST_REQUIRE_THROW(timeService->activate(timer), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(timer_bad_resolution_maxtime)
 {
    app::ApplicationServiceStarter app("timer_bad_resolution_maxtime");
-   std::shared_ptr<time::TimeService> timeService = time::TimeService::instantiate(app, adt::Millisecond(1000), adt::Millisecond(5555));
+   std::shared_ptr<time::TimeService> timeService = time::TimeService::instantiate(app, milliseconds(1000), milliseconds(5555));
    BOOST_REQUIRE_THROW(app.start(), adt::RuntimeException);
 }
 
@@ -209,8 +210,8 @@ BOOST_FIXTURE_TEST_CASE(timer_populate, LongTimeFixture)
    timeService->attach(observer);
 
    for (int ii = 10000; ii < 10050; ++ ii) {
-      const adt::Millisecond timeout ((rand() % MaxLongDuration) / LongResolution * LongResolution);
-      if (timeout > 0) {
+      const milliseconds timeout((rand() % MaxLongDuration.count()) / LongResolution.count() * LongResolution.count());
+      if (timeout.count() > 0) {
          auto timer = time::Timer::instantiate(ii, timeout);
          BOOST_REQUIRE_NO_THROW(timeService->activate(timer));
          usleep(rand() % 200000);
@@ -221,5 +222,6 @@ BOOST_FIXTURE_TEST_CASE(timer_populate, LongTimeFixture)
 
    auto avgDeviation = observer->getAvgDeviation();
    BOOST_REQUIRE(!avgDeviation.isEmpty());
-   BOOST_REQUIRE_LE(avgDeviation.value(), LongResolution);
+   BOOST_REQUIRE_LE(avgDeviation.value().count(), LongResolution.count());
 }
+

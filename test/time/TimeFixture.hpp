@@ -23,20 +23,19 @@
 #ifndef TEST_TIME_TIMEFIXTURE_HPP_
 #define TEST_TIME_TIMEFIXTURE_HPP_
 
-#include <coffee/adt/Millisecond.hpp>
 #include <coffee/app/ApplicationServiceStarter.hpp>
 #include <coffee/time/TimeService.hpp>
 
 struct TimeFixture {
-   static const coffee::adt::Millisecond time100ms;
-   static const coffee::adt::Millisecond time200ms;
+   static const std::chrono::milliseconds time100ms;
+   static const std::chrono::milliseconds time200ms;
 
    coffee::app::ApplicationServiceStarter app;
    bool finalizeEmpty;
    std::shared_ptr<coffee::time::TimeService> timeService;
    std::thread thr;
 
-   TimeFixture(const coffee::adt::Millisecond& maxTime, const coffee::adt::Millisecond& resolution) :
+   TimeFixture(const std::chrono::milliseconds& maxTime, const std::chrono::milliseconds& resolution) :
       app("TimeFixture"),
       finalizeEmpty(true)
    {

@@ -41,18 +41,20 @@
 
 using namespace coffee;
 
+using std::chrono::milliseconds;
+
 using Subject = coffee::adt::pattern::observer::Subject;
 using Event = coffee::adt::pattern::observer::Event;
 
 struct ClockFixture : public TimeFixture {
-   static const adt::Millisecond MaxShortDuration;
-   static const adt::Millisecond ShortResolution;
+   static const milliseconds MaxShortDuration;
+   static const milliseconds ShortResolution;
 
    ClockFixture() : TimeFixture(MaxShortDuration, ShortResolution) {;}
 };
 
-const adt::Millisecond ClockFixture::MaxShortDuration(1000);
-const adt::Millisecond ClockFixture::ShortResolution(50);
+const milliseconds ClockFixture::MaxShortDuration(1000);
+const milliseconds ClockFixture::ShortResolution(50);
 
 class ClockObserver : public adt::pattern::observer::Observer {
 public:
@@ -62,7 +64,7 @@ public:
    {;}
    virtual ~ClockObserver() {;}
 
-   bool receiveTicks(const int ticks, const adt::Millisecond& maxWait) noexcept;
+   bool receiveTicks(const int ticks, const milliseconds& maxWait) noexcept;
 
 private:
    std::mutex mutex;
@@ -78,12 +80,14 @@ private:
    void detached(const Subject& subject) noexcept {  }
 };
 
-bool ClockObserver::receiveTicks(const int ticks, const adt::Millisecond& maxWait) noexcept {
-   std::chrono::milliseconds ww(maxWait.getValue() + ClockFixture::ShortResolution.getValue());
+bool ClockObserver::receiveTicks(const int ticks, const milliseconds& maxWait)
+   noexcept
+{
+   milliseconds ww(maxWait+ ClockFixture::ShortResolution);
 
-   LOG_DEBUG("Waiting " << ticks << " | " << maxWait.asString());
+   LOG_DEBUG("Waiting " << ticks << " | " << maxWait);
 
-   std::unique_lock <std::mutex> guard (mutex);
+   std::unique_lock <std::mutex> guard(mutex);
 
    while(counter < ticks) {
       std::cv_status status = conditionForStop.wait_for(guard, ww);
@@ -97,7 +101,7 @@ bool ClockObserver::receiveTicks(const int ticks, const adt::Millisecond& maxWai
 
 BOOST_FIXTURE_TEST_CASE(clock_cancel_inactive, ClockFixture)
 {
-   auto clock = time::Clock::instantiate(111, adt::Millisecond(200));
+   auto clock = time::Clock::instantiate(111, milliseconds(200));
    BOOST_REQUIRE(!timeService->cancel(clock));
 }
 
@@ -109,7 +113,7 @@ BOOST_FIXTURE_TEST_CASE(clock_cancel_empty, ClockFixture)
 
 BOOST_FIXTURE_TEST_CASE(clock_bad_duration, ClockFixture)
 {
-   auto clock = time::Clock::instantiate(111, adt::Millisecond(200));
+   auto clock = time::Clock::instantiate(111, milliseconds(200));
    BOOST_REQUIRE_THROW(clock->getDuration(), adt::RuntimeException);
 }
 
@@ -118,7 +122,7 @@ BOOST_FIXTURE_TEST_CASE(clock_basic, ClockFixture)
    auto observer = std::make_shared<ClockObserver>();
    timeService->attach(observer);
 
-   auto clock = time::Clock::instantiate(111, adt::Millisecond(200));
+   auto clock = time::Clock::instantiate(111, milliseconds(200));
    BOOST_REQUIRE_NO_THROW(timeService->activate(clock));
    BOOST_CHECK(observer->receiveTicks(4, MaxShortDuration));
    BOOST_CHECK(timeService->cancel(clock));
@@ -126,7 +130,7 @@ BOOST_FIXTURE_TEST_CASE(clock_basic, ClockFixture)
 
 BOOST_FIXTURE_TEST_CASE(clock_terminate_noempty, ClockFixture)
 {
-   auto clock = time::Clock::instantiate(111, adt::Millisecond(200));
+   auto clock = time::Clock::instantiate(111, milliseconds(200));
    BOOST_REQUIRE_NO_THROW(timeService->activate(clock));
    finalizeEmpty = false;
 }

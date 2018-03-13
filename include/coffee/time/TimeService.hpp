@@ -32,6 +32,7 @@
 #include <thread>
 
 #include <coffee/app/Service.hpp>
+#include <coffee/adt/Semaphore.hpp>
 #include <coffee/adt/pattern/observer/Subject.hpp>
 #include <coffee/time/TimeEvent.hpp>
 
@@ -51,6 +52,8 @@ public:
    void activate(std::shared_ptr<TimeEvent> timeEvent) throw(adt::RuntimeException);
    bool cancel(std::shared_ptr<TimeEvent> timeEvent) noexcept;
    bool empty() noexcept;
+   size_t size() const noexcept { return events.size(); }
+   void waitUntilRunning() noexcept { producerIsWorking.wait(); }
 
    adt::StreamString asString() const noexcept;
 
@@ -65,6 +68,7 @@ private:
    const adt::Millisecond resolution;
    const int maxQuantum;
    int currentQuantum;
+   adt::Semaphore producerIsWorking;
    Quantum* timeTable;
    Events events;
    Quantum temporaryQuantum;

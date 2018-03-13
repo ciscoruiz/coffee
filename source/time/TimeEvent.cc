@@ -21,49 +21,37 @@
 // SOFTWARE.
 //
 
-#ifndef _coffee_time_TimeEvent_hpp_
-#define _coffee_time_TimeEvent_hpp_
+#include <coffee/time/TimeEvent.hpp>
 
-#include <memory>
+using namespace coffee;
 
-#include <coffee/adt/pattern/observer/Event.hpp>
-#include <coffee/adt/Millisecond.hpp>
+time::TimeEvent::TimeEvent(const Id id, const adt::Millisecond& _timeout) :
+   adt::pattern::observer::Event(id), timeout(_timeout),
+   initTime(0),
+   endTime(0)
+{;}
 
-namespace coffee {
-namespace time {
+adt::Millisecond time::TimeEvent::getDuration() const
+   throw(adt::RuntimeException)
+{
+   if (!isStarted() || !isFinished()) {
+      COFFEE_THROW_EXCEPTION(asString() << " was not started or finished");
+   }
 
-class TimeService;
-
-class TimeEvent : public adt::pattern::observer::Event {
-public:
-   virtual ~TimeEvent() {;}
-
-   const adt::Millisecond& getTimeout() const noexcept { return timeout; }
-
-   bool isStarted() const throw () { return initTime != 0; }
-   bool isFinished() const throw () { return endTime != 0; }
-
-   adt::Millisecond getDuration() const throw(adt::RuntimeException);
-
-   virtual bool isPeriodical() const noexcept = 0;
-
-   /**
-    * \return Summarize information of the TimeEvent
-    */
-   virtual adt::StreamString asString() const noexcept;
-
-protected:
-   TimeEvent(const Id id, const adt::Millisecond& _timeout);
-
-private:
-   const adt::Millisecond timeout;
-   adt::Millisecond initTime;
-   adt::Millisecond endTime;
-
-   friend class TimeService;
-};
-
-}
+   return endTime - initTime;
 }
 
-#endif /* _coffee_time_TimeEvent_hpp_ */
+//virtual
+adt::StreamString time::TimeEvent::asString() const
+   noexcept
+{
+   adt::StreamString result("time.TimeEvent {");
+   result << Event::asString();
+   result << " | Timeout=" << timeout.asString();
+
+   if (isStarted() && isFinished()) {
+      result << " | Duration=" << getDuration().asString();
+   }
+
+   return result << "}";
+}

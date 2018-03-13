@@ -26,6 +26,7 @@
 #include <coffee/adt/Microsecond.hpp>
 
 #include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
 
 #include <coffee/time/TimeService.hpp>
 #include <coffee/time/SCCS.hpp>
@@ -49,7 +50,8 @@ time::TimeService::TimeService(app::Application& application, const adt::Millise
    maxTime(_maxTime),
    resolution(_resolution),
    maxQuantum(calculeMaxQuantum(_maxTime, _resolution)),
-   currentQuantum(0)
+   currentQuantum(0),
+   producerIsWorking(0)
 {
    time::SCCS::activate();
 
@@ -142,6 +144,7 @@ void time::TimeService::store(std::shared_ptr<TimeEvent> timeEvent, std::unique_
    target->push_front(timeEvent);
    Location location(target, target->begin());
    events[timeEvent->getId()] = location;
+   timeEvent->initTime = adt::Millisecond::getTime();
 
    LOG_DEBUG("Now=" << adt::Millisecond::getTime().asString() << " | CurrentQuantum=" << currentQuantum << " | IndexQuantum=" << indexQuantum << " | " << timeEvent->asString());
 }
@@ -176,9 +179,10 @@ adt::StreamString time::TimeService::asString() const
 {
    adt::StreamString result("time.TimeService{");
    result << Service::asString();
-   result << " | MaxTime=" << maxTime;
-   result << " | Resolution=" << resolution;
+   result << " | MaxTime=" << maxTime.asString();
+   result << " | Resolution=" << resolution.asString();
    result << " | MaxQuantum=" << maxQuantum;
+   result << " | #TimeEvents=" << events.size();
    return result << "}";
 }
 
@@ -187,17 +191,25 @@ void time::TimeService::produce(time::TimeService& timeService)
    noexcept
 {
    adt::Microsecond timeToWait(timeService.resolution);
+   adt::Millisecond now = adt::Millisecond::getTime();
    int tickCounter = 0;
 
-   LOG_LOCAL7("TimetoWait=" << timeToWait.asString());
+   LOG_DEBUG("Now=" << now.asString() <<" | TimeToWait=" << timeService.resolution.asString());
+
+   timeService.producerIsWorking.signal();
+
+   const adt::Microsecond usResolution (timeService.resolution);
 
    while (timeService.isRunning()) {
+      const adt::Microsecond nextTime = adt::Microsecond::getTime() + usResolution;
       usleep(timeToWait);
       if (true) {
          std::unique_lock <std::mutex> guard(timeService.mutex);
          timeService.ticks.push_back(++ tickCounter);
          timeService.condition.notify_one();
       }
+      const adt::Microsecond deviation = nextTime - adt::Microsecond::getTime();
+      timeToWait = timeToWait + deviation;
    }
 }
 
@@ -206,6 +218,9 @@ void time::TimeService::consume(TimeService& timeService)
    noexcept
 {
    std::unique_lock<std::mutex> guard(timeService.mutex);
+   adt::Millisecond now = adt::Millisecond::getTime();
+
+   LOG_DEBUG("Now=" << now.asString());
 
    while (timeService.isRunning()) {
       timeService.condition.wait(guard);
@@ -217,10 +232,12 @@ void time::TimeService::consume(TimeService& timeService)
 
       Quantum& timedout = timeService.timeTable[timeService.currentQuantum];
 
-      LOG_LOCAL7("Now=" << adt::Millisecond::getTime().asString() << " | CurrentQuantum=" << timeService.currentQuantum);
+      now = adt::Millisecond::getTime();
+      LOG_LOCAL7("Now=" << now.asString() << " | CurrentQuantum=" << timeService.currentQuantum);
 
       for (quantum_iterator ii = timedout.begin(), maxii = timedout.end(); ii != maxii; ++ ii) {
          std::shared_ptr<TimeEvent> timeEvent = *ii;
+         timeEvent->endTime = now;
          LOG_LOCAL7(timeEvent->asString());
          timeService.notify(*timeEvent);
          timeService.events.erase(timeEvent->getId());
@@ -231,8 +248,10 @@ void time::TimeService::consume(TimeService& timeService)
 
       timedout.clear();
 
+      LOG_LOCAL7("CurrentQuantum=" << timeService.currentQuantum << " has been processed");
+
       if (!timeService.temporaryQuantum.empty()) {
-         timedout.splice(timedout.begin(), timeService.temporaryQuantum);
+         timedout.splice(timedout.end(), timeService.temporaryQuantum);
       }
 
       if (++ timeService.currentQuantum == timeService.maxQuantum) {

@@ -51,7 +51,7 @@ public:
 
    void activate(std::shared_ptr<TimeEvent> timeEvent) throw(adt::RuntimeException);
    bool cancel(std::shared_ptr<TimeEvent> timeEvent) noexcept;
-   bool empty() noexcept;
+   bool empty() const noexcept { return events.empty(); }
    size_t size() const noexcept { return events.size(); }
    void waitUntilRunning() noexcept { producerIsWorking.wait(); }
 

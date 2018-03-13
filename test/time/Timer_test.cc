@@ -28,6 +28,7 @@
 
 #include <coffee/adt/pattern/observer/Observer.hpp>
 #include <coffee/adt/Average.hpp>
+#include <coffee/adt/DelayMeter.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TtyWriter.hpp>
@@ -36,38 +37,9 @@
 #include <coffee/time/TimeService.hpp>
 #include <coffee/time/TimeEvent.hpp>
 
-#include <coffee/app/ApplicationServiceStarter.hpp>
-
 using namespace coffee;
 
-struct TimeFixture {
-   static const adt::Millisecond time100ms;
-   static const adt::Millisecond time200ms;
-
-   app::ApplicationServiceStarter app;
-   std::shared_ptr<time::TimeService> timeService;
-   std::thread thr;
-
-   TimeFixture(const adt::Millisecond& maxTime, const adt::Millisecond& resolution) : app("TimeFixture") {
-      logger::Logger::setLevel(logger::Level::Local7);
-      logger::Logger::initialize(logger::TtyWriter::instantiate());
-
-      timeService = time::TimeService::instantiate(app, maxTime, resolution);
-      thr = std::thread(parallelRun, std::ref(app));
-      app.waitUntilRunning();
-      timeService->waitUntilRunning();
-   }
-
-   virtual ~TimeFixture() {
-      BOOST_CHECK(timeService->empty());
-      app.stop();
-      thr.join();
-   }
-
-   static void parallelRun(app::Application& app) {
-      app.start();
-   }
-};
+#include "TimeFixture.hpp"
 
 struct ShortTimeFixture : public TimeFixture {
    static const adt::Millisecond MaxShortDuration;
@@ -92,15 +64,15 @@ const adt::Millisecond LongTimeFixture::LongResolution(100);
 using Subject = coffee::adt::pattern::observer::Subject;
 using Event = coffee::adt::pattern::observer::Event;
 
-class TimeObserver : public adt::pattern::observer::Observer {
+class TimerObserver : public adt::pattern::observer::Observer {
 public:
-   TimeObserver() :
+   TimerObserver() :
       adt::pattern::observer::Observer("TimeObserver"),
       avgDeviation("Deviation", "ms")
    {;}
-   virtual ~TimeObserver() {;}
+   virtual ~TimerObserver() {;}
 
-   bool receiveTimedouts(const int nevents, const adt::Millisecond& maxWait) noexcept;
+   bool receiveTimedouts(std::shared_ptr<coffee::time::TimeService>& timeService, const adt::Millisecond& maxWait) noexcept;
    const adt::Average<adt::Millisecond>& getAvgDeviation() const noexcept { return avgDeviation; }
 
 private:
@@ -110,7 +82,7 @@ private:
 
    void attached(const Subject& subject) noexcept { }
    void update(const Subject& subject, const Event& event) noexcept {
-      std::unique_lock <std::mutex> guard (mutex);
+      std::unique_lock <std::mutex> guard(mutex);
       auto duration = static_cast<const time::TimeEvent&>(event).getDuration();
       auto timeout = static_cast<const time::TimeEvent&>(event).getTimeout();
       avgDeviation += duration - timeout;
@@ -119,18 +91,17 @@ private:
    void detached(const Subject& subject) noexcept {  }
 };
 
-bool TimeObserver::receiveTimedouts(const int nevents, const adt::Millisecond& maxWait) noexcept {
-   std::unique_lock <std::mutex> guard (mutex);
-   std::chrono::milliseconds ww(maxWait.getValue() + ShortTimeFixture::ShortResolution.getValue());
+bool TimerObserver::receiveTimedouts(std::shared_ptr<coffee::time::TimeService>& timeService, const adt::Millisecond& maxWait)
+   noexcept
+{
+   std::chrono::milliseconds ww(maxWait.getValue() * 2);
 
-   LOG_DEBUG("Waiting " << nevents << " | " << maxWait.asString());
-   const int maxSize = avgDeviation.size() + nevents;
+   std::unique_lock <std::mutex> guard(mutex);
 
-   while(avgDeviation.size() != maxSize) {
+   while(!timeService->empty()) {
       std::cv_status status = conditionForStop.wait_for(guard, ww);
       if (status == std::cv_status::timeout) {
-         LOG_DEBUG(avgDeviation.asString());
-         return avgDeviation.size() == nevents;
+         return false;
       }
    }
 
@@ -188,7 +159,7 @@ BOOST_AUTO_TEST_CASE(timer_bad_resolution_maxtime)
 
 BOOST_FIXTURE_TEST_CASE(timer_repeat_id, ShortTimeFixture)
 {
-   auto observer = std::make_shared<TimeObserver>();
+   auto observer = std::make_shared<TimerObserver>();
    timeService->attach(observer);
 
    auto firstTimer = time::Timer::instantiate(3333, time100ms);
@@ -197,12 +168,12 @@ BOOST_FIXTURE_TEST_CASE(timer_repeat_id, ShortTimeFixture)
    auto secondTimer = time::Timer::instantiate(3333, time200ms);
    BOOST_REQUIRE_THROW(timeService->activate(secondTimer), adt::RuntimeException);
 
-   BOOST_REQUIRE(observer->receiveTimedouts(1, time200ms));
+   BOOST_REQUIRE(observer->receiveTimedouts(timeService, time200ms));
 }
 
 BOOST_FIXTURE_TEST_CASE(timer_timeout, ShortTimeFixture)
 {
-   auto observer = std::make_shared<TimeObserver>();
+   auto observer = std::make_shared<TimerObserver>();
    timeService->attach(observer);
 
    auto firstTimer = time::Timer::instantiate(1111, time100ms);
@@ -211,12 +182,12 @@ BOOST_FIXTURE_TEST_CASE(timer_timeout, ShortTimeFixture)
    auto secondTimer = time::Timer::instantiate(2222, time200ms);
    BOOST_CHECK_NO_THROW(timeService->activate(secondTimer));
 
-   BOOST_REQUIRE(observer->receiveTimedouts(2, time200ms));
+   BOOST_REQUIRE(observer->receiveTimedouts(timeService, time200ms));
 }
 
 BOOST_FIXTURE_TEST_CASE(timer_max_timeout, ShortTimeFixture)
 {
-   auto observer = std::make_shared<TimeObserver>();
+   auto observer = std::make_shared<TimerObserver>();
    timeService->attach(observer);
 
    auto maxTimer = time::Timer::instantiate(12345, MaxShortDuration);
@@ -230,12 +201,12 @@ BOOST_FIXTURE_TEST_CASE(timer_max_timeout, ShortTimeFixture)
    auto secondTimer = time::Timer::instantiate(1234, MaxShortDuration / 2);
    BOOST_CHECK_NO_THROW(timeService->activate(secondTimer));
 
-   BOOST_REQUIRE(observer->receiveTimedouts(3, MaxShortDuration));
+   BOOST_REQUIRE(observer->receiveTimedouts(timeService, MaxShortDuration));
 }
 
 BOOST_FIXTURE_TEST_CASE(timer_populate, LongTimeFixture)
 {
-   auto observer = std::make_shared<TimeObserver>();
+   auto observer = std::make_shared<TimerObserver>();
    timeService->attach(observer);
 
    for (int ii = 10000; ii < 10050; ++ ii) {
@@ -247,7 +218,7 @@ BOOST_FIXTURE_TEST_CASE(timer_populate, LongTimeFixture)
       }
    }
 
-   BOOST_REQUIRE(observer->receiveTimedouts(timeService->size(), MaxLongDuration));
+   BOOST_REQUIRE(observer->receiveTimedouts(timeService, MaxLongDuration));
 
    auto avgDeviation = observer->getAvgDeviation();
    BOOST_REQUIRE(!avgDeviation.isEmpty());

@@ -61,10 +61,6 @@ time::TimeService::TimeService(app::Application& application, const adt::Millise
 
 time::TimeService::~TimeService()
 {
-   if (!events.empty()) {
-      LOG_WARN("There were " << events.size() << " events on air");
-   }
-
    delete [] timeTable;
 }
 
@@ -90,6 +86,8 @@ void time::TimeService::do_initialize()
       COFFEE_THROW_EXCEPTION("Resolution must be lesser than " << maxTime);
    }
 
+   std::unique_lock<std::mutex> guard(mutex);
+
    producer = std::thread(produce, std::ref(*this));
    consumer = std::thread(consume, std::ref(*this));
 }
@@ -97,7 +95,16 @@ void time::TimeService::do_initialize()
 void time::TimeService::do_stop()
    throw(adt::RuntimeException)
 {
+   LOG_THIS_METHOD();
+
    statusStopped();
+   ticks.clear();
+
+   if (!events.empty()) {
+       LOG_WARN("There were " << events.size() << " events on air");
+    }
+
+   events.clear();
    condition.notify_all();
    producer.join();
    consumer.join();
@@ -145,6 +152,7 @@ void time::TimeService::store(std::shared_ptr<TimeEvent> timeEvent, std::unique_
    Location location(target, target->begin());
    events[timeEvent->getId()] = location;
    timeEvent->initTime = adt::Millisecond::getTime();
+   timeEvent->endTime = 0;
 
    LOG_DEBUG("Now=" << adt::Millisecond::getTime().asString() << " | CurrentQuantum=" << currentQuantum << " | IndexQuantum=" << indexQuantum << " | " << timeEvent->asString());
 }
@@ -165,13 +173,6 @@ bool time::TimeService::cancel(std::shared_ptr<TimeEvent> timeEvent)
    ii->second.first->erase(ii->second.second);
    events.erase(ii);
    return true;
-}
-
-bool time::TimeService::empty()
-   noexcept
-{
-   std::unique_lock<std::mutex> guard(mutex);
-   return events.empty();
 }
 
 adt::StreamString time::TimeService::asString() const
@@ -210,6 +211,7 @@ void time::TimeService::produce(time::TimeService& timeService)
       }
       const adt::Microsecond deviation = nextTime - adt::Microsecond::getTime();
       timeToWait = timeToWait + deviation;
+      LOG_LOCAL7("TimeToWait=" << timeToWait.asString());
    }
 }
 
@@ -238,9 +240,9 @@ void time::TimeService::consume(TimeService& timeService)
       for (quantum_iterator ii = timedout.begin(), maxii = timedout.end(); ii != maxii; ++ ii) {
          std::shared_ptr<TimeEvent> timeEvent = *ii;
          timeEvent->endTime = now;
-         LOG_LOCAL7(timeEvent->asString());
-         timeService.notify(*timeEvent);
+         LOG_DEBUG("CurrentQuantum=" << timeService.currentQuantum << " | " << timeEvent->asString());
          timeService.events.erase(timeEvent->getId());
+         timeService.notify(*timeEvent);
 
          if (timeEvent->isPeriodical())
             timeService.store(timeEvent, guard);

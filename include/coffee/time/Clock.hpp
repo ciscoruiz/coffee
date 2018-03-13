@@ -33,11 +33,11 @@ namespace time {
 
 class Clock : public TimeEvent {
 public:
-   static std::shared_ptr<Clock> instantiate(const Id id, const adt::Millisecond& _timeout) noexcept {
-      return std::make_shared<Clock>(id, _timeout);
+   static std::shared_ptr<Clock> instantiate(const Id id, const adt::Millisecond& timeout) noexcept {
+      return std::make_shared<Clock>(id, timeout);
    }
 
-   Clock(const Id id, const adt::Millisecond& _timeout) : TimeEvent(id, _timeout) {;}
+   Clock(const Id id, const adt::Millisecond& timeout) : TimeEvent(id, timeout) {;}
 
 private:
    bool isPeriodical() const noexcept { return true; }

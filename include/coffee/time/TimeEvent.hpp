@@ -35,17 +35,40 @@ namespace time {
 
 class TimeService;
 
+/**
+ * Class base for different types of time events.
+ */
 class TimeEvent : public adt::pattern::observer::Event {
 public:
+   /**
+    * Destructor.
+    */
    virtual ~TimeEvent() {;}
 
+   /**
+    * \return The timeout of this instance.
+    */
    const std::chrono::milliseconds& getTimeout() const noexcept { return timeout; }
 
-   bool isStarted() const throw () { return initTime.count() != 0 ; }
+   /**
+    * \return \b true if the event been started into the TimeService.
+    */
+   bool isStarted() const throw () { return initTime.count() != 0; }
+
+   /**
+    * \return \b true if the event has been finished into the TimeService.
+    */
    bool isFinished() const throw () { return endTime.count() != 0; }
 
+   /**
+    * \return The final duration of this event.
+    * \warning It should not be valid until #isFinished returns \b true
+    */
    std::chrono::milliseconds getDuration() const throw(adt::RuntimeException);
 
+   /**
+    * \return \b true if the event will be re-scheduled once it has been finished or \b false otherwise.
+    */
    virtual bool isPeriodical() const noexcept = 0;
 
    /**
@@ -54,6 +77,11 @@ public:
    virtual adt::StreamString asString() const noexcept;
 
 protected:
+   /**
+    * Constructor.
+    * \param id Unique identification for this event.
+    * \param timeout Expected duration of this event once it has been activated.
+    */
    TimeEvent(const Id id, const std::chrono::milliseconds& timeout);
 
 private:

@@ -38,14 +38,10 @@ class Subject;
 
 /**
  * Define the different events that a Subject can generate.
- * Every Subject could have 32 different events.
  */
 class Event {
 public:
    typedef int Id;
-   typedef unsigned int BitMask;
-
-   static const Id NullId = -1;
 
    /**
     * Constructor.
@@ -55,7 +51,6 @@ public:
    /**
     * Constructor.
     * \param id Event id. It must be unique for the associated Subject.
-    * \param bitMask the mask that defines the event.
     */
    explicit Event(const Id id) : m_id(id) {;}
 
@@ -88,7 +83,7 @@ public:
    }
 
    /**
-    * \return Summarize information of the subject
+    * \return Summarize information of the instance
     */
    virtual adt::StreamString asString() const noexcept {
       adt::StreamString result("pattern.observer.Event {");
@@ -96,6 +91,8 @@ public:
       return result << "}";
    }
 private:
+   static const Id NullId = -1;
+
    Id m_id;
 
    friend class Subject;

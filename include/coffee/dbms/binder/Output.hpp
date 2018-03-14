@@ -37,21 +37,27 @@ namespace datatype {
 namespace binder {
 
 /**
-   Clase que facilita la interconexion entre las variables del ambito C++ y el ambito RDBMS.
-
-   @author frr@tid.es cisco.tierra@gmail.com.
-
-   \since NemesisRD.dbms 1.4.2.
-
-   A continuacion presentamos un ejemplo de uso detallado.
-   \include test/dbms/Definition_test.cc
-*/
+ * Output binder for a DBMS variable which value will be received for some c++ variable.
+ *
+ * \include test/dbms/Definition_test.cc
+ */
 class Output : public Binder {
 public:
+   /**
+    * Define how to transfer information from the DBMS scope to the c++ scope.
+    */
    virtual void do_decode(Statement& statement, const int pos) throw(adt::RuntimeException) = 0;
+
+   /**
+    * \return Summarize information of this instance in a coffee::adt::StreamString.
+    */
    adt::StreamString asString() const noexcept;
 
 protected:
+   /**
+    * Constructor.
+    * \param value Variable which will be use to populate a c+ variable
+    */
    explicit Output(std::shared_ptr<datatype::Abstract>& value) : Binder(value) {;}
 };
 

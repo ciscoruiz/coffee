@@ -40,55 +40,105 @@ namespace dbms {
 namespace datatype {
 
 /**
-   Clase base para las variables de entrada/salida asociadas a las sentencias SQL.
-
-   @author  cisco.tierra@gmail.com.
-*/
+ * Base class for input/output variables into the c++ scope associated to
+ * different SQL sentences.
+ */
 class Abstract  {
 public:
    struct Datatype {
       enum _v {
-         Integer, /**< Numeros enteros */
-         String,  /**< Cadenas de caracteres */
-         Float, /**< N�mero en coma flotante */
-         ShortBlock,  /**< Tipos de dato RAW */
-         LongBlock,  /**< Tipo de datos CLOB */
-         Date, /** Tipo de fecha(dependiendo del gestor de base de datos puede contener tambien la hora) */
-         TimeStamp /** Tipo para contener simult�neamente la fecha y la hora */
+         Integer, /**< Integer data type*/
+         String,  /**< String data type */
+         Float, /**< Floating point type */
+         ShortBlock,  /**< Memory block datatype */
+         LongBlock,  /**< Big memory block datatype */
+         Date, /** Date data type */
+         TimeStamp /** Epoch data type */
       };
    };
 
+   /**
+    * Destructor
+    */
    virtual ~Abstract() {;}
 
+   /**
+    * \return the name for this instance.
+    */
    const char* getName() const noexcept { return m_name.c_str(); }
 
+   /**
+    * \return Max size for this instance
+    */
    int getMaxSize() const noexcept { return m_maxSize; }
 
+   /**
+    * \return the data type of this instance
+    */
    Datatype::_v getType() const noexcept { return m_type; }
 
+   /**
+    * \return the buffer associated to this instance.
+    * \warning You should not need this method.
+    */
    void* getBuffer() noexcept { return m_buffer; }
+
+   /**
+    * \return the buffer associated to this instance.
+    * \warning You should not need this method.
+    */
    const void* getBuffer() const noexcept { return m_buffer; }
 
+   /**
+    * \return \b true if the data has a value assigned or \b false otherwise.
+    */
    bool hasValue() const noexcept { return m_isNull == false; }
 
+   /**
+    * \return \b true it this instance can contain a null value or \b false otherwise.
+    */
    bool canBeNull() const noexcept { return m_constraint == Constraint::CanBeNull; }
 
+   /**
+    * Set to null the value of this instance.
+    * \warning It will throw an exception in case of this instance could not contain a null value.
+    */
    void isNull() throw(adt::RuntimeException);
 
+   /**
+    * Clear the value of this instance.
+    */
    void clear() noexcept;
 
+   /**
+    * Compare the value of this instance with the value of the received instance.
+    */
    int compare(const std::shared_ptr<Abstract>& other) const throw(adt::RuntimeException);
+
+   /**
+    * Compare the value of this instance with the value of the received instance.
+    */
    int compare(const Abstract& other) const throw(adt::RuntimeException);
 
    operator adt::StreamString() const noexcept { return asString(); }
 
+   /**
+    * \return Summarize information of this instance in a coffee::adt::StreamString.
+    */
    virtual adt::StreamString asString() const noexcept;
 
+   /**
+    * \return a duplicate of this instance.
+    */
    virtual std::shared_ptr<Abstract> clone() const noexcept = 0;
+
+   /**
+    * \return the hash code for this instance.
+    */
    virtual size_t hash() const noexcept = 0;
 
 protected:
-   explicit Abstract(const char* name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
+   Abstract(const char* name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
       m_name(name),
       m_type(type),
       m_maxSize(maxSize),
@@ -97,7 +147,7 @@ protected:
       m_buffer(NULL)
    {;}
 
-   explicit Abstract(const std::string& name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
+   Abstract(const std::string& name, const Datatype::_v type, const int maxSize, const Constraint::_v constraint) :
       m_name(name),
       m_type(type),
       m_maxSize(maxSize),

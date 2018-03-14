@@ -42,18 +42,20 @@ class Node;
 
 namespace app {
 
-class Engine;
+class Service;
 
 /**
  * This abstraction manage all resources needed to run our application.
  *
- * It maintains the list of engines needed to run our application.
+ * It maintains the list of services needed to run our application.
+ *
+ * \include Application_test.cc
 */
 class Application : public Runnable {
 public:
-   typedef std::vector<std::shared_ptr<Engine> > Engines;
-   typedef Engines::iterator engine_iterator;
-   typedef Engines::const_iterator const_engine_iterator;
+   typedef std::vector<std::shared_ptr<Service> > Services;
+   typedef Services::iterator service_iterator;
+   typedef Services::const_iterator const_service_iterator;
 
    /**
       Constructor.
@@ -75,9 +77,8 @@ public:
    const std::string& getShortName() const noexcept { return getName(); }
 
    /**
-      Devuelve la version indicado en el contructor de esta aplicacion.
-      \return La version indicado en el contructor de esta aplicacion.
-   */
+    * \return The version of this application.
+    */
    const std::string& getVersion() const noexcept { return a_version; }
 
    /**
@@ -101,9 +102,9 @@ public:
    const boost::filesystem::path& getOutputContextFilename() const noexcept { return a_outputContextFilename; }
 
    /**
-    * \return the engine_iterator addresses the engine received as parameter or #engine_end if the name is not found.
+    * \return the service_iterator addresses the service received as parameter or #service_end if the name is not found.
     */
-   engine_iterator engine_find(const std::string& className) noexcept;
+   service_iterator service_find(const std::string& serviceName) noexcept;
 
    /**
     * Initialize all resources related to this application, and then it will call virtual method #initialize and #run.
@@ -111,41 +112,41 @@ public:
    void start() throw(adt::RuntimeException);
 
    /**
-    * Attach the engine to this application. It will be started before this application start to run.
+    * Attach the service to this application. It will be started before this application start to run.
     */
-   virtual void attach(std::shared_ptr<Engine> engine) throw(adt::RuntimeException);
+   virtual void attach(std::shared_ptr<Service> service) throw(adt::RuntimeException);
 
    /**
-    * \return engine_iterator to the first attached engine.
+    * \return service_iterator to the first attached service.
     */
-   engine_iterator engine_begin() noexcept { return a_engines.begin(); }
+   service_iterator service_begin() noexcept { return a_services.begin(); }
 
    /**
-    * \return engine_iterator to the last attached engine.
+    * \return service_iterator to the last attached service.
     */
-   const_engine_iterator engine_end() const noexcept { return a_engines.end(); }
+   const_service_iterator service_end() const noexcept { return a_services.end(); }
 
    /**
-    * \return the engine addressed by the engine_iterator.
-    * \warning the value ii must be contained in [#engine_begin, #engine_end)
+    * \return the service addressed by the service_iterator.
+    * \warning the value ii must be contained in [#service_begin, #service_end)
     */
-   static std::shared_ptr<Engine>& engine(engine_iterator ii) noexcept { return std::ref(*ii); }
+   static std::shared_ptr<Service>& service(service_iterator ii) noexcept { return std::ref(*ii); }
 
    /**
-    * \return engine_iterator to the first attached engine.
+    * \return service_iterator to the first attached service.
     */
-   const_engine_iterator engine_begin() const noexcept { return a_engines.begin(); }
+   const_service_iterator service_begin() const noexcept { return a_services.begin(); }
 
    /**
-    * \return engine_iterator to the last attached engine.
+    * \return service_iterator to the last attached service.
     */
-   engine_iterator engine_end() noexcept { return a_engines.end(); }
+   service_iterator service_end() noexcept { return a_services.end(); }
 
    /**
-    * \return the engine addressed by the engine_iterator.
-    * \warning the value ii must be contained in [#engine_begin, #engine_end)
+    * \return the service addressed by the service_iterator.
+    * \warning the value ii must be contained in [#service_begin, #service_end)
     */
-   static const std::shared_ptr<Engine> engine(const_engine_iterator ii) noexcept { return std::ref(*ii); }
+   static const std::shared_ptr<Service> service(const_service_iterator ii) noexcept { return std::ref(*ii); }
 
    /**
     * Write the context as a coffee::xml::Node into the path indicated by file.
@@ -159,7 +160,7 @@ public:
    virtual void initialize() throw(adt::RuntimeException) {;}
 
    /**
-    * \return Summarize information of this instance in a StreamString.
+    * \return Summarize information of this instance in a coffee::adt::StreamString.
     */
    virtual adt::StreamString asString() const noexcept;
 
@@ -177,10 +178,10 @@ protected:
    /**
     * Virtual method to capture the request stop.
     */
-   virtual void do_requestStop() throw(adt::RuntimeException);
+   virtual void do_stop() throw(adt::RuntimeException);
 
    /**
-    * Handler for signal USR1, it will write the context into file #getContextPath.
+    * Handler for signal USR1, it will write the context into file #getOutputContextFilename.
     */
    virtual void signalUSR1() throw(adt::RuntimeException);
 
@@ -198,10 +199,9 @@ private:
    const std::string a_title;
    const pid_t a_pid;
    boost::filesystem::path a_outputContextFilename;
-   Engines a_engines;
+   Services a_services;
 
-   void startEngines() throw(adt::RuntimeException);
-   void stopEngines() noexcept;
+   void startServices() throw(adt::RuntimeException);
    void sendSignalToChilds(const int signal) noexcept;
 
    static void handlerUserSignal(int) noexcept;

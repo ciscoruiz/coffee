@@ -29,6 +29,9 @@
 
 #include <coffee/config/defines.hpp>
 
+
+#include <chrono>
+
 namespace coffee {
 
 namespace adt {
@@ -86,6 +89,26 @@ public:
     * \return A string with a brief description of the data block.
     */
    static std::string apply (const DataBlock& dataBlock, const int characterByLine = 16) noexcept;
+
+   /**
+    * \return A string with the seconds
+    */
+   static std::string apply(const std::chrono::seconds& value) noexcept;
+
+   /**
+    * \return A string with the seconds
+    */
+   static std::string apply(const std::chrono::seconds& value, const char* format) noexcept;
+
+   /**
+    * \return A string with the milliseconds
+    */
+   static std::string apply(const std::chrono::milliseconds& value) noexcept;
+
+   /**
+    * \return A string with the microseconds
+    */
+   static std::string apply(const std::chrono::microseconds& value) noexcept;
 };
 
 }

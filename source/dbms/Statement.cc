@@ -43,6 +43,12 @@ Statement::~Statement()
    m_outputBinds.clear();
 }
 
+void Statement::registerElapsedTime(const std::chrono::microseconds& elapsedTime)
+   noexcept
+{
+   m_elapsedTime += elapsedTime.count();
+}
+
 void Statement::createBinderInput(std::shared_ptr<datatype::Abstract> data)
    throw(adt::RuntimeException)
 {
@@ -162,7 +168,7 @@ adt::StreamString Statement::asString() const
    result += m_name;
    result << " | N-input: " << input_size();
    result << " | N-output: " << output_size();
-   result << " | " << m_measureTiming.asString();
+   result << " | " << m_elapsedTime.asString();
    result << " | Expression: " << m_expression;
    return result += " }";
 }
@@ -172,13 +178,12 @@ std::shared_ptr<xml::Node> dbms::Statement::asXML(std::shared_ptr<xml::Node>& pa
 {
    std::shared_ptr<xml::Node> result = parent->createChild("dbms.Statement");
 
-   adt::Microsecond avgT = m_measureTiming;
    result->createAttribute("Name", m_name);
 
    std::shared_ptr<xml::Node> node = result->createChild("Timing");
-   node->createAttribute("N", m_measureTiming.size());
-   node->createAttribute("Accumulator", m_measureTiming.getAccumulator());
-   node->createAttribute("Timing", m_measureTiming.value().asString());
+   node->createAttribute("N", m_elapsedTime.size());
+   node->createAttribute("Accumulator", m_elapsedTime.getAccumulator());
+   node->createAttribute("ElapsedTime", adt::AsString::apply(m_elapsedTime.value()));
 
    result->createChild("Expression")->createText(m_expression);
 

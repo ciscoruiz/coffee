@@ -22,60 +22,20 @@
 //
 
 
-#ifndef _coffee_app_ApplicationEngineRunner_hpp_
-#define _coffee_app_ApplicationEngineRunner_hpp_
-
-#include <mutex>
-#include <thread>
-#include <condition_variable>
-
-#include <coffee/adt/Semaphore.hpp>
-
-#include <coffee/app/Application.hpp>
+#ifndef _coffee_dbms_sqlite_sccs_hpp_
+#define _coffee_dbms_sqlite_sccs_hpp_
 
 namespace coffee {
+namespace dbms {
+namespace sqlite {
 
-namespace xml {
-class Node;
-}
-
-namespace app {
-
-class Engine;
-
-/**
- * Starts all engines attached to this instance and wait for requestStop, then
- * it will stop all engines before finished execution.
- *
- * \warning Application::start method should be called from a thread different
- * from which it will call to the requestStop method.
- */
-class ApplicationEngineRunner : public Application {
+class SCCS {
 public:
-   /**
-      Constructor.
-      @param shortName Logical name.
-   */
-   ApplicationEngineRunner(const char* shortName);
-
-   /**
-    * Once you call start method from a thread you have to wait for the application really start
-    * its execution.
-    */
-   void waitUntilRunning() { semaphoreForRun.wait(); }
-
-private:
-   adt::Semaphore semaphoreForRun;
-   std::mutex mutex;
-   std::condition_variable conditionForStop;
-   bool stopNow;
-
-   void run() throw(adt::RuntimeException);
-   void do_requestStop() throw(adt::RuntimeException);
+   static void activate () noexcept;
 };
 
 }
 }
+}
 
-#endif
-
+#endif /* _coffee_dbms_sqlite_sccs_hpp_ */

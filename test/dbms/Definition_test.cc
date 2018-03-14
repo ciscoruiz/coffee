@@ -23,6 +23,7 @@
 
 
 #include <boost/test/unit_test.hpp>
+#include <coffee/app/ApplicationServiceStarter.hpp>
 
 #include <functional>
 #include <mutex>
@@ -37,8 +38,6 @@
 #include "MockDatabase.hpp"
 #include "MockLowLevelRecord.hpp"
 #include "MockDatabaseFixture.hpp"
-
-#include <coffee/app/ApplicationEngineRunner.hpp>
 
 #include <coffee/dbms/Statement.hpp>
 #include <coffee/dbms/GuardConnection.hpp>
@@ -114,8 +113,9 @@ public:
    }
 
 private:
-
    mock::MockLowLevelContainer m_container;
+
+   void do_stop() throw(adt::RuntimeException) {;}
 
    std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
       throw(adt::RuntimeException)
@@ -227,7 +227,7 @@ bool test_dbms::MyReadStatement::do_fetch() throw(adt::RuntimeException, Databas
 
    auto time = coffee_datatype_downcast(dbms::datatype::Date, m_datas[4]);
 
-   if(record.m_time == 0)
+   if(record.m_time == std::chrono::seconds::zero())
       time->isNull();
    else
       time->setValue(record.m_time);
@@ -274,7 +274,7 @@ dbms::ResultCode test_dbms::MyWriteStatement::do_execute(dbms::Connection& conne
       record.m_float = coffee_datatype_downcast(dbms::datatype::Float, m_datas[3])->getValue();
 
       auto time = coffee_datatype_downcast(dbms::datatype::Date, m_datas[4]);
-      record.m_time = (time->hasValue()) ? time->getValue(): 0;
+      record.m_time = (time->hasValue()) ? time->getValue(): std::chrono::seconds::zero();
    }
 
    LOG_DEBUG("ID = " << record.m_id);
@@ -305,7 +305,7 @@ const char* test_dbms::MyTranslator::apply(const char* statement)
 
 BOOST_AUTO_TEST_CASE(dbms_define_structure)
 {
-   app::ApplicationEngineRunner application("dbms_define_structure");
+   app::ApplicationServiceStarter application("dbms_define_structure");
 
    auto database = test_dbms::MyDatabase::instantiate(application);
    auto connection = database->createConnection("0", "0", "0");
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE(dbms_define_structure)
 
 BOOST_AUTO_TEST_CASE(dbms_translator)
 {
-   app::ApplicationEngineRunner application("dbms_define_structure");
+   app::ApplicationServiceStarter application("dbms_define_structure");
 
    auto database = test_dbms::MyDatabase::instantiate(application);
 
@@ -898,7 +898,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_dealing_with_nulls, DbmsDefineAndRun)
 
 BOOST_AUTO_TEST_CASE(dbms_null_binder_allocated)
 {
-   app::ApplicationEngineRunner application("dbms_null_binder_allocated");
+   app::ApplicationServiceStarter application("dbms_null_binder_allocated");
    auto database = test_dbms::MyDatabase::instantiate(application);
    auto statement = database->createStatement("one", "read");
    auto id = std::make_shared<datatype::Integer>("give-me-null");
@@ -908,7 +908,7 @@ BOOST_AUTO_TEST_CASE(dbms_null_binder_allocated)
 
 BOOST_AUTO_TEST_CASE(dbms_input_binder_out_range)
 {
-   app::ApplicationEngineRunner application("dbms_input_binder_out_range");
+   app::ApplicationServiceStarter application("dbms_input_binder_out_range");
    auto database = test_dbms::MyDatabase::instantiate(application);
    auto stWriter = database->createStatement("the_write", "write");
    auto stReader = database->createStatement("the_read", "read");
@@ -924,7 +924,7 @@ BOOST_AUTO_TEST_CASE(dbms_input_binder_out_range)
 
 BOOST_AUTO_TEST_CASE(dbms_resultcode_without_interpreter)
 {
-   app::ApplicationEngineRunner application("dbms_resultcode_without_interpreter");
+   app::ApplicationServiceStarter application("dbms_resultcode_without_interpreter");
    auto database = test_dbms::MyDatabase::instantiate(application);
    std::shared_ptr<dbms::ErrorCodeInterpreter> empty;
    database->setErrorCodeInterpreter(empty);
@@ -938,7 +938,7 @@ BOOST_AUTO_TEST_CASE(dbms_resultcode_without_interpreter)
 
 BOOST_AUTO_TEST_CASE(dbms_resultcode_asstring)
 {
-   app::ApplicationEngineRunner application("dbms_resultcode_asstring");
+   app::ApplicationServiceStarter application("dbms_resultcode_asstring");
    auto database = test_dbms::MyDatabase::instantiate(application);
    dbms::ResultCode resultCode(*database, 100, "text");
 
@@ -947,7 +947,7 @@ BOOST_AUTO_TEST_CASE(dbms_resultcode_asstring)
 
 BOOST_AUTO_TEST_CASE(dbms_database_asXML)
 {
-   app::ApplicationEngineRunner application("dbms_database_asXML");
+   app::ApplicationServiceStarter application("dbms_database_asXML");
    auto database = test_dbms::MyDatabase::instantiate(application);
 
    database->createConnection("connection0", "user0", "password0");

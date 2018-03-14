@@ -57,7 +57,7 @@ void logger::Logger::initialize(std::shared_ptr<Writer> writer, std::shared_ptr<
 void logger::Logger::initialize(std::shared_ptr<Writer> writer)
    throw(adt::RuntimeException)
 {
-   initialize(writer, std::make_shared<DefaultFormatter>());
+   initialize(writer, DefaultFormatter::instantiate());
 }
 
 //static
@@ -79,7 +79,16 @@ void logger::Logger::write(const Level::_v level, const adt::StreamString& input
    if (!wantsToProcess(level))
       return;
 
-   const std::string string = m_formatter->apply(level, input, function, file, lineno);
+   const char* path = coffee_strstr(file, "/coffee/");
+
+   if (path != nullptr) {
+      ++ path;
+   }
+   else {
+      path = file;
+   }
+
+   const std::string string = m_formatter->apply(level, input, function, path, lineno);
 
    for (auto writer : m_writers) {
       if (writer->wantsToProcess(level)) {

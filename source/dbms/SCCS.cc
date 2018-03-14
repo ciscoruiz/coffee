@@ -29,10 +29,11 @@
 #include <coffee/xml/SCCS.hpp>
 #include <coffee/logger/SCCS.hpp>
 #include <coffee/app/SCCS.hpp>
+#include <coffee/time/SCCS.hpp>
 
 #include <coffee/dbms/SCCS.hpp>
 
-coffee_sccs_define_tag (dbms,release-18.03.06);
+coffee_sccs_define_tag (dbms,release-18.03.14);
 
 using namespace coffee;
 
@@ -44,6 +45,7 @@ void dbms::SCCS::activate()
    xml::SCCS::activate ();
    logger::SCCS::activate();
    app::SCCS::activate();
+   time::SCCS::activate();
 
    config::SCCSRepository::getInstance().registerModule(coffee_sccs_use_tag(dbms));
 }

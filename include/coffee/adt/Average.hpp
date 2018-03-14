@@ -26,6 +26,7 @@
 
 #include <coffee/adt/StreamString.hpp>
 
+#include <coffee/adt/AsString.hpp>
 namespace coffee {
 
 namespace adt {
@@ -163,13 +164,13 @@ public:
       noexcept
    {
       StreamString result(a_name);
-      result << " { Accumulator:" << a_accumulator;
+      result << " { Accumulator:" << adt::AsString::apply(a_accumulator);
 
       if (!a_measure.empty())
          result << " " << a_measure;
 
       result << " | N=" <<  a_n;
-      result << " | Value=" << value();
+      result << " | Value=" << adt::AsString::apply(value());
 
       if (!a_measure.empty())
          result << " " << a_measure;

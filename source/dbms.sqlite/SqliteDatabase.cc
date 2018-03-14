@@ -32,6 +32,8 @@
 #include <coffee/dbms.sqlite/SqliteOutputBinder.hpp>
 #include <coffee/dbms.sqlite/SqliteErrorCodeInterpreter.hpp>
 
+#include <coffee/dbms.sqlite/SCCS.hpp>
+
 using namespace coffee;
 using namespace coffee::dbms;
 
@@ -47,6 +49,8 @@ std::shared_ptr<sqlite::SqliteDatabase> sqlite::SqliteDatabase::instantiate(app:
 sqlite::SqliteDatabase::SqliteDatabase(app::Application& application, const boost::filesystem::path& dbFile) :
    Database(application, "SQLite3", dbFile.c_str())
 {
+   sqlite::SCCS::activate();
+
    setErrorCodeInterpreter(std::make_shared<sqlite::SqliteErrorCodeInterpreter>());
 }
 

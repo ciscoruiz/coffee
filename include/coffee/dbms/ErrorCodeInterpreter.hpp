@@ -40,45 +40,31 @@ namespace dbms {
 class Database;
 
 /**
-   Clase para acceder a la informacion devuelta por el gestor de base de datos
-   referente al ultimo comando realizado.
-
-   @author cisco.tierra@gmail.com
+ * This class should translate numeric values returned by the RDBMS into
+ * concepts or states that should be evaluated for our application.
  */
 class ErrorCodeInterpreter {
 public:
    virtual ~ErrorCodeInterpreter() {;}
 
    /**
-      Devuelve \em true si las condiciones de busqueda de la ultimo operacion
-      no han sido satisfechas por ningun registro o \em false en otro caso.      
-      @return \em true si las condiciones de busqueda de la ultimo operacion
-      no han sido satisfechas por ningun registro o \em false en otro caso.
-   */   
+    * \return \b true if the search conditions was not find any record or \b false otherwise.
+    */
    virtual bool notFound(const int errorCode) const throw(adt::RuntimeException) = 0;
    
    /**
-      Devuelve \em true si la ultima operacion solicitada fue realizada correctamente
-      o \em false en otro caso.      
-      @return \em true si la ultima operacion solicitada fue realizada correctamente
-      o \em false en otro caso.      
-   */
+    * \return \b true if the sentence was run successfully or \b false otherwise.
+    */
    virtual bool successful(const int errorCode) const throw(adt::RuntimeException) = 0;
 
    /**
-      Devuelve \em true Si el registro obtenenido en una sentencia de seleccion con indicador
-      de modo exclusivo ha sido bloqueada previamente por otro proceso y/o contexto de base de 
-      datos o \em false en otro caso.      
-      @return \em true Si el registro obtenenido en una sentencia de seleccion con indicador
-      de modo exclusivo ha sido bloqueada previamente por otro proceso y/o contexto de base de 
-      datos o \em false en otro caso.      
-   */
+    * \return \b true if the sentence fault due to inter-locked detection or \b false otherwise.
+    */
    virtual bool locked(const int errorCode) const throw(adt::RuntimeException) = 0;
 
    /**
-      Devuelve \em true si se perdio la conexion la base de datos o \em false en otro caso.
-      @return \em true si se perdio la conexion la base de datos o \em false en otro caso.
-   */
+    * \return \b true if the sentence fault due to lost connection or \b false otherwise.
+    */
    virtual bool lostConnection(const int errorCode) const throw(adt::RuntimeException) = 0;
 };
 

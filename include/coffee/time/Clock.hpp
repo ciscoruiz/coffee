@@ -21,42 +21,44 @@
 // SOFTWARE.
 //
 
-#include <coffee/app/ApplicationEngineRunner.hpp>
+#ifndef _coffee_time_Clock_hpp_
+#define _coffee_time_Clock_hpp_
 
-#include <coffee/config/SCCS.hpp>
+#include <memory>
 
-using namespace coffee;
+#include <coffee/time/TimeEvent.hpp>
 
-coffee_sccs_import_tag(app);
+namespace coffee {
+namespace time {
 
-app::ApplicationEngineRunner::ApplicationEngineRunner(const char* shortName):
-    app::Application(shortName, "Application for run attached engines", coffee_sccs_use_tag(app)),
-    semaphoreForRun(0),
-    stopNow(false)
- {
- }
-
-void app::ApplicationEngineRunner::run()
-   throw(adt::RuntimeException)
-{
-   semaphoreForRun.signal();
-   std::unique_lock <std::mutex> guard (mutex);
-   while(!stopNow) {
-      conditionForStop.wait(guard);
+/**
+ * Time event for a periodical time event.
+ *
+ * It will be re-scheduled every time the timeout has been reached.
+ *
+ * \include time/Clock_test.cc
+ */
+class Clock : public TimeEvent {
+public:
+   /**
+    * Fast instantiation for this class
+    */
+   static std::shared_ptr<Clock> instantiate(const Id id, const std::chrono::milliseconds& timeout) noexcept {
+      return std::make_shared<Clock>(id, timeout);
    }
+
+   /**
+    * Constructor.
+    * \param id Unique identification for this event.
+    * \param timeout It will be re-scheduled every time the timeout has been reached.
+    */
+   Clock(const Id id, const std::chrono::milliseconds& timeout) : TimeEvent(id, timeout) {;}
+
+private:
+   bool isPeriodical() const noexcept { return true; }
+};
+
+}
 }
 
-void app::ApplicationEngineRunner::do_requestStop()
-   throw(adt::RuntimeException)
-{
-   try {
-      app::Application::do_requestStop();
-      stopNow = true;
-      conditionForStop.notify_all();
-   }
-   catch(adt::RuntimeException&) {
-      stopNow = true;
-      conditionForStop.notify_all();
-      throw;
-   }
-}
+#endif /* _coffee_time_Clock_hpp_ */

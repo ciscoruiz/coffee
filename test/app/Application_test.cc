@@ -33,13 +33,12 @@
 #include <boost/test/unit_test.hpp>
 
 #include <coffee/adt/Semaphore.hpp>
+#include <coffee/app/ApplicationServiceStarter.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TtyWriter.hpp>
 
-#include <coffee/app/ApplicationEngineRunner.hpp>
-#include <coffee/app/Engine.hpp>
-
+#include <coffee/app/Service.hpp>
 #include <coffee/xml/Document.hpp>
 #include <coffee/xml/Node.hpp>
 
@@ -55,51 +54,13 @@ public:
    void run() throw(adt::RuntimeException) {;}
 };
 
-class ParallelApplication : public app::Application {
-public:
-   ParallelApplication() : app::Application("ParallelApplication", "It will wait till condition", "1.0"),
-      semaphoreForRun(0),
-      stopNow(false)
-   {
-      logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
-   }
-
-   void waitForRun() { semaphoreForRun.wait(); }
-   void terminateApplication() { stopNow = true; conditionForStop.notify_all(); }
-
-private:
-   adt::Semaphore semaphoreForRun;
-   std::mutex mutex;
-   std::condition_variable conditionForStop;
-   bool stopNow;
-
-   void run() throw(adt::RuntimeException) {
-      semaphoreForRun.signal();
-      std::unique_lock <std::mutex> guard (mutex);
-      while(!stopNow) {
-         conditionForStop.wait(guard);
-      }
-   }
-
-   void do_requestStop() throw(adt::RuntimeException) {
-      try {
-         app::Application::do_requestStop();
-         terminateApplication();
-      }
-      catch(adt::RuntimeException&) {
-         terminateApplication();
-         throw;
-      }
-   }
-};
-
 void parallelRun(app::Application& app) {
    app.start();
 }
 
-class MyEngine : public app::Engine {
+class MyService : public app::Service {
 public:
-   MyEngine(app::Application& application, const char* name) : Engine(application, name), m_initilized(0), m_stopped(0) {;}
+   MyService(app::Application& application, const char* name) : Service(application, name), m_initilized(0), m_stopped(0) {;}
 
    int getInitializedCounter() const noexcept { return m_initilized; }
    int getStoppedCounter() const noexcept { return m_stopped; }
@@ -110,46 +71,30 @@ private:
    int m_initilized;
    int m_stopped;
 
-   void do_initialize() throw(adt::RuntimeException){ ++ m_initilized;}
-   void do_stop() throw(adt::RuntimeException) { ++ m_stopped;}
+   void do_initialize() throw(adt::RuntimeException);
+   void do_stop() throw(adt::RuntimeException);
 };
 
-class NoStopEngine : public app::Engine {
-public:
-   NoStopEngine(app::Application& application, const char* name) : app::Engine(application, name) {;}
-
-private:
-   void do_initialize() throw(adt::RuntimeException) {;}
-   void do_stop() throw(adt::RuntimeException) { COFFEE_THROW_EXCEPTION("I dont want to stop"); }
-};
-
-class NoRequestStopEngine : public app::Engine {
-public:
-   NoRequestStopEngine(app::Application& application, const char* name) : app::Engine(application, name) {;}
-
-private:
-   void do_initialize() throw(adt::RuntimeException) {;}
-   void do_requestStop() throw(adt::RuntimeException) { COFFEE_THROW_EXCEPTION("I dont accept request stop"); }
-   void do_stop() throw(adt::RuntimeException) { ; }
-};
+void MyService::do_initialize() throw(adt::RuntimeException){ ++ m_initilized;}
+void MyService::do_stop() throw(adt::RuntimeException) { ++ m_stopped;}
 
 BOOST_AUTO_TEST_CASE( smallest_application )
 { 
    SmallestApplication application;
 
-   BOOST_REQUIRE_EQUAL(application.engine_find("00") == application.engine_end(), true);
+   BOOST_REQUIRE_EQUAL(application.service_find("00") == application.service_end(), true);
 
-   std::shared_ptr<MyEngine> engine = std::make_shared<MyEngine>(application, "00");
-   application.attach(engine);
+   std::shared_ptr<MyService> service = std::make_shared<MyService>(application, "00");
+   application.attach(service);
    application.start();
 
    BOOST_REQUIRE_EQUAL(application.getPid(), getpid());
    BOOST_REQUIRE_EQUAL(application.getVersion().find("1.0/"), 0);
 
-   BOOST_REQUIRE(application.engine_find("00") != application.engine_end());
+   BOOST_REQUIRE(application.service_find("00") != application.service_end());
 
-   BOOST_REQUIRE_EQUAL(engine->getInitializedCounter(), 1);
-   BOOST_REQUIRE_EQUAL(engine->getStoppedCounter(), 1);
+   BOOST_REQUIRE_EQUAL(service->getInitializedCounter(), 1);
+   BOOST_REQUIRE_EQUAL(service->getStoppedCounter(), 1);
 }
 
 BOOST_AUTO_TEST_CASE( status_application )
@@ -169,15 +114,15 @@ BOOST_AUTO_TEST_CASE( undefined_predecessor )
 {
    SmallestApplication application;
 
-   std::shared_ptr<MyEngine> engine = std::make_shared<MyEngine>(application, "00");
-   application.attach(engine);
+   std::shared_ptr<MyService> service = std::make_shared<MyService>(application, "00");
+   application.attach(service);
 
-   engine->setPredecessor("undefined");
+   service->setPredecessor("undefined");
 
    BOOST_REQUIRE_THROW(application.start(), adt::RuntimeException);;
 
-   BOOST_REQUIRE_EQUAL(engine->getInitializedCounter(), 0);
-   BOOST_REQUIRE_EQUAL(engine->getStoppedCounter(), 0);
+   BOOST_REQUIRE_EQUAL(service->getInitializedCounter(), 0);
+   BOOST_REQUIRE_EQUAL(service->getStoppedCounter(), 0);
 
    BOOST_REQUIRE_EQUAL(application.isStopped(), true);
    BOOST_REQUIRE_EQUAL(application.isRunning(), false);
@@ -187,9 +132,9 @@ BOOST_AUTO_TEST_CASE( repeat_predecessor )
 {
    SmallestApplication application;
 
-   std::shared_ptr<MyEngine> engine = std::make_shared<MyEngine>(application, "00");
-   engine->setPredecessor("SomeRepeatedName");
-   engine->setPredecessor("SomeRepeatedName");
+   std::shared_ptr<MyService> service = std::make_shared<MyService>(application, "00");
+   service->setPredecessor("SomeRepeatedName");
+   service->setPredecessor("SomeRepeatedName");
 
    BOOST_REQUIRE_NO_THROW(application.start());
 }
@@ -198,189 +143,185 @@ BOOST_AUTO_TEST_CASE( interdependence_predecessor )
 {
    SmallestApplication application;
 
-   std::shared_ptr<MyEngine> engine00 = std::make_shared<MyEngine>(application, "00");
-   application.attach(engine00);
+   std::shared_ptr<MyService> service00 = std::make_shared<MyService>(application, "00");
+   application.attach(service00);
 
-   std::shared_ptr<MyEngine> engine01 = std::make_shared<MyEngine>(application, "01");
-   application.attach(engine01);
+   std::shared_ptr<MyService> service01 = std::make_shared<MyService>(application, "01");
+   application.attach(service01);
 
-   engine00->setPredecessor("01");
-   engine01->setPredecessor("00");
+   service00->setPredecessor("01");
+   service01->setPredecessor("00");
 
    BOOST_REQUIRE_THROW(application.start(), adt::RuntimeException);;
 
-   BOOST_REQUIRE_EQUAL(engine00->getInitializedCounter(), 0);
-   BOOST_REQUIRE_EQUAL(engine00->getStoppedCounter(), 0);
+   BOOST_REQUIRE_EQUAL(service00->getInitializedCounter(), 0);
+   BOOST_REQUIRE_EQUAL(service00->getStoppedCounter(), 0);
 
-   BOOST_REQUIRE_EQUAL(engine01->getInitializedCounter(), 0);
-   BOOST_REQUIRE_EQUAL(engine01->getStoppedCounter(), 0);
+   BOOST_REQUIRE_EQUAL(service01->getInitializedCounter(), 0);
+   BOOST_REQUIRE_EQUAL(service01->getStoppedCounter(), 0);
 
    BOOST_REQUIRE_EQUAL(application.isStopped(), true);
    BOOST_REQUIRE_EQUAL(application.isRunning(), false);
 }
 
-BOOST_AUTO_TEST_CASE( iterator_engine )
+BOOST_AUTO_TEST_CASE( iterator_service )
 {
    SmallestApplication application;
 
-   application.attach(std::make_shared<MyEngine>(application, "00"));
-   application.attach(std::make_shared<MyEngine>(application, "01"));
-   application.attach(std::make_shared<MyEngine>(application, "02"));
-   application.attach(std::make_shared<MyEngine>(application, "03"));
-   application.attach(std::make_shared<MyEngine>(application, "04"));
+   application.attach(std::make_shared<MyService>(application, "00"));
+   application.attach(std::make_shared<MyService>(application, "01"));
+   application.attach(std::make_shared<MyService>(application, "02"));
+   application.attach(std::make_shared<MyService>(application, "03"));
+   application.attach(std::make_shared<MyService>(application, "04"));
 
    BOOST_REQUIRE_NO_THROW(application.start());
 
    const SmallestApplication& constApplication(application);
 
-   auto ii = application.engine_begin();
-   auto maxii = application.engine_end();
+   auto ii = application.service_begin();
+   auto maxii = application.service_end();
 
-   app::Application::const_engine_iterator jj = constApplication.engine_begin();
-   app::Application::const_engine_iterator  maxjj =  constApplication.engine_end();
+   app::Application::const_service_iterator jj = constApplication.service_begin();
+   app::Application::const_service_iterator  maxjj =  constApplication.service_end();
 
    while (ii != maxii) {
-	   BOOST_REQUIRE_EQUAL (app::Application::engine(ii)->asString(), app::Application::engine(jj)->asString());
-	   BOOST_REQUIRE(jj != maxjj);
-	   ++ ii;
-	   ++ jj;
+       BOOST_REQUIRE_EQUAL (app::Application::service(ii)->asString(), app::Application::service(jj)->asString());
+       BOOST_REQUIRE(jj != maxjj);
+       ++ ii;
+       ++ jj;
    }
 }
 
 BOOST_AUTO_TEST_CASE( app_already_run )
 {
-   app::ApplicationEngineRunner application("app_already_run");
+   app::ApplicationServiceStarter application("app_already_run");
 
    auto thread = std::thread(parallelRun, std::ref(application));
 
    application.waitUntilRunning();
    BOOST_CHECK_THROW(application.start(), adt::RuntimeException);
-   application.requestStop();
+   BOOST_CHECK(application.stop());
    thread.join();
+   BOOST_CHECK(!application.stop());
 }
 
-BOOST_AUTO_TEST_CASE( app_stop_engines )
+BOOST_AUTO_TEST_CASE( app_stop_services )
 {
-   app::ApplicationEngineRunner application("app_stop_engines");
-   auto engine = std::make_shared<MyEngine>(application, "00");
-   application.attach(engine);
+   app::ApplicationServiceStarter application("app_stop_services");
+   auto service = std::make_shared<MyService>(application, "00");
+   application.attach(service);
 
    auto thread = std::thread(parallelRun, std::ref(application));
    application.waitUntilRunning();
    BOOST_CHECK(application.isRunning());
 
-   BOOST_CHECK(engine->isRunning());
-   BOOST_CHECK_EQUAL(engine->getInitializedCounter(), 1);
-   BOOST_CHECK_EQUAL(engine->getStoppedCounter(), 0);
+   BOOST_CHECK(service->isRunning());
+   BOOST_CHECK_EQUAL(service->getInitializedCounter(), 1);
+   BOOST_CHECK_EQUAL(service->getStoppedCounter(), 0);
 
-   application.requestStop();
+   application.stop();
    thread.join();
 
-   BOOST_CHECK(engine->isStopped());
-   BOOST_CHECK_EQUAL(engine->getInitializedCounter(), 1);
-   BOOST_CHECK_EQUAL(engine->getStoppedCounter(), 1);
-
+   BOOST_CHECK(service->isStopped());
+   BOOST_CHECK_EQUAL(service->getInitializedCounter(), 1);
+   BOOST_CHECK_EQUAL(service->getStoppedCounter(), 1);
 }
 
-BOOST_AUTO_TEST_CASE( app_null_engine )
+BOOST_AUTO_TEST_CASE( app_null_service )
 {
-   std::shared_ptr<MyEngine> engine;
+   std::shared_ptr<MyService> service;
    SmallestApplication application;
-   BOOST_REQUIRE_THROW(application.attach(engine), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(application.attach(service), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE( app_already_defined )
 {
    SmallestApplication application;
-   application.attach(std::make_shared<MyEngine>(application, "00"));
-   auto iiprev = application.engine_begin();
-   auto iimaxprev = application.engine_end();
+   application.attach(std::make_shared<MyService>(application, "00"));
+   auto iiprev = application.service_begin();
+   auto iimaxprev = application.service_end();
 
-   application.attach(std::make_shared<MyEngine>(application, "00"));
-   BOOST_REQUIRE(iiprev == application.engine_begin());
-   BOOST_REQUIRE(iimaxprev == application.engine_end());
+   application.attach(std::make_shared<MyService>(application, "00"));
+   BOOST_REQUIRE(iiprev == application.service_begin());
+   BOOST_REQUIRE(iimaxprev == application.service_end());
 }
 
-BOOST_AUTO_TEST_CASE( app_unstoppable_stop_engines )
+struct ApplicationFixture {
+   ApplicationFixture() : application("ApplicationFixture"),
+      externalStop(false)
+   {
+      service = std::make_shared<MyService>(application, "my-service");
+      application.attach(service);
+      thr = std::thread(parallelRun, std::ref(application));
+
+      application.waitUntilRunning();
+      BOOST_CHECK(application.isRunning());
+      BOOST_CHECK(service->isRunning());
+   }
+   virtual ~ApplicationFixture() {
+      if (!externalStop) {
+         try {
+            application.stop();
+         }
+         catch(adt::Exception& ex) {
+
+         }
+         thr.join();
+      }
+
+      BOOST_CHECK(application.isStopped());
+      BOOST_CHECK(service->isStopped());
+
+   }
+   app::ApplicationServiceStarter application;
+   std::shared_ptr<app::Service> service;
+   std::thread thr;
+   bool externalStop;
+};
+
+class NoStopService : public app::Service {
+public:
+   NoStopService(app::Application& application, const char* name) : app::Service(application, name) {;}
+
+private:
+   void do_initialize() throw(adt::RuntimeException);
+   void do_stop() throw(adt::RuntimeException);
+};
+
+void NoStopService::do_initialize() throw(adt::RuntimeException) {;}
+
+void NoStopService::do_stop()
+   throw(adt::RuntimeException)
 {
-   app::ApplicationEngineRunner application("app_unstoppable_stop_engines");
-
-   auto engine = std::make_shared<NoStopEngine>(application, "00");
-   application.attach(engine);
-   application.attach(std::make_shared<NoStopEngine>(application, "01"));
-   application.attach(std::make_shared<NoStopEngine>(application, "02"));
-
-   auto thread = std::thread(parallelRun, std::ref(application));
-   application.waitUntilRunning();
-   BOOST_CHECK(application.isRunning());
-
-   application.requestStop();
-
-   thread.join();
-
-   BOOST_CHECK(application.isStopped());
-   BOOST_CHECK(engine->isStopped());
+   COFFEE_THROW_EXCEPTION("I dont want to stop");
 }
 
-BOOST_AUTO_TEST_CASE( app_unstoppable_requeststop_engines )
+BOOST_FIXTURE_TEST_CASE( app_unstoppable_stop_services, ApplicationFixture)
 {
-   app::ApplicationEngineRunner application("app_unstoppable_requeststop_engines");
+   auto service = std::make_shared<NoStopService>(application, "00");
+   application.attach(service);
+   application.attach(std::make_shared<NoStopService>(application, "01"));
+   application.attach(std::make_shared<NoStopService>(application, "02"));
 
-   auto engine = std::make_shared<NoRequestStopEngine>(application, "00");
-   application.attach(engine);
-   application.attach(std::make_shared<NoRequestStopEngine>(application, "01"));
-   application.attach(std::make_shared<NoRequestStopEngine>(application, "02"));
+   BOOST_CHECK_THROW(application.stop(), adt::RuntimeException);
+   thr.join();
+   externalStop = true;
 
-   auto thread = std::thread(parallelRun, std::ref(application));
-   application.waitUntilRunning();
-   BOOST_CHECK(application.isRunning());
-   BOOST_CHECK(engine->isRunning());
-
-   BOOST_CHECK_THROW(application.requestStop(), adt::RuntimeException);
-
-   thread.join();
-
-   BOOST_CHECK(application.isStopped());
-   BOOST_CHECK(engine->isStopped());
+   BOOST_CHECK(service->isStoppedWithError() == true);
 }
 
-BOOST_AUTO_TEST_CASE( engine_attach_after_running )
+BOOST_FIXTURE_TEST_CASE( service_attach_after_running, ApplicationFixture)
 {
-   app::ApplicationEngineRunner application("engine_attach_after_running");
+   std::shared_ptr<MyService> secondService = std::make_shared<MyService>(application, "01");
+   BOOST_CHECK(!secondService->isRunning());
 
-   std::shared_ptr<MyEngine> engine = std::make_shared<MyEngine>(application, "00");
-   application.attach(engine);
-
-   auto thread = std::thread(parallelRun, std::ref(application));
-
-   application.waitUntilRunning();
-   BOOST_CHECK(application.isRunning());
-   BOOST_CHECK(engine->isRunning());
-
-   std::shared_ptr<MyEngine> secondEngine = std::make_shared<MyEngine>(application, "01");
-   BOOST_CHECK(!secondEngine->isRunning());
-
-   application.attach(secondEngine);
-   BOOST_CHECK(secondEngine->isRunning());
-
-   BOOST_CHECK_NO_THROW(application.requestStop());
-   thread.join();
+   application.attach(secondService);
+   BOOST_CHECK(secondService->isRunning());
 }
 
-BOOST_AUTO_TEST_CASE( app_logger_level_change_onair )
+BOOST_FIXTURE_TEST_CASE( app_logger_level_change_onair, ApplicationFixture)
 {
-   app::ApplicationEngineRunner application("app_logger_level_change_onair");
-
-   std::shared_ptr<MyEngine> engine = std::make_shared<MyEngine>(application, "00");
-   application.attach(engine);
-
-   auto thread = std::thread(parallelRun, std::ref(application));
-
    logger::Logger::setLevel(logger::Level::Information);
-
-   application.waitUntilRunning();
-   BOOST_CHECK(application.isRunning());
-   BOOST_CHECK(engine->isRunning());
 
    std::raise(SIGUSR2);
    BOOST_CHECK_EQUAL(logger::Logger::getLevel(), logger::Level::Debug);
@@ -390,32 +331,22 @@ BOOST_AUTO_TEST_CASE( app_logger_level_change_onair )
 
    std::raise(SIGUSR2);
    BOOST_CHECK_EQUAL(logger::Logger::getLevel(), logger::Level::Warning);
-
-   BOOST_CHECK_NO_THROW(application.requestStop());
-   thread.join();
 }
 
-struct CleanContextFilename {
-   CleanContextFilename() : application("AppDownloadContext") {
+struct RemoveContextFilenameFixture : ApplicationFixture {
+   RemoveContextFilenameFixture() {
       remove(application.getOutputContextFilename().c_str());
 
    }
-   ~CleanContextFilename() {
+   ~RemoveContextFilenameFixture() {
       remove(application.getOutputContextFilename().c_str());
    }
-
-   app::ApplicationEngineRunner application;
 };
 
-BOOST_FIXTURE_TEST_CASE( app_write_context, CleanContextFilename )
+BOOST_FIXTURE_TEST_CASE( app_write_context, RemoveContextFilenameFixture )
 {
-   application.attach(std::make_shared<MyEngine>(application, "00"));
-   application.attach(std::make_shared<MyEngine>(application, "01"));
-
-   auto thread = std::thread(parallelRun, std::ref(application));
-
-   application.waitUntilRunning();
-   BOOST_CHECK(application.isRunning());
+   application.attach(std::make_shared<MyService>(application, "00"));
+   application.attach(std::make_shared<MyService>(application, "01"));
 
    std::raise(SIGUSR1);
 
@@ -426,31 +357,18 @@ BOOST_FIXTURE_TEST_CASE( app_write_context, CleanContextFilename )
    auto root = document.getRoot();
 
    auto app = root->lookupChild("app.Application");
-   auto engines = app->lookupChild("Engines");
+   auto services = app->lookupChild("Services");
 
-   BOOST_CHECK_EQUAL(engines->childAt(0)->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "00");
-   BOOST_CHECK_EQUAL(engines->childAt(1)->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "01");
-
-   BOOST_CHECK_NO_THROW(application.requestStop());
-   thread.join();
+   BOOST_CHECK_EQUAL(services->childAt(0)->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "my-service");
+   BOOST_CHECK_EQUAL(services->childAt(1)->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "00");
+   BOOST_CHECK_EQUAL(services->childAt(2)->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "01");
 }
 
-BOOST_FIXTURE_TEST_CASE( app_cannot_write_context, CleanContextFilename )
+BOOST_FIXTURE_TEST_CASE( app_cannot_write_context, RemoveContextFilenameFixture )
 {
    application.setOutputContextFilename("/root/file-without-access.context");
 
-   application.attach(std::make_shared<MyEngine>(application, "00"));
-   application.attach(std::make_shared<MyEngine>(application, "01"));
-
-   auto thread = std::thread(parallelRun, std::ref(application));
-
-   application.waitUntilRunning();
-   BOOST_CHECK(application.isRunning());
-
    std::raise(SIGUSR1);
-
-   BOOST_CHECK_NO_THROW(application.requestStop());
-   thread.join();
 
    BOOST_REQUIRE_THROW(boost::filesystem::exists(application.getOutputContextFilename()), std::runtime_error);
 }

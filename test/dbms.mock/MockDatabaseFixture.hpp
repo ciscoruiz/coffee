@@ -8,13 +8,12 @@
 #ifndef TEST_DBMS_MOCK_MOCKFIXTURE_HPP_
 #define TEST_DBMS_MOCK_MOCKFIXTURE_HPP_
 
-#include <coffee/app/ApplicationEngineRunner.hpp>
-
 #include <coffee/dbms/Database.hpp>
 #include <coffee/dbms/Connection.hpp>
+#include "../../include/coffee/app/ApplicationServiceStarter.hpp"
 
 template <class _T> struct MockDatabaseFixture {
-   coffee::app::ApplicationEngineRunner app;
+   coffee::app::ApplicationServiceStarter app;
    std::shared_ptr<_T> database;
    std::shared_ptr<coffee::dbms::Connection> connection;
    std::thread thr;
@@ -28,7 +27,7 @@ template <class _T> struct MockDatabaseFixture {
    }
 
    virtual ~MockDatabaseFixture() {
-       app.requestStop();
+       app.stop();
        thr.join();
     }
 

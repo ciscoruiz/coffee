@@ -1,17 +1,17 @@
 // MIT License
-// 
+//
 // Copyright (c) 2018 Francisco Ruiz (francisco.ruiz.rayo@gmail.com)
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,38 +21,40 @@
 // SOFTWARE.
 //
 
-#ifndef __coffee_adt_DelayMeter_hpp
-#define __coffee_adt_DelayMeter_hpp
+#ifndef _coffee_time_Timer_hpp_
+#define _coffee_time_Timer_hpp_
+
+#include <memory>
+
+#include <coffee/time/TimeEvent.hpp>
 
 namespace coffee {
+namespace time {
 
-namespace adt {
-
-template <class _TimeUnit> class DelayMeter {
+/**
+ * Time event for a non periodical time event.
+ */
+class Timer : public TimeEvent {
 public:
-   DelayMeter () { m_timeStamp = _TimeUnit::getTime (); }
-   DelayMeter (const DelayMeter& other) { m_timeStamp = other.m_timeStamp; }
-
-   _TimeUnit getValue () const noexcept {
-      return _TimeUnit::getTime () - m_timeStamp;
+   /**
+    * Fast instantiation for this class
+    */
+   static std::shared_ptr<Timer> instantiate(const Id id, const std::chrono::milliseconds& _timeout) noexcept {
+      return std::make_shared<Timer>(id, _timeout);
    }
 
-   operator _TimeUnit () const noexcept { return getValue (); }
-
-   void reset () noexcept {
-      m_timeStamp = _TimeUnit::getTime ();
-   }
-
-   DelayMeter <_TimeUnit>& operator= (const DelayMeter& other) noexcept { m_timeStamp = other.m_timeStamp; return *this; }
-   bool operator < (const _TimeUnit& other) const noexcept { return getValue () < other; }
-   bool operator > (const _TimeUnit& other) const noexcept { return getValue () > other; }
-   bool operator == (const _TimeUnit& other) const noexcept { return getValue () == other; }
+   /**
+    * Constructor.
+    * \param id Unique identification for this event.
+    * \param timeout Expected duration of this event once it has been activated.
+    */
+   Timer(const Id id, const std::chrono::milliseconds& timeout) : TimeEvent(id, timeout) {;}
 
 private:
-   _TimeUnit m_timeStamp;
+   bool isPeriodical() const noexcept { return false; }
 };
 
 }
 }
 
-#endif
+#endif /* _coffee_time_Timer_hpp_ */

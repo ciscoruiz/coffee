@@ -23,9 +23,6 @@
 
 #include <coffee/config/defines.hpp>
 
-#include <coffee/adt/DelayMeter.hpp>
-#include <coffee/adt/Microsecond.hpp>
-
 #include <coffee/logger/TraceMethod.hpp>
 
 #include <coffee/xml/Node.hpp>
@@ -46,7 +43,8 @@ dbms::ResultCode dbms::Connection::execute(std::shared_ptr<Statement>& statement
 {
    LOG_THIS_METHOD();
 
-   adt::DelayMeter <adt::Microsecond> delay;
+   // See https://www.guyrutenberg.com/2013/01/27/using-stdchronohigh_resolution_clock-example/
+   auto startTime = std::chrono::high_resolution_clock::now();
 
    LOG_DEBUG("Using " << asString() << " to run " << statement->asString());
 
@@ -67,7 +65,9 @@ dbms::ResultCode dbms::Connection::execute(std::shared_ptr<Statement>& statement
       COFFEE_THROW_NAME_DB_EXCEPTION(statement->getName(), result);
    }
 
-   statement->measureTiming(delay);
+   auto endTime = std::chrono::high_resolution_clock::now();
+   std::chrono::microseconds elapsedTime = chrono::duration_cast<chrono::microseconds>(endTime - startTime);
+   statement->registerElapsedTime(elapsedTime);
 
    if(result.successful() == false && result.notFound() == false) {
       LOG_ERROR(asString() << " | " << statement->asString() << " | " << result);

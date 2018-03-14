@@ -60,7 +60,7 @@ public:
 
    /**
    * Initialize the logger with the writer received as parameter and the default formatter (DefaultFormatter).
-   * \warning Before calling that method the calling of method #critical, @error, ..., #debug will have no effect.
+   * \warning Before calling that method the calling of method #critical, #error, ..., #debug will have no effect.
    */
    static void initialize(std::shared_ptr<Writer> writer) throw(adt::RuntimeException);
 
@@ -236,7 +236,7 @@ private:
    do {\
    if(coffee::logger::Logger::wantsToProcess(coffee::logger::Level::Local7)) { \
       coffee::adt::StreamString msg; \
-      coffee::logger::Logger::debug(msg << args, COFFEE_LOG_LOCATION); \
+      coffee::logger::Logger::write(coffee::logger::Level::Local7, msg << args, COFFEE_LOG_LOCATION); \
    } \
    } while(false);
 

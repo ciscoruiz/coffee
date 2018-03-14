@@ -49,9 +49,8 @@ using namespace coffee;
 
 
 dbms::Database::Database(app::Application& app, const char* className, const char* dbmsName) :
-   app::Engine(app, className),
+   app::Service(app, className),
    m_name((dbmsName == NULL) ? "local": dbmsName),
-   m_type((dbmsName == NULL) ? Type::Local: Type::Remote),
    m_failRecoveryHandler(NULL),
    m_statementTranslator(NULL)
 {
@@ -60,8 +59,6 @@ dbms::Database::Database(app::Application& app, const char* className, const cha
 
 dbms::Database::~Database()
 {
-   if(this->isStopped() == false)
-      stop();
 }
 
 void dbms::Database::do_initialize()
@@ -91,7 +88,7 @@ void dbms::Database::do_initialize()
 }
 
 void dbms::Database::do_stop()
-   noexcept
+   throw(adt::RuntimeException)
 {
    LOG_THIS_METHOD();
 
@@ -226,14 +223,8 @@ adt::StreamString dbms::Database::asString() const
 {
    adt::StreamString result("dbms::Database { ");
 
-   result << app::Engine::asString();
-
-   if(m_type == Type::Local)
-      result += " | Type: Local";
-   else {
-      result += " | Type: Remote | Name: ";
-      result += m_name;
-   }
+   result << app::Service::asString();
+   result << " | Name=" << m_name;
 
    if(m_statementTranslator)
       result << " | StatementTranslator=" << m_statementTranslator->getName();
@@ -246,12 +237,9 @@ std::shared_ptr<xml::Node> dbms::Database::asXML(std::shared_ptr<xml::Node>& par
 {
    std::shared_ptr<xml::Node> result = parent->createChild("dbms.Database");
 
-   app::Engine::asXML(result);
+   app::Service::asXML(result);
 
-   result->createAttribute("Type",(m_type == Type::Local) ? "Local": "Remote");
-
-   if(m_type != Type::Local)
-      result->createAttribute("Name", m_name);
+   result->createAttribute("Name", m_name);
 
    if(m_statementTranslator)
       result->createAttribute("Translator", m_statementTranslator->getName());

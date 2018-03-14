@@ -164,3 +164,17 @@ BOOST_AUTO_TEST_CASE( StreamString_string_double )
    result << "double=" << (double) 0.000123;
    BOOST_REQUIRE_EQUAL(result, "double=1.230000e-04");
 }
+
+BOOST_AUTO_TEST_CASE( StreamString_chrono )
+{
+   std::chrono::seconds sec (100);
+   std::chrono::milliseconds ms(sec);
+   std::chrono::microseconds us(sec);
+
+   adt::StreamString result;
+
+   result = sec;
+   result << " | " << ms;
+   result << " | " << us;
+   BOOST_REQUIRE_EQUAL(result, "100 sec | 100000 ms | 100000000 us");
+}

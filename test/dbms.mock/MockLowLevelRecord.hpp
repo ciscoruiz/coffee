@@ -25,7 +25,7 @@
 #define __coffee_mock_MockLowLevelRecord_hpp
 
 #include <map>
-#include <coffee/adt/Second.hpp>
+#include <chrono>
 
 namespace coffee {
 namespace mock {
@@ -35,7 +35,7 @@ struct MockLowLevelRecord {
    std::string m_name;
    int m_integer;
    float m_float;
-   adt::Second m_time;
+   std::chrono::seconds m_time;
 };
 
 typedef std::map <int, mock::MockLowLevelRecord> MockLowLevelContainer;

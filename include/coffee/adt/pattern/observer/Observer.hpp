@@ -48,6 +48,11 @@ class Subject;
 class Observer : public NamedObject {
 public:
    /**
+    * Destructor.
+    */
+   virtual ~Observer() {;}
+
+   /**
     * \return \b true if this observer is attached to some subject or \b false otherwise.
     */
    bool isSubscribed() const noexcept { return m_isSubscribed; }
@@ -60,9 +65,10 @@ protected:
    explicit Observer(const std::string& name) : NamedObject(name), m_isSubscribed(false) {;}
 
    /**
-    * Destructor.
+    * Receive notification to be aware that was attached to the received subject.
+    * \param subject that changes its state.
     */
-   virtual ~Observer() {;}
+   virtual void attached(const Subject& subject) noexcept = 0 ;
 
    /**
     * Receive notification about change in the subject.
@@ -70,6 +76,12 @@ protected:
     * \param event Event information. Depending of his event the observer could read different members of the subject.
     */
    virtual void update(const Subject& subject, const Event& event) noexcept = 0 ;
+
+   /**
+    * Receive notification to be aware that was detached from the received subject.
+    * \param subject that changes its state.
+    */
+   virtual void detached(const Subject& subject) noexcept {;}
 
 private:
    bool m_isSubscribed;

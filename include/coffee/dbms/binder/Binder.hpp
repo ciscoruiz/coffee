@@ -44,16 +44,37 @@ class Statement;
 
 namespace binder {
 
+/**
+ * Bind one C++ variable to the some other DBMS variable.
+ *
+ * \include test/dbms/Definition_test.cc
+ */
 class Binder {
 public:
-   virtual ~Binder() {;}
+   /**
+    * Destructor.
+    */
+   virtual ~Binder() { m_data.reset(); }
 
+   /**
+    * \return the C++ variable bond to this instance.
+    */
    std::shared_ptr<datatype::Abstract>& getData() noexcept { return std::ref(m_data); }
+
+   /**
+    * \return the C++ variable bond to this instance.
+    */
    const std::shared_ptr<datatype::Abstract>& getData() const noexcept { return std::ref(m_data); }
 
 protected:
+   /**
+    * Constructor.
+    */
    explicit Binder(std::shared_ptr<datatype::Abstract>& data) : m_data(data) {;}
 
+   /**
+    * \return Summarize information of this instance in a coffee::adt::StreamString.
+    */
    virtual adt::StreamString asString() const noexcept = 0;
 
 private:

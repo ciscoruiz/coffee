@@ -1,9 +1,9 @@
 // MIT License
 // 
-// Copyright (c) 2018 Francisco Ruiz (francisco.ruiz.rayo@gmail.com)
+// Copyright(c) 2018 Francisco Ruiz(francisco.ruiz.rayo@gmail.com)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
+// of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
@@ -31,86 +31,107 @@
 using namespace std;
 using namespace coffee;
 
-adt::StreamString& adt::StreamString::toUpper ()
+adt::StreamString& adt::StreamString::toUpper()
    noexcept
 {
-   std::transform(begin(), end(), begin(), (int(*)(int)) toupper);
+   std::transform(begin(), end(), begin(),(int(*)(int)) toupper);
    return *this;
 }
 
-adt::StreamString& adt::StreamString::toLower ()
+adt::StreamString& adt::StreamString::toLower()
    noexcept
 {
-   std::transform(begin(), end(), begin(), (int(*)(int)) tolower);
+   std::transform(begin(), end(), begin(),(int(*)(int)) tolower);
    return *this;
 }
 
-adt::StreamString& adt::StreamString::operator<< (const char vv)
+adt::StreamString& adt::StreamString::operator<<(const char vv)
    noexcept
 {
    string::operator +=(vv);
    return *this;
 }
 
-adt::StreamString& adt::StreamString::operator<< (const char* vv)
+adt::StreamString& adt::StreamString::operator<<(const char* vv)
    noexcept
 {
-   if (vv == NULL) {
-      if (a_flags & Flag::ShowNull)
-         string::append ("<null>");
+   if(vv == NULL) {
+      if(a_flags & Flag::ShowNull)
+         string::append("<null>");
    }
    else
-      string:append (vv);
+      string:append(vv);
 
    return *this;
 }
 
-adt::StreamString& adt::StreamString::operator<< (const int vv)
+adt::StreamString& adt::StreamString::operator<<(const int vv)
    noexcept
 {
-   string::append(AsString::apply (vv));
+   string::append(AsString::apply(vv));
    return *this;
 }
 
-adt::StreamString& adt::StreamString::operator<< (const unsigned int vv)
+adt::StreamString& adt::StreamString::operator<<(const unsigned int vv)
    noexcept
 {
-   string::append(AsString::apply (vv));
+   string::append(AsString::apply(vv));
    return *this;
 }
 
-adt::StreamString& adt::StreamString::operator<< (const bool vv)
+adt::StreamString& adt::StreamString::operator<<(const bool vv)
    noexcept
 {
-   string::append(AsString::apply (vv));
+   string::append(AsString::apply(vv));
    return *this;
 }
 
-adt::StreamString& adt::StreamString::operator<< (const Integer64 vv)
+adt::StreamString& adt::StreamString::operator<<(const Integer64 vv)
    noexcept
 {
-   string::append(AsString::apply (vv));
+   string::append(AsString::apply(vv));
    return *this;
 }
 
-adt::StreamString& adt::StreamString::operator<< (const Unsigned64 vv)
+adt::StreamString& adt::StreamString::operator<<(const Unsigned64 vv)
    noexcept
 {
-   string::append(AsString::apply (vv));
+   string::append(AsString::apply(vv));
    return *this;
 }
 
-adt::StreamString& adt::StreamString::operator<< (const float vv)
+adt::StreamString& adt::StreamString::operator<<(const float vv)
    noexcept
 {
-   string::append(AsString::apply (vv, "%f"));
+   string::append(AsString::apply(vv, "%f"));
    return *this;
 }
 
-adt::StreamString& adt::StreamString::operator<< (const double vv)
+adt::StreamString& adt::StreamString::operator<<(const double vv)
    noexcept
 {
-   string::append(AsString::apply (vv, "%e"));
+   string::append(AsString::apply(vv, "%e"));
+   return *this;
+}
+
+adt::StreamString& adt::StreamString::operator<<(const std::chrono::microseconds& vv)
+   noexcept
+{
+   string::append(AsString::apply(vv));
+   return *this;
+}
+
+adt::StreamString& adt::StreamString::operator<<(const std::chrono::milliseconds& vv)
+   noexcept
+{
+   string::append(AsString::apply(vv));
+   return *this;
+}
+
+adt::StreamString& adt::StreamString::operator<<(const std::chrono::seconds& vv)
+   noexcept
+{
+   string::append(AsString::apply(vv));
    return *this;
 }
 

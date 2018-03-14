@@ -170,7 +170,7 @@ const adt::DataBlock& dbms::datatype::Set::getDataBlock(const std::string& colum
       return coffee_datatype_downcast(dbms::datatype::ShortBlock, abstractMember)->getValue();
 }
 
-const adt::Second& dbms::datatype::Set::getDate(const std::string& columnName) const throw(dbms::InvalidDataException)
+const std::chrono::seconds& dbms::datatype::Set::getDate(const std::string& columnName) const throw(dbms::InvalidDataException)
 {
    auto member = coffee_datatype_downcast(dbms::datatype::Date,find(columnName));
    return member->getValue();
@@ -205,7 +205,7 @@ void dbms::datatype::Set::setDataBlock(const std::string& columnName, const adt:
       coffee_datatype_downcast(dbms::datatype::ShortBlock, abstractMember)->setValue(value);
 }
 
-void dbms::datatype::Set::setDate(const std::string& columnName, const adt::Second& value)
+void dbms::datatype::Set::setDate(const std::string& columnName, const std::chrono::seconds& value)
    throw(adt::RuntimeException, dbms::InvalidDataException)
 {
    auto member = coffee_datatype_downcast(dbms::datatype::Date,find(columnName));

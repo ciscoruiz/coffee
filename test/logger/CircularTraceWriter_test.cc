@@ -31,8 +31,9 @@
 #include <sys/types.h>
 #include <fstream>
 #include <iostream>
+#include <chrono>
 
-#include <coffee/adt/Microsecond.hpp>
+#include <coffee/adt/AsString.hpp>
 
 #include <coffee/logger/CircularTraceWriter.hpp>
 #include <coffee/logger/Logger.hpp>
@@ -129,7 +130,7 @@ BOOST_FIXTURE_TEST_CASE(circular_performance_measure_test, CircularTraceFixture)
 
    Logger::setLevel (Level::Error);
 
-   adt::Microsecond init = adt::Microsecond::getTime();
+   auto startTime = std::chrono::high_resolution_clock::now();
 
    Logger::initialize(writer);
 
@@ -151,7 +152,8 @@ BOOST_FIXTURE_TEST_CASE(circular_performance_measure_test, CircularTraceFixture)
          LOG_ERROR ("step " << ii / 100);
    }
 
-   adt::Microsecond end = adt::Microsecond::getTime();
+   auto endTime = std::chrono::high_resolution_clock::now();
 
-   std::cout << "Delay(CircularTraceWriter): " << end - init << " ms" << std::endl << std::endl;
+   std::chrono::microseconds elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+   std::cout << "Delay(CircularTraceWriter): " << adt::AsString::apply(elapsedTime) << std::endl << std::endl;
 }

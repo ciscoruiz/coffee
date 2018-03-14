@@ -33,20 +33,27 @@ namespace dbms {
 namespace binder {
 
 /**
- * Clase que facilita la interconexion entre las variables del ambito C++ y el ambito RDBMS.
+ * Input binder for a c++ variable which value will be received for some DBMS variable.
  *
- * @author frr@tid.es cisco.tierra@gmail.com.
- *
- * A continuacion presentamos un ejemplo de uso detallado.
  * \include test/dbms/Definition_test.cc
  */
 class Input : public Binder {
 public:
+   /**
+    * Define how to transfer information from the c++ scope to the DBMS scope.
+    */
    virtual void do_encode(Statement& statement, const int pos) throw(adt::RuntimeException, DatabaseException) = 0;
 
+   /**
+    * \return Summarize information of this instance in a coffee::adt::StreamString.
+    */
    adt::StreamString asString() const noexcept;
 
 protected:
+   /**
+    * Constructor.
+    * \param value Variable which will be use to populate a DBMS variable
+    */
    explicit Input(std::shared_ptr<datatype::Abstract>& value) : Binder(value) {;}
 };
 

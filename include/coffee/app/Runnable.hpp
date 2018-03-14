@@ -43,7 +43,7 @@ namespace app {
  * undefined period of time.
  */
 class Runnable : public adt::NamedObject {
-   struct StatusFlags { enum _v { Stopped = 0, Starting = 1, Running = 2, WaitingStop = 4 }; };
+   struct StatusFlags { enum _v { Stopped = 0, Starting = 1, Running = 2, StoppedWithError = 4 }; };
 
 public:
    /**
@@ -54,7 +54,12 @@ public:
    /**
     * \return \b true if this instance is stopped or \b false otherwise.
     */
-   bool isStopped() const noexcept { return m_statusFlags == StatusFlags::Stopped; }
+   bool isStopped() const noexcept { return m_statusFlags == StatusFlags::Stopped || m_statusFlags == StatusFlags::StoppedWithError; }
+
+   /**
+    * \return \b true if this instance had and error during stop processing or \b false otherwise.
+    */
+   bool isStoppedWithError() const noexcept { return(m_statusFlags & StatusFlags::StoppedWithError) != 0; }
 
    /**
     * \return \b true if this instance is starting its execution or \b false otherwise.
@@ -66,16 +71,11 @@ public:
     */
    bool isRunning() const noexcept { return(m_statusFlags & StatusFlags::Running) != 0; }
 
-    /**
-    * \return \b true if this instance received a request for stop.
-    * \warning Any implementation of run method should check this value during its execution.
-    */
-   bool isWaitingStop() const noexcept { return(m_statusFlags & StatusFlags::WaitingStop) != 0; }
-
    /**
-    * Process the request to stop, it will act over internal members and it will call virtual pure method do_requestStop.
+    * Process the request to stop, it will act over internal members and it will call virtual pure method do_stop.
+    * \return \b true if this instance was in an state which could accept the stop or \b false otherwise.
     */
-   void requestStop() throw(adt::RuntimeException);
+   bool stop() throw(adt::RuntimeException);
 
    /**
     * \return Summarize information of the instance as adt::StreamString
@@ -121,11 +121,6 @@ protected:
    void statusStarting() noexcept { m_statusFlags = StatusFlags::Starting; }
 
    /**
-    * Set flags to indicate that this instance has received a request for stop.
-    */
-   void statusWaitingStop() noexcept { m_statusFlags |= StatusFlags::WaitingStop;  }
-
-   /**
     * Set flags to indicate this instance is running.
     */
    void statusRunning() noexcept {
@@ -139,16 +134,10 @@ protected:
    void statusStopped() noexcept { m_statusFlags = StatusFlags::Stopped; }
 
    /**
-    * Inicializa el estado de esta instancia.
-    * \internal.
-    */
-   void clearStatusFlags() noexcept { m_statusFlags = StatusFlags::Stopped; }
-
-   /**
     * Pure virtual method to fine tuning operations to done in case of receive a
     * request for stop.
     */
-   virtual void do_requestStop() throw(adt::RuntimeException) {;}
+   virtual void do_stop() throw(adt::RuntimeException) = 0;
 
 private:
    int m_statusFlags;

@@ -33,23 +33,25 @@ namespace dbms {
 class Database;
 
 /**
- * Clase que ajustar de forma transparente las diferencias de tratamiento que tiene las 
- * sentencias SQL en los distintos motores de base de datos. De esta forma una aplicaci�n
- * originariamente escrita para un determinado RDBMS no tendr� que hacer ning�n cambio
- * en las sentencias SQL al cambiar a otro RDBMS.
+ * Class to translate sentences between different SQL flavors.
  * 
- * Por ejemplo para indicar los par�metros de entrada en Oracle se indica con un
- * literal precedido de ':' o '&'. Con lo que la sentencia podr�a quedar como:
+ * It will offer the possibility to write our sentences for a very specify RDBMS-SQL
+ * but they will be used without any kind of re-writing for any other RDBMS.
+ *
+ * For example Oracle uses ':' or '&' to indicate one SQL argument, then a valid
+ * SQL sentence could look like:
+ *
  * \code 
  * insert into foo (field1, field2) values (:f1, :f2)
  * \endcode
  * 
- * En PosgreSQL (tambien sorpotado en Oracle) quedar�a algo as�:
+ * PosgreSQL uses '&':
  * \code
  * insert into foo (field1, field2) values (&f1, &f2)
  * \endcode
  * 
- * Mientras que en MySQL la expresi�n deber�a ser como:
+ * MySQL uses '?' without any kind of naming:
+ *
  * \code
  * insert into foo (field1, field2) values (?, ?);
  * \endcode

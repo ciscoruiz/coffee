@@ -51,7 +51,7 @@
 
 #include <coffee/app/Application.hpp>
 #include <coffee/app/SCCS.hpp>
-#include <coffee/app/Engine.hpp>
+#include <coffee/app/Service.hpp>
 
 using namespace std;
 using namespace coffee;
@@ -86,24 +86,21 @@ app::Application::~Application()
    if(m_this == this) {
       m_this = nullptr;
    }
-   a_engines.clear();
+   a_services.clear();
 }
 
-app::Application::engine_iterator app::Application::engine_find(const std::string& className)
+app::Application::service_iterator app::Application::service_find(const std::string& serviceName)
    noexcept
 {
-   for(engine_iterator ii = engine_begin(), maxii = engine_end(); ii != maxii; ii ++) {
-      auto engine = Application::engine(ii);
-      if(engine->getClassName() == className)
+   for(service_iterator ii = service_begin(), maxii = service_end(); ii != maxii; ii ++) {
+      auto service = Application::service(ii);
+      if(service->getClassName() == serviceName)
          return ii;
    }
 
-   return engine_end();
+   return service_end();
 }
 
-/**
- *(1) Si se ejecuta el metodo clone evita que los hijos que termina se queden como zombies.
- */
 void app::Application::start()
    throw(RuntimeException)
 {
@@ -125,87 +122,67 @@ void app::Application::start()
       cout << "(c) Copyright 2018,2014 by Francisco Ruiz." << endl << endl;
 
       initialize();
-
-      cout << "Loading modules ...." << endl;
-      for(config::SCCSRepository::const_entry_iterator ii = moduleManager.entry_begin(), maxii = moduleManager.entry_end(); ii != maxii; ++ ii) {
-         cout << "\t Module " << config::SCCSRepository::module_name(ii) << endl;
-      }
-      cout << endl;
-
-      statusStarting();
-
-      startEngines();
-
-      statusRunning();
-      run();
-      statusStopped();
-
-      stopEngines();
    }
    catch(adt::RuntimeException& ex) {
       logger::Logger::write(ex);
-      statusStopped();
-      stopEngines();
       throw;
    }
+
+   cout << "Loading modules ...." << endl;
+   for(config::SCCSRepository::const_entry_iterator ii = moduleManager.entry_begin(), maxii = moduleManager.entry_end(); ii != maxii; ++ ii) {
+      cout << "\t Module " << config::SCCSRepository::module_name(ii) << endl;
+   }
+   cout << endl;
+
+   try {
+      statusStarting();
+      startServices();
+      statusRunning();
+      run();
+   }
+   catch(adt::RuntimeException& ex) {
+      logger::Logger::write(ex);
+      stop();
+      throw;
+   }
+
+   stop();
 
    cout << getName() << " finished ..." << endl << endl;
 }
 
-void app::Application::startEngines()
+void app::Application::startServices()
    throw(RuntimeException)
 {
    LOG_THIS_METHOD();
 
-   for(engine_iterator ii = engine_begin(); ii != engine_end(); ii ++) {
-      auto engine = Application::engine(ii);
-      LOG_INFO("Initializing engine | " <<  engine->asString());
-      engine->initialize();
-   }
-}
-
-void app::Application::stopEngines()
-   noexcept
-{
-   LOG_THIS_METHOD();
-
-   for(engine_iterator ii = engine_begin(); ii != engine_end(); ii ++) {
-      auto engine = Application::engine(ii);
-
-      if(engine->isStopped() == true)
-         continue;
-
-      LOG_INFO("Finalizing engine | " <<  engine->asString());
-
-      try {
-         engine->stop();
-      }
-      catch(RuntimeException& ex) {
-         logger::Logger::write(ex);
-      }
+   for(service_iterator ii = service_begin(); ii != service_end(); ii ++) {
+      auto service = Application::service(ii);
+      LOG_INFO("Starting service | " <<  service->asString());
+      service->initialize();
    }
 }
 
 // virtual
-void app::Application::do_requestStop()
+void app::Application::do_stop()
    throw(RuntimeException)
 {
    LOG_THIS_METHOD();
 
-   adt::StreamString ss("Some engines do not accept the request stop { ");
+   adt::StreamString ss("Some services do not accept the request stop { ");
    bool exception = false;
 
-   for(engine_iterator ii = engine_begin(), maxii = engine_end(); ii != maxii; ii ++) {
-      auto engine = Application::engine(ii);
+   for(service_iterator ii = service_begin(), maxii = service_end(); ii != maxii; ii ++) {
+      auto service = Application::service(ii);
 
-      LOG_INFO("Send stop for engine | " <<  engine->asString());
+      LOG_INFO("Send stop for service | " <<  service->asString());
 
       try {
-         engine->requestStop();
+         service->stop();
       }
       catch(RuntimeException& ex) {
          logger::Logger::write(ex);
-         ss << engine->getName() << " ";
+         ss << service->getName() << " ";
          exception = true;
       }
    }
@@ -216,26 +193,26 @@ void app::Application::do_requestStop()
    }
 }
 
-void app::Application::attach(std::shared_ptr<Engine> engine)
+void app::Application::attach(std::shared_ptr<Service> service)
    throw(RuntimeException)
 {
-   if(!engine)
-      COFFEE_THROW_EXCEPTION("Can not associate a NULL engine");
+   if(!service)
+      COFFEE_THROW_EXCEPTION("Can not associate a NULL service");
 
-   auto ii = engine_find(engine->getName());
+   auto ii = service_find(service->getName());
 
-   if(ii != engine_end()) {
-      LOG_INFO(engine->asString() << " | Already defined") ;
+   if(ii != service_end()) {
+      LOG_INFO(service->asString() << " | Already defined") ;
       return;
    }
 
-   LOG_DEBUG("Registering " << engine->asString());
+   LOG_DEBUG("Registering " << service->asString());
 
-   a_engines.push_back(engine);
+   a_services.push_back(service);
 
    if(isRunning()) {
-      LOG_INFO("Initializing engine | " << engine->asString());
-      engine->initialize();
+      LOG_INFO("Initializing service | " << service->asString());
+      service->initialize();
    }
 }
 
@@ -267,7 +244,7 @@ adt::StreamString app::Application::asString() const noexcept
 {
    adt::StreamString result("app::Application { ");
    result << app::Runnable::asString();
-   result << " | #engines=" << a_engines.size();
+   result << " | #services=" << a_services.size();
    return result += " }";
 }
 
@@ -287,9 +264,9 @@ std::shared_ptr<xml::Node> app::Application::asXML(std::shared_ptr<xml::Node>& r
       xmlModule->createAttribute("Name", config::SCCSRepository::module_name(ii));
    }
 
-   std::shared_ptr<xml::Node> engines = result->createChild("Engines");
-   for(const_engine_iterator ii = engine_begin(), maxii = engine_end(); ii != maxii; ii ++)
-      engine(ii)->asXML(engines);
+   std::shared_ptr<xml::Node> services = result->createChild("Services");
+   for(const_service_iterator ii = service_begin(), maxii = service_end(); ii != maxii; ii ++)
+      service(ii)->asXML(services);
 
    return result;
 }
@@ -346,7 +323,7 @@ void app::Application::handlerSignalTerminate(int)
    try {
       if(m_this != nullptr) {
          LOG_WARN(m_this->asString() << " | Received SIGTERM signal");
-         m_this->requestStop();
+         m_this->stop();
       }
    }
    catch(adt::RuntimeException& ex) {

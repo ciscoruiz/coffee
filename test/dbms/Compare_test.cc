@@ -24,6 +24,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <coffee/time/TimeService.hpp>
+
 #include <coffee/dbms/datatype/Date.hpp>
 #include <coffee/dbms/datatype/Float.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
@@ -44,7 +46,9 @@ BOOST_AUTO_TEST_CASE(dbms_compare_date)
 
    BOOST_REQUIRE_EQUAL(value.compare(other), 0);
 
-   other.setValue(adt::Second::getTime());
+   auto now = time::TimeService::toSeconds(time::TimeService::now());
+
+   other.setValue(now);
 
    BOOST_REQUIRE_LT(value.compare(other), 0);
    BOOST_REQUIRE_GT(other.compare(value), 0);
@@ -52,13 +56,12 @@ BOOST_AUTO_TEST_CASE(dbms_compare_date)
    value.setValue(other.getValue());
    BOOST_REQUIRE_EQUAL(value.compare(other), 0);
 
-   adt::Second second = adt::Second(other.getValue() + 10);
-   value.setValue(second);
+   value.setValue(now + std::chrono::seconds(10));
    BOOST_REQUIRE_GT(value.compare(other), 0);
    BOOST_REQUIRE_LT(other.compare(value), 0);
 
    other.clear();
-   BOOST_REQUIRE_EQUAL(other.hasValue(), false);
+   BOOST_REQUIRE(!other.hasValue());
    BOOST_REQUIRE_GT(value.compare(other), 0);
    BOOST_REQUIRE_LT(other.compare(value), 0);
 

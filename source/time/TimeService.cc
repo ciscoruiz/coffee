@@ -270,3 +270,9 @@ milliseconds time::TimeService::now()
    // See https://stackoverflow.com/questions/9089842/c-chrono-system-time-in-milliseconds-time-operations
    return std::chrono::duration_cast<milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
 }
+
+std::chrono::seconds time::TimeService::toSeconds(const std::chrono::milliseconds& millisecond)
+   noexcept
+{
+   return std::chrono::duration_cast<std::chrono::seconds>(millisecond);
+}

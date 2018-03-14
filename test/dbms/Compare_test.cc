@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(dbms_compare_date)
 
    BOOST_REQUIRE_EQUAL(value.compare(other), 0);
 
-   auto now = std::chrono::duration_cast<std::chrono::seconds>(time::TimeService::now());
+   auto now = time::TimeService::toSeconds(time::TimeService::now());
 
    other.setValue(now);
 

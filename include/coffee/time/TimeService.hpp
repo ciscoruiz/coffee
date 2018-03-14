@@ -51,6 +51,7 @@ public:
    ~TimeService();
 
    static std::chrono::milliseconds now() noexcept;
+   static std::chrono::seconds toSeconds(const std::chrono::milliseconds& millisecond) noexcept;
 
    void activate(std::shared_ptr<TimeEvent> timeEvent) throw(adt::RuntimeException);
    bool cancel(std::shared_ptr<TimeEvent> timeEvent) noexcept;

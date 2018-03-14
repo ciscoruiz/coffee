@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(set_access)
 {
    datatype::Set set;
 
-   std::chrono::seconds second = std::chrono::duration_cast<std::chrono::seconds>(time::TimeService::now());
+   std::chrono::seconds second = time::TimeService::toSeconds(time::TimeService::now());
 
    set.insert(std::make_shared<datatype::Integer>("integer"));
    set.insert(std::make_shared<datatype::String>("string", 16));

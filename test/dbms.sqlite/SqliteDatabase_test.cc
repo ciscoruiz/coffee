@@ -29,6 +29,8 @@
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TtyWriter.hpp>
 
+#include <coffee/time/TimeService.hpp>
+
 #include <coffee/app/ApplicationServiceStarter.hpp>
 
 #include <coffee/dbms.sqlite/SqliteDatabase.hpp>
@@ -46,7 +48,11 @@
 #include <coffee/dbms/datatype/Date.hpp>
 #include <coffee/dbms/datatype/TimeStamp.hpp>
 
+#include "../dbms/PrintChrono.hpp"
+
 using namespace coffee;
+
+using std::chrono::seconds;
 
 struct StatementAgeGreater {
    StatementAgeGreater(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
@@ -513,14 +519,16 @@ BOOST_FIXTURE_TEST_CASE(sqlite_rollback, SqliteFixture)
    StatementCountAllTypes count(database, connection);
 
    {
+      auto now = time::TimeService::toSeconds(time::TimeService::now());
+
       dbms::GuardConnection guardConnection(connection);
       dbms::GuardStatement guardStament(guardConnection, insert.statement);
       insert.id->setValue(100);
       insert.theBlob->isNull();
       insert.theFloat->isNull();
-      insert.theDate->setValue(adt::Second::getLocalTime());
+      insert.theDate->setValue(now);
       insert.theLongBlob->isNull();
-      insert.theTime->setValue(adt::Second::getLocalTime());
+      insert.theTime->setValue(now);
       BOOST_REQUIRE_NO_THROW(guardStament.execute());
    }
 
@@ -542,7 +550,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_rollback, SqliteFixture)
 
 BOOST_FIXTURE_TEST_CASE(sqlite_insert_all_types, SqliteFixture)
 {
-   auto now = adt::Second::getTime();
+   auto now = time::TimeService::toSeconds(time::TimeService::now());
 
    InsertAllType insert(database, connection);
    StatementCountAllTypes count(database, connection);
@@ -557,10 +565,10 @@ BOOST_FIXTURE_TEST_CASE(sqlite_insert_all_types, SqliteFixture)
       for (int ii = 0; ii < 10; ++ ii) {
          insert.id->setValue(ii);
          insert.theFloat->setValue(10.11 * ii);
-         insert.theDate->setValue(now + ii);
+         insert.theDate->setValue(now + seconds(ii));
          insert.theBlob->setValue(adt::DataBlock((const char*) &now, sizeof(now)));
-         insert.theTime->setValue(now + ii * 2);
-         memset(buffer, now % 255, sizeof(buffer));
+         insert.theTime->setValue(now + seconds(ii * 2));
+         memset(buffer, now.count() % 255, sizeof(buffer));
          adt::DataBlock value(buffer, sizeof(buffer));
          insert.theLongBlob->setValue(value);
          BOOST_REQUIRE_NO_THROW(guardStament.execute());
@@ -585,9 +593,9 @@ BOOST_FIXTURE_TEST_CASE(sqlite_insert_all_types, SqliteFixture)
       while (guardStament.fetch()) {
          BOOST_REQUIRE_EQUAL(select.id->getValue(), counter);
          BOOST_REQUIRE_CLOSE(select.theFloat->getValue(), 10.11 * counter, 0.1);
-         BOOST_REQUIRE_EQUAL(select.theDate->getValue(), now + counter);
+         BOOST_REQUIRE_EQUAL(select.theDate->getValue(), now + seconds(counter));
          BOOST_REQUIRE(select.theBlob->getValue() == adt::DataBlock((const char*) &now, sizeof(now)));
-         BOOST_REQUIRE(select.theTime->getValue() == now + counter * 2);
+         BOOST_REQUIRE(select.theTime->getValue() == now + seconds(counter * 2));
          counter ++;
       }
 

@@ -26,8 +26,6 @@
 #include <thread>
 #include <iostream>
 
-#include <coffee/adt/Second.hpp>
-
 #include <coffee/xml/Node.hpp>
 #include <coffee/xml/Attribute.hpp>
 

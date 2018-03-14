@@ -29,10 +29,14 @@
 #include <coffee/persistence/Class.hpp>
 #include <coffee/persistence/Object.hpp>
 
+#include <coffee/time/TimeService.hpp>
+
 #include <coffee/dbms/datatype/Integer.hpp>
 #include <coffee/dbms/datatype/String.hpp>
 #include <coffee/dbms/datatype/Date.hpp>
 #include <coffee/dbms/datatype/Float.hpp>
+
+#include "../dbms/PrintChrono.hpp"
 
 using namespace coffee;
 
@@ -58,7 +62,7 @@ BOOST_AUTO_TEST_CASE(persistence_class)
    BOOST_REQUIRE_EQUAL(object->getPrimaryKey()->getInteger("id"), 111);
    BOOST_REQUIRE_EQUAL(object->getPrimaryKey()->getString("id2"), "zzz");
 
-   const adt::Second now = adt::Second::getLocalTime();
+   auto now = time::TimeService::toSeconds(time::TimeService::now());
 
    BOOST_REQUIRE_NO_THROW(object->setString("name", "the name"));
    BOOST_REQUIRE_NO_THROW(object->setDate("date", now));

@@ -29,14 +29,15 @@
 #include <coffee/dbms/datatype/Date.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
 
+#include "PrintChrono.hpp"
+
 using namespace coffee;
 using namespace coffee::dbms;
-
 
 // See http://www.mbari.org/staff/rich/utccalc.htm
 BOOST_AUTO_TEST_CASE(date_setter_second)
 {
-   adt::Second date_01_31_1987_23_59_59(539110799);
+   std::chrono::seconds date_01_31_1987_23_59_59(539110799);
    datatype::Date column("from_number");
 
    column.setValue(date_01_31_1987_23_59_59);
@@ -49,7 +50,7 @@ BOOST_AUTO_TEST_CASE(date_setter_second)
    BOOST_REQUIRE_EQUAL(localTime->tm_min, 59);
    BOOST_REQUIRE_EQUAL(localTime->tm_sec, 59);
 
-   BOOST_REQUIRE_EQUAL(column.getValue(), 539110799);
+   BOOST_REQUIRE_EQUAL(column.getValue().count(), 539110799);
 }
 
 BOOST_AUTO_TEST_CASE(date_setter_text)
@@ -122,9 +123,9 @@ BOOST_AUTO_TEST_CASE(date_is_not_nulleable)
    BOOST_REQUIRE_THROW(column.isNull(), adt::RuntimeException);
 
    column.clear();
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+   BOOST_REQUIRE(column.hasValue());
 
-   BOOST_REQUIRE_EQUAL(column.getValue(), 0);
+   BOOST_REQUIRE(column.getValue() == std::chrono::seconds::zero());
 }
 
 BOOST_AUTO_TEST_CASE(date_downcast)
@@ -153,32 +154,41 @@ BOOST_AUTO_TEST_CASE(date_clone)
    datatype::Date cannotBeNull("cannotBeNull", datatype::Constraint::CanNotBeNull);
    datatype::Date canBeNull("canBeNull", datatype::Constraint::CanBeNull);
 
-   BOOST_REQUIRE_EQUAL(cannotBeNull.hasValue(), true);
-   BOOST_REQUIRE_EQUAL(canBeNull.hasValue(), false);
+   BOOST_REQUIRE(cannotBeNull.hasValue());
+   BOOST_REQUIRE(!canBeNull.hasValue());
 
    std::shared_ptr<datatype::Abstract> notnull(cannotBeNull.clone());
    std::shared_ptr<datatype::Abstract> null(canBeNull.clone());
 
-   BOOST_REQUIRE_EQUAL(notnull->hasValue(), true);
-   BOOST_REQUIRE_EQUAL(null->hasValue(), false);
+   BOOST_REQUIRE(notnull->hasValue());
+   BOOST_REQUIRE(!null->hasValue());
 
    BOOST_REQUIRE_EQUAL(notnull->compare(cannotBeNull), 0);
 
-   cannotBeNull.setValue(adt::Second(5));
+   const std::chrono::seconds fiveSeconds(5);
 
-   BOOST_REQUIRE_EQUAL(cannotBeNull.getValue(), adt::Second(5));
+   cannotBeNull.setValue(fiveSeconds);
+
+   BOOST_REQUIRE_EQUAL(cannotBeNull.getValue(), fiveSeconds);
 
    notnull = cannotBeNull.clone();
-   BOOST_REQUIRE_EQUAL(notnull->hasValue(), true);
+   BOOST_REQUIRE(notnull->hasValue());
    BOOST_REQUIRE_EQUAL(notnull->compare(cannotBeNull), 0);
+}
 
-   canBeNull.setValue(adt::Second(25));
-   null = canBeNull.clone();
-   BOOST_REQUIRE_EQUAL(null->hasValue(), true);
+BOOST_AUTO_TEST_CASE(date_clone_nuleable)
+{
+   datatype::Date canBeNull("canBeNull", datatype::Constraint::CanBeNull);
+   datatype::Date cannotBeNull("cannotBeNull", datatype::Constraint::CanNotBeNull);
+
+   cannotBeNull.setValue(std::chrono::seconds(5));
+   canBeNull.setValue(std::chrono::seconds(25));
+
+   auto null = canBeNull.clone();
+   BOOST_REQUIRE(null->hasValue());
    BOOST_REQUIRE_EQUAL(null->compare(canBeNull), 0);
 
    BOOST_REQUIRE_EQUAL(null->compare(cannotBeNull), 20);
-
-   BOOST_REQUIRE_EQUAL(notnull->compare(canBeNull), -20);
+   BOOST_REQUIRE_EQUAL(cannotBeNull.compare(null), -20);
 }
 

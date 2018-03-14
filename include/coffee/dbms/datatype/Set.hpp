@@ -27,6 +27,7 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <chrono>
 
 #include <coffee/adt/RuntimeException.hpp>
 
@@ -89,18 +90,19 @@ public:
 
    bool operator==(const Set& other) const noexcept;
    bool operator< (const Set& other) const throw (adt::RuntimeException){ return compare(other) < 0; }
+   bool operator!=(const Set& other) const noexcept { return !operator==(other); }
 
    int getInteger(const std::string& columnName) const throw(dbms::InvalidDataException);
    std::string getString(const std::string& columnName) const throw(adt::RuntimeException, dbms::InvalidDataException);
    float getFloat(const std::string& columnName) const throw(dbms::InvalidDataException);
    const adt::DataBlock& getDataBlock(const std::string& columnName) const throw(dbms::InvalidDataException);
-   const adt::Second& getDate(const std::string& columnName) const throw(dbms::InvalidDataException);
+   const std::chrono::seconds& getDate(const std::string& columnName) const throw(dbms::InvalidDataException);
 
    void setInteger(const std::string& columnName, const int value) throw(dbms::InvalidDataException);
    void setString(const std::string& columnName, const std::string& value) throw(adt::RuntimeException, dbms::InvalidDataException);
    void setFloat(const std::string& columnName, const float value) throw(dbms::InvalidDataException);
    void setDataBlock(const std::string& columnName, const adt::DataBlock& value) throw(dbms::InvalidDataException);
-   void setDate(const std::string& columnName, const adt::Second& date) throw(adt::RuntimeException, dbms::InvalidDataException);
+   void setDate(const std::string& columnName, const std::chrono::seconds& date) throw(adt::RuntimeException, dbms::InvalidDataException);
 
 private:
    Datas m_datas;

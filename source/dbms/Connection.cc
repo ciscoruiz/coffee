@@ -23,8 +23,6 @@
 
 #include <coffee/config/defines.hpp>
 
-#include <coffee/adt/Microsecond.hpp>
-
 #include <coffee/logger/TraceMethod.hpp>
 
 #include <coffee/xml/Node.hpp>

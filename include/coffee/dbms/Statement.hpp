@@ -31,7 +31,6 @@
 
 #include <coffee/adt/RuntimeException.hpp>
 #include <coffee/adt/Average.hpp>
-#include <coffee/adt/Microsecond.hpp>
 
 #include <coffee/dbms/DatabaseException.hpp>
 #include <coffee/dbms/ResultCode.hpp>

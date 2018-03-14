@@ -29,14 +29,15 @@
 #include <coffee/dbms/datatype/TimeStamp.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
 
+#include "PrintChrono.hpp"
+
 using namespace coffee;
 using namespace coffee::dbms;
-
 
 // See http://www.mbari.org/staff/rich/utccalc.htm
 BOOST_AUTO_TEST_CASE(timestamp_setter_second)
 {
-   adt::Second timestamp_01_31_1987_23_59_59(539110799);
+   std::chrono::seconds timestamp_01_31_1987_23_59_59(539110799);
    datatype::TimeStamp column("from_number");
 
    column.setValue(timestamp_01_31_1987_23_59_59);
@@ -49,7 +50,7 @@ BOOST_AUTO_TEST_CASE(timestamp_setter_second)
    BOOST_REQUIRE_EQUAL(localTime->tm_min, 59);
    BOOST_REQUIRE_EQUAL(localTime->tm_sec, 59);
 
-   BOOST_REQUIRE_EQUAL(column.getValue(), 539110799);
+   BOOST_REQUIRE_EQUAL(column.getValue().count(), 539110799);
 }
 
 BOOST_AUTO_TEST_CASE(timestamp_setter_text)
@@ -110,21 +111,20 @@ BOOST_AUTO_TEST_CASE(timestamp_is_nulleable)
    BOOST_REQUIRE_EQUAL(time_t->tm_mday, 25);
 
    column.clear();
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
+   BOOST_REQUIRE(!column.hasValue());
 }
 
 BOOST_AUTO_TEST_CASE(timestamp_is_not_nulleable)
 {
    datatype::TimeStamp column("not_nulleable", datatype::Constraint::CanNotBeNull);
 
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+   BOOST_REQUIRE(column.hasValue());
 
    BOOST_REQUIRE_THROW(column.isNull(), adt::RuntimeException);
 
    column.clear();
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
-
-   BOOST_REQUIRE_EQUAL(column.getValue(), 0);
+   BOOST_REQUIRE(column.hasValue());
+   BOOST_REQUIRE_EQUAL(column.getValue(), std::chrono::seconds::zero());
 }
 
 BOOST_AUTO_TEST_CASE(timestamp_downcast)
@@ -146,50 +146,4 @@ BOOST_AUTO_TEST_CASE(timestamp_downcast)
    datatype::Integer zzz("zzz");
 
    BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::TimeStamp, zzz), dbms::InvalidDataException);
-}
-
-BOOST_AUTO_TEST_CASE(timestamp_clone)
-{
-   datatype::TimeStamp cannotBeNull("cannotBeNull", datatype::Constraint::CanNotBeNull);
-   datatype::TimeStamp canBeNull("canBeNull", datatype::Constraint::CanBeNull);
-
-   BOOST_REQUIRE_EQUAL(cannotBeNull.hasValue(), true);
-   BOOST_REQUIRE_EQUAL(canBeNull.hasValue(), false);
-
-   std::shared_ptr<datatype::Abstract> notnull(cannotBeNull.clone());
-   std::shared_ptr<datatype::Abstract> null(canBeNull.clone());
-
-   BOOST_REQUIRE_EQUAL(notnull->hasValue(), true);
-   BOOST_REQUIRE_EQUAL(null->hasValue(), false);
-
-   BOOST_REQUIRE_EQUAL(notnull->compare(cannotBeNull), 0);
-
-   cannotBeNull.setValue(adt::Second(5));
-
-   BOOST_REQUIRE_EQUAL(cannotBeNull.getValue(), adt::Second(5));
-
-   notnull = cannotBeNull.clone();
-   BOOST_REQUIRE_EQUAL(notnull->hasValue(), true);
-   BOOST_REQUIRE_EQUAL(notnull->compare(cannotBeNull), 0);
-
-   canBeNull.setValue(adt::Second(25));
-   null = canBeNull.clone();
-   BOOST_REQUIRE_EQUAL(null->hasValue(), true);
-   BOOST_REQUIRE_EQUAL(null->compare(canBeNull), 0);
-
-   BOOST_REQUIRE_EQUAL(null->compare(cannotBeNull), 20);
-
-   BOOST_REQUIRE_EQUAL(notnull->compare(canBeNull), -20);
-}
-
-BOOST_AUTO_TEST_CASE(timestamp_fractional)
-{
-   datatype::TimeStamp data("timestamp");
-   adt::Second now = adt::Second::getLocalTime();
-   data.setValue(now);
-   data.setFractionalSecond(100);
-
-   datatype::TimeStamp copy(data);
-   BOOST_REQUIRE(copy.getValue() == now);
-   BOOST_REQUIRE(copy.getFractionalSecond() == 100);
 }

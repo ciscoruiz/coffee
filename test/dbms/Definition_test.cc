@@ -227,7 +227,7 @@ bool test_dbms::MyReadStatement::do_fetch() throw(adt::RuntimeException, Databas
 
    auto time = coffee_datatype_downcast(dbms::datatype::Date, m_datas[4]);
 
-   if(record.m_time == 0)
+   if(record.m_time == std::chrono::seconds::zero())
       time->isNull();
    else
       time->setValue(record.m_time);
@@ -274,7 +274,7 @@ dbms::ResultCode test_dbms::MyWriteStatement::do_execute(dbms::Connection& conne
       record.m_float = coffee_datatype_downcast(dbms::datatype::Float, m_datas[3])->getValue();
 
       auto time = coffee_datatype_downcast(dbms::datatype::Date, m_datas[4]);
-      record.m_time = (time->hasValue()) ? time->getValue(): 0;
+      record.m_time = (time->hasValue()) ? time->getValue(): std::chrono::seconds::zero();
    }
 
    LOG_DEBUG("ID = " << record.m_id);

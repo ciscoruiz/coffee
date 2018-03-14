@@ -21,8 +21,10 @@
 // SOFTWARE.
 //
 
-#include <coffee/adt/Second.hpp>
 #include <coffee/adt/DataBlock.hpp>
+#include <coffee/adt/AsString.hpp>
+
+#include <coffee/time/TimeService.hpp>
 
 #include <coffee/dbms/datatype/Set.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
@@ -32,6 +34,8 @@
 #include <coffee/dbms/datatype/LongBlock.hpp>
 
 #include <boost/test/unit_test.hpp>
+
+#include "PrintChrono.hpp"
 
 using namespace coffee;
 using namespace coffee::dbms;
@@ -75,7 +79,7 @@ BOOST_AUTO_TEST_CASE(set_access)
 {
    datatype::Set set;
 
-   adt::Second second = adt::Second::getLocalTime();
+   std::chrono::seconds second = std::chrono::duration_cast<std::chrono::seconds>(time::TimeService::now());
 
    set.insert(std::make_shared<datatype::Integer>("integer"));
    set.insert(std::make_shared<datatype::String>("string", 16));
@@ -123,7 +127,7 @@ BOOST_AUTO_TEST_CASE(set_operator_compare)
   other.setString("string", "hello");
   other.setFloat("float", 0.123);
 
-  BOOST_REQUIRE_EQUAL(set == other, true);
+  BOOST_REQUIRE(set == other);
   BOOST_REQUIRE_EQUAL(set < other, false);
 }
 
@@ -185,11 +189,10 @@ BOOST_AUTO_TEST_CASE(set_compare_different_no_members_numbers)
   set.setString("string", "hello");
 
   BOOST_REQUIRE_THROW(set.compare(other), adt::RuntimeException);
-  BOOST_REQUIRE_EQUAL(set == other, false);
+  BOOST_REQUIRE(set != other);
 
   BOOST_REQUIRE_THROW(other.compare(set), adt::RuntimeException);
-  BOOST_REQUIRE_EQUAL(other == set, false);
-
+  BOOST_REQUIRE(other != set);
 }
 
 BOOST_AUTO_TEST_CASE(set_compare_different_members_names)
@@ -206,14 +209,16 @@ BOOST_AUTO_TEST_CASE(set_compare_different_members_names)
   datatype::Set other;
   other.insert(std::make_shared<datatype::Integer>("integer"));
   other.insert(std::make_shared<datatype::String>("string", 16));
-  other.insert(std::make_shared<datatype::Float>("float2"));
+  other.insert(std::make_shared<datatype::Float>("float-with-other-name"));
   other.setInteger("integer", 123);
   other.setString("string", "hello");
-  other.setFloat("float2", 0.123);
+  other.setFloat("float-with-other-name", 0.123);
 
   BOOST_REQUIRE_THROW(set.compare(other), adt::RuntimeException);
   BOOST_REQUIRE_THROW(other.compare(set), adt::RuntimeException);
-  BOOST_REQUIRE_EQUAL(set == other, false);
-  BOOST_REQUIRE_EQUAL(other == set, false);
+  BOOST_REQUIRE(set != other);
+  BOOST_REQUIRE(other != set);
 }
+
+
 

@@ -1,5 +1,7 @@
 project(coffee)
 
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
+
 if (CMAKE_VERSION VERSION_LESS "3.1")
    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 else()
@@ -57,8 +59,8 @@ add_subdirectory(source/xml)
 add_subdirectory(source/logger)
 add_subdirectory(source/balance)
 add_subdirectory(source/app)
-add_subdirectory(source/dbms)
 add_subdirectory(source/time)
+add_subdirectory(source/dbms)
 add_subdirectory(source/dbms.sqlite)
 add_subdirectory(source/persistence)
 

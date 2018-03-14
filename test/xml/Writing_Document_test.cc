@@ -25,7 +25,6 @@
 #include <boost/filesystem.hpp>
 
 #include <coffee/adt/DataBlock.hpp>
-#include <coffee/adt/Second.hpp>
 
 #include <coffee/xml/Document.hpp>
 #include <coffee/xml/Node.hpp>
@@ -74,13 +73,13 @@ BOOST_AUTO_TEST_CASE(create_attribute)
 
    root->createAttribute("attr_char", "This is the char");
    root->createAttribute("attr_int", 1024);
-   root->createAttribute("attr_second", adt::Second(59));
+   root->createAttribute("attr_second", std::chrono::seconds(59));
 
    BOOST_REQUIRE_EQUAL(root->attributes_size(), 3);
 
    BOOST_REQUIRE_EQUAL(root->lookupAttribute("attr_char")->getValue(), "This is the char");
    BOOST_REQUIRE_EQUAL(root->lookupAttribute("attr_int")->getValue(), "1024");
-   BOOST_REQUIRE_EQUAL(root->lookupAttribute("attr_second")->getValue(), "59");
+   BOOST_REQUIRE_EQUAL(root->lookupAttribute("attr_second")->getValue(), "59 sec");
 }
 
 BOOST_AUTO_TEST_CASE(change_attribute)

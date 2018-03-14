@@ -55,7 +55,6 @@ BOOST_AUTO_TEST_CASE (persistence_repository_repeat)
    BOOST_REQUIRE_EQUAL (ii.get(), find.get());
 
    BOOST_REQUIRE_THROW(repository.createStorage("the 0", 16), adt::RuntimeException);
-
 }
 
 BOOST_AUTO_TEST_CASE (persistence_repository_as)
@@ -76,4 +75,11 @@ BOOST_AUTO_TEST_CASE (persistence_repository_as)
    auto info = repository.asXML(root);
 
    BOOST_REQUIRE_EQUAL (info->children_size(), 2);
+}
+
+BOOST_AUTO_TEST_CASE (persistence_repository_notfound)
+{
+   persistence::Repository repository ("persistence_repository_notfound");
+
+   BOOST_REQUIRE_THROW(repository.findStorage("does-not-exist"), adt::RuntimeException);
 }

@@ -128,6 +128,10 @@ dbms::ResultCode test_persistence::MockCustomerRecorder::apply(dbms::GuardStatem
 {
    CustomerObjectWrapper customer(getObject());
 
+   if(customer.getId() == IdToThrowDbException) {
+      return dbms::ResultCode(statement->getDatabase(),MyDatabase::Lock);
+   }
+
    coffee_datatype_downcast(dbms::datatype::Integer, statement.getInputData(0))->setValue(customer.getId());
    coffee_datatype_downcast(dbms::datatype::String, statement.getInputData(1))->setValue(customer.getName());
 
@@ -140,6 +144,11 @@ dbms::ResultCode test_persistence::MockCustomerEraser::apply(dbms::GuardStatemen
    auto primaryKey = getPrimaryKey();
 
    const int id = primaryKey->getInteger("id");
+
+   if(id == IdToThrowDbException) {
+      return dbms::ResultCode(statement->getDatabase(),MyDatabase::LostConnection);
+   }
+
    coffee_datatype_downcast(dbms::datatype::Integer, statement.getInputData(0))->setValue(id);
 
    return statement.execute();

@@ -293,6 +293,23 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_write, Fixture)
    BOOST_REQUIRE_EQUAL(storage->getHitCounter(), 0);
 }
 
+BOOST_FIXTURE_TEST_CASE(persistence_storage_write_fail, Fixture)
+{
+   BOOST_REQUIRE_EQUAL(mockDatabase->container_size(), test_persistence::MyDatabase::PreloadRegisterCounter);
+
+   if (true) {
+      primaryKeyForFind->setInteger("id", test_persistence::IdToThrowDbException);
+      auto object = customerClass->createObject(primaryKeyForFind);
+
+      object->setString("name", "5555 name");
+      test_persistence::MockCustomerRecorder recorder(writerStatement, object);
+
+      BOOST_REQUIRE_THROW(storage->save(connection, recorder), dbms::DatabaseException);
+   }
+
+   BOOST_REQUIRE_EQUAL(mockDatabase->container_size(), test_persistence::MyDatabase::PreloadRegisterCounter);
+}
+
 BOOST_FIXTURE_TEST_CASE(persistence_storage_erase_preloaded, Fixture)
 {
    test_persistence::MockCustomerLoader myLoader(readerStatement, primaryKeyForFind, customerClass);
@@ -354,6 +371,15 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_erase_noloaded, Fixture)
 
    BOOST_REQUIRE_EQUAL(storage->getFaultCounter(), 2);
    BOOST_REQUIRE_EQUAL(storage->getHitCounter(), 0);
+}
+
+BOOST_FIXTURE_TEST_CASE(persistence_storage_delete_fail, Fixture)
+{
+   BOOST_REQUIRE_EQUAL(mockDatabase->container_size(), test_persistence::MyDatabase::PreloadRegisterCounter);
+
+   primaryKeyForFind->setInteger("id", test_persistence::IdToThrowDbException);
+   test_persistence::MockCustomerEraser eraser(eraserStatement, primaryKeyForFind);
+   BOOST_REQUIRE_THROW(storage->erase(connection, eraser), dbms::DatabaseException);
 }
 
 BOOST_FIXTURE_TEST_CASE(persistence_storage_save_commit_pending, Fixture)
@@ -462,3 +488,18 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_showclass, Fixture)
    BOOST_REQUIRE_EQUAL(xmlNode->getName(), "persistence.Class");
    BOOST_REQUIRE_EQUAL(xmlNode->lookupAttribute("Name")->getValue(), "customer");
 }
+
+BOOST_FIXTURE_TEST_CASE(persistence_storage_asstring, Fixture)
+{
+   test_persistence::MockCustomerLoader myLoader(readerStatement, primaryKeyForFind, customerClass);
+
+   primaryKeyForFind->setInteger("id", 6);
+   test_persistence::CustomerObjectWrapper customer(storage->load(connection, myLoader));
+
+   std::string text = storage->asString();
+
+   BOOST_REQUIRE(text.find("pattern.lru.Cache { MaxSize=128 | Size=1 }") != std::string::npos);
+}
+
+
+

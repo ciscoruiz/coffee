@@ -155,7 +155,7 @@ public:
     * \return Summarize status the instance over a StreamString.
     */
    StreamString asString() const noexcept {
-      StreamString result ("coffee.adt.pattern.lru.Cache { MaxSize=");
+      StreamString result ("pattern.lru.Cache { MaxSize=");
       return result << m_maxSize << " | Size=" << m_quickAccess.size () << " }";
    }
 

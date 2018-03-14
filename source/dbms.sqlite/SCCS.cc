@@ -29,15 +29,15 @@
 #include <coffee/xml/SCCS.hpp>
 #include <coffee/logger/SCCS.hpp>
 #include <coffee/app/SCCS.hpp>
-#include <coffee/time/SCCS.hpp>
-
 #include <coffee/dbms/SCCS.hpp>
 
-coffee_sccs_define_tag (dbms,release-18.03.06);
+#include <coffee/dbms.sqlite/SCCS.hpp>
+
+coffee_sccs_define_tag (dbms_sqlite,release-18.03.06);
 
 using namespace coffee;
 
-void dbms::SCCS::activate()
+void dbms::sqlite::SCCS::activate()
    noexcept
 {
    config::SCCS::activate ();
@@ -45,8 +45,8 @@ void dbms::SCCS::activate()
    xml::SCCS::activate ();
    logger::SCCS::activate();
    app::SCCS::activate();
-   time::SCCS::activate();
+   dbms::SCCS::activate();
 
-   config::SCCSRepository::getInstance().registerModule(coffee_sccs_use_tag(dbms));
+   config::SCCSRepository::getInstance().registerModule(coffee_sccs_use_tag(dbms_sqlite));
 }
 

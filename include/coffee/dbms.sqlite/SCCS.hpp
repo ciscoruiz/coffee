@@ -22,31 +22,20 @@
 //
 
 
-#include <coffee/config/SCCSRepository.hpp>
+#ifndef _coffee_dbms_sqlite_sccs_hpp_
+#define _coffee_dbms_sqlite_sccs_hpp_
 
-#include <coffee/config/SCCS.hpp>
-#include <coffee/adt/SCCS.hpp>
-#include <coffee/xml/SCCS.hpp>
-#include <coffee/logger/SCCS.hpp>
-#include <coffee/app/SCCS.hpp>
-#include <coffee/time/SCCS.hpp>
+namespace coffee {
+namespace dbms {
+namespace sqlite {
 
-#include <coffee/dbms/SCCS.hpp>
+class SCCS {
+public:
+   static void activate () noexcept;
+};
 
-coffee_sccs_define_tag (dbms,release-18.03.06);
-
-using namespace coffee;
-
-void dbms::SCCS::activate()
-   noexcept
-{
-   config::SCCS::activate ();
-   adt::SCCS::activate ();
-   xml::SCCS::activate ();
-   logger::SCCS::activate();
-   app::SCCS::activate();
-   time::SCCS::activate();
-
-   config::SCCSRepository::getInstance().registerModule(coffee_sccs_use_tag(dbms));
+}
+}
 }
 
+#endif /* _coffee_dbms_sqlite_sccs_hpp_ */

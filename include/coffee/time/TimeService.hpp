@@ -43,22 +43,65 @@ namespace time {
 
 class TimeEvent;
 
+/**
+ * Service for managing asynchronous time events.
+ */
 class TimeService : public app::Service, public adt::pattern::observer::Subject {
 public:
+   /**
+    * Fast instantiation for this service.
+    */
    static std::shared_ptr<TimeService> instantiate(app::Application& application, const std::chrono::milliseconds& maxTime, const std::chrono::milliseconds& resolution)
       throw(adt::RuntimeException);
 
+   /**
+    * Destructor.
+    */
    ~TimeService();
 
+   /**
+    * \return This current time expressed in milliseconds.
+    */
    static std::chrono::milliseconds now() noexcept;
+
+   /**
+    * \return Converts milliseconds to seconds.
+    */
    static std::chrono::seconds toSeconds(const std::chrono::milliseconds& millisecond) noexcept;
 
+   /**
+    * Activate the time event. Once the duration of this event has been reach the associated
+    * observer will be notified.
+    * \include test/time/Timer_test.cc
+    */
    void activate(std::shared_ptr<TimeEvent> timeEvent) throw(adt::RuntimeException);
+
+   /*
+    * Cancel the time event.
+    * \return \b true if the time event can be cancelled or \b false otherwise.
+    */
    bool cancel(std::shared_ptr<TimeEvent> timeEvent) noexcept;
+
+   /**
+    * \return \b true if there is not any event activated or \b false otherwise.
+    */
    bool empty() const noexcept { return events.empty(); }
+
+   /**
+    * \return Numbers of activated time events.
+    */
    size_t size() const noexcept { return events.size(); }
+
+   /**
+    * Method to call to be sure TimeService is fully prepared to accept request of
+    * activation events.
+    * \include time/TimeFixture.hpp
+    */
    void waitUntilRunning() noexcept { producerIsWorking.wait(); }
 
+   /**
+    * \return Summarize information of the instance
+    */
    adt::StreamString asString() const noexcept;
 
 private:

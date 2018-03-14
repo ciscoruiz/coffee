@@ -31,12 +31,23 @@
 namespace coffee {
 namespace time {
 
+/**
+ * Time event for a non periodical time event.
+ */
 class Timer : public TimeEvent {
 public:
+   /**
+    * Fast instantiation for this class
+    */
    static std::shared_ptr<Timer> instantiate(const Id id, const std::chrono::milliseconds& _timeout) noexcept {
       return std::make_shared<Timer>(id, _timeout);
    }
 
+   /**
+    * Constructor.
+    * \param id Unique identification for this event.
+    * \param timeout Expected duration of this event once it has been activated.
+    */
    Timer(const Id id, const std::chrono::milliseconds& timeout) : TimeEvent(id, timeout) {;}
 
 private:

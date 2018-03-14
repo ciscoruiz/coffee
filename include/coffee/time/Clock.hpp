@@ -31,12 +31,27 @@
 namespace coffee {
 namespace time {
 
+/**
+ * Time event for a periodical time event.
+ *
+ * It will be re-scheduled every time the timeout has been reached.
+ *
+ * \include time/Clock_test.cc
+ */
 class Clock : public TimeEvent {
 public:
+   /**
+    * Fast instantiation for this class
+    */
    static std::shared_ptr<Clock> instantiate(const Id id, const std::chrono::milliseconds& timeout) noexcept {
       return std::make_shared<Clock>(id, timeout);
    }
 
+   /**
+    * Constructor.
+    * \param id Unique identification for this event.
+    * \param timeout It will be re-scheduled every time the timeout has been reached.
+    */
    Clock(const Id id, const std::chrono::milliseconds& timeout) : TimeEvent(id, timeout) {;}
 
 private:

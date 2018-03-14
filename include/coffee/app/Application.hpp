@@ -160,7 +160,7 @@ public:
    virtual void initialize() throw(adt::RuntimeException) {;}
 
    /**
-    * \return Summarize information of this instance in a StreamString.
+    * \return Summarize information of this instance in a coffee::adt::StreamString.
     */
    virtual adt::StreamString asString() const noexcept;
 

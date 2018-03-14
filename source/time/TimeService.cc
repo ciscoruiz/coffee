@@ -23,7 +23,7 @@
 
 #include <unistd.h>
 
-#include <coffee/adt/Microsecond.hpp>
+#include <coffee/adt/AsString.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
@@ -35,8 +35,11 @@
 
 using namespace coffee;
 
+using std::chrono::microseconds;
+using std::chrono::milliseconds;
+
 //static
-std::shared_ptr<time::TimeService> time::TimeService::instantiate(app::Application& application, const adt::Millisecond& maxTime, const adt::Millisecond& resolution)
+std::shared_ptr<time::TimeService> time::TimeService::instantiate(app::Application& application, const milliseconds& maxTime, const milliseconds& resolution)
    throw(adt::RuntimeException)
 {
    std::shared_ptr<TimeService> result(new TimeService(application, maxTime, resolution));
@@ -44,7 +47,7 @@ std::shared_ptr<time::TimeService> time::TimeService::instantiate(app::Applicati
    return result;
 }
 
-time::TimeService::TimeService(app::Application& application, const adt::Millisecond& _maxTime, const adt::Millisecond& _resolution) :
+time::TimeService::TimeService(app::Application& application, const milliseconds& _maxTime, const milliseconds& _resolution) :
    app::Service(application, "TimeService"),
    adt::pattern::observer::Subject("TimeService"),
    maxTime(_maxTime),
@@ -65,15 +68,12 @@ time::TimeService::~TimeService()
 }
 
 //static
-int time::TimeService::calculeMaxQuantum(const adt::Millisecond& maxTime, const adt::Millisecond& resolution)
+int time::TimeService::calculeMaxQuantum(const milliseconds& maxTime, const milliseconds& resolution)
    noexcept
 {
-   const adt::Millisecond::type_t _maxTime = maxTime.getValue();
-   const adt::Millisecond::type_t _resolution= resolution.getValue();
+   int result = maxTime.count() / resolution.count();
 
-   int result = _maxTime / _resolution;
-
-   while ((result * _resolution) < _maxTime)
+   while ((result * resolution) < maxTime)
       ++ result;
 
    return result;
@@ -121,9 +121,9 @@ void time::TimeService::activate(std::shared_ptr<TimeEvent> timeEvent)
       COFFEE_THROW_EXCEPTION("Time Event must be created by using TimeEvent::instantiate");
    }
 
-   const adt::Millisecond& timeout = timeEvent->getTimeout();
+   const milliseconds& timeout = timeEvent->getTimeout();
 
-   if (timeout == 0) {
+   if (timeout.count() == 0) {
       COFFEE_THROW_EXCEPTION("Event duration should be greater that 0");
    }
 
@@ -143,18 +143,20 @@ void time::TimeService::activate(std::shared_ptr<TimeEvent> timeEvent)
 void time::TimeService::store(std::shared_ptr<TimeEvent> timeEvent, std::unique_lock<std::mutex>& guard)
    noexcept
 {
-   const adt::Millisecond& timeout = timeEvent->getTimeout();
+   const milliseconds& timeout = timeEvent->getTimeout();
 
-   const int indexQuantum = (currentQuantum + timeout.getValue() / resolution.getValue()) % maxQuantum;
+   const int indexQuantum = (currentQuantum + timeout / resolution) % maxQuantum;
 
    Quantum* target = (indexQuantum == currentQuantum) ? &temporaryQuantum: &timeTable[indexQuantum];
    target->push_front(timeEvent);
    Location location(target, target->begin());
    events[timeEvent->getId()] = location;
-   timeEvent->initTime = adt::Millisecond::getTime();
-   timeEvent->endTime = 0;
 
-   LOG_DEBUG("Now=" << adt::Millisecond::getTime().asString() << " | CurrentQuantum=" << currentQuantum << " | IndexQuantum=" << indexQuantum << " | " << timeEvent->asString());
+   auto now = std::chrono::high_resolution_clock::now();
+   timeEvent->initTime = TimeService::now();
+   timeEvent->endTime = milliseconds::zero();
+
+   LOG_DEBUG("Now=" << timeEvent->initTime << " | CurrentQuantum=" << currentQuantum << " | IndexQuantum=" << indexQuantum << " | " << timeEvent->asString());
 }
 
 bool time::TimeService::cancel(std::shared_ptr<TimeEvent> timeEvent)
@@ -180,8 +182,8 @@ adt::StreamString time::TimeService::asString() const
 {
    adt::StreamString result("time.TimeService{");
    result << Service::asString();
-   result << " | MaxTime=" << maxTime.asString();
-   result << " | Resolution=" << resolution.asString();
+   result << " | MaxTime=" << maxTime;
+   result << " | Resolution=" << resolution;
    result << " | MaxQuantum=" << maxQuantum;
    result << " | #TimeEvents=" << events.size();
    return result << "}";
@@ -191,27 +193,29 @@ adt::StreamString time::TimeService::asString() const
 void time::TimeService::produce(time::TimeService& timeService)
    noexcept
 {
-   adt::Microsecond timeToWait(timeService.resolution);
-   adt::Millisecond now = adt::Millisecond::getTime();
+   microseconds timeToWait(timeService.resolution);
+
    int tickCounter = 0;
 
-   LOG_DEBUG("Now=" << now.asString() <<" | TimeToWait=" << timeService.resolution.asString());
+   LOG_DEBUG("TimeToWait=" << timeToWait);
 
    timeService.producerIsWorking.signal();
 
-   const adt::Microsecond usResolution (timeService.resolution);
+   const microseconds usResolution(timeService.resolution);
 
    while (timeService.isRunning()) {
-      const adt::Microsecond nextTime = adt::Microsecond::getTime() + usResolution;
-      usleep(timeToWait);
+      auto expectedTime = std::chrono::high_resolution_clock::now() + usResolution;
+
+      usleep(timeToWait.count());
+
       if (true) {
          std::unique_lock <std::mutex> guard(timeService.mutex);
          timeService.ticks.push_back(++ tickCounter);
          timeService.condition.notify_one();
       }
-      const adt::Microsecond deviation = nextTime - adt::Microsecond::getTime();
-      timeToWait = timeToWait + deviation;
-      LOG_LOCAL7("TimeToWait=" << timeToWait.asString());
+      auto deviation = expectedTime - std::chrono::high_resolution_clock::now();
+      timeToWait = timeToWait + std::chrono::duration_cast<microseconds>(deviation);
+      LOG_LOCAL7("TimeToWait=" << timeToWait);
    }
 }
 
@@ -220,9 +224,6 @@ void time::TimeService::consume(TimeService& timeService)
    noexcept
 {
    std::unique_lock<std::mutex> guard(timeService.mutex);
-   adt::Millisecond now = adt::Millisecond::getTime();
-
-   LOG_DEBUG("Now=" << now.asString());
 
    while (timeService.isRunning()) {
       timeService.condition.wait(guard);
@@ -234,8 +235,9 @@ void time::TimeService::consume(TimeService& timeService)
 
       Quantum& timedout = timeService.timeTable[timeService.currentQuantum];
 
-      now = adt::Millisecond::getTime();
-      LOG_LOCAL7("Now=" << now.asString() << " | CurrentQuantum=" << timeService.currentQuantum);
+      const milliseconds now = TimeService::now();
+
+      LOG_LOCAL7("Now=" << now << " | CurrentQuantum=" << timeService.currentQuantum);
 
       for (quantum_iterator ii = timedout.begin(), maxii = timedout.end(); ii != maxii; ++ ii) {
          std::shared_ptr<TimeEvent> timeEvent = *ii;
@@ -262,3 +264,15 @@ void time::TimeService::consume(TimeService& timeService)
    }
 }
 
+milliseconds time::TimeService::now()
+   noexcept
+{
+   // See https://stackoverflow.com/questions/9089842/c-chrono-system-time-in-milliseconds-time-operations
+   return std::chrono::duration_cast<milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
+}
+
+std::chrono::seconds time::TimeService::toSeconds(const std::chrono::milliseconds& millisecond)
+   noexcept
+{
+   return std::chrono::duration_cast<std::chrono::seconds>(millisecond);
+}

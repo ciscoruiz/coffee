@@ -25,13 +25,15 @@
 
 using namespace coffee;
 
-time::TimeEvent::TimeEvent(const Id id, const adt::Millisecond& _timeout) :
+using std::chrono::milliseconds;
+
+time::TimeEvent::TimeEvent(const Id id, const milliseconds& _timeout) :
    adt::pattern::observer::Event(id), timeout(_timeout),
    initTime(0),
    endTime(0)
 {;}
 
-adt::Millisecond time::TimeEvent::getDuration() const
+milliseconds time::TimeEvent::getDuration() const
    throw(adt::RuntimeException)
 {
    if (!isStarted() || !isFinished()) {
@@ -47,10 +49,10 @@ adt::StreamString time::TimeEvent::asString() const
 {
    adt::StreamString result("time.TimeEvent {");
    result << Event::asString();
-   result << " | Timeout=" << timeout.asString();
+   result << " | Timeout=" << timeout;
 
    if (isStarted() && isFinished()) {
-      result << " | Duration=" << getDuration().asString();
+      result << " | Duration=" << getDuration();
    }
 
    return result << "}";

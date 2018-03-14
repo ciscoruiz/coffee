@@ -91,7 +91,7 @@ public:
     * \return Summarize information of the subject
     */
    virtual adt::StreamString asString() const noexcept {
-      adt::StreamString result("pattern::observer::Event {");
+      adt::StreamString result("pattern.observer.Event {");
       result << "Id=" << m_id;
       return result << "}";
    }

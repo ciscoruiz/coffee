@@ -24,8 +24,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include <iostream>
+#include <chrono>
 
-#include <coffee/adt/Microsecond.hpp>
+#include <coffee/adt/AsString.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/Formatter.hpp>
@@ -140,7 +141,7 @@ BOOST_FIXTURE_TEST_CASE (backtraking_performance_measure_test, BackTraceFixture)
 
    Logger::setLevel (Level::Error);
 
-   adt::Microsecond init = adt::Microsecond::getTime();
+   auto startTime = std::chrono::high_resolution_clock::now();
 
    Logger::initialize(writer);
 
@@ -162,7 +163,8 @@ BOOST_FIXTURE_TEST_CASE (backtraking_performance_measure_test, BackTraceFixture)
          LOG_ERROR ("step " << ii / 100);
    }
 
-   adt::Microsecond end = adt::Microsecond::getTime();
+   auto endTime = std::chrono::high_resolution_clock::now();
 
-   std::cout << "Delay(BacktraceWriter): " << end - init << " ms" << std::endl << std::endl;
+   std::chrono::microseconds elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+   std::cout << "Delay(BacktraceWriter): " << adt::AsString::apply(elapsedTime) << std::endl << std::endl;
 }

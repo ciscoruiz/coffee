@@ -25,6 +25,7 @@
 #define _coffee_adt_StreamString_H
 
 #include <string>
+#include <chrono>
 
 #include <stdio.h>
 
@@ -136,64 +137,97 @@ public:
    StreamString& operator = (const std::string& vv) noexcept { std::string::operator= (vv); return *this; }
 
    /**
+    * Initialize this instance with the value of \b vv converted to std::string.
+    */
+   StreamString& operator = (const std::chrono::microseconds& vv) noexcept {std::string::clear (); return operator<<(vv);  }
+
+   /**
+    * Initialize this instance with the value of \b vv converted to std::string.
+    */
+   StreamString& operator = (const std::chrono::milliseconds& vv) noexcept {std::string::clear (); return operator<<(vv);  }
+
+   /**
+    * Initialize this instance with the value of \b vv converted to std::string.
+    */
+   StreamString& operator = (const std::chrono::seconds& vv) noexcept {std::string::clear (); return operator<<(vv);  }
+
+   /**
     * Append the value of \b vv converted to std::string into this instance.
-    * \return This instance to be able to concatenate operations of apending.
+    * \return This instance to be able to concatenate operations of appending.
     */
    StreamString& operator << (const char vv) noexcept;
 
    /**
     * Append the value of \b vv converted to std::string into this instance.
-    * \return This instance to be able to concatenate operations of apending.
+    * \return This instance to be able to concatenate operations of appending.
     */
    StreamString& operator << (const char* vv) noexcept;
 
    /**
     * Append the value of \b vv converted to std::string into this instance.
-    * \return This instance to be able to concatenate operations of apending.
+    * \return This instance to be able to concatenate operations of appending.
     */
    StreamString& operator << (const int vv) noexcept;
 
    /**
     * Append the value of \b vv converted to std::string into this instance.
-    * \return This instance to be able to concatenate operations of apending.
+    * \return This instance to be able to concatenate operations of appending.
     */
    StreamString& operator << (const unsigned int vv) noexcept;
 
    /**
     * Append the value of \b vv converted to std::string into this instance.
-    * \return This instance to be able to concatenate operations of apending.
+    * \return This instance to be able to concatenate operations of appending.
     */
    StreamString& operator << (const bool vv) noexcept;
 
    /**
     * Append the value of \b vv converted to std::string into this instance.
-    * \return This instance to be able to concatenate operations of apending.
+    * \return This instance to be able to concatenate operations of appending.
     */
    StreamString& operator << (const Integer64 vv) noexcept;
 
    /**
     * Append the value of \b vv converted to std::string into this instance.
-    * \return This instance to be able to concatenate operations of apending.
+    * \return This instance to be able to concatenate operations of appending.
     */
    StreamString& operator << (const Unsigned64 vv) noexcept;
 
    /**
     * Append the value of \b vv converted to std::string into this instance.
-    * \return This instance to be able to concatenate operations of apending.
+    * \return This instance to be able to concatenate operations of appending.
     */
    StreamString& operator << (const float vv) noexcept;
 
    /**
     * Append the value of \b vv converted to std::string into this instance.
-    * \return This instance to be able to concatenate operations of apending.
+    * \return This instance to be able to concatenate operations of appending.
     */
    StreamString& operator << (const double vv) noexcept;
 
    /**
     * Append the value of \b vv converted to std::string into this instance.
-    * \return This instance to be able to concatenate operations of apending.
+    * \return This instance to be able to concatenate operations of appending.
     */
    StreamString& operator << (const std::string& vv) noexcept { std::string::append (vv); return *this; }
+
+   /**
+    * Append the value of \b vv converted to std::string into this instance.
+    * \return This instance to be able to concatenate operations of appending.
+    */
+   StreamString& operator << (const std::chrono::microseconds& vv) noexcept;
+
+   /**
+    * Append the value of \b vv converted to std::string into this instance.
+    * \return This instance to be able to concatenate operations of appending.
+    */
+   StreamString& operator << (const std::chrono::milliseconds& vv) noexcept;
+
+   /**
+    * Append the value of \b vv converted to std::string into this instance.
+    * \return This instance to be able to concatenate operations of appending.
+    */
+   StreamString& operator << (const std::chrono::seconds& vv) noexcept;
 
 private:
    Flag::_v a_flags;

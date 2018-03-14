@@ -27,28 +27,28 @@
 
 #include <coffee/config/defines.hpp>
 
-#include <coffee/adt/Second.hpp>
-
 #include <coffee/dbms/datatype/Date.hpp>
 
 using namespace std;
 using namespace coffee;
 using namespace coffee::dbms;
 
+using std::chrono::seconds;
+
 datatype::Date::Date (const char* name, const Constraint::_v constraint) :
-   datatype::Abstract (name, Datatype::Date, MaxDateSize, constraint)
+   datatype::Abstract (name, Datatype::Date, MaxDateSize, constraint),
+   m_value(seconds::zero())
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
-   m_value = 0;
 }
 
 datatype::Date::Date (const char* name, const datatype::Abstract::Datatype::_v type,  const Constraint::_v constraint) :
-   datatype::Abstract (name, type, MaxDateSize, constraint)
+   datatype::Abstract (name, type, MaxDateSize, constraint),
+   m_value(seconds::zero())
 {
    datatype::Abstract::setBuffer (m_buffer);
    m_buffer [0] = 0;
-   m_value = 0;
 }
 
 datatype::Date::Date (const Date& other) :
@@ -64,7 +64,7 @@ struct tm* datatype::Date::getLocalTime () const
 {
    this->exceptionWhenIsNull();
 
-   adt::Second::type_t tt = m_value.getValue ();
+   time_t tt = m_value.count();
    tm* result = localtime ((time_t*) &tt);
 
    if (result == NULL) {
@@ -91,17 +91,18 @@ void datatype::Date::setValue (const char* str, const char* format)
    }
 
    aux.tm_isdst = 0;
-   time_t newValue = mktime (&aux);
+   std::time_t newValue = std::mktime (&aux);
 
    if (newValue == -1) {
-      COFFEE_THROW_EXCEPTION("'" << str << "' can not be treated as adt::Second '" << format << "'");
+      COFFEE_THROW_EXCEPTION("'" << str << "' can not be treated as std::chrono::seconds '" << format << "'");
    }
 
+   // http://www.cplusplus.com/reference/chrono/system_clock/from_time_t/
    this->isNotNull();
-   m_value = newValue;
+   m_value = chrono::duration_cast<seconds>(chrono::system_clock::from_time_t(newValue).time_since_epoch());
 }
 
-void datatype::Date::setValue (const adt::Second& value)
+void datatype::Date::setValue (const std::chrono::seconds& value)
    throw (adt::RuntimeException)
 {
    this->isNotNull();
@@ -117,7 +118,7 @@ adt::StreamString datatype::Date::asString () const
    result << dbms::datatype::Abstract::asString ();
 
    if (this->hasValue () == true) {
-      result << " | Value=" << "'" << m_value.asString () << "'";
+      result << " | Value=" << "'" << m_value << "'";
    }
 
    return result += " }";
@@ -128,6 +129,6 @@ int datatype::Date::do_compare (const datatype::Abstract& other) const
 {
    const Date& _other = coffee_datatype_downcast(Date, other);
 
-   return this->m_value - _other.m_value;
+   return this->m_value.count() - _other.m_value.count();
 }
 

@@ -127,3 +127,46 @@ std::string adt::AsString::apply (const DataBlock& dataBlock, const int characte
    result += "  ";
    return result += characters;
 }
+
+std::string adt::AsString::apply(const std::chrono::seconds& value)
+   noexcept
+{
+   std::string result(AsString::apply(value.count()));
+   return result += " sec";
+}
+
+std::string adt::AsString::apply(const std::chrono::seconds& value, const char* format)
+   noexcept
+{
+   char aux[64];
+
+   time_t time = value.count();
+
+   struct tm* tt = localtime (&time);
+
+   if (tt == nullptr) {
+      COFFEE_THROW_EXCEPTION(value << " is a bad time");
+   }
+
+   if (strftime (aux, sizeof (aux), format, tt) == 0) {
+      COFFEE_THROW_EXCEPTION(value << "is a bad date");
+   }
+
+   return string(aux);
+}
+
+std::string adt::AsString::apply(const std::chrono::milliseconds& value)
+   noexcept
+{
+   std::string result(AsString::apply(value.count()));
+   return result += " ms";
+}
+
+std::string adt::AsString::apply(const std::chrono::microseconds& value)
+   noexcept
+{
+   std::string result(AsString::apply(value.count()));
+   return result += " us";
+}
+
+

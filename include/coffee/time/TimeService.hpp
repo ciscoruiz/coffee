@@ -30,6 +30,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <thread>
+#include <chrono>
 
 #include <coffee/app/Service.hpp>
 #include <coffee/adt/Semaphore.hpp>
@@ -44,10 +45,13 @@ class TimeEvent;
 
 class TimeService : public app::Service, public adt::pattern::observer::Subject {
 public:
-   static std::shared_ptr<TimeService> instantiate(app::Application& application, const adt::Millisecond& maxTime, const adt::Millisecond& resolution)
+   static std::shared_ptr<TimeService> instantiate(app::Application& application, const std::chrono::milliseconds& maxTime, const std::chrono::milliseconds& resolution)
       throw(adt::RuntimeException);
 
    ~TimeService();
+
+   static std::chrono::milliseconds now() noexcept;
+   static std::chrono::seconds toSeconds(const std::chrono::milliseconds& millisecond) noexcept;
 
    void activate(std::shared_ptr<TimeEvent> timeEvent) throw(adt::RuntimeException);
    bool cancel(std::shared_ptr<TimeEvent> timeEvent) noexcept;
@@ -64,8 +68,8 @@ private:
    typedef std::pair<Quantum*, quantum_iterator> Location;
    typedef std::unordered_map<TimeEvent::Id, Location> Events;
 
-   const adt::Millisecond maxTime;
-   const adt::Millisecond resolution;
+   const std::chrono::milliseconds maxTime;
+   const std::chrono::milliseconds resolution;
    const int maxQuantum;
    int currentQuantum;
    adt::Semaphore producerIsWorking;
@@ -79,8 +83,8 @@ private:
    std::thread consumer;
    std::thread producer;
 
-   TimeService(app::Application& application, const adt::Millisecond& maxTime, const adt::Millisecond& resolution);
-   static int calculeMaxQuantum(const adt::Millisecond& maxTime, const adt::Millisecond& resolution) noexcept;
+   TimeService(app::Application& application, const std::chrono::milliseconds& maxTime, const std::chrono::milliseconds& resolution);
+   static int calculeMaxQuantum(const std::chrono::milliseconds& maxTime, const std::chrono::milliseconds& resolution) noexcept;
    static void consume(TimeService& timeService) noexcept;
    static void produce(TimeService& timeService) noexcept;
 

@@ -25,9 +25,10 @@
 #define _coffee_time_TimeEvent_hpp_
 
 #include <memory>
+#include <chrono>
 
+#include <coffee/adt/RuntimeException.hpp>
 #include <coffee/adt/pattern/observer/Event.hpp>
-#include <coffee/adt/Millisecond.hpp>
 
 namespace coffee {
 namespace time {
@@ -38,12 +39,12 @@ class TimeEvent : public adt::pattern::observer::Event {
 public:
    virtual ~TimeEvent() {;}
 
-   const adt::Millisecond& getTimeout() const noexcept { return timeout; }
+   const std::chrono::milliseconds& getTimeout() const noexcept { return timeout; }
 
-   bool isStarted() const throw () { return initTime != 0; }
-   bool isFinished() const throw () { return endTime != 0; }
+   bool isStarted() const throw () { return initTime.count() != 0 ; }
+   bool isFinished() const throw () { return endTime.count() != 0; }
 
-   adt::Millisecond getDuration() const throw(adt::RuntimeException);
+   std::chrono::milliseconds getDuration() const throw(adt::RuntimeException);
 
    virtual bool isPeriodical() const noexcept = 0;
 
@@ -53,12 +54,12 @@ public:
    virtual adt::StreamString asString() const noexcept;
 
 protected:
-   TimeEvent(const Id id, const adt::Millisecond& _timeout);
+   TimeEvent(const Id id, const std::chrono::milliseconds& timeout);
 
 private:
-   const adt::Millisecond timeout;
-   adt::Millisecond initTime;
-   adt::Millisecond endTime;
+   const std::chrono::milliseconds timeout;
+   std::chrono::milliseconds initTime;
+   std::chrono::milliseconds endTime;
 
    friend class TimeService;
 };

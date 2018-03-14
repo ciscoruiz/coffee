@@ -24,6 +24,8 @@
 #ifndef _coffee_dbms_sqlite_SqliteOutputBinder_hpp_
 #define _coffee_dbms_sqlite_SqliteOutputBinder_hpp_
 
+#include <chrono>
+
 #include <coffee/dbms/binder/Output.hpp>
 
 namespace coffee {
@@ -39,6 +41,8 @@ private:
    void do_prepare(Statement& statement, const int pos) throw(adt::RuntimeException, DatabaseException) {;}
    void do_decode(Statement& statement, const int pos) throw(adt::RuntimeException);
    void do_write(const std::shared_ptr<datatype::LongBlock>&) throw(adt::RuntimeException, dbms::DatabaseException) {;}
+
+   static std::chrono::seconds getSeconds(const std::string& value) throw (adt::RuntimeException);
 };
 
 } /* namespace sqlite */

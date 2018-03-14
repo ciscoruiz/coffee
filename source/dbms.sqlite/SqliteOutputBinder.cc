@@ -23,8 +23,6 @@
 
 
 #include <coffee/adt/DataBlock.hpp>
-#include <coffee/adt/Millisecond.hpp>
-#include <coffee/adt/Second.hpp>
 
 #include <coffee/dbms.sqlite/SqliteOutputBinder.hpp>
 #include <coffee/dbms.sqlite/SqliteStatement.hpp>
@@ -79,16 +77,30 @@ void sqlite::SqliteOutputBinder::do_decode(Statement& statement, const int pos)
    case dbms::datatype::Abstract::Datatype::Date:
       {
          const std::string date = (const char*) sqlite3_column_text(impl, pos);
-         coffee_datatype_downcast(datatype::Date, data)->setValue(adt::Second::fromString(date, "%Y-%m-%d %H:%M:%S"));
+         coffee_datatype_downcast(datatype::Date, data)->setValue(getSeconds(date));
       }
       break;
    case dbms::datatype::Abstract::Datatype::TimeStamp:
       {
-         adt::Second seconds(sqlite3_column_int64(impl, pos));
-         coffee_datatype_downcast(datatype::TimeStamp, data)->setValue(seconds);
+         std::chrono::seconds value(sqlite3_column_int64(impl, pos));
+         coffee_datatype_downcast(datatype::TimeStamp, data)->setValue(value);
       }
       break;
    }
 }
 
+//static
+std::chrono::seconds sqlite::SqliteOutputBinder::getSeconds(const std::string& value)
+   throw (adt::RuntimeException)
+{
+   const char* format = "%Y-%m-%d %H:%M:%S";
 
+   tm tt;
+
+   coffee_memset(&tt, 0, sizeof(tt));
+   if (strptime(value.c_str(), format, &tt) == NULL) {
+    COFFEE_THROW_EXCEPTION(value << " is not valid expression for " << format);
+   }
+
+   return std::chrono::seconds(mktime(&tt));
+}

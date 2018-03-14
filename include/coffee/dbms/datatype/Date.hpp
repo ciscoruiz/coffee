@@ -25,11 +25,12 @@
 #define _coffee_dbms_datatype_Date_h
 
 #include <time.h>
+#include <chrono>
+#include <functional>
 
 #include <coffee/config/defines.hpp>
 
 #include <coffee/adt/RuntimeException.hpp>
-#include <coffee/adt/Second.hpp>
 
 #include <coffee/dbms/datatype/Abstract.hpp>
 
@@ -58,7 +59,7 @@ public:
 
    ~Date() { ; }
 
-   const adt::Second& getValue() const throw(adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
+   const std::chrono::seconds& getValue() const throw(adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
    struct tm* getLocalTime() const throw(adt::RuntimeException);
 
@@ -161,7 +162,7 @@ public:
 
    void setValue(const std::string& str, const char* format) throw(adt::RuntimeException) { setValue(str.c_str(), format); }
 
-   void setValue(const adt::Second& second) throw(adt::RuntimeException);
+   void setValue(const std::chrono::seconds& second) throw(adt::RuntimeException);
 
    std::shared_ptr<Abstract> clone() const noexcept { return std::make_shared<Date>(*this); }
 
@@ -172,17 +173,17 @@ public:
    Date& operator=(const Date&) = delete;
    bool operator==(const Date& other) const noexcept { return m_value == other.m_value; }
 
-   size_t hash() const noexcept { return std::hash<adt::Second::type_t>{}(m_value.getValue()); }
+   size_t hash() const noexcept { return m_value.count(); }
 
    coffee_declare_datatype_downcast(Date);
 
 protected:
-   adt::Second m_value;
-   char m_buffer  [MaxDateSize + 1];
+   std::chrono::seconds m_value;
+   char m_buffer[MaxDateSize + 1];
 
    explicit Date(const char* name, const Datatype::_v type, const Constraint::_v constraint);
 
-   void do_clear() noexcept { m_value = 0; }
+   void do_clear() noexcept { m_value = std::chrono::seconds::zero(); }
 
 private:
    int do_compare(const Abstract& other) const throw(adt::RuntimeException);

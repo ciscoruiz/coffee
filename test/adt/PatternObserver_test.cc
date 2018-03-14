@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <coffee/adt/Millisecond.hpp>
+#include <chrono>
 
 #include <coffee/adt/pattern/observer/Subject.hpp>
 #include <coffee/adt/pattern/observer/Event.hpp>
@@ -32,6 +32,8 @@
 using namespace std;
 using namespace coffee::adt;
 using namespace coffee::adt::pattern;
+
+using std::chrono::milliseconds;
 
 const int iiInitialValue = 55;
 const int uuInitialValue = 88;
@@ -143,37 +145,41 @@ public:
    TimedObserver() : observer::Observer("OptimalObserver") {}
 
    int getII() const noexcept { return m_ii.first; }
-   const Millisecond& getIITime() { return m_ii.second; }
+   const milliseconds& getIITime() { return m_ii.second; }
 
    unsigned int getUU() const noexcept { return m_uu.first; }
-   const Millisecond& getUUTime() { return m_uu.second; }
+   const milliseconds& getUUTime() { return m_uu.second; }
 
 private:
-   pair<int, Millisecond> m_ii;
-   pair<unsigned,Millisecond> m_uu;
+   pair<int, milliseconds> m_ii;
+   pair<unsigned,milliseconds> m_uu;
 
    void attached(const observer::Subject& subject) noexcept {
       const TheSubject& mySubject = static_cast<const TheSubject&>(subject);
 
       m_uu.first =  mySubject.getUU();
-      m_uu.second = Millisecond::getTime();
+      m_uu.second = getTime();
 
       m_ii.first = mySubject.getII();
-      m_ii.second = Millisecond::getTime();
+      m_ii.second = getTime();
    }
-
 
    void update(const observer::Subject& subject, const observer::Event& event) noexcept {
       const TheSubject& mySubject = static_cast<const TheSubject&>(subject);
 
       if (event.getId() == TheSubject::Events::ChangeUU) {
          m_uu.first =  mySubject.getUU();
-         m_uu.second = Millisecond::getTime();
+         m_uu.second = getTime();
       }
       if (event.getId() == TheSubject::Events::ChangeII) {
          m_ii.first = mySubject.getII();
-         m_ii.second = Millisecond::getTime();
+         m_ii.second = getTime();
       }
+   }
+
+   static milliseconds getTime() {
+      // See https://stackoverflow.com/questions/9089842/c-chrono-system-time-in-milliseconds-time-operations
+      return std::chrono::duration_cast<milliseconds>(std::chrono::system_clock::now().time_since_epoch());
    }
 };
 
@@ -280,7 +286,7 @@ BOOST_AUTO_TEST_CASE(optimal_subscription)
 
    BOOST_REQUIRE_EQUAL(observer->getII(), 100);
    BOOST_REQUIRE_EQUAL(observer->getUU(), 3000);
-   BOOST_REQUIRE_LT(observer->getIITime(), observer->getUUTime());
+   BOOST_REQUIRE_LT(observer->getIITime().count(), observer->getUUTime().count());
 }
 
 BOOST_AUTO_TEST_CASE(promicuous_observer)
@@ -320,3 +326,4 @@ BOOST_AUTO_TEST_CASE(subscription_asstring)
 
    BOOST_REQUIRE(subject.asString().find("#Observers=2") != std::string::npos);
 }
+

@@ -96,6 +96,11 @@ public:
    static std::string apply(const std::chrono::seconds& value) noexcept;
 
    /**
+    * \return A string with the seconds
+    */
+   static std::string apply(const std::chrono::seconds& value, const char* format) noexcept;
+
+   /**
     * \return A string with the milliseconds
     */
    static std::string apply(const std::chrono::milliseconds& value) noexcept;

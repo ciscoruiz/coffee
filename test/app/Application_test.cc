@@ -192,7 +192,8 @@ BOOST_AUTO_TEST_CASE( iterator_service )
 
 BOOST_AUTO_TEST_CASE( app_already_run )
 {
-   app::ApplicationServiceStarter application("test_app_already_run");
+   // Without "test" to cover the case in the coverage measurement
+   app::ApplicationServiceStarter application("app_already_run");
 
    auto thread = std::thread(parallelRun, std::ref(application));
 

@@ -32,6 +32,8 @@
 using namespace std;
 using namespace coffee;
 
+const int adt::AsString::DefaultCharactersByLine = 16;
+
 string adt::AsString::apply (const int number, const char* format)
    noexcept
 {

@@ -65,11 +65,15 @@ private:
 };
 
 class PrintAddUp : public AddUpIsANumber::Solution::Predicate {
+   std::stringstream& ss;
+
 public:
+   PrintAddUp(std::stringstream& _ss) : ss(_ss) {;}
+
    void apply(const AddUpIsANumber::Solution& solution, const int margin) const noexcept {
-      for(int ii = 0; ii < margin; ++ ii)
-         std::cout << "   ";
-      std::cout << solution.getValue() << std::endl;
+      if (margin > 0) {
+         ss << "{" << margin << "," << solution.getValue() << "}";
+      }
    }
 };
 
@@ -79,14 +83,16 @@ BOOST_AUTO_TEST_CASE(addup_is_ten)
 
    solver.setValueUnderStudy(10);
 
-   BOOST_REQUIRE_EQUAL(solver.apply(), true);
+   BOOST_REQUIRE(solver.apply());
 
-   PrintAddUp print;
+   std::stringstream ss;
+   PrintAddUp print(ss);
 
    solver.depthFirst(print);
 
    BOOST_REQUIRE_EQUAL(solver.successors_size(), 6);
    BOOST_REQUIRE_EQUAL(solver.countSolutions(), 9);
+   BOOST_REQUIRE_EQUAL(ss.str(), "{1,9}{2,1}{1,8}{2,2}{1,7}{2,3}{2,2}{3,1}{1,6}{2,4}{2,3}{3,1}{1,5}{2,4}{3,1}{2,3}{3,2}{1,4}{2,3}{3,2}{4,1}");
 
    AddUpIsANumber::shared_solution step;
 
@@ -110,12 +116,7 @@ BOOST_AUTO_TEST_CASE(addup_out_of_range)
 
    solver.setValueUnderStudy(10);
 
-   BOOST_REQUIRE_EQUAL(solver.apply(), true);
-
-   PrintAddUp print;
-
-   solver.depthFirst(print);
-
+   BOOST_REQUIRE(solver.apply());
    BOOST_REQUIRE_EQUAL(solver.successors_size(), 6);
    BOOST_REQUIRE_EQUAL(solver.countSolutions(), 9);
 
@@ -128,10 +129,10 @@ BOOST_AUTO_TEST_CASE(addup_without_solution)
 
    solver.setValueUnderStudy(2);
 
-   BOOST_REQUIRE_EQUAL(solver.apply(), false);
-   BOOST_REQUIRE_EQUAL(solver.hasSuccessor(), false);
+   BOOST_REQUIRE(!solver.apply());
+   BOOST_REQUIRE(!solver.hasSuccessor());
 
    solver.setValueUnderStudy(0);
 
-   BOOST_REQUIRE_EQUAL(solver.apply(), false);
+   BOOST_REQUIRE(!solver.apply());
 }

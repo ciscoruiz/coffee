@@ -121,17 +121,18 @@ bool NQueen::diagonalCollision(const ColumnAndRow& step, const ColumnAndRow& can
 }
 
 class PrintChessboard: public NQueen::Solution::Predicate {
+   std::stringstream& ss;
+
 public:
+   PrintChessboard(std::stringstream& _ss) : ss(_ss) {;}
+
    void apply(const NQueen::Solution& solution, const int depth) const noexcept {
       if(depth == 0)
          return;
 
-      for(int ii = 0; ii < depth; ++ ii)
-         std::cout << "   ";
-
       ColumnAndRow columnAndRow(solution.getValue());
 
-      std::cout << "X=" << columnAndRow.first << " | Y=" << columnAndRow.second << std::endl;
+      ss << "{" << depth <<  "," << columnAndRow.first << "," << columnAndRow.second << "}";
    }
 };
 
@@ -139,13 +140,16 @@ BOOST_AUTO_TEST_CASE(NQueen4x4)
 {
    NQueen solver(4);
 
-   BOOST_REQUIRE_EQUAL(solver.apply(), true);
+   BOOST_REQUIRE(solver.apply());
 
-   PrintChessboard print;
+   std::stringstream ss;
+   PrintChessboard print(ss);
 
    solver.depthFirst(print);
 
    BOOST_REQUIRE_EQUAL(solver.successors_size(), 2);
    BOOST_REQUIRE_EQUAL(solver.countSolutions(), 2);
+   BOOST_REQUIRE_EQUAL(ss.str(), "{1,1,0}{2,3,1}{3,0,2}{4,2,3}{1,2,0}{2,0,1}{3,3,2}{4,1,3}");
 }
+
 

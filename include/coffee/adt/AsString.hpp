@@ -43,6 +43,8 @@ class DataBlock;
  */
 class AsString {
 public:
+   static const int DefaultCharactersByLine;
+
    /**
       @return A string with the number.
    */
@@ -88,7 +90,7 @@ public:
    /**
     * \return A string with a brief description of the data block.
     */
-   static std::string apply (const DataBlock& dataBlock, const int characterByLine = 16) noexcept;
+   static std::string apply (const DataBlock& dataBlock, const int characterByLine = DefaultCharactersByLine) noexcept;
 
    /**
     * \return A string with the seconds

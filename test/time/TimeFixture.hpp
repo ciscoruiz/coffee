@@ -25,6 +25,7 @@
 
 #include <coffee/app/ApplicationServiceStarter.hpp>
 #include <coffee/time/TimeService.hpp>
+#include <coffee/logger/UnlimitedTraceWriter.hpp>
 
 struct TimeFixture {
    static const std::chrono::milliseconds time100ms;
@@ -36,11 +37,13 @@ struct TimeFixture {
    std::thread thr;
 
    TimeFixture(const std::chrono::milliseconds& maxTime, const std::chrono::milliseconds& resolution) :
-      app("TimeFixture"),
+      app("TestAppTimeFixture"),
       finalizeEmpty(true)
    {
+      const char* logFileName = "test/time/trace.log";
+      unlink (logFileName);
+      coffee::logger::Logger::initialize(std::make_shared<coffee::logger::UnlimitedTraceWriter>(logFileName));
       coffee::logger::Logger::setLevel(coffee::logger::Level::Debug);
-      coffee::logger::Logger::initialize(coffee::logger::TtyWriter::instantiate());
 
       timeService = coffee::time::TimeService::instantiate(app, maxTime, resolution);
       thr = std::thread(parallelRun, std::ref(app));

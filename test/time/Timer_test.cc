@@ -152,7 +152,7 @@ BOOST_FIXTURE_TEST_CASE(timer_below_resolution, ShortTimeFixture)
 
 BOOST_AUTO_TEST_CASE(timer_bad_resolution_maxtime)
 {
-   app::ApplicationServiceStarter app("timer_bad_resolution_maxtime");
+   app::ApplicationServiceStarter app("test_timer_bad_resolution_maxtime");
    std::shared_ptr<time::TimeService> timeService = time::TimeService::instantiate(app, milliseconds(1000), milliseconds(5555));
    BOOST_REQUIRE_THROW(app.start(), adt::RuntimeException);
 }

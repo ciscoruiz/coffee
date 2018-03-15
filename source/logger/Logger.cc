@@ -79,14 +79,7 @@ void logger::Logger::write(const Level::_v level, const adt::StreamString& input
    if (!wantsToProcess(level))
       return;
 
-   const char* path = coffee_strstr(file, "/coffee/");
-
-   if (path != nullptr) {
-      ++ path;
-   }
-   else {
-      path = file;
-   }
+   const char* path = removePathBeforeCoffee(file);
 
    const std::string string = m_formatter->apply(level, input, function, path, lineno);
 

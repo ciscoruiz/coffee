@@ -43,6 +43,7 @@
 #include <coffee/xml/Compiler.hpp>
 
 #include "TestResource.hpp"
+#include "ResourceListFixture.hpp"
 
 using namespace coffee;
 using namespace coffee::balance;
@@ -82,10 +83,8 @@ namespace IndexedTest {
    }
 }
 
-BOOST_AUTO_TEST_CASE( inx_dont_use_unavailables )
+BOOST_FIXTURE_TEST_CASE( inx_dont_use_unavailables, ResourceListFixture )
 {
-   auto resourceList = coffee::test::balance::setup(IndexedTest::MaxResources);
-
    balance::StrategyIndexed strategy(resourceList);
 
    std::shared_ptr<TestResource> myResource = TestResource::cast_copy(strategy.apply(0));
@@ -112,10 +111,8 @@ BOOST_AUTO_TEST_CASE( inx_dont_use_unavailables )
 }
 
 
-BOOST_AUTO_TEST_CASE( inx_balance_quality)
+BOOST_FIXTURE_TEST_CASE( inx_balance_quality, ResourceListFixture )
 {
-   auto resourceList = coffee::test::balance::setup(IndexedTest::MaxResources);
-
    balance::StrategyIndexed strategy(resourceList);
    IndexedTest::CounterContainer counterContainer;
 
@@ -137,10 +134,8 @@ BOOST_AUTO_TEST_CASE( inx_empty_list )
    BOOST_REQUIRE_THROW (strategy.apply(0), ResourceUnavailableException);
 }
 
-BOOST_AUTO_TEST_CASE( inx_balance_multithread )
+BOOST_FIXTURE_TEST_CASE( inx_balance_multithread,  ResourceListFixture)
 {
-   auto resourceList = coffee::test::balance::setup(IndexedTest::MaxResources);
-
    balance::StrategyIndexed strategy(resourceList);
    IndexedTest::CounterContainer counterContainer;
    std::mutex mutexContainer;

@@ -41,12 +41,14 @@
 #include <coffee/xml/Compiler.hpp>
 
 #include "TestResource.hpp"
+#include "ResourceListFixture.hpp"
 
 using namespace coffee;
 using namespace coffee::balance;
+
 using namespace coffee::test::balance;
 
-int MaxResources = 10;
+const int ResourceListFixture::MaxResources = 10;
 
 BOOST_AUTO_TEST_CASE( avoid_empties )
 {
@@ -55,10 +57,8 @@ BOOST_AUTO_TEST_CASE( avoid_empties )
    BOOST_REQUIRE_THROW (resourceList.add (emptyResource), adt::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE( count_availables )
+BOOST_FIXTURE_TEST_CASE( count_availables, ResourceListFixture)
 {
-   auto resourceList = coffee::test::balance::setup(MaxResources);
-
    GuardResourceList guard(resourceList);
 
    BOOST_REQUIRE_EQUAL(resourceList->size(guard), MaxResources);
@@ -106,10 +106,8 @@ BOOST_AUTO_TEST_CASE( initialize_without_available_resources )
    BOOST_REQUIRE_EQUAL(resourceList->countAvailableResources(guard), 0);
 }
 
-BOOST_AUTO_TEST_CASE (as_string)
+BOOST_FIXTURE_TEST_CASE (as_string, ResourceListFixture)
 {
-   auto resourceList = coffee::test::balance::setup(MaxResources);
-
    if (true) {
       GuardResourceList guard(resourceList);
       std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, 0));
@@ -119,19 +117,27 @@ BOOST_AUTO_TEST_CASE (as_string)
    BOOST_REQUIRE_EQUAL (resourceList->asString (), "balance.ResourceList { adt.NamedObject { Name: TestResources } | Available = 9 of 10 }");
 }
 
-BOOST_AUTO_TEST_CASE (as_xml)
+BOOST_FIXTURE_TEST_CASE (as_xml, ResourceListFixture)
 {
-   auto resourceList = coffee::test::balance::setup(MaxResources);
+   const int hotIndex = ResourceListFixture::MaxResources / 2;
 
    if (true) {
       GuardResourceList guard(resourceList);
-      std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, MaxResources / 2));
+      std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, hotIndex));
       myResource->setAvailable(false);
    }
 
    std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("root");
    resourceList->asXML(root);
    xml::Compiler compiler;
-   std::cout << compiler.apply(root) << std::endl;
+
+   std::string str = compiler.apply(root);
+
+   for (int ii = 0; ii < ResourceListFixture::MaxResources; ++ ii) {
+      adt::StreamString ss("<balance.Resource IsAvailable=\"");
+      ss << adt::AsString::apply(ii != hotIndex) << "\" Name=\"TestResource-";
+      ss << adt::AsString::apply(ii, "%02d") << "\"/>";
+      BOOST_REQUIRE(str.find(ss) != std::string::npos);
+   }
 }
 

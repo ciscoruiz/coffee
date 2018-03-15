@@ -43,6 +43,7 @@
 #include <coffee/xml/Compiler.hpp>
 
 #include "TestResource.hpp"
+#include "ResourceListFixture.hpp"
 
 using namespace coffee;
 using namespace coffee::balance;
@@ -94,20 +95,17 @@ BOOST_AUTO_TEST_CASE(byrange_recursive)
    BOOST_REQUIRE_THROW (strategy->addRange (0, 10, strategy), adt::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(byrange_bad_limits)
+BOOST_FIXTURE_TEST_CASE(byrange_bad_limits, ResourceListFixture)
 {
    balance::StrategyByRange mainStrategy;
-
-   auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources);
    std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
    BOOST_REQUIRE_THROW (mainStrategy.addRange (10, 0, strategy), adt::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(byrange_overlapping)
+BOOST_FIXTURE_TEST_CASE(byrange_overlapping, ResourceListFixture)
 {
    balance::StrategyByRange mainStrategy;
 
-   auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources);
    std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
 
    mainStrategy.addRange (10, 20, strategy);
@@ -123,19 +121,19 @@ BOOST_AUTO_TEST_CASE(byrange_sharing)
    balance::StrategyByRange mainStrategy;
 
    {
-      auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources);
+      auto resourceList = ResourceListFixture::setup(ByRangeTest::MaxResources, 0);
       std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
       mainStrategy.addRange(100, 200, strategy);
    }
 
    {
-      auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources, 100);
+      auto resourceList = ResourceListFixture::setup(ByRangeTest::MaxResources, 100);
       std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
       mainStrategy.addRange(205, 350, strategy);
    }
 
    {
-      auto resourceList = coffee::test::balance::setup(ByRangeTest::MaxResources, 1000);
+      auto resourceList = ResourceListFixture::setup(ByRangeTest::MaxResources, 1000);
       std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
       mainStrategy.addRange(351, 450, strategy);
    }

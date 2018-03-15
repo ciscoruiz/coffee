@@ -123,7 +123,6 @@ BOOST_AUTO_TEST_CASE(dtd_novalidate_file)
    BOOST_REQUIRE_THROW(doc.parse(xmlFile, dtd), adt::RuntimeException);
 }
 
-
 BOOST_AUTO_TEST_CASE(dtd_novalidate_memory)
 {
    boost::filesystem::path coffeePath(boost::filesystem::current_path());

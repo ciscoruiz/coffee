@@ -25,6 +25,7 @@
 #define __coffee_xml_Document_hpp
 
 struct _xmlDoc;
+struct _xmlError;
 
 namespace boost {
    namespace filesystem {
@@ -77,6 +78,8 @@ private:
    static void extractAttributes(std::shared_ptr<xml::Node>& node) throw(adt::RuntimeException);
 
    void compile(Compiler& compiler) const throw(adt::RuntimeException);
+
+   static void logError(void* data, _xmlError* error) noexcept;
 
    friend class Compiler;
 };

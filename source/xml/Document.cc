@@ -41,11 +41,13 @@
 
 using namespace coffee;
 
+
 xml::Document::Document() :
    Wrapper()
 {
    xml::SCCS::activate();
    setDeleter(xmlFreeDoc);
+   xmlSetStructuredErrorFunc(NULL, logError);
 }
 
 //virtual
@@ -100,6 +102,7 @@ const xml::Document& xml::Document::parse(const adt::DataBlock& buffer, const DT
    xmlCleanupParser();
    return *this;
 }
+
 
 void xml::Document::parseFile(const boost::filesystem::path& file)
    throw(adt::RuntimeException)
@@ -184,3 +187,25 @@ void xml::Document::compile(xml::Compiler& compiler) const
       COFFEE_THROW_EXCEPTION("Document " << getName() << " could not start document");
 }
 
+//static
+void xml::Document::logError(void* data, _xmlError* error)
+   noexcept
+{
+   adt::StreamString ss;
+
+   std::string messageWithoutEnter(error->message);
+
+   auto pos = messageWithoutEnter.find('\n');
+
+   if (pos != std::string::npos) {
+      messageWithoutEnter.erase(pos, 1);
+   }
+
+   ss << messageWithoutEnter;
+
+   if (error->file) {
+      ss << " in file='" << error->file << "' Line=" << error->line;
+   }
+
+   LOG_ERROR(ss);
+}

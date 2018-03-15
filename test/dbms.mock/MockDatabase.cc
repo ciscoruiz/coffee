@@ -28,12 +28,17 @@
 using namespace coffee;
 
 #include <coffee/logger/Logger.hpp>
-#include <coffee/logger/TtyWriter.hpp>
+#include <coffee/logger/UnlimitedTraceWriter.hpp>
 
 mock::MockDatabase::MockDatabase(app::Application& app) :
    dbms::Database(app, "map", app.getTitle().c_str())
 {
-   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
+   const char* logFileName = "test/dbms/trace.log";
+
+   unlink (logFileName);
+
+   logger::Logger::initialize(std::make_shared<logger::UnlimitedTraceWriter>(logFileName));
+   logger::Logger::setLevel(logger::Level::Debug);
 
    std::shared_ptr<dbms::ErrorCodeInterpreter> eci = std::make_shared<MockErrorCodeInterpreter>();
    setErrorCodeInterpreter(eci);

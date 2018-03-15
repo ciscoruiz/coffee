@@ -26,6 +26,8 @@
 
 #include <stdexcept>
 
+#include <coffee/config/defines.hpp>
+
 namespace coffee {
 
 namespace adt {
@@ -68,7 +70,7 @@ protected:
    Exception (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
       std::logic_error (str),
       m_fromMethod (fromMethod),
-      m_fromFile (fromFile),
+      m_fromFile (removePathBeforeCoffee(fromFile)),
       m_fromLine (fromLine)
    {;}
 

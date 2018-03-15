@@ -65,22 +65,6 @@ private:
    void initialize () throw (adt::RuntimeException) { setAvailable(false); COFFEE_THROW_EXCEPTION("Can not initialize resource"); }
 };
 
-inline std::shared_ptr<coffee::balance::ResourceList> setup(const int maxResource, const int firstId = 0)
-{
-   std::shared_ptr<coffee::balance::ResourceList> result = std::make_shared<coffee::balance::ResourceList>("TestResources");
-
-   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
-
-   int id = firstId;
-   for (int ii = 0; ii < maxResource; ++ ii) {
-      result->add(std::make_shared<TestResource>(id ++));
-   }
-
-   result->initialize();
-
-   return result;
-}
-
 }
 }
 }

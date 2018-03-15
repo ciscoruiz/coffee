@@ -1,17 +1,17 @@
 // MIT License
-// 
+//
 // Copyright (c) 2018 Francisco Ruiz (francisco.ruiz.rayo@gmail.com)
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,26 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+#ifndef TEST_BALANCE_RESOURCELISTFIXTURE_HPP_
+#define TEST_BALANCE_RESOURCELISTFIXTURE_HPP_
 
-#include <memory>
+#include <coffee/balance/ResourceList.hpp>
 
-#include "MockDatabase.hpp"
+#include "TestResource.hpp"
 
-using namespace coffee;
+struct ResourceListFixture {
+   static const int MaxResources;
 
-#include <coffee/logger/Logger.hpp>
-#include <coffee/logger/UnlimitedTraceWriter.hpp>
+   ResourceListFixture()
+   {
 
-mock::MockDatabase::MockDatabase(app::Application& app) :
-   dbms::Database(app, "map", app.getTitle().c_str())
-{
-   const char* logFileName = "test/dbms/trace.log";
+      resourceList = setup(MaxResources, 0);
+   }
 
-   unlink (logFileName);
+   static std::shared_ptr<coffee::balance::ResourceList> setup(const int maxResources, const int firstId) {
+      auto result = std::make_shared<coffee::balance::ResourceList>("TestResources");
 
-   logger::Logger::initialize(std::make_shared<logger::UnlimitedTraceWriter>(logFileName));
-   logger::Logger::setLevel(logger::Level::Debug);
+      int id = firstId;
+      for (int ii = 0; ii < maxResources; ++ ii) {
+         result->add(std::make_shared<coffee::test::balance::TestResource>(id ++));
+      }
 
-   std::shared_ptr<dbms::ErrorCodeInterpreter> eci = std::make_shared<MockErrorCodeInterpreter>();
-   setErrorCodeInterpreter(eci);
-}
+      result->initialize();
+      return result;
+   }
+
+   std::shared_ptr<coffee::balance::ResourceList> resourceList;
+};
+
+#endif /* TEST_BALANCE_RESOURCELISTFIXTURE_HPP_ */

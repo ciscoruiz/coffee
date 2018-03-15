@@ -71,7 +71,7 @@ void xml::DTD::initialize (const boost::filesystem::path& filename)
 void xml::DTD::initialize (const adt::DataBlock& buffer)
    throw (adt::RuntimeException)
 {
-   char filename[] = "/tmp/mytemp.XXXXXX";
+   char filename[] = "/tmp/coffee_dtd.XXXXXX";
    int fd = mkstemp(filename);
    write(fd, buffer.data(), buffer.size());
    close(fd);

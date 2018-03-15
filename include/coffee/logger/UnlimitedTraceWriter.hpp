@@ -21,25 +21,52 @@
 // SOFTWARE.
 //
 
-#include <memory>
+#ifndef __coffee_logger_UnlimitedTraceWriter_hpp
+#define __coffee_logger_UnlimitedTraceWriter_hpp
 
-#include "MockDatabase.hpp"
+#include <coffee/logger/Writer.hpp>
 
-using namespace coffee;
+namespace coffee {
 
-#include <coffee/logger/Logger.hpp>
-#include <coffee/logger/UnlimitedTraceWriter.hpp>
+namespace logger {
 
-mock::MockDatabase::MockDatabase(app::Application& app) :
-   dbms::Database(app, "map", app.getTitle().c_str())
-{
-   const char* logFileName = "test/dbms/trace.log";
+/**
+ * It stores traces in a file this file will not has any limit in size.
+ *
+ * \include test/logger/UnlimitedTraceWriter_test.cc
+ */
+class UnlimitedTraceWriter : public Writer {
+public:
+   static const int NullStream ;
 
-   unlink (logFileName);
+   /**
+    * Constructor.
+    * \param path file path to store the traces.
+    */
+   UnlimitedTraceWriter (const std::string& path);
 
-   logger::Logger::initialize(std::make_shared<logger::UnlimitedTraceWriter>(logFileName));
-   logger::Logger::setLevel(logger::Level::Debug);
+   /**
+    * Destructor.
+    */
+   virtual ~UnlimitedTraceWriter () { closeStream (); }
 
-   std::shared_ptr<dbms::ErrorCodeInterpreter> eci = std::make_shared<MockErrorCodeInterpreter>();
-   setErrorCodeInterpreter(eci);
+   int getStream () const noexcept { return m_stream; }
+
+protected:
+   void apply (const Level::_v level, const std::string& line) noexcept;
+   bool wantsToProcess (const Level::_v level) const noexcept;
+
+private:
+   const std::string m_path;
+   int m_stream;
+
+   void initialize () throw (adt::RuntimeException);
+
+   void openStream () throw (adt::RuntimeException);
+   void closeStream () noexcept;
+};
+
 }
+}
+
+#endif

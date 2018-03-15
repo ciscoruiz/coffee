@@ -86,5 +86,14 @@ namespace coffee {
  */
 #define coffee_ptrnumber_cast(pointer) (coffee::ptrnumber)((void*)(pointer))
 
+/**
+ * \return Removes coffee directory from the path received as parameter
+ */
+static const char* removePathBeforeCoffee(const char* path) noexcept {
+   const char* result = coffee_strstr(path, "/coffee/");
+   return (result == nullptr) ? path: (result + 1);
+}
+
+
 #endif
 

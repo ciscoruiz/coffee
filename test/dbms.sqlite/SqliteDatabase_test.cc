@@ -47,6 +47,7 @@
 #include <coffee/dbms/datatype/ShortBlock.hpp>
 #include <coffee/dbms/datatype/Date.hpp>
 #include <coffee/dbms/datatype/TimeStamp.hpp>
+#include <coffee/logger/UnlimitedTraceWriter.hpp>
 
 #include "../dbms/PrintChrono.hpp"
 
@@ -195,8 +196,10 @@ static void sqliteParallelRun(coffee::app::Application& app) {
 struct SqliteFixture  {
    static  boost::filesystem::path dbPath;
 
-   SqliteFixture() : app ("SqliteApplication"){
-      logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
+   SqliteFixture() : app ("TestSqliteApplication"){
+      const char* logFileName = "test/dbms.sqlite/trace.log";
+      unlink (logFileName);
+      logger::Logger::initialize(std::make_shared<logger::UnlimitedTraceWriter>(logFileName));
       logger::Logger::setLevel(logger::Level::Debug);
 
       database = dbms::sqlite::SqliteDatabase::instantiate(app, dbPath);
@@ -247,7 +250,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_create_db, SqliteFixture)
 struct SqliteFixtureBadPath  {
    static  boost::filesystem::path dbBadPath;
 
-   SqliteFixtureBadPath() : app ("SqliteApplication-Badpath"){
+   SqliteFixtureBadPath() : app ("TestSqliteApplication-Badpath"){
       database = dbms::sqlite::SqliteDatabase::instantiate(app, dbBadPath);
       thr = std::thread(sqliteParallelRun, std::ref(app));
       app.waitUntilRunning();

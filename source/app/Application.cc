@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <cctype>
 
 #include <time.h>
 #include <unistd.h>
@@ -78,7 +79,6 @@ app::Application::Application(const char* shortName, const char* title, const ch
    if(m_this == nullptr)
       m_this = this;
 
-   cout << getName() << " - " << a_title << ". Version " << a_version << endl;
 }
 
 app::Application::~Application()
@@ -106,6 +106,10 @@ void app::Application::start()
 {
    LOG_THIS_METHOD();
 
+   std::string upperName = getName();
+   std::transform(upperName.begin(), upperName.end(), upperName.begin(), [](unsigned char c){return std::toupper(c);});
+   const bool isAnApplicationTest = (upperName.find("TEST") != std::string::npos);
+
    config::SCCSRepository& moduleManager = config::SCCSRepository::getInstance();
 
    if(isRunning() == true) {
@@ -117,10 +121,12 @@ void app::Application::start()
    }
 
    try {
-      cout << "COFFEE - COmpany eFFEEctive platform. " << config::Release::getVersion() << endl;
-      cout << "Release date: " << __DATE__ << " " << __TIME__ << endl;
-      cout << "(c) Copyright 2018,2014 by Francisco Ruiz." << endl << endl;
-
+      if (!isAnApplicationTest) {
+         cout << getName() << " - " << a_title << ". Version " << a_version << endl;
+         cout << "COFFEE - COmpany eFFEEctive platform. " << config::Release::getVersion() << endl;
+         cout << "Release date: " << __DATE__ << " " << __TIME__ << endl;
+         cout << "(c) Copyright 2018,2014 by Francisco Ruiz." << endl << endl;
+      }
       initialize();
    }
    catch(adt::RuntimeException& ex) {
@@ -128,11 +134,13 @@ void app::Application::start()
       throw;
    }
 
-   cout << "Loading modules ...." << endl;
-   for(config::SCCSRepository::const_entry_iterator ii = moduleManager.entry_begin(), maxii = moduleManager.entry_end(); ii != maxii; ++ ii) {
-      cout << "\t Module " << config::SCCSRepository::module_name(ii) << endl;
+   if (!isAnApplicationTest) {
+      cout << "Loading modules ...." << endl;
+      for(config::SCCSRepository::const_entry_iterator ii = moduleManager.entry_begin(), maxii = moduleManager.entry_end(); ii != maxii; ++ ii) {
+         cout << "\t Module " << config::SCCSRepository::module_name(ii) << endl;
+      }
+      cout << endl;
    }
-   cout << endl;
 
    try {
       statusStarting();
@@ -148,7 +156,9 @@ void app::Application::start()
 
    stop();
 
-   cout << getName() << " finished ..." << endl << endl;
+   if (!isAnApplicationTest) {
+      cout << getName() << " finished ..." << endl << endl;
+   }
 }
 
 void app::Application::startServices()

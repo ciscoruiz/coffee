@@ -45,11 +45,9 @@
 using namespace std;
 using namespace coffee;
 
-class SmallestApplication : public app::Application {
+class TestApplication : public app::Application {
 public:
-   SmallestApplication() : app::Application("SmallerApplication", "This is the title", "1.0") {
-      logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
-   }
+   TestApplication() : app::Application("TestApplication", "This is the title", "1.0") {}
 
    void run() throw(adt::RuntimeException) {;}
 };
@@ -80,7 +78,7 @@ void MyService::do_stop() throw(adt::RuntimeException) { ++ m_stopped;}
 
 BOOST_AUTO_TEST_CASE( smallest_application )
 { 
-   SmallestApplication application;
+   TestApplication application;
 
    BOOST_REQUIRE_EQUAL(application.service_find("00") == application.service_end(), true);
 
@@ -99,7 +97,7 @@ BOOST_AUTO_TEST_CASE( smallest_application )
 
 BOOST_AUTO_TEST_CASE( status_application )
 {
-   SmallestApplication application;
+   TestApplication application;
 
    BOOST_REQUIRE_EQUAL(application.isStopped(), true);
    BOOST_REQUIRE_EQUAL(application.isRunning(), false);
@@ -112,7 +110,7 @@ BOOST_AUTO_TEST_CASE( status_application )
 
 BOOST_AUTO_TEST_CASE( undefined_predecessor )
 {
-   SmallestApplication application;
+   TestApplication application;
 
    std::shared_ptr<MyService> service = std::make_shared<MyService>(application, "00");
    application.attach(service);
@@ -130,7 +128,7 @@ BOOST_AUTO_TEST_CASE( undefined_predecessor )
 
 BOOST_AUTO_TEST_CASE( repeat_predecessor )
 {
-   SmallestApplication application;
+   TestApplication application;
 
    std::shared_ptr<MyService> service = std::make_shared<MyService>(application, "00");
    service->setPredecessor("SomeRepeatedName");
@@ -141,7 +139,7 @@ BOOST_AUTO_TEST_CASE( repeat_predecessor )
 
 BOOST_AUTO_TEST_CASE( interdependence_predecessor )
 {
-   SmallestApplication application;
+   TestApplication application;
 
    std::shared_ptr<MyService> service00 = std::make_shared<MyService>(application, "00");
    application.attach(service00);
@@ -166,7 +164,7 @@ BOOST_AUTO_TEST_CASE( interdependence_predecessor )
 
 BOOST_AUTO_TEST_CASE( iterator_service )
 {
-   SmallestApplication application;
+   TestApplication application;
 
    application.attach(std::make_shared<MyService>(application, "00"));
    application.attach(std::make_shared<MyService>(application, "01"));
@@ -176,7 +174,7 @@ BOOST_AUTO_TEST_CASE( iterator_service )
 
    BOOST_REQUIRE_NO_THROW(application.start());
 
-   const SmallestApplication& constApplication(application);
+   const TestApplication& constApplication(application);
 
    auto ii = application.service_begin();
    auto maxii = application.service_end();
@@ -194,7 +192,7 @@ BOOST_AUTO_TEST_CASE( iterator_service )
 
 BOOST_AUTO_TEST_CASE( app_already_run )
 {
-   app::ApplicationServiceStarter application("app_already_run");
+   app::ApplicationServiceStarter application("test_app_already_run");
 
    auto thread = std::thread(parallelRun, std::ref(application));
 
@@ -207,7 +205,7 @@ BOOST_AUTO_TEST_CASE( app_already_run )
 
 BOOST_AUTO_TEST_CASE( app_stop_services )
 {
-   app::ApplicationServiceStarter application("app_stop_services");
+   app::ApplicationServiceStarter application("test_app_stop_services");
    auto service = std::make_shared<MyService>(application, "00");
    application.attach(service);
 
@@ -230,13 +228,13 @@ BOOST_AUTO_TEST_CASE( app_stop_services )
 BOOST_AUTO_TEST_CASE( app_null_service )
 {
    std::shared_ptr<MyService> service;
-   SmallestApplication application;
+   TestApplication application;
    BOOST_REQUIRE_THROW(application.attach(service), adt::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE( app_already_defined )
 {
-   SmallestApplication application;
+   TestApplication application;
    application.attach(std::make_shared<MyService>(application, "00"));
    auto iiprev = application.service_begin();
    auto iimaxprev = application.service_end();
@@ -247,7 +245,7 @@ BOOST_AUTO_TEST_CASE( app_already_defined )
 }
 
 struct ApplicationFixture {
-   ApplicationFixture() : application("ApplicationFixture"),
+   ApplicationFixture() : application("TestApplicationFixture"),
       externalStop(false)
    {
       service = std::make_shared<MyService>(application, "my-service");

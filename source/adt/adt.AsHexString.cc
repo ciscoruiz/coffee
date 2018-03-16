@@ -23,6 +23,7 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 #include <coffee/config/defines.hpp>
 
@@ -52,12 +53,7 @@ string adt::AsHexString::apply (const int64_t number)
    noexcept
 {
    char aux [24];
-#ifdef __coffee64__
-   sprintf (aux, "0x%lx", number);
-#else
-   sprintf (aux, "0x%llx", number);
-#endif
-
+   sprintf (aux, "0x%jx", number);
    return string (aux);
 }
 
@@ -65,11 +61,7 @@ string adt::AsHexString::apply (const uint64_t number)
    noexcept
 {
    char aux [32];
-#ifdef __coffee64__
-   sprintf (aux, "0x%lx", number);
-#else
-   sprintf (aux, "0x%llx", number);
-#endif
+   sprintf (aux, "0x%jx", number);
    return string (aux);
 }
 

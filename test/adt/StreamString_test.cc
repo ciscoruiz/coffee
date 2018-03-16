@@ -79,11 +79,11 @@ BOOST_AUTO_TEST_CASE( StreamString_integer64 )
    result = val;
    BOOST_REQUIRE_EQUAL(result, "-1");
 
-   val = LLONG_MAX;
+   val = INT64_MAX;
    result = val;
    BOOST_REQUIRE_EQUAL(result, "9223372036854775807");
 
-   val = LLONG_MIN;
+   val = INT64_MIN;
    result = val;
    BOOST_REQUIRE_EQUAL(result, "-9223372036854775808");
 }
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE( StreamString_uinteger64 )
    result = val;
    BOOST_REQUIRE_EQUAL(result, "0");
 
-   val = ULLONG_MAX;
+   val = UINT64_MAX;
    result = val;
    BOOST_REQUIRE_EQUAL(result, "18446744073709551615");
 }
@@ -144,9 +144,9 @@ BOOST_AUTO_TEST_CASE( StreamString_string_int64 )
 {
    adt::StreamString result;
 
-   result << "max_long:" << ULONG_MAX;
+   result << "max_int64:" << INT64_MAX;
    result.toUpper();
-   BOOST_REQUIRE_EQUAL(result, "MAX_LONG:18446744073709551615");
+   BOOST_REQUIRE_EQUAL(result, "MAX_INT64:9223372036854775807");
 }
 
 BOOST_AUTO_TEST_CASE( StreamString_string_null )

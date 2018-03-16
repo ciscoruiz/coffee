@@ -164,13 +164,13 @@ public:
       noexcept
    {
       StreamString result(a_name);
-      result << " { Accumulator:" << adt::AsString::apply(a_accumulator);
+      result << " { Accumulator:" << adt::AsString::apply((int64_t) a_accumulator);
 
       if (!a_measure.empty())
          result << " " << a_measure;
 
       result << " | N=" <<  a_n;
-      result << " | Value=" << adt::AsString::apply(value());
+      result << " | Value=" << adt::AsString::apply((int64_t) value());
 
       if (!a_measure.empty())
          result << " " << a_measure;

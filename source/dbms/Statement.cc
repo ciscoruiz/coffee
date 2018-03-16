@@ -182,8 +182,8 @@ std::shared_ptr<xml::Node> dbms::Statement::asXML(std::shared_ptr<xml::Node>& pa
 
    std::shared_ptr<xml::Node> node = result->createChild("Timing");
    node->createAttribute("N", m_elapsedTime.size());
-   node->createAttribute("Accumulator", m_elapsedTime.getAccumulator());
-   node->createAttribute("ElapsedTime", adt::AsString::apply(m_elapsedTime.value()));
+   node->createAttribute("Accumulator", (int64_t) m_elapsedTime.getAccumulator());
+   node->createAttribute("ElapsedTime", adt::AsString::apply((uint64_t) m_elapsedTime.value()));
 
    result->createChild("Expression")->createText(m_expression);
 

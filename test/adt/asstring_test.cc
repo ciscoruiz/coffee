@@ -123,6 +123,9 @@ BOOST_AUTO_TEST_CASE( asstring_datablock )
    }
 
    BOOST_REQUIRE_GT (result.size (), 0);
+
+   value.clear();
+   BOOST_REQUIRE_EQUAL(adt::AsString::apply(value), "<null>");
 }
 
 BOOST_AUTO_TEST_CASE( asstring_double )

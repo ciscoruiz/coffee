@@ -56,7 +56,7 @@ adt::StreamString datatype::LongBlock::asString () const
    result << " | MaxSize=" << getMaxSize();
 
    if (hasValue()) {
-      result << " | Buffer=" << adt::AsHexString::apply(coffee_ptrnumber_cast (getBuffer()));
+      result << " | Buffer=" << adt::AsHexString::apply((int64_t) getBuffer());
       result << " | Size=" << m_value.size ();
    }
 

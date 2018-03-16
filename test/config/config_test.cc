@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE (release)
 
 BOOST_AUTO_TEST_CASE (numbers)
 {
-   Integer64 ii64;
+   int64_t ii64;
 
    ii64 = LLONG_MAX;
    BOOST_REQUIRE_EQUAL (ii64, LLONG_MAX);
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE (numbers)
    ii64 = LLONG_MIN;
    BOOST_REQUIRE_EQUAL (ii64, LLONG_MIN);
 
-   Unsigned64 u64;
+   uint64_t u64;
    u64 = ULLONG_MAX;
    BOOST_REQUIRE_EQUAL (u64, ULLONG_MAX);
 }

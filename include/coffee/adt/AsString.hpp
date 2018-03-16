@@ -55,22 +55,15 @@ public:
    */
    static std::string apply (const unsigned int number) noexcept;
 
-#ifndef __coffee64__
    /**
       @return A string with the number.
    */
-   static std::string apply (const long number) noexcept;
-#endif
+   static std::string apply (const int64_t number) noexcept;
 
    /**
       @return A string with the number.
    */
-   static std::string apply (const Integer64 number) noexcept;
-
-   /**
-      @return A string with the number.
-   */
-   static std::string apply (const Unsigned64 number) noexcept;
+   static std::string apply (const uint64_t number) noexcept;
 
    /**
       @return A string with the number.

@@ -58,17 +58,10 @@ bool app::Runnable::stop ()
 adt::StreamString app::Runnable::asString () const
    noexcept
 {
-   adt::StreamString result ("coffee::app::Runnable { Reference: ");
+   adt::StreamString result ("app.Runnable { ");
 
-   result << adt::AsHexString::apply (coffee_ptrnumber_cast (this));
-
-   const std::string& name = getName();
-
-   if (!name.empty()) {
-      result << " | Name: " << name;
-   }
-
-   result << " | Status:" << flagsAsString ();
+   result << "Name=" << getName();
+   result << " | Status=" << flagsAsString ();
 
    return result += " }";
 }
@@ -79,13 +72,7 @@ std::shared_ptr<xml::Node> app::Runnable::asXML (std::shared_ptr<xml::Node>& par
 {
    std::shared_ptr<xml::Node> result = parent->createChild("Runnable");
 
-   result->createAttribute ("Reference", adt::AsHexString::apply (coffee_ptrnumber_cast (this)));
-
-   const std::string& name = getName();
-
-   if (!name.empty())
-      result->createAttribute ("Name", name);
-
+   result->createAttribute ("Name", getName());
    result->createAttribute ("Status", flagsAsString());
 
    return result;

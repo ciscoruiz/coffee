@@ -114,12 +114,12 @@ public:
    /**
     * Initialize this instance with the value of \b vv converted to std::string.
     */
-   StreamString& operator = (const Integer64 vv) noexcept { std::string::clear (); return operator<< (vv); }
+   StreamString& operator = (const int64_t vv) noexcept { std::string::clear (); return operator<< (vv); }
 
    /**
     * Initialize this instance with the value of \b vv converted to std::string.
     */
-   StreamString& operator = (const Unsigned64 vv) noexcept { std::string::clear (); return operator<< (vv); }
+   StreamString& operator = (const uint64_t vv) noexcept { std::string::clear (); return operator<< (vv); }
 
    /**
     * Initialize this instance with the value of \b vv converted to std::string.
@@ -185,13 +185,13 @@ public:
     * Append the value of \b vv converted to std::string into this instance.
     * \return This instance to be able to concatenate operations of appending.
     */
-   StreamString& operator << (const Integer64 vv) noexcept;
+   StreamString& operator << (const int64_t vv) noexcept;
 
    /**
     * Append the value of \b vv converted to std::string into this instance.
     * \return This instance to be able to concatenate operations of appending.
     */
-   StreamString& operator << (const Unsigned64 vv) noexcept;
+   StreamString& operator << (const uint64_t vv) noexcept;
 
    /**
     * Append the value of \b vv converted to std::string into this instance.

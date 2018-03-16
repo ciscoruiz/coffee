@@ -84,17 +84,17 @@ BOOST_AUTO_TEST_CASE(timestamp_is_nulleable)
 
    const char* format = "%d/%m/%YT%H:%M:%S";
 
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
+   BOOST_REQUIRE(!column.hasValue());
 
    column.clear();
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
+   BOOST_REQUIRE(!column.hasValue());
 
-   std::string str_TimeStamp("01/01/1800T12:30:50");
+   std::string str_TimeStamp("01/01/1925T12:30:50");
    column.setValue(str_TimeStamp, format);
    BOOST_REQUIRE_EQUAL(column.hasValue(), true);
 
    BOOST_REQUIRE_NO_THROW(column.setValue("01/01/2000T00:00:00", format));
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+   BOOST_REQUIRE(column.hasValue());
 
    column.clear();
    BOOST_REQUIRE_THROW(column.getValue(), adt::RuntimeException);
@@ -131,17 +131,17 @@ BOOST_AUTO_TEST_CASE(timestamp_downcast)
 {
    datatype::TimeStamp column("not_nulleable", datatype::Constraint::CanNotBeNull);
 
-   datatype::Abstract& abs = column;
+   datatype::Abstract& abs(column);
 
-   BOOST_REQUIRE_EQUAL(abs.hasValue(), true);
+   BOOST_REQUIRE(abs.hasValue());
 
    const datatype::TimeStamp& other = coffee_datatype_downcast(datatype::TimeStamp, abs);
 
    const char* format = "%d/%m/%YT%H:%M:%S";
-   std::string str_TimeStamp("01/01/1800T12:30:50");
+   std::string str_TimeStamp("01/01/1920T12:30:50");
    column.setValue(str_TimeStamp, format);
 
-   BOOST_REQUIRE_EQUAL(other == column, true);
+   BOOST_REQUIRE(other == column);
 
    datatype::Integer zzz("zzz");
 

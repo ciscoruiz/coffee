@@ -359,12 +359,13 @@ struct DbmsDefineAndRun : public MockDatabaseFixture<test_dbms::MyDatabase> {
    dbms::ResultCode  writeRecord(dbms::GuardStatement& writer, const int id) throw (dbms::DatabaseException) {
       adt::StreamString name("the ");
       name << id;
+
       coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(id);
       coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue(name);
       coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(id * id);
       coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue((float) id * 1.1);
       char buffer[64];
-      sprintf(buffer, "%d/%d/%dT%02d:%02d", 1 + id % 28, 1 + id % 11, 2000 + id, id % 12, id % 60);
+      sprintf(buffer, "%d/%d/%dT%02d:%02d", 1 + id % 28, 1 + id % 11, 2000 + (id % 25), id % 12, id % 60);
       coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(buffer, "%d/%m/%YT%H:%M");
       return writer.execute();
    }

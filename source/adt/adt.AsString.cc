@@ -48,21 +48,13 @@ string adt::AsString::apply (const unsigned int number)
    return to_string(number);
 }
 
-#ifndef __coffee64__
-string adt::AsString::apply (const long number)
-   noexcept
-{
-   return to_string(number);
-}
-#endif
-
-string adt::AsString::apply (const Integer64 number)
+string adt::AsString::apply (const int64_t number)
    noexcept
 {
    return to_string(number);
 }
 
-string adt::AsString::apply (const Unsigned64 number)
+string adt::AsString::apply (const uint64_t number)
    noexcept
 {
    return to_string(number);

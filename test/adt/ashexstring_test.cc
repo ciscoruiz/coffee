@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE( ashexstring_uinteger )
 
 BOOST_AUTO_TEST_CASE( ashexstring_integer64 )
 {
-   Integer64 val = 0;
+   int64_t val = 0;
    string result;
 
    val --;
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( ashexstring_integer64 )
 
 BOOST_AUTO_TEST_CASE( ashexstring_uinteger64 )
 {
-   Unsigned64 val = 0;
+   uint64_t val = 0;
    string result;
 
    result = adt::AsHexString::apply(val);

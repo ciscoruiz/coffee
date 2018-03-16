@@ -48,7 +48,7 @@ string adt::AsHexString::apply (const unsigned int number)
    return string (aux);
 }
 
-string adt::AsHexString::apply (const Integer64 number)
+string adt::AsHexString::apply (const int64_t number)
    noexcept
 {
    char aux [24];
@@ -61,7 +61,7 @@ string adt::AsHexString::apply (const Integer64 number)
    return string (aux);
 }
 
-string adt::AsHexString::apply (const Unsigned64 number)
+string adt::AsHexString::apply (const uint64_t number)
    noexcept
 {
    char aux [32];

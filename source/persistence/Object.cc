@@ -40,7 +40,7 @@ persistence::Object::Object(const Class& clazz, const std::shared_ptr<PrimaryKey
 
 std::string persistence::Object::getInternalId () const noexcept
 {
-   return adt::AsHexString::apply (coffee_ptrnumber_cast(this));
+   return adt::AsHexString::apply((int64_t) this);
 }
 
 adt::StreamString persistence::Object::asString() const noexcept

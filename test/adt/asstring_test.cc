@@ -74,44 +74,39 @@ BOOST_AUTO_TEST_CASE( asstring_uinteger )
 
 BOOST_AUTO_TEST_CASE( asstring_integer64 )
 {
-   Integer64 val = 0;
+   int64_t val = 0;
    string result;
 
    val --;
    result = adt::AsString::apply(val);
    BOOST_REQUIRE_EQUAL(result, "-1");
 
-   val = LLONG_MAX;
+   val = INT64_MAX;
    result = adt::AsString::apply(val);
    BOOST_REQUIRE_EQUAL(result, "9223372036854775807");
 
-   val = LLONG_MIN;
+   val = INT64_MIN;
    result = adt::AsString::apply(val);
    BOOST_REQUIRE_EQUAL(result, "-9223372036854775808");
 }
 
 BOOST_AUTO_TEST_CASE( asstring_uinteger64 )
 {
-   Unsigned64 val = 0;
+   uint64_t val = 0;
    string result;
 
    result = adt::AsString::apply(val);
    BOOST_REQUIRE_EQUAL(result, "0");
 
-   val = ULLONG_MAX;
+   val = UINT64_MAX;
    result = adt::AsString::apply(val);
    BOOST_REQUIRE_EQUAL(result, "18446744073709551615");
 }
 
 BOOST_AUTO_TEST_CASE( asstring_bool )
 {
-   string result;
-
-   result = adt::AsString::apply(true);
-   BOOST_REQUIRE_EQUAL(result, "true");
-
-   result = adt::AsString::apply(false);
-   BOOST_REQUIRE_EQUAL(result, "false");
+   BOOST_REQUIRE_EQUAL(adt::AsString::apply(true), "true");
+   BOOST_REQUIRE_EQUAL(adt::AsString::apply(false), "false");
 }
 
 BOOST_AUTO_TEST_CASE( asstring_datablock )

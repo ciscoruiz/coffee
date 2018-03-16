@@ -86,14 +86,14 @@ adt::StreamString& adt::StreamString::operator<<(const bool vv)
    return *this;
 }
 
-adt::StreamString& adt::StreamString::operator<<(const Integer64 vv)
+adt::StreamString& adt::StreamString::operator<<(const int64_t vv)
    noexcept
 {
    string::append(AsString::apply(vv));
    return *this;
 }
 
-adt::StreamString& adt::StreamString::operator<<(const Unsigned64 vv)
+adt::StreamString& adt::StreamString::operator<<(const uint64_t vv)
    noexcept
 {
    string::append(AsString::apply(vv));

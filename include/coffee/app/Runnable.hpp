@@ -95,12 +95,6 @@ protected:
    explicit Runnable(const std::string& name) : adt::NamedObject(name), m_statusFlags(StatusFlags::Stopped) {;}
 
    /**
-     Constructor.
-     @param name Logic name.
-   */
-   explicit Runnable(const char* name) : adt::NamedObject(name), m_statusFlags(StatusFlags::Stopped) {;}
-
-   /**
     * Constructor .
     */
    Runnable() : adt::NamedObject(""), m_statusFlags(StatusFlags::Stopped) {;}

@@ -26,6 +26,7 @@
 
 #include <coffee/adt/StreamString.hpp>
 #include <coffee/adt/AsString.hpp>
+#include <coffee/adt/AsHexString.hpp>
 
 using namespace coffee;
 using namespace coffee::logger;
@@ -39,7 +40,7 @@ std::string DefaultFormatter::apply (const Level::_v level, const adt::StreamStr
    adt::StreamString output;
 
    output << "[" << adt::AsString::apply(second, "%d/%0m/%Y %T") << "] ";
-   output << "[thr=" << pthread_self() << "] ";
+   output << "[thr=" << adt::AsHexString::apply((int64_t) pthread_self()) << "] ";
    output << Level::enumName(level) << " | ";
    output << methodName << " [" << file << "(" << lineno << ")]: ";
    output << comment;

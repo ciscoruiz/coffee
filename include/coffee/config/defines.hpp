@@ -59,33 +59,6 @@
 
 #define coffee_signal_shield(r,a) { register int cx (0); do { if ((r = (a)) < 0) cx ++; } while (r < 0 && errno == EINTR && cx < 5); }
 
-namespace coffee {
-   #if !defined(__x86_64__) && !defined(__x86_64)
-      #undef  __coffee64__
-      typedef int64_t Integer64;
-      typedef u_int64_t Unsigned64;
-
-      /**
-       * Defines required data type to conversion from pointer to integer 
-       */
-      typedef int ptrnumber;
-   #else
-      #define __coffee64__
-      typedef long Integer64;
-      typedef unsigned long Unsigned64;
-
-      /**
-       * Defines required data type to conversion from pointer to integer 
-       */
-      typedef long ptrnumber;
-   #endif
-}
-
-/**
- * Make conversion from pointer to integer, it will work both 64 bits and 32 bits architecture.
- */
-#define coffee_ptrnumber_cast(pointer) (coffee::ptrnumber)((void*)(pointer))
-
 /**
  * \return Removes coffee directory from the path received as parameter
  */

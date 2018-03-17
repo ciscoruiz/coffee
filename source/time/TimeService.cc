@@ -228,38 +228,37 @@ void time::TimeService::consume(TimeService& timeService)
    while (timeService.isRunning()) {
       timeService.condition.wait(guard);
 
-      if (timeService.ticks.empty())
-         continue;
+      while (!timeService.ticks.empty()) {
+         timeService.ticks.pop_front();
 
-      timeService.ticks.pop_front();
+         Quantum& timedout = timeService.timeTable[timeService.currentQuantum];
 
-      Quantum& timedout = timeService.timeTable[timeService.currentQuantum];
+         const milliseconds now = TimeService::now();
 
-      const milliseconds now = TimeService::now();
+         LOG_LOCAL7("Now=" << now << " | CurrentQuantum=" << timeService.currentQuantum);
 
-      LOG_LOCAL7("Now=" << now << " | CurrentQuantum=" << timeService.currentQuantum);
+         for (quantum_iterator ii = timedout.begin(), maxii = timedout.end(); ii != maxii; ++ ii) {
+            std::shared_ptr<TimeEvent> timeEvent = *ii;
+            timeEvent->endTime = now;
+            LOG_DEBUG("CurrentQuantum=" << timeService.currentQuantum << " | " << timeEvent->asString());
+            timeService.events.erase(timeEvent->getId());
+            timeService.notify(*timeEvent);
 
-      for (quantum_iterator ii = timedout.begin(), maxii = timedout.end(); ii != maxii; ++ ii) {
-         std::shared_ptr<TimeEvent> timeEvent = *ii;
-         timeEvent->endTime = now;
-         LOG_DEBUG("CurrentQuantum=" << timeService.currentQuantum << " | " << timeEvent->asString());
-         timeService.events.erase(timeEvent->getId());
-         timeService.notify(*timeEvent);
+            if (timeEvent->isPeriodical())
+               timeService.store(timeEvent, guard);
+         }
 
-         if (timeEvent->isPeriodical())
-            timeService.store(timeEvent, guard);
-      }
+         timedout.clear();
 
-      timedout.clear();
+         LOG_LOCAL7("CurrentQuantum=" << timeService.currentQuantum << " has been processed");
 
-      LOG_LOCAL7("CurrentQuantum=" << timeService.currentQuantum << " has been processed");
+         if (!timeService.temporaryQuantum.empty()) {
+            timedout.splice(timedout.end(), timeService.temporaryQuantum);
+         }
 
-      if (!timeService.temporaryQuantum.empty()) {
-         timedout.splice(timedout.end(), timeService.temporaryQuantum);
-      }
-
-      if (++ timeService.currentQuantum == timeService.maxQuantum) {
-         timeService.currentQuantum = 0;
+         if (++ timeService.currentQuantum == timeService.maxQuantum) {
+            timeService.currentQuantum = 0;
+         }
       }
    }
 }

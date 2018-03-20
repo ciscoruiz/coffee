@@ -62,6 +62,7 @@ add_subdirectory(source/app)
 add_subdirectory(source/time)
 add_subdirectory(source/dbms)
 add_subdirectory(source/dbms.sqlite)
+add_subdirectory(source/dbms.ldap)
 add_subdirectory(source/persistence)
 
 enable_testing()

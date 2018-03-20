@@ -27,6 +27,7 @@ This framework contains a set of modules to boost productivity while developing 
 | coffee.dbms | **D**ata**B**ase **M**anager **S**ystem. It defines a common interface for work with any database you need (MySQL, PostgreSQL and more). |
 | coffee.time | Service to manage asynchronuos time events. |
 | coffee.dbms.sqlite | Module to work with SQLite3 database. |
+| coffee.dbms.ldap | Module to work with LDAP directory. |
 | coffee.persistence | High Level of classes to work over a database without has to deal with SQL sentences, transactions and so on, it will work with classes, primrary keys and object that will be read/write from the DBMS. |
 
 ### Prerequisites
@@ -42,6 +43,7 @@ sudo apt-get install libboost-filesystem-dev
 sudo apt-get install libboost-test-dev
 sudo apt-get install libsqlite3-dev:amd64
 sudo apt-get install sqlite sqlite3   
+sudo apt-get install libldap2-dev
    
 ```
 

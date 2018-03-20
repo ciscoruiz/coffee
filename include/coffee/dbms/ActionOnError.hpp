@@ -35,5 +35,4 @@ struct ActionOnError { enum _v { Ignore, Rollback }; };
 }
 }
 
-
 #endif

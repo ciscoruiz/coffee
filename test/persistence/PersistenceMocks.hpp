@@ -51,8 +51,8 @@ using namespace coffee::mock;
 
 class MyReadStatement : public dbms::Statement {
 public:
-   MyReadStatement(const dbms::Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
-      dbms::Statement(database, name, expression, actionOnError),
+   MyReadStatement(const dbms::Database& database, const char* name, const char* expression, const StatementParameters& parameters) :
+      dbms::Statement(database, name, expression, parameters),
       m_isValid(false)
    {
       m_id = std::make_shared<datatype::Integer>("ID");
@@ -77,8 +77,8 @@ private:
 
 class MyWriteStatement : public dbms::Statement {
 public:
-   MyWriteStatement(const dbms::Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
-      dbms::Statement(database, name, expression, actionOnError)
+   MyWriteStatement(const dbms::Database& database, const char* name, const char* expression, const StatementParameters& parameters) :
+      dbms::Statement(database, name, expression, parameters)
    {
       m_id = std::make_shared<datatype::Integer>("ID");
       m_name = std::make_shared<datatype::String>("name", 64);
@@ -119,16 +119,16 @@ private:
          add(record);
       }
    }
-   std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
+   std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
       throw(adt::RuntimeException)
    {
       std::shared_ptr<Statement> result;
 
       if(expression == "read" || expression == "READ")
-         result = std::make_shared<MyReadStatement>(*this, name, expression.c_str(), actionOnError);
+         result = std::make_shared<MyReadStatement>(*this, name, expression.c_str(), parameters);
 
       if(expression == "write" || expression == "delete")
-         result = std::make_shared<MyWriteStatement>(*this, name, expression.c_str(), actionOnError);
+         result = std::make_shared<MyWriteStatement>(*this, name, expression.c_str(), parameters);
 
       if(!result)
          COFFEE_THROW_EXCEPTION(name << " invalid statement");

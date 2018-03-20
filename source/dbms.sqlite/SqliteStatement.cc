@@ -31,8 +31,8 @@
 using namespace coffee;
 using namespace coffee::dbms;
 
-sqlite::SqliteStatement::SqliteStatement(const Database& database, const char* name, const std::string& expression, const ActionOnError::_v actionOnError) :
-   Statement(database, name, expression, actionOnError),
+sqlite::SqliteStatement::SqliteStatement(const Database& database, const char* name, const std::string& expression, const StatementParameters& parameters) :
+   Statement(database, name, expression, parameters),
    impl(nullptr),
    owner(nullptr),
    fetchIsDone(false),

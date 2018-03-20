@@ -61,8 +61,8 @@ using namespace coffee::dbms;
 
 class MyStatement : public Statement {
 protected:
-   MyStatement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
-      Statement(database, name, expression, actionOnError)
+   MyStatement(const Database& database, const char* name, const char* expression, const StatementParameters& parameters) :
+      Statement(database, name, expression, parameters)
    {
       m_datas.push_back(std::make_shared<datatype::Integer>("ID"));
       m_datas.push_back(std::make_shared<datatype::String>("name", 64));
@@ -83,7 +83,7 @@ private:
 
 class MyReadStatement : public MyStatement {
 public:
-   MyReadStatement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError);
+   MyReadStatement(const Database& database, const char* name, const char* expression, const StatementParameters& parameters);
 
 private:
    std::vector <mock::MockLowLevelRecord> m_selection;
@@ -95,7 +95,7 @@ private:
 
 class MyWriteStatement : public MyStatement {
 public:
-   MyWriteStatement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError);
+   MyWriteStatement(const Database& database, const char* name, const char* expression, const StatementParameters& parameters);
 
 private:
    ResultCode do_execute(Connection& connection) throw(adt::RuntimeException, DatabaseException);
@@ -117,16 +117,16 @@ private:
 
    void do_stop() throw(adt::RuntimeException) {;}
 
-   std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
+   std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
       throw(adt::RuntimeException)
    {
       std::shared_ptr<Statement> result;
 
       if(expression == "read" || expression == "READ")
-         result = std::make_shared<MyReadStatement>(*this, name, expression.c_str(), actionOnError);
+         result = std::make_shared<MyReadStatement>(*this, name, expression.c_str(), parameters);
 
       if(expression == "write" || expression == "delete")
-         result = std::make_shared<MyWriteStatement>(*this, name, expression.c_str(), actionOnError);
+         result = std::make_shared<MyWriteStatement>(*this, name, expression.c_str(), parameters);
 
       if (!result)
          COFFEE_THROW_EXCEPTION(name << " invalid statement");
@@ -167,8 +167,8 @@ using namespace coffee;
 using namespace coffee::dbms;
 using namespace coffee::mock;
 
-test_dbms::MyReadStatement::MyReadStatement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
-   MyStatement(database, name, expression, actionOnError),
+test_dbms::MyReadStatement::MyReadStatement(const Database& database, const char* name, const char* expression, const StatementParameters& parameters) :
+   MyStatement(database, name, expression, parameters),
    m_index(0)
 {
    createBinderInput(m_datas[0]);
@@ -235,8 +235,8 @@ bool test_dbms::MyReadStatement::do_fetch() throw(adt::RuntimeException, Databas
    return true;
 }
 
-test_dbms::MyWriteStatement::MyWriteStatement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
-   MyStatement(database, name, expression, actionOnError)
+test_dbms::MyWriteStatement::MyWriteStatement(const Database& database, const char* name, const char* expression, const StatementParameters& parameters) :
+   MyStatement(database, name, expression, parameters)
 {
    for (auto member : m_datas) {
       createBinderInput(member);
@@ -540,7 +540,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_write_rollback, DbmsDefineAndRun)
 
 BOOST_FIXTURE_TEST_CASE(dbms_write_norollback, DbmsDefineAndRun)
 {
-   auto noRollbackWriter = database->createStatement("no_rollback_write", "write", dbms::ActionOnError::Ignore);
+   auto noRollbackWriter = database->createStatement("no_rollback_write", "write", dbms::StatementParameters(dbms::ActionOnError::Ignore));
    ResultCode resultCode;
 
    BOOST_REQUIRE_NO_THROW(populate(noRollbackWriter));
@@ -570,7 +570,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_erase_rollback, DbmsDefineAndRun)
 {
    auto stWriter = database->createStatement("writer", "write");
    auto rollbackEraser = database->createStatement("rollback_eraser", "delete");
-   auto noRollbackEraser = database->createStatement("no_rollback_eraser", "delete", dbms::ActionOnError::Ignore);
+   auto noRollbackEraser = database->createStatement("no_rollback_eraser", "delete", dbms::StatementParameters(dbms::ActionOnError::Ignore));
    ResultCode resultCode;
 
    BOOST_REQUIRE_NO_THROW(populate(stWriter));
@@ -601,7 +601,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_erase_rollback, DbmsDefineAndRun)
 BOOST_FIXTURE_TEST_CASE(dbms_erase_norollback, DbmsDefineAndRun)
 {
    auto stWriter = database->createStatement("writer", "write");
-   auto noRollbackEraser = database->createStatement("no_rollback_eraser", "delete", dbms::ActionOnError::Ignore);
+   auto noRollbackEraser = database->createStatement("no_rollback_eraser", "delete", dbms::StatementParameters(dbms::ActionOnError::Ignore));
    ResultCode resultCode;
 
    BOOST_REQUIRE_NO_THROW(populate(stWriter));

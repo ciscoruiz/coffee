@@ -47,6 +47,7 @@ namespace dbms {
 class Database;
 class Connection;
 class GuardStatement;
+class StatementParameters;
 
 namespace binder {
 class Input;
@@ -189,16 +190,7 @@ protected:
       aunque falle se invocara a Connection::commit. Solo aplicara en sentencias que no sean de seleccion.
       \param actionOnError Action to do in case of statement execution fails.
    */
-   Statement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
-      m_database(database),
-      m_name(name),
-      m_expression(expression),
-      m_actionOnError(actionOnError),
-      m_elapsedTime("Timing", "us"),
-      m_requiresCommit(false),
-      m_isPrepared(false)
-   {
-   }
+   Statement(const Database& database, const char* name, const char* expression, const StatementParameters& parameters);
 
    /**
       Contructor.
@@ -208,14 +200,8 @@ protected:
       \param expression Sentencia SQL asociada a esta clase.
       \param actionOnError Action to do in case of statement execution fails.
    */
-   Statement(const Database& database, const char* name, const std::string& expression, const ActionOnError::_v actionOnError) :
-      m_database(database),
-      m_name(name),
-      m_expression(expression),
-      m_actionOnError(actionOnError),
-      m_elapsedTime("ElapsedTime", "us"),
-      m_requiresCommit(false),
-      m_isPrepared(false)
+   Statement(const Database& database, const char* name, const std::string& expression, const StatementParameters& parameters) :
+      Statement(database, name, expression.c_str(), parameters)
    {
    }
 
@@ -232,10 +218,10 @@ protected:
 private:
    const Database& m_database;
    const std::string m_name;
-   std::string m_expression;
+   const std::string m_expression;
+   const ActionOnError::_v m_actionOnError;
    Inputs m_inputBinds;  /**< Lista de variables de entrada */
    Outputs m_outputBinds; /**< Lista de variables de salida */
-   const ActionOnError::_v m_actionOnError;
    adt::Average <long> m_elapsedTime;
    bool m_requiresCommit;
    std::mutex m_mutex;

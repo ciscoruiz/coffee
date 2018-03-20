@@ -64,10 +64,10 @@ std::shared_ptr<Connection> sqlite::SqliteDatabase::allocateConnection(const std
    return std::make_shared<sqlite::SqliteConnection>(*this, name, parameters);
 }
 
-std::shared_ptr<Statement> sqlite::SqliteDatabase::allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
+std::shared_ptr<Statement> sqlite::SqliteDatabase::allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
    throw(adt::RuntimeException)
 {
-   return std::make_shared<sqlite::SqliteStatement>(*this, name, expression, actionOnError);
+   return std::make_shared<sqlite::SqliteStatement>(*this, name, expression, parameters);
 }
 
 std::shared_ptr<binder::Input> sqlite::SqliteDatabase::allocateInputBind(std::shared_ptr<datatype::Abstract> data) const

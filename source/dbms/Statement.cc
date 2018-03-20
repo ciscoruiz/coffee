@@ -27,6 +27,7 @@
 #include <coffee/xml/Attribute.hpp>
 
 #include <coffee/dbms/Statement.hpp>
+#include <coffee/dbms/StatementParameters.hpp>
 #include <coffee/dbms/binder/Input.hpp>
 #include <coffee/dbms/binder/Output.hpp>
 #include <coffee/dbms/datatype/Abstract.hpp>
@@ -35,6 +36,17 @@
 using namespace std;
 using namespace coffee;
 using namespace coffee::dbms;
+
+Statement::Statement(const Database& database, const char* name, const char* expression, const StatementParameters& parameters) :
+   m_database(database),
+   m_name(name),
+   m_expression(expression),
+   m_actionOnError(parameters.getActionOnError()),
+   m_elapsedTime("Timing", "us"),
+   m_requiresCommit(false),
+   m_isPrepared(false)
+{
+}
 
 // virtual
 Statement::~Statement()

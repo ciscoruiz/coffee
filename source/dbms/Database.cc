@@ -47,6 +47,8 @@
 using namespace std;
 using namespace coffee;
 
+//static
+dbms::StatementParameters dbms::Database::defaultParameters(dbms::ActionOnError::Rollback);
 
 dbms::Database::Database(app::Application& app, const char* className, const char* dbmsName) :
    app::Service(app, className),
@@ -169,7 +171,7 @@ std::shared_ptr<dbms::Connection>& dbms::Database::findConnection(const char* na
    COFFEE_THROW_EXCEPTION(asString() << " | Connection='" << name << "' is not defined");
 }
 
-std::shared_ptr<dbms::Statement> dbms::Database::createStatement(const char* name, const char* expression, const ActionOnError::_v actionOnError)
+std::shared_ptr<dbms::Statement> dbms::Database::createStatement(const char* name, const char* expression, const StatementParameters& parameters)
    throw(adt::RuntimeException)
 {
    logger::TraceMethod ttmm(logger::Level::Local7, COFFEE_FILE_LOCATION);
@@ -182,7 +184,7 @@ std::shared_ptr<dbms::Statement> dbms::Database::createStatement(const char* nam
    if(m_statementTranslator)
       expression = m_statementTranslator->apply(expression);
 
-   std::shared_ptr<Statement> result = allocateStatement(name, expression, actionOnError);
+   std::shared_ptr<Statement> result = allocateStatement(name, expression, parameters);
 
    LOG_DEBUG(result->asString());
 

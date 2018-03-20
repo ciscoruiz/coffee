@@ -30,6 +30,7 @@
 #include <coffee/dbms/DatabaseException.hpp>
 #include <coffee/dbms/ActionOnError.hpp>
 #include <coffee/app/Service.hpp>
+#include <coffee/dbms/StatementParameters.hpp>
 
 namespace coffee {
 
@@ -48,6 +49,7 @@ class Abstract;
 }
 
 class Statement;
+class StatementParameters;
 class FailRecoveryHandler;
 class StatementTranslator;
 class ErrorCodeInterpreter;
@@ -139,12 +141,12 @@ public:
    const_connection_iterator connection_end() const noexcept { return m_connections.end(); }
    static const std::shared_ptr<Connection>& connection(const_connection_iterator ii) noexcept { return std::ref(*ii); }
 
-   std::shared_ptr<Statement> createStatement(const char* name, const char* expression, const ActionOnError::_v actionOnError = ActionOnError::Rollback)
+   std::shared_ptr<Statement> createStatement(const char* name, const char* expression, const StatementParameters& parameters = defaultParameters)
       throw(adt::RuntimeException);
-   std::shared_ptr<Statement> createStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError = ActionOnError::Rollback)
+   std::shared_ptr<Statement> createStatement(const char* name, const std::string& expression, const StatementParameters& parameters = defaultParameters)
       throw(adt::RuntimeException)
    {
-      return createStatement(name, expression.c_str(), actionOnError);
+      return createStatement(name, expression.c_str(), parameters);
    }
 
    std::shared_ptr<Statement>& findStatement(const char* name) throw(adt::RuntimeException);
@@ -233,6 +235,8 @@ protected:
    static std::shared_ptr<Statement>& statement(statement_iterator ii) noexcept { return std::ref(*ii); }
 
 private:
+   static StatementParameters defaultParameters;
+
    const std::string m_name;
    connection_container m_connections;
    statement_container m_statements;
@@ -243,7 +247,7 @@ private:
    virtual std::shared_ptr<Connection> allocateConnection(const std::string& name, const ConnectionParameters& parameters)
       throw(adt::RuntimeException) = 0;
 
-   virtual std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
+   virtual std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
       throw(adt::RuntimeException) = 0;
 
    virtual std::shared_ptr<binder::Input> allocateInputBind(std::shared_ptr<datatype::Abstract> data) const

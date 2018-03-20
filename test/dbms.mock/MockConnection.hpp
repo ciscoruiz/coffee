@@ -45,7 +45,7 @@ class MockConnection : public dbms::Connection {
 public:
    enum OpCode {  Write, Delete };
 
-   MockConnection(MockDatabase& database, const std::string& name, const char* user, const char* password);
+   MockConnection(MockDatabase& database, const std::string& name, const dbms::ConnectionParameters& parameters);
 
    int operation_size() const noexcept { return m_operations.size(); }
 

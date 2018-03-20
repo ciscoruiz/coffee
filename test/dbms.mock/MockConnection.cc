@@ -29,8 +29,8 @@
 
 using namespace coffee;
 
-mock::MockConnection::MockConnection (MockDatabase& database, const std::string& name, const char* user, const char* password) :
-   dbms::Connection (database, name, user, password),
+mock::MockConnection::MockConnection (MockDatabase& database, const std::string& name, const dbms::ConnectionParameters& parameters) :
+   dbms::Connection (database, name, parameters),
    m_container(database.m_container),
    m_isOpen(false)
 {

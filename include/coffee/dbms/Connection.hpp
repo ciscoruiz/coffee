@@ -43,6 +43,7 @@ namespace dbms {
 class Database;
 class Statement;
 class GuardConnection;
+class ConnectionParameters;
 
 /**
    Clase que modela la conexion con la base de datos.
@@ -80,20 +81,10 @@ public:
 
 protected:
    const Database& m_dbmsDatabase;
-   std::string m_user; /**< Nombre del usuario */
-   std::string m_password; /**< Clave de acceso del usuario. */
+   std::string m_user; /**< User name */
+   std::string m_password; /**< Password */
 
-   Connection(const Database& dbmsDatabase, const std::string& name, const char* user, const char* password) :
-      balance::Resource(name),
-      m_dbmsDatabase(dbmsDatabase),
-      m_user(user),
-      m_password(password),
-      m_lockingCounter(0),
-      m_commitPending(0),
-      m_rollbackPending(false),
-      m_maxCommitPending(0),
-      m_accesingCounter(0)
-   {}
+   Connection(const Database& dbmsDatabase, const std::string& name, const ConnectionParameters& parameters);
 
    int setMaxCommitPending(const int maxCommitPending) noexcept {
       const int result = m_maxCommitPending;

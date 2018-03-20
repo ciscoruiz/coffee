@@ -81,7 +81,7 @@ void sqlite::SqliteInputBinder::do_encode(Statement& statement, const int pos)
       case dbms::datatype::Abstract::Datatype::Date:
          {
             auto date = coffee_datatype_downcast(datatype::Date, data)->getValue();
-            const std::string text = adt::AsString::apply(date, "%Y-%m-%d %H:%M:%S");
+            const std::string text = adt::AsString::apply(date, datatype::Date::DefaultFormat);
             rc = sqlite3_bind_text(impl, pos + 1, text.c_str(), text.length(), SQLITE_TRANSIENT);
          }
          break;

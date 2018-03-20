@@ -35,6 +35,9 @@ using namespace coffee::dbms;
 
 using std::chrono::seconds;
 
+//static
+const char* datatype::Date::DefaultFormat = "%Y-%m-%dT%H:%M:%S";
+
 datatype::Date::Date (const char* name, const Constraint::_v constraint) :
    datatype::Abstract (name, Datatype::Date, MaxDateSize, constraint),
    m_value(seconds::zero())
@@ -84,6 +87,7 @@ void datatype::Date::setValue (const char* str, const char* format)
    }
 
    tm aux;
+   coffee_memset(&aux, 0, sizeof(aux));
    char* r = strptime (str, format, &aux);
 
    if (r == NULL ) {
@@ -97,9 +101,7 @@ void datatype::Date::setValue (const char* str, const char* format)
       COFFEE_THROW_EXCEPTION("'" << str << "' can not be treated as std::chrono::seconds '" << format << "'");
    }
 
-   // http://www.cplusplus.com/reference/chrono/system_clock/from_time_t/
-   this->isNotNull();
-   m_value = chrono::duration_cast<seconds>(chrono::system_clock::from_time_t(newValue).time_since_epoch());
+   setValue(std::chrono::seconds(newValue));
 }
 
 void datatype::Date::setValue (const std::chrono::seconds& value)

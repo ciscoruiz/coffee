@@ -30,8 +30,8 @@
 using namespace coffee;
 using namespace coffee::dbms;
 
-sqlite::SqliteConnection::SqliteConnection(const Database& database, const std::string& name, const char* user, const char* password) :
-   Connection(database, name, user, password),
+sqlite::SqliteConnection::SqliteConnection(const Database& database, const std::string& name, const ConnectionParameters& parameters) :
+   Connection(database, name, parameters),
    impl(nullptr)
 {
 }

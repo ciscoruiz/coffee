@@ -50,6 +50,7 @@ public:
     * Espacio maximo reservado para representar lo datos de una fecha sobre una cadena.
     */
    static const int MaxDateSize = 48;
+   static const char* DefaultFormat;
 
    explicit Date(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) ;
 
@@ -155,8 +156,6 @@ public:
 
         %%     Replaced by % .
        \endcode
-
-      Para obtener m�s informacion sobre la espeficacion de formato \em man \em strftime(p.e.).
    */
    void setValue(const char* str, const char* format) throw(adt::RuntimeException);
 

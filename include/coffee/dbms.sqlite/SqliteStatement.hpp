@@ -34,7 +34,7 @@ namespace sqlite {
 class SqliteStatement : public Statement {
 public:
    SqliteStatement(const Database& database, const char* name, const std::string& expression, const ActionOnError::_v actionOnError);
-   virtual ~SqliteStatement();
+   ~SqliteStatement();
 
    ::sqlite3_stmt* getImpl() { return impl; }
 

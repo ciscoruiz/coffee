@@ -10,7 +10,8 @@
 
 #include <coffee/dbms/Database.hpp>
 #include <coffee/dbms/Connection.hpp>
-#include "../../include/coffee/app/ApplicationServiceStarter.hpp"
+#include <coffee/dbms/ConnectionParameters.hpp>
+#include <coffee/app/ApplicationServiceStarter.hpp>
 
 template <class _T> struct MockDatabaseFixture {
    coffee::app::ApplicationServiceStarter app;
@@ -23,7 +24,8 @@ template <class _T> struct MockDatabaseFixture {
       thr = std::thread(dbmsParallelRun, std::ref(app));
       app.waitUntilRunning();
       BOOST_REQUIRE(database->isRunning());
-      connection = database->createConnection("0", "0", "0");
+      const coffee::dbms::ConnectionParameters parameters("0", "0");
+      connection = database->createConnection("0", parameters);
    }
 
    virtual ~MockDatabaseFixture() {

@@ -308,9 +308,11 @@ BOOST_AUTO_TEST_CASE(dbms_define_structure)
    app::ApplicationServiceStarter application("dbms_define_structure");
 
    auto database = test_dbms::MyDatabase::instantiate(application);
-   auto connection = database->createConnection("0", "0", "0");
 
-   BOOST_REQUIRE_THROW(database->createConnection("0", "bis0", "bis0"), adt::RuntimeException);
+   const coffee::dbms::ConnectionParameters zero("0", "0");
+   auto connection = database->createConnection("0", zero);
+
+   BOOST_REQUIRE_THROW(database->createConnection("0", coffee::dbms::ConnectionParameters ("bis00", "bis0")), adt::RuntimeException);
 
    auto findConnection = database->findConnection("0");
 
@@ -913,7 +915,7 @@ BOOST_AUTO_TEST_CASE(dbms_input_binder_out_range)
    auto database = test_dbms::MyDatabase::instantiate(application);
    auto stWriter = database->createStatement("the_write", "write");
    auto stReader = database->createStatement("the_read", "read");
-   auto connection = database->createConnection("0", "0", "0");
+   auto connection = database->createConnection("0", coffee::dbms::ConnectionParameters ("0", "0"));
 
    dbms::GuardConnection guard(connection);
    dbms::GuardStatement writer(guard, stWriter);
@@ -951,7 +953,7 @@ BOOST_AUTO_TEST_CASE(dbms_database_asXML)
    app::ApplicationServiceStarter application("dbms_database_asXML");
    auto database = test_dbms::MyDatabase::instantiate(application);
 
-   database->createConnection("connection0", "user0", "password0");
+   database->createConnection("connection0", coffee::dbms::ConnectionParameters ("user0", "password0"));
    database->createStatement("the_write", "write");
    database->createStatement("the_read", "read");
 

@@ -54,7 +54,7 @@ private:
 
    explicit SqliteDatabase(app::Application& application, const boost::filesystem::path& dbFile);
 
-   std::shared_ptr<Connection> allocateConnection(const std::string& name, const char* user, const char* password)
+   std::shared_ptr<Connection> allocateConnection(const std::string& name, const ConnectionParameters& parameters)
       throw(adt::RuntimeException);
 
    std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)

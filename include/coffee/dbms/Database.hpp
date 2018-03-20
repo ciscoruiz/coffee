@@ -51,6 +51,7 @@ class Statement;
 class FailRecoveryHandler;
 class StatementTranslator;
 class ErrorCodeInterpreter;
+class ConnectionParameters;
 
 /**
    Class for modeling access to any kind of Database
@@ -117,16 +118,16 @@ public:
    /**
     * Create a new connection.
     */
-   std::shared_ptr<Connection> createConnection(const char* name, const char* user, const char* password)
+   std::shared_ptr<Connection> createConnection(const char* name, const ConnectionParameters& parameters)
       throw(adt::RuntimeException, DatabaseException);
 
    /**
     * Create a new connection.
     */
-   std::shared_ptr<Connection> createConnection(const std::string& name, const char* user, const char* password)
+   std::shared_ptr<Connection> createConnection(const std::string& name, const ConnectionParameters& parameters)
       throw(adt::RuntimeException, DatabaseException)
    {
-      return createConnection(name.c_str(), user, password);
+      return createConnection(name.c_str(), parameters);
    }
 
    /**
@@ -239,7 +240,7 @@ private:
    std::shared_ptr<StatementTranslator> m_statementTranslator;
    std::shared_ptr<ErrorCodeInterpreter> m_errorCodeInterpreter;
 
-   virtual std::shared_ptr<Connection> allocateConnection(const std::string& name, const char* user, const char* password)
+   virtual std::shared_ptr<Connection> allocateConnection(const std::string& name, const ConnectionParameters& parameters)
       throw(adt::RuntimeException) = 0;
 
    virtual std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)

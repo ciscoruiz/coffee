@@ -39,6 +39,7 @@
 #include <coffee/dbms/GuardConnection.hpp>
 #include <coffee/dbms/GuardStatement.hpp>
 #include <coffee/dbms/Connection.hpp>
+#include <coffee/dbms/ConnectionParameters.hpp>
 #include <coffee/dbms/Statement.hpp>
 #include <coffee/dbms/datatype/String.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
@@ -207,7 +208,7 @@ struct SqliteFixture  {
       app.waitUntilRunning();
       BOOST_REQUIRE(database->isRunning());
       boost::filesystem::remove(dbPath);
-      connection = database->createConnection("first", "user:first", "none");
+      connection = database->createConnection("first", coffee::dbms::ConnectionParameters("user:first", "none"));
       BOOST_REQUIRE_EQUAL(boost::filesystem::exists(dbPath), true);
       BOOST_REQUIRE_EQUAL(connection->isAvailable(), true);
 
@@ -243,7 +244,7 @@ boost::filesystem::path SqliteFixture::dbPath("/tmp/sqlite_test.db");
 
 BOOST_FIXTURE_TEST_CASE(sqlite_create_db, SqliteFixture)
 {
-   auto secondConnection = database->createConnection("second", "user:second", "none");
+   auto secondConnection = database->createConnection("second", coffee::dbms::ConnectionParameters("user:second", "none"));
    BOOST_REQUIRE_EQUAL(secondConnection->isAvailable(), true);
 }
 
@@ -271,8 +272,7 @@ boost::filesystem::path SqliteFixtureBadPath::dbBadPath("/root");
 BOOST_FIXTURE_TEST_CASE(sqlite_connection_badpath, SqliteFixtureBadPath)
 {
    BOOST_REQUIRE(database->isRunning());
-   std::shared_ptr<dbms::Connection> connection;
-   BOOST_REQUIRE_THROW(connection = database->createConnection("closed", "user:first", "none"), dbms::DatabaseException);
+   BOOST_REQUIRE_THROW(database->createConnection("db_is_not_working", coffee::dbms::ConnectionParameters ("user:first", "none")), dbms::DatabaseException);
 }
 
 BOOST_FIXTURE_TEST_CASE(undefined_column_select, SqliteFixture)
@@ -407,7 +407,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_insert, SqliteFixture)
       BOOST_REQUIRE(rc.successful());
    }
 
-   auto secondConnection = database->createConnection("second", "user:second", "none");
+   auto secondConnection = database->createConnection("second", coffee::dbms::ConnectionParameters("user:second", "none"));
 
    {
       dbms::GuardConnection guardConnection(secondConnection);
@@ -492,7 +492,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_reuse_sentence, SqliteFixture)
       BOOST_REQUIRE_EQUAL(ageCounter.outputId->getValue(), 4);
    }
 
-   auto secondConnection = database->createConnection("second", "user:second", "none");
+   auto secondConnection = database->createConnection("second", coffee::dbms::ConnectionParameters("user:second", "none"));
 
    {
       dbms::GuardConnection guardConnection(secondConnection);

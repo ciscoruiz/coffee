@@ -35,14 +35,14 @@
 #include <coffee/xml/Node.hpp>
 #include <coffee/xml/Attribute.hpp>
 
+#include <coffee/dbms/Database.hpp>
 #include <coffee/dbms/Statement.hpp>
 #include <coffee/dbms/Connection.hpp>
-
+#include <coffee/dbms/ConnectionParameters.hpp>
 #include <coffee/dbms/FailRecoveryHandler.hpp>
 #include <coffee/dbms/StatementTranslator.hpp>
 #include <coffee/dbms/SCCS.hpp>
 
-#include <coffee/dbms/Database.hpp>
 
 using namespace std;
 using namespace coffee;
@@ -111,12 +111,12 @@ void dbms::Database::do_stop()
    m_statements.clear();
 }
 
-std::shared_ptr<dbms::Connection> dbms::Database::createConnection(const char* name, const char* user, const char* password)
+std::shared_ptr<dbms::Connection> dbms::Database::createConnection(const char* name, const ConnectionParameters& parameters)
    throw(adt::RuntimeException, dbms::DatabaseException)
 {
    logger::TraceMethod ttmm(logger::Level::Local7, COFFEE_FILE_LOCATION);
 
-   LOG_DEBUG("Name=" << name << " | User=" << user);
+   LOG_DEBUG("Name=" << name << " | User=" << parameters.getUser());
 
    if(m_connections.size() >= MaxConnection) {
       COFFEE_THROW_EXCEPTION(asString() << " Can not create more than " << MaxConnection);
@@ -130,7 +130,7 @@ std::shared_ptr<dbms::Connection> dbms::Database::createConnection(const char* n
 
    string strname(name);
 
-   std::shared_ptr<Connection> result = allocateConnection(strname, user, password);
+   std::shared_ptr<Connection> result = allocateConnection(strname, parameters);
 
    LOG_DEBUG(result->asString());
 

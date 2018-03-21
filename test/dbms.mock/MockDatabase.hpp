@@ -69,7 +69,7 @@ private:
    };
 
    std::shared_ptr<dbms::Connection> allocateConnection(const std::string& name, const dbms::ConnectionParameters& parameters)
-      throw(adt::RuntimeException)
+      throw(adt::RuntimeException, std::bad_cast)
    {
       return std::make_shared<mock::MockConnection>(std::ref(*this), name, parameters);
    }

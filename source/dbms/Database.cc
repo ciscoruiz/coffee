@@ -132,23 +132,30 @@ std::shared_ptr<dbms::Connection> dbms::Database::createConnection(const char* n
 
    string strname(name);
 
-   std::shared_ptr<Connection> result = allocateConnection(strname, parameters);
+   std::shared_ptr<Connection> result;
 
-   LOG_DEBUG(result->asString());
+   try {
+      result = allocateConnection(strname, parameters);
 
-   if(this->isRunning() == true) {
-      try {
-         result->open();
+      LOG_DEBUG(result->asString());
+
+      if(this->isRunning() == true) {
+         try {
+            result->open();
+            m_connections.push_back(result);
+         }
+         catch(adt::Exception& ex) {
+            logger::Logger::write(ex);
+            result.reset();
+            throw;
+         }
+      }
+      else
          m_connections.push_back(result);
-      }
-      catch(adt::Exception& ex) {
-         logger::Logger::write(ex);
-         result.reset();
-         throw;
-      }
    }
-   else
-      m_connections.push_back(result);
+   catch(std::bad_cast& ex) {
+      throw adt::RuntimeException(ex.what(), COFFEE_FILE_LOCATION);
+   }
 
    LOG_DEBUG(result->asString());
 
@@ -184,11 +191,16 @@ std::shared_ptr<dbms::Statement> dbms::Database::createStatement(const char* nam
    if(m_statementTranslator)
       expression = m_statementTranslator->apply(expression);
 
-   std::shared_ptr<Statement> result = allocateStatement(name, expression, parameters);
+   std::shared_ptr<Statement> result;
 
-   LOG_DEBUG(result->asString());
-
-   m_statements.push_back(result);
+   try {
+      result = allocateStatement(name, expression, parameters);
+      LOG_DEBUG(result->asString());
+      m_statements.push_back(result);
+   }
+   catch(std::bad_cast& ex) {
+      throw adt::RuntimeException(ex.what(), COFFEE_FILE_LOCATION);
+   }
 
    return result;
 }

@@ -59,13 +59,13 @@ sqlite::SqliteDatabase::~SqliteDatabase()
 }
 
 std::shared_ptr<Connection> sqlite::SqliteDatabase::allocateConnection(const std::string& name, const ConnectionParameters& parameters)
-   throw(adt::RuntimeException)
+   throw(adt::RuntimeException, std::bad_cast)
 {
    return std::make_shared<sqlite::SqliteConnection>(*this, name, parameters);
 }
 
 std::shared_ptr<Statement> sqlite::SqliteDatabase::allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
-   throw(adt::RuntimeException)
+   throw(adt::RuntimeException, std::bad_cast)
 {
    return std::make_shared<sqlite::SqliteStatement>(*this, name, expression, parameters);
 }

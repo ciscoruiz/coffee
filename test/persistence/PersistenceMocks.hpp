@@ -120,7 +120,7 @@ private:
       }
    }
    std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
-      throw(adt::RuntimeException)
+      throw(std::bad_cast)
    {
       std::shared_ptr<Statement> result;
 
@@ -131,7 +131,7 @@ private:
          result = std::make_shared<MyWriteStatement>(*this, name, expression.c_str(), parameters);
 
       if(!result)
-         COFFEE_THROW_EXCEPTION(name << " invalid statement");
+         throw std::bad_cast();
 
       return result;
    }

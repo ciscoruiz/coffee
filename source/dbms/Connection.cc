@@ -24,6 +24,7 @@
 #include <coffee/config/defines.hpp>
 
 #include <coffee/logger/TraceMethod.hpp>
+#include <coffee/logger/Logger.hpp>
 
 #include <coffee/xml/Node.hpp>
 #include <coffee/xml/Attribute.hpp>
@@ -36,17 +37,19 @@
 using namespace std;
 using namespace coffee;
 
-dbms::Connection::Connection(const Database& dbmsDatabase, const std::string& name, const dbms::ConnectionParameters& parameter) :
+dbms::Connection::Connection(const Database& dbmsDatabase, const std::string& name, const dbms::ConnectionParameters& parameters) :
    balance::Resource(name),
    m_dbmsDatabase(dbmsDatabase),
-   m_user(parameter.getUser()),
-   m_password(parameter.getPassword()),
+   m_user(parameters.getUser()),
+   m_password(parameters.getPassword()),
    m_lockingCounter(0),
    m_commitPending(0),
    m_rollbackPending(false),
    m_maxCommitPending(0),
    m_accesingCounter(0)
-{}
+{
+   LOG_DEBUG("Name=" << name << " | " << parameters.asString());
+}
 
 //-----------------------------------------------------------------------------------------------------------
 //(1) Si no tiene variables de salida => consideramos que es un update, insert o delete.

@@ -23,6 +23,7 @@
 #ifndef _coffee_dbms_ConnectionParameter_h
 #define _coffee_dbms_ConnectionParameter_h
 
+#include <coffee/adt/StreamString.hpp>
 
 namespace coffee {
 
@@ -35,6 +36,12 @@ public:
 
    const std::string& getUser() const noexcept { return m_user; }
    const std::string& getPassword() const noexcept { return m_password; }
+
+   virtual adt::StreamString asString() const noexcept {
+      adt::StreamString result("dbms.ConnectionParameters { ");
+      result << "User=" << m_user;
+      return result << " }";
+   }
 
 private:
    std::string m_user; /**< Nombre del usuario */

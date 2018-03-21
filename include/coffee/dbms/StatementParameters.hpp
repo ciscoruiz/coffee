@@ -23,6 +23,7 @@
 #ifndef _coffee_dbms_StatementParameter_h
 #define _coffee_dbms_StatementParameter_h
 
+#include <coffee/adt/StreamString.hpp>
 #include <coffee/dbms/ActionOnError.hpp>
 
 namespace coffee {
@@ -33,10 +34,15 @@ class StatementParameters {
 public:
    StatementParameters() : actionOnError(ActionOnError::Rollback) {;}
    explicit StatementParameters(const ActionOnError::_v _actionOnError ) : actionOnError(_actionOnError) {;}
-
    virtual ~StatementParameters() { ; }
 
    const ActionOnError::_v getActionOnError() const noexcept { return actionOnError; }
+
+   virtual adt::StreamString asString() const noexcept {
+      adt::StreamString result("dbms.StatementParameters { ");
+      result << "ActionOnError=" << (actionOnError == ActionOnError::Ignore ? "Ignore": "Rollback");
+      return result << " }";
+   }
 
 private:
    const ActionOnError::_v actionOnError;

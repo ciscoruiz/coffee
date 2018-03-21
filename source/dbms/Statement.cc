@@ -46,6 +46,7 @@ Statement::Statement(const Database& database, const char* name, const char* exp
    m_requiresCommit(false),
    m_isPrepared(false)
 {
+   LOG_DEBUG("Name=" << name << " | " << parameters.asString());
 }
 
 // virtual

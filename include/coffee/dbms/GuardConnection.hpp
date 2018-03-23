@@ -29,12 +29,14 @@
 
 #include <coffee/adt/RuntimeException.hpp>
 #include <coffee/dbms/ResultCode.hpp>
+#include <coffee/dbms/DatabaseException.hpp>
 
 namespace coffee {
 namespace dbms {
 
 class Connection;
 class GuardStatement;
+class Statement;
 
 class GuardConnection {
 public:

@@ -46,23 +46,23 @@ public:
 private:
    const std::string base;
    const LdapStatementParameters::Scope::_v scope;
-   const std::string filter;
    const bool attrOnly;
    timeval timeout;
    const int sizeLimit;
    std::vector<std::string> boundValues;
    LDAP* handle;
    LDAPMessage* result;
-   LDAPMessage* pos;
+   LDAPMessage* currentEntry;
 
    LDAP* getHandle() noexcept { return handle; }
-   LDAPMessage* getMessage() noexcept { return pos; }
+   LDAPMessage* getCurrentEntry() noexcept { return currentEntry; }
    void setBoundValue(const std::string& boundValue) noexcept { boundValues.push_back(boundValue); }
 
    void do_prepare(Connection& connection) throw(adt::RuntimeException, DatabaseException) {;}
    ResultCode do_execute(Connection& connection) throw(adt::RuntimeException, DatabaseException);
    bool do_fetch() throw(adt::RuntimeException, DatabaseException);
    void close() noexcept;
+   std::string getDn(LDAPMessage* entry) noexcept;
 
    friend class LdapInputBinder;
    friend class LdapOutputBinder;

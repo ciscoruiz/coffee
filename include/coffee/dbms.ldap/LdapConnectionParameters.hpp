@@ -33,7 +33,7 @@ namespace ldap {
 
 class LdapConnectionParameters : public ConnectionParameters {
 public:
-   struct Version {
+   struct ProtocolVersion {
       enum _v {
          V2 = LDAP_VERSION2,
          V3 = LDAP_VERSION3
@@ -42,17 +42,27 @@ public:
 
    LdapConnectionParameters(const char* user, const char* password) :
       ConnectionParameters(user, password),
-      version(Version::V3)
+      protocolVersion(ProtocolVersion::V3),
+      useTLS(false)
    {}
 
-   LdapConnectionParameters& setVersion(const Version::_v version) noexcept { this->version = version; return *this; }
+   LdapConnectionParameters& setVersion(const ProtocolVersion::_v version) noexcept { this->protocolVersion = version; return *this; }
+   LdapConnectionParameters& setUseTLS(const bool value) noexcept { useTLS = value; return *this; }
 
-   const char* getDN() const noexcept { return NULL; }
+   ProtocolVersion::_v getProtocolVersion() const noexcept { return protocolVersion; }
+   bool getUseTLS() const noexcept { return useTLS; }
 
-   Version::_v getVersion() const noexcept { return version; }
+   virtual adt::StreamString asString() const noexcept {
+      adt::StreamString result("dbms.LdapConnectionParameters { ");
+      result << ConnectionParameters::asString();
+      result << " | ProtocolVersion=" << (protocolVersion == ProtocolVersion::V2 ? "V2": "V3") << "(" << (int) protocolVersion << ")";
+      result << " | UseTLS=" << useTLS;
+      return result << " }";
+   }
 
 private:
-   Version::_v version;
+   ProtocolVersion::_v protocolVersion;
+   bool useTLS;
 };
 
 }

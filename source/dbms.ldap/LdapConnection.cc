@@ -35,9 +35,9 @@ using coffee::dbms::ldap::LdapConnection;
 
 LdapConnection::LdapConnection(const Database& database, const std::string& name, const ConnectionParameters& parameters) :
    Connection(database, name, parameters),
-   dn(dynamic_cast<const LdapConnectionParameters&>(parameters).getDN()),
-   protocolVersion(dynamic_cast<const LdapConnectionParameters&>(parameters).getVersion()),
-   impl(nullptr)
+   protocolVersion(dynamic_cast<const LdapConnectionParameters&>(parameters).getProtocolVersion()),
+   useTLS(dynamic_cast<const LdapConnectionParameters&>(parameters).getUseTLS()),
+   ldapHandle(nullptr)
 {
 }
 
@@ -49,10 +49,27 @@ LdapConnection::~LdapConnection()
 void LdapConnection::open()
    throw(DatabaseException)
 {
-   checkResult(ldap_initialize(&impl, getDatabase().getName().c_str()));
+   checkResult(ldap_initialize(&ldapHandle, getDatabase().getName().c_str()), COFFEE_FILE_LOCATION);
+
+   if (ldapHandle == nullptr) {
+      COFFEE_THROW_EXCEPTION("Can not access to " << getDatabase().getName());
+   }
 
    int version = protocolVersion;
-   checkResult(ldap_set_option(impl, LDAP_OPT_PROTOCOL_VERSION, &version));
+   checkResult(ldap_set_option(ldapHandle, LDAP_OPT_PROTOCOL_VERSION, &version), COFFEE_FILE_LOCATION);
+
+   if (useTLS) {
+      int rc = ldap_start_tls_s(ldapHandle, NULL, NULL);
+
+      if (rc == LDAP_CONNECT_ERROR) {
+         char* errorMessage;
+         ldap_get_option(ldapHandle, LDAP_OPT_DIAGNOSTIC_MESSAGE, (void*)&errorMessage);
+         adt::RuntimeException ex(std::string(errorMessage), COFFEE_FILE_LOCATION);
+         ldap_memfree(errorMessage);
+         throw ex;
+      }
+      checkResult(rc, COFFEE_FILE_LOCATION);
+   }
 
    const char* _user = (getPassword().empty()) ? nullptr: getPassword().c_str();
    const char* _password = (getPassword().empty()) ? nullptr: getPassword().c_str();
@@ -63,15 +80,15 @@ void LdapConnection::open()
    userCrendential.bv_len = coffee_strlen(userCrendential.bv_val);
    BerValue *serverCredential;
 
-   checkResult(ldap_sasl_bind_s(impl, dn, LDAP_SASL_SIMPLE, &userCrendential, NULL, NULL, &serverCredential));
+   checkResult(ldap_sasl_bind_s(ldapHandle, getUser().c_str(), LDAP_SASL_SIMPLE, &userCrendential, NULL, NULL, &serverCredential), COFFEE_FILE_LOCATION);
 }
 
 void LdapConnection::close()
    noexcept
 {
-   if (impl != nullptr) {
-      ldap_unbind_ext_s (impl, NULL, NULL);
-      impl = nullptr;
+   if (ldapHandle) {
+      ldap_unbind_ext_s (ldapHandle, NULL, NULL);
+      ldapHandle = nullptr;
    }
 }
 
@@ -81,12 +98,12 @@ void LdapConnection::do_rollback()
    LOG_WARN("No rollback can be done in LDAP");
 }
 
-void LdapConnection::checkResult(const int rc)
+void LdapConnection::checkResult(const int rc, const char *method, const char* file, const int line)
    throw (DatabaseException)
 {
    if (rc != LDAP_SUCCESS) {
       close();
       ResultCode resultCode(getDatabase(), rc, ldap_err2string(rc));
-      COFFEE_THROW_DB_EXCEPTION(resultCode);
+      throw coffee::dbms::DatabaseException (resultCode, method, file, line);
    }
 }

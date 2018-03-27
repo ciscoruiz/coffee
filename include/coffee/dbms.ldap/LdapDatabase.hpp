@@ -53,13 +53,13 @@ private:
       bool lostConnection(const int errorCode) const throw(adt::RuntimeException);
    };
 
-   explicit LdapDatabase(app::Application& application, const std::string& url);
+   LdapDatabase(app::Application& application, const std::string& url);
 
    std::shared_ptr<Connection> allocateConnection(const std::string& name, const ConnectionParameters& parameters)
-      throw(adt::RuntimeException);
+      throw(adt::RuntimeException, std::bad_cast);
 
    std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
-      throw(adt::RuntimeException);
+      throw(adt::RuntimeException, std::bad_cast);
 
    std::shared_ptr<binder::Input> allocateInputBind(std::shared_ptr<datatype::Abstract> data) const
       throw(adt::RuntimeException);

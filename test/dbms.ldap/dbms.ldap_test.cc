@@ -21,40 +21,6 @@
 // SOFTWARE.
 //
 
-#ifndef _coffee_dbms_ldap_LdapConnection_hpp_
-#define _coffee_dbms_ldap_LdapConnection_hpp_
+#define BOOST_TEST_MODULE COFFEE_DBMS_LDAP_TEST
 
-#include <ldap.h>
-
-#include <coffee/dbms/Connection.hpp>
-
-namespace coffee {
-namespace dbms {
-namespace ldap {
-
-class LdapConnection : public Connection {
-public:
-   LdapConnection(const Database& dbmsDatabase, const std::string& name, const ConnectionParameters& parameters);
-   ~LdapConnection();
-
-   LDAP* getImpl() { return ldapHandle; }
-
-private:
-   const int protocolVersion;
-   const bool useTLS;
-   LDAP* ldapHandle;
-
-   void open() throw(DatabaseException);
-   void close() noexcept;
-   bool isAvailable () const noexcept  { return ldapHandle != nullptr;  }
-   void do_commit() throw(adt::RuntimeException, DatabaseException) { ; }
-   void do_rollback() noexcept;
-
-   void checkResult(const int rc, const char *method, const char* file, const int line) throw (DatabaseException);
-};
-
-} /* namespace ldap */
-} /* namespace dbms */
-} /* namespace coffee */
-
-#endif
+#include <boost/test/included/unit_test.hpp>

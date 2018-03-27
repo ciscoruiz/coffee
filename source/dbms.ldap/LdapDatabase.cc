@@ -61,13 +61,13 @@ LdapDatabase::~LdapDatabase()
 }
 
 std::shared_ptr<Connection> LdapDatabase::allocateConnection(const std::string& name, const ConnectionParameters& parameters)
-   throw(adt::RuntimeException)
+   throw(adt::RuntimeException, std::bad_cast)
 {
    return std::make_shared<LdapConnection>(*this, name, parameters);
 }
 
 std::shared_ptr<Statement> LdapDatabase::allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
-   throw(adt::RuntimeException)
+   throw(adt::RuntimeException, std::bad_cast)
 {
    return std::make_shared<LdapStatement>(*this, name, expression, parameters);
 }

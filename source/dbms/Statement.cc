@@ -161,17 +161,16 @@ bool Statement::fetch()
 {
    LOG_THIS_METHOD();
 
-   bool result;
-
-   if((result = do_fetch()) == true) {
+   if(do_fetch()) {
       int pos = 0;
       for(auto& oo : m_outputBinds) {
          oo->do_decode(*this, pos ++);
          LOG_DEBUG(oo->asString());
       }
+      return true;
    }
 
-   return result;
+   return false;
 }
 
 adt::StreamString Statement::asString() const

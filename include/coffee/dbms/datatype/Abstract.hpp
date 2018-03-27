@@ -53,7 +53,8 @@ public:
          ShortBlock,  /**< Memory block datatype */
          LongBlock,  /**< Big memory block datatype */
          Date, /** Date data type */
-         TimeStamp /** Epoch data type */
+         TimeStamp, /** Epoch data type */
+         MultiString /** A data type which has a lot of values */
       };
    };
 

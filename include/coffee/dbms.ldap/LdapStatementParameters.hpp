@@ -46,21 +46,27 @@ public:
       baseDN(_baseDN),
       scope(Scope::Base),
       attrOnly(false),
-      sizeLimit(0)
+      sizeLimit(LDAP_NO_LIMIT)
    {}
 
-   LdapStatementParameters& setBaseDN(const std::string& baseDN) noexcept { this->baseDN = baseDN; return *this; }
    LdapStatementParameters& setScope(const Scope::_v scope) noexcept { this->scope = scope; return *this; }
    LdapStatementParameters& setAttrOnly(const bool attrOnly) noexcept { this->attrOnly = attrOnly; return *this; }
    LdapStatementParameters& setSizeLimit(const int sizeLimit) noexcept { this->sizeLimit = sizeLimit; return *this; }
 
    const std::string& getBaseDN() const noexcept { return baseDN; }
-
-   bool getAttrOnly() const noexcept { return attrOnly; }
-
    Scope::_v getScope() const noexcept { return scope; }
-
+   bool getAttrOnly() const noexcept { return attrOnly; }
    int getSizeLimit() const noexcept { return sizeLimit; }
+
+   adt::StreamString asString() const noexcept {
+      adt::StreamString result("dbms.ldap.LdapStatementParameters {");
+      result << StatementParameters::asString();
+      result << " | BaseDN=" << baseDN;
+      result << " | Scope=" << (scope == Scope::Base ? "Base": (scope == Scope::OneLevel ? "OneLevel": "SubTree"));
+      result << " | AttrOnly=" << attrOnly;
+      result << " | SizeLimit=" << sizeLimit;
+      return result << " }";
+   }
 
 private:
    std::string baseDN;

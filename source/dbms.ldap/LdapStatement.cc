@@ -23,6 +23,9 @@
 
 #include <coffee/adt/StreamString.hpp>
 
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
+
 #include <coffee/dbms/ResultCode.hpp>
 
 #include <coffee/dbms.ldap/LdapStatement.hpp>
@@ -41,7 +44,8 @@ LdapStatement::LdapStatement(const Database& database, const char* name, const s
    attrOnly(dynamic_cast<const LdapStatementParameters&>(parameters).getAttrOnly()),
    sizeLimit(dynamic_cast<const LdapStatementParameters&>(parameters).getSizeLimit()),
    result(nullptr),
-   handle(nullptr)
+   handle(nullptr),
+   currentEntry(nullptr)
 {
 }
 
@@ -53,33 +57,38 @@ LdapStatement::~LdapStatement()
 ResultCode LdapStatement::do_execute(Connection& connection)
    throw(adt::RuntimeException, DatabaseException)
 {
+   LOG_THIS_METHOD();
+
    close();
 
    handle = static_cast <LdapConnection&>(connection).getImpl();
 
+   const char* _filter = (getExpression().empty()) ? nullptr: getExpression().c_str();
+
+   char** attributes;
+
    if (boundValues.size() == 0) {
-      COFFEE_THROW_EXCEPTION(asString() << " does not have any bound value");
+      attributes = new char*[2];
+      attributes[0] = (char*)LDAP_ALL_USER_ATTRIBUTES;
+      attributes[1] = nullptr;
+   }
+   else {
+      attributes = new char*[boundValues.size()+1];
+      int index = 0;
+      for (auto ii = boundValues.begin(), maxii = boundValues.end(); ii != maxii; ++ ii, ++ index) {
+         attributes[index] =  const_cast <char*> (ii->c_str());
+      }
+      attributes[index] = nullptr;
    }
 
-   const char* _filter = (filter.empty()) ? nullptr: filter.c_str();
-   char** attributes = new char*[boundValues.size()];
-   int index = 0;
-   for (auto ii = boundValues.begin(), maxii = boundValues.end(); ii != maxii; ++ ii, ++ index) {
-      attributes[index] =  const_cast <char*> (ii->c_str());
-   }
-   attributes[index] = nullptr;
-
-   int rc = ldap_search_ext_s(handle, base.c_str (), scope, _filter, attributes, attrOnly, NULL, NULL, &timeout, sizeLimit, &result);
+   int rc = ldap_search_ext_s(handle, base.c_str (), scope, _filter, attributes, attrOnly, NULL, NULL, NULL, sizeLimit, &result);
 
    delete []attributes;
 
    if (rc == LDAP_SUCCESS) {
-      if (!ldap_count_entries(handle, result) == 0) {
+      if (!ldap_count_entries(handle, result)) {
          ldap_msgfree(result);
          rc = LDAP_NO_SUCH_OBJECT;
-      }
-      else {
-         pos = ldap_first_entry(handle, result);
       }
    }
 
@@ -89,24 +98,44 @@ ResultCode LdapStatement::do_execute(Connection& connection)
 bool LdapStatement::do_fetch()
    throw(adt::RuntimeException, DatabaseException)
 {
-   auto copy = pos;
-   pos = ldap_next_entry(handle, copy);
-   ldap_memfree(copy);
-   return pos != nullptr;
+   if (!result)
+      return false;
+
+   if (!currentEntry) {
+      currentEntry = ldap_first_entry(handle, result);
+   }
+   else {
+      auto copy = currentEntry;
+      currentEntry = ldap_next_entry(handle, copy);
+      ldap_memfree(copy);
+   }
+
+   LOG_DEBUG("Dn=" << getDn(currentEntry));
+
+   return currentEntry != nullptr;
 }
 
 void LdapStatement::close()
    noexcept
 {
+   if (currentEntry) {
+      ldap_memfree(currentEntry);
+      currentEntry = nullptr;
+   }
+
    handle = nullptr;
+}
 
-   if(result) {
-      ldap_msgfree(result);
-      result = nullptr;
+std::string LdapStatement::getDn(LDAPMessage* entry)
+   noexcept
+{
+   std::string result("<no-enry>");
+
+   if (entry) {
+      char* dn = ldap_get_dn(handle, currentEntry);
+      result = dn;
+      ldap_memfree(dn);
    }
 
-   if (pos) {
-      ldap_msgfree(pos);
-      pos = nullptr;
-   }
+   return result;
 }

@@ -26,6 +26,8 @@
 
 #include <coffee/adt/DataBlock.hpp>
 
+#include <coffee/logger/Logger.hpp>
+
 #include <coffee/dbms.ldap/LdapOutputBinder.hpp>
 #include <coffee/dbms.ldap/LdapStatement.hpp>
 
@@ -39,6 +41,7 @@
 #include <coffee/dbms/datatype/LongBlock.hpp>
 #include <coffee/dbms/datatype/Date.hpp>
 #include <coffee/dbms/datatype/TimeStamp.hpp>
+#include <coffee/dbms/datatype/MultiString.hpp>
 
 using namespace coffee;
 using namespace coffee::dbms;
@@ -51,54 +54,32 @@ void LdapOutputBinder::do_decode(Statement& _statement, const int pos)
    std::shared_ptr<datatype::Abstract>& data(getData());
    LdapStatement& statement = static_cast<LdapStatement&>(_statement);
    auto handle = statement.getHandle();
-   auto entry = statement.getMessage();
-   BerElement* ber;
+   auto entry = statement.getCurrentEntry();
 
-   auto attribute = ldap_first_attribute(handle, entry, &ber);
+   auto multiValue = coffee_datatype_downcast(datatype::MultiString, data);
 
-   if (attribute == nullptr) {
-      data->isNull();
+   multiValue->clear();
+
+   LOG_DEBUG("Reading " << getData()->asString());
+
+   auto values = ldap_get_values_len(handle, entry, getData()->getName());
+
+   if (values == nullptr) {
+      LOG_WARN(getData()->asString() << " was not found is the LDAP result");
       return;
    }
 
-   auto values = ldap_get_values_len(handle, entry, attribute);
-
-   const int maxValues = ldap_count_values_len(values);
-
-   if (maxValues <= pos) {
+   try {
+      for (int ii = 0, maxii = ldap_count_values_len(values); ii < maxii; ++ ii) {
+         LOG_DEBUG("Index=" << ii << " | Value=" << values[ii]->bv_val);
+         multiValue->addValue(values[ii]->bv_val);
+      }
       ldap_value_free_len(values);
-      COFFEE_THROW_EXCEPTION("Position=" << pos << " is out or range for MaxRange=" << maxValues);
    }
-
-   const char* value = values[pos]->bv_val;
-
-   switch(data->getType()) {
-   case dbms::datatype::Abstract::Datatype::Integer:
-      coffee_datatype_downcast(datatype::Integer, data)->setValue(atoi(value));
-      break;
-   case dbms::datatype::Abstract::Datatype::String:
-      coffee_datatype_downcast(datatype::String, data)->setValue(value);
-      break;
-   case dbms::datatype::Abstract::Datatype::Float:
-      coffee_datatype_downcast(datatype::Float, data)->setValue(atof(value));
-      break;
-   case dbms::datatype::Abstract::Datatype::ShortBlock:
-   case dbms::datatype::Abstract::Datatype::LongBlock:
-      break;
-   case dbms::datatype::Abstract::Datatype::Date:
-      {
-         coffee_datatype_downcast(datatype::Date, data)->setValue(value, datatype::Date::DefaultFormat);
-      }
-      break;
-   case dbms::datatype::Abstract::Datatype::TimeStamp:
-      {
-         int64_t i64;
-         sscanf(value, "%" SCNd64, &i64);
-         std::chrono::seconds value(i64);
-         coffee_datatype_downcast(datatype::TimeStamp, data)->setValue(value);
-      }
-      break;
+   catch(adt::RuntimeException& ex) {
+      ldap_value_free_len(values);
+      throw;
    }
-
-   ldap_value_free_len(values);
 }
+
+

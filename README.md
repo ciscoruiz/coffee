@@ -25,7 +25,7 @@ This framework contains a set of modules to boost productivity while developing 
 | coffee.balance | Module for share load between a set of resources, it implements three different strategies and it does easy to write your own. A database connection will be a resource inherited from this kind of resource. |
 | coffee.app | Define classes to make easy to run an application with lots of services. It deal with internal dependencias between services. One service is a large functionality which can depend on other services. An example of service could be one database or one communication system. |
 | coffee.dbms | **D**ata**B**ase **M**anager **S**ystem. It defines a common interface for work with any database you need (MySQL, PostgreSQL and more). |
-| coffee.time | Service to manage asynchronuos time events. |
+| coffee.time | Service to manage asynchronuos time events. You have to define a valid TZ environment variable to run its unit tests |
 | coffee.dbms.sqlite | Module to work with SQLite3 database. |
 | coffee.dbms.ldap | Module to work with LDAP directory. |
 | coffee.persistence | High Level of classes to work over a database without has to deal with SQL sentences, transactions and so on, it will work with classes, primrary keys and object that will be read/write from the DBMS. |

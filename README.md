@@ -19,7 +19,7 @@ This framework contains a set of modules to boost productivity while developing 
 | Module | Comment|
 |--------|--------|
 | coffee.config | Low level macros defines to support different architectures. |
-| coffee.adt | Defines **A**bstract **D**ata **T**ypes commonly used, some patterns (LRU Cache, Backtracking general algorihtm, observer) and more. |
+| coffee.basis | Defines classes that will be the fundation for all upper modules |
 | coffee.xml | Defines and high level interface to work with XML documents. |
 | coffee.logger | Best logging system you will see. If defines a fast common interfaces for lots of ways of write logs and formatters. |
 | coffee.balance | Module for share load between a set of resources, it implements three different strategies and it does easy to write your own. A database connection will be a resource inherited from this kind of resource. |

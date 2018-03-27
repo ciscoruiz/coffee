@@ -26,13 +26,30 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <coffee/adt/AsString.hpp>
+
 #include <coffee/dbms/datatype/Date.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
+
+#include <coffee/time/TimeService.hpp>
 
 #include "PrintChrono.hpp"
 
 using namespace coffee;
 using namespace coffee::dbms;
+
+struct tm* getLocalTime(const std::chrono::seconds& seconds)
+   throw (adt::RuntimeException)
+{
+   time_t tt = seconds.count();
+   tm* result = localtime ((time_t*) &tt);
+
+   if (result == NULL) {
+      COFFEE_THROW_EXCEPTION(seconds.count() << " | It is not a valid date");
+   }
+
+   return result;
+}
 
 // See http://www.mbari.org/staff/rich/utccalc.htm
 BOOST_AUTO_TEST_CASE(date_setter_second)
@@ -42,15 +59,25 @@ BOOST_AUTO_TEST_CASE(date_setter_second)
 
    column.setValue(date_01_31_1987_23_59_59);
 
-   tm* localTime = column.getLocalTime();
-
-   BOOST_REQUIRE_EQUAL(localTime->tm_mday, 31);
-   BOOST_REQUIRE_EQUAL(localTime->tm_mon, 0);
-   BOOST_REQUIRE_EQUAL(localTime->tm_year, 1987 - 1900);
-   BOOST_REQUIRE_EQUAL(localTime->tm_min, 59);
-   BOOST_REQUIRE_EQUAL(localTime->tm_sec, 59);
-
    BOOST_REQUIRE_EQUAL(column.getValue().count(), 539110799);
+}
+
+#include <iostream>
+
+BOOST_AUTO_TEST_CASE(date_setter_now)
+{
+   auto now = coffee::time::TimeService::toSeconds(coffee::time::TimeService::now());
+
+   datatype::Date column("from_now");
+   column.setValue(now);
+
+   const std::string text = adt::AsString::apply(column.getValue(), datatype::Date::DefaultFormat);
+
+   datatype::Date other("from_text");
+   other.setValue(text, datatype::Date::DefaultFormat);
+
+   BOOST_REQUIRE_EQUAL(column.getValue(), now);
+   BOOST_REQUIRE_EQUAL(column.getValue(), other.getValue());
 }
 
 BOOST_AUTO_TEST_CASE(date_setter_text)
@@ -62,7 +89,7 @@ BOOST_AUTO_TEST_CASE(date_setter_text)
    try {
       column.setValue(str_date, "%d/%m/%YT%T");
 
-      tm* localTime = column.getLocalTime();
+      tm* localTime = getLocalTime(column.getValue());
 
       BOOST_REQUIRE_EQUAL(localTime->tm_mday, 31);
       BOOST_REQUIRE_EQUAL(localTime->tm_mon, 0);
@@ -94,31 +121,30 @@ BOOST_AUTO_TEST_CASE(date_is_nulleable)
    BOOST_REQUIRE(column.hasValue());
 
    BOOST_REQUIRE_NO_THROW(column.setValue("01/01/2000T00:00:00", format));
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+   BOOST_REQUIRE(column.hasValue());
 
    column.clear();
    BOOST_REQUIRE_THROW(column.getValue(), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(column.getLocalTime(), adt::RuntimeException);
 
    str_date = "25/10/2013T02:00:10";
 
    column.setValue(str_date, "%d/%m/%YT%H:%M:%S");
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+   BOOST_REQUIRE(column.hasValue());
 
-   const tm* time_t = column.getLocalTime();
+   const tm* time_t = getLocalTime(column.getValue());
    BOOST_REQUIRE_EQUAL(time_t->tm_year, 2013 - 1900);
    BOOST_REQUIRE_EQUAL(time_t->tm_mon, 9);
    BOOST_REQUIRE_EQUAL(time_t->tm_mday, 25);
 
    column.clear();
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
+   BOOST_REQUIRE(!column.hasValue());
 }
 
 BOOST_AUTO_TEST_CASE(date_is_not_nulleable)
 {
    datatype::Date column("not_nulleable", datatype::Constraint::CanNotBeNull);
 
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+   BOOST_REQUIRE(column.hasValue());
 
    BOOST_REQUIRE_THROW(column.isNull(), adt::RuntimeException);
 

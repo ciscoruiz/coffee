@@ -62,21 +62,6 @@ datatype::Date::Date (const Date& other) :
    m_buffer [0] = 0;
 }
 
-struct tm* datatype::Date::getLocalTime () const
-   throw (adt::RuntimeException)
-{
-   this->exceptionWhenIsNull();
-
-   time_t tt = m_value.count();
-   tm* result = localtime ((time_t*) &tt);
-
-   if (result == NULL) {
-      COFFEE_THROW_EXCEPTION(asString () << " | It is not a valid date");
-   }
-
-   return result;
-}
-
 void datatype::Date::setValue (const char* str, const char* format)
    throw (adt::RuntimeException)
 {
@@ -95,7 +80,7 @@ void datatype::Date::setValue (const char* str, const char* format)
    }
 
    aux.tm_isdst = 0;
-   std::time_t newValue = std::mktime (&aux);
+   std::time_t newValue = std::mktime(&aux);
 
    if (newValue == -1) {
       COFFEE_THROW_EXCEPTION("'" << str << "' can not be treated as std::chrono::seconds '" << format << "'");

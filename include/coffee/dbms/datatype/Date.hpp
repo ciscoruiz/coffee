@@ -62,8 +62,6 @@ public:
 
    const std::chrono::seconds& getValue() const throw(adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
-   struct tm* getLocalTime() const throw(adt::RuntimeException);
-
    /**
        \code
         %a     Replaced by the localeâs abbreviated weekday name. [ tm_wday]

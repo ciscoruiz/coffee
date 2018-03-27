@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(integer_is_nulleable)
 
    BOOST_REQUIRE_EQUAL(column.hasValue(), false);
 
-   BOOST_REQUIRE_THROW(column.getValue(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(column.getValue(), basis::RuntimeException);
 
    column.setValue(10);
    BOOST_REQUIRE_EQUAL(column.hasValue(), true);

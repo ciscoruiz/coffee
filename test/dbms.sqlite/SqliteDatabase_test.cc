@@ -302,7 +302,7 @@ BOOST_FIXTURE_TEST_CASE(bad_input_parameters, SqliteFixture)
    auto statement = database->createStatement("bad_input_parameters", sql);
    dbms::GuardConnection guardConnection(connection);
    dbms::GuardStatement guardStament(guardConnection, statement);
-   BOOST_REQUIRE_THROW(guardStament.execute(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(guardStament.execute(), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(bad_output_parameters, SqliteFixture)
@@ -313,7 +313,7 @@ BOOST_FIXTURE_TEST_CASE(bad_output_parameters, SqliteFixture)
    statement->createBinderInput(id);
    dbms::GuardConnection guardConnection(connection);
    dbms::GuardStatement guardStament(guardConnection, statement);
-   BOOST_REQUIRE_THROW(guardStament.execute(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(guardStament.execute(), basis::RuntimeException);
 }
 
 // See http://www.yolinux.com/TUTORIALS/SQLite.html
@@ -439,8 +439,8 @@ BOOST_FIXTURE_TEST_CASE(sqlite_float, SqliteFixture)
    BOOST_REQUIRE(guardStament.fetch());
    BOOST_REQUIRE_CLOSE(fullStatement.myfloat->getValue(), 0.22, 0.1);
 
-   const adt::DataBlock& dbBlob = fullStatement.mydata->getValue();
-   adt::DataBlock expected("123456789-12345", 15);
+   const basis::DataBlock& dbBlob = fullStatement.mydata->getValue();
+   basis::DataBlock expected("123456789-12345", 15);
    BOOST_REQUIRE_EQUAL(dbBlob.size(), expected.size());
    BOOST_REQUIRE_EQUAL(memcmp(dbBlob.data(), expected.data(), expected.size()), 0);
 }
@@ -569,10 +569,10 @@ BOOST_FIXTURE_TEST_CASE(sqlite_insert_all_types, SqliteFixture)
          insert.id->setValue(ii);
          insert.theFloat->setValue(10.11 * ii);
          insert.theDate->setValue(now + seconds(ii));
-         insert.theBlob->setValue(adt::DataBlock((const char*) &now, sizeof(now)));
+         insert.theBlob->setValue(basis::DataBlock((const char*) &now, sizeof(now)));
          insert.theTime->setValue(now + seconds(ii * 2));
          memset(buffer, now.count() % 255, sizeof(buffer));
-         adt::DataBlock value(buffer, sizeof(buffer));
+         basis::DataBlock value(buffer, sizeof(buffer));
          insert.theLongBlob->setValue(value);
          BOOST_REQUIRE_NO_THROW(guardStament.execute());
       }
@@ -597,7 +597,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_insert_all_types, SqliteFixture)
          BOOST_REQUIRE_EQUAL(select.id->getValue(), counter);
          BOOST_REQUIRE_CLOSE(select.theFloat->getValue(), 10.11 * counter, 0.1);
          BOOST_REQUIRE_EQUAL(select.theDate->getValue(), now + seconds(counter));
-         BOOST_REQUIRE(select.theBlob->getValue() == adt::DataBlock((const char*) &now, sizeof(now)));
+         BOOST_REQUIRE(select.theBlob->getValue() == basis::DataBlock((const char*) &now, sizeof(now)));
          BOOST_REQUIRE(select.theTime->getValue() == now + seconds(counter * 2));
          counter ++;
       }

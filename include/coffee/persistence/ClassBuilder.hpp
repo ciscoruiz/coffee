@@ -26,7 +26,7 @@
 
 #include <memory>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/dbms/datatype/Set.hpp>
 
@@ -40,9 +40,9 @@ class ClassBuilder : public dbms::datatype::Set {
 public:
    explicit ClassBuilder(const std::string& className) : m_className (className) {;}
    
-   ClassBuilder& set(std::shared_ptr<PrimaryKey>& primaryKey) throw (adt::RuntimeException);
+   ClassBuilder& set(std::shared_ptr<PrimaryKey>& primaryKey) throw (basis::RuntimeException);
    
-   ClassBuilder& add(std::shared_ptr<dbms::datatype::Abstract> data) throw (adt::RuntimeException) {
+   ClassBuilder& add(std::shared_ptr<dbms::datatype::Abstract> data) throw (basis::RuntimeException) {
       insert(data);
       return *this;
    }
@@ -50,7 +50,7 @@ public:
    const std::string& getClassName() const noexcept { return m_className; }
    const std::shared_ptr<PrimaryKey>& getPrimaryKey() const noexcept { return m_primaryKey; }
 
-   std::shared_ptr<Class> build() const throw (adt::RuntimeException);
+   std::shared_ptr<Class> build() const throw (basis::RuntimeException);
    
 private:
    const std::string m_className;

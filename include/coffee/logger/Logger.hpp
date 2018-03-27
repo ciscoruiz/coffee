@@ -29,11 +29,11 @@
 
 #include <coffee/logger/Level.hpp>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 namespace coffee {
 
-namespace adt {
+namespace basis {
    class StreamString;
 }
 
@@ -56,19 +56,19 @@ public:
     * Initialize the logger with the writer and the formatter received as parameter.
     * \warning Before calling that method the calling of method #critical, #error, ..., #debug will have no effect.
     */
-   static void initialize(std::shared_ptr<Writer> writer, std::shared_ptr<Formatter> formatter) throw(adt::RuntimeException);
+   static void initialize(std::shared_ptr<Writer> writer, std::shared_ptr<Formatter> formatter) throw(basis::RuntimeException);
 
    /**
    * Initialize the logger with the writer received as parameter and the default formatter (DefaultFormatter).
    * \warning Before calling that method the calling of method #critical, #error, ..., #debug will have no effect.
    */
-   static void initialize(std::shared_ptr<Writer> writer) throw(adt::RuntimeException);
+   static void initialize(std::shared_ptr<Writer> writer) throw(basis::RuntimeException);
 
    /**
     * You can attach a undefined numbers of writers to the this Logger, and all of them will received
     * the string composed by the formatter.
     */
-   static void add(std::shared_ptr<Writer> writer) throw (adt::RuntimeException);
+   static void add(std::shared_ptr<Writer> writer) throw (basis::RuntimeException);
 
    /**
     * Write the trace received.
@@ -81,7 +81,7 @@ public:
     * \param file The file where the trace was created
     * \param line The line number where the trace was created.
     */
-   static void write(const Level::_v level, const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept;
+   static void write(const Level::_v level, const basis::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept;
 
    /**
     * Change the current level. Only traces with a level smaller that this level will be traced.
@@ -113,7 +113,7 @@ public:
     *     LOG_CRITICAL(var1 << " some text " << var2 << " more text " << ... << varn);
     * \endcode
     */
-   static void critical(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Critical, streamString, function, file, line); }
+   static void critical(const basis::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Critical, streamString, function, file, line); }
 
    /**
     * Send a trace with level Level::Error to attached writers.
@@ -122,7 +122,7 @@ public:
     *     LOG_ERROR(var1 << " some text " << var2 << " more text " << ... << varn);
     * \endcode
     */
-   static void error(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Error, streamString, function, file, line); }
+   static void error(const basis::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Error, streamString, function, file, line); }
 
    /**
     * Send a trace with level Level::Warning to attached writers.
@@ -131,7 +131,7 @@ public:
     *     LOG_WARN(var1 << " some text " << var2 << " more text " << ... << varn);
     * \endcode
     */
-   static void warning(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Warning, streamString, function, file, line); }
+   static void warning(const basis::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Warning, streamString, function, file, line); }
 
    /**
     * end a trace with level Level::Notice to attached writers.
@@ -141,7 +141,7 @@ public:
     *    LOG_NOTICE(var1 << " some text " << var2 << " more text " << ... << varn);
     * \endcode
     */
-   static void notice(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Notice, streamString, function, file, line); }
+   static void notice(const basis::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Notice, streamString, function, file, line); }
 
    /**
     * end a trace with level Level::Information to attached writers.
@@ -151,7 +151,7 @@ public:
     *    LOG_INFO(var1 << " some text " << var2 << " more text " << ... << varn);
     * \endcode
     */
-   static void info(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Information, streamString, function, file, line); }
+   static void info(const basis::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Information, streamString, function, file, line); }
 
    /**
     * end a trace with level Level::Debug to attached writers.
@@ -161,12 +161,12 @@ public:
     *    LOG_DEBUG(var1 << " some text " << var2 << " more text " << ... << varn);
     * \endcode
     */
-   static void debug(const adt::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Debug, streamString, function, file, line); }
+   static void debug(const basis::StreamString& streamString, const char* function, const char* file, const unsigned line) noexcept { write(Level::Debug, streamString, function, file, line); }
 
    /**
     * Send the trace of error with the information of the exception received.
     */
-   static void write(const adt::Exception& ex) {
+   static void write(const basis::Exception& ex) {
       error(ex.what(), ex.getMethod(), ex.getFile(), ex.getLine());
    }
 
@@ -187,7 +187,7 @@ private:
 #define LOG_CRITICAL(args)\
    do {\
    if(coffee::logger::Logger::wantsToProcess(coffee::logger::Level::Critical)) { \
-      coffee::adt::StreamString msg; \
+      coffee::basis::StreamString msg; \
       coffee::logger::Logger::critical(msg << args, COFFEE_LOG_LOCATION); \
    } \
    } while(false);
@@ -195,7 +195,7 @@ private:
 #define LOG_ERROR(args)\
    do {\
    if(coffee::logger::Logger::wantsToProcess(coffee::logger::Level::Error)) { \
-      coffee::adt::StreamString msg; \
+      coffee::basis::StreamString msg; \
       coffee::logger::Logger::error(msg << args, COFFEE_LOG_LOCATION); \
    } \
    } while(false);
@@ -203,7 +203,7 @@ private:
 #define LOG_WARN(args)\
    do {\
    if(coffee::logger::Logger::wantsToProcess(coffee::logger::Level::Warning)) { \
-      coffee::adt::StreamString msg; \
+      coffee::basis::StreamString msg; \
       coffee::logger::Logger::warning(msg << args, COFFEE_LOG_LOCATION); \
    } \
    } while(false);
@@ -211,7 +211,7 @@ private:
 #define LOG_NOTICE(args)\
    do {\
    if(coffee::logger::Logger::wantsToProcess(coffee::logger::Level::Notice)) { \
-      coffee::adt::StreamString msg; \
+      coffee::basis::StreamString msg; \
       coffee::logger::Logger::notice(msg << args, COFFEE_LOG_LOCATION); \
    } \
    } while(false);
@@ -219,7 +219,7 @@ private:
 #define LOG_INFO(args)\
    do {\
    if(coffee::logger::Logger::wantsToProcess(coffee::logger::Level::Information)) { \
-      coffee::adt::StreamString msg; \
+      coffee::basis::StreamString msg; \
       coffee::logger::Logger::info(msg << args, COFFEE_LOG_LOCATION); \
    } \
    } while(false);
@@ -227,7 +227,7 @@ private:
 #define LOG_DEBUG(args)\
    do {\
    if(coffee::logger::Logger::wantsToProcess(coffee::logger::Level::Debug)) { \
-      coffee::adt::StreamString msg; \
+      coffee::basis::StreamString msg; \
       coffee::logger::Logger::debug(msg << args, COFFEE_LOG_LOCATION); \
    } \
    } while(false);
@@ -235,7 +235,7 @@ private:
 #define LOG_LOCAL7(args)\
    do {\
    if(coffee::logger::Logger::wantsToProcess(coffee::logger::Level::Local7)) { \
-      coffee::adt::StreamString msg; \
+      coffee::basis::StreamString msg; \
       coffee::logger::Logger::write(coffee::logger::Level::Local7, msg << args, COFFEE_LOG_LOCATION); \
    } \
    } while(false);

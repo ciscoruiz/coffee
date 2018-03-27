@@ -27,7 +27,7 @@
 using namespace coffee;
 
 persistence::ClassBuilder& persistence::ClassBuilder::set(std::shared_ptr<PrimaryKey>& primaryKey)
-throw (adt::RuntimeException)
+throw (basis::RuntimeException)
 {
    if (m_primaryKey) {
       COFFEE_THROW_EXCEPTION(m_className << " primary key already added");
@@ -38,7 +38,7 @@ throw (adt::RuntimeException)
 }
 
 std::shared_ptr<persistence::Class> persistence::ClassBuilder::build() const
-      throw (adt::RuntimeException)
+      throw (basis::RuntimeException)
 {
    if (!m_primaryKey) {
       COFFEE_THROW_EXCEPTION(m_className << " does not define a valid primary key");

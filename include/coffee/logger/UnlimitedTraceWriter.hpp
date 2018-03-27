@@ -60,9 +60,9 @@ private:
    const std::string m_path;
    int m_stream;
 
-   void initialize () throw (adt::RuntimeException);
+   void initialize () throw (basis::RuntimeException);
 
-   void openStream () throw (adt::RuntimeException);
+   void openStream () throw (basis::RuntimeException);
    void closeStream () noexcept;
 };
 

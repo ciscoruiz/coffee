@@ -26,7 +26,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/dbms/datatype/Date.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
@@ -39,7 +39,7 @@ using namespace coffee;
 using namespace coffee::dbms;
 
 struct tm* getLocalTime(const std::chrono::seconds& seconds)
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    time_t tt = seconds.count();
    tm* result = localtime ((time_t*) &tt);
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(date_setter_now)
    datatype::Date column("from_now");
    column.setValue(now);
 
-   const std::string text = adt::AsString::apply(column.getValue(), datatype::Date::DefaultFormat);
+   const std::string text = basis::AsString::apply(column.getValue(), datatype::Date::DefaultFormat);
 
    datatype::Date other("from_text");
    other.setValue(text, datatype::Date::DefaultFormat);
@@ -98,11 +98,11 @@ BOOST_AUTO_TEST_CASE(date_setter_text)
       BOOST_REQUIRE_EQUAL(localTime->tm_min, 17);
       BOOST_REQUIRE_EQUAL(localTime->tm_sec, 10);
    }
-   catch(adt::RuntimeException& ex) {
+   catch(basis::RuntimeException& ex) {
       std::cout << ex.what() << std::endl;
    }
 
-   BOOST_REQUIRE_THROW(column.setValue("12:10", "%d/%m/%YT%T"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(column.setValue("12:10", "%d/%m/%YT%T"), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(date_is_nulleable)
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(date_is_nulleable)
    BOOST_REQUIRE(column.hasValue());
 
    column.clear();
-   BOOST_REQUIRE_THROW(column.getValue(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(column.getValue(), basis::RuntimeException);
 
    str_date = "25/10/2013T02:00:10";
 
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(date_is_not_nulleable)
 
    BOOST_REQUIRE(column.hasValue());
 
-   BOOST_REQUIRE_THROW(column.isNull(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(column.isNull(), basis::RuntimeException);
 
    column.clear();
    BOOST_REQUIRE(column.hasValue());

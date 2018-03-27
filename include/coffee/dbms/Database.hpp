@@ -122,13 +122,13 @@ public:
     * Create a new connection.
     */
    std::shared_ptr<Connection> createConnection(const char* name, const ConnectionParameters& parameters)
-      throw(adt::RuntimeException, DatabaseException);
+      throw(basis::RuntimeException, DatabaseException);
 
    /**
     * Create a new connection.
     */
    std::shared_ptr<Connection> createConnection(const std::string& name, const ConnectionParameters& parameters)
-      throw(adt::RuntimeException, DatabaseException)
+      throw(basis::RuntimeException, DatabaseException)
    {
       return createConnection(name.c_str(), parameters);
    }
@@ -136,26 +136,26 @@ public:
    /**
     * \return the connection that matches with the received name or throws an exception in case of there is not any connection with that name.
     */
-   std::shared_ptr<Connection>& findConnection(const char* name) throw(adt::RuntimeException);
+   std::shared_ptr<Connection>& findConnection(const char* name) throw(basis::RuntimeException);
 
    const_connection_iterator connection_begin() const noexcept { return m_connections.begin(); }
    const_connection_iterator connection_end() const noexcept { return m_connections.end(); }
    static const std::shared_ptr<Connection>& connection(const_connection_iterator ii) noexcept { return std::ref(*ii); }
 
    std::shared_ptr<Statement> createStatement(const char* name, const char* expression, const StatementParameters& parameters = defaultParameters)
-      throw(adt::RuntimeException);
+      throw(basis::RuntimeException);
    std::shared_ptr<Statement> createStatement(const char* name, const std::string& expression, const StatementParameters& parameters = defaultParameters)
-      throw(adt::RuntimeException)
+      throw(basis::RuntimeException)
    {
       return createStatement(name, expression.c_str(), parameters);
    }
 
-   std::shared_ptr<Statement>& findStatement(const char* name) throw(adt::RuntimeException);
+   std::shared_ptr<Statement>& findStatement(const char* name) throw(basis::RuntimeException);
    const_statement_iterator statement_begin() const noexcept { return m_statements.begin(); }
    const_statement_iterator statement_end() const noexcept { return m_statements.end(); }
    static const std::shared_ptr<Statement>& statement(const_statement_iterator ii) noexcept { return std::ref(*ii); }
 
-   virtual adt::StreamString asString() const noexcept;
+   virtual basis::StreamString asString() const noexcept;
 
    virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
@@ -175,7 +175,7 @@ protected:
     * This method will be called when some layer detect some fault in the connection
     * received as parameter.
     */
-   void notifyRecoveryFail(Connection& connection) const throw(adt::RuntimeException);
+   void notifyRecoveryFail(Connection& connection) const throw(basis::RuntimeException);
 
    /**
       Inicializa las conexiones definidas sobre esta base de datos. Este metodo se invocaria
@@ -183,13 +183,13 @@ protected:
       Slo seria necesario invocarlo cuando nuestro programa no tenga asociada ninguna aplicacion
       que se encarga de inicializar los enginees.
    */
-   virtual void do_initialize() throw(adt::RuntimeException);
+   virtual void do_initialize() throw(basis::RuntimeException);
 
    /**
       Elimina las conexiones definidas sobre esta base de datos. Este metodo se invocaria automaticamente
       desde el nucleo de NemesisRD.
    */
-   virtual void do_stop() throw(adt::RuntimeException);
+   virtual void do_stop() throw(basis::RuntimeException);
 
    /**
       Devuelve un iterator al comienzo de la lista de conexiones establecidas con esta base de datos.
@@ -246,15 +246,15 @@ private:
    std::shared_ptr<ErrorCodeInterpreter> m_errorCodeInterpreter;
 
    virtual std::shared_ptr<Connection> allocateConnection(const std::string& name, const ConnectionParameters& parameters)
-      throw(adt::RuntimeException, std::bad_cast) = 0;
+      throw(basis::RuntimeException, std::bad_cast) = 0;
 
    virtual std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
-      throw(adt::RuntimeException, std::bad_cast) = 0;
+      throw(basis::RuntimeException, std::bad_cast) = 0;
 
    virtual std::shared_ptr<binder::Input> allocateInputBind(std::shared_ptr<datatype::Abstract> data) const
-      throw(adt::RuntimeException) = 0;
+      throw(basis::RuntimeException) = 0;
    virtual std::shared_ptr<binder::Output> allocateOutputBind(std::shared_ptr<datatype::Abstract> data) const
-      throw(adt::RuntimeException) = 0;
+      throw(basis::RuntimeException) = 0;
 
    friend class Statement;
    friend class ResultCode;

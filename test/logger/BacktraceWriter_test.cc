@@ -26,7 +26,7 @@
 #include <iostream>
 #include <chrono>
 
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/Formatter.hpp>
@@ -150,7 +150,7 @@ BOOST_FIXTURE_TEST_CASE (backtraking_performance_measure_test, BackTraceFixture)
    Level::_v level = Level::Notice;
    for (int ii = 0; ii < maxLine; ++ ii) {
       if (Logger::wantsToProcess(level) == true) {
-         adt::StreamString msg;
+         basis::StreamString msg;
          Logger::write (level, msg << "Line=" << ii, COFFEE_FILE_LOCATION);
       }
 
@@ -166,5 +166,5 @@ BOOST_FIXTURE_TEST_CASE (backtraking_performance_measure_test, BackTraceFixture)
    auto endTime = std::chrono::high_resolution_clock::now();
 
    std::chrono::microseconds elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
-   std::cout << "Delay(BacktraceWriter): " << adt::AsString::apply(elapsedTime) << std::endl << std::endl;
+   std::cout << "Delay(BacktraceWriter): " << basis::AsString::apply(elapsedTime) << std::endl << std::endl;
 }

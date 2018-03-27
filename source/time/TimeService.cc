@@ -23,7 +23,7 @@
 
 #include <unistd.h>
 
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
@@ -40,7 +40,7 @@ using std::chrono::milliseconds;
 
 //static
 std::shared_ptr<time::TimeService> time::TimeService::instantiate(app::Application& application, const milliseconds& maxTime, const milliseconds& resolution)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<TimeService> result(new TimeService(application, maxTime, resolution));
    application.attach(result);
@@ -49,7 +49,7 @@ std::shared_ptr<time::TimeService> time::TimeService::instantiate(app::Applicati
 
 time::TimeService::TimeService(app::Application& application, const milliseconds& _maxTime, const milliseconds& _resolution) :
    app::Service(application, "TimeService"),
-   adt::pattern::observer::Subject("TimeService"),
+   basis::pattern::observer::Subject("TimeService"),
    maxTime(_maxTime),
    resolution(_resolution),
    maxQuantum(calculeMaxQuantum(_maxTime, _resolution)),
@@ -80,7 +80,7 @@ int time::TimeService::calculeMaxQuantum(const milliseconds& maxTime, const mill
 }
 
 void time::TimeService::do_initialize()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if (maxTime <= resolution) {
       COFFEE_THROW_EXCEPTION("Resolution must be lesser than " << maxTime);
@@ -93,7 +93,7 @@ void time::TimeService::do_initialize()
 }
 
 void time::TimeService::do_stop()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    LOG_THIS_METHOD();
 
@@ -111,7 +111,7 @@ void time::TimeService::do_stop()
 }
 
 void time::TimeService::activate(std::shared_ptr<TimeEvent> timeEvent)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if (isStopped()) {
       COFFEE_THROW_EXCEPTION(asString() << " can not accept new activation");
@@ -177,10 +177,10 @@ bool time::TimeService::cancel(std::shared_ptr<TimeEvent> timeEvent)
    return true;
 }
 
-adt::StreamString time::TimeService::asString() const
+basis::StreamString time::TimeService::asString() const
    noexcept
 {
-   adt::StreamString result("time.TimeService{");
+   basis::StreamString result("time.TimeService{");
    result << Service::asString();
    result << " | MaxTime=" << maxTime;
    result << " | Resolution=" << resolution;

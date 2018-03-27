@@ -29,7 +29,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TtyWriter.hpp>

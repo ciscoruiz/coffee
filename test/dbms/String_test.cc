@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(string_is_nulleable)
    column.clear();
 
    BOOST_REQUIRE_EQUAL(column.hasValue(), false);
-   BOOST_REQUIRE_THROW(column.getValue(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(column.getValue(), basis::RuntimeException);
    BOOST_REQUIRE_EQUAL(column.getSize(), 0);
 
    column.setValue("hello world");
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(string_is_nulleable)
 
    BOOST_REQUIRE_EQUAL(init, column.getBuffer());
 
-   BOOST_REQUIRE_THROW(column.setValue("size out of range"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(column.setValue("size out of range"), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(string_nulleable_asstring)
@@ -92,8 +92,8 @@ BOOST_AUTO_TEST_CASE(string_is_not_nulleable)
 
    BOOST_REQUIRE_EQUAL(init, column.getBuffer());
 
-   BOOST_REQUIRE_THROW(column.setValue("size out of range"), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(column.setValue(NULL), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(column.setValue("size out of range"), basis::RuntimeException);
+   BOOST_REQUIRE_THROW(column.setValue(NULL), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(string_downcast)

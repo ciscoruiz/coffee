@@ -29,9 +29,9 @@
 #include <unordered_map>
 #include <map>
 
-#include <coffee/adt/pattern/lru/Cache.hpp>
-#include <coffee/adt/AsString.hpp>
-#include <coffee/adt/AsHexString.hpp>
+#include <coffee/basis/pattern/lru/Cache.hpp>
+#include <coffee/basis/AsString.hpp>
+#include <coffee/basis/AsHexString.hpp>
 
 #include <coffee/dbms/datatype/Integer.hpp>
 #include <coffee/dbms/datatype/String.hpp>
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_copy_constructor)
    persistence::PrimaryKeyBuilder builder;
 
    for (int ii = 0; ii < 25; ++ ii) {
-      auto field = std::make_shared<dbms::datatype::Integer>(adt::AsHexString::apply(ii));
+      auto field = std::make_shared<dbms::datatype::Integer>(basis::AsHexString::apply(ii));
       builder.add(field);
    }
 
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_assignmet_operator)
    persistence::PrimaryKeyBuilder builder;
 
    for (int ii = 0; ii < 25; ++ ii) {
-      auto field = std::make_shared<dbms::datatype::Integer>(adt::AsHexString::apply(ii));
+      auto field = std::make_shared<dbms::datatype::Integer>(basis::AsHexString::apply(ii));
       builder.add(field);
    }
 
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_map)
 {
    using persistence::PrimaryKey;
 
-   typedef adt::pattern::lru::Cache<std::shared_ptr<PrimaryKey>, int, PrimaryKey::HashSharedPointer, PrimaryKey::EqualSharedPointer> Cache;
+   typedef basis::pattern::lru::Cache<std::shared_ptr<PrimaryKey>, int, PrimaryKey::HashSharedPointer, PrimaryKey::EqualSharedPointer> Cache;
 
    Cache entries(16);
 
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_hash)
       auto string = std::make_shared<dbms::datatype::String>("string", 16);
 
       integer->setValue(ii);
-      string->setValue(adt::AsString::apply(ii));
+      string->setValue(basis::AsString::apply(ii));
 
       persistence::PrimaryKeyBuilder builder;
       std::shared_ptr<persistence::PrimaryKey> pk = builder.add(string).add(integer).build();

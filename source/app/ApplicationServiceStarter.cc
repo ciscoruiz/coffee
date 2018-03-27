@@ -37,7 +37,7 @@ app::ApplicationServiceStarter::ApplicationServiceStarter(const char* shortName)
  }
 
 void app::ApplicationServiceStarter::run()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    semaphoreForRun.signal();
    std::unique_lock <std::mutex> guard (mutex);
@@ -47,14 +47,14 @@ void app::ApplicationServiceStarter::run()
 }
 
 void app::ApplicationServiceStarter::do_stop()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    try {
       app::Application::do_stop();
       stopNow = true;
       conditionForStop.notify_all();
    }
-   catch(adt::RuntimeException&) {
+   catch(basis::RuntimeException&) {
       stopNow = true;
       conditionForStop.notify_all();
       throw;

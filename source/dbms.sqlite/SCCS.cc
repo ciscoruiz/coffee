@@ -25,7 +25,7 @@
 #include <coffee/config/SCCSRepository.hpp>
 
 #include <coffee/config/SCCS.hpp>
-#include <coffee/adt/SCCS.hpp>
+#include <coffee/basis/SCCS.hpp>
 #include <coffee/xml/SCCS.hpp>
 #include <coffee/logger/SCCS.hpp>
 #include <coffee/app/SCCS.hpp>
@@ -41,7 +41,7 @@ void dbms::sqlite::SCCS::activate()
    noexcept
 {
    config::SCCS::activate ();
-   adt::SCCS::activate ();
+   basis::SCCS::activate ();
    xml::SCCS::activate ();
    logger::SCCS::activate();
    app::SCCS::activate();

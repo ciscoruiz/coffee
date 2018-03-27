@@ -52,8 +52,8 @@ public:
    ProtocolVersion::_v getProtocolVersion() const noexcept { return protocolVersion; }
    bool getUseTLS() const noexcept { return useTLS; }
 
-   virtual adt::StreamString asString() const noexcept {
-      adt::StreamString result("dbms.LdapConnectionParameters { ");
+   virtual basis::StreamString asString() const noexcept {
+      basis::StreamString result("dbms.LdapConnectionParameters { ");
       result << ConnectionParameters::asString();
       result << " | ProtocolVersion=" << (protocolVersion == ProtocolVersion::V2 ? "V2": "V3") << "(" << (int) protocolVersion << ")";
       result << " | UseTLS=" << useTLS;

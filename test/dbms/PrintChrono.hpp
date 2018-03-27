@@ -24,7 +24,7 @@
 #define TEST_DBMS_PRINTCHRONO_HPP_
 
 #include <chrono>
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 // See https://stackoverflow.com/questions/17572583/boost-check-fails-to-compile-operator-for-custom-types
 namespace boost {
@@ -32,7 +32,7 @@ namespace test_tools {
    template<> struct print_log_value<std::chrono::seconds> {
       void operator()( std::ostream& os, std::chrono::seconds const& ts)
       {
-          os << coffee::adt::AsString::apply(ts);
+          os << coffee::basis::AsString::apply(ts);
       }
    };
 }}

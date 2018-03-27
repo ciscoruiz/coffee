@@ -27,8 +27,8 @@
 #include <functional>
 #include <memory>
 
-#include <coffee/adt/StreamString.hpp>
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/StreamString.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 #include <coffee/dbms/datatype/Constraint.hpp>
 
 #include <coffee/dbms/InvalidDataException.hpp>
@@ -104,7 +104,7 @@ public:
     * Set to null the value of this instance.
     * \warning It will throw an exception in case of this instance could not contain a null value.
     */
-   void isNull() throw(adt::RuntimeException);
+   void isNull() throw(basis::RuntimeException);
 
    /**
     * Clear the value of this instance.
@@ -114,19 +114,19 @@ public:
    /**
     * Compare the value of this instance with the value of the received instance.
     */
-   int compare(const std::shared_ptr<Abstract>& other) const throw(adt::RuntimeException);
+   int compare(const std::shared_ptr<Abstract>& other) const throw(basis::RuntimeException);
 
    /**
     * Compare the value of this instance with the value of the received instance.
     */
-   int compare(const Abstract& other) const throw(adt::RuntimeException);
+   int compare(const Abstract& other) const throw(basis::RuntimeException);
 
-   operator adt::StreamString() const noexcept { return asString(); }
+   operator basis::StreamString() const noexcept { return asString(); }
 
    /**
-    * \return Summarize information of this instance in a coffee::adt::StreamString.
+    * \return Summarize information of this instance in a coffee::basis::StreamString.
     */
-   virtual adt::StreamString asString() const noexcept;
+   virtual basis::StreamString asString() const noexcept;
 
    /**
     * \return a duplicate of this instance.
@@ -170,7 +170,7 @@ protected:
 
    void isNotNull() noexcept { m_isNull = false; }
 
-   void exceptionWhenIsNull() const throw(adt::RuntimeException);
+   void exceptionWhenIsNull() const throw(basis::RuntimeException);
 
 private:
    const std::string m_name;
@@ -181,7 +181,7 @@ private:
    bool m_isNull;
 
    virtual void do_clear() noexcept = 0;
-   virtual int do_compare(const Abstract& other) const throw(adt::RuntimeException) = 0;
+   virtual int do_compare(const Abstract& other) const throw(basis::RuntimeException) = 0;
 };
 
 #define coffee_declare_datatype_downcast(inherit) \
@@ -192,7 +192,7 @@ private:
       } \
       catch(std::bad_cast& ex) { \
       } \
-      coffee::adt::StreamString str; \
+      coffee::basis::StreamString str; \
       str << data.asString() << " | Invalid down cast"; \
       throw coffee::dbms::InvalidDataException(str, function, file, lineno); \
    } \
@@ -203,7 +203,7 @@ private:
       } \
       catch(std::bad_cast& ex) { \
       } \
-      coffee::adt::StreamString str; \
+      coffee::basis::StreamString str; \
       str << data.asString() << " | Invalid down cast"; \
       throw coffee::dbms::InvalidDataException(str, function, file, lineno); \
    } \
@@ -212,7 +212,7 @@ private:
          throw(coffee::dbms::InvalidDataException) { \
       const std::shared_ptr<inherit> result = std::dynamic_pointer_cast<inherit>(data); \
       if(!result) { \
-         coffee::adt::StreamString str; \
+         coffee::basis::StreamString str; \
          str << data->asString() << " | Invalid down cast"; \
          throw coffee::dbms::InvalidDataException(str, function, file, lineno); \
       } \
@@ -223,7 +223,7 @@ private:
    throw(dbms::InvalidDataException) { \
       std::shared_ptr<inherit> result = std::dynamic_pointer_cast<inherit>(data); \
       if(!result) { \
-         coffee::adt::StreamString str; \
+         coffee::basis::StreamString str; \
          str << data->asString() << " | Invalid down cast"; \
          throw coffee::dbms::InvalidDataException(str, function, file, lineno); \
       } \

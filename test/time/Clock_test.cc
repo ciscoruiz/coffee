@@ -26,7 +26,7 @@
 #include <condition_variable>
 #include <chrono>
 
-#include <coffee/adt/pattern/observer/Observer.hpp>
+#include <coffee/basis/pattern/observer/Observer.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TtyWriter.hpp>
@@ -43,8 +43,8 @@ using namespace coffee;
 
 using std::chrono::milliseconds;
 
-using Subject = coffee::adt::pattern::observer::Subject;
-using Event = coffee::adt::pattern::observer::Event;
+using Subject = coffee::basis::pattern::observer::Subject;
+using Event = coffee::basis::pattern::observer::Event;
 
 struct ClockFixture : public TimeFixture {
    static const milliseconds MaxShortDuration;
@@ -56,10 +56,10 @@ struct ClockFixture : public TimeFixture {
 const milliseconds ClockFixture::MaxShortDuration(1000);
 const milliseconds ClockFixture::ShortResolution(50);
 
-class ClockObserver : public adt::pattern::observer::Observer {
+class ClockObserver : public basis::pattern::observer::Observer {
 public:
    ClockObserver() :
-      adt::pattern::observer::Observer("ClockObserver"),
+      basis::pattern::observer::Observer("ClockObserver"),
       counter(0)
    {;}
    virtual ~ClockObserver() {;}
@@ -114,7 +114,7 @@ BOOST_FIXTURE_TEST_CASE(clock_cancel_empty, ClockFixture)
 BOOST_FIXTURE_TEST_CASE(clock_bad_duration, ClockFixture)
 {
    auto clock = time::Clock::instantiate(111, milliseconds(200));
-   BOOST_REQUIRE_THROW(clock->getDuration(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(clock->getDuration(), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(clock_basic, ClockFixture)

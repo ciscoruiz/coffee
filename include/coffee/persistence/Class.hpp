@@ -28,8 +28,8 @@
 #include <memory>
 #include <vector>
 
-#include <coffee/adt/NamedObject.hpp>
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/NamedObject.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/dbms/datatype/Abstract.hpp>
 #include <coffee/dbms/datatype/Set.hpp>
@@ -47,16 +47,16 @@ class Accessor;
 class ClassBuilder;
 class PrimaryKey;
 
-class Class : public adt::NamedObject {
+class Class : public basis::NamedObject {
 public:
    explicit Class(const ClassBuilder& classBuilder);
 
    virtual ~Class() {;}
 
-   adt::StreamString asString() const noexcept;
+   basis::StreamString asString() const noexcept;
       
    std::shared_ptr<PrimaryKey> createPrimaryKey() const throw ();
-   std::shared_ptr<Object> createObject(const std::shared_ptr<PrimaryKey>& primaryKey) const throw(adt::RuntimeException);
+   std::shared_ptr<Object> createObject(const std::shared_ptr<PrimaryKey>& primaryKey) const throw(basis::RuntimeException);
 
    std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 

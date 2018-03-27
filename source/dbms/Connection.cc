@@ -55,7 +55,7 @@ dbms::Connection::Connection(const Database& dbmsDatabase, const std::string& na
 //(1) Si no tiene variables de salida => consideramos que es un update, insert o delete.
 //-----------------------------------------------------------------------------------------------------------
 dbms::ResultCode dbms::Connection::execute(std::shared_ptr<Statement>& statement)
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    LOG_THIS_METHOD();
 
@@ -109,7 +109,7 @@ dbms::ResultCode dbms::Connection::execute(std::shared_ptr<Statement>& statement
 }
 
 void dbms::Connection::commit()
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    LOG_INFO(asString() << " | State before commit");
    
@@ -141,7 +141,7 @@ void dbms::Connection::rollback()
 }
 
 void dbms::Connection::lock()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(isAvailable() == false) {
       if(recover() == false) {
@@ -180,7 +180,7 @@ void dbms::Connection::unlock()
          else if(m_commitPending > 0)
             commit();
       }
-      catch(adt::Exception& ex) {
+      catch(basis::Exception& ex) {
          logger::Logger::write(ex);
       }
    }
@@ -200,7 +200,7 @@ bool dbms::Connection::recover()
       open();
       result = true;
    }
-   catch(adt::Exception& edbms) {
+   catch(basis::Exception& edbms) {
       logger::Logger::write(edbms);
       m_dbmsDatabase.notifyRecoveryFail(*this);
    }
@@ -210,10 +210,10 @@ bool dbms::Connection::recover()
    return result;
 }
 
-adt::StreamString dbms::Connection::asString() const
+basis::StreamString dbms::Connection::asString() const
    noexcept
 {
-   adt::StreamString result("dbms::Connection { ");
+   basis::StreamString result("dbms::Connection { ");
    result += balance::Resource::asString();
    result << " | Database=" << m_dbmsDatabase.getName();
    result << " | User=" << m_user;

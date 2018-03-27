@@ -28,8 +28,8 @@
 #include <memory>
 #include <functional>
 
-#include <coffee/adt/NamedObject.hpp>
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/NamedObject.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 namespace coffee {
 
@@ -41,15 +41,15 @@ namespace persistence {
 
 class Storage;
 
-class Repository : public adt::NamedObject {
+class Repository : public basis::NamedObject {
 public:
    explicit Repository(const char* name) : NamedObject(name) {;}
    explicit Repository(const std::string& name) : NamedObject(name) {;}
 
-   std::shared_ptr<Storage> createStorage(const std::string& name, const int maxCacheSize) throw(adt::RuntimeException);
-   std::shared_ptr<Storage>& findStorage(const std::string& name) throw(adt::RuntimeException);
+   std::shared_ptr<Storage> createStorage(const std::string& name, const int maxCacheSize) throw(basis::RuntimeException);
+   std::shared_ptr<Storage>& findStorage(const std::string& name) throw(basis::RuntimeException);
 
-   adt::StreamString asString() const noexcept;
+   basis::StreamString asString() const noexcept;
 
    std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 

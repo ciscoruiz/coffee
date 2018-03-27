@@ -44,7 +44,7 @@ private:
       std::cout << line << std::endl;
       ++ m_counter;
    }
-   void initialize () throw (adt::RuntimeException) {;}
+   void initialize () throw (basis::RuntimeException) {;}
 };
 
 
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE( DefaultFormatter_test )
 
    logger::Logger::setLevel (logger::Level::Local2);
 
-   adt::StreamString msg;
+   basis::StreamString msg;
    for (int ii = logger::Level::Emergency; ii <= logger::Level::Local7; ++ ii) {
       msg.clear ();
       logger::Logger::write((logger::Level::_v)ii, msg << " numeric value=" << ii, COFFEE_FILE_LOCATION);

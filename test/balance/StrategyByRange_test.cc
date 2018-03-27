@@ -29,7 +29,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TtyWriter.hpp>
@@ -53,20 +53,20 @@ BOOST_AUTO_TEST_CASE(byrange_empty_strategy)
 {
    balance::StrategyByRange mainStrategy;
    std::shared_ptr<balance::Strategy> foo;
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (0, 10, foo), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (0, 10, foo), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(byrange_recursive)
 {
    std::shared_ptr<balance::StrategyByRange> strategy = std::make_shared<balance::StrategyByRange>();
-   BOOST_REQUIRE_THROW (strategy->addRange (0, 10, strategy), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (strategy->addRange (0, 10, strategy), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(byrange_bad_limits, ResourceListFixture)
 {
    balance::StrategyByRange mainStrategy;
    std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (10, 0, strategy), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (10, 0, strategy), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(byrange_overlapping, ResourceListFixture)
@@ -77,10 +77,10 @@ BOOST_FIXTURE_TEST_CASE(byrange_overlapping, ResourceListFixture)
 
    mainStrategy.addRange (10, 20, strategy);
 
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (5, 14, strategy), adt::RuntimeException);
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (5, 25, strategy), adt::RuntimeException);
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (15, 25, strategy), adt::RuntimeException);
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (11, 19, strategy), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (5, 14, strategy), basis::RuntimeException);
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (5, 25, strategy), basis::RuntimeException);
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (15, 25, strategy), basis::RuntimeException);
+   BOOST_REQUIRE_THROW (mainStrategy.addRange (11, 19, strategy), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(byrange_sharing)

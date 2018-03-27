@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(persistence_classbuilder_twice_pks)
       badPrimaryKey = pkBuilder.build();
    }
 
-   BOOST_REQUIRE_THROW(classBuilder.set(badPrimaryKey), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(classBuilder.set(badPrimaryKey), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(persistence_classbuilder_without_pk)
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(persistence_classbuilder_without_pk)
    persistence::ClassBuilder classBuilder("customer");
 
    classBuilder.add(std::make_shared<dbms::datatype::Integer>("id")).add(std::make_shared<dbms::datatype::Integer>("age"));
-   BOOST_REQUIRE_THROW(classBuilder.build(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(classBuilder.build(), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(persistence_classbuilder_without_fields)
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(persistence_classbuilder_without_fields)
    auto primaryKey = pkBuilder.build();
 
    BOOST_REQUIRE_NO_THROW(classBuilder.set(primaryKey));
-   BOOST_REQUIRE_THROW(classBuilder.build(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(classBuilder.build(), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(persistence_classbuilder_dual_member)
@@ -86,5 +86,5 @@ BOOST_AUTO_TEST_CASE(persistence_classbuilder_dual_member)
    BOOST_REQUIRE_NO_THROW(classBuilder.set(primaryKey));
    classBuilder.add(std::make_shared<dbms::datatype::Integer>("size")).add(std::make_shared<dbms::datatype::Integer>(NameInPkAndMember));
 
-   BOOST_REQUIRE_THROW(classBuilder.build(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(classBuilder.build(), basis::RuntimeException);
 }

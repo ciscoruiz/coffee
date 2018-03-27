@@ -47,7 +47,7 @@ private:
    void open() throw(DatabaseException);
    void close() noexcept;
    bool isAvailable () const noexcept  { return ldapHandle != nullptr;  }
-   void do_commit() throw(adt::RuntimeException, DatabaseException) { ; }
+   void do_commit() throw(basis::RuntimeException, DatabaseException) { ; }
    void do_rollback() noexcept;
 
    void checkResult(const int rc, const char *method, const char* file, const int line) throw (DatabaseException);

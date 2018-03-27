@@ -64,7 +64,7 @@ void LdapConnection::open()
       if (rc == LDAP_CONNECT_ERROR) {
          char* errorMessage;
          ldap_get_option(ldapHandle, LDAP_OPT_DIAGNOSTIC_MESSAGE, (void*)&errorMessage);
-         adt::RuntimeException ex(std::string(errorMessage), COFFEE_FILE_LOCATION);
+         basis::RuntimeException ex(std::string(errorMessage), COFFEE_FILE_LOCATION);
          ldap_memfree(errorMessage);
          throw ex;
       }

@@ -43,7 +43,7 @@ public:
    explicit Integer(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) : Integer(name.c_str(), constraint) {;}
    Integer(const Integer& other);
 
-   int getValue() const throw(adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
+   int getValue() const throw(basis::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
    void setValue(const int i)
       noexcept
@@ -56,9 +56,9 @@ public:
 
    bool operator==(const Integer& other) const noexcept { return m_value == other.m_value; }
 
-   operator adt::StreamString() const noexcept { return asString(); }
+   operator basis::StreamString() const noexcept { return asString(); }
 
-   adt::StreamString asString() const noexcept;
+   basis::StreamString asString() const noexcept;
 
    size_t hash() const noexcept { return std::hash<int>{}(m_value); }
 
@@ -68,7 +68,7 @@ private:
    int m_value;
 
    void do_clear() noexcept { m_value = 0; }
-   int do_compare(const Abstract& other) const throw(adt::RuntimeException);
+   int do_compare(const Abstract& other) const throw(basis::RuntimeException);
 };
 
 }

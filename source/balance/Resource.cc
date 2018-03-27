@@ -23,8 +23,8 @@
 
 #include <coffee/balance/Resource.hpp>
 
-#include <coffee/adt/StreamString.hpp>
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/StreamString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/xml/Node.hpp>
 #include <coffee/xml/Attribute.hpp>
@@ -32,13 +32,13 @@
 using namespace coffee;
 
 //virtual
-adt::StreamString balance::Resource::asString() const
+basis::StreamString balance::Resource::asString() const
    noexcept
 {
-   adt::StreamString result("balance::Resource {");
-   result += adt::NamedObject::asString();
+   basis::StreamString result("balance::Resource {");
+   result += basis::NamedObject::asString();
    result += " } | Available = ";
-   result += adt::AsString::apply(isAvailable());
+   result += basis::AsString::apply(isAvailable());
    return result.append("}");
 }
 

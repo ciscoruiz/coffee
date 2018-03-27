@@ -34,7 +34,7 @@ public:
    DummyFormatter() {;}
 
 private:
-   std::string apply(const logger::Level::_v level, const adt::StreamString& comment, const char* methodName, const char* file, const unsigned lineno) noexcept {
+   std::string apply(const logger::Level::_v level, const basis::StreamString& comment, const char* methodName, const char* file, const unsigned lineno) noexcept {
       return comment;
    }
 };
@@ -50,7 +50,7 @@ private:
    unsigned int m_counters [logger::Level::Local7 + 1];
    unsigned int m_total;
 
-   void initialize() throw(adt::RuntimeException){
+   void initialize() throw(basis::RuntimeException){
       memset(&m_counters, 0, sizeof(m_counters));
       m_total = 0;
    }
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(filter_level)
 
    BOOST_REQUIRE_EQUAL(ss->getTotal(), 10);
 
-   adt::RuntimeException ex("None",COFFEE_FILE_LOCATION);
+   basis::RuntimeException ex("None",COFFEE_FILE_LOCATION);
 
    Logger::write(ex);
    BOOST_REQUIRE_EQUAL(ss->getTotal(), 11);

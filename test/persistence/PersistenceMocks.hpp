@@ -70,9 +70,9 @@ private:
    std::shared_ptr<datatype::String> m_name;
    mock::MockLowLevelRecord m_selection;
 
-   void do_prepare(dbms::Connection& connection) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-   dbms::ResultCode do_execute(dbms::Connection& connection) throw(adt::RuntimeException, dbms::DatabaseException);
-   bool do_fetch() throw(adt::RuntimeException, dbms::DatabaseException);
+   void do_prepare(dbms::Connection& connection) throw(basis::RuntimeException, dbms::DatabaseException) {;}
+   dbms::ResultCode do_execute(dbms::Connection& connection) throw(basis::RuntimeException, dbms::DatabaseException);
+   bool do_fetch() throw(basis::RuntimeException, dbms::DatabaseException);
 };
 
 class MyWriteStatement : public dbms::Statement {
@@ -91,9 +91,9 @@ private:
    std::shared_ptr<datatype::String> m_name;
    mock::MockLowLevelRecord m_selection;
 
-   void do_prepare(dbms::Connection& connection) throw(adt::RuntimeException, dbms::DatabaseException) {;}
-   dbms::ResultCode do_execute(dbms::Connection& connection) throw(adt::RuntimeException, dbms::DatabaseException);
-   bool do_fetch() throw(adt::RuntimeException, dbms::DatabaseException) { return false; }
+   void do_prepare(dbms::Connection& connection) throw(basis::RuntimeException, dbms::DatabaseException) {;}
+   dbms::ResultCode do_execute(dbms::Connection& connection) throw(basis::RuntimeException, dbms::DatabaseException);
+   bool do_fetch() throw(basis::RuntimeException, dbms::DatabaseException) { return false; }
 };
 
 class MyDatabase : public mock::MockDatabase {
@@ -101,7 +101,7 @@ public:
    static const int PreloadRegisterCounter;
 
    static std::shared_ptr<MyDatabase> instantiate(app::Application& application)
-      throw(adt::RuntimeException)
+      throw(basis::RuntimeException)
    {
       std::shared_ptr<MyDatabase> result(new MyDatabase(application));
       application.attach(result);
@@ -115,7 +115,7 @@ private:
       mock::MockLowLevelRecord record;
       for(int ii = 0; ii < PreloadRegisterCounter; ++ ii) {
          record.m_id = ii;
-         record.m_name = adt::StreamString("the name ") << ii;
+         record.m_name = basis::StreamString("the name ") << ii;
          add(record);
       }
    }
@@ -136,7 +136,7 @@ private:
       return result;
    }
 
-   void do_stop() throw(adt::RuntimeException) {;}
+   void do_stop() throw(basis::RuntimeException) {;}
 };
 
 class CustomerObjectWrapper {
@@ -160,8 +160,8 @@ public:
    {;}
 
 private:
-   dbms::ResultCode apply(dbms::GuardStatement& statement, TheObject& object) throw(adt::RuntimeException, dbms::DatabaseException);
-   bool hasToRefresh (dbms::GuardStatement& statement, TheObject& object) throw (adt::RuntimeException, dbms::DatabaseException);
+   dbms::ResultCode apply(dbms::GuardStatement& statement, TheObject& object) throw(basis::RuntimeException, dbms::DatabaseException);
+   bool hasToRefresh (dbms::GuardStatement& statement, TheObject& object) throw (basis::RuntimeException, dbms::DatabaseException);
 };
 
 class MockCustomerRecorder : public persistence::Recorder {
@@ -169,7 +169,7 @@ public:
    MockCustomerRecorder(TheStatement& statement, const TheObject& object) : persistence::Recorder("MockCustomerRecorder", statement, object) {;}
 
 private:
-   dbms::ResultCode apply(dbms::GuardStatement& statement) throw(adt::RuntimeException, dbms::DatabaseException);
+   dbms::ResultCode apply(dbms::GuardStatement& statement) throw(basis::RuntimeException, dbms::DatabaseException);
 };
 
 struct MockCustomerEraser : public persistence::Eraser {
@@ -177,7 +177,7 @@ public:
    MockCustomerEraser(TheStatement& statement, const ThePrimaryKey& primaryKey) : persistence::Eraser("MockCustomerEraser", statement, primaryKey) {;}
 
 private:
-   dbms::ResultCode apply(dbms::GuardStatement& statement) throw(adt::RuntimeException, dbms::DatabaseException);
+   dbms::ResultCode apply(dbms::GuardStatement& statement) throw(basis::RuntimeException, dbms::DatabaseException);
 };
 
 }

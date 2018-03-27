@@ -65,9 +65,9 @@ size_t persistence::PrimaryKey::hash() const noexcept
    return result;
 }
 
-adt::StreamString persistence::PrimaryKey::asString() const noexcept
+basis::StreamString persistence::PrimaryKey::asString() const noexcept
 {
-   adt::StreamString result("persistence.PrimaryKey { ");
+   basis::StreamString result("persistence.PrimaryKey { ");
 
    bool first = true;
    for (const_data_iterator ii = begin(), maxii = end(); ii != maxii; ++ ii) {

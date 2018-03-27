@@ -63,7 +63,7 @@ datatype::Date::Date (const Date& other) :
 }
 
 void datatype::Date::setValue (const char* str, const char* format)
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    clear ();
 
@@ -90,18 +90,18 @@ void datatype::Date::setValue (const char* str, const char* format)
 }
 
 void datatype::Date::setValue (const std::chrono::seconds& value)
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    this->isNotNull();
    m_value = value;
 }
 
-adt::StreamString datatype::Date::asString () const
+basis::StreamString datatype::Date::asString () const
    noexcept
 {
    const char* cstring;
 
-   adt::StreamString result ("datatype.Date { ");
+   basis::StreamString result ("datatype.Date { ");
    result << dbms::datatype::Abstract::asString ();
 
    if (this->hasValue () == true) {
@@ -112,7 +112,7 @@ adt::StreamString datatype::Date::asString () const
 }
 
 int datatype::Date::do_compare (const datatype::Abstract& other) const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    const Date& _other = coffee_datatype_downcast(Date, other);
 

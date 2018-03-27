@@ -24,7 +24,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-#include <coffee/adt/DataBlock.hpp>
+#include <coffee/basis/DataBlock.hpp>
 
 #include <coffee/logger/Logger.hpp>
 
@@ -49,7 +49,7 @@ using namespace coffee::dbms;
 using coffee::dbms::ldap::LdapOutputBinder;
 
 void LdapOutputBinder::do_decode(Statement& _statement, const int pos)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<datatype::Abstract>& data(getData());
    LdapStatement& statement = static_cast<LdapStatement&>(_statement);
@@ -76,7 +76,7 @@ void LdapOutputBinder::do_decode(Statement& _statement, const int pos)
       }
       ldap_value_free_len(values);
    }
-   catch(adt::RuntimeException& ex) {
+   catch(basis::RuntimeException& ex) {
       ldap_value_free_len(values);
       throw;
    }

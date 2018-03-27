@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/dbms.ldap/LdapInputBinder.hpp>
 #include <coffee/dbms.ldap/LdapConnection.hpp>
@@ -44,7 +44,7 @@ using namespace coffee::dbms;
 using coffee::dbms::ldap::LdapInputBinder;
 
 void LdapInputBinder::do_encode(Statement& _statement, const int pos)
-   throw(adt::RuntimeException, DatabaseException)
+   throw(basis::RuntimeException, DatabaseException)
 {
    static const std::string empty;
 
@@ -59,13 +59,13 @@ void LdapInputBinder::do_encode(Statement& _statement, const int pos)
    else {
       switch(data->getType()) {
       case dbms::datatype::Abstract::Datatype::Integer:
-         statement.setBoundValue(adt::AsString::apply(coffee_datatype_downcast(datatype::Integer, data)->getValue()));
+         statement.setBoundValue(basis::AsString::apply(coffee_datatype_downcast(datatype::Integer, data)->getValue()));
          break;
       case dbms::datatype::Abstract::Datatype::String:
-         statement.setBoundValue(adt::AsString::apply(coffee_datatype_downcast(datatype::String, data)->getValue()));
+         statement.setBoundValue(basis::AsString::apply(coffee_datatype_downcast(datatype::String, data)->getValue()));
          break;
       case dbms::datatype::Abstract::Datatype::Float:
-         statement.setBoundValue(adt::AsString::apply(coffee_datatype_downcast(datatype::Float, data)->getValue()));
+         statement.setBoundValue(basis::AsString::apply(coffee_datatype_downcast(datatype::Float, data)->getValue()));
          break;
       case dbms::datatype::Abstract::Datatype::ShortBlock:
       case dbms::datatype::Abstract::Datatype::LongBlock:
@@ -74,13 +74,13 @@ void LdapInputBinder::do_encode(Statement& _statement, const int pos)
       case dbms::datatype::Abstract::Datatype::Date:
          {
             auto date = coffee_datatype_downcast(datatype::Date, data)->getValue();
-            statement.setBoundValue(adt::AsString::apply(date, datatype::Date::DefaultFormat));
+            statement.setBoundValue(basis::AsString::apply(date, datatype::Date::DefaultFormat));
          }
          break;
       case dbms::datatype::Abstract::Datatype::TimeStamp:
          {
             const std::chrono::seconds& timeStamp = coffee_datatype_downcast(datatype::TimeStamp, data)->getValue();
-            statement.setBoundValue(adt::AsString::apply(timeStamp));
+            statement.setBoundValue(basis::AsString::apply(timeStamp));
          }
          break;
       }

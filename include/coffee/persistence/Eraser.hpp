@@ -39,7 +39,7 @@ public:
    virtual ~Eraser () {;}
 
    virtual dbms::ResultCode apply(dbms::GuardStatement& statement)
-      throw(adt::RuntimeException, dbms::DatabaseException) = 0;
+      throw(basis::RuntimeException, dbms::DatabaseException) = 0;
 
 protected:
    Eraser (const char* name, TheStatement& statement, const ThePrimaryKey& primaryKey) :

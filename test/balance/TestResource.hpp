@@ -25,7 +25,7 @@
 #define _coffee_test_balance_TestResource_hpp
 
 #include <coffee/balance/Resource.hpp>
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/balance/ResourceList.hpp>
 
@@ -38,7 +38,7 @@ namespace balance {
 class TestResource : public coffee::balance::Resource {
 public:
    explicit TestResource (const int key) :
-      Resource (adt::StreamString ("TestResource-").append (adt::AsString::apply (key, "%02d"))),
+      Resource (basis::StreamString ("TestResource-").append (basis::AsString::apply (key, "%02d"))),
       m_key (key),
       m_available (false) {;}
 
@@ -54,7 +54,7 @@ private:
    bool m_available;
 
    bool isAvailable () const noexcept { return m_available; }
-   virtual void initialize () throw (adt::RuntimeException) { m_available = true; }
+   virtual void initialize () throw (basis::RuntimeException) { m_available = true; }
 };
 
 class UnusableResource  : public TestResource {
@@ -62,7 +62,7 @@ public:
    UnusableResource() :  TestResource(555){;}
 
 private:
-   void initialize () throw (adt::RuntimeException) { setAvailable(false); COFFEE_THROW_EXCEPTION("Can not initialize resource"); }
+   void initialize () throw (basis::RuntimeException) { setAvailable(false); COFFEE_THROW_EXCEPTION("Can not initialize resource"); }
 };
 
 }

@@ -36,8 +36,8 @@ public:
    virtual ~LdapInputBinder() {;}
 
 private:
-   void do_prepare(Statement& statement, const int pos) throw(adt::RuntimeException, DatabaseException) {;}
-   void do_encode(Statement& statement, const int pos) throw(adt::RuntimeException, DatabaseException);
+   void do_prepare(Statement& statement, const int pos) throw(basis::RuntimeException, DatabaseException) {;}
+   void do_encode(Statement& statement, const int pos) throw(basis::RuntimeException, DatabaseException);
 };
 
 } /* namespace ldap */

@@ -34,10 +34,10 @@ public:
    explicit MockOutput(std::shared_ptr<dbms::datatype::Abstract>& abstract) : dbms::binder::Output(abstract) {;}
 
 private:
-   void do_prepare(dbms::Statement& statement, const int pos) throw(adt::RuntimeException, dbms::DatabaseException) {;}
+   void do_prepare(dbms::Statement& statement, const int pos) throw(basis::RuntimeException, dbms::DatabaseException) {;}
    void do_release(dbms::Statement& statement) noexcept {;}
-   void do_decode(dbms::Statement& statement, const int pos) throw(adt::RuntimeException) {;}
-   void do_write(const std::shared_ptr<dbms::datatype::LongBlock>&) throw(adt::RuntimeException, dbms::DatabaseException) {;}
+   void do_decode(dbms::Statement& statement, const int pos) throw(basis::RuntimeException) {;}
+   void do_write(const std::shared_ptr<dbms::datatype::LongBlock>&) throw(basis::RuntimeException, dbms::DatabaseException) {;}
 };
 
 } /* namespace mock */

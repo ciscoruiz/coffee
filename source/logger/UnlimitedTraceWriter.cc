@@ -47,7 +47,7 @@ logger::UnlimitedTraceWriter::UnlimitedTraceWriter(const std::string& path) :
 {
 }
 
-void logger::UnlimitedTraceWriter::initialize() throw(adt::RuntimeException)
+void logger::UnlimitedTraceWriter::initialize() throw(basis::RuntimeException)
 {
    openStream();
 }
@@ -66,7 +66,7 @@ void logger::UnlimitedTraceWriter::apply(const Level::_v level, const std::strin
       write(m_stream, line.data(), line.length());
       write(m_stream, "\n", 1);
    }
-   catch(adt::RuntimeException& ex) {
+   catch(basis::RuntimeException& ex) {
       std::cerr << ex.what() << std::endl;
    }
 }
@@ -79,7 +79,7 @@ bool logger::UnlimitedTraceWriter::wantsToProcess(const logger::Level::_v level)
 }
 
 void coffee::logger::UnlimitedTraceWriter::openStream()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    int stream = open(m_path.c_str(), O_RDWR | O_CREAT | O_APPEND, S_IRUSR |S_IWUSR | S_IRGRP| S_IROTH);
 

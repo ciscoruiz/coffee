@@ -58,9 +58,9 @@ private:
    LDAPMessage* getCurrentEntry() noexcept { return currentEntry; }
    void setBoundValue(const std::string& boundValue) noexcept { boundValues.push_back(boundValue); }
 
-   void do_prepare(Connection& connection) throw(adt::RuntimeException, DatabaseException) {;}
-   ResultCode do_execute(Connection& connection) throw(adt::RuntimeException, DatabaseException);
-   bool do_fetch() throw(adt::RuntimeException, DatabaseException);
+   void do_prepare(Connection& connection) throw(basis::RuntimeException, DatabaseException) {;}
+   ResultCode do_execute(Connection& connection) throw(basis::RuntimeException, DatabaseException);
+   bool do_fetch() throw(basis::RuntimeException, DatabaseException);
    void close() noexcept;
    std::string getDn(LDAPMessage* entry) noexcept;
 

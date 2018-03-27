@@ -26,9 +26,9 @@
 
 #include <memory>
 
-#include <coffee/adt/NamedObject.hpp>
+#include <coffee/basis/NamedObject.hpp>
 
-#include <coffee/adt/pattern/lru/Cache.hpp>
+#include <coffee/basis/pattern/lru/Cache.hpp>
 
 #include <coffee/persistence/PrimaryKey.hpp>
 #include <coffee/persistence/Accessor.hpp>
@@ -53,11 +53,11 @@ class Recorder;
 class Eraser;
 class Creator;
 
-class Storage : public adt::NamedObject {
+class Storage : public basis::NamedObject {
 public:
 
 private:
-   typedef adt::pattern::lru::Cache<
+   typedef basis::pattern::lru::Cache<
          Accessor::ThePrimaryKey,
          Accessor::TheObject,
          persistence::PrimaryKey::HashSharedPointer,
@@ -77,20 +77,20 @@ public:
    unsigned int getFaultCounter() const noexcept { return m_faultCounter; }
 
    Accessor::TheObject load(Accessor::TheConnection& connection, Loader& loader)
-      throw(adt::RuntimeException, dbms::DatabaseException);
+      throw(basis::RuntimeException, dbms::DatabaseException);
    void save(Accessor::TheConnection& connection, Recorder& recorder)
-      throw(adt::RuntimeException, dbms::DatabaseException);
+      throw(basis::RuntimeException, dbms::DatabaseException);
    void erase(Accessor::TheConnection& connection, Eraser& eraser)
-      throw(adt::RuntimeException, dbms::DatabaseException);
+      throw(basis::RuntimeException, dbms::DatabaseException);
 
    void save(dbms::GuardConnection& connection, Recorder& recorder)
-      throw(adt::RuntimeException, dbms::DatabaseException);
+      throw(basis::RuntimeException, dbms::DatabaseException);
    void erase(dbms::GuardConnection& connection, Eraser& eraser)
-      throw(adt::RuntimeException, dbms::DatabaseException);
+      throw(basis::RuntimeException, dbms::DatabaseException);
 
-   operator adt::StreamString() const noexcept { return asString(); }
+   operator basis::StreamString() const noexcept { return asString(); }
 
-   adt::StreamString asString() const noexcept;
+   basis::StreamString asString() const noexcept;
 
    std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 

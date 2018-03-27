@@ -27,7 +27,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TtyWriter.hpp>
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE( avoid_empties )
 {
    ResourceList resourceList("otherList");
    std::shared_ptr<Resource> emptyResource;
-   BOOST_REQUIRE_THROW (resourceList.add (emptyResource), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (resourceList.add (emptyResource), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE( count_availables, ResourceListFixture)
@@ -114,7 +114,7 @@ BOOST_FIXTURE_TEST_CASE (as_string, ResourceListFixture)
       myResource->setAvailable(false);
    }
 
-   BOOST_REQUIRE_EQUAL (resourceList->asString (), "balance.ResourceList { adt.NamedObject { Name: TestResources } | Available = 9 of 10 }");
+   BOOST_REQUIRE_EQUAL (resourceList->asString (), "balance.ResourceList { basis.NamedObject { Name: TestResources } | Available = 9 of 10 }");
 }
 
 BOOST_FIXTURE_TEST_CASE (as_xml, ResourceListFixture)
@@ -134,9 +134,9 @@ BOOST_FIXTURE_TEST_CASE (as_xml, ResourceListFixture)
    std::string str = compiler.apply(root);
 
    for (int ii = 0; ii < ResourceListFixture::MaxResources; ++ ii) {
-      adt::StreamString ss("<balance.Resource IsAvailable=\"");
-      ss << adt::AsString::apply(ii != hotIndex) << "\" Name=\"TestResource-";
-      ss << adt::AsString::apply(ii, "%02d") << "\"/>";
+      basis::StreamString ss("<balance.Resource IsAvailable=\"");
+      ss << basis::AsString::apply(ii != hotIndex) << "\" Name=\"TestResource-";
+      ss << basis::AsString::apply(ii, "%02d") << "\"/>";
       BOOST_REQUIRE(str.find(ss) != std::string::npos);
    }
 }

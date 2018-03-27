@@ -30,10 +30,10 @@
 using namespace coffee;
 
 //virtual
-adt::StreamString balance::Strategy::asString() const noexcept
+basis::StreamString balance::Strategy::asString() const noexcept
 {
-   adt::StreamString result("balance.Strategy { ");
-   result += adt::NamedObject::asString();
+   basis::StreamString result("balance.Strategy { ");
+   result += basis::NamedObject::asString();
    result += "|";
    result += m_resources->asString();
    return result += " }";

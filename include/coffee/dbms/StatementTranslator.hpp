@@ -24,7 +24,7 @@
 #ifndef _coffee_dbms_StatementTranslator_hpp
 #define _coffee_dbms_StatementTranslator_hpp
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 namespace coffee {
 
@@ -90,7 +90,7 @@ protected:
     * pueda ser interpretada correctamente por el motor de base de datos sobre el que 
     * se va a ejecutar. 
     */ 
-   virtual const char* apply (const char* statement) throw (adt::RuntimeException) = 0;
+   virtual const char* apply (const char* statement) throw (basis::RuntimeException) = 0;
    
 private:
    const std::string a_name;

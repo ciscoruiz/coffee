@@ -26,8 +26,8 @@
 
 #include <memory>
 
-#include <coffee/adt/NamedObject.hpp>
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/NamedObject.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 namespace coffee {
 
@@ -42,7 +42,7 @@ namespace balance {
  *
  * \include test/balance/TestResource.hpp
  */
-class Resource : public adt::NamedObject {
+class Resource : public basis::NamedObject {
 public:
    /**
     * Destructor
@@ -52,7 +52,7 @@ public:
    /**
     * Initialize the resource
     */
-   virtual void initialize () throw (adt::RuntimeException) {;}
+   virtual void initialize () throw (basis::RuntimeException) {;}
 
    /**
     * \return \b true is the resource is available or \b false otherwise.
@@ -62,12 +62,12 @@ public:
    /**
     * \return Summarize information of this instance in a StreamString.
     */
-   operator adt::StreamString () const noexcept { return asString (); }
+   operator basis::StreamString () const noexcept { return asString (); }
 
    /**
     * \return Summarize information of this instance in a StreamString.
     */
-   virtual adt::StreamString asString () const noexcept;
+   virtual basis::StreamString asString () const noexcept;
 
    /**
     * \return Summarize information of this instance in a coffee::xml::Node.
@@ -75,7 +75,7 @@ public:
    virtual std::shared_ptr<xml::Node> asXML (std::shared_ptr<xml::Node>& parent) const noexcept;
 
 protected:
-   explicit Resource(const std::string& name) : adt::NamedObject(name) {;}
+   explicit Resource(const std::string& name) : basis::NamedObject(name) {;}
 
 };
 

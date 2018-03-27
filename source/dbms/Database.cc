@@ -64,7 +64,7 @@ dbms::Database::~Database()
 }
 
 void dbms::Database::do_initialize()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    LOG_THIS_METHOD();
 
@@ -76,7 +76,7 @@ void dbms::Database::do_initialize()
          connection(iic)->open();
          counter ++;
       }
-      catch(adt::Exception& ex) {
+      catch(basis::Exception& ex) {
          logger::Logger::write(ex);
          error = true;
       }
@@ -90,7 +90,7 @@ void dbms::Database::do_initialize()
 }
 
 void dbms::Database::do_stop()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    LOG_THIS_METHOD();
 
@@ -102,7 +102,7 @@ void dbms::Database::do_stop()
          _connection->close();
          ++ counter;
       }
-      catch(adt::Exception& ex) {
+      catch(basis::Exception& ex) {
          logger::Logger::write(ex);
       }
    }
@@ -114,7 +114,7 @@ void dbms::Database::do_stop()
 }
 
 std::shared_ptr<dbms::Connection> dbms::Database::createConnection(const char* name, const ConnectionParameters& parameters)
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    logger::TraceMethod ttmm(logger::Level::Local7, COFFEE_FILE_LOCATION);
 
@@ -144,7 +144,7 @@ std::shared_ptr<dbms::Connection> dbms::Database::createConnection(const char* n
             result->open();
             m_connections.push_back(result);
          }
-         catch(adt::Exception& ex) {
+         catch(basis::Exception& ex) {
             logger::Logger::write(ex);
             result.reset();
             throw;
@@ -154,7 +154,7 @@ std::shared_ptr<dbms::Connection> dbms::Database::createConnection(const char* n
          m_connections.push_back(result);
    }
    catch(std::bad_cast& ex) {
-      throw adt::RuntimeException(ex.what(), COFFEE_FILE_LOCATION);
+      throw basis::RuntimeException(ex.what(), COFFEE_FILE_LOCATION);
    }
 
    LOG_DEBUG(result->asString());
@@ -163,7 +163,7 @@ std::shared_ptr<dbms::Connection> dbms::Database::createConnection(const char* n
 }
 
 std::shared_ptr<dbms::Connection>& dbms::Database::findConnection(const char* name)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    logger::TraceMethod ttmm(logger::Level::Local7, COFFEE_FILE_LOCATION);
 
@@ -179,7 +179,7 @@ std::shared_ptr<dbms::Connection>& dbms::Database::findConnection(const char* na
 }
 
 std::shared_ptr<dbms::Statement> dbms::Database::createStatement(const char* name, const char* expression, const StatementParameters& parameters)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    logger::TraceMethod ttmm(logger::Level::Local7, COFFEE_FILE_LOCATION);
 
@@ -199,14 +199,14 @@ std::shared_ptr<dbms::Statement> dbms::Database::createStatement(const char* nam
       m_statements.push_back(result);
    }
    catch(std::bad_cast& ex) {
-      throw adt::RuntimeException(ex.what(), COFFEE_FILE_LOCATION);
+      throw basis::RuntimeException(ex.what(), COFFEE_FILE_LOCATION);
    }
 
    return result;
 }
 
 std::shared_ptr<dbms::Statement>& dbms::Database::findStatement(const char* name)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    logger::TraceMethod ttmm(logger::Level::Local7, COFFEE_FILE_LOCATION);
 
@@ -224,7 +224,7 @@ std::shared_ptr<dbms::Statement>& dbms::Database::findStatement(const char* name
 }
 
 void dbms::Database::notifyRecoveryFail(dbms::Connection& connection) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    LOG_WARN(connection.asString());
 
@@ -232,10 +232,10 @@ void dbms::Database::notifyRecoveryFail(dbms::Connection& connection) const
       m_failRecoveryHandler->apply(connection);
 }
 
-adt::StreamString dbms::Database::asString() const
+basis::StreamString dbms::Database::asString() const
    noexcept
 {
-   adt::StreamString result("dbms::Database { ");
+   basis::StreamString result("dbms::Database { ");
 
    result << app::Service::asString();
    result << " | Name=" << m_name;

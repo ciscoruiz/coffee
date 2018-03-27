@@ -24,7 +24,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 
-#include <coffee/adt/DataBlock.hpp>
+#include <coffee/basis/DataBlock.hpp>
 
 #include <coffee/xml/Document.hpp>
 #include <coffee/xml/Node.hpp>

@@ -38,7 +38,7 @@ namespace ldap {
 class LdapDatabase : public Database {
 public:
    static std::shared_ptr<LdapDatabase> instantiate(app::Application& application, const std::string& url)
-      throw(adt::RuntimeException);
+      throw(basis::RuntimeException);
 
    ~LdapDatabase();
 
@@ -47,26 +47,26 @@ private:
    public:
       LdapErrorCodeInterpreter() {;}
    private:
-      bool notFound(const int errorCode) const throw(adt::RuntimeException);
-      bool successful(const int errorCode) const throw(adt::RuntimeException);
-      bool locked(const int errorCode) const throw(adt::RuntimeException);
-      bool lostConnection(const int errorCode) const throw(adt::RuntimeException);
+      bool notFound(const int errorCode) const throw(basis::RuntimeException);
+      bool successful(const int errorCode) const throw(basis::RuntimeException);
+      bool locked(const int errorCode) const throw(basis::RuntimeException);
+      bool lostConnection(const int errorCode) const throw(basis::RuntimeException);
    };
 
    LdapDatabase(app::Application& application, const std::string& url);
 
    std::shared_ptr<Connection> allocateConnection(const std::string& name, const ConnectionParameters& parameters)
-      throw(adt::RuntimeException, std::bad_cast);
+      throw(basis::RuntimeException, std::bad_cast);
 
    std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
-      throw(adt::RuntimeException, std::bad_cast);
+      throw(basis::RuntimeException, std::bad_cast);
 
    std::shared_ptr<binder::Input> allocateInputBind(std::shared_ptr<datatype::Abstract> data) const
-      throw(adt::RuntimeException);
+      throw(basis::RuntimeException);
    std::shared_ptr<binder::Output> allocateOutputBind(std::shared_ptr<datatype::Abstract> data) const
-      throw(adt::RuntimeException);
+      throw(basis::RuntimeException);
 
-   void do_stop() throw(adt::RuntimeException) {;}
+   void do_stop() throw(basis::RuntimeException) {;}
 };
 
 }

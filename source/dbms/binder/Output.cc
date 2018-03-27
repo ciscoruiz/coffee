@@ -32,10 +32,10 @@
 using namespace coffee;
 using namespace coffee::dbms;
 
-adt::StreamString binder::Output::asString() const
+basis::StreamString binder::Output::asString() const
    noexcept
 {
-   adt::StreamString result("binder.Output {");
+   basis::StreamString result("binder.Output {");
    result += getData()->asString();
    return result += "}";
 }

@@ -58,7 +58,7 @@ protected:
     * \param file The file where the trace was created
     * \param lineno The line number where the trace was created.
     */
-   virtual std::string apply(const Level::_v level, const adt::StreamString& comment, const char* methodName, const char* file, const unsigned lineno) noexcept = 0;
+   virtual std::string apply(const Level::_v level, const basis::StreamString& comment, const char* methodName, const char* file, const unsigned lineno) noexcept = 0;
 
 private:
    friend class Logger;

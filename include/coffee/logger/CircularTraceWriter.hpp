@@ -70,12 +70,12 @@ private:
    size_t m_lineno;
    unsigned int m_loops;
 
-   void initialize () throw (adt::RuntimeException);
+   void initialize () throw (basis::RuntimeException);
 
-   void openStream () throw (adt::RuntimeException);
-   bool oversizedStream () throw (adt::RuntimeException);
+   void openStream () throw (basis::RuntimeException);
+   bool oversizedStream () throw (basis::RuntimeException);
    void closeStream () noexcept;
-   void renameFile () throw (adt::RuntimeException);
+   void renameFile () throw (basis::RuntimeException);
 };
 
 }

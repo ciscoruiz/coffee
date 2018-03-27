@@ -63,7 +63,7 @@ void sqlite::SqliteConnection::close()
 }
 
 void sqlite::SqliteConnection::execute(const char* statement)
-   throw(adt::RuntimeException, DatabaseException)
+   throw(basis::RuntimeException, DatabaseException)
 {
    LOG_DEBUG(statement);
 
@@ -84,7 +84,7 @@ void sqlite::SqliteConnection::do_rollback()
    try {
       execute("ROLLBACK");
    }
-   catch (adt::Exception& ex) {
+   catch (basis::Exception& ex) {
       logger::Logger::write(ex);
    }
 }

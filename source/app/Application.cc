@@ -40,7 +40,7 @@
 #include <coffee/config/SCCSRepository.hpp>
 #include <coffee/config/defines.hpp>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
@@ -56,7 +56,7 @@
 
 using namespace std;
 using namespace coffee;
-using namespace coffee::adt;
+using namespace coffee::basis;
 
 //static
 app::Application* app::Application::m_this = nullptr;
@@ -66,7 +66,7 @@ app::Application::Application(const char* shortName, const char* title, const ch
    a_version(std::string(version) + config::Release::getArchitecture()),
    a_title(title),
    a_pid(getpid()),
-   a_outputContextFilename(adt::StreamString("/tmp/coffee.context.").append(AsString::apply(a_pid, "%05d")).append(".xml"))
+   a_outputContextFilename(basis::StreamString("/tmp/coffee.context.").append(AsString::apply(a_pid, "%05d")).append(".xml"))
 {
    sigset(SIGUSR1, handlerUserSignal);
    sigset(SIGUSR2, handlerUserSignal);
@@ -129,7 +129,7 @@ void app::Application::start()
       }
       initialize();
    }
-   catch(adt::RuntimeException& ex) {
+   catch(basis::RuntimeException& ex) {
       logger::Logger::write(ex);
       throw;
    }
@@ -148,7 +148,7 @@ void app::Application::start()
       statusRunning();
       run();
    }
-   catch(adt::RuntimeException& ex) {
+   catch(basis::RuntimeException& ex) {
       logger::Logger::write(ex);
       stop();
       throw;
@@ -179,7 +179,7 @@ void app::Application::do_stop()
 {
    LOG_THIS_METHOD();
 
-   adt::StreamString ss("Some services do not accept the request stop { ");
+   basis::StreamString ss("Some services do not accept the request stop { ");
    bool exception = false;
 
    for(service_iterator ii = service_begin(), maxii = service_end(); ii != maxii; ii ++) {
@@ -250,9 +250,9 @@ void app::Application::writeContext(const boost::filesystem::path& file)
    out.close();
 }
 
-adt::StreamString app::Application::asString() const noexcept
+basis::StreamString app::Application::asString() const noexcept
 {
-   adt::StreamString result("app::Application { ");
+   basis::StreamString result("app::Application { ");
    result << app::Runnable::asString();
    result << " | #services=" << a_services.size();
    return result += " }";
@@ -321,7 +321,7 @@ void app::Application::handlerUserSignal(int signalID)
             m_this->signalUSR2();
       }
    }
-   catch(adt::RuntimeException& ex) {
+   catch(basis::RuntimeException& ex) {
       logger::Logger::write(ex);
    }
 }
@@ -336,7 +336,7 @@ void app::Application::handlerSignalTerminate(int)
          m_this->stop();
       }
    }
-   catch(adt::RuntimeException& ex) {
+   catch(basis::RuntimeException& ex) {
       logger::Logger::write(ex);
       exit(EXIT_SUCCESS);
    }

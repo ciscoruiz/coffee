@@ -31,25 +31,25 @@ using namespace coffee::dbms;
 using coffee::dbms::ldap::LdapErrorCodeInterpreter;
 
 bool LdapErrorCodeInterpreter::notFound(const int errorCode) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    return errorCode == LDAP_NO_SUCH_OBJECT;
 }
 
 bool LdapErrorCodeInterpreter::successful(const int errorCode) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    return errorCode == LDAP_SUCCESS;
 }
 
 bool LdapErrorCodeInterpreter::locked(const int errorCode) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    return errorCode == LDAP_BUSY;
 }
 
 bool LdapErrorCodeInterpreter::lostConnection(const int errorCode) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    return errorCode == LDAP_CONNECT_ERROR;
 }

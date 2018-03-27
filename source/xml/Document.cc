@@ -28,8 +28,8 @@
 #include <boost/filesystem.hpp>
 #include <memory>
 
-#include <coffee/adt/DataBlock.hpp>
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/DataBlock.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/logger/Logger.hpp>
 
@@ -62,7 +62,7 @@ const char* xml::Document::readName(const Handler handler) const
 }
 
 const xml::Document& xml::Document::parse(const boost::filesystem::path& file)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    releaseHandler();
    parseFile(file);
@@ -71,8 +71,8 @@ const xml::Document& xml::Document::parse(const boost::filesystem::path& file)
    return *this;
 }
 
-const xml::Document& xml::Document::parse(const adt::DataBlock& buffer)
-   throw(adt::RuntimeException)
+const xml::Document& xml::Document::parse(const basis::DataBlock& buffer)
+   throw(basis::RuntimeException)
 {
    releaseHandler();
    parseMemory(buffer);
@@ -82,7 +82,7 @@ const xml::Document& xml::Document::parse(const adt::DataBlock& buffer)
 }
 
 const xml::Document& xml::Document::parse(const boost::filesystem::path& file, const DTD& dtd)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    releaseHandler();
    parseFile(file);
@@ -92,8 +92,8 @@ const xml::Document& xml::Document::parse(const boost::filesystem::path& file, c
    return *this;
 }
 
-const xml::Document& xml::Document::parse(const adt::DataBlock& buffer, const DTD& dtd)
-   throw(adt::RuntimeException)
+const xml::Document& xml::Document::parse(const basis::DataBlock& buffer, const DTD& dtd)
+   throw(basis::RuntimeException)
 {
    releaseHandler();
    parseMemory(buffer);
@@ -105,7 +105,7 @@ const xml::Document& xml::Document::parse(const adt::DataBlock& buffer, const DT
 
 
 void xml::Document::parseFile(const boost::filesystem::path& file)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(boost::filesystem::exists(file) == false) {
       COFFEE_THROW_EXCEPTION("File '" << file.c_str() << "' does not exist");
@@ -117,15 +117,15 @@ void xml::Document::parseFile(const boost::filesystem::path& file)
       COFFEE_THROW_EXCEPTION("Some errors were found while parsing filename '" << file.c_str() << "'");
 }
 
-void xml::Document::parseMemory(const adt::DataBlock& buffer)
-   throw(adt::RuntimeException)
+void xml::Document::parseMemory(const basis::DataBlock& buffer)
+   throw(basis::RuntimeException)
 {
    if(setHandler(xmlParseMemory(buffer.data(), buffer.size())) == NULL)
-      COFFEE_THROW_EXCEPTION("Some errors were found while parsing memory: " << adt::AsString::apply(buffer));
+      COFFEE_THROW_EXCEPTION("Some errors were found while parsing memory: " << basis::AsString::apply(buffer));
 }
 
 void xml::Document::extractNodes(_xmlDoc* handler)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    xmlNodePtr root = xmlDocGetRootElement(handler);
 
@@ -136,7 +136,7 @@ void xml::Document::extractNodes(_xmlDoc* handler)
 
 // static
 void xml::Document::extractNodes(std::shared_ptr<xml::Node>& node)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    xml::Node::Handler handler = node->getHandler()->children;
    std::shared_ptr<xml::Node> child;
@@ -160,7 +160,7 @@ void xml::Document::extractNodes(std::shared_ptr<xml::Node>& node)
 
 //static
 void xml::Document::extractAttributes(std::shared_ptr<xml::Node>& node)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    xmlAttrPtr xmlAttribute = node->getHandler()->properties;
 
@@ -171,7 +171,7 @@ void xml::Document::extractAttributes(std::shared_ptr<xml::Node>& node)
 }
 
 void xml::Document::compile(xml::Compiler& compiler) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    Compiler::Handler compilerHandler = compiler.getHandler();
 
@@ -191,7 +191,7 @@ void xml::Document::compile(xml::Compiler& compiler) const
 void xml::Document::logError(void* data, _xmlError* error)
    noexcept
 {
-   adt::StreamString ss;
+   basis::StreamString ss;
 
    std::string messageWithoutEnter(error->message);
 

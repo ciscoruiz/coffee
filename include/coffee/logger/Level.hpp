@@ -24,7 +24,7 @@
 #ifndef coffee_logger_Level_hpp
 #define coffee_logger_Level_hpp
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 namespace coffee {
 

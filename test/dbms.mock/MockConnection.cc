@@ -60,7 +60,7 @@ void mock::MockConnection::close() noexcept
 }
 
 void mock::MockConnection::do_commit()
-   throw (adt::RuntimeException, dbms::DatabaseException)
+   throw (basis::RuntimeException, dbms::DatabaseException)
 {
    LOG_THIS_METHOD();
 
@@ -102,7 +102,7 @@ void mock::MockConnection::do_rollback()
 }
 
 mock::MockLowLevelContainer& mock::MockConnection::getContainer()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if (m_isOpen == false) {
       COFFEE_THROW_EXCEPTION("Connection " << getName() << " is not available");

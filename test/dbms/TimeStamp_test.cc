@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(timestamp_is_not_nulleable)
 
    BOOST_REQUIRE(column.hasValue());
 
-   BOOST_REQUIRE_THROW(column.isNull(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(column.isNull(), basis::RuntimeException);
 
    column.clear();
    BOOST_REQUIRE(column.hasValue());

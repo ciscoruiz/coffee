@@ -68,9 +68,9 @@ public:
 
    const std::string& getPassword() const noexcept { return m_password; }
 
-   operator adt::StreamString() const noexcept { return asString(); }
+   operator basis::StreamString() const noexcept { return asString(); }
 
-   virtual adt::StreamString asString() const noexcept;
+   virtual basis::StreamString asString() const noexcept;
 
    virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
@@ -98,9 +98,9 @@ protected:
 
    void activateRollbackPending() noexcept { m_rollbackPending = true; }
 
-   ResultCode execute(std::shared_ptr<Statement>& statement) throw(adt::RuntimeException, DatabaseException);
+   ResultCode execute(std::shared_ptr<Statement>& statement) throw(basis::RuntimeException, DatabaseException);
 
-   void commit() throw(adt::RuntimeException, DatabaseException);
+   void commit() throw(basis::RuntimeException, DatabaseException);
 
    void rollback() noexcept;
 
@@ -112,13 +112,13 @@ private:
    unsigned int m_accesingCounter;
    std::mutex m_mutex;
 
-   void lock() throw(adt::RuntimeException);
+   void lock() throw(basis::RuntimeException);
    void unlock() noexcept;
    bool recover() noexcept;
    bool reachMaxCommitPending() const noexcept { return m_maxCommitPending > 0 && m_commitPending >= m_maxCommitPending; }
 
-   virtual bool do_beginTransaction() throw(adt::RuntimeException, DatabaseException) { return false;}
-   virtual void do_commit() throw(adt::RuntimeException, DatabaseException) = 0;
+   virtual bool do_beginTransaction() throw(basis::RuntimeException, DatabaseException) { return false;}
+   virtual void do_commit() throw(basis::RuntimeException, DatabaseException) = 0;
    virtual void do_rollback() noexcept = 0;
    virtual void open() throw(DatabaseException) = 0;
    virtual void close() noexcept = 0;

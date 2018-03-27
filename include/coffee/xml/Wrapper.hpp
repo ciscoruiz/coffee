@@ -26,7 +26,7 @@
 
 #include <functional>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/xml/Content.hpp>
 
@@ -76,7 +76,7 @@ protected:
       }
    }
 
-   virtual void compile(Compiler& compiler) const throw(adt::RuntimeException) {;} ;
+   virtual void compile(Compiler& compiler) const throw(basis::RuntimeException) {;} ;
 
 private:
    Handler m_handler;

@@ -24,11 +24,11 @@
 #ifndef _wepm_dbms_DatabaseException_hpp
 #define _wepm_dbms_DatabaseException_hpp
 
-#include <coffee/adt/Exception.hpp>
+#include <coffee/basis/Exception.hpp>
 
 #include <coffee/dbms/ResultCode.hpp>
 
-#include <coffee/adt/StreamString.hpp>
+#include <coffee/basis/StreamString.hpp>
 
 namespace coffee {
 
@@ -37,7 +37,7 @@ namespace dbms {
 /**
    Exception ocurrida al acceder a algun servicio de la base de datos.
 */
-class DatabaseException : public adt::Exception {
+class DatabaseException : public basis::Exception {
 public:
    /**
       Constructor.
@@ -49,7 +49,7 @@ public:
       @param fromLine Linea del fichero en la que se provoco la situacion de error.
    */
    DatabaseException (const ResultCode& resultCode, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
-      adt::Exception (resultCode.getErrorText(), fromMethod, fromFile, fromLine),
+      basis::Exception (resultCode.getErrorText(), fromMethod, fromFile, fromLine),
       m_resultCode (resultCode)
    {}
    
@@ -64,7 +64,7 @@ public:
       @param fromLine Linea del fichero en la que se provoco la situacion de error.
    */
    DatabaseException (const std::string& logicalName, const ResultCode& resultCode, const char* fromMethod, const char* fromFile, const int fromLine) :
-      adt::Exception (std::string (logicalName).append (": ").append (resultCode.asString ()), fromMethod, fromFile, fromLine),
+      basis::Exception (std::string (logicalName).append (": ").append (resultCode.asString ()), fromMethod, fromFile, fromLine),
       m_resultCode (resultCode)
    {}
 

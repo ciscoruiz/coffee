@@ -29,7 +29,7 @@
 #include <thread>
 #include <condition_variable>
 
-#include <coffee/adt/Semaphore.hpp>
+#include <coffee/basis/Semaphore.hpp>
 
 #include <coffee/app/Application.hpp>
 
@@ -66,13 +66,13 @@ public:
    void waitUntilRunning() noexcept { semaphoreForRun.wait(); }
 
 private:
-   adt::Semaphore semaphoreForRun;
+   basis::Semaphore semaphoreForRun;
    std::mutex mutex;
    std::condition_variable conditionForStop;
    bool stopNow;
 
-   void run() throw(adt::RuntimeException);
-   void do_stop() throw(adt::RuntimeException);
+   void run() throw(basis::RuntimeException);
+   void do_stop() throw(basis::RuntimeException);
 };
 
 }

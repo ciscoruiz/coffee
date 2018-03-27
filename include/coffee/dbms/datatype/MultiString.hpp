@@ -58,9 +58,9 @@ public:
 
    bool operator==(const MultiString& other) const noexcept { return values == other.values; }
 
-   operator adt::StreamString() const noexcept { return asString(); }
+   operator basis::StreamString() const noexcept { return asString(); }
 
-   adt::StreamString asString() const noexcept;
+   basis::StreamString asString() const noexcept;
 
    size_t hash() const noexcept;
 
@@ -70,7 +70,7 @@ private:
    std::vector<std::string> values;
 
    void do_clear() noexcept { values.clear(); }
-   int do_compare(const Abstract& other) const throw(adt::RuntimeException);
+   int do_compare(const Abstract& other) const throw(basis::RuntimeException);
 };
 
 }

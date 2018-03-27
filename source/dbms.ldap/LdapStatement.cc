@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <coffee/adt/StreamString.hpp>
+#include <coffee/basis/StreamString.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
@@ -55,7 +55,7 @@ LdapStatement::~LdapStatement()
 }
 
 ResultCode LdapStatement::do_execute(Connection& connection)
-   throw(adt::RuntimeException, DatabaseException)
+   throw(basis::RuntimeException, DatabaseException)
 {
    LOG_THIS_METHOD();
 
@@ -96,7 +96,7 @@ ResultCode LdapStatement::do_execute(Connection& connection)
 }
 
 bool LdapStatement::do_fetch()
-   throw(adt::RuntimeException, DatabaseException)
+   throw(basis::RuntimeException, DatabaseException)
 {
    if (!result)
       return false;

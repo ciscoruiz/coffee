@@ -33,12 +33,12 @@
 #include <iostream>
 #include <chrono>
 
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/logger/CircularTraceWriter.hpp>
 #include <coffee/logger/Logger.hpp>
 
-#include <coffee/adt/pattern/observer/Observer.hpp>
+#include <coffee/basis/pattern/observer/Observer.hpp>
 
 using namespace coffee;
 using namespace coffee::logger;
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE( CircularTraceWriter_can_not_write )
    auto writer = std::make_shared<CircularTraceWriter>("/trace.log", 128);
 
    // When the circular writer can not write over the file, then it will trace on cerr, but only traces with level error or lesser
-   BOOST_CHECK_THROW (Logger::initialize(writer), adt::RuntimeException);
+   BOOST_CHECK_THROW (Logger::initialize(writer), basis::RuntimeException);
 
    BOOST_REQUIRE_EQUAL (writer->getStream(), CircularTraceWriter::NullStream);
 
@@ -139,7 +139,7 @@ BOOST_FIXTURE_TEST_CASE(circular_performance_measure_test, CircularTraceFixture)
    Level::_v level = Level::Notice;
    for (int ii = 0; ii < maxLine; ++ ii) {
       if (Logger::wantsToProcess(level) == true) {
-         adt::StreamString msg;
+         basis::StreamString msg;
          Logger::write (level, msg << "Line=" << ii, COFFEE_FILE_LOCATION);
       }
 
@@ -155,5 +155,5 @@ BOOST_FIXTURE_TEST_CASE(circular_performance_measure_test, CircularTraceFixture)
    auto endTime = std::chrono::high_resolution_clock::now();
 
    std::chrono::microseconds elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
-   std::cout << "Delay(CircularTraceWriter): " << adt::AsString::apply(elapsedTime) << std::endl << std::endl;
+   std::cout << "Delay(CircularTraceWriter): " << basis::AsString::apply(elapsedTime) << std::endl << std::endl;
 }

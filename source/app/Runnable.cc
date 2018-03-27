@@ -26,9 +26,9 @@
 
 #include <coffee/config/defines.hpp>
 
-#include <coffee/adt/StreamString.hpp>
-#include <coffee/adt/AsString.hpp>
-#include <coffee/adt/AsHexString.hpp>
+#include <coffee/basis/StreamString.hpp>
+#include <coffee/basis/AsString.hpp>
+#include <coffee/basis/AsHexString.hpp>
 
 #include <coffee/xml/Node.hpp>
 #include <coffee/xml/Attribute.hpp>
@@ -37,7 +37,7 @@ using namespace std;
 using namespace coffee;
 
 bool app::Runnable::stop ()
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    if (isStopped())
       return false;
@@ -46,7 +46,7 @@ bool app::Runnable::stop ()
       do_stop ();
       m_statusFlags = StatusFlags::Stopped;
    }
-   catch (adt::RuntimeException& ex) {
+   catch (basis::RuntimeException& ex) {
       m_statusFlags = StatusFlags::StoppedWithError;
       throw;
    }
@@ -55,10 +55,10 @@ bool app::Runnable::stop ()
 }
 
 //virtual
-adt::StreamString app::Runnable::asString () const
+basis::StreamString app::Runnable::asString () const
    noexcept
 {
-   adt::StreamString result ("app.Runnable { ");
+   basis::StreamString result ("app.Runnable { ");
 
    result << "Name=" << getName();
    result << " | Status=" << flagsAsString ();

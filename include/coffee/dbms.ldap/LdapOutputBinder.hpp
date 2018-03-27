@@ -38,11 +38,11 @@ public:
    virtual ~LdapOutputBinder() {;}
 
 private:
-   void do_prepare(Statement& statement, const int pos) throw(adt::RuntimeException, DatabaseException) {;}
-   void do_decode(Statement& statement, const int pos) throw(adt::RuntimeException);
-   void do_write(const std::shared_ptr<datatype::LongBlock>&) throw(adt::RuntimeException, dbms::DatabaseException) {;}
+   void do_prepare(Statement& statement, const int pos) throw(basis::RuntimeException, DatabaseException) {;}
+   void do_decode(Statement& statement, const int pos) throw(basis::RuntimeException);
+   void do_write(const std::shared_ptr<datatype::LongBlock>&) throw(basis::RuntimeException, dbms::DatabaseException) {;}
 
-   static std::chrono::seconds getSeconds(const std::string& value) throw (adt::RuntimeException);
+   static std::chrono::seconds getSeconds(const std::string& value) throw (basis::RuntimeException);
 };
 
 } /* namespace ldap */

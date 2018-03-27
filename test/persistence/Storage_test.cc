@@ -396,7 +396,7 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_save_commit_pending, Fixture)
          primaryKeyForFind->setInteger("id", ii);
          auto object = customerClass->createObject(primaryKeyForFind);
 
-         adt::StreamString streamString;
+         basis::StreamString streamString;
          streamString << ii << " - name";
          object->setString("name", streamString);
          test_persistence::MockCustomerRecorder recorder(writerStatement, object);
@@ -450,7 +450,7 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_type_mismatch_primarykey, Fixture)
       unmatchesPrimaryKey->setString("id", "unused");
 
       test_persistence::MockCustomerLoader myLoader(readerStatement, unmatchesPrimaryKey, customerClass);
-      BOOST_REQUIRE_THROW(storage->load(connection, myLoader), adt::RuntimeException);
+      BOOST_REQUIRE_THROW(storage->load(connection, myLoader), basis::RuntimeException);
    }
 }
 
@@ -470,14 +470,14 @@ BOOST_FIXTURE_TEST_CASE(persistence_storage_size_mismatch_primarykey, Fixture)
       unmatchesPrimaryKey->setString("other", "unused");
 
       test_persistence::MockCustomerLoader myLoader(readerStatement, unmatchesPrimaryKey, customerClass);
-      BOOST_REQUIRE_THROW(storage->load(connection, myLoader), adt::RuntimeException);
+      BOOST_REQUIRE_THROW(storage->load(connection, myLoader), basis::RuntimeException);
    }
 }
 
 BOOST_AUTO_TEST_CASE(persistence_storage_empty_pkbuilder)
 {
    persistence::PrimaryKeyBuilder builder;
-   BOOST_REQUIRE_THROW(builder.build(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(builder.build(), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(persistence_storage_showclass, Fixture)

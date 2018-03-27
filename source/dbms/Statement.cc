@@ -63,7 +63,7 @@ void Statement::registerElapsedTime(const std::chrono::microseconds& elapsedTime
 }
 
 void Statement::createBinderInput(std::shared_ptr<datatype::Abstract> data)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<binder::Input> result = m_database.allocateInputBind(data);
 
@@ -74,7 +74,7 @@ void Statement::createBinderInput(std::shared_ptr<datatype::Abstract> data)
 }
 
 std::shared_ptr<datatype::Abstract>& Statement::getInputData(const GuardStatement&, const int pos)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(pos >= input_size()) {  
       COFFEE_THROW_EXCEPTION(pos << " is out of range [0," << input_size() << ")");
@@ -84,7 +84,7 @@ std::shared_ptr<datatype::Abstract>& Statement::getInputData(const GuardStatemen
 }
 
 const std::shared_ptr<datatype::Abstract>& Statement::getInputData(const int pos) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(pos >= input_size()) {
       COFFEE_THROW_EXCEPTION(pos << " is out of range [0," << input_size() << ")");
@@ -94,13 +94,13 @@ const std::shared_ptr<datatype::Abstract>& Statement::getInputData(const int pos
 }
 
 std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const GuardStatement&, const int pos)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    return getOutputData(pos);
 }
 
 std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const int pos)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(pos >= output_size()) {
       COFFEE_THROW_EXCEPTION(pos << " is out of range [0," << output_size() << ")");
@@ -110,7 +110,7 @@ std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const int pos)
 }
 
 void Statement::createBinderOutput(std::shared_ptr<datatype::Abstract> data)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<binder::Output> result = m_database.allocateOutputBind(data);
 
@@ -121,7 +121,7 @@ void Statement::createBinderOutput(std::shared_ptr<datatype::Abstract> data)
 }
 
 void Statement::prepare(Connection& connection)
-   throw(adt::RuntimeException, DatabaseException)
+   throw(basis::RuntimeException, DatabaseException)
 {
    LOG_THIS_METHOD();
 
@@ -139,7 +139,7 @@ void Statement::prepare(Connection& connection)
 }
 
 ResultCode Statement::execute(Connection& connection)
-   throw(adt::RuntimeException, DatabaseException)
+   throw(basis::RuntimeException, DatabaseException)
 {
    LOG_THIS_METHOD();
 
@@ -157,7 +157,7 @@ ResultCode Statement::execute(Connection& connection)
 }
 
 bool Statement::fetch()
-   throw(adt::RuntimeException, DatabaseException)
+   throw(basis::RuntimeException, DatabaseException)
 {
    LOG_THIS_METHOD();
 
@@ -173,10 +173,10 @@ bool Statement::fetch()
    return false;
 }
 
-adt::StreamString Statement::asString() const
+basis::StreamString Statement::asString() const
    noexcept
 {
-   adt::StreamString  result("dbms::Statement { Name: ");
+   basis::StreamString  result("dbms::Statement { Name: ");
    result += m_name;
    result << " | N-input: " << input_size();
    result << " | N-output: " << output_size();
@@ -195,7 +195,7 @@ std::shared_ptr<xml::Node> dbms::Statement::asXML(std::shared_ptr<xml::Node>& pa
    std::shared_ptr<xml::Node> node = result->createChild("Timing");
    node->createAttribute("N", m_elapsedTime.size());
    node->createAttribute("Accumulator", (int64_t) m_elapsedTime.getAccumulator());
-   node->createAttribute("ElapsedTime", adt::AsString::apply((uint64_t) m_elapsedTime.value()));
+   node->createAttribute("ElapsedTime", basis::AsString::apply((uint64_t) m_elapsedTime.value()));
 
    result->createChild("Expression")->createText(m_expression);
 

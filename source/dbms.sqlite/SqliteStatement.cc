@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <coffee/adt/StreamString.hpp>
+#include <coffee/basis/StreamString.hpp>
 
 #include <coffee/dbms/ResultCode.hpp>
 
@@ -36,7 +36,7 @@ sqlite::SqliteStatement::SqliteStatement(const Database& database, const char* n
    impl(nullptr),
    owner(nullptr),
    fetchIsDone(false),
-   isASelect(adt::StreamString(expression).toLower().find("select") != std::string::npos)
+   isASelect(basis::StreamString(expression).toLower().find("select") != std::string::npos)
 {
 }
 
@@ -52,7 +52,7 @@ bool sqlite::SqliteStatement::isPrepared(Connection& connection) const
 }
 
 void sqlite::SqliteStatement::do_prepare(Connection& connection)
-   throw(adt::RuntimeException, DatabaseException)
+   throw(basis::RuntimeException, DatabaseException)
 {
    const char* expression = getExpression().c_str();
    const int len = coffee_strlen(expression);
@@ -79,7 +79,7 @@ void sqlite::SqliteStatement::do_prepare(Connection& connection)
 }
 
 ResultCode sqlite::SqliteStatement::do_execute(Connection& connection)
-   throw(adt::RuntimeException, DatabaseException)
+   throw(basis::RuntimeException, DatabaseException)
 {
    int rc = sqlite3_reset(impl);
 
@@ -110,7 +110,7 @@ ResultCode sqlite::SqliteStatement::do_execute(Connection& connection)
 }
 
 bool sqlite::SqliteStatement::do_fetch()
-   throw(adt::RuntimeException, DatabaseException)
+   throw(basis::RuntimeException, DatabaseException)
 {
    if (fetchIsDone) {
       fetchIsDone = false;

@@ -29,7 +29,7 @@
 #include <mutex>
 #include <thread>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE (persistence_repository_repeat)
 
    BOOST_REQUIRE_EQUAL (ii.get(), find.get());
 
-   BOOST_REQUIRE_THROW(repository.createStorage("the 0", 16), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(repository.createStorage("the 0", 16), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE (persistence_repository_as)
@@ -64,9 +64,9 @@ BOOST_AUTO_TEST_CASE (persistence_repository_as)
    repository.createStorage("the 0", 16);
    repository.createStorage("the 1", persistence::Storage::DefaultMaxCacheSize);
 
-   adt::StreamString zz = repository.asString ();
+   basis::StreamString zz = repository.asString ();
 
-   BOOST_REQUIRE_EQUAL (zz, "persistence.Repository { adt.NamedObject { Name: persistence_define_structure } | N-Size=2 }");
+   BOOST_REQUIRE_EQUAL (zz, "persistence.Repository { basis.NamedObject { Name: persistence_define_structure } | N-Size=2 }");
 
    xml::Node myNode ("root");
 
@@ -81,5 +81,5 @@ BOOST_AUTO_TEST_CASE (persistence_repository_notfound)
 {
    persistence::Repository repository ("persistence_repository_notfound");
 
-   BOOST_REQUIRE_THROW(repository.findStorage("does-not-exist"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(repository.findStorage("does-not-exist"), basis::RuntimeException);
 }

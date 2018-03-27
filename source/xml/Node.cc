@@ -47,7 +47,7 @@ const char* xml::Node::readName(const Handler handler) const
 }
 
 const std::string& xml::Node::getText() const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(hasText() == false) {
       COFFEE_THROW_EXCEPTION("Node '" << getName() << "' does not have any TEXT item");
@@ -57,7 +57,7 @@ const std::string& xml::Node::getText() const
 }
 
 void xml::Node::addAttribute(std::shared_ptr<Attribute> attribute)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    auto rr = m_attributes.insert(attribute);
 
@@ -66,7 +66,7 @@ void xml::Node::addAttribute(std::shared_ptr<Attribute> attribute)
 }
 
 std::shared_ptr<xml::Node> xml::Node::lookupChild(const char* name) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<Node> result = searchChild(name);
 
@@ -95,7 +95,7 @@ std::shared_ptr<xml::Node> xml::Node::searchChild(const char* name) const
 }
 
 std::shared_ptr<xml::Node> xml::Node::childAt(const size_t ii) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(ii >= children_size()) {
       COFFEE_THROW_EXCEPTION("There is not any child at position: " << ii);
@@ -105,7 +105,7 @@ std::shared_ptr<xml::Node> xml::Node::childAt(const size_t ii) const
 }
 
 std::shared_ptr<xml::Node> xml::Node::lookupChild(const char* name)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<Node> result = searchChild(name);
 
@@ -134,7 +134,7 @@ std::shared_ptr<xml::Node> xml::Node::searchChild(const char* name)
 }
 
 std::shared_ptr<xml::Node> xml::Node::childAt(const size_t ii)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(ii >= children_size()) {
       COFFEE_THROW_EXCEPTION("There is not any child at position: " << ii);
@@ -144,7 +144,7 @@ std::shared_ptr<xml::Node> xml::Node::childAt(const size_t ii)
 }
 
 std::shared_ptr<xml::Node> xml::Node::createChild(const char* name)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(getHandler() == NULL)
       COFFEE_THROW_EXCEPTION("Can not create a child on an empty XML node");
@@ -157,7 +157,7 @@ std::shared_ptr<xml::Node> xml::Node::createChild(const char* name)
 }
 
 std::shared_ptr<xml::Attribute> xml::Node::createAttribute(const char* name, const char* value)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(getHandler() == NULL)
       COFFEE_THROW_EXCEPTION("Can not create an attribute on an empty XML node");
@@ -170,7 +170,7 @@ std::shared_ptr<xml::Attribute> xml::Node::createAttribute(const char* name, con
 }
 
 void xml::Node::createText(const char* text)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(getHandler() == NULL)
       COFFEE_THROW_EXCEPTION("Can not create an attribute on an empty XML node");
@@ -182,7 +182,7 @@ void xml::Node::createText(const char* text)
 }
 
 std::shared_ptr<xml::Attribute> xml::Node::lookupAttribute(const char* name) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<Attribute> result = searchAttribute(name);
 
@@ -211,7 +211,7 @@ std::shared_ptr<xml::Attribute> xml::Node::searchAttribute(const char* name) con
 }
 
 void xml::Node::compile(xml::Compiler& compiler) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    int rc;
 

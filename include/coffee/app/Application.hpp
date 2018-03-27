@@ -30,7 +30,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/app/Runnable.hpp>
 
@@ -109,12 +109,12 @@ public:
    /**
     * Initialize all resources related to this application, and then it will call virtual method #initialize and #run.
     */
-   void start() throw(adt::RuntimeException);
+   void start() throw(basis::RuntimeException);
 
    /**
     * Attach the service to this application. It will be started before this application start to run.
     */
-   virtual void attach(std::shared_ptr<Service> service) throw(adt::RuntimeException);
+   virtual void attach(std::shared_ptr<Service> service) throw(basis::RuntimeException);
 
    /**
     * \return service_iterator to the first attached service.
@@ -151,18 +151,18 @@ public:
    /**
     * Write the context as a coffee::xml::Node into the path indicated by file.
     */
-   void writeContext(const boost::filesystem::path& file) throw(adt::RuntimeException);
+   void writeContext(const boost::filesystem::path& file) throw(basis::RuntimeException);
 
    /**
     * This virtual method will give us the opportunity to initialize custom resources of
     * our inherit application.
    */
-   virtual void initialize() throw(adt::RuntimeException) {;}
+   virtual void initialize() throw(basis::RuntimeException) {;}
 
    /**
-    * \return Summarize information of this instance in a coffee::adt::StreamString.
+    * \return Summarize information of this instance in a coffee::basis::StreamString.
     */
-   virtual adt::StreamString asString() const noexcept;
+   virtual basis::StreamString asString() const noexcept;
 
    /**
     * \return Summarize information of this instance in a coffee::xml::Node.
@@ -173,24 +173,24 @@ protected:
    /**
     * Virtual method to implement for running our application.
     */
-   virtual void run() throw(adt::RuntimeException) = 0;
+   virtual void run() throw(basis::RuntimeException) = 0;
 
    /**
     * Virtual method to capture the request stop.
     */
-   virtual void do_stop() throw(adt::RuntimeException);
+   virtual void do_stop() throw(basis::RuntimeException);
 
    /**
     * Handler for signal USR1, it will write the context into file #getOutputContextFilename.
     */
-   virtual void signalUSR1() throw(adt::RuntimeException);
+   virtual void signalUSR1() throw(basis::RuntimeException);
 
    /**
     * Handler for signal USR2
     * By default it will change the trace level, adding 1 to the current level. Once it reach
     * the level logger::Level::Debug it will return to the logger::Level::Error.
     */
-   virtual void signalUSR2() throw(adt::RuntimeException);
+   virtual void signalUSR2() throw(basis::RuntimeException);
 
 private:
    static Application* m_this;
@@ -201,7 +201,7 @@ private:
    boost::filesystem::path a_outputContextFilename;
    Services a_services;
 
-   void startServices() throw(adt::RuntimeException);
+   void startServices() throw(basis::RuntimeException);
    void sendSignalToChilds(const int signal) noexcept;
 
    static void handlerUserSignal(int) noexcept;

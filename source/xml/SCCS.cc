@@ -25,7 +25,7 @@
 #include <coffee/config/SCCSRepository.hpp>
 
 #include <coffee/config/SCCS.hpp>
-#include <coffee/adt/SCCS.hpp>
+#include <coffee/basis/SCCS.hpp>
 
 #include <coffee/xml/SCCS.hpp>
 
@@ -36,7 +36,7 @@ using namespace coffee;
 void xml::SCCS::activate()
    noexcept
 {
-   adt::SCCS::activate ();
+   basis::SCCS::activate ();
 
    config::SCCSRepository::getInstance().registerModule(coffee_sccs_use_tag(xml));
 }

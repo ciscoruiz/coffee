@@ -24,7 +24,7 @@
 #include <coffee/persistence/Object.hpp>
 #include <coffee/persistence/PrimaryKey.hpp>
 
-#include <coffee/adt/AsHexString.hpp>
+#include <coffee/basis/AsHexString.hpp>
 
 #include <coffee/persistence/Class.hpp>
 #include <coffee/persistence/PrimaryKey.hpp>
@@ -40,12 +40,12 @@ persistence::Object::Object(const Class& clazz, const std::shared_ptr<PrimaryKey
 
 std::string persistence::Object::getInternalId () const noexcept
 {
-   return adt::AsHexString::apply((int64_t) this);
+   return basis::AsHexString::apply((int64_t) this);
 }
 
-adt::StreamString persistence::Object::asString() const noexcept
+basis::StreamString persistence::Object::asString() const noexcept
 {
-   adt::StreamString result("persistence.Object { ClassName=");
+   basis::StreamString result("persistence.Object { ClassName=");
    result << m_class.getName();
    result << " | " << m_primaryKey->asString();
    

@@ -32,7 +32,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <coffee/adt/Semaphore.hpp>
+#include <coffee/basis/Semaphore.hpp>
 #include <coffee/app/ApplicationServiceStarter.hpp>
 
 #include <coffee/logger/Logger.hpp>
@@ -49,7 +49,7 @@ class TestApplication : public app::Application {
 public:
    TestApplication() : app::Application("TestApplication", "This is the title", "1.0") {}
 
-   void run() throw(adt::RuntimeException) {;}
+   void run() throw(basis::RuntimeException) {;}
 };
 
 void parallelRun(app::Application& app) {
@@ -69,12 +69,12 @@ private:
    int m_initilized;
    int m_stopped;
 
-   void do_initialize() throw(adt::RuntimeException);
-   void do_stop() throw(adt::RuntimeException);
+   void do_initialize() throw(basis::RuntimeException);
+   void do_stop() throw(basis::RuntimeException);
 };
 
-void MyService::do_initialize() throw(adt::RuntimeException){ ++ m_initilized;}
-void MyService::do_stop() throw(adt::RuntimeException) { ++ m_stopped;}
+void MyService::do_initialize() throw(basis::RuntimeException){ ++ m_initilized;}
+void MyService::do_stop() throw(basis::RuntimeException) { ++ m_stopped;}
 
 BOOST_AUTO_TEST_CASE( smallest_application )
 { 
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE( undefined_predecessor )
 
    service->setPredecessor("undefined");
 
-   BOOST_REQUIRE_THROW(application.start(), adt::RuntimeException);;
+   BOOST_REQUIRE_THROW(application.start(), basis::RuntimeException);;
 
    BOOST_REQUIRE_EQUAL(service->getInitializedCounter(), 0);
    BOOST_REQUIRE_EQUAL(service->getStoppedCounter(), 0);
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE( interdependence_predecessor )
    service00->setPredecessor("01");
    service01->setPredecessor("00");
 
-   BOOST_REQUIRE_THROW(application.start(), adt::RuntimeException);;
+   BOOST_REQUIRE_THROW(application.start(), basis::RuntimeException);;
 
    BOOST_REQUIRE_EQUAL(service00->getInitializedCounter(), 0);
    BOOST_REQUIRE_EQUAL(service00->getStoppedCounter(), 0);
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE( app_already_run )
    auto thread = std::thread(parallelRun, std::ref(application));
 
    application.waitUntilRunning();
-   BOOST_CHECK_THROW(application.start(), adt::RuntimeException);
+   BOOST_CHECK_THROW(application.start(), basis::RuntimeException);
    BOOST_CHECK(application.stop());
    thread.join();
    BOOST_CHECK(!application.stop());
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE( app_null_service )
 {
    std::shared_ptr<MyService> service;
    TestApplication application;
-   BOOST_REQUIRE_THROW(application.attach(service), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(application.attach(service), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE( app_already_defined )
@@ -262,7 +262,7 @@ struct ApplicationFixture {
          try {
             application.stop();
          }
-         catch(adt::Exception& ex) {
+         catch(basis::Exception& ex) {
 
          }
          thr.join();
@@ -283,14 +283,14 @@ public:
    NoStopService(app::Application& application, const char* name) : app::Service(application, name) {;}
 
 private:
-   void do_initialize() throw(adt::RuntimeException);
-   void do_stop() throw(adt::RuntimeException);
+   void do_initialize() throw(basis::RuntimeException);
+   void do_stop() throw(basis::RuntimeException);
 };
 
-void NoStopService::do_initialize() throw(adt::RuntimeException) {;}
+void NoStopService::do_initialize() throw(basis::RuntimeException) {;}
 
 void NoStopService::do_stop()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    COFFEE_THROW_EXCEPTION("I dont want to stop");
 }
@@ -302,7 +302,7 @@ BOOST_FIXTURE_TEST_CASE( app_unstoppable_stop_services, ApplicationFixture)
    application.attach(std::make_shared<NoStopService>(application, "01"));
    application.attach(std::make_shared<NoStopService>(application, "02"));
 
-   BOOST_CHECK_THROW(application.stop(), adt::RuntimeException);
+   BOOST_CHECK_THROW(application.stop(), basis::RuntimeException);
    thr.join();
    externalStop = true;
 

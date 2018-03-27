@@ -24,7 +24,7 @@
 #ifndef _coffee_dbms_datatype_String_h
 #define _coffee_dbms_datatype_String_h
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 #include <coffee/config/defines.hpp>
 
 #include <coffee/dbms/datatype/Abstract.hpp>
@@ -50,11 +50,11 @@ public:
 
    int getSize() const noexcept { return(hasValue() == true) ? coffee_strlen(m_value): 0; }
 
-   const char* getValue() const throw(adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
+   const char* getValue() const throw(basis::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
-   void setValue(const char* str) throw(adt::RuntimeException);
+   void setValue(const char* str) throw(basis::RuntimeException);
 
-   void setValue(const std::string& str) throw(adt::RuntimeException) { setValue(str.c_str()); }
+   void setValue(const std::string& str) throw(basis::RuntimeException) { setValue(str.c_str()); }
 
    static char* strip(char *str) noexcept;
 
@@ -62,9 +62,9 @@ public:
 
    bool operator==(const String& other) const noexcept { return coffee_strcmp (this->m_value, other.m_value) == 0; }
 
-   operator adt::StreamString() const noexcept { return asString(); }
+   operator basis::StreamString() const noexcept { return asString(); }
 
-   adt::StreamString asString() const noexcept;
+   basis::StreamString asString() const noexcept;
 
    size_t hash() const noexcept { return std::hash<std::string>{}(m_value); }
 
@@ -74,7 +74,7 @@ private:
    char* m_value;
 
    void do_clear() noexcept { m_value [0] = 0; }
-   int do_compare(const Abstract& other) const throw(adt::RuntimeException);
+   int do_compare(const Abstract& other) const throw(basis::RuntimeException);
 };
 
 }

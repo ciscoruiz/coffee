@@ -26,8 +26,8 @@
 
 #include <functional>
 
-#include <coffee/adt/StreamString.hpp>
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/StreamString.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/dbms/datatype/Set.hpp>
 
@@ -51,13 +51,13 @@ public:
    }
 
    const Class& getClass() const noexcept { return std::ref(m_class); }
-   const std::shared_ptr<PrimaryKey>& getPrimaryKey() const throw(adt::RuntimeException) { return m_primaryKey; }
+   const std::shared_ptr<PrimaryKey>& getPrimaryKey() const throw(basis::RuntimeException) { return m_primaryKey; }
 
    std::string getInternalId() const noexcept;
    
-   operator adt::StreamString() const noexcept { return asString(); }
+   operator basis::StreamString() const noexcept { return asString(); }
 
-   adt::StreamString asString() const noexcept;
+   basis::StreamString asString() const noexcept;
 
 private:
    const Class& m_class;

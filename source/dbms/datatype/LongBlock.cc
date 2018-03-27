@@ -22,7 +22,7 @@
 //
 
 #include <coffee/dbms/datatype/LongBlock.hpp>
-#include <coffee/adt/AsHexString.hpp>
+#include <coffee/basis/AsHexString.hpp>
 
 using namespace coffee;
 using namespace coffee::dbms;
@@ -41,22 +41,22 @@ datatype::LongBlock::LongBlock (const LongBlock& other) :
    m_value = other.m_value;
 }
 
-void datatype::LongBlock::setValue (const adt::DataBlock& value)
-   throw (adt::RuntimeException)
+void datatype::LongBlock::setValue (const basis::DataBlock& value)
+   throw (basis::RuntimeException)
 {
    m_value = value;
    this->isNotNull();
 }
 
-adt::StreamString datatype::LongBlock::asString () const
+basis::StreamString datatype::LongBlock::asString () const
    noexcept
 {
-   adt::StreamString result ("datatype.LongBlock { ");
+   basis::StreamString result ("datatype.LongBlock { ");
    result += datatype::Abstract::asString ();
    result << " | MaxSize=" << getMaxSize();
 
    if (hasValue()) {
-      result << " | Buffer=" << adt::AsHexString::apply((int64_t) getBuffer());
+      result << " | Buffer=" << basis::AsHexString::apply((int64_t) getBuffer());
       result << " | Size=" << m_value.size ();
    }
 
@@ -64,7 +64,7 @@ adt::StreamString datatype::LongBlock::asString () const
 }
 
 int datatype::LongBlock::do_compare (const datatype::Abstract& other) const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    COFFEE_THROW_EXCEPTION(asString () << " | Can not apply");
    return 0;

@@ -92,7 +92,7 @@ struct LdapFixture  {
 
 BOOST_FIXTURE_TEST_CASE(ldap_dbms_bad_cast, LdapFixture)
 {
-   BOOST_REQUIRE_THROW(database->createConnection("second", coffee::dbms::ConnectionParameters("otheruser", "somepassword")), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(database->createConnection("second", coffee::dbms::ConnectionParameters("otheruser", "somepassword")), basis::RuntimeException);
 }
 
 

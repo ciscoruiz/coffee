@@ -41,7 +41,7 @@ using coffee::dbms::ldap::LdapDatabase;
 
 //static
 std::shared_ptr<LdapDatabase> LdapDatabase::instantiate(app::Application& application, const std::string& url)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<LdapDatabase> result(new LdapDatabase(application, url));
    application.attach(result);
@@ -61,25 +61,25 @@ LdapDatabase::~LdapDatabase()
 }
 
 std::shared_ptr<Connection> LdapDatabase::allocateConnection(const std::string& name, const ConnectionParameters& parameters)
-   throw(adt::RuntimeException, std::bad_cast)
+   throw(basis::RuntimeException, std::bad_cast)
 {
    return std::make_shared<LdapConnection>(*this, name, parameters);
 }
 
 std::shared_ptr<Statement> LdapDatabase::allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
-   throw(adt::RuntimeException, std::bad_cast)
+   throw(basis::RuntimeException, std::bad_cast)
 {
    return std::make_shared<LdapStatement>(*this, name, expression, parameters);
 }
 
 std::shared_ptr<binder::Input> LdapDatabase::allocateInputBind(std::shared_ptr<datatype::Abstract> data) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    return std::make_shared<LdapInputBinder>(data);
 }
 
 std::shared_ptr<binder::Output> LdapDatabase::allocateOutputBind(std::shared_ptr<datatype::Abstract> data) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    return std::make_shared<LdapOutputBinder>(data);
 }

@@ -48,7 +48,7 @@ void app::Service::addPredecessor(const char* engineName)
 }
 
 void app::Service::initialize()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    statusStarting();
 
@@ -79,16 +79,16 @@ void app::Service::initialize()
       do_initialize();
       statusRunning();
    }
-   catch(adt::RuntimeException&) {
+   catch(basis::RuntimeException&) {
       statusStopped();
       throw;
    }
 }
 
-adt::StreamString app::Service::asString() const
+basis::StreamString app::Service::asString() const
    noexcept
 {
-   adt::StreamString result("app.Service { ");
+   basis::StreamString result("app.Service { ");
    result += Runnable::asString();
    return result += " }";
 }

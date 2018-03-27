@@ -37,7 +37,7 @@
 using namespace coffee;
 
 persistence::Class::Class(const ClassBuilder& classBuilder) :
-     adt::NamedObject(classBuilder.getClassName())
+     basis::NamedObject(classBuilder.getClassName())
 
 {
    m_primaryKey = classBuilder.getPrimaryKey();
@@ -57,7 +57,7 @@ std::shared_ptr<persistence::PrimaryKey> persistence::Class::createPrimaryKey() 
 }
 
 std::shared_ptr<persistence::Object> persistence::Class::createObject(const std::shared_ptr<PrimaryKey>& primaryKey) const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    if (!m_primaryKey->matches(*primaryKey.get())) {
       COFFEE_THROW_EXCEPTION(asString() << " primary key does not matches with class");
@@ -72,9 +72,9 @@ std::shared_ptr<persistence::Object> persistence::Class::createObject(const std:
    return std::make_shared<Object>(*this, primaryKey, members);
 }
 
-adt::StreamString persistence::Class::asString() const noexcept {
-   adt::StreamString result("persistence.Class { ");
-   result << adt::NamedObject::asString();
+basis::StreamString persistence::Class::asString() const noexcept {
+   basis::StreamString result("persistence.Class { ");
+   result << basis::NamedObject::asString();
    result << " | N-members=" << m_members.size();
    return result << " }";
 }

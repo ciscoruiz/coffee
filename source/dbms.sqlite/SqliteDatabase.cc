@@ -39,7 +39,7 @@ using namespace coffee::dbms;
 
 //static
 std::shared_ptr<sqlite::SqliteDatabase> sqlite::SqliteDatabase::instantiate(app::Application& application, const boost::filesystem::path& dbFile)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<SqliteDatabase> result(new SqliteDatabase(application, dbFile));
    application.attach(result);
@@ -59,25 +59,25 @@ sqlite::SqliteDatabase::~SqliteDatabase()
 }
 
 std::shared_ptr<Connection> sqlite::SqliteDatabase::allocateConnection(const std::string& name, const ConnectionParameters& parameters)
-   throw(adt::RuntimeException, std::bad_cast)
+   throw(basis::RuntimeException, std::bad_cast)
 {
    return std::make_shared<sqlite::SqliteConnection>(*this, name, parameters);
 }
 
 std::shared_ptr<Statement> sqlite::SqliteDatabase::allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
-   throw(adt::RuntimeException, std::bad_cast)
+   throw(basis::RuntimeException, std::bad_cast)
 {
    return std::make_shared<sqlite::SqliteStatement>(*this, name, expression, parameters);
 }
 
 std::shared_ptr<binder::Input> sqlite::SqliteDatabase::allocateInputBind(std::shared_ptr<datatype::Abstract> data) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    return std::make_shared<sqlite::SqliteInputBinder>(data);
 }
 
 std::shared_ptr<binder::Output> sqlite::SqliteDatabase::allocateOutputBind(std::shared_ptr<datatype::Abstract> data) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    return std::make_shared<sqlite::SqliteOutputBinder>(data);
 }

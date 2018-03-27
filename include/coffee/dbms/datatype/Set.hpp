@@ -29,7 +29,7 @@
 #include <vector>
 #include <chrono>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/dbms/DatabaseException.hpp>
 #include <coffee/dbms/InvalidDataException.hpp>
@@ -38,7 +38,7 @@
 
 namespace coffee {
 
-namespace adt {
+namespace basis {
    class Date;
    class DataBlock;
    class Second;
@@ -64,9 +64,9 @@ public:
 
    void clear() { m_datas.clear(); }
 
-   void insert(std::shared_ptr<Abstract> data) throw (adt::RuntimeException);
-   std::shared_ptr<Abstract>& find(const std::string& name) throw (adt::RuntimeException);
-   const std::shared_ptr<Abstract>& find(const std::string& name) const throw (adt::RuntimeException);
+   void insert(std::shared_ptr<Abstract> data) throw (basis::RuntimeException);
+   std::shared_ptr<Abstract>& find(const std::string& name) throw (basis::RuntimeException);
+   const std::shared_ptr<Abstract>& find(const std::string& name) const throw (basis::RuntimeException);
    bool constains(const std::string& name) const noexcept { return m_datas.find(name) != end(); }
 
    size_t size() const noexcept { return m_datas.size(); }
@@ -85,24 +85,24 @@ public:
 
    Set& operator=(const Set& other) noexcept;
 
-   int compare(const Set& other) const throw (adt::RuntimeException);
-   int compare(const std::shared_ptr<Set>& other) const throw (adt::RuntimeException) { return compare(*other.get()); }
+   int compare(const Set& other) const throw (basis::RuntimeException);
+   int compare(const std::shared_ptr<Set>& other) const throw (basis::RuntimeException) { return compare(*other.get()); }
 
    bool operator==(const Set& other) const noexcept;
-   bool operator< (const Set& other) const throw (adt::RuntimeException){ return compare(other) < 0; }
+   bool operator< (const Set& other) const throw (basis::RuntimeException){ return compare(other) < 0; }
    bool operator!=(const Set& other) const noexcept { return !operator==(other); }
 
    int getInteger(const std::string& columnName) const throw(dbms::InvalidDataException);
-   std::string getString(const std::string& columnName) const throw(adt::RuntimeException, dbms::InvalidDataException);
+   std::string getString(const std::string& columnName) const throw(basis::RuntimeException, dbms::InvalidDataException);
    float getFloat(const std::string& columnName) const throw(dbms::InvalidDataException);
-   const adt::DataBlock& getDataBlock(const std::string& columnName) const throw(dbms::InvalidDataException);
+   const basis::DataBlock& getDataBlock(const std::string& columnName) const throw(dbms::InvalidDataException);
    const std::chrono::seconds& getDate(const std::string& columnName) const throw(dbms::InvalidDataException);
 
    void setInteger(const std::string& columnName, const int value) throw(dbms::InvalidDataException);
-   void setString(const std::string& columnName, const std::string& value) throw(adt::RuntimeException, dbms::InvalidDataException);
+   void setString(const std::string& columnName, const std::string& value) throw(basis::RuntimeException, dbms::InvalidDataException);
    void setFloat(const std::string& columnName, const float value) throw(dbms::InvalidDataException);
-   void setDataBlock(const std::string& columnName, const adt::DataBlock& value) throw(dbms::InvalidDataException);
-   void setDate(const std::string& columnName, const std::chrono::seconds& date) throw(adt::RuntimeException, dbms::InvalidDataException);
+   void setDataBlock(const std::string& columnName, const basis::DataBlock& value) throw(dbms::InvalidDataException);
+   void setDate(const std::string& columnName, const std::chrono::seconds& date) throw(basis::RuntimeException, dbms::InvalidDataException);
 
 private:
    Datas m_datas;

@@ -49,7 +49,7 @@ public:
    }
 
 private:
-   void initialize () throw (adt::RuntimeException) {;}
+   void initialize () throw (basis::RuntimeException) {;}
    void apply (const Level::_v level, const std::string& line) noexcept {
       std::cout << line << std::endl;
    }

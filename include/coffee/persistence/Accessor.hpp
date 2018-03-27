@@ -26,8 +26,8 @@
 
 #include <vector>
 
-#include <coffee/adt/RuntimeException.hpp>
-#include <coffee/adt/NamedObject.hpp>
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/basis/NamedObject.hpp>
 
 #include <coffee/dbms/DatabaseException.hpp>
 #include <coffee/dbms/ResultCode.hpp>
@@ -36,7 +36,7 @@
 
 namespace coffee {
 
-namespace adt {
+namespace basis {
    class DataBlock;
    class Second;
 }
@@ -57,7 +57,7 @@ namespace persistence {
 class Class;
 class Object;
 
-class Accessor : public adt::NamedObject {
+class Accessor : public basis::NamedObject {
 public:
    typedef std::shared_ptr<dbms::Connection> TheConnection;
    typedef std::shared_ptr<dbms::Statement> TheStatement;
@@ -66,7 +66,7 @@ public:
    typedef std::shared_ptr<PrimaryKey> ThePrimaryKey;
    
    TheStatement& getStatement() noexcept { return m_statement; }
-   const ThePrimaryKey& getPrimaryKey() const throw(adt::RuntimeException) { return m_primaryKey; }
+   const ThePrimaryKey& getPrimaryKey() const throw(basis::RuntimeException) { return m_primaryKey; }
    
    bool hasAutoCommit() const noexcept { return m_autoCommit; }
    bool setAutoCommit(const bool value) { bool result(m_autoCommit); m_autoCommit = value; return result; }
@@ -77,14 +77,14 @@ public:
 
 protected:
    Accessor(const char* name, TheStatement& statement, const ThePrimaryKey& primaryKey) :
-      adt::NamedObject(name),
+      basis::NamedObject(name),
       m_statement(statement),
       m_primaryKey(primaryKey),
       m_autoCommit(false)
    {;}
 
    Accessor(const char* name, const ThePrimaryKey& primaryKey) :
-      adt::NamedObject(name),
+      basis::NamedObject(name),
       m_statement(nullptr),
       m_primaryKey(primaryKey),
       m_autoCommit(false)

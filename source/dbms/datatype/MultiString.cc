@@ -37,10 +37,10 @@ datatype::MultiString::MultiString(const MultiString& other) :
 {
 }
 
-adt::StreamString datatype::MultiString::asString() const
+basis::StreamString datatype::MultiString::asString() const
    noexcept
 {
-   adt::StreamString result("datatype.MultiString { ");
+   basis::StreamString result("datatype.MultiString { ");
    result << datatype::Abstract::asString();
    result << " | #Values=" << values.size();
    return result += " }";
@@ -57,7 +57,7 @@ size_t datatype::MultiString::hash() const
 }
 
 int datatype::MultiString::do_compare(const datatype::Abstract& other) const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    const MultiString& _other = coffee_datatype_downcast(MultiString, other);
 

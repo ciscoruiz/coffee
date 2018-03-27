@@ -28,13 +28,13 @@ using namespace coffee;
 using std::chrono::milliseconds;
 
 time::TimeEvent::TimeEvent(const Id id, const milliseconds& _timeout) :
-   adt::pattern::observer::Event(id), timeout(_timeout),
+   basis::pattern::observer::Event(id), timeout(_timeout),
    initTime(0),
    endTime(0)
 {;}
 
 milliseconds time::TimeEvent::getDuration() const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if (!isStarted() || !isFinished()) {
       COFFEE_THROW_EXCEPTION(asString() << " was not started or finished");
@@ -44,10 +44,10 @@ milliseconds time::TimeEvent::getDuration() const
 }
 
 //virtual
-adt::StreamString time::TimeEvent::asString() const
+basis::StreamString time::TimeEvent::asString() const
    noexcept
 {
-   adt::StreamString result("time.TimeEvent {");
+   basis::StreamString result("time.TimeEvent {");
    result << Event::asString();
    result << " | Timeout=" << timeout;
 

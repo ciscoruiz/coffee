@@ -58,8 +58,8 @@ public:
    bool getAttrOnly() const noexcept { return attrOnly; }
    int getSizeLimit() const noexcept { return sizeLimit; }
 
-   adt::StreamString asString() const noexcept {
-      adt::StreamString result("dbms.ldap.LdapStatementParameters {");
+   basis::StreamString asString() const noexcept {
+      basis::StreamString result("dbms.ldap.LdapStatementParameters {");
       result << StatementParameters::asString();
       result << " | BaseDN=" << baseDN;
       result << " | Scope=" << (scope == Scope::Base ? "Base": (scope == Scope::OneLevel ? "OneLevel": "SubTree"));

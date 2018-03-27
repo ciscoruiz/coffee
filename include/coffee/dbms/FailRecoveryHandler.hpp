@@ -24,7 +24,7 @@
 #ifndef _coffee_dbms_FailRecoveryHandler_hpp
 #define _coffee_dbms_FailRecoveryHandler_hpp
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
   
 namespace coffee {
 
@@ -45,7 +45,7 @@ public:
    /**
     * This method shold be implemented to describe the process to recover a lost databse connection.
    */
-   virtual void apply (const Connection& connection) throw (adt::RuntimeException) = 0;
+   virtual void apply (const Connection& connection) throw (basis::RuntimeException) = 0;
 };
 
 }

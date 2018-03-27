@@ -31,7 +31,7 @@
 
 #include <stdlib.h>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 namespace coffee {
 
@@ -50,22 +50,22 @@ public:
    /**
     * \return \b true if the search conditions was not find any record or \b false otherwise.
     */
-   virtual bool notFound(const int errorCode) const throw(adt::RuntimeException) = 0;
+   virtual bool notFound(const int errorCode) const throw(basis::RuntimeException) = 0;
    
    /**
     * \return \b true if the sentence was run successfully or \b false otherwise.
     */
-   virtual bool successful(const int errorCode) const throw(adt::RuntimeException) = 0;
+   virtual bool successful(const int errorCode) const throw(basis::RuntimeException) = 0;
 
    /**
     * \return \b true if the sentence fault due to inter-locked detection or \b false otherwise.
     */
-   virtual bool locked(const int errorCode) const throw(adt::RuntimeException) = 0;
+   virtual bool locked(const int errorCode) const throw(basis::RuntimeException) = 0;
 
    /**
     * \return \b true if the sentence fault due to lost connection or \b false otherwise.
     */
-   virtual bool lostConnection(const int errorCode) const throw(adt::RuntimeException) = 0;
+   virtual bool lostConnection(const int errorCode) const throw(basis::RuntimeException) = 0;
 };
 
 }

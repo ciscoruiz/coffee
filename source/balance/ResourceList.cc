@@ -27,7 +27,7 @@
 
 #include <mutex>
 
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
@@ -40,7 +40,7 @@
 using namespace coffee;
 
 void balance::ResourceList::initialize()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    LOG_THIS_METHOD();
 
@@ -53,7 +53,7 @@ void balance::ResourceList::initialize()
          resource(ii)->initialize();
          LOG_DEBUG(resource(ii)->asString());
       }
-      catch(adt::RuntimeException& ex) {
+      catch(basis::RuntimeException& ex) {
          LOG_ERROR(resource(ii)->getName() << " | " << ex.asString());
       }
    }
@@ -66,7 +66,7 @@ void balance::ResourceList::initialize()
 }
 
 bool balance::ResourceList::add(std::shared_ptr<Resource> resource)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    logger::TraceMethod tm(logger::Level::Local7, COFFEE_FILE_LOCATION);
 
@@ -91,7 +91,7 @@ bool balance::ResourceList::add(std::shared_ptr<Resource> resource)
       }
    }
 
-   LOG_INFO(asString() << " | Add: " << resource->asString() << " | Result=" << adt::AsString::apply(result));
+   LOG_INFO(asString() << " | Add: " << resource->asString() << " | Result=" << basis::AsString::apply(result));
 
    return result;
 }
@@ -121,11 +121,11 @@ balance::ResourceList::resource_iterator balance::ResourceList::next(balance::Gu
 }
 
 //virtual
-adt::StreamString balance::ResourceList::asString() const
+basis::StreamString balance::ResourceList::asString() const
    noexcept
 {
-   adt::StreamString result("balance.ResourceList { ");
-   result += adt::NamedObject::asString();
+   basis::StreamString result("balance.ResourceList { ");
+   result += basis::NamedObject::asString();
    result += " | Available = ";
 
    int availableResources = 0;

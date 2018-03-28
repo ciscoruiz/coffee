@@ -97,4 +97,10 @@ BOOST_AUTO_TEST_CASE(multistring_downcast)
    BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::MultiString, zzz), InvalidDataException);
 }
 
+BOOST_AUTO_TEST_CASE(multistring_instantiate) {
+   auto data = datatype::MultiString::instantiate("nulleable");
+   BOOST_REQUIRE(data->hasValue());
 
+   data = datatype::MultiString::instantiate("not-nulleable", datatype::Constraint::CanBeNull);
+   BOOST_REQUIRE(!data->hasValue());
+}

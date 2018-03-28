@@ -54,6 +54,10 @@ public:
    LongBlock(const LongBlock& other);
    ~LongBlock() {;}
 
+   static std::shared_ptr<LongBlock> instantiate(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) {
+      return std::make_shared<LongBlock>(name, constraint);
+   }
+
    int getSize() const noexcept { return(hasValue() == true) ? m_value.size(): 0; }
 
    const basis::DataBlock& getValue(basis::RuntimeException) const noexcept { this->exceptionWhenIsNull(); return m_value; }

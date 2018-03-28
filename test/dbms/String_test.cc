@@ -145,4 +145,12 @@ BOOST_AUTO_TEST_CASE(string_clone)
    BOOST_REQUIRE_LT(notnull->compare(canBeNull), 0);
 }
 
+BOOST_AUTO_TEST_CASE(string_instantiate) {
+   auto data = datatype::String::instantiate("nulleable", 10);
+   BOOST_REQUIRE(data->hasValue());
+   BOOST_REQUIRE_EQUAL(data->getMaxSize(), 10);
 
+   data = datatype::String::instantiate("not-nulleable", 20, datatype::Constraint::CanBeNull);
+   BOOST_REQUIRE(!data->hasValue());
+   BOOST_REQUIRE_EQUAL(data->getMaxSize(), 20);
+}

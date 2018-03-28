@@ -118,3 +118,13 @@ BOOST_AUTO_TEST_CASE (shortblock_clone)
 
    BOOST_REQUIRE(clone->getValue() == column.getValue());
 }
+
+BOOST_AUTO_TEST_CASE(shortblock_instantiate) {
+   auto data = datatype::ShortBlock::instantiate("nulleable", 10);
+   BOOST_REQUIRE(data->hasValue());
+   BOOST_REQUIRE_EQUAL(data->getMaxSize(), 10);
+
+   data = datatype::ShortBlock::instantiate("not-nulleable", 20, datatype::Constraint::CanBeNull);
+   BOOST_REQUIRE(!data->hasValue());
+   BOOST_REQUIRE_EQUAL(data->getMaxSize(), 20);
+}

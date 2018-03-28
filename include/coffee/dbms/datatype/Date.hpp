@@ -60,6 +60,10 @@ public:
 
    ~Date() { ; }
 
+   static std::shared_ptr<Date> instantiate(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) {
+      return std::make_shared<Date>(name, constraint);
+   }
+
    const std::chrono::seconds& getValue() const throw(basis::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
    /**

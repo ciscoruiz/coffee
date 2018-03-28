@@ -120,3 +120,11 @@ BOOST_AUTO_TEST_CASE(float_clone)
 
    BOOST_REQUIRE_EQUAL(notnull->compare(canBeNull), -1);
 }
+
+BOOST_AUTO_TEST_CASE(float_instantiate) {
+   auto data = datatype::Float::instantiate("nulleable");
+   BOOST_REQUIRE(data->hasValue());
+
+   data = datatype::Float::instantiate("not-nulleable", datatype::Constraint::CanBeNull);
+   BOOST_REQUIRE(!data->hasValue());
+}

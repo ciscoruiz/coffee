@@ -49,6 +49,10 @@ public:
 
    TimeStamp(const datatype::TimeStamp& other);
 
+   static std::shared_ptr<TimeStamp> instantiate(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) {
+      return std::make_shared<TimeStamp>(name, constraint);
+   }
+
    std::shared_ptr<Abstract> clone() const noexcept { return std::make_shared<TimeStamp>(*this); }
 
    coffee_declare_datatype_downcast(TimeStamp);

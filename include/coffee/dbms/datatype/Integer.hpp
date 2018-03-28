@@ -43,6 +43,10 @@ public:
    explicit Integer(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) : Integer(name.c_str(), constraint) {;}
    Integer(const Integer& other);
 
+   static std::shared_ptr<Integer> instantiate(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) {
+      return std::make_shared<Integer>(name, constraint);
+   }
+
    int getValue() const throw(basis::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
    void setValue(const int i)

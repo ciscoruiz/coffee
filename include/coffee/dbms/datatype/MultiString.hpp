@@ -47,6 +47,10 @@ public:
    explicit MultiString(const std::string& name, const Constraint::_v constraint = Constraint::CanNotBeNull) : MultiString(name.c_str(), constraint) {;}
    MultiString(const MultiString& other);
 
+   static std::shared_ptr<MultiString> instantiate(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) {
+      return std::make_shared<MultiString>(name, constraint);
+   }
+
    const_value_iterator begin_value() const noexcept { return values.begin(); }
    const_value_iterator end_value() const noexcept { return values.end(); }
    static const std::string& value(const_value_iterator ii) noexcept { return std::ref(*ii); }

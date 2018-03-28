@@ -45,6 +45,10 @@ public:
       Float(name.c_str(), constraint, format){;}
    Float (const Float& other);
 
+   static std::shared_ptr<Float> instantiate(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull, const char* format="%f") {
+      return std::make_shared<Float>(name, constraint, format);
+   }
+
    float getFloatValue () const throw (basis::RuntimeException) { return getValue (); }
 
    float getValue () const throw (basis::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }

@@ -48,6 +48,10 @@ public:
    String(const String& other);
    ~String() { delete [] m_value; }
 
+   static std::shared_ptr<String> instantiate(const char* name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull) {
+      return std::make_shared<String>(name, maxSize, constraint);
+   }
+
    int getSize() const noexcept { return(hasValue() == true) ? coffee_strlen(m_value): 0; }
 
    const char* getValue() const throw(basis::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }

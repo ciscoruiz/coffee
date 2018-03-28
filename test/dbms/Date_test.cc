@@ -218,3 +218,10 @@ BOOST_AUTO_TEST_CASE(date_clone_nuleable)
    BOOST_REQUIRE_EQUAL(cannotBeNull.compare(null), -20);
 }
 
+BOOST_AUTO_TEST_CASE(date_instantiate) {
+   auto data = datatype::Date::instantiate("nulleable");
+   BOOST_REQUIRE(data->hasValue());
+
+   data = datatype::Date::instantiate("not-nulleable", datatype::Constraint::CanBeNull);
+   BOOST_REQUIRE(!data->hasValue());
+}

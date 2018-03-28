@@ -67,3 +67,11 @@ BOOST_AUTO_TEST_CASE(timestamp_downcast)
 
    BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::TimeStamp, zzz), dbms::InvalidDataException);
 }
+
+BOOST_AUTO_TEST_CASE(timestamp_instantiate) {
+   auto data = datatype::TimeStamp::instantiate("nulleable");
+   BOOST_REQUIRE(data->hasValue());
+
+   data = datatype::TimeStamp::instantiate("not-nulleable", datatype::Constraint::CanBeNull);
+   BOOST_REQUIRE(!data->hasValue());
+}

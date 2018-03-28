@@ -64,11 +64,11 @@ protected:
    MyStatement(const Database& database, const char* name, const char* expression, const StatementParameters& parameters) :
       Statement(database, name, expression, parameters)
    {
-      m_datas.push_back(std::make_shared<datatype::Integer>("ID"));
-      m_datas.push_back(std::make_shared<datatype::String>("name", 64));
-      m_datas.push_back(std::make_shared<datatype::Integer>("integer", datatype::Constraint::CanBeNull));
-      m_datas.push_back(std::make_shared<datatype::Float>("float"));
-      m_datas.push_back(std::make_shared<datatype::Date>("time", datatype::Constraint::CanBeNull));
+      m_datas.push_back(datatype::Integer::instantiate("ID"));
+      m_datas.push_back(datatype::String::instantiate("name", 64));
+      m_datas.push_back(datatype::Integer::instantiate("integer", datatype::Constraint::CanBeNull));
+      m_datas.push_back(datatype::Float::instantiate("float"));
+      m_datas.push_back(datatype::Date::instantiate("time", datatype::Constraint::CanBeNull));
    }
 
    mock::MockLowLevelRecord& getRecord() noexcept { return std::ref(m_record); }

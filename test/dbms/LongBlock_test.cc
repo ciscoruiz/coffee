@@ -118,4 +118,10 @@ BOOST_AUTO_TEST_CASE (longblock_clone_innerscope)
    BOOST_REQUIRE(memcmp(clone->getValue().data(), "1234", 4) == 0);
 }
 
+BOOST_AUTO_TEST_CASE(longblock_instantiate) {
+   auto data = datatype::LongBlock::instantiate("nulleable");
+   BOOST_REQUIRE(data->hasValue());
 
+   data = datatype::LongBlock::instantiate("not-nulleable", datatype::Constraint::CanBeNull);
+   BOOST_REQUIRE(!data->hasValue());
+}

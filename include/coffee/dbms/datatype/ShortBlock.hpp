@@ -55,6 +55,10 @@ public:
    ShortBlock (const ShortBlock& other);
    ~ShortBlock () {;}
 
+   static std::shared_ptr<ShortBlock> instantiate(const char* name, const int maxSize, const Constraint::_v constraint = Constraint::CanNotBeNull) {
+      return std::make_shared<ShortBlock>(name, maxSize, constraint);
+   }
+
    int getSize () const noexcept { return (hasValue () == true) ? m_value.size (): 0; }
 
    const basis::DataBlock& getValue () const throw (basis::RuntimeException) {  this->exceptionWhenIsNull();return m_value; }

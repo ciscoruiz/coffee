@@ -19,6 +19,7 @@ release
 *.old
 /Default/
 libs/
+*.cbp
 
 # Files and directories generated for cmake 
 Makefile

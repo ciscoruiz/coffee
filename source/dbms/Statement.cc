@@ -93,6 +93,13 @@ const std::shared_ptr<datatype::Abstract>& Statement::getInputData(const int pos
    return m_inputBinds[pos]->getData();
 }
 
+//static
+std::shared_ptr<datatype::Abstract>& Statement::data(input_iterator ii)
+   noexcept
+{
+   return (*ii)->getData();
+}
+
 std::shared_ptr<datatype::Abstract>& Statement::getOutputData(const GuardStatement&, const int pos)
    throw(basis::RuntimeException)
 {

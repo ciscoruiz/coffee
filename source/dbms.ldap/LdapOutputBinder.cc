@@ -60,26 +60,19 @@ void LdapOutputBinder::do_decode(Statement& _statement, const int pos)
 
    multiValue->clear();
 
-   LOG_DEBUG("Reading " << getData()->asString());
+   LOG_DEBUG("Reading " << getData()->getName());
 
    auto values = ldap_get_values_len(handle, entry, getData()->getName());
 
    if (values == nullptr) {
-      LOG_WARN(getData()->asString() << " was not found is the LDAP result");
+      multiValue->isNull();
       return;
    }
 
-   try {
-      for (int ii = 0, maxii = ldap_count_values_len(values); ii < maxii; ++ ii) {
-         LOG_DEBUG("Index=" << ii << " | Value=" << values[ii]->bv_val);
-         multiValue->addValue(values[ii]->bv_val);
-      }
-      ldap_value_free_len(values);
+   for (int ii = 0, maxii = ldap_count_values_len(values); ii < maxii; ++ ii) {
+      multiValue->addValue(values[ii]->bv_val);
    }
-   catch(basis::RuntimeException& ex) {
-      ldap_value_free_len(values);
-      throw;
-   }
+   ldap_value_free_len(values);
 }
 
 

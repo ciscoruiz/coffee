@@ -51,10 +51,6 @@ void LdapConnection::open()
 {
    checkResult(ldap_initialize(&ldapHandle, getDatabase().getName().c_str()), COFFEE_FILE_LOCATION);
 
-   if (ldapHandle == nullptr) {
-      COFFEE_THROW_EXCEPTION("Can not access to " << getDatabase().getName());
-   }
-
    int version = protocolVersion;
    checkResult(ldap_set_option(ldapHandle, LDAP_OPT_PROTOCOL_VERSION, &version), COFFEE_FILE_LOCATION);
 

@@ -28,6 +28,7 @@
 
 #include <coffee/dbms/ResultCode.hpp>
 
+#include <coffee/dbms/datatype/Abstract.hpp>
 #include <coffee/dbms.ldap/LdapStatement.hpp>
 #include <coffee/dbms.ldap/LdapConnection.hpp>
 
@@ -67,16 +68,16 @@ ResultCode LdapStatement::do_execute(Connection& connection)
 
    char** attributes;
 
-   if (boundValues.size() == 0) {
+   if (input_size() == 0) {
       attributes = new char*[2];
       attributes[0] = (char*)LDAP_ALL_USER_ATTRIBUTES;
       attributes[1] = nullptr;
    }
    else {
-      attributes = new char*[boundValues.size()+1];
+      attributes = new char*[input_size() + 1];
       int index = 0;
-      for (auto ii = boundValues.begin(), maxii = boundValues.end(); ii != maxii; ++ ii, ++ index) {
-         attributes[index] =  const_cast <char*> (ii->c_str());
+      for (input_iterator ii = input_begin(), maxii = input_end(); ii != maxii; ++ ii) {
+         attributes[index ++] = const_cast <char*> (Statement::data(ii)->getName());
       }
       attributes[index] = nullptr;
    }

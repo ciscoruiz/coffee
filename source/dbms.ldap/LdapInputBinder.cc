@@ -46,49 +46,5 @@ using coffee::dbms::ldap::LdapInputBinder;
 void LdapInputBinder::do_encode(Statement& _statement, const int pos)
    throw(basis::RuntimeException, DatabaseException)
 {
-   static const std::string empty;
-
-   std::shared_ptr<datatype::Abstract>& data(getData());
-   LdapStatement& statement = static_cast<LdapStatement&>(_statement);
-
-   int rc = LDAP_SUCCESS;
-
-   if (data->hasValue() == false) {
-      statement.setBoundValue(empty);
-   }
-   else {
-      switch(data->getType()) {
-      case dbms::datatype::Abstract::Datatype::Integer:
-         statement.setBoundValue(basis::AsString::apply(coffee_datatype_downcast(datatype::Integer, data)->getValue()));
-         break;
-      case dbms::datatype::Abstract::Datatype::String:
-         statement.setBoundValue(basis::AsString::apply(coffee_datatype_downcast(datatype::String, data)->getValue()));
-         break;
-      case dbms::datatype::Abstract::Datatype::Float:
-         statement.setBoundValue(basis::AsString::apply(coffee_datatype_downcast(datatype::Float, data)->getValue()));
-         break;
-      case dbms::datatype::Abstract::Datatype::ShortBlock:
-      case dbms::datatype::Abstract::Datatype::LongBlock:
-         rc = LDAP_NOT_SUPPORTED;
-         break;
-      case dbms::datatype::Abstract::Datatype::Date:
-         {
-            auto date = coffee_datatype_downcast(datatype::Date, data)->getValue();
-            statement.setBoundValue(basis::AsString::apply(date, datatype::Date::DefaultFormat));
-         }
-         break;
-      case dbms::datatype::Abstract::Datatype::TimeStamp:
-         {
-            const std::chrono::seconds& timeStamp = coffee_datatype_downcast(datatype::TimeStamp, data)->getValue();
-            statement.setBoundValue(basis::AsString::apply(timeStamp));
-         }
-         break;
-      }
-   }
-
-   if (rc != LDAP_SUCCESS) {
-      ResultCode resultCode(statement.getDatabase(), rc, ldap_err2string(rc));
-      COFFEE_THROW_DB_EXCEPTION(resultCode);
-   }
 }
 

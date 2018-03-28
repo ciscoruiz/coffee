@@ -3,54 +3,54 @@
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="true">
     <generated>
       <config projectName="coffee" targetName="ContinuousStart" />
-      <config projectName="coffee" targetName="ExperimentalTest" />
       <config projectName="coffee" targetName="NightlySubmit" />
-      <config projectName="coffee" targetName="ExperimentalCoverage" />
+      <config projectName="coffee" targetName="test_coffee_dbms" />
       <config projectName="coffee" targetName="ExperimentalUpdate" />
       <config projectName="coffee" targetName="coffee_xml" />
       <config projectName="coffee" targetName="test_coffee_dbms_ldap" />
-      <config projectName="coffee" targetName="ExperimentalSubmit" />
-      <config projectName="coffee" targetName="ExperimentalStart" />
-      <config projectName="coffee" targetName="NightlyUpdate" />
+      <config projectName="coffee" targetName="ExperimentalTest" />
+      <config projectName="coffee" targetName="ExperimentalBuild" />
       <config projectName="coffee" targetName="coffee_persistence" />
       <config projectName="coffee" targetName="test_coffee_basis" />
       <config projectName="coffee" targetName="NightlyConfigure" />
       <config projectName="coffee" targetName="coffee_dbms_sqlite" />
       <config projectName="coffee" targetName="test_coffee_dbms_sqlite" />
       <config projectName="coffee" targetName="test_coffee_config" />
-      <config projectName="coffee" targetName="NightlyStart" />
-      <config projectName="coffee" targetName="ContinuousMemCheck" />
-      <config projectName="coffee" targetName="coffee_dbms_ldap" />
+      <config projectName="coffee" targetName="ExperimentalCoverage" />
       <config projectName="coffee" targetName="NightlyBuild" />
+      <config projectName="coffee" targetName="ContinuousConfigure" />
       <config projectName="coffee" targetName="NightlyCoverage" />
       <config projectName="coffee" targetName="Continuous" />
-      <config projectName="coffee" targetName="coffee_time" />
+      <config projectName="coffee" targetName="ExperimentalStart" />
       <config projectName="coffee" targetName="test_coffee_logger" />
-      <config projectName="coffee" targetName="test_coffee_dbms" />
+      <config projectName="coffee" targetName="coffee_time" />
       <config projectName="coffee" targetName="test_coffee_app" />
       <config projectName="coffee" targetName="ContinuousCoverage" />
-      <config projectName="coffee" targetName="doc" />
+      <config projectName="coffee" targetName="coffee_dbms_ldap" />
       <config projectName="coffee" targetName="ContinuousBuild" />
-      <config projectName="coffee" targetName="test_coffee_persistence" />
+      <config projectName="coffee" targetName="coffee_config" />
       <config projectName="coffee" targetName="test_coffee_balance" />
       <config projectName="coffee" targetName="coffee_basis" />
+      <config projectName="coffee" targetName="ContinuousMemCheck" />
       <config projectName="coffee" targetName="Experimental" />
       <config projectName="coffee" targetName="coffee_balance" />
       <config projectName="coffee" targetName="coffee_app" />
       <config projectName="coffee" targetName="coffee_dbms_mock" />
       <config projectName="coffee" targetName="ContinuousUpdate" />
       <config projectName="coffee" targetName="NightlyTest" />
-      <config projectName="coffee" targetName="coffee_config" />
-      <config projectName="coffee" targetName="NightlyMemCheck" />
+      <config projectName="coffee" targetName="NightlyUpdate" />
+      <config projectName="coffee" targetName="test_coffee_xml" />
       <config projectName="coffee" targetName="Nightly" />
       <config projectName="coffee" targetName="ExperimentalConfigure" />
       <config projectName="coffee" targetName="ContinuousTest" />
-      <config projectName="coffee" targetName="NightlyMemoryCheck" />
+      <config projectName="coffee" targetName="test_coffee_persistence" />
       <config projectName="coffee" targetName="test_coffee_time" />
+      <config projectName="coffee" targetName="NightlyStart" />
+      <config projectName="coffee" targetName="NightlyMemCheck" />
+      <config projectName="coffee" targetName="doc" />
       <config projectName="coffee" targetName="coffee_logger" />
-      <config projectName="coffee" targetName="ContinuousConfigure" />
-      <config projectName="coffee" targetName="test_coffee_xml" />
-      <config projectName="coffee" targetName="ExperimentalBuild" />
+      <config projectName="coffee" targetName="ExperimentalSubmit" />
+      <config projectName="coffee" targetName="NightlyMemoryCheck" />
       <config projectName="coffee" targetName="coffee_dbms" />
       <config projectName="coffee" targetName="ExperimentalMemCheck" />
       <config projectName="coffee" targetName="ContinuousSubmit" />
@@ -63,16 +63,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1996f6df-826a-4fbe-909a-9191da0bb4bb" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/deployment.xml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
       <change beforePath="$PROJECT_DIR$/.cproject" afterPath="$PROJECT_DIR$/.cproject" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/.settings/language.settings.xml" afterPath="$PROJECT_DIR$/.settings/language.settings.xml" />
+      <change beforePath="$PROJECT_DIR$/include/coffee/dbms.ldap/LdapStatement.hpp" afterPath="$PROJECT_DIR$/include/coffee/dbms.ldap/LdapStatement.hpp" />
+      <change beforePath="$PROJECT_DIR$/include/coffee/dbms/Statement.hpp" afterPath="$PROJECT_DIR$/include/coffee/dbms/Statement.hpp" />
       <change beforePath="$PROJECT_DIR$/source/dbms.ldap/LdapConnection.cc" afterPath="$PROJECT_DIR$/source/dbms.ldap/LdapConnection.cc" />
       <change beforePath="$PROJECT_DIR$/source/dbms.ldap/LdapInputBinder.cc" afterPath="$PROJECT_DIR$/source/dbms.ldap/LdapInputBinder.cc" />
       <change beforePath="$PROJECT_DIR$/source/dbms.ldap/LdapOutputBinder.cc" afterPath="$PROJECT_DIR$/source/dbms.ldap/LdapOutputBinder.cc" />
+      <change beforePath="$PROJECT_DIR$/source/dbms.ldap/LdapStatement.cc" afterPath="$PROJECT_DIR$/source/dbms.ldap/LdapStatement.cc" />
+      <change beforePath="$PROJECT_DIR$/source/dbms/Statement.cc" afterPath="$PROJECT_DIR$/source/dbms/Statement.cc" />
+      <change beforePath="$PROJECT_DIR$/source/dbms/datatype/MultiString.cc" afterPath="$PROJECT_DIR$/source/dbms/datatype/MultiString.cc" />
       <change beforePath="$PROJECT_DIR$/test/dbms.ldap/LdapDatabase_test.cc" afterPath="$PROJECT_DIR$/test/dbms.ldap/LdapDatabase_test.cc" />
     </list>
     <ignored path="$PROJECT_DIR$/CMakeFiles/" />
@@ -112,8 +113,30 @@
       <file leaf-file-name="LdapDatabase_test.cc" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test/dbms.ldap/LdapDatabase_test.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1476">
-              <caret line="162" column="17" lean-forward="true" selection-start-line="162" selection-start-column="17" selection-end-line="162" selection-end-column="17" />
+            <state relative-caret-position="257">
+              <caret line="213" column="5" lean-forward="false" selection-start-line="213" selection-start-column="5" selection-end-line="213" selection-end-column="5" />
+              <folding>
+                <element signature="e#1166#1201#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="LdapStatement.cc" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/source/dbms.ldap/LdapStatement.cc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="353">
+              <caret line="97" column="0" lean-forward="false" selection-start-line="97" selection-start-column="0" selection-end-line="97" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="LdapOutputBinder.cc" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/source/dbms.ldap/LdapOutputBinder.cc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="280">
+              <caret line="49" column="0" lean-forward="false" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -129,8 +152,30 @@
       <list>
         <option value="$PROJECT_DIR$/include/coffee/dbms.ldap/LdapDatabase.hpp" />
         <option value="$PROJECT_DIR$/source/dbms.ldap/LdapConnection.cc" />
-        <option value="$PROJECT_DIR$/source/dbms.ldap/LdapOutputBinder.cc" />
+        <option value="$PROJECT_DIR$/include/coffee/dbms/datatype/Date.hpp" />
+        <option value="$PROJECT_DIR$/include/coffee/dbms/datatype/Float.hpp" />
+        <option value="$PROJECT_DIR$/include/coffee/dbms/datatype/Integer.hpp" />
+        <option value="$PROJECT_DIR$/include/coffee/dbms/datatype/LongBlock.hpp" />
+        <option value="$PROJECT_DIR$/include/coffee/dbms/datatype/MultiString.hpp" />
+        <option value="$PROJECT_DIR$/include/coffee/dbms/datatype/ShortBlock.hpp" />
+        <option value="$PROJECT_DIR$/include/coffee/dbms/datatype/String.hpp" />
+        <option value="$PROJECT_DIR$/include/coffee/dbms/datatype/TimeStamp.hpp" />
+        <option value="$PROJECT_DIR$/test/dbms/Date_test.cc" />
+        <option value="$PROJECT_DIR$/test/dbms/Float_test.cc" />
+        <option value="$PROJECT_DIR$/test/dbms/Integer_test.cc" />
+        <option value="$PROJECT_DIR$/test/dbms/LongBlock_test.cc" />
+        <option value="$PROJECT_DIR$/test/dbms/MultiString_test.cc" />
+        <option value="$PROJECT_DIR$/test/dbms/ShortBlock_test.cc" />
+        <option value="$PROJECT_DIR$/test/dbms/String_test.cc" />
+        <option value="$PROJECT_DIR$/test/dbms/TimeStamp_test.cc" />
+        <option value="$PROJECT_DIR$/test/dbms/Definition_test.cc" />
         <option value="$PROJECT_DIR$/source/dbms.ldap/LdapInputBinder.cc" />
+        <option value="$PROJECT_DIR$/include/coffee/dbms.ldap/LdapStatement.hpp" />
+        <option value="$PROJECT_DIR$/include/coffee/dbms/Statement.hpp" />
+        <option value="$PROJECT_DIR$/source/dbms/Statement.cc" />
+        <option value="$PROJECT_DIR$/source/dbms/datatype/MultiString.cc" />
+        <option value="$PROJECT_DIR$/source/dbms.ldap/LdapStatement.cc" />
+        <option value="$PROJECT_DIR$/source/dbms.ldap/LdapOutputBinder.cc" />
         <option value="$PROJECT_DIR$/test/dbms.ldap/LdapDatabase_test.cc" />
       </list>
     </option>
@@ -238,6 +283,13 @@
               <item name="coffee" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
               <item name="coffee" type="462c0819:PsiDirectoryNode" />
               <item name="source" type="462c0819:PsiDirectoryNode" />
+              <item name="dbms" type="462c0819:PsiDirectoryNode" />
+              <item name="datatype" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="coffee" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="coffee" type="462c0819:PsiDirectoryNode" />
+              <item name="source" type="462c0819:PsiDirectoryNode" />
               <item name="dbms.ldap" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -255,7 +307,19 @@
               <item name="coffee" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
               <item name="coffee" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="dbms" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="coffee" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="coffee" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
               <item name="dbms.ldap" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="coffee" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="coffee" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="persistence" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -280,7 +344,7 @@
     </option>
   </component>
   <component name="RunManager" selected="Application.Build All">
-    <configuration name="Build All" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" CONFIG_NAME="COVERAGE" EXPLICIT_BUILD_TARGET_NAME="all">
+    <configuration name="Build All" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" CONFIG_NAME="COVERAGE" RUN_TARGET_PROJECT_NAME="coffee" RUN_TARGET_NAME="test_coffee_dbms_ldap" EXPLICIT_BUILD_TARGET_NAME="all">
       <envs />
     </configuration>
     <configuration name="Continuous" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="coffee" TARGET_NAME="Continuous" CONFIG_NAME="COVERAGE">
@@ -500,15 +564,14 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="260" y="34" width="1920" height="1176" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18186583" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.27570093" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.27570093" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32990655" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -518,7 +581,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32990655" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -526,7 +589,9 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager />
+    <breakpoint-manager>
+      <option name="time" value="1" />
+    </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
@@ -534,7 +599,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="700">
           <caret line="50" column="41" lean-forward="false" selection-start-line="50" selection-start-column="41" selection-end-line="50" selection-end-column="41" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -542,7 +606,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="798">
           <caret line="57" column="0" lean-forward="false" selection-start-line="57" selection-start-column="0" selection-end-line="57" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -550,7 +613,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="238">
           <caret line="17" column="64" lean-forward="false" selection-start-line="17" selection-start-column="57" selection-end-line="17" selection-end-column="64" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -558,7 +620,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1484">
           <caret line="106" column="14" lean-forward="false" selection-start-line="106" selection-start-column="14" selection-end-line="106" selection-end-column="14" />
-          <folding />
+          <folding>
+            <element signature="e#1166#1201#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -609,7 +673,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="361">
           <caret line="122" column="46" lean-forward="true" selection-start-line="122" selection-start-column="46" selection-end-line="122" selection-end-column="46" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -617,7 +680,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="490">
           <caret line="37" column="0" lean-forward="true" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -625,7 +687,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="739">
           <caret line="91" column="0" lean-forward="true" selection-start-line="91" selection-start-column="0" selection-end-line="91" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -649,7 +710,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="336">
           <caret line="24" column="32" lean-forward="false" selection-start-line="24" selection-start-column="32" selection-end-line="24" selection-end-column="32" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -657,7 +717,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="50" column="41" lean-forward="false" selection-start-line="50" selection-start-column="41" selection-end-line="50" selection-end-column="41" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -669,27 +728,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/source/dbms.ldap/LdapDatabase.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="51" column="45" lean-forward="false" selection-start-line="51" selection-start-column="44" selection-end-line="51" selection-end-column="45" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/source/dbms.ldap/LdapConnection.cc">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="448">
           <caret line="61" column="88" lean-forward="false" selection-start-line="61" selection-start-column="88" selection-end-line="61" selection-end-column="88" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/datatype/String.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="249">
-          <caret line="52" column="15" lean-forward="false" selection-start-line="52" selection-start-column="15" selection-end-line="52" selection-end-column="15" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -697,25 +739,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="406">
           <caret line="29" column="16" lean-forward="true" selection-start-line="29" selection-start-column="16" selection-end-line="29" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/source/dbms.ldap/LdapInputBinder.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="215">
-          <caret line="53" column="25" lean-forward="false" selection-start-line="53" selection-start-column="25" selection-end-line="53" selection-end-column="25" />
-          <folding>
-            <element signature="e#1170#1206#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/source/dbms.ldap/LdapOutputBinder.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="52" column="1" lean-forward="true" selection-start-line="52" selection-start-column="1" selection-end-line="52" selection-end-column="1" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -723,15 +746,248 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
           <caret line="15" column="75" lean-forward="true" selection-start-line="15" selection-start-column="75" selection-end-line="15" selection-end-column="75" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/datatype/Float.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="630">
+          <caret line="47" column="0" lean-forward="true" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/datatype/Set.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-168">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/datatype/LongBlock.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="756">
+          <caret line="58" column="4" lean-forward="true" selection-start-line="58" selection-start-column="4" selection-end-line="58" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/datatype/ShortBlock.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="728">
+          <caret line="57" column="4" lean-forward="true" selection-start-line="57" selection-start-column="4" selection-end-line="57" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/datatype/Integer.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="672">
+          <caret line="48" column="0" lean-forward="true" selection-start-line="45" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/datatype/String.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="510">
+          <caret line="53" column="0" lean-forward="true" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/datatype/Date.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="630">
+          <caret line="65" column="0" lean-forward="true" selection-start-line="62" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/datatype/TimeStamp.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="700">
+          <caret line="50" column="0" lean-forward="true" selection-start-line="50" selection-start-column="0" selection-end-line="50" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dbms/Date_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="677">
+          <caret line="224" column="80" lean-forward="false" selection-start-line="224" selection-start-column="80" selection-end-line="224" selection-end-column="80" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dbms/Float_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="677">
+          <caret line="127" column="81" lean-forward="false" selection-start-line="127" selection-start-column="81" selection-end-line="127" selection-end-column="81" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dbms/Integer_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="663">
+          <caret line="126" column="0" lean-forward="false" selection-start-line="119" selection-start-column="0" selection-end-line="126" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dbms/LongBlock_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="719">
+          <caret line="127" column="0" lean-forward="false" selection-start-line="127" selection-start-column="0" selection-end-line="127" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dbms/MultiString_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="705">
+          <caret line="106" column="0" lean-forward="false" selection-start-line="106" selection-start-column="0" selection-end-line="106" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dbms/ShortBlock_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="453">
+          <caret line="115" column="0" lean-forward="false" selection-start-line="115" selection-start-column="0" selection-end-line="115" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dbms/String_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="705">
+          <caret line="155" column="1" lean-forward="false" selection-start-line="155" selection-start-column="1" selection-end-line="155" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dbms/TimeStamp_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="551">
+          <caret line="67" column="74" lean-forward="false" selection-start-line="67" selection-start-column="74" selection-end-line="67" selection-end-column="74" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dbms/Definition_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="15" column="75" lean-forward="false" selection-start-line="15" selection-start-column="75" selection-end-line="15" selection-end-column="75" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/persistence/Storage_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="42">
+          <caret line="3" column="3" lean-forward="false" selection-start-line="3" selection-start-column="3" selection-end-line="3" selection-end-column="3" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/dbms.ldap/LdapInputBinder.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="672">
+          <caret line="48" column="1" lean-forward="false" selection-start-line="48" selection-start-column="1" selection-end-line="48" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/dbms.ldap/LdapStatement.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="560">
+          <caret line="40" column="33" lean-forward="false" selection-start-line="40" selection-start-column="33" selection-end-line="40" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/dbms.ldap/LdapDatabase.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="994">
+          <caret line="71" column="32" lean-forward="false" selection-start-line="71" selection-start-column="32" selection-end-line="71" selection-end-column="32" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/Statement.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3080">
+          <caret line="220" column="0" lean-forward="false" selection-start-line="220" selection-start-column="0" selection-end-line="220" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/dbms/Statement.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1442">
+          <caret line="103" column="27" lean-forward="false" selection-start-line="103" selection-start-column="27" selection-end-line="103" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/dbms/datatype/MultiString.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="109">
+          <caret line="29" column="65" lean-forward="false" selection-start-line="29" selection-start-column="65" selection-end-line="29" selection-end-column="65" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/datatype/MultiString.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="403">
+          <caret line="57" column="0" lean-forward="false" selection-start-line="57" selection-start-column="0" selection-end-line="57" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/dbms/GuardStatement.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="495">
+          <caret line="68" column="27" lean-forward="false" selection-start-line="68" selection-start-column="27" selection-end-line="68" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/dbms.ldap/LdapStatement.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="353">
+          <caret line="97" column="0" lean-forward="false" selection-start-line="97" selection-start-column="0" selection-end-line="97" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/dbms/datatype/Abstract.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="249">
+          <caret line="44" column="25" lean-forward="false" selection-start-line="44" selection-start-column="25" selection-end-line="44" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/dbms.ldap/LdapOutputBinder.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="280">
+          <caret line="49" column="0" lean-forward="false" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/dbms.ldap/LdapDatabase_test.cc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1476">
-          <caret line="162" column="17" lean-forward="true" selection-start-line="162" selection-start-column="17" selection-end-line="162" selection-end-column="17" />
-          <folding />
+        <state relative-caret-position="257">
+          <caret line="213" column="5" lean-forward="false" selection-start-line="213" selection-start-column="5" selection-end-line="213" selection-end-column="5" />
+          <folding>
+            <element signature="e#1166#1201#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

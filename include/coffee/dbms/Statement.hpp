@@ -215,6 +215,10 @@ protected:
    const std::shared_ptr<datatype::Abstract>& getInputData(const int pos) const throw(basis::RuntimeException);
    std::shared_ptr<datatype::Abstract>& getOutputData(const int pos) throw(basis::RuntimeException);
 
+   input_iterator input_begin() noexcept { return m_inputBinds.begin(); }
+   input_iterator input_end() noexcept { return m_inputBinds.end(); }
+   static std::shared_ptr<datatype::Abstract>& data(input_iterator ii) noexcept;
+
 private:
    const Database& m_database;
    const std::string m_name;

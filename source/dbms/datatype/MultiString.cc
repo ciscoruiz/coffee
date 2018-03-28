@@ -42,7 +42,18 @@ basis::StreamString datatype::MultiString::asString() const
 {
    basis::StreamString result("datatype.MultiString { ");
    result << datatype::Abstract::asString();
-   result << " | #Values=" << values.size();
+
+   result << " | Values={";
+   bool isFirst = true;
+   for (auto ii = begin_value(), maxii = end_value(); ii != maxii; ++ ii) {
+      if (!isFirst) {
+         result << " ";
+      }
+      result << "'" << value(ii) << "'";
+      isFirst = false;
+   }
+   result << "}";
+
    return result += " }";
 }
 

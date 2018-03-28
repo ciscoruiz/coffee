@@ -49,14 +49,12 @@ private:
    const bool attrOnly;
    timeval timeout;
    const int sizeLimit;
-   std::vector<std::string> boundValues;
    LDAP* handle;
    LDAPMessage* result;
    LDAPMessage* currentEntry;
 
    LDAP* getHandle() noexcept { return handle; }
    LDAPMessage* getCurrentEntry() noexcept { return currentEntry; }
-   void setBoundValue(const std::string& boundValue) noexcept { boundValues.push_back(boundValue); }
 
    void do_prepare(Connection& connection) throw(basis::RuntimeException, DatabaseException) {;}
    ResultCode do_execute(Connection& connection) throw(basis::RuntimeException, DatabaseException);

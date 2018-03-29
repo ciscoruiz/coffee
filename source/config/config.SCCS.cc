@@ -25,7 +25,7 @@
 #include <coffee/config/SCCS.hpp>
 #include <coffee/config/SCCSRepository.hpp>
 
-coffee_sccs_define_tag (config,release-18.03.14);
+coffee_sccs_define_tag (config,release-18.03.29);
 
 using namespace coffee;
 

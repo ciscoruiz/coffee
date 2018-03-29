@@ -66,7 +66,7 @@ public:
     * @param top Maximal value for this range
     * @param strategy Selection strategy used under this range.
     */
-   void addRange (const int bottom, const int top, std::shared_ptr<Strategy> strategy) throw (adt::RuntimeException);
+   void addRange (const int bottom, const int top, std::shared_ptr<Strategy> strategy) throw (basis::RuntimeException);
 
    /**
     * \param key to be used to select the range that contains the strategy to be used.

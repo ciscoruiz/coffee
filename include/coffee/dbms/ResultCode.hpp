@@ -31,7 +31,7 @@
 
 #include <stdlib.h>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 namespace coffee {
 
@@ -121,7 +121,7 @@ public:
       @return \em true si las condiciones de busqueda de la ultimo operacion
       no han sido satisfechas por ningun registro o \em false en otro caso.
    */   
-   bool notFound() const throw(adt::RuntimeException);
+   bool notFound() const throw(basis::RuntimeException);
    
    /**
       Devuelve \em true si la ultima operacion solicitada fue realizada correctamente
@@ -129,7 +129,7 @@ public:
       @return \em true si la ultima operacion solicitada fue realizada correctamente
       o \em false en otro caso.      
    */
-   bool successful() const throw(adt::RuntimeException);
+   bool successful() const throw(basis::RuntimeException);
 
    /**
       Devuelve \em true Si el registro obtenenido en una sentencia de seleccion con indicador
@@ -139,25 +139,25 @@ public:
       de modo exclusivo ha sido bloqueada previamente por otro proceso y/o contexto de base de 
       datos o \em false en otro caso.      
    */
-   bool locked() const throw(adt::RuntimeException);
+   bool locked() const throw(basis::RuntimeException);
 
    /**
       Devuelve \em true si se perdio la conexion la base de datos o \em false en otro caso.
       @return \em true si se perdio la conexion la base de datos o \em false en otro caso.
    */
-   bool lostConnection() const throw(adt::RuntimeException);
+   bool lostConnection() const throw(basis::RuntimeException);
 
    /**
       Devuelve una cadena con la informacion sobre esta clase.
       \return Una cadena con la informacion sobre esta clase.
    */
-   operator adt::StreamString() const noexcept { return asString(); }
+   operator basis::StreamString() const noexcept { return asString(); }
 
    /**
       Devuelve una cadena con la informacion sobre esta clase.
       \return Una cadena con la informacion sobre esta clase.
    */
-   adt::StreamString asString() const noexcept;
+   basis::StreamString asString() const noexcept;
 
 private:
    std::shared_ptr<ErrorCodeInterpreter> m_errorCodeInterpreter;

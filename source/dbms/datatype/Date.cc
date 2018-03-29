@@ -35,6 +35,9 @@ using namespace coffee::dbms;
 
 using std::chrono::seconds;
 
+//static
+const char* datatype::Date::DefaultFormat = "%Y-%m-%dT%H:%M:%S";
+
 datatype::Date::Date (const char* name, const Constraint::_v constraint) :
    datatype::Abstract (name, Datatype::Date, MaxDateSize, constraint),
    m_value(seconds::zero())
@@ -59,23 +62,8 @@ datatype::Date::Date (const Date& other) :
    m_buffer [0] = 0;
 }
 
-struct tm* datatype::Date::getLocalTime () const
-   throw (adt::RuntimeException)
-{
-   this->exceptionWhenIsNull();
-
-   time_t tt = m_value.count();
-   tm* result = localtime ((time_t*) &tt);
-
-   if (result == NULL) {
-      COFFEE_THROW_EXCEPTION(asString () << " | It is not a valid date");
-   }
-
-   return result;
-}
-
 void datatype::Date::setValue (const char* str, const char* format)
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    clear ();
 
@@ -84,6 +72,7 @@ void datatype::Date::setValue (const char* str, const char* format)
    }
 
    tm aux;
+   coffee_memset(&aux, 0, sizeof(aux));
    char* r = strptime (str, format, &aux);
 
    if (r == NULL ) {
@@ -91,30 +80,28 @@ void datatype::Date::setValue (const char* str, const char* format)
    }
 
    aux.tm_isdst = 0;
-   std::time_t newValue = std::mktime (&aux);
+   std::time_t newValue = std::mktime(&aux);
 
    if (newValue == -1) {
       COFFEE_THROW_EXCEPTION("'" << str << "' can not be treated as std::chrono::seconds '" << format << "'");
    }
 
-   // http://www.cplusplus.com/reference/chrono/system_clock/from_time_t/
-   this->isNotNull();
-   m_value = chrono::duration_cast<seconds>(chrono::system_clock::from_time_t(newValue).time_since_epoch());
+   setValue(std::chrono::seconds(newValue));
 }
 
 void datatype::Date::setValue (const std::chrono::seconds& value)
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    this->isNotNull();
    m_value = value;
 }
 
-adt::StreamString datatype::Date::asString () const
+basis::StreamString datatype::Date::asString () const
    noexcept
 {
    const char* cstring;
 
-   adt::StreamString result ("datatype.Date { ");
+   basis::StreamString result ("datatype.Date { ");
    result << dbms::datatype::Abstract::asString ();
 
    if (this->hasValue () == true) {
@@ -125,7 +112,7 @@ adt::StreamString datatype::Date::asString () const
 }
 
 int datatype::Date::do_compare (const datatype::Abstract& other) const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    const Date& _other = coffee_datatype_downcast(Date, other);
 

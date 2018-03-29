@@ -26,9 +26,9 @@
 
 #include <memory>
 
-#include <coffee/adt/RuntimeException.hpp>
-#include <coffee/adt/NamedObject.hpp>
-#include <coffee/adt/StreamString.hpp>
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/basis/NamedObject.hpp>
+#include <coffee/basis/StreamString.hpp>
 
 namespace coffee {
 
@@ -42,7 +42,7 @@ namespace app {
  * Generic class for other classes which has to done an unique specific operation during a
  * undefined period of time.
  */
-class Runnable : public adt::NamedObject {
+class Runnable : public basis::NamedObject {
    struct StatusFlags { enum _v { Stopped = 0, Starting = 1, Running = 2, StoppedWithError = 4 }; };
 
 public:
@@ -75,12 +75,12 @@ public:
     * Process the request to stop, it will act over internal members and it will call virtual pure method do_stop.
     * \return \b true if this instance was in an state which could accept the stop or \b false otherwise.
     */
-   bool stop() throw(adt::RuntimeException);
+   bool stop() throw(basis::RuntimeException);
 
    /**
-    * \return Summarize information of the instance as adt::StreamString
+    * \return Summarize information of the instance as basis::StreamString
     */
-   virtual adt::StreamString asString() const noexcept;
+   virtual basis::StreamString asString() const noexcept;
 
    /**
     * \return Summarize information of the instance as coffee::xml::Node
@@ -92,18 +92,12 @@ protected:
      Constructor.
      @param name Logic name.
    */
-   explicit Runnable(const std::string& name) : adt::NamedObject(name), m_statusFlags(StatusFlags::Stopped) {;}
-
-   /**
-     Constructor.
-     @param name Logic name.
-   */
-   explicit Runnable(const char* name) : adt::NamedObject(name), m_statusFlags(StatusFlags::Stopped) {;}
+   explicit Runnable(const std::string& name) : basis::NamedObject(name), m_statusFlags(StatusFlags::Stopped) {;}
 
    /**
     * Constructor .
     */
-   Runnable() : adt::NamedObject(""), m_statusFlags(StatusFlags::Stopped) {;}
+   Runnable() : basis::NamedObject(""), m_statusFlags(StatusFlags::Stopped) {;}
 
    /**
     * Activates the flag received as parameter.
@@ -137,7 +131,7 @@ protected:
     * Pure virtual method to fine tuning operations to done in case of receive a
     * request for stop.
     */
-   virtual void do_stop() throw(adt::RuntimeException) = 0;
+   virtual void do_stop() throw(basis::RuntimeException) = 0;
 
 private:
    int m_statusFlags;

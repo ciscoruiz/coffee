@@ -29,7 +29,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TtyWriter.hpp>
@@ -39,6 +39,7 @@
 #include <coffee/balance/GuardResourceList.hpp>
 
 #include "TestResource.hpp"
+#include "ResourceListFixture.hpp"
 
 using namespace coffee;
 using namespace coffee::balance;
@@ -48,7 +49,6 @@ namespace RoundRobinTest {
    typedef std::map <int, int> CounterContainer;
    typedef CounterContainer::iterator counter_iterator;
 
-   static int MaxResources = 13;
    static int MaxLoop = 5;
 
    void incrementUse (CounterContainer& counterContainer, const std::shared_ptr<Resource>& resource)
@@ -67,7 +67,7 @@ namespace RoundRobinTest {
 
    void parallel_work(std::mutex& mutexContainer, CounterContainer& counterContainer, balance::StrategyRoundRobin& strategy)
    {
-      for (int ii = 0; ii < MaxResources; ++ ii) {
+      for (int ii = 0; ii < ResourceListFixture::MaxResources; ++ ii) {
          auto resource = strategy.apply ();
 
          if (true) {
@@ -78,10 +78,8 @@ namespace RoundRobinTest {
    }
 }
 
-BOOST_AUTO_TEST_CASE( rr_dont_use_unavailables )
+BOOST_FIXTURE_TEST_CASE( rr_dont_use_unavailables, ResourceListFixture)
 {
-   auto resourceList = coffee::test::balance::setup(RoundRobinTest::MaxResources);
-
    balance::StrategyRoundRobin strategy(resourceList);
 
    if (true) {
@@ -104,18 +102,16 @@ BOOST_AUTO_TEST_CASE( rr_dont_use_unavailables )
    BOOST_REQUIRE_THROW (strategy.apply(), ResourceUnavailableException);
 }
 
-BOOST_AUTO_TEST_CASE( rr_balance_quality)
+BOOST_FIXTURE_TEST_CASE( rr_balance_quality, ResourceListFixture)
 {
-   auto resourceList = coffee::test::balance::setup(RoundRobinTest::MaxResources);
-
    balance::StrategyRoundRobin strategy(resourceList);
    RoundRobinTest::CounterContainer counterContainer;
 
-   for (int ii = 0; ii < RoundRobinTest::MaxResources * RoundRobinTest::MaxLoop; ++ ii){
+   for (int ii = 0; ii < MaxResources * RoundRobinTest::MaxLoop; ++ ii){
       RoundRobinTest::incrementUse (counterContainer, strategy.apply());
    }
 
-   BOOST_REQUIRE_EQUAL (counterContainer.size (), RoundRobinTest::MaxResources);
+   BOOST_REQUIRE_EQUAL (counterContainer.size (), MaxResources);
 
    for (RoundRobinTest::counter_iterator ii = counterContainer.begin (), maxii = counterContainer.end (); ii != maxii; ++ ii) {
       BOOST_REQUIRE_EQUAL (ii->second, RoundRobinTest::MaxLoop);
@@ -129,10 +125,8 @@ BOOST_AUTO_TEST_CASE( rr_empty_list )
    BOOST_REQUIRE_THROW (strategy.apply(), ResourceUnavailableException);
 }
 
-BOOST_AUTO_TEST_CASE( rr_balance_multithread )
+BOOST_FIXTURE_TEST_CASE( rr_balance_multithread, ResourceListFixture)
 {
-   auto resourceList = coffee::test::balance::setup(RoundRobinTest::MaxResources);
-
    balance::StrategyRoundRobin strategy(resourceList);
    RoundRobinTest::CounterContainer counterContainer;
    std::mutex mutexContainer;
@@ -152,9 +146,9 @@ BOOST_AUTO_TEST_CASE( rr_balance_multithread )
       sumUse += useCounter.second;
    }
 
-   BOOST_REQUIRE_EQUAL(sumUse, RoundRobinTest::MaxResources * RoundRobinTest::MaxLoop);
+   BOOST_REQUIRE_EQUAL(sumUse, MaxResources * RoundRobinTest::MaxLoop);
 
-   BOOST_REQUIRE_EQUAL (counterContainer.size (), RoundRobinTest::MaxResources);
+   BOOST_REQUIRE_EQUAL (counterContainer.size (), MaxResources);
 
    for (RoundRobinTest::counter_iterator ii = counterContainer.begin (), maxii = counterContainer.end (); ii != maxii; ++ ii) {
       BOOST_REQUIRE_EQUAL (ii->second, RoundRobinTest::MaxLoop);

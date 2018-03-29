@@ -57,7 +57,7 @@ public:
    }
 
 private:
-   std::string apply(const Level::_v level, const adt::StreamString& comment, const char* methodName, const char* file, const unsigned lineno) noexcept;
+   std::string apply(const Level::_v level, const basis::StreamString& comment, const char* methodName, const char* file, const unsigned lineno) noexcept;
 
 };
 

@@ -30,7 +30,7 @@
 
 #include <coffee/config/defines.hpp>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/dbms/datatype/Abstract.hpp>
 
@@ -50,6 +50,7 @@ public:
     * Espacio maximo reservado para representar lo datos de una fecha sobre una cadena.
     */
    static const int MaxDateSize = 48;
+   static const char* DefaultFormat;
 
    explicit Date(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) ;
 
@@ -59,9 +60,11 @@ public:
 
    ~Date() { ; }
 
-   const std::chrono::seconds& getValue() const throw(adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
+   static std::shared_ptr<Date> instantiate(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) {
+      return std::make_shared<Date>(name, constraint);
+   }
 
-   struct tm* getLocalTime() const throw(adt::RuntimeException);
+   const std::chrono::seconds& getValue() const throw(basis::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
    /**
        \code
@@ -155,20 +158,18 @@ public:
 
         %%     Replaced by % .
        \endcode
-
-      Para obtener m�s informacion sobre la espeficacion de formato \em man \em strftime(p.e.).
    */
-   void setValue(const char* str, const char* format) throw(adt::RuntimeException);
+   void setValue(const char* str, const char* format) throw(basis::RuntimeException);
 
-   void setValue(const std::string& str, const char* format) throw(adt::RuntimeException) { setValue(str.c_str(), format); }
+   void setValue(const std::string& str, const char* format) throw(basis::RuntimeException) { setValue(str.c_str(), format); }
 
-   void setValue(const std::chrono::seconds& second) throw(adt::RuntimeException);
+   void setValue(const std::chrono::seconds& second) throw(basis::RuntimeException);
 
    std::shared_ptr<Abstract> clone() const noexcept { return std::make_shared<Date>(*this); }
 
-   operator adt::StreamString() const noexcept { return asString(); }
+   operator basis::StreamString() const noexcept { return asString(); }
 
-   virtual adt::StreamString asString() const noexcept;
+   virtual basis::StreamString asString() const noexcept;
 
    Date& operator=(const Date&) = delete;
    bool operator==(const Date& other) const noexcept { return m_value == other.m_value; }
@@ -186,7 +187,7 @@ protected:
    void do_clear() noexcept { m_value = std::chrono::seconds::zero(); }
 
 private:
-   int do_compare(const Abstract& other) const throw(adt::RuntimeException);
+   int do_compare(const Abstract& other) const throw(basis::RuntimeException);
 };
 
 }

@@ -26,8 +26,8 @@
 
 #include <memory>
 
-#include <coffee/adt/RuntimeException.hpp>
-#include <coffee/adt/DataBlock.hpp>
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/basis/DataBlock.hpp>
 
 #include <coffee/xml/Wrapper.hpp>
 
@@ -45,11 +45,11 @@ public:
    Compiler ();
    virtual ~Compiler ();
 
-   std::string apply (const Document& document) throw (adt::RuntimeException);
-   std::string apply (const std::shared_ptr<Node>& node) throw (adt::RuntimeException);
+   std::string apply (const Document& document) throw (basis::RuntimeException);
+   std::string apply (const std::shared_ptr<Node>& node) throw (basis::RuntimeException);
 
-   const char* encode (const char* text) throw (adt::RuntimeException);
-   const char* encode (const std::string& text) throw (adt::RuntimeException) { return encode (text.c_str ()); }
+   const char* encode (const char* text) throw (basis::RuntimeException);
+   const char* encode (const std::string& text) throw (basis::RuntimeException) { return encode (text.c_str ()); }
 
    void setEncoding (const char* encoding) noexcept { m_encoding = encoding; }
 

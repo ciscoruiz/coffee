@@ -32,7 +32,7 @@
 using namespace coffee;
 
 std::shared_ptr<persistence::Storage> persistence::Repository::createStorage(const std::string& ident, const int maxCacheSize)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    storage_iterator ii = m_storages.find(ident);
 
@@ -48,7 +48,7 @@ std::shared_ptr<persistence::Storage> persistence::Repository::createStorage(con
 }
 
 std::shared_ptr<persistence::Storage>& persistence::Repository::findStorage(const std::string& ident)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
 
    storage_iterator ii = m_storages.find(ident);
@@ -60,11 +60,11 @@ std::shared_ptr<persistence::Storage>& persistence::Repository::findStorage(cons
    return std::ref(Repository::storage(ii));
 }
 
-adt::StreamString persistence::Repository::asString() const
+basis::StreamString persistence::Repository::asString() const
    noexcept
 {
-   adt::StreamString result("persistence.Repository { ");
-   result << adt::NamedObject::asString();
+   basis::StreamString result("persistence.Repository { ");
+   result << basis::NamedObject::asString();
    result << " | N-Size=" << m_storages.size();
    return result += " }";
 }

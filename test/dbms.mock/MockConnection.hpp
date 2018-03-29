@@ -26,7 +26,7 @@
 
 #include <vector>
 
-#include <coffee/adt/StreamString.hpp>
+#include <coffee/basis/StreamString.hpp>
 
 #include <coffee/dbms/Connection.hpp>
 
@@ -45,7 +45,7 @@ class MockConnection : public dbms::Connection {
 public:
    enum OpCode {  Write, Delete };
 
-   MockConnection(MockDatabase& database, const std::string& name, const char* user, const char* password);
+   MockConnection(MockDatabase& database, const std::string& name, const dbms::ConnectionParameters& parameters);
 
    int operation_size() const noexcept { return m_operations.size(); }
 
@@ -59,15 +59,15 @@ public:
    unsigned int getOpenCounter() const noexcept { return m_openCounter; }
    unsigned int getCloseCounter() const noexcept { return m_closeCounter; }
 
-   adt::StreamString asString() const noexcept {
-      adt::StreamString result("MockConnection {");
+   basis::StreamString asString() const noexcept {
+      basis::StreamString result("MockConnection {");
       result << dbms::Connection::asString();
       result << " | CommitCounter=" << m_commitCounter;
       result << " | RollbackCounter=" << m_rollbackCounter;
       return result << " }";
    }
 
-   mock::MockLowLevelContainer& getContainer() throw(adt::RuntimeException);
+   mock::MockLowLevelContainer& getContainer() throw(basis::RuntimeException);
 
    void addOperation(const OpCode opCode, const MockLowLevelRecord& record) noexcept {
       m_operations.push_back(Operation(opCode, record));
@@ -89,7 +89,7 @@ private:
 
    void open() throw(dbms::DatabaseException);
    void close() noexcept;
-   void do_commit() throw (adt::RuntimeException, dbms::DatabaseException);
+   void do_commit() throw (basis::RuntimeException, dbms::DatabaseException);
    void do_rollback() noexcept;
 
    friend class MyReadStatement;

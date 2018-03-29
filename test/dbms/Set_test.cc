@@ -21,8 +21,8 @@
 // SOFTWARE.
 //
 
-#include <coffee/adt/DataBlock.hpp>
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/DataBlock.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/time/TimeService.hpp>
 
@@ -44,14 +44,14 @@ BOOST_AUTO_TEST_CASE(set_already_defined)
 {
   datatype::Set set;
   set.insert(std::make_shared<datatype::Integer>("integer"));
-  BOOST_REQUIRE_THROW(set.insert(std::make_shared<datatype::Integer>("integer")), adt::RuntimeException);
+  BOOST_REQUIRE_THROW(set.insert(std::make_shared<datatype::Integer>("integer")), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(set_empty_field)
 {
   datatype::Set set;
   std::shared_ptr<datatype::Integer> data;
-  BOOST_REQUIRE_THROW(set.insert(data), adt::RuntimeException);
+  BOOST_REQUIRE_THROW(set.insert(data), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(set_find)
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(set_find)
 
   BOOST_REQUIRE_NO_THROW(set.find("integer"));
 
-  BOOST_REQUIRE_THROW(set.find("other-name"), adt::RuntimeException);
+  BOOST_REQUIRE_THROW(set.find("other-name"), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(set_constains)
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(set_access)
 
    const int maxSize = 1024;
    char* buffer = new char[maxSize];
-   adt::DataBlock data(buffer, maxSize);
+   basis::DataBlock data(buffer, maxSize);
 
    set.setInteger("integer", 123);
    set.setString("string", "hello");
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(set_access)
    BOOST_REQUIRE_CLOSE(set.getFloat("float"), 0.123, 0.001);
    BOOST_REQUIRE_EQUAL(set.getDate("date"), second);
 
-   const adt::DataBlock& read = set.getDataBlock("longblock");
+   const basis::DataBlock& read = set.getDataBlock("longblock");
 
    BOOST_REQUIRE (memcmp(read.data(), buffer, maxSize) == 0);
 }
@@ -188,10 +188,10 @@ BOOST_AUTO_TEST_CASE(set_compare_different_no_members_numbers)
   set.setInteger("integer", 123);
   set.setString("string", "hello");
 
-  BOOST_REQUIRE_THROW(set.compare(other), adt::RuntimeException);
+  BOOST_REQUIRE_THROW(set.compare(other), basis::RuntimeException);
   BOOST_REQUIRE(set != other);
 
-  BOOST_REQUIRE_THROW(other.compare(set), adt::RuntimeException);
+  BOOST_REQUIRE_THROW(other.compare(set), basis::RuntimeException);
   BOOST_REQUIRE(other != set);
 }
 
@@ -214,8 +214,8 @@ BOOST_AUTO_TEST_CASE(set_compare_different_members_names)
   other.setString("string", "hello");
   other.setFloat("float-with-other-name", 0.123);
 
-  BOOST_REQUIRE_THROW(set.compare(other), adt::RuntimeException);
-  BOOST_REQUIRE_THROW(other.compare(set), adt::RuntimeException);
+  BOOST_REQUIRE_THROW(set.compare(other), basis::RuntimeException);
+  BOOST_REQUIRE_THROW(other.compare(set), basis::RuntimeException);
   BOOST_REQUIRE(set != other);
   BOOST_REQUIRE(other != set);
 }

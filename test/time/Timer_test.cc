@@ -26,8 +26,8 @@
 #include <condition_variable>
 #include <chrono>
 
-#include <coffee/adt/pattern/observer/Observer.hpp>
-#include <coffee/adt/Average.hpp>
+#include <coffee/basis/pattern/observer/Observer.hpp>
+#include <coffee/basis/Average.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TtyWriter.hpp>
@@ -61,24 +61,24 @@ struct LongTimeFixture : public TimeFixture {
 const milliseconds LongTimeFixture::MaxLongDuration(5000);
 const milliseconds LongTimeFixture::LongResolution(100);
 
-using Subject = coffee::adt::pattern::observer::Subject;
-using Event = coffee::adt::pattern::observer::Event;
+using Subject = coffee::basis::pattern::observer::Subject;
+using Event = coffee::basis::pattern::observer::Event;
 
-class TimerObserver : public adt::pattern::observer::Observer {
+class TimerObserver : public basis::pattern::observer::Observer {
 public:
    TimerObserver() :
-      adt::pattern::observer::Observer("TimeObserver"),
+      basis::pattern::observer::Observer("TimeObserver"),
       avgDeviation("Deviation", "ms")
    {;}
    virtual ~TimerObserver() {;}
 
    bool receiveTimedouts(std::shared_ptr<coffee::time::TimeService>& timeService, const milliseconds& maxWait) noexcept;
-   const adt::Average<milliseconds>& getAvgDeviation() const noexcept { return avgDeviation; }
+   const basis::Average<milliseconds>& getAvgDeviation() const noexcept { return avgDeviation; }
 
 private:
    std::mutex mutex;
    std::condition_variable conditionForStop;
-   adt::Average<milliseconds> avgDeviation;
+   basis::Average<milliseconds> avgDeviation;
 
    void attached(const Subject& subject) noexcept { }
    void update(const Subject& subject, const Event& event) noexcept {
@@ -123,38 +123,38 @@ BOOST_AUTO_TEST_CASE(timer_activate_service_stopped)
    BOOST_REQUIRE(app.isStopped());
    BOOST_REQUIRE(timeService->isStopped());
    auto timer = time::Timer::instantiate(100, milliseconds(100));
-   BOOST_REQUIRE_THROW(timeService->activate(timer), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(timeService->activate(timer), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(timer_empty, ShortTimeFixture)
 {
    std::shared_ptr<time::Timer> emptyTimer;
-   BOOST_REQUIRE_THROW(timeService->activate(emptyTimer), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(timeService->activate(emptyTimer), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(timer_zero_timeout, ShortTimeFixture)
 {
    auto timer = time::Timer::instantiate(100, milliseconds(0));
-   BOOST_REQUIRE_THROW(timeService->activate(timer), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(timeService->activate(timer), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(timer_over_maxtimeout, ShortTimeFixture)
 {
    auto timer = time::Timer::instantiate(100, milliseconds(1500));
-   BOOST_REQUIRE_THROW(timeService->activate(timer), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(timeService->activate(timer), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(timer_below_resolution, ShortTimeFixture)
 {
    auto timer = time::Timer::instantiate(100, milliseconds(10));
-   BOOST_REQUIRE_THROW(timeService->activate(timer), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(timeService->activate(timer), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(timer_bad_resolution_maxtime)
 {
-   app::ApplicationServiceStarter app("timer_bad_resolution_maxtime");
+   app::ApplicationServiceStarter app("test_timer_bad_resolution_maxtime");
    std::shared_ptr<time::TimeService> timeService = time::TimeService::instantiate(app, milliseconds(1000), milliseconds(5555));
-   BOOST_REQUIRE_THROW(app.start(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(app.start(), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(timer_repeat_id, ShortTimeFixture)
@@ -166,7 +166,7 @@ BOOST_FIXTURE_TEST_CASE(timer_repeat_id, ShortTimeFixture)
    BOOST_CHECK_NO_THROW(timeService->activate(firstTimer));
 
    auto secondTimer = time::Timer::instantiate(3333, time200ms);
-   BOOST_REQUIRE_THROW(timeService->activate(secondTimer), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(timeService->activate(secondTimer), basis::RuntimeException);
 
    BOOST_REQUIRE(observer->receiveTimedouts(timeService, time200ms));
 }

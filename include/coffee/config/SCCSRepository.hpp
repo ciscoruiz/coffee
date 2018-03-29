@@ -27,12 +27,12 @@
 
 #include <set>
 
-#include <coffee/adt/pattern/Singleton.hpp>
+#include <coffee/basis/pattern/Singleton.hpp>
 
 namespace coffee {
 namespace config {
 
-class SCCSRepository : public adt::pattern::Singleton <SCCSRepository>{
+class SCCSRepository : public basis::pattern::Singleton <SCCSRepository>{
 public:
    typedef const char* ModuleName;
    typedef std::set <ModuleName> Entries;
@@ -56,7 +56,7 @@ private:
 
    SCCSRepository() {;}
 
-   friend class adt::pattern::Singleton <SCCSRepository>;
+   friend class basis::pattern::Singleton <SCCSRepository>;
 };
 
 } /* namespace config */

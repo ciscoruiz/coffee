@@ -42,12 +42,12 @@ public:
    /**
     * Define how to transfer information from the c++ scope to the DBMS scope.
     */
-   virtual void do_encode(Statement& statement, const int pos) throw(adt::RuntimeException, DatabaseException) = 0;
+   virtual void do_encode(Statement& statement, const int pos) throw(basis::RuntimeException, DatabaseException) = 0;
 
    /**
-    * \return Summarize information of this instance in a coffee::adt::StreamString.
+    * \return Summarize information of this instance in a coffee::basis::StreamString.
     */
-   adt::StreamString asString() const noexcept;
+   basis::StreamString asString() const noexcept;
 
 protected:
    /**

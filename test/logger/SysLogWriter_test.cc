@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE (syslog_test)
    Logger::setLevel(Level::Debug);
 
    for (int ii = Level::Emergency; ii < Level::Local7; ++ ii) {
-      adt::StreamString ss;
+      basis::StreamString ss;
       Level::_v level = (Level::_v) ii;
       ss << "This is the level " << level;
       Logger::write(level, ss, COFFEE_FILE_LOCATION);

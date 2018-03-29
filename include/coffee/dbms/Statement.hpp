@@ -29,8 +29,8 @@
 #include <memory>
 #include <chrono>
 
-#include <coffee/adt/RuntimeException.hpp>
-#include <coffee/adt/Average.hpp>
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/basis/Average.hpp>
 
 #include <coffee/dbms/DatabaseException.hpp>
 #include <coffee/dbms/ResultCode.hpp>
@@ -47,6 +47,7 @@ namespace dbms {
 class Database;
 class Connection;
 class GuardStatement;
+class StatementParameters;
 
 namespace binder {
 class Input;
@@ -133,7 +134,7 @@ public:
       \param data Variable que deseamos asociar como variable de entrada. La correspondencia entre esta
       y la sentencia SQL vendra dada por el orden de declaracion.
    */
-   void createBinderInput(std::shared_ptr<datatype::Abstract> data) throw(adt::RuntimeException);
+   void createBinderInput(std::shared_ptr<datatype::Abstract> data) throw(basis::RuntimeException);
 
    /**
       Establece el parametro de salida de la sentencia SQL.Cada una de las variables de salida indicadas
@@ -158,7 +159,7 @@ public:
 
       \warning Solo las sentencias SQL del tipo \em select usan las variables de salida.
    */
-   void createBinderOutput(std::shared_ptr<datatype::Abstract> data) throw(adt::RuntimeException);
+   void createBinderOutput(std::shared_ptr<datatype::Abstract> data) throw(basis::RuntimeException);
 
    /**
       Devuelve un documento XML con la informacion referente a esta instancia.
@@ -167,13 +168,13 @@ public:
    */
    virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
-   operator adt::StreamString() const noexcept { return asString(); }
+   operator basis::StreamString() const noexcept { return asString(); }
 
    /**
       Devuelve una cadena con la informacion referente a esta instancia.
       @return Una cadena con la informacion referente a esta instancia.
    */
-   virtual adt::StreamString asString() const noexcept;
+   virtual basis::StreamString asString() const noexcept;
 
    Statement(const Statement&) = delete;
    Statement& operator=(const Statement&) = delete;
@@ -189,16 +190,7 @@ protected:
       aunque falle se invocara a Connection::commit. Solo aplicara en sentencias que no sean de seleccion.
       \param actionOnError Action to do in case of statement execution fails.
    */
-   Statement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
-      m_database(database),
-      m_name(name),
-      m_expression(expression),
-      m_actionOnError(actionOnError),
-      m_elapsedTime("Timing", "us"),
-      m_requiresCommit(false),
-      m_isPrepared(false)
-   {
-   }
+   Statement(const Database& database, const char* name, const char* expression, const StatementParameters& parameters);
 
    /**
       Contructor.
@@ -208,14 +200,8 @@ protected:
       \param expression Sentencia SQL asociada a esta clase.
       \param actionOnError Action to do in case of statement execution fails.
    */
-   Statement(const Database& database, const char* name, const std::string& expression, const ActionOnError::_v actionOnError) :
-      m_database(database),
-      m_name(name),
-      m_expression(expression),
-      m_actionOnError(actionOnError),
-      m_elapsedTime("ElapsedTime", "us"),
-      m_requiresCommit(false),
-      m_isPrepared(false)
+   Statement(const Database& database, const char* name, const std::string& expression, const StatementParameters& parameters) :
+      Statement(database, name, expression.c_str(), parameters)
    {
    }
 
@@ -223,36 +209,40 @@ protected:
    int output_size() const noexcept { return m_outputBinds.size(); }
    virtual bool isPrepared(Connection&) const noexcept { return m_isPrepared; }
 
-   std::shared_ptr<datatype::Abstract>& getInputData(const GuardStatement&, const int pos) throw(adt::RuntimeException);
-   std::shared_ptr<datatype::Abstract>& getOutputData(const GuardStatement&, const int pos) throw(adt::RuntimeException);
+   std::shared_ptr<datatype::Abstract>& getInputData(const GuardStatement&, const int pos) throw(basis::RuntimeException);
+   std::shared_ptr<datatype::Abstract>& getOutputData(const GuardStatement&, const int pos) throw(basis::RuntimeException);
 
-   const std::shared_ptr<datatype::Abstract>& getInputData(const int pos) const throw(adt::RuntimeException);
-   std::shared_ptr<datatype::Abstract>& getOutputData(const int pos) throw(adt::RuntimeException);
+   const std::shared_ptr<datatype::Abstract>& getInputData(const int pos) const throw(basis::RuntimeException);
+   std::shared_ptr<datatype::Abstract>& getOutputData(const int pos) throw(basis::RuntimeException);
+
+   input_iterator input_begin() noexcept { return m_inputBinds.begin(); }
+   input_iterator input_end() noexcept { return m_inputBinds.end(); }
+   static std::shared_ptr<datatype::Abstract>& data(input_iterator ii) noexcept;
 
 private:
    const Database& m_database;
    const std::string m_name;
-   std::string m_expression;
+   const std::string m_expression;
+   const ActionOnError::_v m_actionOnError;
    Inputs m_inputBinds;  /**< Lista de variables de entrada */
    Outputs m_outputBinds; /**< Lista de variables de salida */
-   const ActionOnError::_v m_actionOnError;
-   adt::Average <long> m_elapsedTime;
+   basis::Average <long> m_elapsedTime;
    bool m_requiresCommit;
    std::mutex m_mutex;
    bool m_isPrepared;
 
    void registerElapsedTime(const std::chrono::microseconds& elapsedTime) noexcept;
 
-   void prepare(Connection& connection) throw(adt::RuntimeException, DatabaseException);
-   virtual void do_prepare(Connection& connection) throw(adt::RuntimeException, DatabaseException) = 0;
+   void prepare(Connection& connection) throw(basis::RuntimeException, DatabaseException);
+   virtual void do_prepare(Connection& connection) throw(basis::RuntimeException, DatabaseException) = 0;
 
-   ResultCode execute(Connection& connection) throw(adt::RuntimeException, DatabaseException);
-   virtual ResultCode do_execute(Connection& connection) throw(adt::RuntimeException, DatabaseException) = 0;
+   ResultCode execute(Connection& connection) throw(basis::RuntimeException, DatabaseException);
+   virtual ResultCode do_execute(Connection& connection) throw(basis::RuntimeException, DatabaseException) = 0;
 
    bool setRequiresCommit(const bool value) noexcept { m_requiresCommit = value; return requiresCommit(); }
 
-   bool fetch() throw(adt::RuntimeException, DatabaseException);
-   virtual bool do_fetch() throw(adt::RuntimeException, DatabaseException) = 0;
+   bool fetch() throw(basis::RuntimeException, DatabaseException);
+   virtual bool do_fetch() throw(basis::RuntimeException, DatabaseException) = 0;
 
    void lock() noexcept { m_mutex.lock(); }
    void unlock() noexcept { m_mutex.unlock(); }

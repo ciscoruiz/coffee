@@ -46,7 +46,7 @@ xml::Compiler::~Compiler()
 }
 
 std::string xml::Compiler::apply(const Document& document)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    Buffer buffer;
 
@@ -56,7 +56,7 @@ std::string xml::Compiler::apply(const Document& document)
    try {
       document.compile(*this);
    }
-   catch(adt::RuntimeException&) {
+   catch(basis::RuntimeException&) {
       releaseHandler();
       throw;
    }
@@ -67,7 +67,7 @@ std::string xml::Compiler::apply(const Document& document)
 }
 
 std::string xml::Compiler::apply(const std::shared_ptr<Node>& node)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    Buffer buffer;
 
@@ -76,7 +76,7 @@ std::string xml::Compiler::apply(const std::shared_ptr<Node>& node)
    try {
       node->compile(*this);
    }
-   catch(adt::RuntimeException&) {
+   catch(basis::RuntimeException&) {
       releaseHandler();
       throw;
    }
@@ -99,7 +99,7 @@ const char* xml::Compiler::Buffer::getValue() const
 }
 
 const char* xml::Compiler::encode(const char* text)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    bool needEncode  = false;
 

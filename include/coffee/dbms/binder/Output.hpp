@@ -46,12 +46,12 @@ public:
    /**
     * Define how to transfer information from the DBMS scope to the c++ scope.
     */
-   virtual void do_decode(Statement& statement, const int pos) throw(adt::RuntimeException) = 0;
+   virtual void do_decode(Statement& statement, const int pos) throw(basis::RuntimeException) = 0;
 
    /**
-    * \return Summarize information of this instance in a coffee::adt::StreamString.
+    * \return Summarize information of this instance in a coffee::basis::StreamString.
     */
-   adt::StreamString asString() const noexcept;
+   basis::StreamString asString() const noexcept;
 
 protected:
    /**

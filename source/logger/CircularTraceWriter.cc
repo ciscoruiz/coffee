@@ -50,7 +50,7 @@ logger::CircularTraceWriter::CircularTraceWriter(const std::string& path, const 
    m_maxKbSize = std::max(size_t(MinimalKbSize), maxKbSize) * 1024;
 }
 
-void logger::CircularTraceWriter::initialize() throw(adt::RuntimeException)
+void logger::CircularTraceWriter::initialize() throw(basis::RuntimeException)
 {
    openStream();
 
@@ -87,7 +87,7 @@ void logger::CircularTraceWriter::apply(const Level::_v level, const std::string
          m_loops ++;
       }
    }
-   catch(adt::RuntimeException& ex) {
+   catch(basis::RuntimeException& ex) {
       std::cerr << ex.what() << std::endl;
    }
 }
@@ -100,7 +100,7 @@ bool logger::CircularTraceWriter::wantsToProcess(const logger::Level::_v level) 
 }
 
 void coffee::logger::CircularTraceWriter::openStream()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    int stream = open(m_path.c_str(), O_RDWR | O_CREAT | O_APPEND, S_IRUSR |S_IWUSR | S_IRGRP| S_IROTH);
 
@@ -113,7 +113,7 @@ void coffee::logger::CircularTraceWriter::openStream()
 }
 
 bool coffee::logger::CircularTraceWriter::oversizedStream()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if (m_stream == NullStream)
       return false;
@@ -138,7 +138,7 @@ void logger::CircularTraceWriter::closeStream()
 }
 
 void logger::CircularTraceWriter::renameFile()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    std::string file_old(m_path);
    file_old.append(".old");

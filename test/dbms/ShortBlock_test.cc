@@ -45,8 +45,8 @@ BOOST_AUTO_TEST_CASE (shortblock_is_nulleable)
 
    BOOST_REQUIRE_EQUAL (column.hasValue (), false);
 
-   adt::DataBlock other;
-   BOOST_REQUIRE_THROW (column.getValue (), adt::RuntimeException);
+   basis::DataBlock other;
+   BOOST_REQUIRE_THROW (column.getValue (), basis::RuntimeException);
 
    other.assign ("hello world", 7);
 
@@ -72,9 +72,9 @@ BOOST_AUTO_TEST_CASE (shortblock_is_not_nulleable)
 
    BOOST_REQUIRE_EQUAL (column.hasValue (), true);
 
-   adt::DataBlock other ("hello world", 7);
+   basis::DataBlock other ("hello world", 7);
 
-   BOOST_REQUIRE_THROW(column.setValue (other), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(column.setValue (other), basis::RuntimeException);
 
    other.assign ("hello", 4);
    column.setValue (other);
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE (shortblock_is_not_nulleable)
    BOOST_REQUIRE_EQUAL(init, column.getBuffer());
 
    other.assign ("size out of range");
-   BOOST_REQUIRE_THROW (column.setValue (other), adt::RuntimeException);
+   BOOST_REQUIRE_THROW (column.setValue (other), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE (shortblock_downcast)
@@ -110,11 +110,21 @@ BOOST_AUTO_TEST_CASE (shortblock_clone)
    datatype::ShortBlock column ("not_nulleable", 1025);
 
    const char* buffer = new char[1024];
-   adt::DataBlock memory(buffer, 1024);
+   basis::DataBlock memory(buffer, 1024);
 
    column.setValue(memory);
 
    auto clone = coffee_datatype_downcast(datatype::ShortBlock, column.clone());
 
    BOOST_REQUIRE(clone->getValue() == column.getValue());
+}
+
+BOOST_AUTO_TEST_CASE(shortblock_instantiate) {
+   auto data = datatype::ShortBlock::instantiate("nulleable", 10);
+   BOOST_REQUIRE(data->hasValue());
+   BOOST_REQUIRE_EQUAL(data->getMaxSize(), 10);
+
+   data = datatype::ShortBlock::instantiate("not-nulleable", 20, datatype::Constraint::CanBeNull);
+   BOOST_REQUIRE(!data->hasValue());
+   BOOST_REQUIRE_EQUAL(data->getMaxSize(), 20);
 }

@@ -26,8 +26,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 
-#include <coffee/adt/DataBlock.hpp>
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/DataBlock.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/xml/Document.hpp>
 #include <coffee/xml/Node.hpp>
@@ -39,7 +39,7 @@ using namespace coffee::xml;
 
 struct XmlFixture {
    void setup(const char* buffer) {
-      adt::DataBlock content(buffer, strlen(buffer) + 1);
+      basis::DataBlock content(buffer, strlen(buffer) + 1);
       BOOST_REQUIRE(document.getHandler() == NULL);
       document.parse(content);
       BOOST_REQUIRE(document.getHandler() != NULL);
@@ -120,7 +120,7 @@ BOOST_FIXTURE_TEST_CASE(find_child_byname, XmlFixture)
    std::shared_ptr<Node> found = root->searchChild("not_found");
    BOOST_REQUIRE(!found);
 
-   BOOST_REQUIRE_THROW(root->lookupChild("not_found"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(root->lookupChild("not_found"), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(const_find_child_byname, XmlFixture)
@@ -147,12 +147,12 @@ BOOST_FIXTURE_TEST_CASE(const_find_child_byname, XmlFixture)
    std::shared_ptr<Node> found = root->searchChild("not_found");
    BOOST_REQUIRE(!found);
 
-   BOOST_REQUIRE_THROW(root->lookupChild("not_found"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(root->lookupChild("not_found"), basis::RuntimeException);
 
    const Node& constRoot = *root;
    BOOST_REQUIRE_NO_THROW(constRoot.lookupChild("child_one"));
    BOOST_REQUIRE(constRoot.searchChild("child_two"));
-   BOOST_REQUIRE_THROW(constRoot.lookupChild("not_found"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(constRoot.lookupChild("not_found"), basis::RuntimeException);
    BOOST_REQUIRE(!constRoot.searchChild("not_found"));
    BOOST_REQUIRE_NO_THROW(constRoot.childAt(0));
 }
@@ -174,12 +174,12 @@ BOOST_FIXTURE_TEST_CASE(locate_child_by_pos, XmlFixture)
    BOOST_REQUIRE_EQUAL(child->hasText(), true);
    BOOST_REQUIRE_EQUAL(child->getText(), "text two");
 
-   BOOST_REQUIRE_THROW(root->childAt(-1), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(root->childAt(10), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(root->childAt(-1), basis::RuntimeException);
+   BOOST_REQUIRE_THROW(root->childAt(10), basis::RuntimeException);
 
    const Node& constRoot = *root;
-   BOOST_REQUIRE_THROW(constRoot.childAt(-1), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(constRoot.childAt(10), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(constRoot.childAt(-1), basis::RuntimeException);
+   BOOST_REQUIRE_THROW(constRoot.childAt(10), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(const_iterate_attr, XmlFixture)
@@ -217,14 +217,14 @@ BOOST_FIXTURE_TEST_CASE(locate_attr_by_name, XmlFixture)
       BOOST_REQUIRE_EQUAL(attr->getValue(), texts[ii]);
    }
 
-   BOOST_REQUIRE_THROW(root->lookupAttribute("not_found"), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(root->getText(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(root->lookupAttribute("not_found"), basis::RuntimeException);
+   BOOST_REQUIRE_THROW(root->getText(), basis::RuntimeException);
 
    std::shared_ptr<xml::Attribute> found = root->searchAttribute("not_found");
    BOOST_REQUIRE(!found);
 
    const Node& constRoot = *root;
-   BOOST_REQUIRE_THROW(constRoot.lookupAttribute("not_found"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(constRoot.lookupAttribute("not_found"), basis::RuntimeException);
    BOOST_REQUIRE(!constRoot.searchAttribute("not_found"));
 }
 
@@ -236,7 +236,7 @@ BOOST_FIXTURE_TEST_CASE(locate_attr_duplicate, XmlFixture)
 
    setup(buffer);
 
-   BOOST_REQUIRE_THROW(root->createAttribute("attr_aaa", 22), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(root->createAttribute("attr_aaa", 22), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(encoding, XmlFixture)
@@ -272,7 +272,7 @@ BOOST_AUTO_TEST_CASE(file_document)
    try {
       doc.parse(file);
    }
-   catch(adt::RuntimeException& ex) {
+   catch(basis::RuntimeException& ex) {
       std::cout << ex.asString() << std::endl << std::endl;
    }
 
@@ -305,7 +305,7 @@ BOOST_AUTO_TEST_CASE(file_notexisting_document)
 
    BOOST_REQUIRE(doc.getHandler() == NULL);
 
-   BOOST_REQUIRE_THROW(doc.parse(file), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(doc.parse(file), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(file_bad_document)
@@ -315,21 +315,21 @@ BOOST_AUTO_TEST_CASE(file_bad_document)
 
    Document doc;
 
-   BOOST_REQUIRE_THROW(doc.parse(xmlPath), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(doc.parse(xmlPath), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(memory_bad_document)
 {
-   const adt::DataBlock content("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node attr_aaa=\"text one\" attr_bbb=");
+   const basis::DataBlock content("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node attr_aaa=\"text one\" attr_bbb=");
 
    Document doc;
 
-   BOOST_REQUIRE_THROW(doc.parse(content), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(doc.parse(content), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(compile_document)
 {
-   const adt::DataBlock content("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node attr_aaa=\"text one\" attr_bbb=\"text two\" attr_ccc=\"text three\"/>\n");
+   const basis::DataBlock content("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node attr_aaa=\"text one\" attr_bbb=\"text two\" attr_ccc=\"text three\"/>\n");
    Document doc;
 
    BOOST_REQUIRE(doc.getHandler() == NULL);
@@ -343,7 +343,7 @@ BOOST_AUTO_TEST_CASE(compile_document)
 
 BOOST_AUTO_TEST_CASE(compile_document_iso)
 {
-   const adt::DataBlock content("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node>Jörg</root_node>\n");
+   const basis::DataBlock content("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node>Jörg</root_node>\n");
 
    Document doc;
 

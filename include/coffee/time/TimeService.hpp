@@ -33,8 +33,8 @@
 #include <chrono>
 
 #include <coffee/app/Service.hpp>
-#include <coffee/adt/Semaphore.hpp>
-#include <coffee/adt/pattern/observer/Subject.hpp>
+#include <coffee/basis/Semaphore.hpp>
+#include <coffee/basis/pattern/observer/Subject.hpp>
 #include <coffee/time/TimeEvent.hpp>
 
 namespace coffee {
@@ -46,13 +46,13 @@ class TimeEvent;
 /**
  * Service for managing asynchronous time events.
  */
-class TimeService : public app::Service, public adt::pattern::observer::Subject {
+class TimeService : public app::Service, public basis::pattern::observer::Subject {
 public:
    /**
     * Fast instantiation for this service.
     */
    static std::shared_ptr<TimeService> instantiate(app::Application& application, const std::chrono::milliseconds& maxTime, const std::chrono::milliseconds& resolution)
-      throw(adt::RuntimeException);
+      throw(basis::RuntimeException);
 
    /**
     * Destructor.
@@ -74,7 +74,7 @@ public:
     * observer will be notified.
     * \include test/time/Timer_test.cc
     */
-   void activate(std::shared_ptr<TimeEvent> timeEvent) throw(adt::RuntimeException);
+   void activate(std::shared_ptr<TimeEvent> timeEvent) throw(basis::RuntimeException);
 
    /*
     * Cancel the time event.
@@ -102,7 +102,7 @@ public:
    /**
     * \return Summarize information of the instance
     */
-   adt::StreamString asString() const noexcept;
+   basis::StreamString asString() const noexcept;
 
 private:
    typedef std::list<std::shared_ptr<TimeEvent> > Quantum;
@@ -115,7 +115,7 @@ private:
    const std::chrono::milliseconds resolution;
    const int maxQuantum;
    int currentQuantum;
-   adt::Semaphore producerIsWorking;
+   basis::Semaphore producerIsWorking;
    Quantum* timeTable;
    Events events;
    Quantum temporaryQuantum;
@@ -131,11 +131,11 @@ private:
    static void consume(TimeService& timeService) noexcept;
    static void produce(TimeService& timeService) noexcept;
 
-   void timeout(std::unique_lock<std::mutex>& guard) throw(adt::RuntimeException);
+   void timeout(std::unique_lock<std::mutex>& guard) throw(basis::RuntimeException);
    void store(std::shared_ptr<TimeEvent> timeEvent, std::unique_lock<std::mutex>& guard) noexcept;
 
-   void do_initialize() throw(adt::RuntimeException) ;
-   void do_stop() throw(adt::RuntimeException) ;
+   void do_initialize() throw(basis::RuntimeException) ;
+   void do_stop() throw(basis::RuntimeException) ;
 };
 
 }

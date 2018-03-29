@@ -27,8 +27,8 @@
 #include <vector>
 #include <memory>
 
-#include <coffee/adt/RuntimeException.hpp>
-#include <coffee/adt/StreamString.hpp>
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/basis/StreamString.hpp>
 
 #include <coffee/dbms/datatype/Set.hpp>
 
@@ -58,15 +58,15 @@ public:
    explicit PrimaryKey(const PrimaryKeyBuilder& builder);
    PrimaryKey (const PrimaryKey& other) : dbms::datatype::Set(other) {;}
 
-   PrimaryKey& operator= (const PrimaryKey& other) throw (adt::Exception) { Set::operator=(other); return *this; }
-   bool operator== (const PrimaryKey& other) const throw (adt::RuntimeException) { return compare(other) == 0; }
-   bool operator< (const PrimaryKey& other) const throw (adt::RuntimeException){ return compare(other) < 0; }
+   PrimaryKey& operator= (const PrimaryKey& other) throw (basis::Exception) { Set::operator=(other); return *this; }
+   bool operator== (const PrimaryKey& other) const throw (basis::RuntimeException) { return compare(other) == 0; }
+   bool operator< (const PrimaryKey& other) const throw (basis::RuntimeException){ return compare(other) < 0; }
    bool matches(const PrimaryKey& other) const noexcept;
 
    size_t hash() const noexcept;
 
-   operator adt::StreamString () const noexcept { return asString (); }
-   adt::StreamString asString () const noexcept;
+   operator basis::StreamString () const noexcept { return asString (); }
+   basis::StreamString asString () const noexcept;
 };
 
 } /* namespace persistence */

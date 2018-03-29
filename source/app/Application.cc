@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <cctype>
 
 #include <time.h>
 #include <unistd.h>
@@ -39,7 +40,7 @@
 #include <coffee/config/SCCSRepository.hpp>
 #include <coffee/config/defines.hpp>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
@@ -55,7 +56,7 @@
 
 using namespace std;
 using namespace coffee;
-using namespace coffee::adt;
+using namespace coffee::basis;
 
 //static
 app::Application* app::Application::m_this = nullptr;
@@ -65,7 +66,7 @@ app::Application::Application(const char* shortName, const char* title, const ch
    a_version(std::string(version) + config::Release::getArchitecture()),
    a_title(title),
    a_pid(getpid()),
-   a_outputContextFilename(adt::StreamString("/tmp/coffee.context.").append(AsString::apply(a_pid, "%05d")).append(".xml"))
+   a_outputContextFilename(basis::StreamString("/tmp/coffee.context.").append(AsString::apply(a_pid, "%05d")).append(".xml"))
 {
    sigset(SIGUSR1, handlerUserSignal);
    sigset(SIGUSR2, handlerUserSignal);
@@ -78,7 +79,6 @@ app::Application::Application(const char* shortName, const char* title, const ch
    if(m_this == nullptr)
       m_this = this;
 
-   cout << getName() << " - " << a_title << ". Version " << a_version << endl;
 }
 
 app::Application::~Application()
@@ -106,6 +106,10 @@ void app::Application::start()
 {
    LOG_THIS_METHOD();
 
+   std::string upperName = getName();
+   std::transform(upperName.begin(), upperName.end(), upperName.begin(), [](unsigned char c){return std::toupper(c);});
+   const bool isAnApplicationTest = (upperName.find("TEST") != std::string::npos);
+
    config::SCCSRepository& moduleManager = config::SCCSRepository::getInstance();
 
    if(isRunning() == true) {
@@ -117,22 +121,26 @@ void app::Application::start()
    }
 
    try {
-      cout << "COFFEE - COmpany eFFEEctive platform. " << config::Release::getVersion() << endl;
-      cout << "Release date: " << __DATE__ << " " << __TIME__ << endl;
-      cout << "(c) Copyright 2018,2014 by Francisco Ruiz." << endl << endl;
-
+      if (!isAnApplicationTest) {
+         cout << getName() << " - " << a_title << ". Version " << a_version << endl;
+         cout << "COFFEE - COmpany eFFEEctive platform. " << config::Release::getVersion() << endl;
+         cout << "Release date: " << __DATE__ << " " << __TIME__ << endl;
+         cout << "(c) Copyright 2018,2014 by Francisco Ruiz." << endl << endl;
+      }
       initialize();
    }
-   catch(adt::RuntimeException& ex) {
+   catch(basis::RuntimeException& ex) {
       logger::Logger::write(ex);
       throw;
    }
 
-   cout << "Loading modules ...." << endl;
-   for(config::SCCSRepository::const_entry_iterator ii = moduleManager.entry_begin(), maxii = moduleManager.entry_end(); ii != maxii; ++ ii) {
-      cout << "\t Module " << config::SCCSRepository::module_name(ii) << endl;
+   if (!isAnApplicationTest) {
+      cout << "Loading modules ...." << endl;
+      for(config::SCCSRepository::const_entry_iterator ii = moduleManager.entry_begin(), maxii = moduleManager.entry_end(); ii != maxii; ++ ii) {
+         cout << "\t Module " << config::SCCSRepository::module_name(ii) << endl;
+      }
+      cout << endl;
    }
-   cout << endl;
 
    try {
       statusStarting();
@@ -140,7 +148,7 @@ void app::Application::start()
       statusRunning();
       run();
    }
-   catch(adt::RuntimeException& ex) {
+   catch(basis::RuntimeException& ex) {
       logger::Logger::write(ex);
       stop();
       throw;
@@ -148,7 +156,9 @@ void app::Application::start()
 
    stop();
 
-   cout << getName() << " finished ..." << endl << endl;
+   if (!isAnApplicationTest) {
+      cout << getName() << " finished ..." << endl << endl;
+   }
 }
 
 void app::Application::startServices()
@@ -169,7 +179,7 @@ void app::Application::do_stop()
 {
    LOG_THIS_METHOD();
 
-   adt::StreamString ss("Some services do not accept the request stop { ");
+   basis::StreamString ss("Some services do not accept the request stop { ");
    bool exception = false;
 
    for(service_iterator ii = service_begin(), maxii = service_end(); ii != maxii; ii ++) {
@@ -240,9 +250,9 @@ void app::Application::writeContext(const boost::filesystem::path& file)
    out.close();
 }
 
-adt::StreamString app::Application::asString() const noexcept
+basis::StreamString app::Application::asString() const noexcept
 {
-   adt::StreamString result("app::Application { ");
+   basis::StreamString result("app::Application { ");
    result << app::Runnable::asString();
    result << " | #services=" << a_services.size();
    return result += " }";
@@ -311,7 +321,7 @@ void app::Application::handlerUserSignal(int signalID)
             m_this->signalUSR2();
       }
    }
-   catch(adt::RuntimeException& ex) {
+   catch(basis::RuntimeException& ex) {
       logger::Logger::write(ex);
    }
 }
@@ -326,7 +336,7 @@ void app::Application::handlerSignalTerminate(int)
          m_this->stop();
       }
    }
-   catch(adt::RuntimeException& ex) {
+   catch(basis::RuntimeException& ex) {
       logger::Logger::write(ex);
       exit(EXIT_SUCCESS);
    }

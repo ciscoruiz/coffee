@@ -26,7 +26,7 @@
 
 #include <coffee/persistence/Accessor.hpp>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 namespace coffee {
 
@@ -43,10 +43,10 @@ public:
    virtual ~Loader () {;}
 
    virtual dbms::ResultCode apply(dbms::GuardStatement& statement, TheObject& object)
-      throw(adt::RuntimeException, dbms::DatabaseException) = 0;
+      throw(basis::RuntimeException, dbms::DatabaseException) = 0;
 
    virtual bool hasToRefresh (dbms::GuardStatement& statement, TheObject& object)
-      throw (adt::RuntimeException, dbms::DatabaseException) = 0;
+      throw (basis::RuntimeException, dbms::DatabaseException) = 0;
 
    const TheClass& getClass() const noexcept { return m_class; }
    

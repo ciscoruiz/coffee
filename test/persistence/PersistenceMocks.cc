@@ -36,7 +36,7 @@ using namespace coffee;
 const int test_persistence::MyDatabase::PreloadRegisterCounter = 100;
 
 dbms::ResultCode test_persistence::MyReadStatement::do_execute(dbms::Connection& connection)
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    m_isValid = false;
 
@@ -58,7 +58,7 @@ dbms::ResultCode test_persistence::MyReadStatement::do_execute(dbms::Connection&
    return result;
 }
 
-bool test_persistence::MyReadStatement::do_fetch() throw(adt::RuntimeException, DatabaseException)
+bool test_persistence::MyReadStatement::do_fetch() throw(basis::RuntimeException, DatabaseException)
 {
    if(m_isValid == true) {
       m_isValid = false;
@@ -72,7 +72,7 @@ bool test_persistence::MyReadStatement::do_fetch() throw(adt::RuntimeException, 
 }
 
 dbms::ResultCode test_persistence::MyWriteStatement::do_execute(dbms::Connection& connection)
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    dbms::ResultCode result(getDatabase(), MyDatabase::Successful);
 
@@ -98,7 +98,7 @@ dbms::ResultCode test_persistence::MyWriteStatement::do_execute(dbms::Connection
 }
 
 dbms::ResultCode test_persistence::MockCustomerLoader::apply(dbms::GuardStatement& statement, TheObject& object)
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    const int id = object->getPrimaryKey()->getInteger("id");
 
@@ -117,14 +117,14 @@ dbms::ResultCode test_persistence::MockCustomerLoader::apply(dbms::GuardStatemen
    return result;
 }
 
-bool test_persistence::MockCustomerLoader::hasToRefresh (dbms::GuardStatement& statement, TheObject& object) throw (adt::RuntimeException, dbms::DatabaseException)
+bool test_persistence::MockCustomerLoader::hasToRefresh (dbms::GuardStatement& statement, TheObject& object) throw (basis::RuntimeException, dbms::DatabaseException)
 {
    // It will only refresh odd id-numbers.
    return (object->getPrimaryKey()->getInteger("id") % 2) == 0;
 }
 
 dbms::ResultCode test_persistence::MockCustomerRecorder::apply(dbms::GuardStatement& statement)
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    CustomerObjectWrapper customer(getObject());
 
@@ -139,7 +139,7 @@ dbms::ResultCode test_persistence::MockCustomerRecorder::apply(dbms::GuardStatem
 }
 
 dbms::ResultCode test_persistence::MockCustomerEraser::apply(dbms::GuardStatement& statement)
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    auto primaryKey = getPrimaryKey();
 

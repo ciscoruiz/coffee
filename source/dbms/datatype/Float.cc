@@ -21,8 +21,8 @@
 // SOFTWARE.
 //
 
-#include <coffee/adt/StreamString.hpp>
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/StreamString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/dbms/datatype/Float.hpp>
 
@@ -46,21 +46,21 @@ datatype::Float::Float (const Float& other) :
 }
 
 
-adt::StreamString datatype::Float::asString () const
+basis::StreamString datatype::Float::asString () const
    noexcept
 {
-   adt::StreamString result;
+   basis::StreamString result;
    result <<  "datatype.Float { " << datatype::Abstract::asString ();
 
    if (this->hasValue () == true) {
-      result << " | Value=" << adt::AsString::apply (m_value, m_format);
+      result << " | Value=" << basis::AsString::apply (m_value, m_format);
    }
 
    return result += " }";
 }
 
 int datatype::Float::do_compare (const datatype::Abstract& other) const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    const Float& _other = coffee_datatype_downcast(Float, other);
 

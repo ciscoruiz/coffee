@@ -21,10 +21,10 @@
 // SOFTWARE.
 //
 
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/dbms/datatype/ShortBlock.hpp>
-#include <coffee/adt/AsHexString.hpp>
+#include <coffee/basis/AsHexString.hpp>
 
 using namespace coffee;
 using namespace coffee::dbms;
@@ -45,8 +45,8 @@ datatype::ShortBlock::ShortBlock (const ShortBlock& other) :
    datatype::Abstract::setBuffer ((void*) m_value.data ());
 }
 
-void datatype::ShortBlock::setValue(const adt::DataBlock& value)
-   throw (adt::RuntimeException)
+void datatype::ShortBlock::setValue(const basis::DataBlock& value)
+   throw (basis::RuntimeException)
 {
    if (value.size () > datatype::Abstract::getMaxSize ()) {
       COFFEE_THROW_EXCEPTION("Block out of range (" << datatype::Abstract::getMaxSize () << " and " << value.size ());
@@ -56,15 +56,15 @@ void datatype::ShortBlock::setValue(const adt::DataBlock& value)
    this->isNotNull();
 }
 
-adt::StreamString datatype::ShortBlock::asString () const
+basis::StreamString datatype::ShortBlock::asString () const
    noexcept
 {
-   adt::StreamString result ("datatype.ShortBlock { ");
+   basis::StreamString result ("datatype.ShortBlock { ");
    result += datatype::Abstract::asString ();
    result << " | MaxSize=" << getMaxSize();
 
    if (hasValue()) {
-      result << " | Buffer=" << adt::AsHexString::apply(coffee_ptrnumber_cast (getBuffer()));
+      result << " | Buffer=" << basis::AsHexString::apply((int64_t) getBuffer());
       result << " | Size=" << m_value.size ();
    }
 
@@ -72,7 +72,7 @@ adt::StreamString datatype::ShortBlock::asString () const
 }
 
 int datatype::ShortBlock::do_compare (const datatype::Abstract& other) const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    COFFEE_THROW_EXCEPTION(asString () << " | Can not apply");
    return 0;

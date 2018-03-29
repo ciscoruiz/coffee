@@ -26,7 +26,7 @@
 
 #include <string>
 
-#include <coffee/adt/DataBlock.hpp>
+#include <coffee/basis/DataBlock.hpp>
 
 #include <coffee/dbms/datatype/Abstract.hpp>
 
@@ -54,29 +54,33 @@ public:
    LongBlock(const LongBlock& other);
    ~LongBlock() {;}
 
+   static std::shared_ptr<LongBlock> instantiate(const char* name, const Constraint::_v constraint = Constraint::CanNotBeNull) {
+      return std::make_shared<LongBlock>(name, constraint);
+   }
+
    int getSize() const noexcept { return(hasValue() == true) ? m_value.size(): 0; }
 
-   const adt::DataBlock& getValue(adt::RuntimeException) const noexcept { this->exceptionWhenIsNull(); return m_value; }
+   const basis::DataBlock& getValue(basis::RuntimeException) const noexcept { this->exceptionWhenIsNull(); return m_value; }
 
-   adt::DataBlock& getValue() throw(adt::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
+   basis::DataBlock& getValue() throw(basis::RuntimeException) { this->exceptionWhenIsNull(); return m_value; }
 
-   void setValue(const adt::DataBlock& value) throw(adt::RuntimeException);
+   void setValue(const basis::DataBlock& value) throw(basis::RuntimeException);
 
    std::shared_ptr<Abstract> clone() const noexcept { return std::make_shared<LongBlock>(*this); }
 
-   operator adt::StreamString() const noexcept { return asString(); }
+   operator basis::StreamString() const noexcept { return asString(); }
 
-   adt::StreamString asString() const noexcept;
+   basis::StreamString asString() const noexcept;
    
    size_t hash() const noexcept { return m_value.size(); }
 
    coffee_declare_datatype_downcast(LongBlock);
 
 protected:
-   adt::DataBlock m_value;
+   basis::DataBlock m_value;
 
    void do_clear() noexcept { m_value.clear(); }
-   int do_compare(const Abstract& other) const throw(adt::RuntimeException);
+   int do_compare(const Abstract& other) const throw(basis::RuntimeException);
 };
 
 }

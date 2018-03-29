@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/dbms.sqlite/SqliteInputBinder.hpp>
 #include <coffee/dbms.sqlite/SqliteConnection.hpp>
@@ -42,7 +42,7 @@ using namespace coffee;
 using namespace coffee::dbms;
 
 void sqlite::SqliteInputBinder::do_encode(Statement& statement, const int pos)
-   throw(adt::RuntimeException, DatabaseException)
+   throw(basis::RuntimeException, DatabaseException)
 {
    std::shared_ptr<datatype::Abstract>& data(getData());
    sqlite3_stmt* impl = static_cast<SqliteStatement&>(statement).getImpl();
@@ -81,7 +81,7 @@ void sqlite::SqliteInputBinder::do_encode(Statement& statement, const int pos)
       case dbms::datatype::Abstract::Datatype::Date:
          {
             auto date = coffee_datatype_downcast(datatype::Date, data)->getValue();
-            const std::string text = adt::AsString::apply(date, "%Y-%m-%d %H:%M:%S");
+            const std::string text = basis::AsString::apply(date, datatype::Date::DefaultFormat);
             rc = sqlite3_bind_text(impl, pos + 1, text.c_str(), text.length(), SQLITE_TRANSIENT);
          }
          break;

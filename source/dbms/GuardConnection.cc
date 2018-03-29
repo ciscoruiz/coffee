@@ -28,7 +28,7 @@
 
 using namespace coffee;
 
-dbms::GuardConnection::GuardConnection(std::shared_ptr<Connection> connection)  throw (adt::RuntimeException) :
+dbms::GuardConnection::GuardConnection(std::shared_ptr<Connection> connection)  throw (basis::RuntimeException) :
    m_connection (connection),
    m_countLinkedStatement (0)
 {
@@ -55,13 +55,13 @@ void dbms::GuardConnection::clearMaxCommitPending () noexcept
 }
 
 dbms::ResultCode dbms::GuardConnection::execute (std::shared_ptr<Statement>& statement)
-   throw (adt::RuntimeException, DatabaseException)
+   throw (basis::RuntimeException, DatabaseException)
 {
    return m_connection->execute(statement);
 }
 
 void dbms::GuardConnection::commit()
-   throw (adt::RuntimeException, dbms::DatabaseException)
+   throw (basis::RuntimeException, dbms::DatabaseException)
 {
    m_connection->commit();
 }

@@ -24,6 +24,7 @@
 #include <coffee/config/defines.hpp>
 
 #include <coffee/logger/TraceMethod.hpp>
+#include <coffee/logger/Logger.hpp>
 
 #include <coffee/xml/Node.hpp>
 #include <coffee/xml/Attribute.hpp>
@@ -31,15 +32,30 @@
 #include <coffee/dbms/Connection.hpp>
 #include <coffee/dbms/Database.hpp>
 #include <coffee/dbms/Statement.hpp>
+#include <coffee/dbms/ConnectionParameters.hpp>
 
 using namespace std;
 using namespace coffee;
+
+dbms::Connection::Connection(const Database& dbmsDatabase, const std::string& name, const dbms::ConnectionParameters& parameters) :
+   balance::Resource(name),
+   m_dbmsDatabase(dbmsDatabase),
+   m_user(parameters.getUser()),
+   m_password(parameters.getPassword()),
+   m_lockingCounter(0),
+   m_commitPending(0),
+   m_rollbackPending(false),
+   m_maxCommitPending(0),
+   m_accesingCounter(0)
+{
+   LOG_DEBUG("Name=" << name << " | " << parameters.asString());
+}
 
 //-----------------------------------------------------------------------------------------------------------
 //(1) Si no tiene variables de salida => consideramos que es un update, insert o delete.
 //-----------------------------------------------------------------------------------------------------------
 dbms::ResultCode dbms::Connection::execute(std::shared_ptr<Statement>& statement)
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    LOG_THIS_METHOD();
 
@@ -93,7 +109,7 @@ dbms::ResultCode dbms::Connection::execute(std::shared_ptr<Statement>& statement
 }
 
 void dbms::Connection::commit()
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    LOG_INFO(asString() << " | State before commit");
    
@@ -125,7 +141,7 @@ void dbms::Connection::rollback()
 }
 
 void dbms::Connection::lock()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(isAvailable() == false) {
       if(recover() == false) {
@@ -164,7 +180,7 @@ void dbms::Connection::unlock()
          else if(m_commitPending > 0)
             commit();
       }
-      catch(adt::Exception& ex) {
+      catch(basis::Exception& ex) {
          logger::Logger::write(ex);
       }
    }
@@ -184,7 +200,7 @@ bool dbms::Connection::recover()
       open();
       result = true;
    }
-   catch(adt::Exception& edbms) {
+   catch(basis::Exception& edbms) {
       logger::Logger::write(edbms);
       m_dbmsDatabase.notifyRecoveryFail(*this);
    }
@@ -194,10 +210,10 @@ bool dbms::Connection::recover()
    return result;
 }
 
-adt::StreamString dbms::Connection::asString() const
+basis::StreamString dbms::Connection::asString() const
    noexcept
 {
-   adt::StreamString result("dbms::Connection { ");
+   basis::StreamString result("dbms::Connection { ");
    result += balance::Resource::asString();
    result << " | Database=" << m_dbmsDatabase.getName();
    result << " | User=" << m_user;

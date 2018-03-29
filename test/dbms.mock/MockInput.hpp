@@ -34,9 +34,9 @@ public:
    explicit MockInput (std::shared_ptr<dbms::datatype::Abstract>& abstract) : dbms::binder::Input (abstract) {;}
 
 private:
-   void do_prepare (dbms::Statement& statement, const int pos) throw (adt::RuntimeException, dbms::DatabaseException) {;}
+   void do_prepare (dbms::Statement& statement, const int pos) throw (basis::RuntimeException, dbms::DatabaseException) {;}
    void do_release (dbms::Statement& statement) noexcept {;}
-   void do_encode (dbms::Statement& statement, const int pos) throw (adt::RuntimeException) {;}
+   void do_encode (dbms::Statement& statement, const int pos) throw (basis::RuntimeException) {;}
 };
 
 

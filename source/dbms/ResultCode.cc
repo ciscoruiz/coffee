@@ -43,7 +43,7 @@ dbms::ResultCode::ResultCode(const dbms::Database& database, const int numericCo
 }
 
 bool dbms::ResultCode::notFound() const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(!m_errorCodeInterpreter)
       COFFEE_THROW_EXCEPTION(asString() << " does not have associated database to decode error");
@@ -52,7 +52,7 @@ bool dbms::ResultCode::notFound() const
 }
 
 bool dbms::ResultCode::successful() const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(!m_errorCodeInterpreter)
       COFFEE_THROW_EXCEPTION(asString() << " does not have associated database to decode error");
@@ -61,7 +61,7 @@ bool dbms::ResultCode::successful() const
 }
 
 bool dbms::ResultCode::locked() const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(!m_errorCodeInterpreter)
       COFFEE_THROW_EXCEPTION(asString() << " does not have associated database to decode error");
@@ -70,7 +70,7 @@ bool dbms::ResultCode::locked() const
 }
 
 bool dbms::ResultCode::lostConnection() const
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(!m_errorCodeInterpreter)
       COFFEE_THROW_EXCEPTION(asString() << " does not have associated database to decode error");
@@ -79,10 +79,10 @@ bool dbms::ResultCode::lostConnection() const
 }
 
 
-adt::StreamString dbms::ResultCode::asString() const
+basis::StreamString dbms::ResultCode::asString() const
    noexcept
 {
-   adt::StreamString result("dbms.ResultCode { Status=");
+   basis::StreamString result("dbms.ResultCode { Status=");
 
    if (m_errorCodeInterpreter) {
       if (successful()) {

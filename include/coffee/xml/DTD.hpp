@@ -26,7 +26,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/xml/Wrapper.hpp>
 
@@ -40,7 +40,7 @@ namespace boost {
 
 namespace coffee {
 
-namespace adt {
+namespace basis {
    class DataBlock;
 }
 
@@ -53,11 +53,11 @@ public:
    DTD ();
    virtual ~DTD ();
 
-   void initialize (const boost::filesystem::path& path) throw (adt::RuntimeException);
-   void initialize (const adt::DataBlock& buffer) throw (adt::RuntimeException);
+   void initialize (const boost::filesystem::path& path) throw (basis::RuntimeException);
+   void initialize (const basis::DataBlock& buffer) throw (basis::RuntimeException);
 
 private:
-   void validate (xml::Document& document) const throw (adt::RuntimeException);
+   void validate (xml::Document& document) const throw (basis::RuntimeException);
 
    static void callbackErrorHandler (void *ctx,  const char *msg, ...) noexcept;
    static void callbackWarningHandler (void *ctx,  const char *msg, ...) noexcept;

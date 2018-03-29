@@ -36,7 +36,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <coffee/adt/DataBlock.hpp>
+#include <coffee/basis/DataBlock.hpp>
 
 #include <coffee/xml/DTD.hpp>
 #include <coffee/xml/Document.hpp>
@@ -50,14 +50,14 @@ BOOST_AUTO_TEST_CASE(dtd_does_not_exists)
 
    boost::filesystem::path dtdFile(coffeePath.native() + "does_not_exist.dtd");
    xml::DTD dtd;
-   BOOST_REQUIRE_THROW(dtd.initialize(dtdFile), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(dtd.initialize(dtdFile), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(dtd_incomplete_expression)
 {
-   const adt::DataBlock bad_dtd("<!ELEMENT Intersect (Second,Second)");
+   const basis::DataBlock bad_dtd("<!ELEMENT Intersect (Second,Second)");
    xml::DTD dtd;
-   BOOST_REQUIRE_THROW(dtd.initialize(bad_dtd), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(dtd.initialize(bad_dtd), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(dtd_uninit_dtd)
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(dtd_uninit_dtd)
 
    boost::filesystem::path xmlFile(coffeePath.native() + "/test/xml/vertex.xml");
    xml::Document doc;
-   BOOST_REQUIRE_THROW(doc.parse(xmlFile, dtd), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(doc.parse(xmlFile, dtd), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(dtd_file_validate_file)
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(dtd_memory_validate_file)
 {
    boost::filesystem::path coffeePath(boost::filesystem::current_path());
 
-   const adt::DataBlock expression("<!ELEMENT Intersect (First,Second)><!ELEMENT First (Vertex+)><!ELEMENT Second (Vertex+)><!ELEMENT Vertex EMPTY><!ATTLIST Vertex X CDATA #REQUIRED><!ATTLIST Vertex Y CDATA #REQUIRED>");
+   const basis::DataBlock expression("<!ELEMENT Intersect (First,Second)><!ELEMENT First (Vertex+)><!ELEMENT Second (Vertex+)><!ELEMENT Vertex EMPTY><!ATTLIST Vertex X CDATA #REQUIRED><!ATTLIST Vertex Y CDATA #REQUIRED>");
 
    xml::DTD dtd;
    BOOST_REQUIRE_NO_THROW(dtd.initialize(expression));
@@ -100,8 +100,8 @@ BOOST_AUTO_TEST_CASE(dtd_memory_validate_file)
 
 BOOST_AUTO_TEST_CASE(dtd_memory_validate_memory)
 {
-   const adt::DataBlock expression("<!ELEMENT Intersect (First,Second)><!ELEMENT First (Vertex+)><!ELEMENT Second (Vertex+)><!ELEMENT Vertex EMPTY><!ATTLIST Vertex X CDATA #REQUIRED><!ATTLIST Vertex Y CDATA #REQUIRED>");
-   const adt::DataBlock xml("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Intersect><First><Vertex X= \"1\" Y=\"3\"/></First><Second><Vertex X= \"1\" Y=\"3\"/></Second></Intersect>");
+   const basis::DataBlock expression("<!ELEMENT Intersect (First,Second)><!ELEMENT First (Vertex+)><!ELEMENT Second (Vertex+)><!ELEMENT Vertex EMPTY><!ATTLIST Vertex X CDATA #REQUIRED><!ATTLIST Vertex Y CDATA #REQUIRED>");
+   const basis::DataBlock xml("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Intersect><First><Vertex X= \"1\" Y=\"3\"/></First><Second><Vertex X= \"1\" Y=\"3\"/></Second></Intersect>");
 
    xml::DTD dtd;
    BOOST_REQUIRE_NO_THROW(dtd.initialize(expression));
@@ -120,9 +120,8 @@ BOOST_AUTO_TEST_CASE(dtd_novalidate_file)
 
    boost::filesystem::path xmlFile(coffeePath.native() + "/test/xml/bad_vertex.xml");
    xml::Document doc;
-   BOOST_REQUIRE_THROW(doc.parse(xmlFile, dtd), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(doc.parse(xmlFile, dtd), basis::RuntimeException);
 }
-
 
 BOOST_AUTO_TEST_CASE(dtd_novalidate_memory)
 {
@@ -132,9 +131,9 @@ BOOST_AUTO_TEST_CASE(dtd_novalidate_memory)
    xml::DTD dtd;
    BOOST_REQUIRE_NO_THROW(dtd.initialize(dtdFile));
 
-   const adt::DataBlock xml("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Intersect><First><Vertex X= \"1\" Y=\"3\"/></First></Intersect>");
+   const basis::DataBlock xml("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Intersect><First><Vertex X= \"1\" Y=\"3\"/></First></Intersect>");
    xml::Document doc;
-   BOOST_REQUIRE_THROW(doc.parse(xml, dtd), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(doc.parse(xml, dtd), basis::RuntimeException);
 }
 
 

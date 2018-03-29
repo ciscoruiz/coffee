@@ -40,7 +40,7 @@ logger::SysLogWriter::~SysLogWriter ()
 }
 
 void logger::SysLogWriter::initialize ()
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    openlog(m_ident.c_str(), LOG_USER, m_options);
 }

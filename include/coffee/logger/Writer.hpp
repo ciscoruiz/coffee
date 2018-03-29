@@ -25,7 +25,7 @@
 #define coffee_logger_Writer_hpp
 
 #include <coffee/logger/Level.hpp>
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 namespace coffee {
 
@@ -60,7 +60,7 @@ private:
 
    Writer(const Writer&);
 
-   virtual void initialize() throw(adt::RuntimeException) = 0;
+   virtual void initialize() throw(basis::RuntimeException) = 0;
    virtual void apply(const Level::_v level, const std::string& line) noexcept = 0;
 
    friend class Logger;

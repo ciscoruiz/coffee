@@ -42,7 +42,7 @@ logger::Logger::Writers logger::Logger::m_writers;
 
 //static
 void logger::Logger::initialize(std::shared_ptr<Writer> writer, std::shared_ptr<Formatter> formatter)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    SCCS::activate();
 
@@ -55,14 +55,14 @@ void logger::Logger::initialize(std::shared_ptr<Writer> writer, std::shared_ptr<
 
 //static
 void logger::Logger::initialize(std::shared_ptr<Writer> writer)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    initialize(writer, DefaultFormatter::instantiate());
 }
 
 //static
 void logger::Logger::add(std::shared_ptr<Writer> writer)
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    if (!m_formatter) {
       COFFEE_THROW_EXCEPTION("You should initialize the Logger before add a new writer");
@@ -73,20 +73,13 @@ void logger::Logger::add(std::shared_ptr<Writer> writer)
 }
 
 //static
-void logger::Logger::write(const Level::_v level, const adt::StreamString& input, const char* function, const char* file, const unsigned lineno)
+void logger::Logger::write(const Level::_v level, const basis::StreamString& input, const char* function, const char* file, const unsigned lineno)
    noexcept
 {
    if (!wantsToProcess(level))
       return;
 
-   const char* path = coffee_strstr(file, "/coffee/");
-
-   if (path != nullptr) {
-      ++ path;
-   }
-   else {
-      path = file;
-   }
+   const char* path = removePathBeforeCoffee(file);
 
    const std::string string = m_formatter->apply(level, input, function, path, lineno);
 

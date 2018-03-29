@@ -22,14 +22,14 @@
 //
 
 #include <coffee/dbms/DatabaseException.hpp>
-#include <coffee/adt/StreamString.hpp>
+#include <coffee/basis/StreamString.hpp>
 
 using namespace std;
 using namespace coffee;
 
 string dbms::DatabaseException::asString() const noexcept
 {
-   adt::StreamString str (this->filePosition ());
+   basis::StreamString str (this->filePosition ());
 
    str << "ResultCode=" << m_resultCode.asString () << " | ";
 

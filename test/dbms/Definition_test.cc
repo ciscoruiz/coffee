@@ -61,14 +61,14 @@ using namespace coffee::dbms;
 
 class MyStatement : public Statement {
 protected:
-   MyStatement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
-      Statement(database, name, expression, actionOnError)
+   MyStatement(const Database& database, const char* name, const char* expression, const StatementParameters& parameters) :
+      Statement(database, name, expression, parameters)
    {
-      m_datas.push_back(std::make_shared<datatype::Integer>("ID"));
-      m_datas.push_back(std::make_shared<datatype::String>("name", 64));
-      m_datas.push_back(std::make_shared<datatype::Integer>("integer", datatype::Constraint::CanBeNull));
-      m_datas.push_back(std::make_shared<datatype::Float>("float"));
-      m_datas.push_back(std::make_shared<datatype::Date>("time", datatype::Constraint::CanBeNull));
+      m_datas.push_back(datatype::Integer::instantiate("ID"));
+      m_datas.push_back(datatype::String::instantiate("name", 64));
+      m_datas.push_back(datatype::Integer::instantiate("integer", datatype::Constraint::CanBeNull));
+      m_datas.push_back(datatype::Float::instantiate("float"));
+      m_datas.push_back(datatype::Date::instantiate("time", datatype::Constraint::CanBeNull));
    }
 
    mock::MockLowLevelRecord& getRecord() noexcept { return std::ref(m_record); }
@@ -78,28 +78,28 @@ protected:
 
 private:
    mock::MockLowLevelRecord m_record;
-   void do_prepare(dbms::Connection& connection) throw(adt::RuntimeException, DatabaseException) {;}
+   void do_prepare(dbms::Connection& connection) throw(basis::RuntimeException, DatabaseException) {;}
 };
 
 class MyReadStatement : public MyStatement {
 public:
-   MyReadStatement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError);
+   MyReadStatement(const Database& database, const char* name, const char* expression, const StatementParameters& parameters);
 
 private:
    std::vector <mock::MockLowLevelRecord> m_selection;
    int m_index;
 
-   ResultCode do_execute(Connection& connection) throw(adt::RuntimeException, DatabaseException);
-   bool do_fetch() throw(adt::RuntimeException, DatabaseException);
+   ResultCode do_execute(Connection& connection) throw(basis::RuntimeException, DatabaseException);
+   bool do_fetch() throw(basis::RuntimeException, DatabaseException);
 };
 
 class MyWriteStatement : public MyStatement {
 public:
-   MyWriteStatement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError);
+   MyWriteStatement(const Database& database, const char* name, const char* expression, const StatementParameters& parameters);
 
 private:
-   ResultCode do_execute(Connection& connection) throw(adt::RuntimeException, DatabaseException);
-   bool do_fetch() throw(adt::RuntimeException, DatabaseException) { return false; }
+   ResultCode do_execute(Connection& connection) throw(basis::RuntimeException, DatabaseException);
+   bool do_fetch() throw(basis::RuntimeException, DatabaseException) { return false; }
 };
 
 class MyDatabase : public mock::MockDatabase {
@@ -115,18 +115,18 @@ public:
 private:
    mock::MockLowLevelContainer m_container;
 
-   void do_stop() throw(adt::RuntimeException) {;}
+   void do_stop() throw(basis::RuntimeException) {;}
 
-   std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
-      throw(adt::RuntimeException)
+   std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
+      throw(basis::RuntimeException)
    {
       std::shared_ptr<Statement> result;
 
       if(expression == "read" || expression == "READ")
-         result = std::make_shared<MyReadStatement>(*this, name, expression.c_str(), actionOnError);
+         result = std::make_shared<MyReadStatement>(*this, name, expression.c_str(), parameters);
 
       if(expression == "write" || expression == "delete")
-         result = std::make_shared<MyWriteStatement>(*this, name, expression.c_str(), actionOnError);
+         result = std::make_shared<MyWriteStatement>(*this, name, expression.c_str(), parameters);
 
       if (!result)
          COFFEE_THROW_EXCEPTION(name << " invalid statement");
@@ -143,7 +143,7 @@ public:
 private:
    char* m_buffer;
 
-   const char* apply(const char* statement) throw(adt::RuntimeException);
+   const char* apply(const char* statement) throw(basis::RuntimeException);
 };
 
 class MyRecoveryHandler : public dbms::FailRecoveryHandler {
@@ -155,7 +155,7 @@ public:
 private:
    int m_thisWasUsed;
 
-   void apply(const dbms::Connection& connection) throw(adt::RuntimeException) {
+   void apply(const dbms::Connection& connection) throw(basis::RuntimeException) {
       ++ m_thisWasUsed;
    }
 };
@@ -167,8 +167,8 @@ using namespace coffee;
 using namespace coffee::dbms;
 using namespace coffee::mock;
 
-test_dbms::MyReadStatement::MyReadStatement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
-   MyStatement(database, name, expression, actionOnError),
+test_dbms::MyReadStatement::MyReadStatement(const Database& database, const char* name, const char* expression, const StatementParameters& parameters) :
+   MyStatement(database, name, expression, parameters),
    m_index(0)
 {
    createBinderInput(m_datas[0]);
@@ -183,7 +183,7 @@ test_dbms::MyReadStatement::MyReadStatement(const Database& database, const char
 }
 
 dbms::ResultCode test_dbms::MyReadStatement::do_execute(dbms::Connection& connection)
-   throw(adt::RuntimeException, DatabaseException)
+   throw(basis::RuntimeException, DatabaseException)
 {
    LOG_THIS_METHOD();
 
@@ -204,7 +204,7 @@ dbms::ResultCode test_dbms::MyReadStatement::do_execute(dbms::Connection& connec
    return ResultCode(getDatabase(),(m_selection.size() == 0) ? MyDatabase::NotFound: MyDatabase::Successful);
 }
 
-bool test_dbms::MyReadStatement::do_fetch() throw(adt::RuntimeException, DatabaseException)
+bool test_dbms::MyReadStatement::do_fetch() throw(basis::RuntimeException, DatabaseException)
 {
    LOG_THIS_METHOD();
 
@@ -235,8 +235,8 @@ bool test_dbms::MyReadStatement::do_fetch() throw(adt::RuntimeException, Databas
    return true;
 }
 
-test_dbms::MyWriteStatement::MyWriteStatement(const Database& database, const char* name, const char* expression, const ActionOnError::_v actionOnError) :
-   MyStatement(database, name, expression, actionOnError)
+test_dbms::MyWriteStatement::MyWriteStatement(const Database& database, const char* name, const char* expression, const StatementParameters& parameters) :
+   MyStatement(database, name, expression, parameters)
 {
    for (auto member : m_datas) {
       createBinderInput(member);
@@ -244,7 +244,7 @@ test_dbms::MyWriteStatement::MyWriteStatement(const Database& database, const ch
 }
 
 dbms::ResultCode test_dbms::MyWriteStatement::do_execute(dbms::Connection& connection)
-   throw(adt::RuntimeException, DatabaseException)
+   throw(basis::RuntimeException, DatabaseException)
 {
    LOG_THIS_METHOD();
 
@@ -285,7 +285,7 @@ dbms::ResultCode test_dbms::MyWriteStatement::do_execute(dbms::Connection& conne
 }
 
 const char* test_dbms::MyTranslator::apply(const char* statement)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    if(m_buffer != NULL) {
       free(m_buffer);
@@ -308,28 +308,30 @@ BOOST_AUTO_TEST_CASE(dbms_define_structure)
    app::ApplicationServiceStarter application("dbms_define_structure");
 
    auto database = test_dbms::MyDatabase::instantiate(application);
-   auto connection = database->createConnection("0", "0", "0");
 
-   BOOST_REQUIRE_THROW(database->createConnection("0", "bis0", "bis0"), adt::RuntimeException);
+   const coffee::dbms::ConnectionParameters zero("0", "0");
+   auto connection = database->createConnection("0", zero);
+
+   BOOST_REQUIRE_THROW(database->createConnection("0", coffee::dbms::ConnectionParameters ("bis00", "bis0")), basis::RuntimeException);
 
    auto findConnection = database->findConnection("0");
 
    BOOST_REQUIRE_EQUAL(connection.get(), findConnection.get());
 
-   BOOST_REQUIRE_THROW(database->findConnection("zzzz"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(database->findConnection("zzzz"), basis::RuntimeException);
 
    auto statement = database->createStatement("one", "write");
 
-   BOOST_REQUIRE_THROW(database->createStatement("one", "write"), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(database->createStatement("the_null", "null"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(database->createStatement("one", "write"), basis::RuntimeException);
+   BOOST_REQUIRE_THROW(database->createStatement("the_null", "null"), basis::RuntimeException);
 
    auto findStatement = database->findStatement("one");
 
    BOOST_REQUIRE_EQUAL(statement.get(), findStatement.get());
 
-   BOOST_REQUIRE_THROW(database->findStatement("zzzz"), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(database->findStatement("zzzz"), basis::RuntimeException);
 
-   adt::StreamString xxx = connection->operator coffee::adt::StreamString();
+   basis::StreamString xxx = connection->operator coffee::basis::StreamString();
 
    BOOST_REQUIRE_NE(xxx.find("CommitCounter"), std::string::npos);
 }
@@ -357,14 +359,15 @@ struct DbmsDefineAndRun : public MockDatabaseFixture<test_dbms::MyDatabase> {
    }
 
    dbms::ResultCode  writeRecord(dbms::GuardStatement& writer, const int id) throw (dbms::DatabaseException) {
-      adt::StreamString name("the ");
+      basis::StreamString name("the ");
       name << id;
+
       coffee_datatype_downcast(datatype::Integer, writer.getInputData(0))->setValue(id);
       coffee_datatype_downcast(datatype::String, writer.getInputData(1))->setValue(name);
       coffee_datatype_downcast(datatype::Integer, writer.getInputData(2))->setValue(id * id);
       coffee_datatype_downcast(datatype::Float, writer.getInputData(3))->setValue((float) id * 1.1);
       char buffer[64];
-      sprintf(buffer, "%d/%d/%dT%02d:%02d", 1 + id % 28, 1 + id % 11, 2000 + id, id % 12, id % 60);
+      sprintf(buffer, "%d/%d/%dT%02d:%02d", 1 + id % 28, 1 + id % 11, 2000 + (id % 25), id % 12, id % 60);
       coffee_datatype_downcast(datatype::Date, writer.getInputData(4))->setValue(buffer, "%d/%m/%YT%H:%M");
       return writer.execute();
    }
@@ -403,7 +406,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_write_and_read, DbmsDefineAndRun)
 
       BOOST_REQUIRE_EQUAL(guard.getCountLinkedStatement(), 1);
 
-      BOOST_REQUIRE_THROW(writer.getInputData(10), adt::RuntimeException);
+      BOOST_REQUIRE_THROW(writer.getInputData(10), basis::RuntimeException);
 
       BOOST_REQUIRE_NO_THROW(writeRecord(writer, 2));
       BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 1);
@@ -419,7 +422,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_write_and_read, DbmsDefineAndRun)
       BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 3);
       BOOST_REQUIRE_EQUAL(database->container_size(), 0);
    }
-   catch(adt::Exception& ex) {
+   catch(basis::Exception& ex) {
       logger::Logger::write(ex);
       BOOST_REQUIRE_EQUAL(true, false);
    }
@@ -451,7 +454,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_write_and_read, DbmsDefineAndRun)
          BOOST_REQUIRE_EQUAL(id->getValue() * id->getValue(), integer->getValue());
       }
       }
-      catch(adt::Exception& ex) {
+      catch(basis::Exception& ex) {
          std::cout << ex.what() << std::endl;
       }
 
@@ -537,7 +540,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_write_rollback, DbmsDefineAndRun)
 
 BOOST_FIXTURE_TEST_CASE(dbms_write_norollback, DbmsDefineAndRun)
 {
-   auto noRollbackWriter = database->createStatement("no_rollback_write", "write", dbms::ActionOnError::Ignore);
+   auto noRollbackWriter = database->createStatement("no_rollback_write", "write", dbms::StatementParameters(dbms::ActionOnError::Ignore));
    ResultCode resultCode;
 
    BOOST_REQUIRE_NO_THROW(populate(noRollbackWriter));
@@ -567,7 +570,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_erase_rollback, DbmsDefineAndRun)
 {
    auto stWriter = database->createStatement("writer", "write");
    auto rollbackEraser = database->createStatement("rollback_eraser", "delete");
-   auto noRollbackEraser = database->createStatement("no_rollback_eraser", "delete", dbms::ActionOnError::Ignore);
+   auto noRollbackEraser = database->createStatement("no_rollback_eraser", "delete", dbms::StatementParameters(dbms::ActionOnError::Ignore));
    ResultCode resultCode;
 
    BOOST_REQUIRE_NO_THROW(populate(stWriter));
@@ -598,7 +601,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_erase_rollback, DbmsDefineAndRun)
 BOOST_FIXTURE_TEST_CASE(dbms_erase_norollback, DbmsDefineAndRun)
 {
    auto stWriter = database->createStatement("writer", "write");
-   auto noRollbackEraser = database->createStatement("no_rollback_eraser", "delete", dbms::ActionOnError::Ignore);
+   auto noRollbackEraser = database->createStatement("no_rollback_eraser", "delete", dbms::StatementParameters(dbms::ActionOnError::Ignore));
    ResultCode resultCode;
 
    BOOST_REQUIRE_NO_THROW(populate(stWriter));
@@ -732,7 +735,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_break_detected_while_locking, DbmsDefineAndRun)
 
       mockConnection->manualBreak();
 
-      BOOST_REQUIRE_THROW(GuardStatement writer(guard, stWriter), adt::RuntimeException);
+      BOOST_REQUIRE_THROW(GuardStatement writer(guard, stWriter), basis::RuntimeException);
 
       BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 2);
       BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 1);
@@ -807,7 +810,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_break_unrecovery_while_locking, DbmsDefineAndRun)
    mockConnection->avoidRecovery();
 
    if(true) {
-      BOOST_REQUIRE_THROW(GuardConnection guard(connection), adt::RuntimeException);
+      BOOST_REQUIRE_THROW(GuardConnection guard(connection), basis::RuntimeException);
       BOOST_REQUIRE_EQUAL(mockConnection->getOpenCounter(), 1);
       BOOST_REQUIRE_EQUAL(mockConnection->getCloseCounter(), 1);
       BOOST_REQUIRE_EQUAL(recoveryHandler->thisWasUsed(), 1);
@@ -854,7 +857,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_dealing_with_nulls, DbmsDefineAndRun)
          BOOST_REQUIRE_EQUAL(mockConnection->operation_size(), 2);
          BOOST_REQUIRE_EQUAL(database->container_size(), 0);
       }
-      catch(adt::Exception& ex) {
+      catch(basis::Exception& ex) {
          logger::Logger::write(ex);
       }
    }
@@ -882,7 +885,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_dealing_with_nulls, DbmsDefineAndRun)
 
       BOOST_REQUIRE_EQUAL(id->getValue(), 20);
       BOOST_REQUIRE_EQUAL(integer->hasValue(), false);
-      BOOST_REQUIRE_THROW(integer->getValue(), adt::RuntimeException);
+      BOOST_REQUIRE_THROW(integer->getValue(), basis::RuntimeException);
       BOOST_REQUIRE_EQUAL(date->hasValue(), true);
 
       BOOST_REQUIRE_EQUAL(reader.fetch(), true);
@@ -890,7 +893,7 @@ BOOST_FIXTURE_TEST_CASE(dbms_dealing_with_nulls, DbmsDefineAndRun)
       BOOST_REQUIRE_EQUAL(id->getValue(), 25);
       BOOST_REQUIRE_EQUAL(integer->hasValue(), true);
       BOOST_REQUIRE_EQUAL(date->hasValue(), false);
-      BOOST_REQUIRE_THROW(date->getValue(), adt::RuntimeException);
+      BOOST_REQUIRE_THROW(date->getValue(), basis::RuntimeException);
 
       BOOST_REQUIRE_EQUAL(reader.fetch(), false);
    }
@@ -902,8 +905,8 @@ BOOST_AUTO_TEST_CASE(dbms_null_binder_allocated)
    auto database = test_dbms::MyDatabase::instantiate(application);
    auto statement = database->createStatement("one", "read");
    auto id = std::make_shared<datatype::Integer>("give-me-null");
-   BOOST_REQUIRE_THROW(statement->createBinderInput(id), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(statement->createBinderOutput(id), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(statement->createBinderInput(id), basis::RuntimeException);
+   BOOST_REQUIRE_THROW(statement->createBinderOutput(id), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(dbms_input_binder_out_range)
@@ -912,14 +915,14 @@ BOOST_AUTO_TEST_CASE(dbms_input_binder_out_range)
    auto database = test_dbms::MyDatabase::instantiate(application);
    auto stWriter = database->createStatement("the_write", "write");
    auto stReader = database->createStatement("the_read", "read");
-   auto connection = database->createConnection("0", "0", "0");
+   auto connection = database->createConnection("0", coffee::dbms::ConnectionParameters ("0", "0"));
 
    dbms::GuardConnection guard(connection);
    dbms::GuardStatement writer(guard, stWriter);
-   BOOST_REQUIRE_THROW(writer.getInputData(100), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(writer.getInputData(100), basis::RuntimeException);
 
    dbms::GuardStatement reader(guard, stReader);
-   BOOST_REQUIRE_THROW(reader.getOutputData(100), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(reader.getOutputData(100), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(dbms_resultcode_without_interpreter)
@@ -930,10 +933,10 @@ BOOST_AUTO_TEST_CASE(dbms_resultcode_without_interpreter)
    database->setErrorCodeInterpreter(empty);
    dbms::ResultCode resultCode(*database, 100);
 
-   BOOST_REQUIRE_THROW(resultCode.successful(), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(resultCode.notFound(), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(resultCode.locked(), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(resultCode.lostConnection(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(resultCode.successful(), basis::RuntimeException);
+   BOOST_REQUIRE_THROW(resultCode.notFound(), basis::RuntimeException);
+   BOOST_REQUIRE_THROW(resultCode.locked(), basis::RuntimeException);
+   BOOST_REQUIRE_THROW(resultCode.lostConnection(), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(dbms_resultcode_asstring)
@@ -950,7 +953,7 @@ BOOST_AUTO_TEST_CASE(dbms_database_asXML)
    app::ApplicationServiceStarter application("dbms_database_asXML");
    auto database = test_dbms::MyDatabase::instantiate(application);
 
-   database->createConnection("connection0", "user0", "password0");
+   database->createConnection("connection0", coffee::dbms::ConnectionParameters ("user0", "password0"));
    database->createStatement("the_write", "write");
    database->createStatement("the_read", "read");
 

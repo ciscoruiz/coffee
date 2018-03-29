@@ -32,7 +32,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <coffee/adt/Semaphore.hpp>
+#include <coffee/basis/Semaphore.hpp>
 #include <coffee/app/ApplicationServiceStarter.hpp>
 
 #include <coffee/logger/Logger.hpp>
@@ -45,13 +45,11 @@
 using namespace std;
 using namespace coffee;
 
-class SmallestApplication : public app::Application {
+class TestApplication : public app::Application {
 public:
-   SmallestApplication() : app::Application("SmallerApplication", "This is the title", "1.0") {
-      logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
-   }
+   TestApplication() : app::Application("TestApplication", "This is the title", "1.0") {}
 
-   void run() throw(adt::RuntimeException) {;}
+   void run() throw(basis::RuntimeException) {;}
 };
 
 void parallelRun(app::Application& app) {
@@ -71,16 +69,16 @@ private:
    int m_initilized;
    int m_stopped;
 
-   void do_initialize() throw(adt::RuntimeException);
-   void do_stop() throw(adt::RuntimeException);
+   void do_initialize() throw(basis::RuntimeException);
+   void do_stop() throw(basis::RuntimeException);
 };
 
-void MyService::do_initialize() throw(adt::RuntimeException){ ++ m_initilized;}
-void MyService::do_stop() throw(adt::RuntimeException) { ++ m_stopped;}
+void MyService::do_initialize() throw(basis::RuntimeException){ ++ m_initilized;}
+void MyService::do_stop() throw(basis::RuntimeException) { ++ m_stopped;}
 
 BOOST_AUTO_TEST_CASE( smallest_application )
 { 
-   SmallestApplication application;
+   TestApplication application;
 
    BOOST_REQUIRE_EQUAL(application.service_find("00") == application.service_end(), true);
 
@@ -99,7 +97,7 @@ BOOST_AUTO_TEST_CASE( smallest_application )
 
 BOOST_AUTO_TEST_CASE( status_application )
 {
-   SmallestApplication application;
+   TestApplication application;
 
    BOOST_REQUIRE_EQUAL(application.isStopped(), true);
    BOOST_REQUIRE_EQUAL(application.isRunning(), false);
@@ -112,14 +110,14 @@ BOOST_AUTO_TEST_CASE( status_application )
 
 BOOST_AUTO_TEST_CASE( undefined_predecessor )
 {
-   SmallestApplication application;
+   TestApplication application;
 
    std::shared_ptr<MyService> service = std::make_shared<MyService>(application, "00");
    application.attach(service);
 
    service->setPredecessor("undefined");
 
-   BOOST_REQUIRE_THROW(application.start(), adt::RuntimeException);;
+   BOOST_REQUIRE_THROW(application.start(), basis::RuntimeException);;
 
    BOOST_REQUIRE_EQUAL(service->getInitializedCounter(), 0);
    BOOST_REQUIRE_EQUAL(service->getStoppedCounter(), 0);
@@ -130,7 +128,7 @@ BOOST_AUTO_TEST_CASE( undefined_predecessor )
 
 BOOST_AUTO_TEST_CASE( repeat_predecessor )
 {
-   SmallestApplication application;
+   TestApplication application;
 
    std::shared_ptr<MyService> service = std::make_shared<MyService>(application, "00");
    service->setPredecessor("SomeRepeatedName");
@@ -141,7 +139,7 @@ BOOST_AUTO_TEST_CASE( repeat_predecessor )
 
 BOOST_AUTO_TEST_CASE( interdependence_predecessor )
 {
-   SmallestApplication application;
+   TestApplication application;
 
    std::shared_ptr<MyService> service00 = std::make_shared<MyService>(application, "00");
    application.attach(service00);
@@ -152,7 +150,7 @@ BOOST_AUTO_TEST_CASE( interdependence_predecessor )
    service00->setPredecessor("01");
    service01->setPredecessor("00");
 
-   BOOST_REQUIRE_THROW(application.start(), adt::RuntimeException);;
+   BOOST_REQUIRE_THROW(application.start(), basis::RuntimeException);;
 
    BOOST_REQUIRE_EQUAL(service00->getInitializedCounter(), 0);
    BOOST_REQUIRE_EQUAL(service00->getStoppedCounter(), 0);
@@ -166,7 +164,7 @@ BOOST_AUTO_TEST_CASE( interdependence_predecessor )
 
 BOOST_AUTO_TEST_CASE( iterator_service )
 {
-   SmallestApplication application;
+   TestApplication application;
 
    application.attach(std::make_shared<MyService>(application, "00"));
    application.attach(std::make_shared<MyService>(application, "01"));
@@ -176,7 +174,7 @@ BOOST_AUTO_TEST_CASE( iterator_service )
 
    BOOST_REQUIRE_NO_THROW(application.start());
 
-   const SmallestApplication& constApplication(application);
+   const TestApplication& constApplication(application);
 
    auto ii = application.service_begin();
    auto maxii = application.service_end();
@@ -194,12 +192,13 @@ BOOST_AUTO_TEST_CASE( iterator_service )
 
 BOOST_AUTO_TEST_CASE( app_already_run )
 {
+   // Without "test" to cover the case in the coverage measurement
    app::ApplicationServiceStarter application("app_already_run");
 
    auto thread = std::thread(parallelRun, std::ref(application));
 
    application.waitUntilRunning();
-   BOOST_CHECK_THROW(application.start(), adt::RuntimeException);
+   BOOST_CHECK_THROW(application.start(), basis::RuntimeException);
    BOOST_CHECK(application.stop());
    thread.join();
    BOOST_CHECK(!application.stop());
@@ -207,7 +206,7 @@ BOOST_AUTO_TEST_CASE( app_already_run )
 
 BOOST_AUTO_TEST_CASE( app_stop_services )
 {
-   app::ApplicationServiceStarter application("app_stop_services");
+   app::ApplicationServiceStarter application("test_app_stop_services");
    auto service = std::make_shared<MyService>(application, "00");
    application.attach(service);
 
@@ -230,13 +229,13 @@ BOOST_AUTO_TEST_CASE( app_stop_services )
 BOOST_AUTO_TEST_CASE( app_null_service )
 {
    std::shared_ptr<MyService> service;
-   SmallestApplication application;
-   BOOST_REQUIRE_THROW(application.attach(service), adt::RuntimeException);
+   TestApplication application;
+   BOOST_REQUIRE_THROW(application.attach(service), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE( app_already_defined )
 {
-   SmallestApplication application;
+   TestApplication application;
    application.attach(std::make_shared<MyService>(application, "00"));
    auto iiprev = application.service_begin();
    auto iimaxprev = application.service_end();
@@ -247,7 +246,7 @@ BOOST_AUTO_TEST_CASE( app_already_defined )
 }
 
 struct ApplicationFixture {
-   ApplicationFixture() : application("ApplicationFixture"),
+   ApplicationFixture() : application("TestApplicationFixture"),
       externalStop(false)
    {
       service = std::make_shared<MyService>(application, "my-service");
@@ -263,7 +262,7 @@ struct ApplicationFixture {
          try {
             application.stop();
          }
-         catch(adt::Exception& ex) {
+         catch(basis::Exception& ex) {
 
          }
          thr.join();
@@ -284,14 +283,14 @@ public:
    NoStopService(app::Application& application, const char* name) : app::Service(application, name) {;}
 
 private:
-   void do_initialize() throw(adt::RuntimeException);
-   void do_stop() throw(adt::RuntimeException);
+   void do_initialize() throw(basis::RuntimeException);
+   void do_stop() throw(basis::RuntimeException);
 };
 
-void NoStopService::do_initialize() throw(adt::RuntimeException) {;}
+void NoStopService::do_initialize() throw(basis::RuntimeException) {;}
 
 void NoStopService::do_stop()
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    COFFEE_THROW_EXCEPTION("I dont want to stop");
 }
@@ -303,7 +302,7 @@ BOOST_FIXTURE_TEST_CASE( app_unstoppable_stop_services, ApplicationFixture)
    application.attach(std::make_shared<NoStopService>(application, "01"));
    application.attach(std::make_shared<NoStopService>(application, "02"));
 
-   BOOST_CHECK_THROW(application.stop(), adt::RuntimeException);
+   BOOST_CHECK_THROW(application.stop(), basis::RuntimeException);
    thr.join();
    externalStop = true;
 

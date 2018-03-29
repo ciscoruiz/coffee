@@ -27,8 +27,8 @@
 #include <memory>
 #include <chrono>
 
-#include <coffee/adt/RuntimeException.hpp>
-#include <coffee/adt/pattern/observer/Event.hpp>
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/basis/pattern/observer/Event.hpp>
 
 namespace coffee {
 namespace time {
@@ -38,7 +38,7 @@ class TimeService;
 /**
  * Class base for different types of time events.
  */
-class TimeEvent : public adt::pattern::observer::Event {
+class TimeEvent : public basis::pattern::observer::Event {
 public:
    /**
     * Destructor.
@@ -64,7 +64,7 @@ public:
     * \return The final duration of this event.
     * \warning It should not be valid until #isFinished returns \b true
     */
-   std::chrono::milliseconds getDuration() const throw(adt::RuntimeException);
+   std::chrono::milliseconds getDuration() const throw(basis::RuntimeException);
 
    /**
     * \return \b true if the event will be re-scheduled once it has been finished or \b false otherwise.
@@ -74,7 +74,7 @@ public:
    /**
     * \return Summarize information of the TimeEvent
     */
-   virtual adt::StreamString asString() const noexcept;
+   virtual basis::StreamString asString() const noexcept;
 
 protected:
    /**

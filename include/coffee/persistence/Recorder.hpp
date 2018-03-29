@@ -27,7 +27,7 @@
 #include <coffee/persistence/Accessor.hpp>
 #include <coffee/persistence/Object.hpp>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 namespace coffee {
 
@@ -45,7 +45,7 @@ public:
    const Accessor::TheObject& getObject() const noexcept { return m_object; }
 
    virtual dbms::ResultCode apply(dbms::GuardStatement& statement)
-      throw(adt::RuntimeException, dbms::DatabaseException) = 0;
+      throw(basis::RuntimeException, dbms::DatabaseException) = 0;
 
 protected:
    Recorder (const char* name, TheStatement& statement, const Accessor::TheObject& object) :

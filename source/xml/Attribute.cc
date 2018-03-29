@@ -42,7 +42,7 @@ const char* xml::Attribute::readName(const Handler handler) const
 }
 
 void xml::Attribute::setValue (const char* value)
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    Handler handler = getHandler();
    xmlSetProp(handler->parent, BAD_CAST handler->name, BAD_CAST value);
@@ -81,7 +81,7 @@ bool xml::Attribute::operator < (const Attribute& left) const
 }
 
 void xml::Attribute::compile (Compiler& compiler) const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    xmlNsPtr nameSpace = getHandler()->ns;
 

@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(integer_is_nulleable)
 
    BOOST_REQUIRE_EQUAL(column.hasValue(), false);
 
-   BOOST_REQUIRE_THROW(column.getValue(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(column.getValue(), basis::RuntimeException);
 
    column.setValue(10);
    BOOST_REQUIRE_EQUAL(column.hasValue(), true);
@@ -115,4 +115,12 @@ BOOST_AUTO_TEST_CASE(integer_clone)
    BOOST_REQUIRE_EQUAL(null->compare(cannotBeNull), 20);
 
    BOOST_REQUIRE_EQUAL(notnull->compare(canBeNull), -20);
+}
+
+BOOST_AUTO_TEST_CASE(integer_instantiate) {
+   auto data = datatype::Integer::instantiate("nulleable");
+   BOOST_REQUIRE(data->hasValue());
+
+   data = datatype::Integer::instantiate("not-nulleable", datatype::Constraint::CanBeNull);
+   BOOST_REQUIRE(!data->hasValue());
 }

@@ -29,7 +29,7 @@
 
 #include <libxml/parser.h>
 
-#include <coffee/adt/DataBlock.hpp>
+#include <coffee/basis/DataBlock.hpp>
 #include <coffee/logger/Logger.hpp>
 
 #include <coffee/xml/DTD.hpp>
@@ -47,7 +47,7 @@ xml::DTD::~DTD()
 }
 
 void xml::DTD::initialize (const boost::filesystem::path& filename)
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    _xmlDtd* result = nullptr;
 
@@ -68,10 +68,10 @@ void xml::DTD::initialize (const boost::filesystem::path& filename)
    setHandler(result);
 }
 
-void xml::DTD::initialize (const adt::DataBlock& buffer)
-   throw (adt::RuntimeException)
+void xml::DTD::initialize (const basis::DataBlock& buffer)
+   throw (basis::RuntimeException)
 {
-   char filename[] = "/tmp/mytemp.XXXXXX";
+   char filename[] = "/tmp/coffee_dtd.XXXXXX";
    int fd = mkstemp(filename);
    write(fd, buffer.data(), buffer.size());
    close(fd);
@@ -81,14 +81,14 @@ void xml::DTD::initialize (const adt::DataBlock& buffer)
       initialize(file);
       std::remove(filename);
    }
-   catch(adt::RuntimeException&) {
+   catch(basis::RuntimeException&) {
       std::remove(filename);
       throw;
    }
 }
 
 void xml::DTD::validate (xml::Document& document) const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    if (getHandler () == NULL)
       COFFEE_THROW_EXCEPTION("Method xml::DTD::initialize was not called");

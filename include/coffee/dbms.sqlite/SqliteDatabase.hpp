@@ -38,7 +38,7 @@ namespace sqlite {
 class SqliteDatabase : public Database {
 public:
    static std::shared_ptr<SqliteDatabase> instantiate(app::Application& application, const boost::filesystem::path& dbFile)
-      throw(adt::RuntimeException);
+      throw(basis::RuntimeException);
    ~SqliteDatabase();
 
 private:
@@ -46,26 +46,26 @@ private:
    public:
       SqliteErrorCodeInterpreter() {;}
    private:
-      bool notFound(const int errorCode) const throw(adt::RuntimeException);
-      bool successful(const int errorCode) const throw(adt::RuntimeException);
-      bool locked(const int errorCode) const throw(adt::RuntimeException);
-      bool lostConnection(const int errorCode) const throw(adt::RuntimeException);
+      bool notFound(const int errorCode) const throw(basis::RuntimeException);
+      bool successful(const int errorCode) const throw(basis::RuntimeException);
+      bool locked(const int errorCode) const throw(basis::RuntimeException);
+      bool lostConnection(const int errorCode) const throw(basis::RuntimeException);
    };
 
    explicit SqliteDatabase(app::Application& application, const boost::filesystem::path& dbFile);
 
-   std::shared_ptr<Connection> allocateConnection(const std::string& name, const char* user, const char* password)
-      throw(adt::RuntimeException);
+   std::shared_ptr<Connection> allocateConnection(const std::string& name, const ConnectionParameters& parameters)
+      throw(basis::RuntimeException, std::bad_cast);
 
-   std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const ActionOnError::_v actionOnError)
-      throw(adt::RuntimeException);
+   std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
+      throw(basis::RuntimeException, std::bad_cast);
 
    std::shared_ptr<binder::Input> allocateInputBind(std::shared_ptr<datatype::Abstract> data) const
-      throw(adt::RuntimeException);
+      throw(basis::RuntimeException);
    std::shared_ptr<binder::Output> allocateOutputBind(std::shared_ptr<datatype::Abstract> data) const
-      throw(adt::RuntimeException);
+      throw(basis::RuntimeException);
 
-   void do_stop() throw(adt::RuntimeException) {;}
+   void do_stop() throw(basis::RuntimeException) {;}
 };
 
 }

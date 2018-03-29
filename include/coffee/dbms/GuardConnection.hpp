@@ -27,25 +27,27 @@
 #include <memory>
 #include <functional>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 #include <coffee/dbms/ResultCode.hpp>
+#include <coffee/dbms/DatabaseException.hpp>
 
 namespace coffee {
 namespace dbms {
 
 class Connection;
 class GuardStatement;
+class Statement;
 
 class GuardConnection {
 public:
-   explicit GuardConnection (std::shared_ptr<Connection> connection) throw (adt::RuntimeException);
+   explicit GuardConnection (std::shared_ptr<Connection> connection) throw (basis::RuntimeException);
    ~GuardConnection ();
 
    std::shared_ptr<Connection>& operator-> () noexcept { return std::ref(m_connection); }
 
    int setMaxCommitPending (const int maxCommitPending) noexcept;
    void clearMaxCommitPending () noexcept;
-   void commit() throw (adt::RuntimeException, DatabaseException);
+   void commit() throw (basis::RuntimeException, DatabaseException);
 
    int getCountLinkedStatement () const noexcept { return m_countLinkedStatement; }
 
@@ -56,7 +58,7 @@ private:
    void linkStatement () noexcept { m_countLinkedStatement ++; }
    void unlinkStatement () noexcept { m_countLinkedStatement --; }
 
-   ResultCode execute (std::shared_ptr<Statement>& statement) throw (adt::RuntimeException, DatabaseException);
+   ResultCode execute (std::shared_ptr<Statement>& statement) throw (basis::RuntimeException, DatabaseException);
 
    friend class GuardStatement;
 };

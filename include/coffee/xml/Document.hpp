@@ -25,6 +25,7 @@
 #define __coffee_xml_Document_hpp
 
 struct _xmlDoc;
+struct _xmlError;
 
 namespace boost {
    namespace filesystem {
@@ -33,13 +34,13 @@ namespace boost {
 }
 
 #include <memory>
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/xml/Wrapper.hpp>
 
 namespace coffee {
 
-namespace adt {
+namespace basis {
    class DataBlock;
 }
 
@@ -54,11 +55,11 @@ public:
    Document();
    virtual ~Document();
 
-   const Document& parse(const boost::filesystem::path& path) throw(adt::RuntimeException);
-   const Document& parse(const adt::DataBlock& buffer) throw(adt::RuntimeException);
+   const Document& parse(const boost::filesystem::path& path) throw(basis::RuntimeException);
+   const Document& parse(const basis::DataBlock& buffer) throw(basis::RuntimeException);
 
-   const Document& parse(const boost::filesystem::path& path, const DTD& dtd) throw(adt::RuntimeException);
-   const Document& parse(const adt::DataBlock& buffer, const DTD& dtd) throw(adt::RuntimeException);
+   const Document& parse(const boost::filesystem::path& path, const DTD& dtd) throw(basis::RuntimeException);
+   const Document& parse(const basis::DataBlock& buffer, const DTD& dtd) throw(basis::RuntimeException);
 
    const std::shared_ptr<Node> getRoot() const noexcept { return m_root; }
    std::shared_ptr<Node> getRoot() noexcept { return m_root; }
@@ -66,17 +67,19 @@ public:
 private:
    std::shared_ptr <Node> m_root;
 
-   void parseFile(const boost::filesystem::path& path) throw(adt::RuntimeException);
-   void parseMemory(const adt::DataBlock& buffer) throw(adt::RuntimeException);
+   void parseFile(const boost::filesystem::path& path) throw(basis::RuntimeException);
+   void parseMemory(const basis::DataBlock& buffer) throw(basis::RuntimeException);
 
-   void extractNodes(_xmlDoc* handler) throw(adt::RuntimeException);
+   void extractNodes(_xmlDoc* handler) throw(basis::RuntimeException);
 
    const char* readName(const Handler handler) const noexcept;
 
-   static void extractNodes(std::shared_ptr<xml::Node>& node) throw(adt::RuntimeException);
-   static void extractAttributes(std::shared_ptr<xml::Node>& node) throw(adt::RuntimeException);
+   static void extractNodes(std::shared_ptr<xml::Node>& node) throw(basis::RuntimeException);
+   static void extractAttributes(std::shared_ptr<xml::Node>& node) throw(basis::RuntimeException);
 
-   void compile(Compiler& compiler) const throw(adt::RuntimeException);
+   void compile(Compiler& compiler) const throw(basis::RuntimeException);
+
+   static void logError(void* data, _xmlError* error) noexcept;
 
    friend class Compiler;
 };

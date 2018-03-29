@@ -68,14 +68,14 @@ private:
       bool lostConnection(const int errorCode) const noexcept { return errorCode == LostConnection; }
    };
 
-   std::shared_ptr<dbms::Connection> allocateConnection(const std::string& name, const char* user, const char* password)
-      throw(adt::RuntimeException)
+   std::shared_ptr<dbms::Connection> allocateConnection(const std::string& name, const dbms::ConnectionParameters& parameters)
+      throw(basis::RuntimeException, std::bad_cast)
    {
-      return std::make_shared<mock::MockConnection>(std::ref(*this), name, user, password);
+      return std::make_shared<mock::MockConnection>(std::ref(*this), name, parameters);
    }
 
    std::shared_ptr<dbms::binder::Input> allocateInputBind(std::shared_ptr<dbms::datatype::Abstract> data) const
-      throw(adt::RuntimeException)
+      throw(basis::RuntimeException)
    {
       if (std::string("give-me-null") == data->getName())
          return std::shared_ptr<MockInput>();
@@ -84,7 +84,7 @@ private:
    }
 
    std::shared_ptr<dbms::binder::Output> allocateOutputBind(std::shared_ptr<dbms::datatype::Abstract> data) const
-      throw(adt::RuntimeException)
+      throw(basis::RuntimeException)
    {
       if (std::string("give-me-null") == data->getName())
          return std::shared_ptr<MockOutput>();

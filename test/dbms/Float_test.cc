@@ -43,8 +43,8 @@ BOOST_AUTO_TEST_CASE(float_is_nulleable)
 
    BOOST_REQUIRE_EQUAL(column.hasValue(), false);
 
-   BOOST_REQUIRE_THROW(column.getValue(), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(column.getFloatValue(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(column.getValue(), basis::RuntimeException);
+   BOOST_REQUIRE_THROW(column.getFloatValue(), basis::RuntimeException);
 
    column.setValue(10.12);
 
@@ -119,4 +119,12 @@ BOOST_AUTO_TEST_CASE(float_clone)
    BOOST_REQUIRE_EQUAL(null->compare(cannotBeNull), 1);
 
    BOOST_REQUIRE_EQUAL(notnull->compare(canBeNull), -1);
+}
+
+BOOST_AUTO_TEST_CASE(float_instantiate) {
+   auto data = datatype::Float::instantiate("nulleable");
+   BOOST_REQUIRE(data->hasValue());
+
+   data = datatype::Float::instantiate("not-nulleable", datatype::Constraint::CanBeNull);
+   BOOST_REQUIRE(!data->hasValue());
 }

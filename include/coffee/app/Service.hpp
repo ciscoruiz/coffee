@@ -26,8 +26,8 @@
 
 #include <vector>
 
-#include <coffee/adt/RuntimeException.hpp>
-#include <coffee/adt/StreamString.hpp>
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/basis/StreamString.hpp>
 
 #include <coffee/app/Runnable.hpp>
 
@@ -68,12 +68,12 @@ public:
    /**
     * \return Summarize information of this instance in a StreamString.
     */
-   operator adt::StreamString() const noexcept { return asString(); }
+   operator basis::StreamString() const noexcept { return asString(); }
 
    /**
     * \return Summarize information of this instance in a StreamString.
     */
-   virtual adt::StreamString asString() const noexcept;
+   virtual basis::StreamString asString() const noexcept;
 
    /**
     * \return Summarize information of this instance in a coffee::xml::Node.
@@ -103,7 +103,7 @@ protected:
     * This method should be implemented to specialize the initialization of this instance.
     * This method will be called from coffee::app::Application::start method.
     */
-   void initialize() throw(adt::RuntimeException);
+   void initialize() throw(basis::RuntimeException);
 
 private:
    typedef std::vector <std::string>::iterator iterator;
@@ -116,7 +116,7 @@ private:
    iterator end() noexcept { return a_predecessors.end(); }
    const std::string& data(iterator ii) noexcept { return *ii; }
 
-   virtual void do_initialize() throw(adt::RuntimeException) = 0;
+   virtual void do_initialize() throw(basis::RuntimeException) = 0;
 
    friend class Application;
 };

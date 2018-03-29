@@ -24,22 +24,23 @@
 
 #include <coffee/logger/DefaultFormatter.hpp>
 
-#include <coffee/adt/StreamString.hpp>
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/StreamString.hpp>
+#include <coffee/basis/AsString.hpp>
+#include <coffee/basis/AsHexString.hpp>
 
 using namespace coffee;
 using namespace coffee::logger;
 
-std::string DefaultFormatter::apply (const Level::_v level, const adt::StreamString& comment, const char* methodName, const char* file, const unsigned lineno)
+std::string DefaultFormatter::apply (const Level::_v level, const basis::StreamString& comment, const char* methodName, const char* file, const unsigned lineno)
    noexcept
 {
    // See https://stackoverflow.com/questions/9089842/c-chrono-system-time-in-milliseconds-time-operations
    auto second = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
 
-   adt::StreamString output;
+   basis::StreamString output;
 
-   output << "[" << adt::AsString::apply(second, "%d/%0m/%Y %T") << "] ";
-   output << "[thr=" << pthread_self() << "] ";
+   output << "[" << basis::AsString::apply(second, "%d/%0m/%Y %T") << "] ";
+   output << "[thr=" << basis::AsHexString::apply((int64_t) pthread_self()) << "] ";
    output << Level::enumName(level) << " | ";
    output << methodName << " [" << file << "(" << lineno << ")]: ";
    output << comment;

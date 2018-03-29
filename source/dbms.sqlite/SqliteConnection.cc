@@ -30,8 +30,8 @@
 using namespace coffee;
 using namespace coffee::dbms;
 
-sqlite::SqliteConnection::SqliteConnection(const Database& database, const std::string& name, const char* user, const char* password) :
-   Connection(database, name, user, password),
+sqlite::SqliteConnection::SqliteConnection(const Database& database, const std::string& name, const ConnectionParameters& parameters) :
+   Connection(database, name, parameters),
    impl(nullptr)
 {
 }
@@ -63,7 +63,7 @@ void sqlite::SqliteConnection::close()
 }
 
 void sqlite::SqliteConnection::execute(const char* statement)
-   throw(adt::RuntimeException, DatabaseException)
+   throw(basis::RuntimeException, DatabaseException)
 {
    LOG_DEBUG(statement);
 
@@ -84,7 +84,7 @@ void sqlite::SqliteConnection::do_rollback()
    try {
       execute("ROLLBACK");
    }
-   catch (adt::Exception& ex) {
+   catch (basis::Exception& ex) {
       logger::Logger::write(ex);
    }
 }

@@ -26,7 +26,7 @@
 
 #include <memory>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 #include <coffee/dbms/ResultCode.hpp>
 
 namespace coffee {
@@ -46,18 +46,18 @@ class Statement;
  */
 class GuardStatement {
 public:
-   GuardStatement(GuardConnection& guardConnection, std::shared_ptr<Statement>&) throw(adt::RuntimeException);
+   GuardStatement(GuardConnection& guardConnection, std::shared_ptr<Statement>&) throw(basis::RuntimeException);
    ~GuardStatement();
 
    GuardConnection& getGuardConnection() noexcept { return m_guardConnection; }
    std::shared_ptr<Statement> operator->() noexcept { return m_statement; }
 
-   std::shared_ptr<datatype::Abstract>& getInputData(const int pos) throw(adt::RuntimeException);
-   const std::shared_ptr<datatype::Abstract>& getOutputData(const int pos) const throw(adt::RuntimeException);
+   std::shared_ptr<datatype::Abstract>& getInputData(const int pos) throw(basis::RuntimeException);
+   const std::shared_ptr<datatype::Abstract>& getOutputData(const int pos) const throw(basis::RuntimeException);
 
-   ResultCode execute() throw(adt::RuntimeException, DatabaseException);
+   ResultCode execute() throw(basis::RuntimeException, DatabaseException);
 
-   bool fetch() throw(adt::RuntimeException, DatabaseException);
+   bool fetch() throw(basis::RuntimeException, DatabaseException);
 
    bool setRequiresCommit(const bool requiresCommit) noexcept;
 

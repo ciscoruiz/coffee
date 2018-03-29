@@ -41,7 +41,7 @@ dbms::datatype::Set::Set(const Set& other)
    }
 }
 
-void dbms::datatype::Set::insert(std::shared_ptr<Abstract> data) throw (adt::RuntimeException) {
+void dbms::datatype::Set::insert(std::shared_ptr<Abstract> data) throw (basis::RuntimeException) {
    if (!data) {
       COFFEE_THROW_EXCEPTION("data must be initialized");
    }
@@ -58,7 +58,7 @@ void dbms::datatype::Set::insert(std::shared_ptr<Abstract> data) throw (adt::Run
 }
 
 std::shared_ptr<dbms::datatype::Abstract>& dbms::datatype::Set::find(const std::string& name)
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    auto ii = m_datas.find(name);
 
@@ -70,7 +70,7 @@ std::shared_ptr<dbms::datatype::Abstract>& dbms::datatype::Set::find(const std::
 }
 
 const std::shared_ptr<dbms::datatype::Abstract>& dbms::datatype::Set::find(const std::string& name) const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    auto ii = m_datas.find(name);
 
@@ -98,7 +98,7 @@ dbms::datatype::Set& dbms::datatype::Set::operator=(const Set& other)
 }
 
 int dbms::datatype::Set::compare(const Set& other) const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    if (this == &other) {
       return 0;
@@ -133,7 +133,7 @@ bool dbms::datatype::Set::operator==(const Set& other) const
    try {
       result = (compare(other) == 0);
    }
-   catch(adt::RuntimeException&) {
+   catch(basis::RuntimeException&) {
       result = false;
    }
 
@@ -148,7 +148,7 @@ int dbms::datatype::Set::getInteger(const std::string& columnName) const
 }
 
 std::string dbms::datatype::Set::getString(const std::string& columnName)
-   const throw(adt::RuntimeException, dbms::InvalidDataException)
+   const throw(basis::RuntimeException, dbms::InvalidDataException)
 {
    auto member = coffee_datatype_downcast(dbms::datatype::String,find(columnName));
    return std::string(member->getValue());
@@ -160,7 +160,7 @@ float dbms::datatype::Set::getFloat(const std::string& columnName) const throw(d
    return member->getFloatValue();
 }
 
-const adt::DataBlock& dbms::datatype::Set::getDataBlock(const std::string& columnName) const throw(dbms::InvalidDataException)
+const basis::DataBlock& dbms::datatype::Set::getDataBlock(const std::string& columnName) const throw(dbms::InvalidDataException)
 {
    auto abstractMember = find(columnName);
 
@@ -183,7 +183,7 @@ void dbms::datatype::Set::setInteger(const std::string& columnName, const int va
 }
 
 void dbms::datatype::Set::setString(const std::string& columnName, const std::string& value)
-   throw(adt::RuntimeException, dbms::InvalidDataException)
+   throw(basis::RuntimeException, dbms::InvalidDataException)
 {
    auto member = coffee_datatype_downcast(dbms::datatype::String,find(columnName));
    member->setValue(value);
@@ -195,7 +195,7 @@ void dbms::datatype::Set::setFloat(const std::string& columnName, const float va
    member->setValue(value);
 }
 
-void dbms::datatype::Set::setDataBlock(const std::string& columnName, const adt::DataBlock& value) throw(dbms::InvalidDataException)
+void dbms::datatype::Set::setDataBlock(const std::string& columnName, const basis::DataBlock& value) throw(dbms::InvalidDataException)
 {
    auto abstractMember = find(columnName);
 
@@ -206,7 +206,7 @@ void dbms::datatype::Set::setDataBlock(const std::string& columnName, const adt:
 }
 
 void dbms::datatype::Set::setDate(const std::string& columnName, const std::chrono::seconds& value)
-   throw(adt::RuntimeException, dbms::InvalidDataException)
+   throw(basis::RuntimeException, dbms::InvalidDataException)
 {
    auto member = coffee_datatype_downcast(dbms::datatype::Date,find(columnName));
    member->setValue(value);

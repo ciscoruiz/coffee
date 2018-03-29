@@ -26,7 +26,7 @@
 
 #include <memory>
 
-#include <coffee/adt/NamedObject.hpp>
+#include <coffee/basis/NamedObject.hpp>
 #include <coffee/balance/ResourceUnavailableException.hpp>
 
 namespace coffee {
@@ -44,7 +44,7 @@ class ResourceList;
 /**
  * Generic strategy for selecting a resource from a ResourceList.
  */
-class Strategy : public adt::NamedObject {
+class Strategy : public basis::NamedObject {
 public:
    /**
     * Method that will choose one Resource from the ResourceList.
@@ -55,7 +55,7 @@ public:
    /**
     * \return Summarize information of this instance in a StreamString.
     */
-   virtual adt::StreamString asString () const noexcept;
+   virtual basis::StreamString asString () const noexcept;
 
    /**
     * \return Summarize information of this instance in a coffee::xml::Node.
@@ -75,13 +75,13 @@ protected:
     * \param name Logical name.
     * \param resources List of resources to work with.
     */
-   Strategy(const std::string& name, std::shared_ptr<ResourceList>& resources) : adt::NamedObject(name), m_resources(resources) {;}
+   Strategy(const std::string& name, std::shared_ptr<ResourceList>& resources) : basis::NamedObject(name), m_resources(resources) {;}
 
    /**
     * Constuctor.
     * \param name Logical name.
     */
-   explicit Strategy(const std::string& name) : adt::NamedObject(name) {;}
+   explicit Strategy(const std::string& name) : basis::NamedObject(name) {;}
 
    /**
     * Set the resource list to work with.

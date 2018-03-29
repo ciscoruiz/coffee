@@ -44,7 +44,7 @@ datatype::String::String (const String& other) :
 }
 
 void datatype::String::setValue (const char* str)
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    if (str == NULL) {
       this->isNull ();
@@ -63,10 +63,10 @@ void datatype::String::setValue (const char* str)
    this->isNotNull();
 }
 
-adt::StreamString datatype::String::asString () const
+basis::StreamString datatype::String::asString () const
    noexcept
 {
-   adt::StreamString result ("datatype.String { ");
+   basis::StreamString result ("datatype.String { ");
    result += datatype::Abstract::asString ();
    result << " | MaxSize=" << getMaxSize();
 
@@ -77,7 +77,7 @@ adt::StreamString datatype::String::asString () const
 }
 
 int datatype::String::do_compare (const datatype::Abstract& other) const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    const String& _other = coffee_datatype_downcast(String, other);
 

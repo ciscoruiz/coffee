@@ -22,7 +22,7 @@
 //
 
 
-#include <coffee/adt/DataBlock.hpp>
+#include <coffee/basis/DataBlock.hpp>
 
 #include <coffee/dbms.sqlite/SqliteOutputBinder.hpp>
 #include <coffee/dbms.sqlite/SqliteStatement.hpp>
@@ -42,7 +42,7 @@ using namespace coffee;
 using namespace coffee::dbms;
 
 void sqlite::SqliteOutputBinder::do_decode(Statement& statement, const int pos)
-   throw(adt::RuntimeException)
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<datatype::Abstract>& data(getData());
    sqlite3_stmt* impl = static_cast<SqliteStatement&>(statement).getImpl();
@@ -64,20 +64,20 @@ void sqlite::SqliteOutputBinder::do_decode(Statement& statement, const int pos)
       break;
    case dbms::datatype::Abstract::Datatype::ShortBlock:
       {
-         adt::DataBlock blob((const char*) sqlite3_column_blob(impl, pos), sqlite3_column_bytes(impl, pos));
+         basis::DataBlock blob((const char*) sqlite3_column_blob(impl, pos), sqlite3_column_bytes(impl, pos));
          coffee_datatype_downcast(datatype::ShortBlock, data)->setValue(blob);
       }
       break;
    case dbms::datatype::Abstract::Datatype::LongBlock:
       {
-         adt::DataBlock blob((const char*) sqlite3_column_blob(impl, pos), sqlite3_column_bytes(impl, pos));
+         basis::DataBlock blob((const char*) sqlite3_column_blob(impl, pos), sqlite3_column_bytes(impl, pos));
          coffee_datatype_downcast(datatype::LongBlock, data)->setValue(blob);
       }
       break;
    case dbms::datatype::Abstract::Datatype::Date:
       {
          const std::string date = (const char*) sqlite3_column_text(impl, pos);
-         coffee_datatype_downcast(datatype::Date, data)->setValue(getSeconds(date));
+         coffee_datatype_downcast(datatype::Date, data)->setValue(date, datatype::Date::DefaultFormat);
       }
       break;
    case dbms::datatype::Abstract::Datatype::TimeStamp:
@@ -87,20 +87,4 @@ void sqlite::SqliteOutputBinder::do_decode(Statement& statement, const int pos)
       }
       break;
    }
-}
-
-//static
-std::chrono::seconds sqlite::SqliteOutputBinder::getSeconds(const std::string& value)
-   throw (adt::RuntimeException)
-{
-   const char* format = "%Y-%m-%d %H:%M:%S";
-
-   tm tt;
-
-   coffee_memset(&tt, 0, sizeof(tt));
-   if (strptime(value.c_str(), format, &tt) == NULL) {
-    COFFEE_THROW_EXCEPTION(value << " is not valid expression for " << format);
-   }
-
-   return std::chrono::seconds(mktime(&tt));
 }

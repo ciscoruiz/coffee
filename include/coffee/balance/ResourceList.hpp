@@ -28,8 +28,8 @@
 #include <mutex>
 #include <memory>
 
-#include <coffee/adt/RuntimeException.hpp>
-#include <coffee/adt/NamedObject.hpp>
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/basis/NamedObject.hpp>
 
 namespace coffee {
 
@@ -45,7 +45,7 @@ class GuardResourceList;
 /**
  * List of resources with exclusive access.
  */
-class ResourceList : public adt::NamedObject  {
+class ResourceList : public basis::NamedObject  {
    typedef std::vector <std::shared_ptr<Resource> > resource_container;
 
 public:
@@ -56,7 +56,7 @@ public:
     * Constructor
     * \param name Logical name.
     */
-   explicit ResourceList(const char* name) : adt::NamedObject(name) {;}
+   explicit ResourceList(const char* name) : basis::NamedObject(name) {;}
 
    /**
     * Destructor.
@@ -66,12 +66,12 @@ public:
    /**
     * Add resource to the list. It is thread-safe.
     */
-   bool add(std::shared_ptr<Resource> resource) throw(adt::RuntimeException);
+   bool add(std::shared_ptr<Resource> resource) throw(basis::RuntimeException);
 
    /**
     * It will call to pure virtual method \em do_initialize and do_initializer for every one of the associated resources.
     */
-   virtual void initialize() throw(adt::RuntimeException);
+   virtual void initialize() throw(basis::RuntimeException);
 
    /**
     * \return resource_iterator to the first attached resource.
@@ -134,12 +134,12 @@ public:
    /**
     * \return Summarize information of this instance in a StreamString.
     */
-   operator adt::StreamString() const noexcept { return asString(); }
+   operator basis::StreamString() const noexcept { return asString(); }
 
    /**
     * \return Summarize information of this instance in a StreamString.
     */
-   virtual adt::StreamString asString() const noexcept;
+   virtual basis::StreamString asString() const noexcept;
 
    /**
     * \return Summarize information of this instance in a coffee::xml::Node.

@@ -39,6 +39,7 @@
 #include <coffee/dbms/GuardConnection.hpp>
 #include <coffee/dbms/GuardStatement.hpp>
 #include <coffee/dbms/Connection.hpp>
+#include <coffee/dbms/ConnectionParameters.hpp>
 #include <coffee/dbms/Statement.hpp>
 #include <coffee/dbms/datatype/String.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
@@ -47,6 +48,7 @@
 #include <coffee/dbms/datatype/ShortBlock.hpp>
 #include <coffee/dbms/datatype/Date.hpp>
 #include <coffee/dbms/datatype/TimeStamp.hpp>
+#include <coffee/logger/UnlimitedTraceWriter.hpp>
 
 #include "../dbms/PrintChrono.hpp"
 
@@ -195,8 +197,10 @@ static void sqliteParallelRun(coffee::app::Application& app) {
 struct SqliteFixture  {
    static  boost::filesystem::path dbPath;
 
-   SqliteFixture() : app ("SqliteApplication"){
-      logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
+   SqliteFixture() : app ("TestSqliteApplication"){
+      const char* logFileName = "test/dbms.sqlite/trace.log";
+      unlink (logFileName);
+      logger::Logger::initialize(std::make_shared<logger::UnlimitedTraceWriter>(logFileName));
       logger::Logger::setLevel(logger::Level::Debug);
 
       database = dbms::sqlite::SqliteDatabase::instantiate(app, dbPath);
@@ -204,7 +208,7 @@ struct SqliteFixture  {
       app.waitUntilRunning();
       BOOST_REQUIRE(database->isRunning());
       boost::filesystem::remove(dbPath);
-      connection = database->createConnection("first", "user:first", "none");
+      connection = database->createConnection("first", coffee::dbms::ConnectionParameters("user:first", "none"));
       BOOST_REQUIRE_EQUAL(boost::filesystem::exists(dbPath), true);
       BOOST_REQUIRE_EQUAL(connection->isAvailable(), true);
 
@@ -240,14 +244,14 @@ boost::filesystem::path SqliteFixture::dbPath("/tmp/sqlite_test.db");
 
 BOOST_FIXTURE_TEST_CASE(sqlite_create_db, SqliteFixture)
 {
-   auto secondConnection = database->createConnection("second", "user:second", "none");
+   auto secondConnection = database->createConnection("second", coffee::dbms::ConnectionParameters("user:second", "none"));
    BOOST_REQUIRE_EQUAL(secondConnection->isAvailable(), true);
 }
 
 struct SqliteFixtureBadPath  {
    static  boost::filesystem::path dbBadPath;
 
-   SqliteFixtureBadPath() : app ("SqliteApplication-Badpath"){
+   SqliteFixtureBadPath() : app ("TestSqliteApplication-Badpath"){
       database = dbms::sqlite::SqliteDatabase::instantiate(app, dbBadPath);
       thr = std::thread(sqliteParallelRun, std::ref(app));
       app.waitUntilRunning();
@@ -268,8 +272,7 @@ boost::filesystem::path SqliteFixtureBadPath::dbBadPath("/root");
 BOOST_FIXTURE_TEST_CASE(sqlite_connection_badpath, SqliteFixtureBadPath)
 {
    BOOST_REQUIRE(database->isRunning());
-   std::shared_ptr<dbms::Connection> connection;
-   BOOST_REQUIRE_THROW(connection = database->createConnection("closed", "user:first", "none"), dbms::DatabaseException);
+   BOOST_REQUIRE_THROW(database->createConnection("db_is_not_working", coffee::dbms::ConnectionParameters ("user:first", "none")), dbms::DatabaseException);
 }
 
 BOOST_FIXTURE_TEST_CASE(undefined_column_select, SqliteFixture)
@@ -299,7 +302,7 @@ BOOST_FIXTURE_TEST_CASE(bad_input_parameters, SqliteFixture)
    auto statement = database->createStatement("bad_input_parameters", sql);
    dbms::GuardConnection guardConnection(connection);
    dbms::GuardStatement guardStament(guardConnection, statement);
-   BOOST_REQUIRE_THROW(guardStament.execute(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(guardStament.execute(), basis::RuntimeException);
 }
 
 BOOST_FIXTURE_TEST_CASE(bad_output_parameters, SqliteFixture)
@@ -310,7 +313,7 @@ BOOST_FIXTURE_TEST_CASE(bad_output_parameters, SqliteFixture)
    statement->createBinderInput(id);
    dbms::GuardConnection guardConnection(connection);
    dbms::GuardStatement guardStament(guardConnection, statement);
-   BOOST_REQUIRE_THROW(guardStament.execute(), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(guardStament.execute(), basis::RuntimeException);
 }
 
 // See http://www.yolinux.com/TUTORIALS/SQLite.html
@@ -404,7 +407,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_insert, SqliteFixture)
       BOOST_REQUIRE(rc.successful());
    }
 
-   auto secondConnection = database->createConnection("second", "user:second", "none");
+   auto secondConnection = database->createConnection("second", coffee::dbms::ConnectionParameters("user:second", "none"));
 
    {
       dbms::GuardConnection guardConnection(secondConnection);
@@ -436,8 +439,8 @@ BOOST_FIXTURE_TEST_CASE(sqlite_float, SqliteFixture)
    BOOST_REQUIRE(guardStament.fetch());
    BOOST_REQUIRE_CLOSE(fullStatement.myfloat->getValue(), 0.22, 0.1);
 
-   const adt::DataBlock& dbBlob = fullStatement.mydata->getValue();
-   adt::DataBlock expected("123456789-12345", 15);
+   const basis::DataBlock& dbBlob = fullStatement.mydata->getValue();
+   basis::DataBlock expected("123456789-12345", 15);
    BOOST_REQUIRE_EQUAL(dbBlob.size(), expected.size());
    BOOST_REQUIRE_EQUAL(memcmp(dbBlob.data(), expected.data(), expected.size()), 0);
 }
@@ -489,7 +492,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_reuse_sentence, SqliteFixture)
       BOOST_REQUIRE_EQUAL(ageCounter.outputId->getValue(), 4);
    }
 
-   auto secondConnection = database->createConnection("second", "user:second", "none");
+   auto secondConnection = database->createConnection("second", coffee::dbms::ConnectionParameters("user:second", "none"));
 
    {
       dbms::GuardConnection guardConnection(secondConnection);
@@ -566,10 +569,10 @@ BOOST_FIXTURE_TEST_CASE(sqlite_insert_all_types, SqliteFixture)
          insert.id->setValue(ii);
          insert.theFloat->setValue(10.11 * ii);
          insert.theDate->setValue(now + seconds(ii));
-         insert.theBlob->setValue(adt::DataBlock((const char*) &now, sizeof(now)));
+         insert.theBlob->setValue(basis::DataBlock((const char*) &now, sizeof(now)));
          insert.theTime->setValue(now + seconds(ii * 2));
          memset(buffer, now.count() % 255, sizeof(buffer));
-         adt::DataBlock value(buffer, sizeof(buffer));
+         basis::DataBlock value(buffer, sizeof(buffer));
          insert.theLongBlob->setValue(value);
          BOOST_REQUIRE_NO_THROW(guardStament.execute());
       }
@@ -594,7 +597,7 @@ BOOST_FIXTURE_TEST_CASE(sqlite_insert_all_types, SqliteFixture)
          BOOST_REQUIRE_EQUAL(select.id->getValue(), counter);
          BOOST_REQUIRE_CLOSE(select.theFloat->getValue(), 10.11 * counter, 0.1);
          BOOST_REQUIRE_EQUAL(select.theDate->getValue(), now + seconds(counter));
-         BOOST_REQUIRE(select.theBlob->getValue() == adt::DataBlock((const char*) &now, sizeof(now)));
+         BOOST_REQUIRE(select.theBlob->getValue() == basis::DataBlock((const char*) &now, sizeof(now)));
          BOOST_REQUIRE(select.theTime->getValue() == now + seconds(counter * 2));
          counter ++;
       }

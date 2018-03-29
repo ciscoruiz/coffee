@@ -24,7 +24,7 @@
 #ifndef __coffee_persistence_PrimaryKeyBuilder_hpp
 #define __coffee_persistence_PrimaryKeyBuilder_hpp
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/dbms/datatype/Set.hpp>
 
@@ -44,12 +44,12 @@ public:
     */
    PrimaryKeyBuilder() {;}
 
-   PrimaryKeyBuilder& add(std::shared_ptr<dbms::datatype::Abstract> data) throw (adt::RuntimeException) {
+   PrimaryKeyBuilder& add(std::shared_ptr<dbms::datatype::Abstract> data) throw (basis::RuntimeException) {
       insert(data);
       return *this;
    }
     
-   std::shared_ptr<persistence::PrimaryKey> build() const throw (adt::RuntimeException);
+   std::shared_ptr<persistence::PrimaryKey> build() const throw (basis::RuntimeException);
     
 private:
     friend class PrimaryKey;

@@ -66,22 +66,22 @@ BOOST_AUTO_TEST_CASE(dbms_compare_date)
    BOOST_REQUIRE_LT(other.compare(value), 0);
 
    dbms::datatype::Float theFloat("theFloat", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theFloat), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theFloat), basis::RuntimeException);
 
    dbms::datatype::Integer theInteger("theInteger", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theInteger), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theInteger), basis::RuntimeException);
 
    dbms::datatype::LongBlock theLongBlock("theLongBlock", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theLongBlock), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theLongBlock), basis::RuntimeException);
 
    dbms::datatype::ShortBlock theShortBlock("theShortBlock", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theShortBlock), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theShortBlock), basis::RuntimeException);
 
    dbms::datatype::String theString("theString", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theString), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theString), basis::RuntimeException);
 
    dbms::datatype::TimeStamp theTimeStamp("theTimeStamp", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theTimeStamp), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theTimeStamp), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(dbms_compare_float)
@@ -111,22 +111,22 @@ BOOST_AUTO_TEST_CASE(dbms_compare_float)
    BOOST_REQUIRE_LT(other.compare(value), 0);
 
    dbms::datatype::Date theDate("theDate", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theDate), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theDate), basis::RuntimeException);
 
    dbms::datatype::Integer theInteger("theInteger", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theInteger), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theInteger), basis::RuntimeException);
 
    dbms::datatype::LongBlock theLongBlock("theLongBlock", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theLongBlock), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theLongBlock), basis::RuntimeException);
 
    dbms::datatype::ShortBlock theShortBlock("theShortBlock", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theShortBlock), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theShortBlock), basis::RuntimeException);
 
    dbms::datatype::String theString("theString", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theString), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theString), basis::RuntimeException);
 
    dbms::datatype::TimeStamp theTimeStamp("theTimeStamp", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theTimeStamp), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theTimeStamp), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(dbms_compare_float_abstract)
@@ -169,22 +169,22 @@ BOOST_AUTO_TEST_CASE(dbms_compare_integer)
    BOOST_REQUIRE_LT(other.compare(value), 0);
 
    dbms::datatype::Date theDate("theDate", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theDate), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theDate), basis::RuntimeException);
 
    dbms::datatype::Float theFloat("theFloat", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theFloat), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theFloat), basis::RuntimeException);
 
    dbms::datatype::LongBlock theLongBlock("theLongBlock", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theLongBlock), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theLongBlock), basis::RuntimeException);
 
    dbms::datatype::ShortBlock theShortBlock("theShortBlock", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theShortBlock), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theShortBlock), basis::RuntimeException);
 
    dbms::datatype::String theString("theString", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theString), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theString), basis::RuntimeException);
 
    dbms::datatype::TimeStamp theTimeStamp("theTimeStamp", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theTimeStamp), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theTimeStamp), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(dbms_compare_string)
@@ -215,22 +215,22 @@ BOOST_AUTO_TEST_CASE(dbms_compare_string)
    BOOST_REQUIRE_LT(other.compare(value), 0);
 
    dbms::datatype::Date theDate("theDate", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theDate), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theDate), basis::RuntimeException);
 
    dbms::datatype::Float theFloat("theFloat", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theFloat), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theFloat), basis::RuntimeException);
 
    dbms::datatype::Integer theInteger("theInteger", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theInteger), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theInteger), basis::RuntimeException);
 
    dbms::datatype::LongBlock theLongBlock("theLongBlock", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theLongBlock), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theLongBlock), basis::RuntimeException);
 
    dbms::datatype::ShortBlock theShortBlock("theShortBlock", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theShortBlock), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theShortBlock), basis::RuntimeException);
 
    dbms::datatype::TimeStamp theTimeStamp("theTimeStamp", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theTimeStamp), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theTimeStamp), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(dbms_compare_longblock)
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(dbms_compare_longblock)
 
    BOOST_REQUIRE_EQUAL(value.compare(other), 0);
 
-   adt::DataBlock datablock;
+   basis::DataBlock datablock;
 
    datablock.append("hello");
    other.setValue(datablock);
@@ -252,12 +252,12 @@ BOOST_AUTO_TEST_CASE(dbms_compare_longblock)
    BOOST_REQUIRE_GT(other.compare(value), 0);
 
    value.setValue(other.getValue());
-   BOOST_REQUIRE_THROW(value.compare(other), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(other), basis::RuntimeException);
 
    datablock = "xabc";
    value.setValue(datablock);
-   BOOST_REQUIRE_THROW(value.compare(other), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(other.compare(value), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(other), basis::RuntimeException);
+   BOOST_REQUIRE_THROW(other.compare(value), basis::RuntimeException);
 
    other.clear();
    BOOST_REQUIRE_EQUAL(other.hasValue(), false);
@@ -265,22 +265,22 @@ BOOST_AUTO_TEST_CASE(dbms_compare_longblock)
    BOOST_REQUIRE_LT(other.compare(value), 0);
 
    dbms::datatype::Date theDate("theDate", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theDate), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theDate), basis::RuntimeException);
 
    dbms::datatype::Float theFloat("theFloat", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theFloat), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theFloat), basis::RuntimeException);
 
    dbms::datatype::Integer theInteger("theInteger", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theInteger), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theInteger), basis::RuntimeException);
 
    dbms::datatype::String theString("theString", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theString), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theString), basis::RuntimeException);
 
    dbms::datatype::ShortBlock theShortBlock("theShortBlock", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theShortBlock), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theShortBlock), basis::RuntimeException);
 
    dbms::datatype::TimeStamp theTimeStamp("theTimeStamp", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theTimeStamp), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theTimeStamp), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE(dbms_compare_shortblock)
@@ -293,7 +293,7 @@ BOOST_AUTO_TEST_CASE(dbms_compare_shortblock)
 
    BOOST_REQUIRE_EQUAL(value.compare(other), 0);
 
-   adt::DataBlock datablock;
+   basis::DataBlock datablock;
 
    datablock.append("hello");
    other.setValue(datablock);
@@ -302,12 +302,12 @@ BOOST_AUTO_TEST_CASE(dbms_compare_shortblock)
    BOOST_REQUIRE_GT(other.compare(value), 0);
 
    value.setValue(other.getValue());
-   BOOST_REQUIRE_THROW(value.compare(other), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(other), basis::RuntimeException);
 
    datablock = "xabc";
    value.setValue(datablock);
-   BOOST_REQUIRE_THROW(value.compare(other), adt::RuntimeException);
-   BOOST_REQUIRE_THROW(other.compare(value), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(other), basis::RuntimeException);
+   BOOST_REQUIRE_THROW(other.compare(value), basis::RuntimeException);
 
    other.clear();
    BOOST_REQUIRE_EQUAL(other.hasValue(), false);
@@ -315,22 +315,22 @@ BOOST_AUTO_TEST_CASE(dbms_compare_shortblock)
    BOOST_REQUIRE_LT(other.compare(value), 0);
 
    dbms::datatype::Date theDate("theDate", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theDate), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theDate), basis::RuntimeException);
 
    dbms::datatype::Float theFloat("theFloat", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theFloat), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theFloat), basis::RuntimeException);
 
    dbms::datatype::Integer theInteger("theInteger", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theInteger), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theInteger), basis::RuntimeException);
 
    dbms::datatype::String theString("theString", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theString), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theString), basis::RuntimeException);
 
    dbms::datatype::LongBlock theShortBlock("theShortBlock", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theShortBlock), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theShortBlock), basis::RuntimeException);
 
    dbms::datatype::TimeStamp theTimeStamp("theTimeStamp", dbms::datatype::Constraint::CanNotBeNull);
-   BOOST_REQUIRE_THROW(value.compare(theTimeStamp), adt::RuntimeException);
+   BOOST_REQUIRE_THROW(value.compare(theTimeStamp), basis::RuntimeException);
 }
 
 

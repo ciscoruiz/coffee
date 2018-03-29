@@ -40,10 +40,10 @@ datatype::Integer::Integer (const Integer& other) :
    datatype::Abstract::setBuffer (&m_value);
 }
 
-adt::StreamString datatype::Integer::asString () const
+basis::StreamString datatype::Integer::asString () const
    noexcept
 {
-   adt::StreamString result;
+   basis::StreamString result;
    result << "datatype.Integer { " << datatype::Abstract::asString ();
    if (this->hasValue () == true) {
       result << " | Value=" << m_value;
@@ -52,7 +52,7 @@ adt::StreamString datatype::Integer::asString () const
 }
 
 int datatype::Integer::do_compare (const datatype::Abstract& other) const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    const Integer& _other = coffee_datatype_downcast(Integer, other);
 

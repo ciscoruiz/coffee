@@ -35,10 +35,10 @@ public:
    SqliteErrorCodeInterpreter() {;}
 
 private:
-   bool notFound(const int errorCode) const throw(adt::RuntimeException);
-   bool successful(const int errorCode) const throw(adt::RuntimeException);
-   bool locked(const int errorCode) const throw(adt::RuntimeException);
-   bool lostConnection(const int errorCode) const throw(adt::RuntimeException);
+   bool notFound(const int errorCode) const throw(basis::RuntimeException);
+   bool successful(const int errorCode) const throw(basis::RuntimeException);
+   bool locked(const int errorCode) const throw(basis::RuntimeException);
+   bool lostConnection(const int errorCode) const throw(basis::RuntimeException);
 };
 
 } /* namespace sqlite */

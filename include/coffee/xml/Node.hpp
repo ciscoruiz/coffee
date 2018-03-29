@@ -28,8 +28,8 @@
 #include <vector>
 #include <set>
 
-#include <coffee/adt/RuntimeException.hpp>
-#include <coffee/adt/AsString.hpp>
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/basis/AsString.hpp>
 
 #include <coffee/xml/Wrapper.hpp>
 #include <coffee/xml/Attribute.hpp>
@@ -65,33 +65,33 @@ public:
    explicit Node(_xmlNode* xmlNode);
    ~Node() {;}
 
-   std::shared_ptr<Node> lookupChild(const char* name) const throw(adt::RuntimeException);
+   std::shared_ptr<Node> lookupChild(const char* name) const throw(basis::RuntimeException);
    std::shared_ptr<Node> searchChild(const char* name) const noexcept;
-   std::shared_ptr<Node> lookupChild(const std::string& name) const throw(adt::RuntimeException) { return lookupChild(name.c_str()); }
+   std::shared_ptr<Node> lookupChild(const std::string& name) const throw(basis::RuntimeException) { return lookupChild(name.c_str()); }
    std::shared_ptr<Node> searchChild(const std::string& name) const noexcept { return searchChild(name.c_str()); }
-   std::shared_ptr<Node> childAt(const size_t ii) const throw(adt::RuntimeException);
+   std::shared_ptr<Node> childAt(const size_t ii) const throw(basis::RuntimeException);
 
-   std::shared_ptr<Node> lookupChild(const char* name) throw(adt::RuntimeException);
+   std::shared_ptr<Node> lookupChild(const char* name) throw(basis::RuntimeException);
    std::shared_ptr<Node> searchChild(const char* name) noexcept;
-   std::shared_ptr<Node> lookupChild(const std::string& name) throw(adt::RuntimeException) { return lookupChild(name.c_str()); }
+   std::shared_ptr<Node> lookupChild(const std::string& name) throw(basis::RuntimeException) { return lookupChild(name.c_str()); }
    std::shared_ptr<Node> searchChild(const std::string& name) noexcept { return searchChild(name.c_str()); }
-   std::shared_ptr<Node> childAt(const size_t ii) throw(adt::RuntimeException);
+   std::shared_ptr<Node> childAt(const size_t ii) throw(basis::RuntimeException);
 
-   std::shared_ptr<Node> createChild(const char* name) throw(adt::RuntimeException);
-   std::shared_ptr<Node> createChild(const std::string& name) throw(adt::RuntimeException) { return createChild(name.c_str()); }
-   std::shared_ptr<Attribute> createAttribute(const char* name, const char* value) throw(adt::RuntimeException);
-   std::shared_ptr<Attribute> createAttribute(const char* name, const std::string& value) throw(adt::RuntimeException) { return createAttribute(name, value.c_str()); }
+   std::shared_ptr<Node> createChild(const char* name) throw(basis::RuntimeException);
+   std::shared_ptr<Node> createChild(const std::string& name) throw(basis::RuntimeException) { return createChild(name.c_str()); }
+   std::shared_ptr<Attribute> createAttribute(const char* name, const char* value) throw(basis::RuntimeException);
+   std::shared_ptr<Attribute> createAttribute(const char* name, const std::string& value) throw(basis::RuntimeException) { return createAttribute(name, value.c_str()); }
 
-   template <typename _T> std::shared_ptr<Attribute> createAttribute(const char* name, const _T value) throw(adt::RuntimeException) {
-      return createAttribute(name, adt::AsString::apply(value));
+   template <typename _T> std::shared_ptr<Attribute> createAttribute(const char* name, const _T value) throw(basis::RuntimeException) {
+      return createAttribute(name, basis::AsString::apply(value));
    }
 
-   void createText(const char* text) throw(adt::RuntimeException);
-   void createText(const std::string& text) throw(adt::RuntimeException) { createText(text.c_str()); }
+   void createText(const char* text) throw(basis::RuntimeException);
+   void createText(const std::string& text) throw(basis::RuntimeException) { createText(text.c_str()); }
 
-   std::shared_ptr<Attribute> lookupAttribute(const char* name) const throw(adt::RuntimeException);
+   std::shared_ptr<Attribute> lookupAttribute(const char* name) const throw(basis::RuntimeException);
    std::shared_ptr<Attribute> searchAttribute(const char* name) const noexcept;
-   std::shared_ptr<Attribute> lookupAttribute(const std::string& name) const throw(adt::RuntimeException) { return lookupAttribute(name.c_str()); }
+   std::shared_ptr<Attribute> lookupAttribute(const std::string& name) const throw(basis::RuntimeException) { return lookupAttribute(name.c_str()); }
    std::shared_ptr<Attribute> searchAttribute(const std::string& name) const noexcept { return searchAttribute(name.c_str()); }
 
    child_iterator child_begin() noexcept { return m_children.begin(); }
@@ -109,7 +109,7 @@ public:
    static const std::shared_ptr<Attribute>& get_attribute(const_attribute_iterator ii) noexcept { return std::ref(*ii); }
 
    bool hasText() const noexcept { return m_text.isNull() == false; }
-   const std::string& getText() const throw(adt::RuntimeException);
+   const std::string& getText() const throw(basis::RuntimeException);
    void setText(const char* text) noexcept { m_text.setValue(text); }
 
 private:
@@ -118,11 +118,11 @@ private:
    Content m_text;
 
    void addChild(std::shared_ptr<Node> child) noexcept { m_children.push_back(child); }
-   void addAttribute(std::shared_ptr<Attribute> attribute) throw(adt::RuntimeException);
+   void addAttribute(std::shared_ptr<Attribute> attribute) throw(basis::RuntimeException);
 
    const char* readName(const Handler handler) const noexcept;
 
-   void compile(Compiler& compiler) const throw(adt::RuntimeException);
+   void compile(Compiler& compiler) const throw(basis::RuntimeException);
 
    friend class Compiler;
    friend class Document;

@@ -33,8 +33,8 @@ namespace sqlite {
 
 class SqliteStatement : public Statement {
 public:
-   SqliteStatement(const Database& database, const char* name, const std::string& expression, const ActionOnError::_v actionOnError);
-   virtual ~SqliteStatement();
+   SqliteStatement(const Database& database, const char* name, const std::string& expression, const StatementParameters& parameters);
+   ~SqliteStatement();
 
    ::sqlite3_stmt* getImpl() { return impl; }
 
@@ -47,9 +47,9 @@ private:
    const bool isASelect;
 
    bool isPrepared(Connection&) const noexcept;
-   void do_prepare(Connection& connection) throw(adt::RuntimeException, DatabaseException);
-   ResultCode do_execute(Connection& connection) throw(adt::RuntimeException, DatabaseException);
-   bool do_fetch() throw(adt::RuntimeException, DatabaseException);
+   void do_prepare(Connection& connection) throw(basis::RuntimeException, DatabaseException);
+   ResultCode do_execute(Connection& connection) throw(basis::RuntimeException, DatabaseException);
+   bool do_fetch() throw(basis::RuntimeException, DatabaseException);
    void close() noexcept;
 
 };

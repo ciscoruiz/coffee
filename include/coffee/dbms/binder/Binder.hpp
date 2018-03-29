@@ -27,7 +27,7 @@
 #include <functional>
 #include <memory>
 
-#include <coffee/adt/RuntimeException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/dbms/DatabaseException.hpp>
 
@@ -73,14 +73,14 @@ protected:
    explicit Binder(std::shared_ptr<datatype::Abstract>& data) : m_data(data) {;}
 
    /**
-    * \return Summarize information of this instance in a coffee::adt::StreamString.
+    * \return Summarize information of this instance in a coffee::basis::StreamString.
     */
-   virtual adt::StreamString asString() const noexcept = 0;
+   virtual basis::StreamString asString() const noexcept = 0;
 
 private:
    std::shared_ptr<datatype::Abstract> m_data;
 
-   virtual void do_prepare(Statement& statement, const int pos) throw(adt::RuntimeException, DatabaseException) = 0;
+   virtual void do_prepare(Statement& statement, const int pos) throw(basis::RuntimeException, DatabaseException) = 0;
 
    friend class coffee::dbms::Statement;
 };

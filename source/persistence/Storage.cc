@@ -24,7 +24,7 @@
 #include <coffee/xml/Node.hpp>
 #include <coffee/xml/Attribute.hpp>
 
-#include <coffee/adt/AsHexString.hpp>
+#include <coffee/basis/AsHexString.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
@@ -45,7 +45,7 @@ using namespace coffee;
 using namespace coffee::persistence;
 
 Storage::Storage(const std::string& name, const int maxCacheSize) :
-   adt::NamedObject(name),
+   basis::NamedObject(name),
    m_cache(maxCacheSize)
 {
    m_hitCounter = m_faultCounter = 0;
@@ -56,7 +56,7 @@ Storage::~Storage()
 }
 
 Accessor::TheObject Storage::load(Accessor::TheConnection& connection, Loader& loader)
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    LOG_THIS_METHOD();
 
@@ -102,7 +102,7 @@ Accessor::TheObject Storage::load(Accessor::TheConnection& connection, Loader& l
 }
 
 void Storage::save(Accessor::TheConnection& connection, Recorder& recorder)
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    LOG_THIS_METHOD();
    dbms::GuardConnection guardConnection(connection);
@@ -110,7 +110,7 @@ void Storage::save(Accessor::TheConnection& connection, Recorder& recorder)
 }
 
 void Storage::save(dbms::GuardConnection& guardConnection, Recorder& recorder)
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    LOG_THIS_METHOD();
 
@@ -131,7 +131,7 @@ void Storage::save(dbms::GuardConnection& guardConnection, Recorder& recorder)
 }
 
 void Storage::erase(Accessor::TheConnection& connection, Eraser& eraser)
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    LOG_THIS_METHOD();
    dbms::GuardConnection guardConnection(connection);
@@ -139,7 +139,7 @@ void Storage::erase(Accessor::TheConnection& connection, Eraser& eraser)
 }
 
 void Storage::erase(dbms::GuardConnection& guardConnection, Eraser& eraser)
-   throw(adt::RuntimeException, dbms::DatabaseException)
+   throw(basis::RuntimeException, dbms::DatabaseException)
 {
    const Accessor::ThePrimaryKey& primaryKey(eraser.getPrimaryKey());
 
@@ -167,13 +167,13 @@ void Storage::erase(dbms::GuardConnection& guardConnection, Eraser& eraser)
    LOG_DEBUG(eraser << " | " << primaryKey->asString() << " | " << resultCode);
 }
 
-adt::StreamString Storage::asString() const
+basis::StreamString Storage::asString() const
    noexcept
 {
-   adt::StreamString result(adt::StreamString::Flag::ShowNull);
+   basis::StreamString result(basis::StreamString::Flag::ShowNull);
 
    result = "persistence.Storage {";
-   result << adt::NamedObject::asString();
+   result << basis::NamedObject::asString();
    result << " | Hit=" << m_hitCounter;
    result << " | Fault=" << m_faultCounter;
    result << " | " << m_cache;
@@ -185,13 +185,13 @@ std::shared_ptr<xml::Node> Storage::asXML(std::shared_ptr<xml::Node>& parent) co
 {
    std::shared_ptr<xml::Node> result = parent->createChild("persistence.Storage");
 
-   result->createAttribute("Name", adt::NamedObject::getName());
+   result->createAttribute("Name", basis::NamedObject::getName());
    std::shared_ptr<xml::Node> access = result->createChild("Access");
    access->createAttribute("Hit", m_hitCounter);
    access->createAttribute("Fault", m_faultCounter);
 
    std::shared_ptr<xml::Node> cache = result->createChild("Cache(LRU)");
-   access->createAttribute("Size", adt::AsString::apply((int) m_cache.size()));
+   access->createAttribute("Size", basis::AsString::apply((int) m_cache.size()));
 
    return result;
 }

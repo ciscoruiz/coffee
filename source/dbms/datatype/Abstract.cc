@@ -23,17 +23,17 @@
 
 #include <functional>
 
-#include <coffee/adt/StreamString.hpp>
+#include <coffee/basis/StreamString.hpp>
 
 #include <coffee/dbms/datatype/Abstract.hpp>
 
 using namespace coffee;
 using namespace coffee::dbms;
 
-adt::StreamString datatype::Abstract::asString () const
+basis::StreamString datatype::Abstract::asString () const
    noexcept
 {
-   adt::StreamString result;
+   basis::StreamString result;
 
    result << "datatype.Abstract { Name=" << m_name;
    result << " | IsNull=" << m_isNull;
@@ -43,7 +43,7 @@ adt::StreamString datatype::Abstract::asString () const
 }
 
 void datatype::Abstract::isNull ()
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    if (m_constraint == Constraint::CanNotBeNull) {
       COFFEE_THROW_EXCEPTION(asString () << " | Data can not be NULL");
@@ -62,7 +62,7 @@ void datatype::Abstract::clear ()
 }
 
 void datatype::Abstract::exceptionWhenIsNull () const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    if (m_isNull == true) {
       COFFEE_THROW_EXCEPTION("Data '" << m_name << "' is null and it can not return any value");
@@ -70,13 +70,13 @@ void datatype::Abstract::exceptionWhenIsNull () const
 }
 
 int datatype::Abstract::compare (const std::shared_ptr<Abstract>& other) const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    return compare(std::ref(*other.get()));
 }
 
 int datatype::Abstract::compare (const Abstract& other) const
-   throw (adt::RuntimeException)
+   throw (basis::RuntimeException)
 {
    if (this->getType () != other.getType()) {
       COFFEE_THROW_EXCEPTION(this->asString () << " type does not matches with " << other.asString());

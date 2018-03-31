@@ -89,6 +89,7 @@ ResultCode LdapStatement::do_execute(Connection& connection)
    if (rc == LDAP_SUCCESS) {
       if (!ldap_count_entries(handle, result)) {
          ldap_msgfree(result);
+         result = nullptr;
          rc = LDAP_NO_SUCH_OBJECT;
       }
    }

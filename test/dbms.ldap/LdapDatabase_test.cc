@@ -84,7 +84,6 @@ struct LdapFixture  {
          auto outputBind = dbms::datatype::MultiString::instantiate(ii->first.c_str(), ii->second);
          variables.push_back(outputBind);
          BOOST_REQUIRE_NO_THROW(readStatement->createBinderOutput(outputBind));
-
       }
    }
 
@@ -237,6 +236,19 @@ BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement_close_before_end, LdapFixture)
 
    BOOST_REQUIRE(resultCode.successful());
 
-   BOOST_REQUIRE(guardStament.fetch() == true);
+   BOOST_REQUIRE(guardStament.fetch());
 }
 
+BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement_not_found, LdapFixture)
+{
+   LdapStatementParameters stParameters(dbms::ActionOnError::Ignore, "dc=example,dc=com");
+   readStatement = database->createStatement("not-found", "objectClass=zzzz", stParameters.setScope(LdapStatementParameters::Scope::SubTree));
+
+   dbms::GuardConnection guardConnection(connection);
+   dbms::GuardStatement guardStament(guardConnection, readStatement);
+   dbms::ResultCode resultCode = guardStament.execute();
+
+   BOOST_REQUIRE(resultCode.notFound());
+
+   BOOST_REQUIRE(!guardStament.fetch());
+}

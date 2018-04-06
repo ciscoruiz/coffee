@@ -15,6 +15,8 @@ COFFEE is the acronym for "COmpany eFFEEctive platform"
 
 This project is a set of common libraries which help to improve productivity while developing from medium to huge C++ projects.
 
+This project try to facilitate the development of medium to huge applications getting the twelve-factor methodology for building software-as-a-service apps. See https://12factor.net/ for more information.
+
 This framework contains a set of modules to boost productivity while developing C++ applications. The modules are:
 
 | Module | Comment|

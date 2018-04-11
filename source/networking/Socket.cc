@@ -24,12 +24,14 @@
 #include <coffee/networking/Socket.hpp>
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/SocketArguments.hpp>
+#include <coffee/networking/MessageHandler.hpp>
 
 using namespace coffee;
 
 networking::Socket::Socket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
    m_socketType(socketArguments.getSocketType()),
-   m_endPoints(socketArguments.getEndPoints())
+   m_endPoints(socketArguments.getEndPoints()),
+   m_messageHandler(socketArguments.getMessageHandler())
 {
    m_socket = std::make_shared<zmq::socket_t>(*networkingService.getContext(), m_socketType);
 }
@@ -37,6 +39,14 @@ networking::Socket::Socket(networking::NetworkingService& networkingService, con
 networking::Socket::~Socket()
 {
    m_socket.reset();
+}
+
+void networking::Socket::send(const basis::DataBlock& message)
+   throw(basis::RuntimeException)
+{
+   zmq::message_t zmqMessage(message.size());
+   coffee_memcpy(zmqMessage.data(), message.data(), message.size());
+   m_socket->send(zmqMessage);
 }
 
 //virtual
@@ -56,6 +66,8 @@ basis::StreamString networking::Socket::asString() const
       first = false;
    }
    result << "}";
+
+   result << ",Handler=" << m_messageHandler->asString();
 
    return result << "}";
 }

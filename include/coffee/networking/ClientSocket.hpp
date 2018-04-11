@@ -26,7 +26,6 @@
 #include <memory>
 
 #include <coffee/basis/RuntimeException.hpp>
-#include <coffee/basis/DataBlock.hpp>
 #include <coffee/networking/Socket.hpp>
 
 namespace coffee {
@@ -37,8 +36,6 @@ class MessageHandler;
 
 class ClientSocket : public Socket {
 public:
-   std::shared_ptr<MessageHandler>& getMessageHandler() noexcept { return m_messageHandler;}
-   void send(const basis::DataBlock& message) throw(basis::RuntimeException);
    basis::StreamString asString() const noexcept;
 
 protected:
@@ -46,9 +43,7 @@ protected:
    virtual void destroy() noexcept;
 
 private:
-   std::shared_ptr<MessageHandler> m_messageHandler;
-
-   ClientSocket(NetworkingService& networkingService, const SocketArguments& socketArguments, std::shared_ptr<MessageHandler> messageHandler);
+   ClientSocket(NetworkingService& networkingService, const SocketArguments& socketArguments);
 
    friend class NetworkingService;
 };

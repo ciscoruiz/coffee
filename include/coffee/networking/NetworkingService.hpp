@@ -39,7 +39,6 @@ namespace coffee {
 namespace networking {
 
 class Socket;
-class MessageHandler;
 class SocketArguments;
 class ClientSocket;
 
@@ -47,12 +46,12 @@ class NetworkingService : public app::Service {
 public:
    ~NetworkingService();
 
-   static std::shared_ptr<NetworkingService> instantiate(app::Application& app) noexcept;
+   static std::shared_ptr<NetworkingService> instantiate(app::Application& app, const int zeroMQThreads = 1) noexcept;
 
    std::shared_ptr<zmq::context_t>& getContext() noexcept { return m_context; }
 
    std::shared_ptr<networking::Socket> createServerSocket(const SocketArguments& socketArguments) throw(basis::RuntimeException);
-   std::shared_ptr<networking::ClientSocket> createClientSocket(const SocketArguments& socketArguments, std::shared_ptr<MessageHandler> messageHandler) throw(basis::RuntimeException);
+   std::shared_ptr<networking::ClientSocket> createClientSocket(const SocketArguments& socketArguments) throw(basis::RuntimeException);
    std::shared_ptr<networking::ClientSocket> findClientSocket(const std::string& name) throw(basis::RuntimeException);
 
 private:
@@ -64,7 +63,7 @@ private:
    ClientSockets m_clientSockets;
    std::thread m_broker;
 
-   NetworkingService(app::Application &app);
+   NetworkingService(app::Application &app, const int zeroMQThreads);
    void do_initialize() throw(basis::RuntimeException);
    static void broker(NetworkingService& networkingService) noexcept;
    void do_stop() throw(basis::RuntimeException);

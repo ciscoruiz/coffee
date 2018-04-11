@@ -26,9 +26,8 @@
 
 using namespace coffee;
 
-networking::ClientSocket::ClientSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments, std::shared_ptr<MessageHandler> messageHandler) :
-   networking::Socket(networkingService, socketArguments),
-   m_messageHandler(messageHandler)
+networking::ClientSocket::ClientSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
+   networking::Socket(networkingService, socketArguments)
 {
 }
 
@@ -52,21 +51,12 @@ void networking::ClientSocket::destroy()
    }
 }
 
-void networking::ClientSocket::send(const basis::DataBlock& message)
-   throw(basis::RuntimeException)
-{
-   zmq::message_t zmqMessage(message.size());
-   coffee_memcpy(zmqMessage.data(), message.data(), message.size());
-   getImpl()->send(zmqMessage);
-}
-
 basis::StreamString networking::ClientSocket::asString() const
    noexcept
 {
    basis::StreamString result("networking.ClientSocket {");
 
    result << Socket::asString();
-   result << ",Handler=" << m_messageHandler->asString();
 
    return result << "}";
 }

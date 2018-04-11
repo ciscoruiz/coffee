@@ -30,11 +30,15 @@ namespace coffee {
 
 namespace networking {
 
+class MessageHandler;
+
 typedef std::vector<std::string> EndPoints;
 
 class SocketArguments {
 public:
-   explicit SocketArguments(const int socketType) : m_socketType(socketType){;}
+   explicit SocketArguments(const int socketType, std::shared_ptr<MessageHandler> messageHandler) :
+      m_socketType(socketType), m_messageHandler(messageHandler)
+   {;}
 
    SocketArguments& addEndPoint(const EndPoints::value_type& endPoint) noexcept { m_endPoints.push_back(endPoint); return *this; }
    SocketArguments& setName(const std::string& name) noexcept { m_name = name; return *this; }
@@ -42,10 +46,12 @@ public:
    int getSocketType() const noexcept { return m_socketType; }
    const EndPoints& getEndPoints() const noexcept { return m_endPoints; }
    const std::string& getName() const noexcept { return m_name; }
+   std::shared_ptr<MessageHandler> getMessageHandler() const noexcept { return m_messageHandler; }
 
 private:
    const int m_socketType;
    EndPoints m_endPoints;
+   std::shared_ptr<MessageHandler> m_messageHandler;
    std::string m_name;
 };
 

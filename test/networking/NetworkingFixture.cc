@@ -28,19 +28,44 @@
 #include <coffee/logger/TtyWriter.hpp>
 #include <coffee/logger/TraceMethod.hpp>
 
+#include <coffee/networking/MessageHandler.hpp>
+#include <coffee/networking/Socket.hpp>
+
+using namespace coffee;
+
 //static
 const char* NetworkingFixture::serviceIP = "tcp://*:5555";
+
+class UpperStringHandler : public networking::MessageHandler {
+public:
+   UpperStringHandler() : networking::MessageHandler("UpperStringHandler") {;}
+
+   static std::shared_ptr<UpperStringHandler> instantiate() {
+      return std::make_shared<UpperStringHandler>();
+   }
+
+protected:
+   void apply(const basis::DataBlock& message, networking::Socket& socket)
+      throw(basis::RuntimeException)
+   {
+      std::string str(message.data(), message.size());
+      std::transform(str.begin(), str.end(), str.begin(), [](unsigned char cc) { return std::toupper(cc); });
+
+      basis::DataBlock response(str.c_str());
+      socket.send(response);
+   }
+};
 
 NetworkingFixture::NetworkingFixture() : app("TestAppNetworkingFixture")
 {
    const char* logFileName = "test/networking/trace.log";
    unlink (logFileName);
-   //coffee::logger::Logger::initialize(std::make_shared<coffee::logger::UnlimitedTraceWriter>(logFileName));
-   coffee::logger::Logger::initialize(std::make_shared<coffee::logger::TtyWriter>());
-   coffee::logger::Logger::setLevel(coffee::logger::Level::Debug);
+   //logger::Logger::initialize(std::make_shared<logger::UnlimitedTraceWriter>(logFileName));
+   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
+   logger::Logger::setLevel(logger::Level::Debug);
 
-   networkingService = coffee::networking::NetworkingService::instantiate(app);
-   coffee::networking::SocketArguments arguments(ZMQ_REP);
+   networkingService = networking::NetworkingService::instantiate(app);
+   networking::SocketArguments arguments(ZMQ_REP, UpperStringHandler::instantiate());
    serviceSocket = networkingService->createServerSocket(arguments.addEndPoint(serviceIP));
    thr = std::thread(parallelRun, std::ref(app));
    app.waitUntilRunning();

@@ -39,18 +39,18 @@
 using namespace coffee;
 
 // static
-std::shared_ptr<networking::NetworkingService> networking::NetworkingService::instantiate(app::Application& application)
+std::shared_ptr<networking::NetworkingService> networking::NetworkingService::instantiate(app::Application& application, const int zeroMQThreads)
    noexcept
 {
-   std::shared_ptr<NetworkingService> result(new NetworkingService(application));
+   std::shared_ptr<NetworkingService> result(new NetworkingService(application, zeroMQThreads));
    application.attach(result);
    return result;
 }
 
-networking::NetworkingService::NetworkingService(app::Application &app) :
+networking::NetworkingService::NetworkingService(app::Application &app, const int zeroMQThreads) :
    app::Service(app, "networking.NetworkingService")
 {
-   m_context = std::make_shared<zmq::context_t>(1);
+   m_context = std::make_shared<zmq::context_t>(zeroMQThreads);
 }
 
 networking::NetworkingService::~NetworkingService()
@@ -152,10 +152,10 @@ std::shared_ptr<networking::Socket> networking::NetworkingService::createServerS
    return result;
 }
 
-std::shared_ptr<networking::ClientSocket> networking::NetworkingService::createClientSocket(const networking::SocketArguments& socketArguments, std::shared_ptr<networking::MessageHandler> messageHandler)
+std::shared_ptr<networking::ClientSocket> networking::NetworkingService::createClientSocket(const networking::SocketArguments& socketArguments)
    throw(basis::RuntimeException)
 {
-   std::shared_ptr<networking::ClientSocket> result(new networking::ClientSocket(*this, socketArguments, messageHandler));
+   std::shared_ptr<networking::ClientSocket> result(new networking::ClientSocket(*this, socketArguments));
 
    if (this->isRunning()) {
       result->initialize();

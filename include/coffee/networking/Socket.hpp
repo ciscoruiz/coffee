@@ -28,6 +28,7 @@
 
 #include <coffee/basis/StreamString.hpp>
 #include <coffee/basis/RuntimeException.hpp>
+#include <coffee/basis/DataBlock.hpp>
 
 #include <coffee/networking/SocketArguments.hpp>
 
@@ -36,15 +37,20 @@ namespace coffee {
 namespace networking {
 
 class NetworkingService;
+class MessageHandler;
 
 class Socket {
 public:
    virtual ~Socket();
    bool isValid() const noexcept { return (bool) m_socket; }
+   void send(const basis::DataBlock& message) throw(basis::RuntimeException);
+
    virtual basis::StreamString asString() const noexcept;
 
 protected:
    Socket(NetworkingService &networkingService, const SocketArguments& socketArguments);
+
+   std::shared_ptr<MessageHandler>& getMessageHandler() noexcept { return m_messageHandler;}
 
    std::shared_ptr<zmq::socket_t>& getImpl() { return m_socket; }
 
@@ -65,6 +71,7 @@ protected:
 private:
    const int m_socketType;
    const EndPoints m_endPoints;
+   std::shared_ptr<MessageHandler> m_messageHandler;
    std::shared_ptr<zmq::socket_t> m_socket;
 
    friend class NetworkingService;

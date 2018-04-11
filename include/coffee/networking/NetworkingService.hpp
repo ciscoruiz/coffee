@@ -32,6 +32,7 @@
 #include <zmq.hpp>
 
 #include <coffee/app/Service.hpp>
+#include <coffee/basis/NamedObject.hpp>
 
 namespace coffee {
 
@@ -48,7 +49,7 @@ public:
 
    static std::shared_ptr<NetworkingService> instantiate(app::Application& app) noexcept;
 
-   std::shared_ptr<zmq::context_t>& getContext() throw();
+   std::shared_ptr<zmq::context_t>& getContext() noexcept { return m_context; }
 
    std::shared_ptr<networking::Socket> createServerSocket(const SocketArguments& socketArguments) throw(basis::RuntimeException);
    std::shared_ptr<networking::ClientSocket> createClientSocket(const SocketArguments& socketArguments, std::shared_ptr<MessageHandler> messageHandler) throw(basis::RuntimeException);

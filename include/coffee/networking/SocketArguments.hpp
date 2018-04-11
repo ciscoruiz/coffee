@@ -24,29 +24,27 @@
 #ifndef _coffee_networking_SocketArguments_hpp_
 #define _coffee_networking_SocketArguments_hpp_
 
-#include <zmq.hpp>
 #include <vector>
-#include <zmqpp/socket.hpp>
 
 namespace coffee {
 
 namespace networking {
 
-typedef std::vector<zmqpp::endpoint_t> EndPoints;
+typedef std::vector<std::string> EndPoints;
 
 class SocketArguments {
 public:
-   explicit SocketArguments(const zmq::socket_type socketType) : m_socketType(socketType){;}
+   explicit SocketArguments(const int socketType) : m_socketType(socketType){;}
 
    SocketArguments& addEndPoint(const EndPoints::value_type& endPoint) noexcept { m_endPoints.push_back(endPoint); return *this; }
    SocketArguments& setName(const std::string& name) noexcept { m_name = name; return *this; }
 
-   zmq::socket_type getSocketType() const noexcept { return m_socketType; }
+   int getSocketType() const noexcept { return m_socketType; }
    const EndPoints& getEndPoints() const noexcept { return m_endPoints; }
    const std::string& getName() const noexcept { return m_name; }
 
 private:
-   const zmq::socket_type m_socketType;
+   const int m_socketType;
    EndPoints m_endPoints;
    std::string m_name;
 };

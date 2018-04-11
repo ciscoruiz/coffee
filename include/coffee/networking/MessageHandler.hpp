@@ -25,6 +25,7 @@
 
 #include <coffee/basis/RuntimeException.hpp>
 #include <coffee/basis/DataBlock.hpp>
+#include <coffee/basis/NamedObject.hpp>
 
 namespace coffee {
 
@@ -33,7 +34,11 @@ namespace networking {
 class ClientSocket;
 class NetworkingService;
 
-class MessageHandler {
+class MessageHandler : public basis::NamedObject {
+protected:
+public:
+   explicit MessageHandler(const std::string &name) : NamedObject(name) {}
+
 protected:
    virtual void apply(const basis::DataBlock& message, ClientSocket& clientSocket) throw(basis::RuntimeException) = 0;
 

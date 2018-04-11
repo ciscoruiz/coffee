@@ -24,5 +24,12 @@
 #include <boost/test/unit_test.hpp>
 
 #include <coffee/networking/NetworkingService.hpp>
+#include <coffee/networking/Socket.hpp>
 
-BOOST_AUTO_TEST_CASE(bad_)
+#include "NetworkingFixture.hpp"
+
+BOOST_FIXTURE_TEST_CASE(networking_first_case, NetworkingFixture)
+{
+   BOOST_REQUIRE(networkingService->isRunning());
+}
+

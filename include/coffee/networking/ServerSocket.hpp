@@ -33,8 +33,11 @@ namespace coffee {
 namespace networking {
 
 class ServerSocket : public Socket {
+public:
+   basis::StreamString asString() const noexcept;
+
 protected:
-   ServerSocket(NetworkingService& networkingunicator, const SocketArguments& socketArguments);
+   ServerSocket(NetworkingService& networkingService, const SocketArguments& socketArguments);
 
    void initialize() throw(basis::RuntimeException);
    void destroy() noexcept;

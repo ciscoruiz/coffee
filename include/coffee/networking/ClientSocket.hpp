@@ -39,6 +39,7 @@ class ClientSocket : public Socket {
 public:
    std::shared_ptr<MessageHandler>& getMessageHandler() noexcept { return m_messageHandler;}
    void send(const basis::DataBlock& message) throw(basis::RuntimeException);
+   basis::StreamString asString() const noexcept;
 
 protected:
    virtual void initialize() throw(basis::RuntimeException);
@@ -47,7 +48,7 @@ protected:
 private:
    std::shared_ptr<MessageHandler> m_messageHandler;
 
-   ClientSocket(NetworkingService& networkingunicator, const SocketArguments& socketArguments, std::shared_ptr<MessageHandler> messageHandler);
+   ClientSocket(NetworkingService& networkingService, const SocketArguments& socketArguments, std::shared_ptr<MessageHandler> messageHandler);
 
    friend class NetworkingService;
 };

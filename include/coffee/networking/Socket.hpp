@@ -26,6 +26,7 @@
 #include <memory>
 #include <zmq.hpp>
 
+#include <coffee/basis/StreamString.hpp>
 #include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/networking/SocketArguments.hpp>
@@ -37,9 +38,13 @@ namespace networking {
 class NetworkingService;
 
 class Socket {
-protected:
-   Socket(NetworkingService &messageBroker, const SocketArguments& socketArguments);
+public:
    virtual ~Socket();
+   bool isValid() const noexcept { return (bool) m_socket; }
+   virtual basis::StreamString asString() const noexcept;
+
+protected:
+   Socket(NetworkingService &networkingService, const SocketArguments& socketArguments);
 
    std::shared_ptr<zmq::socket_t>& getImpl() { return m_socket; }
 
@@ -58,6 +63,7 @@ protected:
    virtual void destroy() noexcept = 0;
 
 private:
+   const int m_socketType;
    const EndPoints m_endPoints;
    std::shared_ptr<zmq::socket_t> m_socket;
 

@@ -20,3 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+
+#include "NetworkingFixture.hpp"
+
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/UnlimitedTraceWriter.hpp>
+#include <coffee/logger/TtyWriter.hpp>
+#include <coffee/logger/TraceMethod.hpp>
+
+//static
+const char* NetworkingFixture::serviceIP = "tcp://*:5555";
+
+NetworkingFixture::NetworkingFixture() : app("TestAppNetworkingFixture")
+{
+   const char* logFileName = "test/networking/trace.log";
+   unlink (logFileName);
+   //coffee::logger::Logger::initialize(std::make_shared<coffee::logger::UnlimitedTraceWriter>(logFileName));
+   coffee::logger::Logger::initialize(std::make_shared<coffee::logger::TtyWriter>());
+   coffee::logger::Logger::setLevel(coffee::logger::Level::Debug);
+
+   networkingService = coffee::networking::NetworkingService::instantiate(app);
+   coffee::networking::SocketArguments arguments(ZMQ_REP);
+   serviceSocket = networkingService->createServerSocket(arguments.addEndPoint(serviceIP));
+   thr = std::thread(parallelRun, std::ref(app));
+   app.waitUntilRunning();
+   networkingService->waitEffectiveRunning();
+}
+
+NetworkingFixture::~NetworkingFixture() {
+   LOG_THIS_METHOD();
+
+   app.stop();
+   thr.join();
+}

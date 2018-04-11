@@ -22,9 +22,11 @@
 //
 
 #include <zmq.hpp>
-#include <zmqpp/message.hpp>
-#include <zmqpp/socket.hpp>
+
 #include <coffee/basis/DataBlock.hpp>
+
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
 
 #include <coffee/app/Application.hpp>
 
@@ -45,7 +47,11 @@ std::shared_ptr<networking::NetworkingService> networking::NetworkingService::in
    return result;
 }
 
-networking::NetworkingService::NetworkingService(app::Application &app) : app::Service(app, "networking.NetworkingService") {}
+networking::NetworkingService::NetworkingService(app::Application &app) :
+   app::Service(app, "networking.NetworkingService")
+{
+   m_context = std::make_shared<zmq::context_t>(1);
+}
 
 networking::NetworkingService::~NetworkingService()
 {
@@ -57,6 +63,7 @@ void networking::NetworkingService::do_initialize()
    throw(basis::RuntimeException)
 {
    for (auto socket : m_sockets) {
+      LOG_DEBUG("Initializing " << socket->asString());
       socket->initialize();
    }
 
@@ -73,13 +80,21 @@ void networking::NetworkingService::broker(NetworkingService& networkingService)
    size_t nitems = networkingService.m_sockets.size();
    const std::chrono::milliseconds timeout(250);
 
+   networkingService.notifyEffectiveRunning();
+
    while (networkingService.isRunning()) {
       zmq::message_t message;
 
+      LOG_DEBUG("Polling n-items=" << nitems);
       int rpoll = zmq_poll(items, nitems, timeout.count());
 
       if (rpoll == 0)
          continue;
+
+      if (rpoll == -1) {
+         LOG_ERROR("Error=" << strerror(errno));
+         break;
+      }
 
       // See http://zguide.zeromq.org/cpp:mspoller
       for (size_t index = 0; index < nitems; ++ index) {
@@ -111,11 +126,14 @@ void networking::NetworkingService::broker(NetworkingService& networkingService)
 void networking::NetworkingService::do_stop()
    throw(basis::RuntimeException)
 {
+   LOG_THIS_METHOD();
+
    statusStopped();
 
    m_broker.join();
 
    for (auto socket : m_sockets) {
+      LOG_DEBUG("Destroying " << socket->asString());
       socket->destroy();
    }
 }
@@ -127,8 +145,9 @@ std::shared_ptr<networking::Socket> networking::NetworkingService::createServerS
 
    if (this->isRunning()) {
       result->initialize();
-      m_sockets.push_back(result);
    }
+
+   m_sockets.push_back(result);
 
    return result;
 }
@@ -140,8 +159,9 @@ std::shared_ptr<networking::ClientSocket> networking::NetworkingService::createC
 
    if (this->isRunning()) {
       result->initialize();
-      m_sockets.push_back(result);
    }
+
+   m_sockets.push_back(result);
 
    const std::string& name = socketArguments.getName();
 
@@ -170,7 +190,8 @@ zmq_pollitem_t* networking::NetworkingService::createPollItems(networking::Netwo
 
    for (size_t ii = 0; ii < maxii; ++ ii) {
       coffee_memset(&result[ii], 0, sizeof(zmq_pollitem_t));
-      result[ii].socket = broker.m_sockets[ii]->getImpl().get();
+      zmq::socket_t* socket = broker.m_sockets[ii]->getImpl().get();
+      result[ii].socket = (void*) *socket;
       result[ii].events = ZMQ_POLLIN;
    }
 

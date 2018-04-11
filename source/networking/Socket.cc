@@ -27,10 +27,11 @@
 
 using namespace coffee;
 
-networking::Socket::Socket(networking::NetworkingService& messageBroker, const SocketArguments& socketArguments) :
+networking::Socket::Socket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
+   m_socketType(socketArguments.getSocketType()),
    m_endPoints(socketArguments.getEndPoints())
 {
-   m_socket = std::make_shared<zmq::socket_t>(*messageBroker.getContext(), socketArguments.getSocketType());
+   m_socket = std::make_shared<zmq::socket_t>(*networkingService.getContext(), m_socketType);
 }
 
 networking::Socket::~Socket()
@@ -38,3 +39,23 @@ networking::Socket::~Socket()
    m_socket.reset();
 }
 
+//virtual
+basis::StreamString networking::Socket::asString() const
+   noexcept
+{
+   basis::StreamString result("networking.Socket {");
+
+   result << "IsValid=" << isValid();
+   result << ", Type=" << m_socketType;
+   result << ", EndPoints={";
+   bool first = true;
+   for (auto& ii : m_endPoints) {
+      if (!first)
+         result << ",";
+      result << ii;
+      first = false;
+   }
+   result << "}";
+
+   return result << "}";
+}

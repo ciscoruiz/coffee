@@ -20,36 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-#ifndef TEST_TIME_TIMEFIXTURE_HPP_
-#define TEST_TIME_TIMEFIXTURE_HPP_
+#ifndef TEST_NETWORKING_NETWORKINGFIXTURE_HPP_
+#define TEST_NETWORKING_NETWORKINGFIXTURE_HPP_
 
 #include <coffee/app/ApplicationServiceStarter.hpp>
+
 #include <coffee/networking/NetworkingService.hpp>
-#include <coffee/logger/UnlimitedTraceWriter.hpp>
+#include <coffee/networking/SocketArguments.hpp>
+
 
 struct NetworkingFixture {
    coffee::app::ApplicationServiceStarter app;
    std::shared_ptr<coffee::networking::NetworkingService> networkingService;
    std::thread thr;
+   std::shared_ptr<coffee::networking::Socket> serviceSocket;
 
-   NetworkingFixture(const std::chrono::milliseconds& maxNetworking, const std::chrono::milliseconds& resolution) :
-      app("TestAppNetworkingFixture")
-   {
-      const char* logFileName = "test/networking/trace.log";
-      unlink (logFileName);
-      coffee::logger::Logger::initialize(std::make_shared<coffee::logger::UnlimitedTraceWriter>(logFileName));
-      coffee::logger::Logger::setLevel(coffee::logger::Level::Debug);
+   static const char* serviceIP;
 
-      networkingService = coffee::networking::NetworkingService::instantiate(app);
-      thr = std::thread(parallelRun, std::ref(app));
-      app.waitUntilRunning();
-      networkingService->waitUntilRunning();
-   }
-
-   virtual ~NetworkingFixture() {
-      app.stop();
-      thr.join();
-   }
+   NetworkingFixture();
+   ~NetworkingFixture();
 
    static void parallelRun(coffee::app::Application& app) {
       app.start();
@@ -57,4 +46,4 @@ struct NetworkingFixture {
 };
 
 
-#endif /* TEST_TIME_TIMEFIXTURE_HPP_ */
+#endif /* TEST_NETWORKING_NETWORKINGFIXTURE_HPP_ */

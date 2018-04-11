@@ -23,11 +23,12 @@
 
 #include <coffee/networking/ServerSocket.hpp>
 #include <coffee/networking/NetworkingService.hpp>
+#include <coffee/logger/Logger.hpp>
 
 using namespace coffee;
 
-networking::ServerSocket::ServerSocket(networking::NetworkingService& networkingunicator, const SocketArguments& socketArguments) :
-   networking::Socket(networkingunicator, socketArguments)
+networking::ServerSocket::ServerSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
+   networking::Socket(networkingService, socketArguments)
 {
 }
 
@@ -47,6 +48,22 @@ void networking::ServerSocket::destroy()
    auto& socket = getImpl();
 
    for (auto& endPoint : getEndPoints()) {
-      socket->unbind(endPoint);
+      try {
+         socket->unbind(endPoint);
+      }
+      catch (zmq::error_t& ex) {
+         LOG_ERROR(asString() << ", Error=" << ex.what());
+      }
+
    }
+}
+
+basis::StreamString networking::ServerSocket::asString() const
+   noexcept
+{
+   basis::StreamString result("networking.ServerSocket {");
+
+   result << Socket::asString();
+
+   return result << "}";
 }

@@ -53,8 +53,7 @@ time::TimeService::TimeService(app::Application& application, const milliseconds
    maxTime(_maxTime),
    resolution(_resolution),
    maxQuantum(calculeMaxQuantum(_maxTime, _resolution)),
-   currentQuantum(0),
-   producerIsWorking(0)
+   currentQuantum(0)
 {
    time::SCCS::activate();
 
@@ -199,7 +198,7 @@ void time::TimeService::produce(time::TimeService& timeService)
 
    LOG_DEBUG("TimeToWait=" << timeToWait);
 
-   timeService.producerIsWorking.signal();
+   timeService.notifyEffectiveRunning();
 
    const microseconds usResolution(timeService.resolution);
 

@@ -28,6 +28,7 @@
 
 #include <coffee/basis/RuntimeException.hpp>
 #include <coffee/basis/StreamString.hpp>
+#include <coffee/basis/Semaphore.hpp>
 
 #include <coffee/app/Runnable.hpp>
 
@@ -66,6 +67,18 @@ public:
    const std::string& getClassName() const noexcept { return getName(); }
 
    /**
+    * Method to call to be sure Service is fully prepared to accept requests
+    * \include time/TimeFixture.hpp
+    */
+   void waitEffectiveRunning() throw(basis::RuntimeException);
+
+   /**
+    * Method that the server should call from some other thread to notify
+    * it is prepared to accept request.
+    */
+   void notifyEffectiveRunning() noexcept;
+
+   /**
     * \return Summarize information of this instance in a StreamString.
     */
    operator basis::StreamString() const noexcept { return asString(); }
@@ -88,7 +101,8 @@ protected:
     */
    Service(Application& app, const char* className) :
       Runnable(className),
-      a_app(app)
+      a_app(app),
+      effectiveRunning(0)
    {
    }
 
@@ -110,6 +124,7 @@ private:
 
    Application& a_app;
    std::vector <std::string> a_predecessors;
+   basis::Semaphore effectiveRunning;
 
    Service(const Service& other);
    iterator begin() noexcept { return a_predecessors.begin(); }

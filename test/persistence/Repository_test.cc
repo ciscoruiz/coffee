@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE (persistence_repository_as)
 
    basis::StreamString zz = repository.asString ();
 
-   BOOST_REQUIRE_EQUAL (zz, "persistence.Repository { basis.NamedObject { Name: persistence_define_structure } | N-Size=2 }");
+   BOOST_REQUIRE_EQUAL (zz, "persistence.Repository { basis.NamedObject {Name=persistence_define_structure} | N-Size=2 }");
 
    xml::Node myNode ("root");
 

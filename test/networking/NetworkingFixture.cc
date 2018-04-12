@@ -36,26 +36,6 @@ using namespace coffee;
 //static
 const char* NetworkingFixture::serviceIP = "tcp://*:5555";
 
-class UpperStringHandler : public networking::MessageHandler {
-public:
-   UpperStringHandler() : networking::MessageHandler("UpperStringHandler") {;}
-
-   static std::shared_ptr<UpperStringHandler> instantiate() {
-      return std::make_shared<UpperStringHandler>();
-   }
-
-protected:
-   void apply(const basis::DataBlock& message, networking::ServerSocket& serverSocket)
-      throw(basis::RuntimeException)
-   {
-      std::string str(message.data(), message.size());
-      std::transform(str.begin(), str.end(), str.begin(), [](unsigned char cc) { return std::toupper(cc); });
-
-      basis::DataBlock response(str.c_str());
-      serverSocket.send(response);
-   }
-};
-
 NetworkingFixture::NetworkingFixture() : app("TestAppNetworkingFixture")
 {
    const char* logFileName = "test/networking/trace.log";
@@ -65,8 +45,8 @@ NetworkingFixture::NetworkingFixture() : app("TestAppNetworkingFixture")
    logger::Logger::setLevel(logger::Level::Debug);
 
    networkingService = networking::NetworkingService::instantiate(app);
-   networking::SocketArguments arguments(ZMQ_REP);
-   arguments.setMessageHandler(UpperStringHandler::instantiate()).addEndPoint(serviceIP);
+   networking::SocketArguments arguments;
+   arguments.setMessageHandler(UpperStringHandler::instantiate()).addEndPoint("tcp://*:5555").addEndPoint("tcp://*:5556");
    serviceSocket = networkingService->createServerSocket(arguments);
    thr = std::thread(parallelRun, std::ref(app));
    app.waitUntilRunning();
@@ -77,4 +57,22 @@ NetworkingFixture::~NetworkingFixture() {
    LOG_THIS_METHOD();
    app.stop();
    thr.join();
+}
+
+void NetworkingFixture::UpperStringHandler::apply(const basis::DataBlock& message, networking::ServerSocket& serverSocket)
+   throw(basis::RuntimeException)
+{
+   std::string str(message.data(), message.size());
+   std::transform(str.begin(), str.end(), str.begin(), [](unsigned char cc) { return std::toupper(cc); });
+   basis::DataBlock response(str.c_str());
+   serverSocket.send(response);
+}
+
+void NetworkingFixture::LowerStringHandler::apply(const basis::DataBlock& message, networking::ServerSocket& serverSocket)
+   throw(basis::RuntimeException)
+{
+   std::string str(message.data(), message.size());
+   std::transform(str.begin(), str.end(), str.begin(), [](unsigned char cc) { return std::tolower(cc); });
+   basis::DataBlock response(str.c_str());
+   serverSocket.send(response);
 }

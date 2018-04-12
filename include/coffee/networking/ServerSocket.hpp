@@ -32,6 +32,8 @@ namespace coffee {
 
 namespace networking {
 
+class MessageHandler;
+
 class ServerSocket : public Socket {
 public:
    void send(const basis::DataBlock& response) throw(basis::RuntimeException);
@@ -42,6 +44,10 @@ protected:
 
    void initialize() throw(basis::RuntimeException);
    void destroy() noexcept;
+   std::shared_ptr<MessageHandler>& getMessageHandler() noexcept { return m_messageHandler;}
+
+private:
+   std::shared_ptr<MessageHandler> m_messageHandler;
 
    friend class NetworkingService;
 };

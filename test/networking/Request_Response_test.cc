@@ -30,24 +30,66 @@
 
 using namespace coffee;
 
-BOOST_FIXTURE_TEST_CASE(networking_service_on, NetworkingFixture)
+BOOST_FIXTURE_TEST_CASE(networking_single_ip, NetworkingFixture)
 {
-   BOOST_REQUIRE(networkingService->isRunning());
+   {
+      networking::SocketArguments arguments;
+      auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555"));
+      BOOST_REQUIRE(clientSocket);
+      basis::DataBlock request("work");
+      auto response = clientSocket->send(request);
+      BOOST_REQUIRE_EQUAL(std::string(response.data()), "WORK");
+   }
+
+   {
+      networking::SocketArguments arguments;
+      auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://127.0.0.1:5556"));
+      BOOST_REQUIRE(clientSocket);
+      basis::DataBlock request("this is other");
+      auto response = clientSocket->send(request);
+      BOOST_REQUIRE_EQUAL(std::string(response.data()), "THIS IS OTHER");
+   }
 }
 
-BOOST_FIXTURE_TEST_CASE(networking_server_on, NetworkingFixture)
+BOOST_FIXTURE_TEST_CASE(networking_multiple_ip, NetworkingFixture)
 {
-   BOOST_REQUIRE(serviceSocket->isValid());
-}
-
-BOOST_FIXTURE_TEST_CASE(networking_message, NetworkingFixture)
-{
-   networking::SocketArguments arguments(ZMQ_REQ);
-   auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555"));
-
+   networking::SocketArguments arguments;
+   auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555").addEndPoint("tcp://localhost:5556"));
    BOOST_REQUIRE(clientSocket);
 
    basis::DataBlock request("work");
    auto response = clientSocket->send(request);
    BOOST_REQUIRE_EQUAL(std::string(response.data()), "WORK");
+
+   {
+      basis::DataBlock request("this is other");
+      auto response = clientSocket->send(request);
+      BOOST_REQUIRE_EQUAL(std::string(response.data()), "THIS IS OTHER");
+   }
+}
+
+BOOST_FIXTURE_TEST_CASE(networking_create_new_server, NetworkingFixture)
+{
+   {
+      networking::SocketArguments arguments;
+      auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555"));
+      BOOST_REQUIRE(clientSocket);
+      basis::DataBlock request("work");
+      auto response = clientSocket->send(request);
+      BOOST_REQUIRE_EQUAL(std::string(response.data()), "WORK");
+   }
+
+   networking::SocketArguments arguments;
+   arguments.setMessageHandler(LowerStringHandler::instantiate()).addEndPoint("tcp://*:6666");
+   auto newServerSocket = networkingService->createServerSocket(arguments);
+   BOOST_REQUIRE(newServerSocket->isValid());
+
+   {
+      networking::SocketArguments arguments;
+      auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:6666"));
+      BOOST_REQUIRE(clientSocket);
+      basis::DataBlock request("This is the NEW server");
+      auto response = clientSocket->send(request);
+      BOOST_REQUIRE_EQUAL(std::string(response.data()), "this is the new server");
+   }
 }

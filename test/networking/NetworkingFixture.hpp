@@ -28,8 +28,35 @@
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/SocketArguments.hpp>
 #include <coffee/networking/ServerSocket.hpp>
+#include <coffee/networking/MessageHandler.hpp>
 
 struct NetworkingFixture {
+   class UpperStringHandler : public coffee::networking::MessageHandler {
+   public:
+      UpperStringHandler() : coffee::networking::MessageHandler("UpperStringHandler") {;}
+
+      static std::shared_ptr<UpperStringHandler> instantiate() {
+         return std::make_shared<UpperStringHandler>();
+      }
+
+   protected:
+      void apply(const coffee::basis::DataBlock& message, coffee::networking::ServerSocket& serverSocket)
+         throw(coffee::basis::RuntimeException);
+   };
+
+   class LowerStringHandler : public coffee::networking::MessageHandler {
+   public:
+      LowerStringHandler() : coffee::networking::MessageHandler("LowerStringHandler") {;}
+
+      static std::shared_ptr<LowerStringHandler> instantiate() {
+         return std::make_shared<LowerStringHandler>();
+      }
+
+   protected:
+      void apply(const coffee::basis::DataBlock& message, coffee::networking::ServerSocket& serverSocket)
+         throw(coffee::basis::RuntimeException);
+   };
+
    coffee::app::ApplicationServiceStarter app;
    std::shared_ptr<coffee::networking::NetworkingService> networkingService;
    std::thread thr;

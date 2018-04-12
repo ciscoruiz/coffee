@@ -37,23 +37,21 @@ namespace coffee {
 namespace networking {
 
 class NetworkingService;
-class MessageHandler;
 
 class Socket {
 public:
    virtual ~Socket();
+
    bool isValid() const noexcept { return (bool) m_zmqSocket; }
+
+   const EndPoints& getEndPoints() const noexcept { return m_endPoints; }
 
    virtual basis::StreamString asString() const noexcept;
 
 protected:
-   Socket(NetworkingService &networkingService, const SocketArguments& socketArguments);
-
-   std::shared_ptr<MessageHandler>& getMessageHandler() noexcept { return m_messageHandler;}
+   Socket(NetworkingService &networkingService, const SocketArguments& socketArguments, const int socketType);
 
    std::shared_ptr<zmq::socket_t>& getZmqSocket() { return m_zmqSocket; }
-
-   const EndPoints& getEndPoints() const noexcept { return m_endPoints; }
 
    /**
     * This method will be called from MessageBroker once the socket is created and MessageBroker is
@@ -71,9 +69,8 @@ protected:
    std::shared_ptr<zmq::socket_t> m_zmqSocket;
 
 private:
-   const int m_socketType;
    const EndPoints m_endPoints;
-   std::shared_ptr<MessageHandler> m_messageHandler;
+   const int m_socketType;
 
    friend class NetworkingService;
 };

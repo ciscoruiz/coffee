@@ -21,14 +21,17 @@
 // SOFTWARE.
 //
 
+#include <coffee/logger/Logger.hpp>
+
 #include <coffee/networking/ServerSocket.hpp>
 #include <coffee/networking/NetworkingService.hpp>
-#include <coffee/logger/Logger.hpp>
+#include <coffee/networking/MessageHandler.hpp>
 
 using namespace coffee;
 
 networking::ServerSocket::ServerSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
-   networking::Socket(networkingService, socketArguments)
+   networking::Socket(networkingService, socketArguments, ZMQ_REP),
+   m_messageHandler(socketArguments.getMessageHandler())
 {
 }
 
@@ -37,13 +40,24 @@ void networking::ServerSocket::initialize()
 {
    auto& socket = getZmqSocket();
 
+   if (!m_messageHandler) {
+      COFFEE_THROW_EXCEPTION(asString() << " requires message handler instance");
+   }
+
+   bool empty = true;
+
    try {
       for (auto& endPoint : getEndPoints()) {
+         empty = false;
          socket->bind(endPoint);
       }
    }
    catch(zmq::error_t& ex) {
       COFFEE_THROW_EXCEPTION(asString () << ", Error=" << ex.what());
+   }
+
+   if (empty) {
+      COFFEE_THROW_EXCEPTION(asString() << " does not have any end point");
    }
 }
 
@@ -76,6 +90,10 @@ basis::StreamString networking::ServerSocket::asString() const
    basis::StreamString result("networking.ServerSocket {");
 
    result << Socket::asString();
+
+   if (m_messageHandler) {
+      result << ",Handler=" << m_messageHandler->asString();
+   }
 
    return result << "}";
 }

@@ -28,7 +28,7 @@
 using namespace coffee;
 
 networking::ClientSocket::ClientSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
-   networking::Socket(networkingService, socketArguments)
+   networking::Socket(networkingService, socketArguments, ZMQ_REQ)
 {
 }
 
@@ -37,13 +37,20 @@ void networking::ClientSocket::initialize()
 {
    auto& socket = getZmqSocket();
 
+   bool empty = true;
+
    try {
       for (auto& endPoint : getEndPoints()) {
+         empty = false;
          socket->connect(endPoint);
       }
    }
    catch(zmq::error_t& ex) {
       COFFEE_THROW_EXCEPTION(asString () << ", Error=" << ex.what());
+   }
+
+   if (empty) {
+      COFFEE_THROW_EXCEPTION(asString() << " does not have any end point");
    }
 }
 

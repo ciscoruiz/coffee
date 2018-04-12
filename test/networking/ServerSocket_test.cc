@@ -21,43 +21,43 @@
 // SOFTWARE.
 //
 
-#include <coffee/networking/Socket.hpp>
+#include <boost/test/unit_test.hpp>
+
 #include <coffee/networking/NetworkingService.hpp>
-#include <coffee/networking/SocketArguments.hpp>
+#include <coffee/networking/ClientSocket.hpp>
+
+#include "NetworkingFixture.hpp"
 
 using namespace coffee;
 
-networking::Socket::Socket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments, const int socketType) :
-   m_endPoints(socketArguments.getEndPoints()),
-   m_socketType(socketType)
+BOOST_FIXTURE_TEST_CASE(serversocket_service_on, NetworkingFixture)
 {
-   zmq::context_t& context = *networkingService.getContext();
-   m_zmqSocket = std::make_shared<zmq::socket_t>(context, m_socketType);
+   BOOST_REQUIRE(networkingService->isRunning());
 }
 
-networking::Socket::~Socket()
+BOOST_FIXTURE_TEST_CASE(serversocket_server_on, NetworkingFixture)
 {
-   m_zmqSocket.reset();
+   BOOST_REQUIRE(serviceSocket->isValid());
 }
 
-//virtual
-basis::StreamString networking::Socket::asString() const
-   noexcept
+BOOST_FIXTURE_TEST_CASE(serversocket_without_endpoints, NetworkingFixture)
 {
-   basis::StreamString result("networking.Socket {");
+   networking::SocketArguments arguments;
 
-   result << "IsValid=" << isValid();
-   result << ", Type=" << m_socketType;
-   result << ", EndPoints=[";
-   bool first = true;
-   for (auto& ii : m_endPoints) {
-      if (!first)
-         result << ",";
-      result << ii;
-      first = false;
-   }
-   result << "]";
+   BOOST_REQUIRE_THROW(networkingService->createServerSocket(arguments.setMessageHandler(UpperStringHandler::instantiate())), basis::RuntimeException);
+}
 
+BOOST_FIXTURE_TEST_CASE(serversocket_without_handler, NetworkingFixture)
+{
+   networking::SocketArguments arguments;
 
-   return result << "}";
+   BOOST_REQUIRE_THROW(networkingService->createServerSocket(arguments.addEndPoint(serviceIP)), basis::RuntimeException);
+}
+
+BOOST_FIXTURE_TEST_CASE(serversocket_bad_address, NetworkingFixture)
+{
+   networking::SocketArguments arguments;
+
+   arguments.addEndPoint("bad-address").setMessageHandler(UpperStringHandler::instantiate());
+   BOOST_REQUIRE_THROW(networkingService->createServerSocket(arguments), basis::RuntimeException);
 }

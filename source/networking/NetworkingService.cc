@@ -88,7 +88,6 @@ void networking::NetworkingService::broker(NetworkingService& networkingService)
    while (networkingService.isRunning()) {
       zmq::message_t message;
 
-      LOG_DEBUG("Polling n-items=" << nitems);
       int rpoll = zmq_poll(items, nitems, timeout.count());
 
       if (rpoll == 0)

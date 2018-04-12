@@ -24,12 +24,30 @@
 #include <boost/test/unit_test.hpp>
 
 #include <coffee/networking/NetworkingService.hpp>
-#include <coffee/networking/Socket.hpp>
+#include <coffee/networking/ClientSocket.hpp>
 
 #include "NetworkingFixture.hpp"
 
-BOOST_FIXTURE_TEST_CASE(networking_first_case, NetworkingFixture)
+using namespace coffee;
+
+BOOST_FIXTURE_TEST_CASE(networking_service_on, NetworkingFixture)
 {
    BOOST_REQUIRE(networkingService->isRunning());
 }
 
+BOOST_FIXTURE_TEST_CASE(networking_server_on, NetworkingFixture)
+{
+   BOOST_REQUIRE(serviceSocket->isValid());
+}
+
+BOOST_FIXTURE_TEST_CASE(networking_message, NetworkingFixture)
+{
+   networking::SocketArguments arguments(ZMQ_REQ);
+   auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555"));
+
+   BOOST_REQUIRE(clientSocket);
+
+   basis::DataBlock request("work");
+   auto response = clientSocket->send(request);
+   BOOST_REQUIRE_EQUAL(std::string(response.data()), "WORK");
+}

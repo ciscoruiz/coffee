@@ -34,6 +34,7 @@ namespace networking {
 
 class ServerSocket : public Socket {
 public:
+   void send(const basis::DataBlock& response) throw(basis::RuntimeException);
    basis::StreamString asString() const noexcept;
 
 protected:

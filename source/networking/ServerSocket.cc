@@ -35,27 +35,39 @@ networking::ServerSocket::ServerSocket(networking::NetworkingService& networking
 void networking::ServerSocket::initialize()
    throw(basis::RuntimeException)
 {
-   auto& socket = getImpl();
+   auto& socket = getZmqSocket();
 
-   for (auto& endPoint : getEndPoints()) {
-      socket->bind(endPoint);
+   try {
+      for (auto& endPoint : getEndPoints()) {
+         socket->bind(endPoint);
+      }
+   }
+   catch(zmq::error_t& ex) {
+      COFFEE_THROW_EXCEPTION(asString () << ", Error=" << ex.what());
    }
 }
 
 void networking::ServerSocket::destroy()
    noexcept
 {
-   auto& socket = getImpl();
+   auto& socket = getZmqSocket();
 
    for (auto& endPoint : getEndPoints()) {
       try {
          socket->unbind(endPoint);
       }
       catch (zmq::error_t& ex) {
-         LOG_ERROR(asString() << ", Error=" << ex.what());
+         LOG_WARN(asString() << ", Error=" << ex.what());
       }
-
    }
+}
+
+void networking::ServerSocket::send(const basis::DataBlock& response)
+   throw(basis::RuntimeException)
+{
+   zmq::message_t zmqMessage(response.size());
+   coffee_memcpy(zmqMessage.data(), response.data(), response.size());
+   m_zmqSocket->send(zmqMessage);
 }
 
 basis::StreamString networking::ServerSocket::asString() const

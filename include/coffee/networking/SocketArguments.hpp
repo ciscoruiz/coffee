@@ -36,12 +36,13 @@ typedef std::vector<std::string> EndPoints;
 
 class SocketArguments {
 public:
-   explicit SocketArguments(const int socketType, std::shared_ptr<MessageHandler> messageHandler) :
-      m_socketType(socketType), m_messageHandler(messageHandler)
+   explicit SocketArguments(const int socketType) :
+      m_socketType(socketType)
    {;}
 
    SocketArguments& addEndPoint(const EndPoints::value_type& endPoint) noexcept { m_endPoints.push_back(endPoint); return *this; }
    SocketArguments& setName(const std::string& name) noexcept { m_name = name; return *this; }
+   SocketArguments& setMessageHandler(const std::shared_ptr<MessageHandler> messageHandler) { m_messageHandler = messageHandler; return *this; }
 
    int getSocketType() const noexcept { return m_socketType; }
    const EndPoints& getEndPoints() const noexcept { return m_endPoints; }

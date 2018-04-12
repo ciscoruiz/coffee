@@ -23,6 +23,7 @@
 
 #include <coffee/networking/ClientSocket.hpp>
 #include <coffee/networking/MessageHandler.hpp>
+#include <coffee/logger/Logger.hpp>
 
 using namespace coffee;
 
@@ -34,21 +35,45 @@ networking::ClientSocket::ClientSocket(networking::NetworkingService& networking
 void networking::ClientSocket::initialize()
    throw(basis::RuntimeException)
 {
-   auto& socket = getImpl();
+   auto& socket = getZmqSocket();
 
-   for (auto& endPoint : getEndPoints()) {
-      socket->connect(endPoint);
+   try {
+      for (auto& endPoint : getEndPoints()) {
+         socket->connect(endPoint);
+      }
+   }
+   catch(zmq::error_t& ex) {
+      COFFEE_THROW_EXCEPTION(asString () << ", Error=" << ex.what());
    }
 }
 
 void networking::ClientSocket::destroy()
    noexcept
 {
-   auto& socket = getImpl();
+   auto& socket = getZmqSocket();
 
    for (auto& endPoint : getEndPoints()) {
-      socket->disconnect(endPoint);
+      try {
+         socket->disconnect(endPoint);
+      }
+      catch (zmq::error_t& ex) {
+         LOG_WARN(asString() << ", Error=" << ex.what());
+      }
    }
+}
+
+basis::DataBlock networking::ClientSocket::send(const basis::DataBlock& request)
+   throw(basis::RuntimeException)
+{
+   zmq::message_t zmqRequest(request.size());
+   coffee_memcpy(zmqRequest.data(), request.data(), request.size());
+   m_zmqSocket->send(zmqRequest);
+
+   zmq::message_t zmqResponse;
+   m_zmqSocket->recv(&zmqResponse);
+   basis::DataBlock response((char*) zmqResponse.data(), zmqResponse.size());
+
+   return response;
 }
 
 basis::StreamString networking::ClientSocket::asString() const

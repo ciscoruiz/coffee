@@ -41,6 +41,7 @@ namespace networking {
 class Socket;
 class SocketArguments;
 class ClientSocket;
+class ServerSocket;
 
 class NetworkingService : public app::Service {
 public:
@@ -50,17 +51,19 @@ public:
 
    std::shared_ptr<zmq::context_t>& getContext() noexcept { return m_context; }
 
-   std::shared_ptr<networking::Socket> createServerSocket(const SocketArguments& socketArguments) throw(basis::RuntimeException);
+   std::shared_ptr<networking::ServerSocket> createServerSocket(const SocketArguments& socketArguments) throw(basis::RuntimeException);
    std::shared_ptr<networking::ClientSocket> createClientSocket(const SocketArguments& socketArguments) throw(basis::RuntimeException);
    std::shared_ptr<networking::ClientSocket> findClientSocket(const std::string& name) throw(basis::RuntimeException);
 
 private:
    typedef std::vector<std::shared_ptr<Socket> > Sockets;
-   typedef std::unordered_map<std::string, std::shared_ptr<ClientSocket> > ClientSockets;
+   typedef std::vector<std::shared_ptr<ServerSocket> > ServerSockets;
+   typedef std::unordered_map<std::string, std::shared_ptr<ClientSocket> > NamedClientSockets;
 
    std::shared_ptr<zmq::context_t> m_context;
    Sockets m_sockets;
-   ClientSockets m_clientSockets;
+   ServerSockets m_serverSockets;
+   NamedClientSockets m_namedClientSockets;
    std::thread m_broker;
 
    NetworkingService(app::Application &app, const int zeroMQThreads);

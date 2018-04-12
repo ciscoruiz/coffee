@@ -36,6 +36,8 @@ class MessageHandler;
 
 class ClientSocket : public Socket {
 public:
+   basis::DataBlock send(const basis::DataBlock& request) throw(basis::RuntimeException);
+
    basis::StreamString asString() const noexcept;
 
 protected:

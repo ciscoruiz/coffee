@@ -27,13 +27,13 @@
 
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/SocketArguments.hpp>
-
+#include <coffee/networking/ServerSocket.hpp>
 
 struct NetworkingFixture {
    coffee::app::ApplicationServiceStarter app;
    std::shared_ptr<coffee::networking::NetworkingService> networkingService;
    std::thread thr;
-   std::shared_ptr<coffee::networking::Socket> serviceSocket;
+   std::shared_ptr<coffee::networking::ServerSocket> serviceSocket;
 
    static const char* serviceIP;
 

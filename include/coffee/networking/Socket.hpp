@@ -42,8 +42,7 @@ class MessageHandler;
 class Socket {
 public:
    virtual ~Socket();
-   bool isValid() const noexcept { return (bool) m_socket; }
-   void send(const basis::DataBlock& message) throw(basis::RuntimeException);
+   bool isValid() const noexcept { return (bool) m_zmqSocket; }
 
    virtual basis::StreamString asString() const noexcept;
 
@@ -52,7 +51,7 @@ protected:
 
    std::shared_ptr<MessageHandler>& getMessageHandler() noexcept { return m_messageHandler;}
 
-   std::shared_ptr<zmq::socket_t>& getImpl() { return m_socket; }
+   std::shared_ptr<zmq::socket_t>& getZmqSocket() { return m_zmqSocket; }
 
    const EndPoints& getEndPoints() const noexcept { return m_endPoints; }
 
@@ -68,11 +67,13 @@ protected:
     */
    virtual void destroy() noexcept = 0;
 
+protected:
+   std::shared_ptr<zmq::socket_t> m_zmqSocket;
+
 private:
    const int m_socketType;
    const EndPoints m_endPoints;
    std::shared_ptr<MessageHandler> m_messageHandler;
-   std::shared_ptr<zmq::socket_t> m_socket;
 
    friend class NetworkingService;
 };

@@ -29,7 +29,7 @@
 #include <coffee/logger/TraceMethod.hpp>
 
 #include <coffee/networking/MessageHandler.hpp>
-#include <coffee/networking/Socket.hpp>
+#include <coffee/networking/ServerSocket.hpp>
 
 using namespace coffee;
 
@@ -45,14 +45,14 @@ public:
    }
 
 protected:
-   void apply(const basis::DataBlock& message, networking::Socket& socket)
+   void apply(const basis::DataBlock& message, networking::ServerSocket& serverSocket)
       throw(basis::RuntimeException)
    {
       std::string str(message.data(), message.size());
       std::transform(str.begin(), str.end(), str.begin(), [](unsigned char cc) { return std::toupper(cc); });
 
       basis::DataBlock response(str.c_str());
-      socket.send(response);
+      serverSocket.send(response);
    }
 };
 
@@ -65,8 +65,9 @@ NetworkingFixture::NetworkingFixture() : app("TestAppNetworkingFixture")
    logger::Logger::setLevel(logger::Level::Debug);
 
    networkingService = networking::NetworkingService::instantiate(app);
-   networking::SocketArguments arguments(ZMQ_REP, UpperStringHandler::instantiate());
-   serviceSocket = networkingService->createServerSocket(arguments.addEndPoint(serviceIP));
+   networking::SocketArguments arguments(ZMQ_REP);
+   arguments.setMessageHandler(UpperStringHandler::instantiate()).addEndPoint(serviceIP);
+   serviceSocket = networkingService->createServerSocket(arguments);
    thr = std::thread(parallelRun, std::ref(app));
    app.waitUntilRunning();
    networkingService->waitEffectiveRunning();
@@ -74,7 +75,6 @@ NetworkingFixture::NetworkingFixture() : app("TestAppNetworkingFixture")
 
 NetworkingFixture::~NetworkingFixture() {
    LOG_THIS_METHOD();
-
    app.stop();
    thr.join();
 }

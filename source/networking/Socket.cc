@@ -33,20 +33,13 @@ networking::Socket::Socket(networking::NetworkingService& networkingService, con
    m_endPoints(socketArguments.getEndPoints()),
    m_messageHandler(socketArguments.getMessageHandler())
 {
-   m_socket = std::make_shared<zmq::socket_t>(*networkingService.getContext(), m_socketType);
+   zmq::context_t& context = *networkingService.getContext();
+   m_zmqSocket = std::make_shared<zmq::socket_t>(context, m_socketType);
 }
 
 networking::Socket::~Socket()
 {
-   m_socket.reset();
-}
-
-void networking::Socket::send(const basis::DataBlock& message)
-   throw(basis::RuntimeException)
-{
-   zmq::message_t zmqMessage(message.size());
-   coffee_memcpy(zmqMessage.data(), message.data(), message.size());
-   m_socket->send(zmqMessage);
+   m_zmqSocket.reset();
 }
 
 //virtual
@@ -67,7 +60,9 @@ basis::StreamString networking::Socket::asString() const
    }
    result << "}";
 
-   result << ",Handler=" << m_messageHandler->asString();
+   if (m_messageHandler) {
+      result << ",Handler=" << m_messageHandler->asString();
+   }
 
    return result << "}";
 }

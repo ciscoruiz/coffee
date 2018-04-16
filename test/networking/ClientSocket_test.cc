@@ -37,7 +37,7 @@ BOOST_FIXTURE_TEST_CASE(clientsocket_service_on, NetworkingFixture)
 
 BOOST_FIXTURE_TEST_CASE(clientsocket_server_on, NetworkingFixture)
 {
-   BOOST_REQUIRE(serviceSocket->isValid());
+   BOOST_REQUIRE(upperServer->isValid());
 }
 
 BOOST_FIXTURE_TEST_CASE(clientsocket_without_endpoints, NetworkingFixture)
@@ -47,10 +47,17 @@ BOOST_FIXTURE_TEST_CASE(clientsocket_without_endpoints, NetworkingFixture)
    BOOST_REQUIRE_THROW(networkingService->createClientSocket(arguments), basis::RuntimeException);
 }
 
+BOOST_FIXTURE_TEST_CASE(clientsocket_without_handler, NetworkingFixture)
+{
+   networking::SocketArguments arguments;
+   arguments.addSubscription("12345");
+   BOOST_REQUIRE_NO_THROW(networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555")));
+}
+
 BOOST_FIXTURE_TEST_CASE(clientsocket_bad_address, NetworkingFixture)
 {
    networking::SocketArguments arguments;
-
+   arguments.addSubscription("12345");
    BOOST_REQUIRE_THROW(networkingService->createClientSocket(arguments.addEndPoint("bad-address")), basis::RuntimeException);
 }
 
@@ -82,3 +89,12 @@ BOOST_FIXTURE_TEST_CASE(clientsocket_found, NetworkingFixture)
    BOOST_REQUIRE_EQUAL(clientSocket->getEndPoints().at(0), "tcp://127.0.0.1:5556");
 }
 
+//BOOST_FIXTURE_TEST_CASE(clientsocket_unkwown_server, NetworkingFixture)
+//{
+//   networking::SocketArguments arguments;
+//   auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:7777"));
+//   BOOST_REQUIRE(clientSocket);
+//
+//   basis::DataBlock request("Send to an non existant server");
+//   BOOST_REQUIRE_THROW(clientSocket->send(request), basis::RuntimeException);
+//}

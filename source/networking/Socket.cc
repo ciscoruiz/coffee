@@ -24,6 +24,7 @@
 #include <coffee/networking/Socket.hpp>
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/SocketArguments.hpp>
+#include <coffee/logger/Logger.hpp>
 
 using namespace coffee;
 
@@ -38,6 +39,67 @@ networking::Socket::Socket(networking::NetworkingService& networkingService, con
 networking::Socket::~Socket()
 {
    m_zmqSocket.reset();
+}
+
+void networking::Socket::Socket::bind()
+   throw(basis::RuntimeException)
+{
+   if (m_endPoints.empty()) {
+      COFFEE_THROW_EXCEPTION(this->asString() << " does not have any end point");
+   }
+
+   try {
+      for (auto& endPoint : m_endPoints) {
+         m_zmqSocket->bind(endPoint);
+      }
+   }
+   catch(zmq::error_t& ex) {
+      COFFEE_THROW_EXCEPTION(this->asString() << ", Error=" << ex.what());
+   }
+}
+
+void networking::Socket::unbind()
+   noexcept
+{
+   for (auto& endPoint : m_endPoints) {
+      try {
+         m_zmqSocket->unbind(endPoint);
+      }
+      catch (zmq::error_t& ex) {
+         LOG_WARN(asString() << ", Error=" << ex.what());
+      }
+   }
+}
+
+void networking::Socket::connect()
+   throw(basis::RuntimeException)
+{
+   if (m_endPoints.empty()) {
+      COFFEE_THROW_EXCEPTION(this->asString() << " does not have any end point");
+   }
+
+   try {
+      for (auto& endPoint : m_endPoints) {
+         m_zmqSocket->connect(endPoint);
+         m_zmqSocket->setsockopt(ZMQ_SNDTIMEO, (int) 100);
+      }
+   }
+   catch(zmq::error_t& ex) {
+      COFFEE_THROW_EXCEPTION(asString () << ", Error=" << ex.what());
+   }
+}
+
+void networking::Socket::disconnect()
+   noexcept
+{
+   for (auto& endPoint : m_endPoints) {
+      try {
+         m_zmqSocket->disconnect(endPoint);
+      }
+      catch (zmq::error_t& ex) {
+         LOG_WARN(asString() << ", Error=" << ex.what());
+      }
+   }
 }
 
 //virtual

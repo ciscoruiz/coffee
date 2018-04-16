@@ -31,8 +31,7 @@ namespace coffee {
 
 namespace networking {
 
-class ServerSocket;
-class NetworkingService;
+class AsyncSocket;
 
 class MessageHandler : public basis::NamedObject {
 protected:
@@ -40,9 +39,9 @@ public:
    explicit MessageHandler(const std::string &name) : NamedObject(name) {}
 
 protected:
-   virtual void apply(const basis::DataBlock& message, ServerSocket& socket) throw(basis::RuntimeException) = 0;
+   virtual void apply(const basis::DataBlock& message, AsyncSocket& socket) throw(basis::RuntimeException) = 0;
 
-   friend class NetworkingService;
+   friend class AsyncSocket;
 };
 
 }

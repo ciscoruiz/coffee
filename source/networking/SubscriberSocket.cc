@@ -23,44 +23,57 @@
 
 #include <coffee/logger/Logger.hpp>
 
-#include <coffee/networking/ServerSocket.hpp>
+#include <coffee/networking/SubscriberSocket.hpp>
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/MessageHandler.hpp>
 
 using namespace coffee;
 
-networking::ServerSocket::ServerSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
-   networking::AsyncSocket(networkingService, socketArguments, ZMQ_REP)
+networking::SubscriberSocket::SubscriberSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
+   networking::AsyncSocket(networkingService, socketArguments, ZMQ_SUB),
+   m_subscriptions(socketArguments.getSubscriptions())
 {
 }
 
-void networking::ServerSocket::initialize()
+void networking::SubscriberSocket::initialize()
    throw(basis::RuntimeException)
 {
    AsyncSocket::initialize();
-   bind();
+
+   if (m_subscriptions.empty()) {
+      COFFEE_THROW_EXCEPTION(asString() << " requires one or more subscriptions");
+   }
+
+   connect();
+
+   for (auto& subscrition : m_subscriptions) {
+      m_zmqSocket->setsockopt(ZMQ_SUBSCRIBE, subscrition.c_str(), subscrition.size());
+   }
 }
 
-void networking::ServerSocket::destroy()
+void networking::SubscriberSocket::destroy()
    noexcept
 {
-   unbind();
+   disconnect();
 }
 
-void networking::ServerSocket::send(const basis::DataBlock& response)
-   throw(basis::RuntimeException)
-{
-   zmq::message_t zmqMessage(response.size());
-   coffee_memcpy(zmqMessage.data(), response.data(), response.size());
-   m_zmqSocket->send(zmqMessage);
-}
-
-basis::StreamString networking::ServerSocket::asString() const
+basis::StreamString networking::SubscriberSocket::asString() const
    noexcept
 {
-   basis::StreamString result("networking.ServerSocket {");
+   basis::StreamString result("networking.SubscriberSocket {");
 
    result << AsyncSocket::asString();
+
+   result << ",Subscriptions=[";
+
+   bool first = true;
+   for (auto& ii : m_subscriptions) {
+      if (!first)
+         result << ",";
+      result << ii;
+      first = false;
+   }
+   result << "]";
 
    return result << "}";
 }

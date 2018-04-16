@@ -21,46 +21,41 @@
 // SOFTWARE.
 //
 
-#include <coffee/logger/Logger.hpp>
-
-#include <coffee/networking/ServerSocket.hpp>
-#include <coffee/networking/NetworkingService.hpp>
+#include <coffee/networking/AsyncSocket.hpp>
 #include <coffee/networking/MessageHandler.hpp>
 
 using namespace coffee;
 
-networking::ServerSocket::ServerSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
-   networking::AsyncSocket(networkingService, socketArguments, ZMQ_REP)
+networking::AsyncSocket::AsyncSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments, const int socketType) :
+   networking::Socket(networkingService, socketArguments, socketType),
+   m_messageHandler(socketArguments.getMessageHandler())
 {
 }
 
-void networking::ServerSocket::initialize()
+void networking::AsyncSocket::initialize()
    throw(basis::RuntimeException)
 {
-   AsyncSocket::initialize();
-   bind();
+   if (!m_messageHandler) {
+      COFFEE_THROW_EXCEPTION(asString() << " requires a message handler instance");
+   }
 }
 
-void networking::ServerSocket::destroy()
-   noexcept
-{
-   unbind();
-}
-
-void networking::ServerSocket::send(const basis::DataBlock& response)
+void networking::AsyncSocket::handle(const basis::DataBlock& message)
    throw(basis::RuntimeException)
 {
-   zmq::message_t zmqMessage(response.size());
-   coffee_memcpy(zmqMessage.data(), response.data(), response.size());
-   m_zmqSocket->send(zmqMessage);
+   m_messageHandler->apply(message, *this);
 }
 
-basis::StreamString networking::ServerSocket::asString() const
+basis::StreamString networking::AsyncSocket::asString() const
    noexcept
 {
-   basis::StreamString result("networking.ServerSocket {");
+   basis::StreamString result("networking.AsyncSocket {");
 
-   result << AsyncSocket::asString();
+   result << Socket::asString();
+
+   if (m_messageHandler) {
+      result << ",Handler=" << m_messageHandler->asString();
+   }
 
    return result << "}";
 }

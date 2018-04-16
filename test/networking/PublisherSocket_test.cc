@@ -21,46 +21,33 @@
 // SOFTWARE.
 //
 
-#include <coffee/logger/Logger.hpp>
+#include <boost/test/unit_test.hpp>
 
-#include <coffee/networking/ServerSocket.hpp>
 #include <coffee/networking/NetworkingService.hpp>
-#include <coffee/networking/MessageHandler.hpp>
+#include <coffee/networking/ClientSocket.hpp>
+
+#include "NetworkingFixture.hpp"
 
 using namespace coffee;
 
-networking::ServerSocket::ServerSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
-   networking::AsyncSocket(networkingService, socketArguments, ZMQ_REP)
+BOOST_FIXTURE_TEST_CASE(publishersocket_without_endpoints, NetworkingFixture)
 {
+   networking::SocketArguments arguments;
+   arguments.addSubscription("12345");
+   BOOST_REQUIRE_THROW(networkingService->createPublisherSocket(arguments), basis::RuntimeException);
 }
 
-void networking::ServerSocket::initialize()
-   throw(basis::RuntimeException)
+BOOST_FIXTURE_TEST_CASE(publishersocket_without_handler, NetworkingFixture)
 {
-   AsyncSocket::initialize();
-   bind();
+   networking::SocketArguments arguments;
+   arguments.addSubscription("12345");
+   BOOST_REQUIRE_NO_THROW(networkingService->createPublisherSocket(arguments.addEndPoint("tcp://*:5566")));
 }
 
-void networking::ServerSocket::destroy()
-   noexcept
+BOOST_FIXTURE_TEST_CASE(publishersocket_bad_address, NetworkingFixture)
 {
-   unbind();
-}
+   networking::SocketArguments arguments;
 
-void networking::ServerSocket::send(const basis::DataBlock& response)
-   throw(basis::RuntimeException)
-{
-   zmq::message_t zmqMessage(response.size());
-   coffee_memcpy(zmqMessage.data(), response.data(), response.size());
-   m_zmqSocket->send(zmqMessage);
-}
-
-basis::StreamString networking::ServerSocket::asString() const
-   noexcept
-{
-   basis::StreamString result("networking.ServerSocket {");
-
-   result << AsyncSocket::asString();
-
-   return result << "}";
+   arguments.addSubscription("123").addEndPoint("bad-address").setMessageHandler(UpperStringHandler::instantiate());
+   BOOST_REQUIRE_THROW(networkingService->createPublisherSocket(arguments), basis::RuntimeException);
 }

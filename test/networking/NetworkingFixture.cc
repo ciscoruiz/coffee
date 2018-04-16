@@ -34,20 +34,20 @@
 using namespace coffee;
 
 //static
-const char* NetworkingFixture::serviceIP = "tcp://*:5555";
+const char* NetworkingFixture::upperServerEndPoint = "tcp://*:5555";
 
 NetworkingFixture::NetworkingFixture() : app("TestAppNetworkingFixture")
 {
    const char* logFileName = "test/networking/trace.log";
    unlink (logFileName);
-   //logger::Logger::initialize(std::make_shared<logger::UnlimitedTraceWriter>(logFileName));
-   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
+   logger::Logger::initialize(std::make_shared<logger::UnlimitedTraceWriter>(logFileName));
+//   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
    logger::Logger::setLevel(logger::Level::Debug);
 
    networkingService = networking::NetworkingService::instantiate(app);
    networking::SocketArguments arguments;
    arguments.setMessageHandler(UpperStringHandler::instantiate()).addEndPoint("tcp://*:5555").addEndPoint("tcp://*:5556");
-   serviceSocket = networkingService->createServerSocket(arguments);
+   upperServer = networkingService->createServerSocket(arguments);
    thr = std::thread(parallelRun, std::ref(app));
    app.waitUntilRunning();
    networkingService->waitEffectiveRunning();
@@ -59,7 +59,7 @@ NetworkingFixture::~NetworkingFixture() {
    thr.join();
 }
 
-void NetworkingFixture::UpperStringHandler::apply(const basis::DataBlock& message, networking::ServerSocket& serverSocket)
+void NetworkingFixture::UpperStringHandler::apply(const basis::DataBlock& message, networking::AsyncSocket& serverSocket)
    throw(basis::RuntimeException)
 {
    std::string str(message.data(), message.size());
@@ -68,7 +68,7 @@ void NetworkingFixture::UpperStringHandler::apply(const basis::DataBlock& messag
    serverSocket.send(response);
 }
 
-void NetworkingFixture::LowerStringHandler::apply(const basis::DataBlock& message, networking::ServerSocket& serverSocket)
+void NetworkingFixture::LowerStringHandler::apply(const basis::DataBlock& message, networking::AsyncSocket& serverSocket)
    throw(basis::RuntimeException)
 {
    std::string str(message.data(), message.size());

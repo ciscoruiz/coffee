@@ -20,47 +20,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+#ifndef _coffee_networking_AsyncSocket_hpp_
+#define _coffee_networking_AsyncSocket_hpp_
 
-#include <coffee/logger/Logger.hpp>
+#include <vector>
+#include <memory>
 
-#include <coffee/networking/ServerSocket.hpp>
-#include <coffee/networking/NetworkingService.hpp>
-#include <coffee/networking/MessageHandler.hpp>
+#include <coffee/networking/Socket.hpp>
 
-using namespace coffee;
+namespace coffee {
 
-networking::ServerSocket::ServerSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
-   networking::AsyncSocket(networkingService, socketArguments, ZMQ_REP)
-{
+namespace networking {
+
+class MessageHandler;
+
+class AsyncSocket : public Socket {
+public:
+   virtual ~AsyncSocket() { m_messageHandler.reset(); }
+   virtual basis::StreamString asString() const noexcept;
+   virtual void send(const basis::DataBlock& response) throw(basis::RuntimeException) = 0;
+
+protected:
+   AsyncSocket(NetworkingService& networkingService, const SocketArguments& socketArguments, const int socketType);
+
+   virtual void initialize() throw(basis::RuntimeException);
+
+private:
+   std::shared_ptr<MessageHandler> m_messageHandler;
+
+   void handle(const basis::DataBlock& message) throw(basis::RuntimeException);
+
+   friend class NetworkingService;
+};
+
+}
 }
 
-void networking::ServerSocket::initialize()
-   throw(basis::RuntimeException)
-{
-   AsyncSocket::initialize();
-   bind();
-}
-
-void networking::ServerSocket::destroy()
-   noexcept
-{
-   unbind();
-}
-
-void networking::ServerSocket::send(const basis::DataBlock& response)
-   throw(basis::RuntimeException)
-{
-   zmq::message_t zmqMessage(response.size());
-   coffee_memcpy(zmqMessage.data(), response.data(), response.size());
-   m_zmqSocket->send(zmqMessage);
-}
-
-basis::StreamString networking::ServerSocket::asString() const
-   noexcept
-{
-   basis::StreamString result("networking.ServerSocket {");
-
-   result << AsyncSocket::asString();
-
-   return result << "}";
-}
+#endif // _coffee_networking_AsyncSocket_hpp_

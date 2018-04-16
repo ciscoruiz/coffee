@@ -33,8 +33,8 @@
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/ServerSocket.hpp>
 #include <coffee/networking/ClientSocket.hpp>
-#include <coffee/networking/SocketArguments.hpp>
-#include <coffee/networking/MessageHandler.hpp>
+#include <coffee/networking/PublisherSocket.hpp>
+#include <coffee/networking/SubscriberSocket.hpp>
 
 using namespace coffee;
 
@@ -58,6 +58,7 @@ networking::NetworkingService::~NetworkingService()
    m_sockets.clear();
    m_serverSockets.clear();
    m_namedClientSockets.clear();
+   m_subscriberSockets.clear();
 }
 
 void networking::NetworkingService::do_initialize()
@@ -77,21 +78,25 @@ void networking::NetworkingService::broker(NetworkingService& networkingService)
 {
    LOG_THIS_METHOD();
 
+   static const std::chrono::milliseconds timeout(100);
+
    while (networkingService.isStarting());
 
-   zmq::pollitem_t* items = createPollItems(networkingService);
-   size_t nitems = networkingService.m_serverSockets.size();
-   const std::chrono::milliseconds timeout(250);
+   std::shared_ptr<networking::NetworkingService::Poll> poll = std::make_shared<Poll>(networkingService);
 
    networkingService.notifyEffectiveRunning();
 
    while (networkingService.isRunning()) {
-      zmq::message_t message;
+      zmq::message_t zmqMessage;
 
-      int rpoll = zmq_poll(items, nitems, timeout.count());
+      int rpoll = zmq_poll(poll->m_items, poll->m_nitems, timeout.count());
 
-      if (rpoll == 0)
+      if (rpoll == 0) {
+         if (poll->isOutdated()) {
+            poll = std::make_shared<Poll>(networkingService);
+         }
          continue;
+      }
 
       if (rpoll == -1) {
          LOG_ERROR("Error=" << strerror(errno));
@@ -99,24 +104,28 @@ void networking::NetworkingService::broker(NetworkingService& networkingService)
       }
 
       // See http://zguide.zeromq.org/cpp:mspoller
-      for (size_t index = 0; index < nitems; ++ index) {
-         if (items[index].revents & ZMQ_POLLIN) {
-            auto socket = networkingService.m_serverSockets[index];
-            auto zmqSocket = socket->getZmqSocket();
-            zmqSocket->recv(&message);
-            basis::DataBlock ww((const char*) message.data(), message.size());
-            socket->getMessageHandler()->apply(ww, *socket);
+      for (size_t index = 0; index < poll->m_nitems; ++ index) {
+         if (poll->m_items[index].revents & ZMQ_POLLIN) {
+            auto iisocket = poll->m_asyncSockets.find(index);
+
+            if (iisocket != poll->m_asyncSockets.end()) {
+               auto socket = iisocket->second;
+               socket->getZmqSocket()->recv(&zmqMessage);
+               basis::DataBlock message((const char*) zmqMessage.data(), zmqMessage.size());
+               try {
+                  socket->handle(message);
+               }
+               catch(basis::RuntimeException& ex) {
+                  logger::Logger::write(ex);
+               }
+            }
          }
       }
 
-      if (networkingService.m_serverSockets.size() != nitems) {
-         delete [] items;
-         items = createPollItems(networkingService);
-         nitems = networkingService.m_serverSockets.size();
+      if (poll->isOutdated()) {
+         poll = std::make_shared<Poll>(networkingService);
       }
    }
-
-   delete [] items;
 }
 
 void networking::NetworkingService::do_stop()
@@ -173,8 +182,40 @@ std::shared_ptr<networking::ClientSocket> networking::NetworkingService::createC
    return result;
 }
 
-std::shared_ptr<networking::ClientSocket> networking::NetworkingService::findClientSocket(const std::string& name)
+std::shared_ptr<networking::PublisherSocket> networking::NetworkingService::createPublisherSocket(const SocketArguments& socketArguments)
    throw(basis::RuntimeException)
+{
+   std::shared_ptr<networking::PublisherSocket> result(new networking::PublisherSocket(*this, socketArguments));
+
+   if (this->isRunning()) {
+      LOG_DEBUG("Initializing " << result->asString());
+      result->initialize();
+   }
+
+   m_sockets.push_back(result);
+
+   return result;
+}
+
+std::shared_ptr<networking::SubscriberSocket> networking::NetworkingService::createSubscriberSocket(const networking::SocketArguments& socketArguments)
+   throw(basis::RuntimeException)
+{
+   std::shared_ptr<networking::SubscriberSocket> result(new networking::SubscriberSocket(*this, socketArguments));
+
+   if (this->isRunning()) {
+      LOG_DEBUG("Initializing " << result->asString());
+      result->initialize();
+   }
+
+   m_sockets.push_back(result);
+   m_subscriberSockets.push_back(result);
+
+   return result;
+}
+
+
+std::shared_ptr<networking::ClientSocket> networking::NetworkingService::findClientSocket(const std::string& name)
+throw(basis::RuntimeException)
 {
    auto ii = m_namedClientSockets.find(name);
 
@@ -185,16 +226,41 @@ std::shared_ptr<networking::ClientSocket> networking::NetworkingService::findCli
    return ii->second;
 }
 
-zmq_pollitem_t* networking::NetworkingService::createPollItems(networking::NetworkingService &broker) {
-   const size_t maxii = broker.m_serverSockets.size();
-   zmq_pollitem_t* result = new zmq_pollitem_t[maxii];
+networking::NetworkingService::Poll::Poll(networking::NetworkingService& networkingService) :
+   m_networkingService(networkingService),
+   m_nitems(networkingService.m_serverSockets.size() + networkingService.m_subscriberSockets.size())
+{
+   m_items =  new zmq_pollitem_t[m_nitems];
 
-   for (size_t ii = 0; ii < maxii; ++ ii) {
-      coffee_memset(&result[ii], 0, sizeof(zmq_pollitem_t));
-      zmq::socket_t* socket = broker.m_serverSockets[ii]->getZmqSocket().get();
-      result[ii].socket = (void*) *socket;
-      result[ii].events = ZMQ_POLLIN;
+   size_t ii = 0;
+
+   for (auto serverSocket : networkingService.m_serverSockets) {
+      coffee_memset(&m_items[ii], 0, sizeof(zmq_pollitem_t));
+      zmq::socket_t* socket = serverSocket->getZmqSocket().get();
+      m_items[ii].socket = (void*) *socket;
+      m_items[ii].events = ZMQ_POLLIN;
+      m_asyncSockets[ii ++] = serverSocket;
    }
 
-   return result;
+   for (auto subscriberSocket : networkingService.m_subscriberSockets) {
+      coffee_memset(&m_items[ii], 0, sizeof(zmq_pollitem_t));
+      zmq::socket_t* socket = subscriberSocket->getZmqSocket().get();
+      m_items[ii].socket = (void*) *socket;
+      m_items[ii].events = ZMQ_POLLIN;
+      m_asyncSockets[ii ++] = subscriberSocket;
+   }
+
+   LOG_DEBUG("Polling n-items=" << m_nitems);
+}
+
+networking::NetworkingService::Poll::~Poll()
+{
+   m_asyncSockets.clear();
+   delete []m_items;
+}
+
+bool networking::NetworkingService::Poll::isOutdated() const
+   noexcept
+{
+   return m_nitems != m_networkingService.m_serverSockets.size() + m_networkingService.m_subscriberSockets.size();
 }

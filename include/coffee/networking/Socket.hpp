@@ -65,6 +65,11 @@ protected:
     */
    virtual void destroy() noexcept = 0;
 
+   void bind() throw(basis::RuntimeException);
+   void unbind() noexcept ;
+   void connect() throw(basis::RuntimeException);
+   void disconnect() noexcept ;
+
 protected:
    std::shared_ptr<zmq::socket_t> m_zmqSocket;
 

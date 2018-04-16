@@ -20,47 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+#ifndef _coffee_networking_PublisherSocket_hpp_
+#define _coffee_networking_PublisherSocket_hpp_
 
-#include <coffee/logger/Logger.hpp>
+#include <memory>
 
-#include <coffee/networking/ServerSocket.hpp>
-#include <coffee/networking/NetworkingService.hpp>
-#include <coffee/networking/MessageHandler.hpp>
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/networking/Socket.hpp>
 
-using namespace coffee;
+namespace coffee {
 
-networking::ServerSocket::ServerSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
-   networking::AsyncSocket(networkingService, socketArguments, ZMQ_REP)
-{
+namespace networking {
+
+class MessageHandler;
+
+class PublisherSocket : public Socket {
+public:
+   void send(const basis::DataBlock& request) throw(basis::RuntimeException);
+
+   basis::StreamString asString() const noexcept;
+
+protected:
+   virtual void initialize() throw(basis::RuntimeException);
+   virtual void destroy() noexcept;
+
+private:
+   PublisherSocket(NetworkingService& networkingService, const SocketArguments& socketArguments);
+
+   friend class NetworkingService;
+};
+
+}
 }
 
-void networking::ServerSocket::initialize()
-   throw(basis::RuntimeException)
-{
-   AsyncSocket::initialize();
-   bind();
-}
-
-void networking::ServerSocket::destroy()
-   noexcept
-{
-   unbind();
-}
-
-void networking::ServerSocket::send(const basis::DataBlock& response)
-   throw(basis::RuntimeException)
-{
-   zmq::message_t zmqMessage(response.size());
-   coffee_memcpy(zmqMessage.data(), response.data(), response.size());
-   m_zmqSocket->send(zmqMessage);
-}
-
-basis::StreamString networking::ServerSocket::asString() const
-   noexcept
-{
-   basis::StreamString result("networking.ServerSocket {");
-
-   result << AsyncSocket::asString();
-
-   return result << "}";
-}
+#endif // _coffee_networking_PublisherSocket_hpp_

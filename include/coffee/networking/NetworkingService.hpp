@@ -32,7 +32,6 @@
 #include <zmq.hpp>
 
 #include <coffee/app/Service.hpp>
-#include <coffee/basis/NamedObject.hpp>
 
 namespace coffee {
 
@@ -42,6 +41,9 @@ class Socket;
 class SocketArguments;
 class ClientSocket;
 class ServerSocket;
+class AsyncSocket;
+class PublisherSocket;
+class SubscriberSocket;
 
 class NetworkingService : public app::Service {
 public:
@@ -53,25 +55,42 @@ public:
 
    std::shared_ptr<networking::ServerSocket> createServerSocket(const SocketArguments& socketArguments) throw(basis::RuntimeException);
    std::shared_ptr<networking::ClientSocket> createClientSocket(const SocketArguments& socketArguments) throw(basis::RuntimeException);
+   std::shared_ptr<networking::PublisherSocket> createPublisherSocket(const SocketArguments& socketArguments) throw(basis::RuntimeException);
+   std::shared_ptr<networking::SubscriberSocket> createSubscriberSocket(const SocketArguments& socketArguments) throw(basis::RuntimeException);
+
    std::shared_ptr<networking::ClientSocket> findClientSocket(const std::string& name) throw(basis::RuntimeException);
 
 private:
+   struct Poll {
+      typedef std::unordered_map<int, std::shared_ptr<AsyncSocket> > AsyncSockets;
+
+      Poll(NetworkingService& networkingService);
+      ~Poll();
+
+      bool isOutdated() const noexcept;
+
+      NetworkingService& m_networkingService;
+      const int m_nitems;
+      zmq_pollitem_t* m_items;
+      AsyncSockets m_asyncSockets;
+   };
+
    typedef std::vector<std::shared_ptr<Socket> > Sockets;
    typedef std::vector<std::shared_ptr<ServerSocket> > ServerSockets;
+   typedef std::vector<std::shared_ptr<SubscriberSocket> > SubscriberSockets;
    typedef std::unordered_map<std::string, std::shared_ptr<ClientSocket> > NamedClientSockets;
 
    std::shared_ptr<zmq::context_t> m_context;
    Sockets m_sockets;
    ServerSockets m_serverSockets;
+   SubscriberSockets m_subscriberSockets;
    NamedClientSockets m_namedClientSockets;
    std::thread m_broker;
 
-   NetworkingService(app::Application &app, const int zeroMQThreads);
+   NetworkingService(app::Application& app, const int zeroMQThreads);
    void do_initialize() throw(basis::RuntimeException);
    static void broker(NetworkingService& networkingService) noexcept;
    void do_stop() throw(basis::RuntimeException);
-
-   static zmq_pollitem_t *createPollItems(NetworkingService &broker);
 };
 
 }

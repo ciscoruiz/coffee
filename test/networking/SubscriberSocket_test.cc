@@ -30,34 +30,31 @@
 
 using namespace coffee;
 
-BOOST_FIXTURE_TEST_CASE(serversocket_service_on, NetworkingFixture)
+BOOST_FIXTURE_TEST_CASE(subscribersocket_without_endpoints, NetworkingFixture)
 {
-   BOOST_REQUIRE(networkingService->isRunning());
+   networking::SocketArguments arguments;
+   arguments.addSubscription("12345").setMessageHandler(UpperStringHandler::instantiate());
+   BOOST_REQUIRE_THROW(networkingService->createSubscriberSocket(arguments), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(serversocket_server_on, NetworkingFixture)
+BOOST_FIXTURE_TEST_CASE(subscribersocket_without_handler, NetworkingFixture)
 {
-   BOOST_REQUIRE(upperServer->isValid());
+   networking::SocketArguments arguments;
+   arguments.addSubscription("12345").addEndPoint("tcp://localhost:5566");
+   BOOST_REQUIRE_THROW(networkingService->createSubscriberSocket(arguments), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(serversocket_without_endpoints, NetworkingFixture)
+BOOST_FIXTURE_TEST_CASE(subscribersocket_without_subscription, NetworkingFixture)
+{
+   networking::SocketArguments arguments;
+   arguments.addEndPoint("tcp://localhost:5566").setMessageHandler(UpperStringHandler::instantiate());
+   BOOST_REQUIRE_THROW(networkingService->createSubscriberSocket(arguments), basis::RuntimeException);
+}
+
+BOOST_FIXTURE_TEST_CASE(subscribersocket_bad_address, NetworkingFixture)
 {
    networking::SocketArguments arguments;
 
-   BOOST_REQUIRE_THROW(networkingService->createServerSocket(arguments.setMessageHandler(UpperStringHandler::instantiate())), basis::RuntimeException);
-}
-
-BOOST_FIXTURE_TEST_CASE(serversocket_without_handler, NetworkingFixture)
-{
-   networking::SocketArguments arguments;
-
-   BOOST_REQUIRE_THROW(networkingService->createServerSocket(arguments.addEndPoint(upperServerEndPoint)), basis::RuntimeException);
-}
-
-BOOST_FIXTURE_TEST_CASE(serversocket_bad_address, NetworkingFixture)
-{
-   networking::SocketArguments arguments;
-
-   arguments.addEndPoint("bad-address").setMessageHandler(UpperStringHandler::instantiate());
-   BOOST_REQUIRE_THROW(networkingService->createServerSocket(arguments), basis::RuntimeException);
+   arguments.addSubscription("123").addEndPoint("bad-address").setMessageHandler(UpperStringHandler::instantiate());
+   BOOST_REQUIRE_THROW(networkingService->createSubscriberSocket(arguments), basis::RuntimeException);
 }

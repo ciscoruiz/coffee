@@ -35,46 +35,28 @@ networking::ClientSocket::ClientSocket(networking::NetworkingService& networking
 void networking::ClientSocket::initialize()
    throw(basis::RuntimeException)
 {
-   auto& socket = getZmqSocket();
-
-   bool empty = true;
-
-   try {
-      for (auto& endPoint : getEndPoints()) {
-         empty = false;
-         socket->connect(endPoint);
-      }
-   }
-   catch(zmq::error_t& ex) {
-      COFFEE_THROW_EXCEPTION(asString () << ", Error=" << ex.what());
-   }
-
-   if (empty) {
-      COFFEE_THROW_EXCEPTION(asString() << " does not have any end point");
-   }
+   connect();
 }
 
 void networking::ClientSocket::destroy()
    noexcept
 {
-   auto& socket = getZmqSocket();
-
-   for (auto& endPoint : getEndPoints()) {
-      try {
-         socket->disconnect(endPoint);
-      }
-      catch (zmq::error_t& ex) {
-         LOG_WARN(asString() << ", Error=" << ex.what());
-      }
-   }
+   disconnect();
 }
 
 basis::DataBlock networking::ClientSocket::send(const basis::DataBlock& request)
    throw(basis::RuntimeException)
 {
-   zmq::message_t zmqRequest(request.size());
-   coffee_memcpy(zmqRequest.data(), request.data(), request.size());
-   m_zmqSocket->send(zmqRequest);
+   try {
+      zmq::message_t zmqRequest(request.size());
+      coffee_memcpy(zmqRequest.data(), request.data(), request.size());
+      if (!m_zmqSocket->send(zmqRequest, ZMQ_DONTWAIT)) {
+         COFFEE_THROW_EXCEPTION(asString() << ",Error=Socket could not send the message");
+      }
+   }
+   catch(zmq::error_t& ex) {
+      COFFEE_THROW_EXCEPTION(asString() << ",Error=" << ex.what());
+   }
 
    zmq::message_t zmqResponse;
    m_zmqSocket->recv(&zmqResponse);

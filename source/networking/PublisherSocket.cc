@@ -23,31 +23,30 @@
 
 #include <coffee/logger/Logger.hpp>
 
-#include <coffee/networking/ServerSocket.hpp>
+#include <coffee/networking/PublisherSocket.hpp>
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/MessageHandler.hpp>
 
 using namespace coffee;
 
-networking::ServerSocket::ServerSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
-   networking::AsyncSocket(networkingService, socketArguments, ZMQ_REP)
+networking::PublisherSocket::PublisherSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
+   networking::Socket(networkingService, socketArguments, ZMQ_PUB)
 {
 }
 
-void networking::ServerSocket::initialize()
+void networking::PublisherSocket::initialize()
    throw(basis::RuntimeException)
 {
-   AsyncSocket::initialize();
    bind();
 }
 
-void networking::ServerSocket::destroy()
+void networking::PublisherSocket::destroy()
    noexcept
 {
    unbind();
 }
 
-void networking::ServerSocket::send(const basis::DataBlock& response)
+void networking::PublisherSocket::send(const basis::DataBlock& response)
    throw(basis::RuntimeException)
 {
    zmq::message_t zmqMessage(response.size());
@@ -55,12 +54,12 @@ void networking::ServerSocket::send(const basis::DataBlock& response)
    m_zmqSocket->send(zmqMessage);
 }
 
-basis::StreamString networking::ServerSocket::asString() const
+basis::StreamString networking::PublisherSocket::asString() const
    noexcept
 {
-   basis::StreamString result("networking.ServerSocket {");
+   basis::StreamString result("networking.PublisherSocket {");
 
-   result << AsyncSocket::asString();
+   result << Socket::asString();
 
    return result << "}";
 }

@@ -96,3 +96,33 @@ BOOST_FIXTURE_TEST_CASE(networking_create_new_server, NetworkingFixture)
       BOOST_REQUIRE_EQUAL(std::string(response.data()), "this is the new server");
    }
 }
+
+BOOST_FIXTURE_TEST_CASE(networking_large_message, NetworkingFixture)
+{
+   networking::SocketArguments arguments;
+   arguments.setMessageHandler(EchoHandler::instantiate()).addEndPoint("tcp://*:6667");
+   auto echoServer = networkingService->createServerSocket(arguments);
+   BOOST_REQUIRE(echoServer);
+
+   // To give time to NetworkingService to detect new server socket
+   usleep(100000);
+
+   {
+      networking::SocketArguments arguments;
+      auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:6667"));
+      BOOST_REQUIRE(clientSocket);
+
+      static const int largeSize = 16384;
+
+      char* memory = new char[largeSize];
+
+      basis::DataBlock request(memory, largeSize);
+      auto response = clientSocket->send(request);
+      BOOST_REQUIRE_EQUAL(response.size(), largeSize);
+      for(int ii = 0; ii < largeSize; ++ ii) {
+         BOOST_REQUIRE(memory[ii] == response[ii]);
+      }
+
+      delete []memory;
+   }
+}

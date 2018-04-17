@@ -58,6 +58,19 @@ struct NetworkingFixture {
          throw(coffee::basis::RuntimeException);
    };
 
+   class EchoHandler : public coffee::networking::MessageHandler {
+   public:
+      EchoHandler() : coffee::networking::MessageHandler("UpperStringHandler") {;}
+
+      static std::shared_ptr<EchoHandler> instantiate() {
+         return std::make_shared<EchoHandler>();
+      }
+
+   protected:
+      void apply(const coffee::basis::DataBlock& message, coffee::networking::AsyncSocket& serverSocket)
+         throw(coffee::basis::RuntimeException);
+   };
+
    coffee::app::ApplicationServiceStarter app;
    std::shared_ptr<coffee::networking::NetworkingService> networkingService;
    std::thread thr;

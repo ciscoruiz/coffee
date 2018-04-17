@@ -76,3 +76,9 @@ void NetworkingFixture::LowerStringHandler::apply(const basis::DataBlock& messag
    basis::DataBlock response(str.c_str());
    serverSocket.send(response);
 }
+
+void NetworkingFixture::EchoHandler::apply(const basis::DataBlock& message, networking::AsyncSocket& serverSocket)
+   throw(basis::RuntimeException)
+{
+   serverSocket.send(message);
+}

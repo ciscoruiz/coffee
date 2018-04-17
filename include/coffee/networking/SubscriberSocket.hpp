@@ -38,6 +38,10 @@ class SubscriberSocket : public AsyncSocket {
 public:
    basis::StreamString asString() const noexcept;
 
+   void send(const coffee::basis::DataBlock&) throw(basis::RuntimeException) {
+      COFFEE_THROW_EXCEPTION(asString() << " method can not be used");
+   }
+
 private:
    Subscriptions m_subscriptions;
 
@@ -45,9 +49,6 @@ private:
 
    void initialize() throw(basis::RuntimeException);
    void destroy() noexcept;
-   void send(const coffee::basis::DataBlock&) throw(basis::RuntimeException) {
-      COFFEE_THROW_EXCEPTION(asString() << " method can not be used");
-   }
 
    friend class NetworkingService;
 };

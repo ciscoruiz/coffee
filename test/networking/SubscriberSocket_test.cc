@@ -24,7 +24,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <coffee/networking/NetworkingService.hpp>
-#include <coffee/networking/ClientSocket.hpp>
+#include <coffee/networking/SubscriberSocket.hpp>
 
 #include "NetworkingFixture.hpp"
 
@@ -57,4 +57,15 @@ BOOST_FIXTURE_TEST_CASE(subscribersocket_bad_address, NetworkingFixture)
 
    arguments.addSubscription("123").addEndPoint("bad-address").setMessageHandler(UpperStringHandler::instantiate());
    BOOST_REQUIRE_THROW(networkingService->createSubscriberSocket(arguments), basis::RuntimeException);
+}
+
+BOOST_FIXTURE_TEST_CASE(subscribersocket_must_not_send, NetworkingFixture)
+{
+   networking::SocketArguments arguments;
+
+   arguments.addSubscription("123").addEndPoint("tcp://localhost:5566").setMessageHandler(UpperStringHandler::instantiate());
+   auto subscriber = networkingService->createSubscriberSocket(arguments);
+   BOOST_REQUIRE(subscriber);
+   BOOST_REQUIRE_THROW(subscriber->send(basis::DataBlock("world", 5)), basis::RuntimeException);
+
 }

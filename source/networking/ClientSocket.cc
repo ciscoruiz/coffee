@@ -62,7 +62,6 @@ basis::DataBlock networking::ClientSocket::send(const basis::DataBlock& request)
       }
 
       if (!m_zmqSocket->recv(&zmqResponse)) {
-         m_zmqSocket->close();
          COFFEE_THROW_EXCEPTION(asString() << " did not receive any response");
       }
    }

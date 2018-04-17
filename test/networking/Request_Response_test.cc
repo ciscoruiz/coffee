@@ -84,6 +84,9 @@ BOOST_FIXTURE_TEST_CASE(networking_create_new_server, NetworkingFixture)
    auto newServerSocket = networkingService->createServerSocket(arguments);
    BOOST_REQUIRE(newServerSocket->isValid());
 
+   // To give time to NetworkingService to detect new server socket
+   usleep(100000);
+
    {
       networking::SocketArguments arguments;
       auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:6666"));

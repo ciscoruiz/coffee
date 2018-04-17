@@ -38,6 +38,7 @@ networking::Socket::Socket(networking::NetworkingService& networkingService, con
 
 networking::Socket::~Socket()
 {
+   m_zmqSocket->close();
    m_zmqSocket.reset();
 }
 
@@ -81,7 +82,6 @@ void networking::Socket::connect()
    try {
       for (auto& endPoint : m_endPoints) {
          m_zmqSocket->connect(endPoint);
-         m_zmqSocket->setsockopt(ZMQ_SNDTIMEO, (int) 100);
       }
    }
    catch(zmq::error_t& ex) {

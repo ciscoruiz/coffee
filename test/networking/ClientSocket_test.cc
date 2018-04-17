@@ -89,12 +89,12 @@ BOOST_FIXTURE_TEST_CASE(clientsocket_found, NetworkingFixture)
    BOOST_REQUIRE_EQUAL(clientSocket->getEndPoints().at(0), "tcp://127.0.0.1:5556");
 }
 
-//BOOST_FIXTURE_TEST_CASE(clientsocket_unkwown_server, NetworkingFixture)
-//{
-//   networking::SocketArguments arguments;
-//   auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:7777"));
-//   BOOST_REQUIRE(clientSocket);
-//
-//   basis::DataBlock request("Send to an non existant server");
-//   BOOST_REQUIRE_THROW(clientSocket->send(request), basis::RuntimeException);
-//}
+BOOST_FIXTURE_TEST_CASE(clientsocket_unkwown_server, NetworkingFixture)
+{
+   networking::SocketArguments arguments;
+   auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:7777"));
+   BOOST_REQUIRE(clientSocket);
+
+   basis::DataBlock request("Send to an non existant server");
+   BOOST_REQUIRE_THROW(clientSocket->send(request), basis::RuntimeException);
+}

@@ -35,7 +35,12 @@ networking::ClientSocket::ClientSocket(networking::NetworkingService& networking
 void networking::ClientSocket::initialize()
    throw(basis::RuntimeException)
 {
+   static const std::chrono::milliseconds handshakeTime(50);
+
    connect();
+   m_zmqSocket->setsockopt(ZMQ_SNDTIMEO, (int) handshakeTime.count());
+   m_zmqSocket->setsockopt(ZMQ_RCVTIMEO, (int) handshakeTime.count());
+   m_zmqSocket->setsockopt(ZMQ_LINGER, (int) handshakeTime.count());
 }
 
 void networking::ClientSocket::destroy()
@@ -47,22 +52,25 @@ void networking::ClientSocket::destroy()
 basis::DataBlock networking::ClientSocket::send(const basis::DataBlock& request)
    throw(basis::RuntimeException)
 {
+   zmq::message_t zmqResponse;
+
    try {
       zmq::message_t zmqRequest(request.size());
       coffee_memcpy(zmqRequest.data(), request.data(), request.size());
       if (!m_zmqSocket->send(zmqRequest, ZMQ_DONTWAIT)) {
          COFFEE_THROW_EXCEPTION(asString() << ",Error=Socket could not send the message");
       }
+
+      if (!m_zmqSocket->recv(&zmqResponse)) {
+         m_zmqSocket->close();
+         COFFEE_THROW_EXCEPTION(asString() << " did not receive any response");
+      }
    }
    catch(zmq::error_t& ex) {
       COFFEE_THROW_EXCEPTION(asString() << ",Error=" << ex.what());
    }
 
-   zmq::message_t zmqResponse;
-   m_zmqSocket->recv(&zmqResponse);
-   basis::DataBlock response((char*) zmqResponse.data(), zmqResponse.size());
-
-   return response;
+   return basis::DataBlock ((char*) zmqResponse.data(), zmqResponse.size());
 }
 
 basis::StreamString networking::ClientSocket::asString() const
@@ -71,6 +79,7 @@ basis::StreamString networking::ClientSocket::asString() const
    basis::StreamString result("networking.ClientSocket {");
 
    result << Socket::asString();
+   result << ",IsConnected=" << m_zmqSocket->connected();
 
    return result << "}";
 }

@@ -3,59 +3,59 @@
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="true">
     <generated>
       <config projectName="coffee" targetName="ContinuousStart" />
-      <config projectName="coffee" targetName="coffee_persistence" />
-      <config projectName="coffee" targetName="coffee_xml" />
-      <config projectName="coffee" targetName="ContinuousBuild" />
-      <config projectName="coffee" targetName="test_coffee_dbms" />
-      <config projectName="coffee" targetName="NightlyCoverage" />
-      <config projectName="coffee" targetName="coffee_balance" />
-      <config projectName="coffee" targetName="coffee_config" />
-      <config projectName="coffee" targetName="ContinuousCoverage" />
-      <config projectName="coffee" targetName="NightlyTest" />
-      <config projectName="coffee" targetName="test_coffee_networking" />
-      <config projectName="coffee" targetName="test_coffee_dbms_ldap" />
-      <config projectName="coffee" targetName="coffee_dbms_sqlite" />
-      <config projectName="coffee" targetName="NightlyBuild" />
-      <config projectName="coffee" targetName="coffee_logger" />
-      <config projectName="coffee" targetName="test_coffee_xml" />
-      <config projectName="coffee" targetName="NightlyMemoryCheck" />
-      <config projectName="coffee" targetName="doc" />
-      <config projectName="coffee" targetName="test_coffee_app" />
-      <config projectName="coffee" targetName="coffee_time" />
-      <config projectName="coffee" targetName="ExperimentalBuild" />
-      <config projectName="coffee" targetName="ExperimentalConfigure" />
-      <config projectName="coffee" targetName="test_coffee_logger" />
-      <config projectName="coffee" targetName="coffee_app" />
-      <config projectName="coffee" targetName="ContinuousMemCheck" />
-      <config projectName="coffee" targetName="coffee_basis" />
-      <config projectName="coffee" targetName="NightlyConfigure" />
       <config projectName="coffee" targetName="NightlySubmit" />
-      <config projectName="coffee" targetName="test_coffee_dbms_sqlite" />
-      <config projectName="coffee" targetName="Continuous" />
-      <config projectName="coffee" targetName="test_coffee_balance" />
-      <config projectName="coffee" targetName="ExperimentalSubmit" />
-      <config projectName="coffee" targetName="test_coffee_persistence" />
-      <config projectName="coffee" targetName="ContinuousConfigure" />
-      <config projectName="coffee" targetName="ExperimentalMemCheck" />
-      <config projectName="coffee" targetName="Experimental" />
-      <config projectName="coffee" targetName="Nightly" />
-      <config projectName="coffee" targetName="coffee_dbms_mock" />
-      <config projectName="coffee" targetName="NightlyMemCheck" />
-      <config projectName="coffee" targetName="ExperimentalStart" />
-      <config projectName="coffee" targetName="ContinuousUpdate" />
-      <config projectName="coffee" targetName="test_coffee_time" />
-      <config projectName="coffee" targetName="NightlyStart" />
-      <config projectName="coffee" targetName="coffee_networking" />
-      <config projectName="coffee" targetName="test_coffee_config" />
-      <config projectName="coffee" targetName="ExperimentalTest" />
-      <config projectName="coffee" targetName="ContinuousSubmit" />
-      <config projectName="coffee" targetName="ContinuousTest" />
-      <config projectName="coffee" targetName="coffee_dbms_ldap" />
-      <config projectName="coffee" targetName="coffee_dbms" />
-      <config projectName="coffee" targetName="ExperimentalCoverage" />
-      <config projectName="coffee" targetName="NightlyUpdate" />
+      <config projectName="coffee" targetName="test_coffee_dbms" />
       <config projectName="coffee" targetName="ExperimentalUpdate" />
+      <config projectName="coffee" targetName="coffee_xml" />
+      <config projectName="coffee" targetName="test_coffee_dbms_ldap" />
+      <config projectName="coffee" targetName="ExperimentalTest" />
+      <config projectName="coffee" targetName="coffee_networking" />
+      <config projectName="coffee" targetName="NightlyUpdate" />
+      <config projectName="coffee" targetName="coffee_persistence" />
       <config projectName="coffee" targetName="test_coffee_basis" />
+      <config projectName="coffee" targetName="NightlyConfigure" />
+      <config projectName="coffee" targetName="coffee_dbms_sqlite" />
+      <config projectName="coffee" targetName="test_coffee_dbms_sqlite" />
+      <config projectName="coffee" targetName="test_coffee_config" />
+      <config projectName="coffee" targetName="NightlyStart" />
+      <config projectName="coffee" targetName="ExperimentalCoverage" />
+      <config projectName="coffee" targetName="test_coffee_networking" />
+      <config projectName="coffee" targetName="NightlyBuild" />
+      <config projectName="coffee" targetName="NightlyCoverage" />
+      <config projectName="coffee" targetName="Continuous" />
+      <config projectName="coffee" targetName="ExperimentalStart" />
+      <config projectName="coffee" targetName="test_coffee_logger" />
+      <config projectName="coffee" targetName="coffee_time" />
+      <config projectName="coffee" targetName="test_coffee_app" />
+      <config projectName="coffee" targetName="NightlyMemCheck" />
+      <config projectName="coffee" targetName="ContinuousCoverage" />
+      <config projectName="coffee" targetName="coffee_dbms_ldap" />
+      <config projectName="coffee" targetName="ContinuousBuild" />
+      <config projectName="coffee" targetName="test_coffee_balance" />
+      <config projectName="coffee" targetName="coffee_basis" />
+      <config projectName="coffee" targetName="ContinuousMemCheck" />
+      <config projectName="coffee" targetName="Experimental" />
+      <config projectName="coffee" targetName="coffee_balance" />
+      <config projectName="coffee" targetName="coffee_app" />
+      <config projectName="coffee" targetName="ContinuousSubmit" />
+      <config projectName="coffee" targetName="ContinuousUpdate" />
+      <config projectName="coffee" targetName="NightlyTest" />
+      <config projectName="coffee" targetName="coffee_config" />
+      <config projectName="coffee" targetName="test_coffee_xml" />
+      <config projectName="coffee" targetName="Nightly" />
+      <config projectName="coffee" targetName="ExperimentalConfigure" />
+      <config projectName="coffee" targetName="ContinuousTest" />
+      <config projectName="coffee" targetName="test_coffee_persistence" />
+      <config projectName="coffee" targetName="test_coffee_time" />
+      <config projectName="coffee" targetName="coffee_dbms_mock" />
+      <config projectName="coffee" targetName="ContinuousConfigure" />
+      <config projectName="coffee" targetName="doc" />
+      <config projectName="coffee" targetName="ExperimentalBuild" />
+      <config projectName="coffee" targetName="ExperimentalSubmit" />
+      <config projectName="coffee" targetName="NightlyMemoryCheck" />
+      <config projectName="coffee" targetName="coffee_dbms" />
+      <config projectName="coffee" targetName="ExperimentalMemCheck" />
+      <config projectName="coffee" targetName="coffee_logger" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -65,23 +65,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1996f6df-826a-4fbe-909a-9191da0bb4bb" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/test/networking/ClientSocket_test.cc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/networking/ServerSocket_test.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/coffee/basis/NamedObject.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/coffee/basis/NamedObject.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/coffee/networking/ServerSocket.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/coffee/networking/ServerSocket.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/coffee/networking/Socket.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/coffee/networking/Socket.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/coffee/networking/SocketArguments.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/coffee/networking/SocketArguments.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/coffee/networking/SubscriberSocket.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/coffee/networking/SubscriberSocket.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/source/networking/ClientSocket.cc" beforeDir="false" afterPath="$PROJECT_DIR$/source/networking/ClientSocket.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/networking/NetworkingService.cc" beforeDir="false" afterPath="$PROJECT_DIR$/source/networking/NetworkingService.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/networking/ServerSocket.cc" beforeDir="false" afterPath="$PROJECT_DIR$/source/networking/ServerSocket.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/networking/Socket.cc" beforeDir="false" afterPath="$PROJECT_DIR$/source/networking/Socket.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/balance/BasicBalance_test.cc" beforeDir="false" afterPath="$PROJECT_DIR$/test/balance/BasicBalance_test.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/networking/NetworkingFixture.cc" beforeDir="false" afterPath="$PROJECT_DIR$/test/networking/NetworkingFixture.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/networking/NetworkingFixture.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/test/networking/NetworkingFixture.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/networking/Request_Response_test.cc" beforeDir="false" afterPath="$PROJECT_DIR$/test/networking/Request_Response_test.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/persistence/Repository_test.cc" beforeDir="false" afterPath="$PROJECT_DIR$/test/persistence/Repository_test.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/networking/SubscriberSocket_test.cc" beforeDir="false" afterPath="$PROJECT_DIR$/test/networking/SubscriberSocket_test.cc" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/CMakeFiles/" />
     <ignored path="$PROJECT_DIR$/test/dbms/CMakeFiles/" />
@@ -120,35 +107,41 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:COVERAGE" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="ServerSocket_test.cc" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/networking/ServerSocket_test.cc">
+      <file leaf-file-name="SubscriberSocket.cc" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/source/networking/SubscriberSocket.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="568">
-              <caret line="58" column="24" selection-start-line="58" selection-start-column="24" selection-end-line="58" selection-end-column="24" />
+            <state relative-caret-position="362">
+              <caret line="59" column="55" selection-start-line="59" selection-start-column="55" selection-end-line="59" selection-end-column="55" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SubscriberSocket.hpp" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/include/coffee/networking/SubscriberSocket.hpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="560">
+              <caret line="43" selection-start-line="43" selection-end-line="43" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ClientSocket.cc" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/source/networking/ClientSocket.cc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="362">
+              <caret line="64" selection-start-line="64" selection-end-line="64" />
               <folding>
-                <element signature="e#1166#1201#0" expanded="true" />
+                <element signature="e#1166#1211#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ClientSocket_test.cc" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/networking/ClientSocket_test.cc">
+      <file leaf-file-name="Socket.cc" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/source/networking/Socket.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="456">
-              <caret line="69" selection-start-line="69" selection-end-line="69" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NetworkingFixture.cc" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/networking/NetworkingFixture.cc">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="400">
-              <caret line="60" selection-start-line="60" selection-end-line="60" />
-              <folding>
-                <element signature="e#1166#1198#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="242">
+              <caret line="63" column="1" selection-start-line="63" selection-start-column="1" selection-end-line="63" selection-end-column="1" />
             </state>
           </provider>
         </entry>
@@ -156,53 +149,26 @@
       <file leaf-file-name="Request_Response_test.cc" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/networking/Request_Response_test.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="666">
-              <caret line="95" selection-start-line="95" selection-end-line="95" />
-              <folding>
-                <element signature="e#1166#1201#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="572">
+              <caret line="117" selection-start-line="117" selection-end-line="117" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NetworkingService.cc" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/source/networking/NetworkingService.cc">
+      <file leaf-file-name="SubscriberSocket_test.cc" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/networking/SubscriberSocket_test.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="232">
-              <caret line="89" lean-forward="true" selection-start-line="89" selection-end-line="89" />
-              <folding>
-                <element signature="e#1166#1184#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="265">
+              <caret line="27" selection-start-line="27" selection-end-line="27" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BasicBalance_test.cc" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/balance/BasicBalance_test.cc">
+      <file leaf-file-name="NetworkingFixture.cc" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/networking/NetworkingFixture.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="56">
-              <caret line="84" column="30" selection-start-line="84" selection-start-column="30" selection-end-line="84" selection-end-column="30" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Repository_test.cc" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/persistence/Repository_test.cc">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="532">
-              <caret line="68" column="106" selection-start-line="68" selection-start-column="106" selection-end-line="68" selection-end-column="106" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Socket.hpp" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/include/coffee/networking/Socket.hpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="252">
-              <caret line="47" selection-start-line="47" selection-end-line="47" />
-              <folding>
-                <element signature="e#1244#1261#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="306">
+              <caret line="50" selection-start-line="47" selection-end-line="50" />
             </state>
           </provider>
         </entry>
@@ -210,11 +176,8 @@
       <file leaf-file-name="NetworkingFixture.hpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/networking/NetworkingFixture.hpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="362">
-              <caret line="42" column="13" selection-start-line="42" selection-start-column="13" selection-end-line="42" selection-end-column="13" />
-              <folding>
-                <element signature="e#1260#1311#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="180">
+              <caret line="57" column="48" selection-start-line="57" selection-start-column="48" selection-end-line="57" selection-end-column="48" />
             </state>
           </provider>
         </entry>
@@ -241,6 +204,7 @@
       <find>serversocket_</find>
       <find>createServ</find>
       <find>createServer</find>
+      <find>monitor_t</find>
     </findStrings>
     <replaceStrings>
       <replace>Socket</replace>
@@ -259,8 +223,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/include/coffee/dbms/Statement.hpp" />
-        <option value="$PROJECT_DIR$/source/dbms/Statement.cc" />
         <option value="$PROJECT_DIR$/source/dbms/datatype/MultiString.cc" />
         <option value="$PROJECT_DIR$/source/dbms.ldap/LdapStatement.cc" />
         <option value="$PROJECT_DIR$/source/dbms.ldap/LdapOutputBinder.cc" />
@@ -297,19 +259,21 @@
         <option value="$PROJECT_DIR$/include/coffee/basis/DataBlock.hpp" />
         <option value="$PROJECT_DIR$/include/coffee/networking/SocketArguments.hpp" />
         <option value="$PROJECT_DIR$/include/coffee/networking/ServerSocket.hpp" />
-        <option value="$PROJECT_DIR$/source/networking/ClientSocket.cc" />
         <option value="$PROJECT_DIR$/source/networking/ServerSocket.cc" />
-        <option value="$PROJECT_DIR$/source/networking/Socket.cc" />
         <option value="$PROJECT_DIR$/include/coffee/basis/NamedObject.hpp" />
         <option value="$PROJECT_DIR$/test/networking/ServerSocket_test.cc" />
         <option value="$PROJECT_DIR$/test/balance/BasicBalance_test.cc" />
         <option value="$PROJECT_DIR$/test/persistence/Repository_test.cc" />
         <option value="$PROJECT_DIR$/include/coffee/networking/Socket.hpp" />
+        <option value="$PROJECT_DIR$/source/networking/NetworkingService.cc" />
+        <option value="$PROJECT_DIR$/source/networking/Socket.cc" />
         <option value="$PROJECT_DIR$/test/networking/ClientSocket_test.cc" />
         <option value="$PROJECT_DIR$/test/networking/NetworkingFixture.hpp" />
-        <option value="$PROJECT_DIR$/test/networking/Request_Response_test.cc" />
         <option value="$PROJECT_DIR$/test/networking/NetworkingFixture.cc" />
-        <option value="$PROJECT_DIR$/source/networking/NetworkingService.cc" />
+        <option value="$PROJECT_DIR$/test/networking/Request_Response_test.cc" />
+        <option value="$PROJECT_DIR$/include/coffee/networking/SubscriberSocket.hpp" />
+        <option value="$PROJECT_DIR$/test/networking/SubscriberSocket_test.cc" />
+        <option value="$PROJECT_DIR$/source/networking/ClientSocket.cc" />
       </list>
     </option>
   </component>
@@ -363,6 +327,13 @@
               <item name="coffee" type="462c0819:PsiDirectoryNode" />
               <item name="include" type="462c0819:PsiDirectoryNode" />
               <item name="coffee" type="462c0819:PsiDirectoryNode" />
+              <item name="dbms.sqlite" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
+              <item name="coffee" type="462c0819:PsiDirectoryNode" />
+              <item name="include" type="462c0819:PsiDirectoryNode" />
+              <item name="coffee" type="462c0819:PsiDirectoryNode" />
               <item name="networking" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -381,18 +352,6 @@
               <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
               <item name="coffee" type="462c0819:PsiDirectoryNode" />
               <item name="source" type="462c0819:PsiDirectoryNode" />
-              <item name="app" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="coffee" type="462c0819:PsiDirectoryNode" />
-              <item name="source" type="462c0819:PsiDirectoryNode" />
-              <item name="basis" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="coffee" type="462c0819:PsiDirectoryNode" />
-              <item name="source" type="462c0819:PsiDirectoryNode" />
               <item name="networking" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -408,98 +367,7 @@
             </path>
             <path>
               <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="coffee" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="persistence" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="coffee" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="time" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
               <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Header Search Paths" type="70bed36:NamedLibraryElementNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Header Search Paths" type="70bed36:NamedLibraryElementNode" />
-              <item name="include" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Header Search Paths" type="70bed36:NamedLibraryElementNode" />
-              <item name="include" type="462c0819:PsiDirectoryNode" />
-              <item name="asm-generic" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Header Search Paths" type="70bed36:NamedLibraryElementNode" />
-              <item name="include" type="462c0819:PsiDirectoryNode" />
-              <item name="c++" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Header Search Paths" type="70bed36:NamedLibraryElementNode" />
-              <item name="include" type="462c0819:PsiDirectoryNode" />
-              <item name="c++" type="462c0819:PsiDirectoryNode" />
-              <item name="5" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Header Search Paths" type="70bed36:NamedLibraryElementNode" />
-              <item name="include" type="462c0819:PsiDirectoryNode" />
-              <item name="c++" type="462c0819:PsiDirectoryNode" />
-              <item name="5" type="462c0819:PsiDirectoryNode" />
-              <item name="bits" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Header Search Paths" type="70bed36:NamedLibraryElementNode" />
-              <item name="include" type="462c0819:PsiDirectoryNode" />
-              <item name="linux" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Header Search Paths" type="70bed36:NamedLibraryElementNode" />
-              <item name="include" type="462c0819:PsiDirectoryNode" />
-              <item name="x86_64-linux-gnu" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Header Search Paths" type="70bed36:NamedLibraryElementNode" />
-              <item name="include" type="462c0819:PsiDirectoryNode" />
-              <item name="x86_64-linux-gnu" type="462c0819:PsiDirectoryNode" />
-              <item name="asm" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Header Search Paths" type="70bed36:NamedLibraryElementNode" />
-              <item name="include" type="462c0819:PsiDirectoryNode" />
-              <item name="x86_64-linux-gnu" type="462c0819:PsiDirectoryNode" />
-              <item name="bits" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Header Search Paths" type="70bed36:NamedLibraryElementNode" />
-              <item name="include" type="462c0819:PsiDirectoryNode" />
-              <item name="zmqpp" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -535,7 +403,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.test_coffee_networking">
+  <component name="RunManager" selected="Boost.Test.clientsocket_unkwown_server">
+    <configuration name="clientsocket_unkwown_server" type="CMakeBoostTestRunConfigurationType" factoryName="Boost Test" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="coffee" TARGET_NAME="test_coffee_networking" RUN_TARGET_PROJECT_NAME="coffee" RUN_TARGET_NAME="test_coffee_networking" TEST_METHOD="clientsocket_unkwown_server" TEST_MODE="SUITE_TEST" />
     <configuration name="Build All" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" CONFIG_NAME="COVERAGE" RUN_TARGET_PROJECT_NAME="coffee" RUN_TARGET_NAME="test_coffee_dbms_ldap" EXPLICIT_BUILD_TARGET_NAME="all" />
     <configuration name="Continuous" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="coffee" TARGET_NAME="Continuous" CONFIG_NAME="COVERAGE" />
     <configuration name="ContinuousBuild" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="coffee" TARGET_NAME="ContinuousBuild" CONFIG_NAME="COVERAGE" RUN_TARGET_PROJECT_NAME="coffee" RUN_TARGET_NAME="ContinuousBuild" />
@@ -647,49 +516,82 @@
       <item itemvalue="Application.test_coffee_persistence" />
       <item itemvalue="Application.test_coffee_time" />
       <item itemvalue="Application.test_coffee_xml" />
+      <item itemvalue="Boost.Test.clientsocket_unkwown_server" />
     </list>
   </component>
+  <component name="TestHistory">
+    <history-entry file="clientsocket_unkwown_server - 2018.04.16 at 11h 25m 44s.xml">
+      <configuration name="clientsocket_unkwown_server" configurationId="CMakeBoostTestRunConfigurationType" />
+    </history-entry>
+    <history-entry file="clientsocket_unkwown_server - 2018.04.16 at 11h 26m 32s.xml">
+      <configuration name="clientsocket_unkwown_server" configurationId="CMakeBoostTestRunConfigurationType" />
+    </history-entry>
+    <history-entry file="clientsocket_unkwown_server - 2018.04.16 at 11h 28m 19s.xml">
+      <configuration name="clientsocket_unkwown_server" configurationId="CMakeBoostTestRunConfigurationType" />
+    </history-entry>
+    <history-entry file="clientsocket_unkwown_server - 2018.04.16 at 11h 28m 22s.xml">
+      <configuration name="clientsocket_unkwown_server" configurationId="CMakeBoostTestRunConfigurationType" />
+    </history-entry>
+    <history-entry file="clientsocket_unkwown_server - 2018.04.16 at 11h 28m 43s.xml">
+      <configuration name="clientsocket_unkwown_server" configurationId="CMakeBoostTestRunConfigurationType" />
+    </history-entry>
+    <history-entry file="clientsocket_unkwown_server - 2018.04.16 at 11h 29m 18s.xml">
+      <configuration name="clientsocket_unkwown_server" configurationId="CMakeBoostTestRunConfigurationType" />
+    </history-entry>
+    <history-entry file="clientsocket_unkwown_server - 2018.04.16 at 11h 30m 06s.xml">
+      <configuration name="clientsocket_unkwown_server" configurationId="CMakeBoostTestRunConfigurationType" />
+    </history-entry>
+    <history-entry file="clientsocket_unkwown_server - 2018.04.16 at 11h 32m 01s.xml">
+      <configuration name="clientsocket_unkwown_server" configurationId="CMakeBoostTestRunConfigurationType" />
+    </history-entry>
+    <history-entry file="clientsocket_unkwown_server - 2018.04.16 at 11h 40m 59s.xml">
+      <configuration name="clientsocket_unkwown_server" configurationId="CMakeBoostTestRunConfigurationType" />
+    </history-entry>
+    <history-entry file="clientsocket_unkwown_server - 2018.04.17 at 06h 26m 11s.xml">
+      <configuration name="clientsocket_unkwown_server" configurationId="CMakeBoostTestRunConfigurationType" />
+    </history-entry>
+  </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1920" height="1176" extended-state="6" />
+    <frame x="0" y="0" width="1888" height="1200" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17984085" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17970859" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info active="true" anchor="bottom" id="Messages" order="7" visible="true" weight="0.2736842" />
+      <window_info active="true" anchor="bottom" id="Messages" order="7" visible="true" weight="0.27315247" />
       <window_info anchor="bottom" id="CMake" order="11" weight="0.3272727" />
       <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3291866" />
       <window_info anchor="bottom" id="Version Control" order="9" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.3291866" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32834426" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="10" />
       <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39943874" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.3291866" />
     </layout>
     <layout-to-restore>
-      <window_info anchor="bottom" id="CMake" order="11" weight="0.3272727" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17984085" />
+      <window_info anchor="bottom" id="Version Control" order="9" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17984085" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Version Control" order="9" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32990655" />
-      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3291866" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.3291866" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info active="true" anchor="bottom" id="Messages" order="7" visible="true" weight="0.2736842" />
       <window_info anchor="bottom" id="Terminal" order="10" />
       <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3291866" />
-      <window_info anchor="bottom" id="Messages" order="7" weight="0.2736842" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="CMake" order="11" weight="0.3272727" />
       <window_info id="Favorites" order="2" side_tool="true" />
     </layout-to-restore>
   </component>
@@ -698,69 +600,10 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="3" />
+      <option name="time" value="12" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file:///usr/include/zmqpp/context.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="20" column="9" selection-start-line="20" selection-end-line="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/source/dbms/Database.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="215">
-          <caret line="128" column="97" lean-forward="true" selection-start-line="128" selection-start-column="97" selection-end-line="128" selection-end-column="97" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/Database.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="308">
-          <caret line="178" lean-forward="true" selection-start-line="178" selection-end-line="178" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///usr/include/c++/5/bits/unordered_map.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-93">
-          <caret line="97" column="10" selection-start-line="97" selection-start-column="10" selection-end-line="97" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="518">
-            <caret line="46" column="41" lean-forward="true" selection-start-line="46" selection-start-column="41" selection-end-line="46" selection-end-column="41" />
-          </first_editor>
-          <second_editor />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/networking/CMakeLists.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="84">
-          <caret line="6" column="63" selection-start-line="6" selection-start-column="63" selection-end-line="6" selection-end-column="63" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="807">
-          <caret line="90" column="62" selection-start-line="90" selection-start-column="62" selection-end-line="90" selection-end-column="62" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/networking/networking_test.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="322">
-          <caret line="23" column="48" lean-forward="true" selection-start-line="23" selection-start-column="48" selection-end-line="23" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/include/coffee/app/Application.hpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1848" />
@@ -889,9 +732,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="414">
           <caret line="71" column="6" selection-start-line="71" selection-start-column="6" selection-end-line="71" selection-end-column="6" />
-          <folding>
-            <element signature="e#1231#1248#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -909,23 +749,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/include/zmq.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="392">
-          <caret line="362" column="8" selection-start-line="362" selection-start-column="8" selection-end-line="362" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/networking/ClientSocket.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="462">
-          <caret line="36" column="36" selection-start-line="36" selection-start-column="36" selection-end-line="36" selection-end-column="36" />
-          <folding>
-            <element signature="e#1256#1273#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/include/coffee/basis/DataBlock.hpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="148">
@@ -933,50 +756,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/include/c++/5/bits/shared_ptr_base.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="243">
-          <caret line="1054" selection-start-line="1054" selection-end-line="1054" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///usr/include/zmq.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="571" selection-start-line="571" selection-end-line="571" />
-          <folding>
-            <element signature="e#14243#14255#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/source/networking/ClientSocket.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
-          <caret line="54" selection-start-line="51" selection-end-line="54" />
-          <folding>
-            <element signature="e#1166#1211#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/source/networking/ServerSocket.cc">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="504">
           <caret line="60" column="4" selection-start-line="60" selection-start-column="4" selection-end-line="60" selection-end-column="4" />
-          <folding>
-            <element signature="e#1166#1201#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/source/networking/Socket.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="367">
-          <caret line="43" column="56" selection-start-line="43" selection-start-column="56" selection-end-line="43" selection-end-column="56" />
-          <folding>
-            <element signature="e#1166#1205#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -984,26 +767,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="504">
           <caret line="39" column="49" selection-start-line="39" selection-start-column="49" selection-end-line="39" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/networking/NetworkingService.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="518">
-          <caret line="70" column="19" selection-start-line="70" selection-start-column="19" selection-end-line="70" selection-end-column="19" />
-          <folding>
-            <element signature="e#1258#1275#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/networking/MessageHandler.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="36" column="43" selection-start-line="36" selection-start-column="43" selection-end-line="36" selection-end-column="43" />
-          <folding>
-            <element signature="e#1260#1304#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1035,69 +798,179 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/networking/Socket.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="47" selection-start-line="47" selection-end-line="47" />
-          <folding>
-            <element signature="e#1244#1261#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/networking/ServerSocket_test.cc">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="568">
           <caret line="58" column="24" selection-start-line="58" selection-start-column="24" selection-end-line="58" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/networking/AsyncSocket.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="642">
+          <caret line="59" selection-start-line="59" selection-end-line="59" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/networking/ClientSocket.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="516">
+          <caret line="47" column="42" selection-start-line="47" selection-start-column="42" selection-end-line="47" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/networking/PublisherSocket.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="602">
+          <caret line="43" column="11" selection-start-line="43" selection-start-column="11" selection-end-line="43" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/networking/AsyncSocket.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="406">
+          <caret line="29" column="17" selection-start-line="29" selection-start-column="17" selection-end-line="29" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/networking/MessageHandler.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="381">
+          <caret line="40" column="10" lean-forward="true" selection-start-line="40" selection-start-column="10" selection-end-line="40" selection-end-column="10" />
           <folding>
-            <element signature="e#1166#1201#0" expanded="true" />
+            <element signature="e#1260#1304#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/networking/ClientSocket_test.cc">
+    <entry file="file://$PROJECT_DIR$/include/coffee/networking/NetworkingService.hpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="456">
-          <caret line="69" selection-start-line="69" selection-end-line="69" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/networking/NetworkingFixture.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="362">
-          <caret line="42" column="13" selection-start-line="42" selection-start-column="13" selection-end-line="42" selection-end-column="13" />
+        <state relative-caret-position="266">
+          <caret line="49" column="11" selection-start-line="49" selection-start-column="11" selection-end-line="49" selection-end-column="11" />
           <folding>
-            <element signature="e#1260#1311#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/networking/Request_Response_test.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="666">
-          <caret line="95" selection-start-line="95" selection-end-line="95" />
-          <folding>
-            <element signature="e#1166#1201#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/networking/NetworkingFixture.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="400">
-          <caret line="60" selection-start-line="60" selection-end-line="60" />
-          <folding>
-            <element signature="e#1166#1198#0" expanded="true" />
+            <element signature="e#1258#1275#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/source/networking/NetworkingService.cc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="232">
-          <caret line="89" lean-forward="true" selection-start-line="89" selection-end-line="89" />
+        <state relative-caret-position="894">
+          <caret line="254" selection-start-line="254" selection-end-line="254" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/boost/test/utils/basic_cstring/basic_cstring.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="197">
+          <caret line="190" selection-start-line="190" selection-end-line="190" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/boost/test/impl/unit_test_log.ipp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="563">
+          <caret line="246" selection-start-line="246" selection-end-line="246" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/c++/5/bits/shared_ptr_base.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="563">
+          <caret line="1054" selection-start-line="1054" selection-end-line="1054" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/zmq.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="704">
+          <caret line="343" column="15" selection-start-line="343" selection-start-column="15" selection-end-line="343" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/zmq.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1143">
+          <caret line="458" column="31" selection-start-line="458" selection-start-column="31" selection-end-line="458" selection-end-column="31" />
           <folding>
-            <element signature="e#1166#1184#0" expanded="true" />
+            <element signature="e#13592#13604#0" expanded="true" />
+            <element signature="e#14243#14255#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/networking/NetworkingFixture.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="57" column="48" selection-start-line="57" selection-start-column="48" selection-end-line="57" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/networking/NetworkingFixture.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="50" selection-start-line="47" selection-end-line="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/networking/Socket.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="175">
+          <caret line="51" column="5" selection-start-line="51" selection-start-column="5" selection-end-line="51" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/networking/ClientSocket_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-240">
+          <caret line="37" column="66" selection-start-line="37" selection-start-column="66" selection-end-line="37" selection-end-column="66" />
+          <folding>
+            <element signature="e#1166#1201#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/networking/Socket.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="242">
+          <caret line="63" column="1" selection-start-line="63" selection-start-column="1" selection-end-line="63" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/networking/Request_Response_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="572">
+          <caret line="117" selection-start-line="117" selection-end-line="117" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/networking/SubscriberSocket.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="362">
+          <caret line="59" column="55" selection-start-line="59" selection-start-column="55" selection-end-line="59" selection-end-column="55" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/networking/SubscriberSocket.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="560">
+          <caret line="43" selection-start-line="43" selection-end-line="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/networking/SubscriberSocket_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="265">
+          <caret line="27" selection-start-line="27" selection-end-line="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/networking/ClientSocket.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="362">
+          <caret line="64" selection-start-line="64" selection-end-line="64" />
+          <folding>
+            <element signature="e#1166#1211#0" expanded="true" />
           </folding>
         </state>
       </provider>

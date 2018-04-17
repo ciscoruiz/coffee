@@ -20,48 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+#ifndef _coffee_networking_PublisherSocket_hpp_
+#define _coffee_networking_PublisherSocket_hpp_
 
-#include "../../include/coffee/app/ApplicationServiceStarter.hpp"
+#include <memory>
 
-#include <coffee/config/SCCS.hpp>
-#include <coffee/logger/TraceMethod.hpp>
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/networking/Socket.hpp>
 
-using namespace coffee;
+namespace coffee {
 
-coffee_sccs_import_tag(app);
+namespace networking {
 
-app::ApplicationServiceStarter::ApplicationServiceStarter(const char* shortName):
-    app::Application(shortName, "Application for run attached engines", coffee_sccs_use_tag(app)),
-    semaphoreForRun(0),
-    stopNow(false)
- {
- }
+class MessageHandler;
 
-void app::ApplicationServiceStarter::run()
-   throw(basis::RuntimeException)
-{
-   LOG_THIS_METHOD();
+class PublisherSocket : public Socket {
+public:
+   void send(const basis::DataBlock& request) throw(basis::RuntimeException);
 
-   semaphoreForRun.signal();
-   std::unique_lock <std::mutex> guard (mutex);
-   while(!stopNow) {
-      conditionForStop.wait(guard);
-   }
+   basis::StreamString asString() const noexcept;
+
+protected:
+   virtual void initialize() throw(basis::RuntimeException);
+   virtual void destroy() noexcept;
+
+private:
+   PublisherSocket(NetworkingService& networkingService, const SocketArguments& socketArguments);
+
+   friend class NetworkingService;
+};
+
+}
 }
 
-void app::ApplicationServiceStarter::do_stop()
-   throw(basis::RuntimeException)
-{
-   LOG_THIS_METHOD();
-
-   try {
-      app::Application::do_stop();
-      stopNow = true;
-      conditionForStop.notify_all();
-   }
-   catch(basis::RuntimeException&) {
-      stopNow = true;
-      conditionForStop.notify_all();
-      throw;
-   }
-}
+#endif // _coffee_networking_PublisherSocket_hpp_

@@ -4,6 +4,8 @@
   <component name="CidrRootsConfiguration">
     <sourceRoots>
       <file path="$PROJECT_DIR$/include" />
+      <file path="$PROJECT_DIR$/source/networking" />
+      <file path="$PROJECT_DIR$/test/networking" />
     </sourceRoots>
   </component>
 </project>

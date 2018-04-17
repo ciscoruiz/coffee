@@ -114,7 +114,7 @@ BOOST_FIXTURE_TEST_CASE (as_string, ResourceListFixture)
       myResource->setAvailable(false);
    }
 
-   BOOST_REQUIRE_EQUAL (resourceList->asString (), "balance.ResourceList { basis.NamedObject { Name: TestResources } | Available = 9 of 10 }");
+   BOOST_REQUIRE_EQUAL (resourceList->asString (), "balance.ResourceList { basis.NamedObject {Name=TestResources} | Available = 9 of 10 }");
 }
 
 BOOST_FIXTURE_TEST_CASE (as_xml, ResourceListFixture)

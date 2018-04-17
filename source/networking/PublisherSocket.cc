@@ -21,47 +21,45 @@
 // SOFTWARE.
 //
 
-#include "../../include/coffee/app/ApplicationServiceStarter.hpp"
+#include <coffee/logger/Logger.hpp>
 
-#include <coffee/config/SCCS.hpp>
-#include <coffee/logger/TraceMethod.hpp>
+#include <coffee/networking/PublisherSocket.hpp>
+#include <coffee/networking/NetworkingService.hpp>
+#include <coffee/networking/MessageHandler.hpp>
 
 using namespace coffee;
 
-coffee_sccs_import_tag(app);
-
-app::ApplicationServiceStarter::ApplicationServiceStarter(const char* shortName):
-    app::Application(shortName, "Application for run attached engines", coffee_sccs_use_tag(app)),
-    semaphoreForRun(0),
-    stopNow(false)
- {
- }
-
-void app::ApplicationServiceStarter::run()
-   throw(basis::RuntimeException)
+networking::PublisherSocket::PublisherSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments) :
+   networking::Socket(networkingService, socketArguments, ZMQ_PUB)
 {
-   LOG_THIS_METHOD();
-
-   semaphoreForRun.signal();
-   std::unique_lock <std::mutex> guard (mutex);
-   while(!stopNow) {
-      conditionForStop.wait(guard);
-   }
 }
 
-void app::ApplicationServiceStarter::do_stop()
+void networking::PublisherSocket::initialize()
    throw(basis::RuntimeException)
 {
-   LOG_THIS_METHOD();
+   bind();
+}
 
-   try {
-      app::Application::do_stop();
-      stopNow = true;
-      conditionForStop.notify_all();
-   }
-   catch(basis::RuntimeException&) {
-      stopNow = true;
-      conditionForStop.notify_all();
-      throw;
-   }
+void networking::PublisherSocket::destroy()
+   noexcept
+{
+   unbind();
+}
+
+void networking::PublisherSocket::send(const basis::DataBlock& response)
+   throw(basis::RuntimeException)
+{
+   zmq::message_t zmqMessage(response.size());
+   coffee_memcpy(zmqMessage.data(), response.data(), response.size());
+   m_zmqSocket->send(zmqMessage);
+}
+
+basis::StreamString networking::PublisherSocket::asString() const
+   noexcept
+{
+   basis::StreamString result("networking.PublisherSocket {");
+
+   result << Socket::asString();
+
+   return result << "}";
 }

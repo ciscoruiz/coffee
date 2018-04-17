@@ -30,9 +30,34 @@
 
 #include <coffee/app/Application.hpp>
 #include <coffee/app/Service.hpp>
+#include <coffee/logger/TraceMethod.hpp>
 
 using namespace std;
 using namespace coffee;
+
+void app::Service::waitEffectiveRunning()
+   throw(basis::RuntimeException)
+{
+   LOG_THIS_METHOD();
+
+   LOG_DEBUG(asString());
+
+   if (!isStarting() && !isRunning()) {
+      COFFEE_THROW_EXCEPTION(asString () << " could not wait for effective running");
+   }
+
+   effectiveRunning.wait();
+}
+
+void app::Service::notifyEffectiveRunning()
+   noexcept
+{
+   LOG_THIS_METHOD();
+
+   LOG_DEBUG(asString());
+
+   effectiveRunning.signal();
+}
 
 void app::Service::addPredecessor(const char* engineName)
    noexcept

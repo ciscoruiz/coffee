@@ -74,7 +74,7 @@ public:
   /**
    * \return Summarize information of this instance in a StreamString.
   */
-  virtual StreamString asString() const noexcept { StreamString result("basis.NamedObject { Name: "); return result << m_name << " }"; }
+  virtual StreamString asString() const noexcept { StreamString result("basis.NamedObject {Name="); return result << m_name << "}"; }
 
 protected:
   /**

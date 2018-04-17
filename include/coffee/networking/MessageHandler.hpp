@@ -20,48 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+#ifndef _coffee_networking_MessageHandler_hpp_
+#define _coffee_networking_MessageHandler_hpp_
 
-#include "../../include/coffee/app/ApplicationServiceStarter.hpp"
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/basis/DataBlock.hpp>
+#include <coffee/basis/NamedObject.hpp>
 
-#include <coffee/config/SCCS.hpp>
-#include <coffee/logger/TraceMethod.hpp>
+namespace coffee {
 
-using namespace coffee;
+namespace networking {
 
-coffee_sccs_import_tag(app);
+class AsyncSocket;
 
-app::ApplicationServiceStarter::ApplicationServiceStarter(const char* shortName):
-    app::Application(shortName, "Application for run attached engines", coffee_sccs_use_tag(app)),
-    semaphoreForRun(0),
-    stopNow(false)
- {
- }
+class MessageHandler : public basis::NamedObject {
+protected:
+public:
+   explicit MessageHandler(const std::string &name) : NamedObject(name) {}
 
-void app::ApplicationServiceStarter::run()
-   throw(basis::RuntimeException)
-{
-   LOG_THIS_METHOD();
+protected:
+   virtual void apply(const basis::DataBlock& message, AsyncSocket& socket) throw(basis::RuntimeException) = 0;
 
-   semaphoreForRun.signal();
-   std::unique_lock <std::mutex> guard (mutex);
-   while(!stopNow) {
-      conditionForStop.wait(guard);
-   }
+   friend class AsyncSocket;
+};
+
 }
-
-void app::ApplicationServiceStarter::do_stop()
-   throw(basis::RuntimeException)
-{
-   LOG_THIS_METHOD();
-
-   try {
-      app::Application::do_stop();
-      stopNow = true;
-      conditionForStop.notify_all();
-   }
-   catch(basis::RuntimeException&) {
-      stopNow = true;
-      conditionForStop.notify_all();
-      throw;
-   }
 }
+#endif //_coffee_networking_MessageHandler_hpp_

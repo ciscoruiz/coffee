@@ -21,47 +21,33 @@
 // SOFTWARE.
 //
 
-#include "../../include/coffee/app/ApplicationServiceStarter.hpp"
+#include <boost/test/unit_test.hpp>
 
-#include <coffee/config/SCCS.hpp>
-#include <coffee/logger/TraceMethod.hpp>
+#include <coffee/networking/NetworkingService.hpp>
+#include <coffee/networking/ClientSocket.hpp>
+
+#include "NetworkingFixture.hpp"
 
 using namespace coffee;
 
-coffee_sccs_import_tag(app);
-
-app::ApplicationServiceStarter::ApplicationServiceStarter(const char* shortName):
-    app::Application(shortName, "Application for run attached engines", coffee_sccs_use_tag(app)),
-    semaphoreForRun(0),
-    stopNow(false)
- {
- }
-
-void app::ApplicationServiceStarter::run()
-   throw(basis::RuntimeException)
+BOOST_FIXTURE_TEST_CASE(publishersocket_without_endpoints, NetworkingFixture)
 {
-   LOG_THIS_METHOD();
-
-   semaphoreForRun.signal();
-   std::unique_lock <std::mutex> guard (mutex);
-   while(!stopNow) {
-      conditionForStop.wait(guard);
-   }
+   networking::SocketArguments arguments;
+   arguments.addSubscription("12345");
+   BOOST_REQUIRE_THROW(networkingService->createPublisherSocket(arguments), basis::RuntimeException);
 }
 
-void app::ApplicationServiceStarter::do_stop()
-   throw(basis::RuntimeException)
+BOOST_FIXTURE_TEST_CASE(publishersocket_without_handler, NetworkingFixture)
 {
-   LOG_THIS_METHOD();
+   networking::SocketArguments arguments;
+   arguments.addSubscription("12345");
+   BOOST_REQUIRE_NO_THROW(networkingService->createPublisherSocket(arguments.addEndPoint("tcp://*:5566")));
+}
 
-   try {
-      app::Application::do_stop();
-      stopNow = true;
-      conditionForStop.notify_all();
-   }
-   catch(basis::RuntimeException&) {
-      stopNow = true;
-      conditionForStop.notify_all();
-      throw;
-   }
+BOOST_FIXTURE_TEST_CASE(publishersocket_bad_address, NetworkingFixture)
+{
+   networking::SocketArguments arguments;
+
+   arguments.addSubscription("123").addEndPoint("bad-address").setMessageHandler(UpperStringHandler::instantiate());
+   BOOST_REQUIRE_THROW(networkingService->createPublisherSocket(arguments), basis::RuntimeException);
 }

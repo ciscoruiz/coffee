@@ -20,48 +20,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+#ifndef _coffee_networking_AsyncSocket_hpp_
+#define _coffee_networking_AsyncSocket_hpp_
 
-#include "../../include/coffee/app/ApplicationServiceStarter.hpp"
+#include <vector>
+#include <memory>
 
-#include <coffee/config/SCCS.hpp>
-#include <coffee/logger/TraceMethod.hpp>
+#include <coffee/networking/Socket.hpp>
 
-using namespace coffee;
+namespace coffee {
 
-coffee_sccs_import_tag(app);
+namespace networking {
 
-app::ApplicationServiceStarter::ApplicationServiceStarter(const char* shortName):
-    app::Application(shortName, "Application for run attached engines", coffee_sccs_use_tag(app)),
-    semaphoreForRun(0),
-    stopNow(false)
- {
- }
+class MessageHandler;
 
-void app::ApplicationServiceStarter::run()
-   throw(basis::RuntimeException)
-{
-   LOG_THIS_METHOD();
+class AsyncSocket : public Socket {
+public:
+   virtual ~AsyncSocket() { m_messageHandler.reset(); }
+   virtual basis::StreamString asString() const noexcept;
+   virtual void send(const basis::DataBlock& response) throw(basis::RuntimeException) = 0;
 
-   semaphoreForRun.signal();
-   std::unique_lock <std::mutex> guard (mutex);
-   while(!stopNow) {
-      conditionForStop.wait(guard);
-   }
+protected:
+   AsyncSocket(NetworkingService& networkingService, const SocketArguments& socketArguments, const int socketType);
+
+   virtual void initialize() throw(basis::RuntimeException);
+
+private:
+   std::shared_ptr<MessageHandler> m_messageHandler;
+
+   void handle(const basis::DataBlock& message) throw(basis::RuntimeException);
+
+   friend class NetworkingService;
+};
+
+}
 }
 
-void app::ApplicationServiceStarter::do_stop()
-   throw(basis::RuntimeException)
-{
-   LOG_THIS_METHOD();
-
-   try {
-      app::Application::do_stop();
-      stopNow = true;
-      conditionForStop.notify_all();
-   }
-   catch(basis::RuntimeException&) {
-      stopNow = true;
-      conditionForStop.notify_all();
-      throw;
-   }
-}
+#endif // _coffee_networking_AsyncSocket_hpp_

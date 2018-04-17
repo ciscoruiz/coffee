@@ -32,6 +32,7 @@ This framework contains a set of modules to boost productivity while developing 
 | coffee.dbms.sqlite | Module to work with SQLite3 database. |
 | coffee.dbms.ldap | Module to work with LDAP directory. |
 | coffee.persistence | High Level of classes to work over a database without has to deal with SQL sentences, transactions and so on, it will work with classes, primrary keys and object that will be read/write from the DBMS. |
+| coffee.networking | Service to manage asynchronuos messages using [ZeroMQ](http://zguide.zeromq.org/page:all) library. |
 
 ### Prerequisites
 
@@ -42,11 +43,11 @@ And should have installed the next packages:
 ```bash
 sudo apt-get install cmake
 sudo apt-get install libxml2-dev
-sudo apt-get install libboost-filesystem-dev
-sudo apt-get install libboost-test-dev
+sudo apt-get install libboost-filesystem-dev libboost-test-dev
 sudo apt-get install libsqlite3-dev:amd64
 sudo apt-get install sqlite sqlite3   
 sudo apt-get install libldap2-dev
+sudo apt-get install libzmqpp-dev
    
 ```
 

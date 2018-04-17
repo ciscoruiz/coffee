@@ -21,47 +21,41 @@
 // SOFTWARE.
 //
 
-#include "../../include/coffee/app/ApplicationServiceStarter.hpp"
-
-#include <coffee/config/SCCS.hpp>
-#include <coffee/logger/TraceMethod.hpp>
+#include <coffee/networking/AsyncSocket.hpp>
+#include <coffee/networking/MessageHandler.hpp>
 
 using namespace coffee;
 
-coffee_sccs_import_tag(app);
+networking::AsyncSocket::AsyncSocket(networking::NetworkingService& networkingService, const SocketArguments& socketArguments, const int socketType) :
+   networking::Socket(networkingService, socketArguments, socketType),
+   m_messageHandler(socketArguments.getMessageHandler())
+{
+}
 
-app::ApplicationServiceStarter::ApplicationServiceStarter(const char* shortName):
-    app::Application(shortName, "Application for run attached engines", coffee_sccs_use_tag(app)),
-    semaphoreForRun(0),
-    stopNow(false)
- {
- }
-
-void app::ApplicationServiceStarter::run()
+void networking::AsyncSocket::initialize()
    throw(basis::RuntimeException)
 {
-   LOG_THIS_METHOD();
-
-   semaphoreForRun.signal();
-   std::unique_lock <std::mutex> guard (mutex);
-   while(!stopNow) {
-      conditionForStop.wait(guard);
+   if (!m_messageHandler) {
+      COFFEE_THROW_EXCEPTION(asString() << " requires a message handler instance");
    }
 }
 
-void app::ApplicationServiceStarter::do_stop()
+void networking::AsyncSocket::handle(const basis::DataBlock& message)
    throw(basis::RuntimeException)
 {
-   LOG_THIS_METHOD();
+   m_messageHandler->apply(message, *this);
+}
 
-   try {
-      app::Application::do_stop();
-      stopNow = true;
-      conditionForStop.notify_all();
+basis::StreamString networking::AsyncSocket::asString() const
+   noexcept
+{
+   basis::StreamString result("networking.AsyncSocket {");
+
+   result << Socket::asString();
+
+   if (m_messageHandler) {
+      result << ",Handler=" << m_messageHandler->asString();
    }
-   catch(basis::RuntimeException&) {
-      stopNow = true;
-      conditionForStop.notify_all();
-      throw;
-   }
+
+   return result << "}";
 }

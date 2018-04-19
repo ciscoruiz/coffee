@@ -50,3 +50,62 @@ const std::string& http::url::URL::getComponent(const ComponentName::_v componen
 
    return ii->second;
 }
+
+std::string http::url::URL::asText() const
+   throw(basis::RuntimeException)
+{
+   basis::StreamString ss;
+
+   ss << getComponent(ComponentName::Scheme) << "://";
+
+   bool hasUserInformation = false;
+
+   if (hasComponent(ComponentName::User)) {
+      ss << getComponent(ComponentName::User);
+      hasUserInformation = true;
+   }
+
+   if (hasComponent(ComponentName::Password)) {
+      ss << ":" << getComponent(ComponentName::Password);
+      hasUserInformation = true;
+   }
+
+   if (hasUserInformation) {
+      ss << "@";
+   }
+
+   ss << getComponent(ComponentName::Host);
+
+   if (hasComponent(ComponentName::Port)) {
+      ss << ":" << getComponent(ComponentName::Port);
+   }
+
+   if (hasComponent(ComponentName::Path)) {
+      ss << getComponent(ComponentName::Path);
+   }
+
+   if (!m_keyValues.empty()) {
+      bool isFirst = true;
+      for (auto& pair : m_keyValues) {
+         if (isFirst) {
+            ss << "?";
+            isFirst = false;
+         }
+         else {
+            ss << "&";
+         }
+         ss << pair.first;
+
+         if (!pair.second.empty()) {
+            ss << "=" << pair.second;
+         }
+      }
+   }
+
+   if (hasComponent(ComponentName::Fragment)) {
+      ss << getComponent(ComponentName::Fragment);
+   }
+
+   return ss;
+}
+

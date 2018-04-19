@@ -20,33 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-
-#include <coffee/http/url/URLBuilder.hpp>
-#include <coffee/http/url/URLParser.hpp>
-#include <coffee/http/url/URL.hpp>
+#include <coffee/http/url/ComponentName.hpp>
 
 using namespace coffee;
 
-http::url::URL::URL(const URLBuilder& builder) :
-   m_components(builder.m_components),
-   m_keyValues(builder.m_keyValues)
+//static
+const char* http::url::ComponentName::asString(const ComponentName::_v componentName)
+   noexcept
 {
-}
+   static const char* names[] = {
+      "Scheme", "User", "Password", "Host", "Port", "Path", "Fragment"
+   };
 
-http::url::URL::URL(const URLParser& builder) :
-   m_components(builder.m_components),
-   m_keyValues(builder.m_keyValues)
-{
-}
-
-const std::string& http::url::URL::getComponent(const ComponentName::_v component) const
-   throw(basis::RuntimeException)
-{
-   auto ii = m_components.find(component);
-
-   if (ii == m_components.end()) {
-      COFFEE_THROW_EXCEPTION("URL does not contain component " << ComponentName::asString(component));
-   }
-
-   return ii->second;
+   return names[(int) componentName];
 }

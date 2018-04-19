@@ -53,7 +53,7 @@ scheme              path
  */
 class URLBuilder {
 public:
-   URLBuilder();
+   URLBuilder() {;}
    URLBuilder& setCompoment(const ComponentName::_v component, const std::string& value) throw(basis::RuntimeException);
    URLBuilder& addKeyValue(const std::string& key, const std::string& value) noexcept {
       m_keyValues.push_back(KeyValue(key,value));

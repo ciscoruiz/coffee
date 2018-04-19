@@ -54,16 +54,16 @@ scheme              path
  */
 class URL {
 public:
-   bool hasCompoment(const ComponentName::_v component) const noexcept {
-      auto ii = m_components.find(component);
-      return ii != m_components.end();
+   bool hasComponent(const ComponentName::_v component) const noexcept {
+      return m_components.find(component) != m_components.end();
    }
 
-   const std::string& getCompoment(const ComponentName::_v component) const throw(basis::RuntimeException);
+   const std::string& getComponent(const ComponentName::_v component) const throw(basis::RuntimeException);
 
-   keyvalue_iterator begin() const noexcept { return m_keyValues.begin(); }
-   keyvalue_iterator end() const noexcept { return m_keyValues.end(); }
-   const KeyValue& keyvalue(const keyvalue_iterator ii) noexcept { return *ii; }
+   bool hasKeysValues() const noexcept  { return !m_keyValues.empty(); }
+   keyvalue_iterator keyvalue_begin() const noexcept { return m_keyValues.begin(); }
+   keyvalue_iterator keyvalue_end() const noexcept { return m_keyValues.end(); }
+   static const KeyValue& keyValue(const keyvalue_iterator ii) noexcept { return *ii; }
 
 private:
    const std::map<ComponentName::_v, std::string> m_components;

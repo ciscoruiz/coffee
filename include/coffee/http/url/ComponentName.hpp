@@ -49,7 +49,7 @@ struct ComponentName {
    enum _v {
       Scheme, User, Password, Host, Port, Path, Fragment
    };
-   static char* asString(const ComponentName::_v componentName) noexcept;
+   static const char* asString(const ComponentName::_v componentName) noexcept;
 };
 
 }

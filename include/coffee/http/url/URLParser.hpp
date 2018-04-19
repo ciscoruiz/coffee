@@ -67,7 +67,7 @@ private:
    std::map<ComponentName::_v, std::string> m_components;
    KeyValues m_keyValues;
 
-   std::string::size_type readAuthority(const std::string& withoutScheme) noexcept ;
+   std::string::size_type readAuthority(const std::string& withoutScheme) throw(basis::RuntimeException);
    std::string::size_type readPath(const std::string& withoutScheme, const std::string::size_type endPrevious) noexcept ;
    std::string::size_type readQuery(const std::string& withoutScheme, const std::string::size_type endPrevious) throw(basis::RuntimeException) ;
    void readFragment(const std::string& withoutScheme, const std::string::size_type endPrevious) noexcept;
@@ -78,7 +78,6 @@ private:
    static Token extractToken(const std::string& withoutScheme, const std::string::size_type initpos, const char* finalDelims) noexcept;
    static std::pair<std::string, std::string> separate(const std::string& string, const char delim) noexcept;
    static std::vector<std::string> split(const std::string& string, const char delim) noexcept;
-
 
    friend class URL;
 };

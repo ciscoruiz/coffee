@@ -62,7 +62,7 @@ std::shared_ptr<http::url::URL> http::url::URLParser::build()
 }
 
 std::string::size_type http::url::URLParser::readAuthority(const std::string& withoutScheme)
-   noexcept
+   throw(basis::RuntimeException)
 {
    auto start = withoutScheme.find("//");
 
@@ -73,21 +73,28 @@ std::string::size_type http::url::URLParser::readAuthority(const std::string& wi
       start = 0;
    }
 
-   auto token = extractToken(withoutScheme, start, "/");
+   auto token = extractToken(withoutScheme, start, "/?#");
 
-   auto separation = separate(token.first, '@');
-   const std::string& userInformation = separation.first;
-   const std::string& endPoint = separation.second;
-
-   {
-      auto separation = separate(userInformation, ':');
-      addOptionalComponent(ComponentName::User, separation.first);
-      addOptionalComponent(ComponentName::Password, separation.second);
-   }
-   {
-      auto separation = separate(endPoint, ':');
+   if (token.first.find('@', start) == std::string::npos) {
+      auto separation = separate(token.first, ':');
       addMandatoryComponent(ComponentName::Host, separation.first);
       addOptionalComponent(ComponentName::Port, separation.second);
+   }
+   else {
+      auto separation = separate(token.first, '@');
+      const std::string& userInformation = separation.first;
+      const std::string& endPoint = separation.second;
+
+      {
+         auto separation = separate(userInformation, ':');
+         addOptionalComponent(ComponentName::User, separation.first);
+         addOptionalComponent(ComponentName::Password, separation.second);
+      }
+      {
+         auto separation = separate(endPoint, ':');
+         addMandatoryComponent(ComponentName::Host, separation.first);
+         addOptionalComponent(ComponentName::Port, separation.second);
+      }
    }
 
    return token.second;
@@ -167,7 +174,9 @@ http::url::URLParser::Token http::url::URLParser::extractToken(const std::string
 
     do {
       end = withoutScheme.find(*finalDelims ++, initpos);
-   } while (end != std::string::npos && *finalDelims);
+      if (end != std::string::npos)
+         break;
+   } while (*finalDelims);
 
    Token result;
 
@@ -192,7 +201,7 @@ std::pair<std::string, std::string> http::url::URLParser::separate(const std::st
    auto pos = string.find(delim);
 
    if (pos != std::string::npos) {
-      result.first = string.substr(0, pos - 1);
+      result.first = string.substr(0, pos);
       result.second = string.substr(pos + 1);
    }
    else {

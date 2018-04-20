@@ -65,7 +65,7 @@ public:
    keyvalue_iterator keyvalue_end() const noexcept { return m_keyValues.end(); }
    static const KeyValue& keyValue(const keyvalue_iterator ii) noexcept { return *ii; }
 
-   std::string asText() const throw(basis::RuntimeException);
+   std::string encode() const throw(basis::RuntimeException);
 
 private:
    const std::map<ComponentName::_v, std::string> m_components;

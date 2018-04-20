@@ -21,30 +21,52 @@
 // SOFTWARE.
 //
 
-#include <coffee/http/HttpRequest.hpp>
-#include <coffee/http/url/URL.hpp>
+#include <coffee/http/protocol/HttpProtocolEncoder.hpp>
+
+#include <coffee/http/HttpMessage.hpp>
+#include <coffee/http/HttpHeader.hpp>
 
 using namespace coffee;
 
-namespace coffee {
-namespace http {
-static const char* methodNames[] = {
-   "PORT", "OPTIONS", "GET", "HEAD", "PUT", "DELETE", "TRACE", "CONNECT"
-};
-}
-}
+//static
+const char http::protocol::HttpProtocolEncoder::newLineCharacters[] = { 13, 10, 0 };
 
-std::string http::HttpRequest::encodeFirstLine() const
+const basis::DataBlock& http::protocol::HttpProtocolEncoder::apply(std::shared_ptr<HttpMessage> message) const
    throw(basis::RuntimeException)
 {
-   basis::StreamString ss;
+   m_buffer.clear();
 
-   return ss << Method::asString(m_method) << " " << m_url->encode() << " " << encodeVersion();
+   addLine(message->encodeFirstLine());
+
+   const basis::DataBlock& body (message->m_body);
+   const bool hasBody = body.size() > 0;
+
+   if (hasBody && !message->hasHeader(HttpHeader::Type::ContentLength)) {
+      message->setHeader(HttpHeader::Type::ContentLength, basis::AsString::apply(body.size()));
+   }
+
+   for (auto header : message->m_sequentialHeaders) {
+      addLine(header->encode());
+   }
+
+   newLine();
+
+   if (hasBody) {
+      m_buffer.append(body);
+   }
+
+   return m_buffer;
 }
 
-//static
-const char* http::HttpRequest::Method::asString(const http::HttpRequest::Method::_v method)
+void http::protocol::HttpProtocolEncoder::addLine(const std::string& line) const
    noexcept
 {
-   return methodNames[method];
+   m_buffer.append(line).append(newLineCharacters);
 }
+
+void http::protocol::HttpProtocolEncoder::newLine() const
+   noexcept
+{
+   m_buffer.append(newLineCharacters);
+}
+

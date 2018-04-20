@@ -35,6 +35,10 @@ namespace coffee {
 
 namespace http {
 
+namespace protocol {
+class HttpProtocolEncoder;
+}
+
 /**
  * General definition for HTTP messages following RFC 2616.
  * \author francisco.ruiz.rayo@gmail.com
@@ -46,6 +50,9 @@ public:
     */
    virtual ~HttpMessage() { clear(); }
 
+   bool hasHeader(const HttpHeader::Type::_v type) const noexcept {
+      return m_directory.find(HttpHeader::Type::asString(type)) != m_directory.end();
+   }
    HttpMessage& setHeader(const HttpHeader::Type::_v type, const std::string& value) throw(basis::RuntimeException);
    HttpMessage& setCustomHeader(const std::string& headerName, const std::string& value) noexcept;
 
@@ -94,6 +101,8 @@ private:
    SequentialHeaders m_sequentialHeaders;
    std::unordered_map<std::string, SequentialHeaders::iterator> m_directory;
    basis::DataBlock m_body;
+
+   friend class protocol::HttpProtocolEncoder;
 };
 
 }

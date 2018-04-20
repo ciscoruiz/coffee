@@ -21,30 +21,40 @@
 // SOFTWARE.
 //
 
-#include <coffee/http/HttpRequest.hpp>
-#include <coffee/http/url/URL.hpp>
+#ifndef _coffee_http_protocol_HttpProtocolEncoder_hpp_
+#define _coffee_http_protocol_HttpProtocolEncoder_hpp_
 
-using namespace coffee;
+#include <memory>
+
+#include <coffee/basis/DataBlock.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 namespace coffee {
 namespace http {
-static const char* methodNames[] = {
-   "PORT", "OPTIONS", "GET", "HEAD", "PUT", "DELETE", "TRACE", "CONNECT"
+
+class HttpMessage;
+
+namespace protocol {
+
+class HttpProtocolEncoder {
+public:
+   static const char newLineCharacters[];
+
+   HttpProtocolEncoder() {;}
+
+   const basis::DataBlock& apply(std::shared_ptr<HttpMessage> message) const throw(basis::RuntimeException);
+
+private:
+   mutable basis::DataBlock m_buffer;
+
+   void addLine(const std::string& line) const noexcept;
+
+   void newLine() const noexcept;
 };
+
+}
 }
 }
 
-std::string http::HttpRequest::encodeFirstLine() const
-   throw(basis::RuntimeException)
-{
-   basis::StreamString ss;
 
-   return ss << Method::asString(m_method) << " " << m_url->encode() << " " << encodeVersion();
-}
-
-//static
-const char* http::HttpRequest::Method::asString(const http::HttpRequest::Method::_v method)
-   noexcept
-{
-   return methodNames[method];
-}
+#endif // _coffee_http_protocol_HttpProtocolEncoder_hpp_

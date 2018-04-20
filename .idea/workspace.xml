@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/test/http/URLParser_test.cc" line="76" mnemonic="8" />
+    <bookmark url="file://$PROJECT_DIR$/test/http/URLParser_test.cc" line="80" mnemonic="8" />
   </component>
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="true">
     <generated>
@@ -13,9 +13,9 @@
       <config projectName="coffee" targetName="NightlyCoverage" />
       <config projectName="coffee" targetName="coffee_balance" />
       <config projectName="coffee" targetName="coffee_config" />
+      <config projectName="coffee" targetName="test_coffee_http" />
       <config projectName="coffee" targetName="ContinuousCoverage" />
       <config projectName="coffee" targetName="NightlyTest" />
-      <config projectName="coffee" targetName="test_coffee_http" />
       <config projectName="coffee" targetName="test_coffee_networking" />
       <config projectName="coffee" targetName="test_coffee_dbms_ldap" />
       <config projectName="coffee" targetName="coffee_dbms_sqlite" />
@@ -38,8 +38,8 @@
       <config projectName="coffee" targetName="Continuous" />
       <config projectName="coffee" targetName="test_coffee_balance" />
       <config projectName="coffee" targetName="ExperimentalSubmit" />
-      <config projectName="coffee" targetName="ContinuousConfigure" />
       <config projectName="coffee" targetName="test_coffee_persistence" />
+      <config projectName="coffee" targetName="ContinuousConfigure" />
       <config projectName="coffee" targetName="ExperimentalMemCheck" />
       <config projectName="coffee" targetName="coffee_http" />
       <config projectName="coffee" targetName="Experimental" />
@@ -70,10 +70,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1996f6df-826a-4fbe-909a-9191da0bb4bb" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/coffee/http/url/URLParser.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/coffee/http/url/URLParser.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/http/url/URLParser.cc" beforeDir="false" afterPath="$PROJECT_DIR$/source/http/url/URLParser.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/http/URLParser_test.cc" beforeDir="false" afterPath="$PROJECT_DIR$/test/http/URLParser_test.cc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/include/coffee/http/HttpCustomHeader.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/include/coffee/http/HttpHeader.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/include/coffee/http/HttpMessage.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/include/coffee/http/HttpRequest.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/include/coffee/http/HttpResponse.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/source/http/HttpHeader.cc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/source/http/HttpMessage.cc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/source/http/HttpRequest.cc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/source/http/HttpResponse.cc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/http/HttpHeader_test.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/CMakeFiles/" />
     <ignored path="$PROJECT_DIR$/test/dbms/CMakeFiles/" />
@@ -113,88 +120,74 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:COVERAGE" />
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.5">
-      <split-first>
-        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="URLParser.hpp" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/include/coffee/http/url/URLParser.hpp">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="430">
-                  <caret line="69" column="105" selection-start-line="69" selection-start-column="105" selection-end-line="69" selection-end-column="105" />
-                  <folding>
-                    <element signature="e#1252#1269#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="URLParser.cc" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/source/http/url/URLParser.cc">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="158">
-                  <caret line="54" column="52" selection-start-line="54" selection-start-column="52" selection-end-line="54" selection-end-column="52" />
-                  <folding>
-                    <element signature="e#1169#1188#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="URL.cc" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/source/http/url/URL.cc">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="392">
-                  <caret line="28" selection-start-line="28" selection-end-line="28" />
-                  <folding>
-                    <element signature="e#1166#1207#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="URLBuilder.cc" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/source/http/url/URLBuilder.cc">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="418">
-                  <caret line="38" column="48" selection-start-line="38" selection-start-column="48" selection-end-line="38" selection-end-column="48" />
-                  <folding>
-                    <element signature="e#1170#1211#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="URLParser_test.cc" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/test/http/URLParser_test.cc">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="656">
-                  <caret line="254" column="1" lean-forward="true" selection-start-line="254" selection-start-column="1" selection-end-line="254" selection-end-column="1" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-first>
-      <split-second>
-        <leaf>
-          <file leaf-file-name="ComponentName.hpp" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/include/coffee/http/url/ComponentName.hpp">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="642">
-                  <caret line="59" selection-start-line="59" selection-end-line="59" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-second>
-    </splitter>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="HttpMessage.hpp" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/include/coffee/http/HttpMessage.hpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="382">
+              <caret line="69" selection-start-line="69" selection-end-line="69" />
+              <folding>
+                <element signature="e#1243#1258#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HttpRequest.cc" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/source/http/HttpRequest.cc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="560">
+              <caret line="40" selection-start-line="40" selection-end-line="40" />
+              <folding>
+                <element signature="e#1166#1204#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HttpRequest.hpp" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/include/coffee/http/HttpRequest.hpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="390">
+              <caret line="61" column="5" lean-forward="true" selection-start-line="61" selection-start-column="5" selection-end-line="61" selection-end-column="5" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HttpResponse.hpp" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/include/coffee/http/HttpResponse.hpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="598">
+              <caret line="52" column="4" selection-start-line="52" selection-start-column="4" selection-end-line="52" selection-end-column="4" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HttpResponse.cc" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/source/http/HttpResponse.cc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="628">
+              <caret line="52" column="23" lean-forward="true" selection-start-line="52" selection-start-column="23" selection-end-line="52" selection-end-column="23" />
+              <folding>
+                <element signature="e#1166#1180#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HttpCustomHeader.hpp" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/include/coffee/http/HttpCustomHeader.hpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="441">
+              <caret line="43" column="38" lean-forward="true" selection-start-line="43" selection-start-column="38" selection-end-line="43" selection-end-column="38" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Socket</find>
-      <find>Server</find>
-      <find>zmq_</find>
       <find>endpo</find>
       <find>persistence</find>
       <find>Time</find>
@@ -218,6 +211,13 @@
       <find>URL_</find>
       <find>Builder</find>
       <find>token</find>
+      <find>cisco</find>
+      <find>Header:</find>
+      <find>throw ()</find>
+      <find>HttpHeader</find>
+      <find>Header</find>
+      <find>HttpMessage</find>
+      <find>Request</find>
     </findStrings>
     <replaceStrings>
       <replace>Socket</replace>
@@ -232,6 +232,13 @@
       <replace>URLBuilder_</replace>
       <replace>Parser</replace>
       <replace>delim</replace>
+      <replace>Header</replace>
+      <replace>http::HttpHeader:</replace>
+      <replace>noexcept</replace>
+      <replace>HttpCustomHeader</replace>
+      <replace>http::HttpHeader</replace>
+      <replace>HttpRequest</replace>
+      <replace>Response</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -240,18 +247,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/source/comm/ClientSocket.cc" />
-        <option value="$PROJECT_DIR$/include/coffee/comm/ClientSocket.hpp" />
-        <option value="$PROJECT_DIR$/source/comm/Socket.cc" />
-        <option value="$PROJECT_DIR$/include/coffee/comm/Socket.hpp" />
-        <option value="$PROJECT_DIR$/include/coffee/comm/SocketArguments.hpp" />
-        <option value="$PROJECT_DIR$/include/coffee/comm/MessageBroker.hpp" />
-        <option value="$PROJECT_DIR$/source/comm/MessageBroker.cc" />
-        <option value="$PROJECT_DIR$/test/networking/networking_test.cc" />
-        <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/CMakeLists.txt" />
-        <option value="$PROJECT_DIR$/test/networking/CMakeLists.txt" />
-        <option value="$PROJECT_DIR$/include/coffee/time/TimeService.hpp" />
         <option value="$PROJECT_DIR$/test/time/TimeFixture.hpp" />
         <option value="$PROJECT_DIR$/source/time/TimeService.cc" />
         <option value="$PROJECT_DIR$/test/networking/NetworkingFixture.cpp" />
@@ -283,14 +278,26 @@
         <option value="$PROJECT_DIR$/include/coffee/http/url/defines.hpp" />
         <option value="$PROJECT_DIR$/source/http/url/URLBuilder.cc" />
         <option value="$PROJECT_DIR$/include/coffee/http/url/URLBuilder.hpp" />
-        <option value="$PROJECT_DIR$/source/http/url/URL.cc" />
         <option value="$PROJECT_DIR$/source/http/url/ComponentName.cc" />
         <option value="$PROJECT_DIR$/test/http/URLBuilder_test.cc" />
         <option value="$PROJECT_DIR$/include/coffee/http/url/ComponentName.hpp" />
-        <option value="$PROJECT_DIR$/include/coffee/http/url/URL.hpp" />
         <option value="$PROJECT_DIR$/include/coffee/http/url/URLParser.hpp" />
         <option value="$PROJECT_DIR$/source/http/url/URLParser.cc" />
+        <option value="$PROJECT_DIR$/source/http/url/URL.cc" />
         <option value="$PROJECT_DIR$/test/http/URLParser_test.cc" />
+        <option value="$PROJECT_DIR$/include/coffee/http/Message.hpp" />
+        <option value="$PROJECT_DIR$/include/coffee/http/url/URL.hpp" />
+        <option value="$PROJECT_DIR$/test/http/HttpHeader_test.cc" />
+        <option value="$PROJECT_DIR$/include/coffee/http/HttpHeader.hpp" />
+        <option value="$PROJECT_DIR$/source/http/HttpHeader.cc" />
+        <option value="$PROJECT_DIR$/include/coffee/http/HttpCustomHeader.hpp" />
+        <option value="$PROJECT_DIR$/source/http/url/HttpRequest.cc" />
+        <option value="$PROJECT_DIR$/source/http/HttpRequest.cc" />
+        <option value="$PROJECT_DIR$/include/coffee/http/HttpRequest.hpp" />
+        <option value="$PROJECT_DIR$/source/http/HttpMessage.cc" />
+        <option value="$PROJECT_DIR$/include/coffee/http/HttpMessage.hpp" />
+        <option value="$PROJECT_DIR$/include/coffee/http/HttpResponse.hpp" />
+        <option value="$PROJECT_DIR$/source/http/HttpResponse.cc" />
       </list>
     </option>
   </component>
@@ -331,7 +338,31 @@
               <item name="coffee" type="462c0819:PsiDirectoryNode" />
               <item name="include" type="462c0819:PsiDirectoryNode" />
               <item name="coffee" type="462c0819:PsiDirectoryNode" />
-              <item name="http" type="462c0819:PsiDirectoryNode" />
+              <item name="basis" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
+              <item name="coffee" type="462c0819:PsiDirectoryNode" />
+              <item name="include" type="462c0819:PsiDirectoryNode" />
+              <item name="coffee" type="462c0819:PsiDirectoryNode" />
+              <item name="basis" type="462c0819:PsiDirectoryNode" />
+              <item name="pattern" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
+              <item name="coffee" type="462c0819:PsiDirectoryNode" />
+              <item name="include" type="462c0819:PsiDirectoryNode" />
+              <item name="coffee" type="462c0819:PsiDirectoryNode" />
+              <item name="basis" type="462c0819:PsiDirectoryNode" />
+              <item name="pattern" type="462c0819:PsiDirectoryNode" />
+              <item name="lru" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
+              <item name="coffee" type="462c0819:PsiDirectoryNode" />
+              <item name="include" type="462c0819:PsiDirectoryNode" />
+              <item name="coffee" type="462c0819:PsiDirectoryNode" />
+              <item name="dbms" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
@@ -339,14 +370,6 @@
               <item name="include" type="462c0819:PsiDirectoryNode" />
               <item name="coffee" type="462c0819:PsiDirectoryNode" />
               <item name="http" type="462c0819:PsiDirectoryNode" />
-              <item name="url" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="coffee" type="462c0819:PsiDirectoryNode" />
-              <item name="include" type="462c0819:PsiDirectoryNode" />
-              <item name="coffee" type="462c0819:PsiDirectoryNode" />
-              <item name="logger" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
@@ -376,12 +399,6 @@
               <item name="coffee" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
               <item name="http" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
-              <item name="coffee" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="logger" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
@@ -398,17 +415,17 @@
     <property name="settings.editor.selected.configurable" value="preferences.updates" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/source/http/url" />
-      <recent name="$PROJECT_DIR$/include/coffee/http/url" />
-      <recent name="$PROJECT_DIR$/include/coffee/http" />
-      <recent name="$PROJECT_DIR$/test/networking" />
-      <recent name="$PROJECT_DIR$/source/comm" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/include/coffee/http/url" />
       <recent name="$PROJECT_DIR$/include/coffee/comm" />
       <recent name="$PROJECT_DIR$/source/comm" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/source/http" />
+      <recent name="$PROJECT_DIR$/include/coffee/http" />
+      <recent name="$PROJECT_DIR$/source/http/url" />
+      <recent name="$PROJECT_DIR$/include/coffee/http/url" />
+      <recent name="$PROJECT_DIR$/test/networking" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -424,7 +441,11 @@
     </option>
   </component>
   <component name="RunManager" selected="Application.test_coffee_http">
-    <configuration name="clientsocket_unkwown_server" type="CMakeBoostTestRunConfigurationType" factoryName="Boost Test" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="coffee" TARGET_NAME="test_coffee_networking" CONFIG_NAME="COVERAGE" RUN_TARGET_PROJECT_NAME="coffee" RUN_TARGET_NAME="test_coffee_networking" TEST_METHOD="clientsocket_unkwown_server" TEST_MODE="SUITE_TEST" />
+    <configuration name="test_networking" type="CMakeBoostTestRunConfigurationType" factoryName="Boost Test" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="coffee" TARGET_NAME="test_coffee_networking" CONFIG_NAME="COVERAGE" RUN_TARGET_PROJECT_NAME="coffee" RUN_TARGET_NAME="test_coffee_networking" TEST_MODE="SUITE_TEST">
+      <method>
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="false" />
+      </method>
+    </configuration>
     <configuration name="Build All" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" CONFIG_NAME="COVERAGE" RUN_TARGET_PROJECT_NAME="coffee" RUN_TARGET_NAME="test_coffee_dbms_ldap" EXPLICIT_BUILD_TARGET_NAME="all" />
     <configuration name="Continuous" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="coffee" TARGET_NAME="Continuous" CONFIG_NAME="COVERAGE" />
     <configuration name="ContinuousBuild" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="coffee" TARGET_NAME="ContinuousBuild" CONFIG_NAME="COVERAGE" RUN_TARGET_PROJECT_NAME="coffee" RUN_TARGET_NAME="ContinuousBuild" />
@@ -540,16 +561,10 @@
       <item itemvalue="Application.test_coffee_persistence" />
       <item itemvalue="Application.test_coffee_time" />
       <item itemvalue="Application.test_coffee_xml" />
-      <item itemvalue="Boost.Test.clientsocket_unkwown_server" />
+      <item itemvalue="Boost.Test.test_networking" />
     </list>
   </component>
   <component name="TestHistory">
-    <history-entry file="clientsocket_unkwown_server - 2018.04.16 at 11h 25m 44s.xml">
-      <configuration name="clientsocket_unkwown_server" configurationId="CMakeBoostTestRunConfigurationType" />
-    </history-entry>
-    <history-entry file="clientsocket_unkwown_server - 2018.04.16 at 11h 26m 32s.xml">
-      <configuration name="clientsocket_unkwown_server" configurationId="CMakeBoostTestRunConfigurationType" />
-    </history-entry>
     <history-entry file="clientsocket_unkwown_server - 2018.04.16 at 11h 28m 19s.xml">
       <configuration name="clientsocket_unkwown_server" configurationId="CMakeBoostTestRunConfigurationType" />
     </history-entry>
@@ -574,23 +589,29 @@
     <history-entry file="clientsocket_unkwown_server - 2018.04.17 at 06h 26m 11s.xml">
       <configuration name="clientsocket_unkwown_server" configurationId="CMakeBoostTestRunConfigurationType" />
     </history-entry>
+    <history-entry file="test_networking - 2018.04.20 at 02h 53m 10s.xml">
+      <configuration name="test_networking" configurationId="CMakeBoostTestRunConfigurationType" />
+    </history-entry>
+    <history-entry file="test_networking - 2018.04.20 at 02h 53m 18s.xml">
+      <configuration name="test_networking" configurationId="CMakeBoostTestRunConfigurationType" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1888" height="1200" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17970859" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17970859" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info active="true" anchor="bottom" id="Messages" order="7" visible="true" weight="0.27315247" />
+      <window_info anchor="bottom" id="Messages" order="7" visible="true" weight="0.27315247" />
       <window_info anchor="bottom" id="CMake" order="11" weight="0.32647333" />
       <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32834426" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32834426" />
       <window_info anchor="bottom" id="Version Control" order="9" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32834426" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Terminal" order="10" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.39943874" />
+      <window_info anchor="bottom" id="Terminal" order="10" weight="0.2806361" />
       <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39943874" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
@@ -598,26 +619,6 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
     </layout>
-    <layout-to-restore>
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17970859" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32834426" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3291866" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.39943874" />
-      <window_info anchor="bottom" id="Messages" order="7" weight="0.27315247" />
-      <window_info anchor="bottom" id="Terminal" order="10" />
-      <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" />
-      <window_info anchor="bottom" id="Version Control" order="9" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="CMake" order="11" weight="0.32647333" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-    </layout-to-restore>
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
@@ -627,7 +628,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/test/http/URLParser_test.cc</url>
-          <line>65</line>
+          <line>69</line>
           <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>
@@ -635,118 +636,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/source/basis/Semaphore.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="448">
-          <caret line="32" column="4" selection-start-line="32" selection-start-column="4" selection-end-line="32" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/source/app/Service.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="12">
-          <caret line="51" column="43" selection-start-line="51" selection-start-column="43" selection-end-line="51" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/app/Service.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="414">
-          <caret line="71" column="6" selection-start-line="71" selection-start-column="6" selection-end-line="71" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/time/TimeService.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="176">
-          <caret line="47" column="37" selection-start-line="47" selection-start-column="37" selection-end-line="47" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/basis/StreamString.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1840">
-          <caret line="42" column="6" selection-start-line="42" selection-start-column="6" selection-end-line="42" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/basis/DataBlock.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="148">
-          <caret line="55" lean-forward="true" selection-start-line="55" selection-end-line="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/source/networking/ServerSocket.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="60" column="4" selection-start-line="60" selection-start-column="4" selection-end-line="60" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/networking/ServerSocket.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="39" column="49" selection-start-line="39" selection-start-column="49" selection-end-line="39" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/basis/NamedObject.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="593">
-          <caret line="87" column="2" lean-forward="true" selection-start-line="87" selection-start-column="2" selection-end-line="87" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/networking/SocketArguments.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="316">
-          <caret line="31" lean-forward="true" selection-start-line="31" selection-end-line="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/balance/BasicBalance_test.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="56">
-          <caret line="84" column="30" selection-start-line="84" selection-start-column="30" selection-end-line="84" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/persistence/Repository_test.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="532">
-          <caret line="68" column="106" selection-start-line="68" selection-start-column="106" selection-end-line="68" selection-end-column="106" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/networking/ServerSocket_test.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="568">
-          <caret line="58" column="24" selection-start-line="58" selection-start-column="24" selection-end-line="58" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/networking/AsyncSocket.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="642">
-          <caret line="59" selection-start-line="59" selection-end-line="59" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/networking/ClientSocket.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="516">
-          <caret line="47" column="42" selection-start-line="47" selection-start-column="42" selection-end-line="47" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/source/networking/PublisherSocket.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="602">
-          <caret line="43" column="11" selection-start-line="43" selection-start-column="11" selection-end-line="43" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/source/networking/AsyncSocket.cc">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="406">
@@ -904,9 +793,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/logger/logger_test.cc">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/logger/filtering_test.cc">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="322">
@@ -924,32 +810,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/source/http/url/URL.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="392">
-          <caret line="28" selection-start-line="28" selection-end-line="28" />
-          <folding>
-            <element signature="e#1166#1207#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/include/coffee/http/url/URLBuilder.hpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="390">
           <caret line="54" column="7" selection-start-line="54" selection-start-column="7" selection-end-line="54" selection-end-column="7" />
           <folding>
             <element signature="e#1254#1292#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/http/URLBuilder_test.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="45" column="24" selection-start-line="45" selection-start-column="24" selection-end-line="45" selection-end-column="24" />
-          <folding>
-            <element signature="e#1166#1201#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -961,23 +827,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/http/url/URL.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="500">
-          <caret line="53" column="3" selection-start-line="53" selection-start-column="3" selection-end-line="53" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/http/url/ComponentName.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="642">
-          <caret line="59" selection-start-line="59" selection-end-line="59" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/source/http/url/URLBuilder.cc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="418">
+        <state relative-caret-position="532">
           <caret line="38" column="48" selection-start-line="38" selection-start-column="48" selection-end-line="38" selection-end-column="48" />
           <folding>
             <element signature="e#1170#1211#0" expanded="true" />
@@ -985,10 +837,109 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/source/http/url/URL.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1386">
+          <caret line="99" column="14" selection-start-line="99" selection-start-column="14" selection-end-line="99" selection-end-column="14" />
+          <folding>
+            <element signature="e#1166#1207#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/http/URLParser_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="471">
+          <caret line="310" column="64" selection-start-line="310" selection-start-column="64" selection-end-line="310" selection-end-column="64" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/basis/AsString.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-756" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/datatype/Abstract.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="205">
+          <caret line="45" column="6" selection-start-line="45" selection-start-column="6" selection-end-line="45" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/datatype/Float.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-420" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/dbms/datatype/Integer.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="247">
+          <caret line="39" column="35" selection-start-line="39" selection-start-column="35" selection-end-line="39" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/dbms.sqlite/SqliteOutputBinder.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="584">
+          <caret line="65" column="7" selection-start-line="65" selection-start-column="6" selection-end-line="65" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/http/url/URL.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="803">
+          <caret line="74" column="41" lean-forward="true" selection-start-line="74" selection-start-column="41" selection-end-line="74" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/http/url/ComponentName.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="714">
+          <caret line="51" column="77" selection-start-line="51" selection-end-line="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/http/URLBuilder_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="112">
+          <caret line="8" column="72" selection-start-line="8" selection-start-column="72" selection-end-line="8" selection-end-column="72" />
+          <folding>
+            <element signature="e#1166#1201#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/http/HttpHeader.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="438">
+          <caret line="91" column="6" lean-forward="true" selection-start-line="91" selection-start-column="6" selection-end-line="91" selection-end-column="6" />
+          <folding>
+            <element signature="e#1241#1258#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/basis/pattern/lru/Cache.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1101">
+          <caret line="183" column="2" lean-forward="true" selection-start-line="183" selection-start-column="2" selection-end-line="183" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/http/HttpHeader_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="583">
+          <caret line="70" lean-forward="true" selection-start-line="70" selection-end-line="70" />
+          <folding>
+            <element signature="e#1163#1198#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/include/coffee/http/url/URLParser.hpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="430">
-          <caret line="69" column="105" selection-start-line="69" selection-start-column="105" selection-end-line="69" selection-end-column="105" />
+        <state relative-caret-position="443">
+          <caret line="79" column="38" selection-start-line="79" selection-start-column="38" selection-end-line="79" selection-end-column="38" />
           <folding>
             <element signature="e#1252#1269#0" expanded="true" />
           </folding>
@@ -997,18 +948,86 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/source/http/url/URLParser.cc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="158">
-          <caret line="54" column="52" selection-start-line="54" selection-start-column="52" selection-end-line="54" selection-end-column="52" />
+        <state relative-caret-position="172">
+          <caret line="203" column="43" lean-forward="true" selection-start-line="203" selection-start-column="43" selection-end-line="203" selection-end-column="43" />
           <folding>
             <element signature="e#1169#1188#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/http/URLParser_test.cc">
+    <entry file="file://$PROJECT_DIR$/source/http/url/HttpRequest.cc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="656">
-          <caret line="254" column="1" lean-forward="true" selection-start-line="254" selection-start-column="1" selection-end-line="254" selection-end-column="1" />
+        <state relative-caret-position="378">
+          <caret line="27" lean-forward="true" selection-start-line="27" selection-end-line="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/http/HttpHeader.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="45" column="1" lean-forward="true" selection-start-line="45" selection-start-column="1" selection-end-line="45" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/http/HttpRequest.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="560">
+          <caret line="40" selection-start-line="40" selection-end-line="40" />
+          <folding>
+            <element signature="e#1166#1204#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/http/HttpMessage.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="382">
+          <caret line="69" selection-start-line="69" selection-end-line="69" />
+          <folding>
+            <element signature="e#1243#1258#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/http/HttpMessage.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="642">
+          <caret line="76" selection-start-line="76" selection-end-line="76" />
+          <folding>
+            <element signature="e#1166#1204#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/http/HttpResponse.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="598">
+          <caret line="52" column="4" selection-start-line="52" selection-start-column="4" selection-end-line="52" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/http/HttpResponse.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="628">
+          <caret line="52" column="23" lean-forward="true" selection-start-line="52" selection-start-column="23" selection-end-line="52" selection-end-column="23" />
+          <folding>
+            <element signature="e#1166#1180#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/http/HttpCustomHeader.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="441">
+          <caret line="43" column="38" lean-forward="true" selection-start-line="43" selection-start-column="38" selection-end-line="43" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/http/HttpRequest.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="61" column="5" lean-forward="true" selection-start-line="61" selection-start-column="5" selection-end-line="61" selection-end-column="5" />
         </state>
       </provider>
     </entry>

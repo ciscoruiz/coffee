@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(URLParser_set_all_components)
 
    BOOST_REQUIRE(++ ii == url->keyvalue_end());
 
-   BOOST_REQUIRE_EQUAL(url->asText(), expression);
+   BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
 
 BOOST_AUTO_TEST_CASE(URLParser_minimal)
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
    BOOST_REQUIRE(!url->hasKeysValues());
 
-   BOOST_REQUIRE_EQUAL(url->asText(), "tcp://localhost.me");
+   BOOST_REQUIRE_EQUAL(url->encode(), "tcp://localhost.me");
 }
 
 BOOST_AUTO_TEST_CASE(URLParser_minimal_slash)
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_slash)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
    BOOST_REQUIRE(!url->hasKeysValues());
 
-   BOOST_REQUIRE_EQUAL(url->asText(), "tcp://localhost.me");
+   BOOST_REQUIRE_EQUAL(url->encode(), "tcp://localhost.me");
 }
 
 BOOST_AUTO_TEST_CASE(URLParser_minimal_port)
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_port)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Port), "8080");
    BOOST_REQUIRE(!url->hasKeysValues());
 
-   BOOST_REQUIRE_EQUAL(url->asText(), expression);
+   BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
 
 BOOST_AUTO_TEST_CASE(URLParser_minimal_path)
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_path)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Path), "/path/resource");
    BOOST_REQUIRE(!url->hasKeysValues());
 
-   BOOST_REQUIRE_EQUAL(url->asText(), expression);
+   BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
 
 BOOST_AUTO_TEST_CASE(URLParser_minimal_query)
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_query)
    BOOST_REQUIRE_EQUAL(keyValue.first, "key1");
    BOOST_REQUIRE_EQUAL(keyValue.second, "value1");
 
-   BOOST_REQUIRE_EQUAL(url->asText(), expression);
+   BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
 
 BOOST_AUTO_TEST_CASE(URLParser_minimal_query_empty_value)
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_query_empty_value)
    BOOST_REQUIRE_EQUAL(keyValue.first, "key1");
    BOOST_REQUIRE(keyValue.second.empty());
 
-   BOOST_REQUIRE_EQUAL(url->asText(), expression);
+   BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
 
 BOOST_AUTO_TEST_CASE(URLParser_minimal_fragment)
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_fragment)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Fragment), "#reference");
    BOOST_REQUIRE(!url->hasKeysValues());
 
-   BOOST_REQUIRE_EQUAL(url->asText(), expression);
+   BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
 
 BOOST_AUTO_TEST_CASE(URLParser_user)
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(URLParser_user)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Fragment), "#reference");
    BOOST_REQUIRE(!url->hasKeysValues());
 
-   BOOST_REQUIRE_EQUAL(url->asText(), expression);
+   BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
 
 BOOST_AUTO_TEST_CASE(URLParser_pwd)
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE(URLParser_pwd)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
    BOOST_REQUIRE(!url->hasKeysValues());
 
-   BOOST_REQUIRE_EQUAL(url->asText(), expression);
+   BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
 
 BOOST_AUTO_TEST_CASE(URLParser_user_pwd)
@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE(URLParser_user_pwd)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
    BOOST_REQUIRE(!url->hasKeysValues());
 
-   BOOST_REQUIRE_EQUAL(url->asText(), expression);
+   BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
 
 BOOST_AUTO_TEST_CASE(URLParser_empty_path)
@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE(URLParser_empty_path)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Path), "/");
    BOOST_REQUIRE(!url->hasKeysValues());
 
-   BOOST_REQUIRE_EQUAL(url->asText(), expression);
+   BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
 
 BOOST_AUTO_TEST_CASE(URLParser_no_scheme)

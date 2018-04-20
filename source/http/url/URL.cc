@@ -51,7 +51,7 @@ const std::string& http::url::URL::getComponent(const ComponentName::_v componen
    return ii->second;
 }
 
-std::string http::url::URL::asText() const
+std::string http::url::URL::encode() const
    throw(basis::RuntimeException)
 {
    basis::StreamString ss;

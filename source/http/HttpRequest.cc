@@ -39,7 +39,7 @@ std::string http::HttpRequest::encodeFirstLine() const
 {
    basis::StreamString ss;
 
-   return ss << Method::asString(m_method) << " " << m_url->asText() << " " << encodeVersion();
+   return ss << Method::asString(m_method) << " " << m_url->encode() << " " << encodeVersion();
 }
 
 //static

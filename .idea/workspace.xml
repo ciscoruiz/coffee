@@ -70,17 +70,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1996f6df-826a-4fbe-909a-9191da0bb4bb" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/include/coffee/http/HttpCustomHeader.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/include/coffee/http/HttpHeader.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/include/coffee/http/HttpMessage.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/include/coffee/http/HttpRequest.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/include/coffee/http/HttpResponse.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/source/http/HttpHeader.cc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/source/http/HttpMessage.cc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/source/http/HttpRequest.cc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/source/http/HttpResponse.cc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/http/HttpHeader_test.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/coffee/http/url/URL.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/coffee/http/url/URL.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/http/HttpRequest.cc" beforeDir="false" afterPath="$PROJECT_DIR$/source/http/HttpRequest.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/http/url/URL.cc" beforeDir="false" afterPath="$PROJECT_DIR$/source/http/url/URL.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/http/URLParser_test.cc" beforeDir="false" afterPath="$PROJECT_DIR$/test/http/URLParser_test.cc" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/CMakeFiles/" />
     <ignored path="$PROJECT_DIR$/test/dbms/CMakeFiles/" />
@@ -136,8 +129,8 @@
       <file leaf-file-name="HttpRequest.cc" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/source/http/HttpRequest.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="560">
-              <caret line="40" selection-start-line="40" selection-end-line="40" />
+            <state relative-caret-position="516">
+              <caret line="41" column="66" selection-start-line="41" selection-start-column="66" selection-end-line="41" selection-end-column="66" />
               <folding>
                 <element signature="e#1166#1204#0" expanded="true" />
               </folding>
@@ -145,11 +138,23 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="HttpRequest.hpp" pinned="false" current-in-tab="true">
+      <file leaf-file-name="URL.cc" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/source/http/url/URL.cc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="518">
+              <caret line="58" column="54" selection-start-line="58" selection-start-column="54" selection-end-line="58" selection-end-column="54" />
+              <folding>
+                <element signature="e#1166#1207#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HttpRequest.hpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/include/coffee/http/HttpRequest.hpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="390">
-              <caret line="61" column="5" lean-forward="true" selection-start-line="61" selection-start-column="5" selection-end-line="61" selection-end-column="5" />
+            <state relative-caret-position="180">
+              <caret line="46" column="12" selection-start-line="46" selection-start-column="12" selection-end-line="46" selection-end-column="12" />
             </state>
           </provider>
         </entry>
@@ -163,11 +168,29 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="URL.hpp" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/include/coffee/http/url/URL.hpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="539">
+              <caret line="73" column="13" selection-start-line="73" selection-start-column="13" selection-end-line="73" selection-end-column="13" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="URLParser_test.cc" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/test/http/URLParser_test.cc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="153">
+              <caret line="59" column="47" lean-forward="true" selection-start-line="59" selection-start-column="47" selection-end-line="59" selection-end-column="47" />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="HttpResponse.cc" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/source/http/HttpResponse.cc">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="628">
-              <caret line="52" column="23" lean-forward="true" selection-start-line="52" selection-start-column="23" selection-end-line="52" selection-end-column="23" />
+              <caret line="52" column="23" selection-start-line="52" selection-start-column="23" selection-end-line="52" selection-end-column="23" />
               <folding>
                 <element signature="e#1166#1180#0" expanded="true" />
               </folding>
@@ -179,7 +202,7 @@
         <entry file="file://$PROJECT_DIR$/include/coffee/http/HttpCustomHeader.hpp">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="441">
-              <caret line="43" column="38" lean-forward="true" selection-start-line="43" selection-start-column="38" selection-end-line="43" selection-end-column="38" />
+              <caret line="43" column="38" selection-start-line="43" selection-start-column="38" selection-end-line="43" selection-end-column="38" />
             </state>
           </provider>
         </entry>
@@ -283,21 +306,21 @@
         <option value="$PROJECT_DIR$/include/coffee/http/url/ComponentName.hpp" />
         <option value="$PROJECT_DIR$/include/coffee/http/url/URLParser.hpp" />
         <option value="$PROJECT_DIR$/source/http/url/URLParser.cc" />
-        <option value="$PROJECT_DIR$/source/http/url/URL.cc" />
-        <option value="$PROJECT_DIR$/test/http/URLParser_test.cc" />
         <option value="$PROJECT_DIR$/include/coffee/http/Message.hpp" />
-        <option value="$PROJECT_DIR$/include/coffee/http/url/URL.hpp" />
         <option value="$PROJECT_DIR$/test/http/HttpHeader_test.cc" />
         <option value="$PROJECT_DIR$/include/coffee/http/HttpHeader.hpp" />
         <option value="$PROJECT_DIR$/source/http/HttpHeader.cc" />
         <option value="$PROJECT_DIR$/include/coffee/http/HttpCustomHeader.hpp" />
         <option value="$PROJECT_DIR$/source/http/url/HttpRequest.cc" />
-        <option value="$PROJECT_DIR$/source/http/HttpRequest.cc" />
         <option value="$PROJECT_DIR$/include/coffee/http/HttpRequest.hpp" />
         <option value="$PROJECT_DIR$/source/http/HttpMessage.cc" />
         <option value="$PROJECT_DIR$/include/coffee/http/HttpMessage.hpp" />
         <option value="$PROJECT_DIR$/include/coffee/http/HttpResponse.hpp" />
         <option value="$PROJECT_DIR$/source/http/HttpResponse.cc" />
+        <option value="$PROJECT_DIR$/include/coffee/http/url/URL.hpp" />
+        <option value="$PROJECT_DIR$/source/http/url/URL.cc" />
+        <option value="$PROJECT_DIR$/source/http/HttpRequest.cc" />
+        <option value="$PROJECT_DIR$/test/http/URLParser_test.cc" />
       </list>
     </option>
   </component>
@@ -370,6 +393,14 @@
               <item name="include" type="462c0819:PsiDirectoryNode" />
               <item name="coffee" type="462c0819:PsiDirectoryNode" />
               <item name="http" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
+              <item name="coffee" type="462c0819:PsiDirectoryNode" />
+              <item name="include" type="462c0819:PsiDirectoryNode" />
+              <item name="coffee" type="462c0819:PsiDirectoryNode" />
+              <item name="http" type="462c0819:PsiDirectoryNode" />
+              <item name="url" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="coffee" type="b2602c69:ProjectViewProjectNode" />
@@ -600,9 +631,9 @@
     <frame x="0" y="0" width="1888" height="1200" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17970859" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17970859" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Messages" order="7" visible="true" weight="0.27315247" />
+      <window_info active="true" anchor="bottom" id="Messages" order="7" visible="true" weight="0.27315247" />
       <window_info anchor="bottom" id="CMake" order="11" weight="0.32647333" />
       <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32834426" />
@@ -837,23 +868,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/source/http/url/URL.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1386">
-          <caret line="99" column="14" selection-start-line="99" selection-start-column="14" selection-end-line="99" selection-end-column="14" />
-          <folding>
-            <element signature="e#1166#1207#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/http/URLParser_test.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="471">
-          <caret line="310" column="64" selection-start-line="310" selection-start-column="64" selection-end-line="310" selection-end-column="64" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/include/coffee/basis/AsString.hpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-756" />
@@ -882,13 +896,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="584">
           <caret line="65" column="7" selection-start-line="65" selection-start-column="6" selection-end-line="65" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/coffee/http/url/URL.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="803">
-          <caret line="74" column="41" lean-forward="true" selection-start-line="74" selection-start-column="41" selection-end-line="74" selection-end-column="41" />
         </state>
       </provider>
     </entry>
@@ -970,16 +977,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/source/http/HttpRequest.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="560">
-          <caret line="40" selection-start-line="40" selection-end-line="40" />
-          <folding>
-            <element signature="e#1166#1204#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/include/coffee/http/HttpMessage.hpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="382">
@@ -1010,7 +1007,7 @@
     <entry file="file://$PROJECT_DIR$/source/http/HttpResponse.cc">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="628">
-          <caret line="52" column="23" lean-forward="true" selection-start-line="52" selection-start-column="23" selection-end-line="52" selection-end-column="23" />
+          <caret line="52" column="23" selection-start-line="52" selection-start-column="23" selection-end-line="52" selection-end-column="23" />
           <folding>
             <element signature="e#1166#1180#0" expanded="true" />
           </folding>
@@ -1020,14 +1017,48 @@
     <entry file="file://$PROJECT_DIR$/include/coffee/http/HttpCustomHeader.hpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="441">
-          <caret line="43" column="38" lean-forward="true" selection-start-line="43" selection-start-column="38" selection-end-line="43" selection-end-column="38" />
+          <caret line="43" column="38" selection-start-line="43" selection-start-column="38" selection-end-line="43" selection-end-column="38" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/include/coffee/http/HttpRequest.hpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="390">
-          <caret line="61" column="5" lean-forward="true" selection-start-line="61" selection-start-column="5" selection-end-line="61" selection-end-column="5" />
+        <state relative-caret-position="180">
+          <caret line="46" column="12" selection-start-line="46" selection-start-column="12" selection-end-line="46" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/coffee/http/url/URL.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="539">
+          <caret line="73" column="13" selection-start-line="73" selection-start-column="13" selection-end-line="73" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/http/url/URL.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="518">
+          <caret line="58" column="54" selection-start-line="58" selection-start-column="54" selection-end-line="58" selection-end-column="54" />
+          <folding>
+            <element signature="e#1166#1207#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/http/HttpRequest.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="516">
+          <caret line="41" column="66" selection-start-line="41" selection-start-column="66" selection-end-line="41" selection-end-column="66" />
+          <folding>
+            <element signature="e#1166#1204#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/http/URLParser_test.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="59" column="47" lean-forward="true" selection-start-line="59" selection-start-column="47" selection-end-line="59" selection-end-column="47" />
         </state>
       </provider>
     </entry>

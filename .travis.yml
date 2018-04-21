@@ -3,7 +3,7 @@ script: cmake . && make && ctest --output-on-failure
 
 before_script: 
    - sudo apt-get -qq update
-   - sudo apt-get install -y libxml2-dev libboost-filesystem-dev libboost-test-dev libsqlite3-dev:amd64 sqlite sqlite3
+   - sudo apt-get install -y libxml2-dev libboost-filesystem-dev libboost-test-dev libsqlite3-dev:amd64 sqlite sqlite3 sudo apt-get install libzmqpp-dev
 
    
 #

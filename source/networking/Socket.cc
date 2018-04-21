@@ -51,7 +51,7 @@ void networking::Socket::Socket::bind()
 
    try {
       for (auto& endPoint : m_endPoints) {
-         m_zmqSocket->bind(endPoint);
+         m_zmqSocket->bind(endPoint.c_str());
       }
    }
    catch(zmq::error_t& ex) {
@@ -64,7 +64,7 @@ void networking::Socket::unbind()
 {
    for (auto& endPoint : m_endPoints) {
       try {
-         m_zmqSocket->unbind(endPoint);
+         m_zmqSocket->unbind(endPoint.c_str());
       }
       catch (zmq::error_t& ex) {
          LOG_WARN(asString() << ", Error=" << ex.what());
@@ -81,7 +81,7 @@ void networking::Socket::connect()
 
    try {
       for (auto& endPoint : m_endPoints) {
-         m_zmqSocket->connect(endPoint);
+         m_zmqSocket->connect(endPoint.c_str());
       }
    }
    catch(zmq::error_t& ex) {
@@ -94,7 +94,7 @@ void networking::Socket::disconnect()
 {
    for (auto& endPoint : m_endPoints) {
       try {
-         m_zmqSocket->disconnect(endPoint);
+         m_zmqSocket->disconnect(endPoint.c_str());
       }
       catch (zmq::error_t& ex) {
          LOG_WARN(asString() << ", Error=" << ex.what());

@@ -36,10 +36,7 @@ public:
    ~HttpProtocolWaitingContentLength() {;}
 
 private:
-   void initialize(HttpProtocolDecoder& context) const noexcept;
    ProcessResult::_v process(HttpProtocolDecoder& context, const Token& token) const throw(basis::RuntimeException);
-
-
 };
 
 }

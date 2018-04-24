@@ -44,7 +44,6 @@ private:
 
    static bool tryMethod(const std::string& item, HttpRequest::Method::_v& value) noexcept;
    static bool tryHttpVersion(const std::string& item, std::pair<uint16_t, uint16_t>& httpVersion) noexcept;
-   static std::shared_ptr<url::URL> tryURL(const std::string& item) noexcept;
 };
 
 }

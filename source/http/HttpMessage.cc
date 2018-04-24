@@ -28,6 +28,16 @@ using namespace coffee;
 
 using http::HttpMessage;
 
+bool HttpMessage::hasHeader(const HttpHeader::Type::_v type) const
+   throw(basis::RuntimeException)
+{
+   if (type == HttpHeader::Type::Custom) {
+      COFFEE_THROW_EXCEPTION("HttpHeader of type none can not be instantiated for users");
+   }
+
+   return m_directory.find(HttpHeader::Type::asString(type)) != m_directory.end();
+}
+
 const std::string& HttpMessage::getHeaderValue(const HttpHeader::Type::_v type) const
    throw(basis::RuntimeException)
 {

@@ -67,16 +67,16 @@ std::shared_ptr<http::HttpMessage> HttpProtocolWaitingMessage::tryResponse(const
       return empty;
    }
 
-   const std::string& statusCode(items[1]);
-
-   if (!protocol::isNumeric(statusCode))
-      return empty;
-
    std::pair<uint16_t, uint16_t> httpVersion(0, 0);
 
    if (!tryHttpVersion(items[0], httpVersion)){
       return empty;
    }
+
+   const std::string& statusCode(items[1]);
+
+   if (!protocol::isNumeric(statusCode))
+      return empty;
 
    return std::shared_ptr<http::HttpMessage>(new http::HttpResponse(httpVersion.first, httpVersion.second, atoi(statusCode.c_str())));
 }
@@ -96,19 +96,13 @@ std::shared_ptr<http::HttpMessage> HttpProtocolWaitingMessage::tryRequest(const 
       return empty;
    }
 
-   std::shared_ptr<url::URL> url = tryURL(items[1]);
-
-   if (!url) {
-      return empty;
-   }
-
    std::pair<uint16_t, uint16_t> httpVersion(0, 0);
 
    if (!tryHttpVersion(items[2], httpVersion)){
       return empty;
    }
 
-   return http::HttpRequest::instantiate(method, url, httpVersion.first, httpVersion.second);
+   return http::HttpRequest::instantiate(method, items[1], httpVersion.first, httpVersion.second);
 }
 
 bool HttpProtocolWaitingMessage::tryHttpVersion(const std::string& item, std::pair<uint16_t, uint16_t>& httpVersion)
@@ -138,20 +132,4 @@ bool HttpProtocolWaitingMessage::tryMethod(const std::string& item, HttpRequest:
    }
 
    return false;
-}
-
-std::shared_ptr<http::url::URL> HttpProtocolWaitingMessage::tryURL(const std::basic_string<char>& item)
-   noexcept
-{
-   static std::shared_ptr<http::url::URL> empty;
-
-   url::URLParser urlParser(item);
-
-   try {
-      return urlParser.build();
-   }
-   catch(basis::RuntimeException& ex){
-      logger::Logger::write(ex);
-      return empty;
-   }
 }

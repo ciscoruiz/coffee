@@ -35,13 +35,6 @@
 using namespace coffee;
 using namespace coffee::http::protocol::state;
 
-void HttpProtocolWaitingContentLength::initialize(HttpProtocolDecoder& context) const
-   noexcept
-{
-   context.m_bodyExpectedSize = 0;
-   context.m_result->clearBody();
-}
-
 HttpProtocolState::ProcessResult::_v HttpProtocolWaitingContentLength::process(HttpProtocolDecoder& context, const Token& token) const
    throw(basis::RuntimeException)
 {

@@ -38,8 +38,6 @@ using namespace coffee::http::protocol::state;
 HttpProtocolState::ProcessResult::_v HttpProtocolReadBody::process(HttpProtocolDecoder& context, const Token& token) const
    throw(basis::RuntimeException)
 {
-   context.setState(HttpProtocolDecoder::State::WaitingMessage);
-
    if (token.value.size() != context.m_bodyExpectedSize) {
       COFFEE_THROW_EXCEPTION("Body length received (" << context.m_bodyExpectedSize << ") does not match the received (" << token.value.size() << ")");
    }

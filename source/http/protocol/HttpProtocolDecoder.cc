@@ -41,6 +41,7 @@ std::shared_ptr<http::HttpMessage> http::protocol::HttpProtocolDecoder::apply(co
 {
    Token token;
 
+   setState(State::WaitingMessage);
    m_result.reset();
    m_bodyExpectedSize = 0;
 

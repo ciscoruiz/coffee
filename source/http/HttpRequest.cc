@@ -22,7 +22,6 @@
 //
 
 #include <coffee/http/HttpRequest.hpp>
-#include <coffee/http/url/URL.hpp>
 #include <coffee/http/protocol/defines.hpp>
 
 using namespace coffee;
@@ -32,7 +31,7 @@ std::string http::HttpRequest::encodeFirstLine() const
 {
    basis::StreamString ss;
 
-   return ss << Method::asString(m_method) << " " << m_url->encode() << " " << encodeVersion();
+   return ss << Method::asString(m_method) << " " << m_uri << " " << encodeVersion();
 }
 
 //static

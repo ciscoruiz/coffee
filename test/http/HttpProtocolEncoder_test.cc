@@ -23,12 +23,11 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <coffee/http/url/URLParser.hpp>
-#include <coffee/http/protocol/HttpProtocolEncoder.hpp>
 #include <coffee/http/HttpRequest.hpp>
 #include <coffee/http/HttpResponse.hpp>
 #include <coffee/http/protocol/defines.hpp>
 #include <coffee/http/protocol/HttpProtocolDecoder.hpp>
+#include <coffee/http/protocol/HttpProtocolEncoder.hpp>
 
 using namespace coffee;
 using namespace coffee::http;
@@ -61,23 +60,19 @@ const basis::DataBlock&  HttpTestSplitter::readDataBlock()
 
 BOOST_AUTO_TEST_CASE( http_protocol_encoder_basic_request )
 {
-   url::URLParser parser("http:uri.com");
-
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Connect, parser.build());
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Connect, "uri.com");
 
    protocol::HttpProtocolEncoder encoder;
 
    HttpTestSplitter splitter(encoder.apply(request));
 
-   BOOST_REQUIRE_EQUAL(splitter.readLine(), "CONNECT http://uri.com HTTP/1.1");
+   BOOST_REQUIRE_EQUAL(splitter.readLine(), "CONNECT uri.com HTTP/1.1");
    BOOST_REQUIRE(splitter.readLine().empty());
 }
 
 BOOST_AUTO_TEST_CASE( http_protocol_encoder_basic_response )
 {
-   url::URLParser parser("http:uri.com");
-
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Connect, parser.build());
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Connect, "resource/id");
    auto response = HttpResponse::instantiate(401, request);
 
    protocol::HttpProtocolEncoder encoder;
@@ -90,9 +85,7 @@ BOOST_AUTO_TEST_CASE( http_protocol_encoder_basic_response )
 
 BOOST_AUTO_TEST_CASE( http_protocol_encoder_header_request )
 {
-   url::URLParser parser("http:user@uri.com");
-
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Get, parser.build(), 2);
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Get, "path/resource", 2);
 
    auto response = HttpResponse::instantiate(200, request);
    response->setHeader(HttpHeader::Type::Age, "1234").setHeader(HttpHeader::Type::AcceptLanguage, "hava/x");
@@ -112,15 +105,14 @@ BOOST_AUTO_TEST_CASE( http_protocol_encoder_header_body_request )
    char memory[1024];
    basis::DataBlock body(memory,sizeof(memory));
 
-   url::URLParser parser("http:user:password@uri.com");
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, parser.build(), 2);
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "path/resource", 2);
    request->setHeader(HttpHeader::Type::Age, "1234").setHeader(HttpHeader::Type::Age, "333").setBody(body);
 
    protocol::HttpProtocolEncoder encoder;
    const basis::DataBlock& encode = encoder.apply(request);
    HttpTestSplitter splitter(encode);
 
-   BOOST_REQUIRE_EQUAL(splitter.readLine(), "HEAD http://user:password@uri.com HTTP/2.1");
+   BOOST_REQUIRE_EQUAL(splitter.readLine(), "HEAD path/resource HTTP/2.1");
    BOOST_REQUIRE_EQUAL(splitter.readLine(), "Age:1234,333");
    BOOST_REQUIRE_EQUAL(splitter.readLine(), "Content-Length:1024");
    BOOST_REQUIRE(splitter.readLine().empty());
@@ -136,8 +128,7 @@ BOOST_AUTO_TEST_CASE( http_protocol_encoder_header_body_response )
    char memory[1024];
    basis::DataBlock body(memory,sizeof(memory));
 
-   url::URLParser parser("http:user:password@uri.com");
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, parser.build(), 2, 2);
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "uri/res", 2, 2);
 
    auto response = HttpResponse::instantiate(999, request);
    response->setHeader(HttpHeader::Type::Age, "1234").setHeader(HttpHeader::Type::Age, "333").setBody(body);

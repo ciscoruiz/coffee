@@ -30,10 +30,6 @@ namespace coffee {
 
 namespace http {
 
-namespace url {
-   class URL;
-}
-
 /**
  * General definition for HTTP requests following RFC 2616.
  *
@@ -55,20 +51,20 @@ public:
       /**
     * Constructor.
     */
-    HttpRequest(const Method::_v method, std::shared_ptr<url::URL> url, const uint32_t majorVersion, const uint32_t minorVersion) :
+    HttpRequest(const Method::_v method, const std::string& uri, const uint32_t majorVersion, const uint32_t minorVersion) :
       HttpMessage(majorVersion, minorVersion),
       m_method(method),
-      m_url(url)
+      m_uri(uri)
    {}
 
-   static std::shared_ptr<HttpRequest> instantiate(const Method::_v method, std::shared_ptr<url::URL> url, const uint32_t majorVersion = 1, const uint32_t minorVersion = 1)
+   static std::shared_ptr<HttpRequest> instantiate(const Method::_v method, const std::string& uri, const uint32_t majorVersion = 1, const uint32_t minorVersion = 1)
       noexcept
    {
-      return std::make_shared<HttpRequest>(method, url, majorVersion, minorVersion);
+      return std::make_shared<HttpRequest>(method, uri, majorVersion, minorVersion);
    }
 
    const Method::_v getMethod() const noexcept { return m_method; }
-   std::shared_ptr<url::URL> getURL() const noexcept { return m_url; }
+   const std::string& getURI() const noexcept { return m_uri; }
 
 protected:
       /**
@@ -78,7 +74,7 @@ protected:
 
 private:
    const Method::_v m_method;
-   std::shared_ptr<url::URL> m_url;
+   const std::string m_uri;
 };
 
 }

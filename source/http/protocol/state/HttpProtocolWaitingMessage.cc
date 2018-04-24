@@ -104,7 +104,7 @@ std::shared_ptr<http::HttpMessage> HttpProtocolWaitingMessage::tryRequest(const 
 
    std::pair<uint16_t, uint16_t> httpVersion(0, 0);
 
-   if (!tryHttpVersion(items[0], httpVersion)){
+   if (!tryHttpVersion(items[2], httpVersion)){
       return empty;
    }
 

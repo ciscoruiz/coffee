@@ -21,23 +21,30 @@
 // SOFTWARE.
 //
 
-#include <coffee/http/HttpRequest.hpp>
-#include <coffee/http/url/URL.hpp>
+#include <string.h>
+#include <algorithm>
+
+#include <coffee/http/protocol/state/HttpProtocolReadBody.hpp>
+#include <coffee/http/protocol/HttpProtocolDecoder.hpp>
 #include <coffee/http/protocol/defines.hpp>
+#include <coffee/http/HttpResponse.hpp>
+#include <coffee/http/HttpRequest.hpp>
+#include <coffee/http/url/URLParser.hpp>
+#include <coffee/logger/Logger.hpp>
 
 using namespace coffee;
+using namespace coffee::http::protocol::state;
 
-std::string http::HttpRequest::encodeFirstLine() const
+HttpProtocolState::ProcessResult::_v HttpProtocolReadBody::process(HttpProtocolDecoder& context, const Token& token) const
    throw(basis::RuntimeException)
 {
-   basis::StreamString ss;
+   context.setState(HttpProtocolDecoder::State::WaitingMessage);
 
-   return ss << Method::asString(m_method) << " " << m_url->encode() << " " << encodeVersion();
+   if (token.value.size() != context.m_bodyExpectedSize) {
+      COFFEE_THROW_EXCEPTION("Body length received (" << context.m_bodyExpectedSize << ") does not match the received (" << token.value.size() << ")");
+   }
+
+   context.m_result->setBody(token.value);
+   return ProcessResult::Completed;
 }
 
-//static
-const char* http::HttpRequest::Method::asString(const http::HttpRequest::Method::_v method)
-   noexcept
-{
-   return protocol::requestMethodNames[method];
-}

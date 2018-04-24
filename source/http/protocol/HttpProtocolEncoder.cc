@@ -25,18 +25,16 @@
 
 #include <coffee/http/HttpMessage.hpp>
 #include <coffee/http/HttpHeader.hpp>
+#include <coffee/http/protocol/defines.hpp>
 
 using namespace coffee;
-
-//static
-const char http::protocol::HttpProtocolEncoder::newLineCharacters[] = { 13, 10, 0 };
 
 const basis::DataBlock& http::protocol::HttpProtocolEncoder::apply(std::shared_ptr<HttpMessage> message) const
    throw(basis::RuntimeException)
 {
    m_buffer.clear();
 
-   addLine(message->encodeFirstLine());
+   m_buffer.append(message->encodeFirstLine()).append(newLineCharacters);
 
    const basis::DataBlock& body (message->m_body);
    const bool hasBody = body.size() > 0;
@@ -46,27 +44,15 @@ const basis::DataBlock& http::protocol::HttpProtocolEncoder::apply(std::shared_p
    }
 
    for (auto header : message->m_sequentialHeaders) {
-      addLine(header->encode());
+      m_buffer.append(header->encode()).append(newLineCharacters);
    }
 
-   newLine();
+   m_buffer.append(newLineCharacters);
 
    if (hasBody) {
       m_buffer.append(body);
    }
 
    return m_buffer;
-}
-
-void http::protocol::HttpProtocolEncoder::addLine(const std::string& line) const
-   noexcept
-{
-   m_buffer.append(line).append(newLineCharacters);
-}
-
-void http::protocol::HttpProtocolEncoder::newLine() const
-   noexcept
-{
-   m_buffer.append(newLineCharacters);
 }
 

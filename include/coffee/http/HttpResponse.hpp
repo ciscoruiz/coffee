@@ -29,6 +29,11 @@
 namespace coffee {
 namespace http {
 
+namespace protocol {
+namespace state {
+class HttpProtocolWaitingMessage;
+}
+}
 class HttpRequest;
 
 /**
@@ -49,24 +54,28 @@ public:
    HttpResponse(const int statusCode, const std::shared_ptr<HttpRequest>& request);
 
    static std::shared_ptr<HttpResponse> instantiate(const int statusCode, const std::shared_ptr<HttpRequest>& request)
-      noexcept
-   {
+   noexcept {
       return std::make_shared<HttpResponse>(statusCode, request);
    }
+
+   bool isOk() const noexcept { return m_statusCode == 200; }
 
    int getStatusCode() const noexcept { return m_statusCode; }
 
 protected:
-      /**
-    * @return the first line in the HTTP message.
-    */
+   /**
+ * @return the first line in the HTTP message.
+ */
    std::string encodeFirstLine() const throw(basis::RuntimeException);
 
 private:
    const int m_statusCode;
    std::shared_ptr<HttpRequest> m_request;
-};
 
+   HttpResponse(const uint16_t majorVersion, const uint16_t minorVersion, const int statusCode);
+
+   friend class protocol::state::HttpProtocolWaitingMessage;
+};
 }
 }
 

@@ -20,24 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+#ifndef _coffee_http_protocol_state_HttpProtocolState_hpp_
+#define _coffee_http_protocol_state_HttpProtocolState_hpp_
 
-#include <coffee/http/HttpRequest.hpp>
-#include <coffee/http/url/URL.hpp>
-#include <coffee/http/protocol/defines.hpp>
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/http/HttpHeader.hpp>
 
-using namespace coffee;
+namespace coffee {
+namespace http {
+namespace protocol {
 
-std::string http::HttpRequest::encodeFirstLine() const
-   throw(basis::RuntimeException)
-{
-   basis::StreamString ss;
+class HttpProtocolDecoder;
+struct Token;
 
-   return ss << Method::asString(m_method) << " " << m_url->encode() << " " << encodeVersion();
+namespace state {
+
+class HttpProtocolState {
+public:
+   struct ProcessResult {
+      enum _v { Continue, Completed };
+   };
+
+   virtual ~HttpProtocolState() {;}
+   virtual ProcessResult::_v process(HttpProtocolDecoder& context, const Token& token) const throw(basis::RuntimeException) = 0;
+
+protected:
+   HttpProtocolState() {;}
+
+   static bool tryStandardType(const std::string& item, HttpHeader::Type::_v& value) noexcept;
+};
+
+}
+}
+}
 }
 
-//static
-const char* http::HttpRequest::Method::asString(const http::HttpRequest::Method::_v method)
-   noexcept
-{
-   return protocol::requestMethodNames[method];
-}
+#endif

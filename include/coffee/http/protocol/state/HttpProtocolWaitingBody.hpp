@@ -20,24 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+#ifndef _coffee_http_protocol_state_HttpProtocolWaitingBody_hpp_
+#define _coffee_http_protocol_state_HttpProtocolWaitingBody_hpp_
 
-#include <coffee/http/HttpRequest.hpp>
-#include <coffee/http/url/URL.hpp>
-#include <coffee/http/protocol/defines.hpp>
+#include <coffee/http/protocol/state/HttpProtocolState.hpp>
 
-using namespace coffee;
+namespace coffee {
+namespace http {
+namespace protocol {
+namespace state {
 
-std::string http::HttpRequest::encodeFirstLine() const
-   throw(basis::RuntimeException)
-{
-   basis::StreamString ss;
+class HttpProtocolWaitingBody : public HttpProtocolState {
+public:
+   HttpProtocolWaitingBody() {;}
+   ~HttpProtocolWaitingBody() {;}
 
-   return ss << Method::asString(m_method) << " " << m_url->encode() << " " << encodeVersion();
+private:
+   ProcessResult::_v process(HttpProtocolDecoder& context, const Token& token) const throw(basis::RuntimeException);
+
+
+};
+
+}
+}
+}
 }
 
-//static
-const char* http::HttpRequest::Method::asString(const http::HttpRequest::Method::_v method)
-   noexcept
-{
-   return protocol::requestMethodNames[method];
-}
+#endif

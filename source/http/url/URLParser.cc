@@ -20,12 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-#include <string.h>
 
 #include <coffee/http/url/URLParser.hpp>
 #include <coffee/http/url/URL.hpp>
 #include <coffee/http/url/ComponentName.hpp>
-#include <string.h>
+
+#include <coffee/http/protocol/defines.hpp>
 
 using namespace coffee;
 
@@ -46,7 +46,7 @@ using namespace coffee;
 std::shared_ptr<http::url::URL> http::url::URLParser::build()
    throw(basis::RuntimeException)
 {
-   auto separation = separate(m_url, ':');
+   auto separation = protocol::separate(m_url, ':');
    const std::string& scheme = separation.first;
    addMandatoryComponent(ComponentName::Scheme, scheme);
 
@@ -76,22 +76,22 @@ std::string::size_type http::url::URLParser::readAuthority(const std::string& wi
    auto token = extractToken(withoutScheme, start, "/?#");
 
    if (token.first.find('@', start) == std::string::npos) {
-      auto separation = separate(token.first, ':');
+      auto separation = protocol::separate(token.first, ':');
       addMandatoryComponent(ComponentName::Host, separation.first);
       addOptionalComponent(ComponentName::Port, separation.second);
    }
    else {
-      auto separation = separate(token.first, '@');
+      auto separation = protocol::separate(token.first, '@');
       const std::string& userInformation = separation.first;
       const std::string& endPoint = separation.second;
 
       {
-         auto separation = separate(userInformation, ':');
+         auto separation = protocol::separate(userInformation, ':');
          addOptionalComponent(ComponentName::User, separation.first);
          addOptionalComponent(ComponentName::Password, separation.second);
       }
       {
-         auto separation = separate(endPoint, ':');
+         auto separation = protocol::separate(endPoint, ':');
          addMandatoryComponent(ComponentName::Host, separation.first);
          addOptionalComponent(ComponentName::Port, separation.second);
       }
@@ -125,10 +125,10 @@ std::string::size_type http::url::URLParser::readQuery(const std::string& withou
 
    auto token = extractToken(withoutScheme, endPrevious + 1, "#");
 
-   std::vector<std::string> pairs = split(token.first, '&');
+   std::vector<std::string> pairs = protocol::split(token.first, '&');
 
    for (auto& pair : pairs) {
-      auto keyValue = separate(pair, '=');
+      auto keyValue = protocol::separate(pair, '=');
 
       if (keyValue.first.empty()) {
          COFFEE_THROW_EXCEPTION(token.first << " contains an empty key");
@@ -187,45 +187,6 @@ http::url::URLParser::Token http::url::URLParser::extractToken(const std::string
    else {
       result.first.assign(withoutScheme.begin() + initpos, withoutScheme.begin() + end);
       result.second = end;
-   }
-
-   return result;
-}
-
-// static
-std::pair<std::string, std::string> http::url::URLParser::separate(const std::string& string, const char delim)
-   noexcept
-{
-   std::pair<std::string, std::string> result;
-
-   auto pos = string.find(delim);
-
-   if (pos != std::string::npos) {
-      result.first = string.substr(0, pos);
-      result.second = string.substr(pos + 1);
-   }
-   else {
-      result.first = string;
-   }
-
-   return result;
-}
-
-//static
-std::vector<std::string> http::url::URLParser::split(const std::string& string, const char _delim)
-   noexcept
-{
-   char delim[2] = { _delim, 0 };
-
-   std::vector<std::string> result;
-
-   char* source = (char*) string.c_str();
-   const char* item;
-   char* saveptr = nullptr;
-
-   while ((item = strtok_r(source, delim, &saveptr)) != nullptr) {
-      source = nullptr;
-      result.push_back(item);
    }
 
    return result;

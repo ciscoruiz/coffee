@@ -76,8 +76,6 @@ private:
    void addOptionalComponent(const ComponentName::_v componentName, const std::string& value) noexcept ;
 
    static Token extractToken(const std::string& withoutScheme, const std::string::size_type initpos, const char* finalDelims) noexcept;
-   static std::pair<std::string, std::string> separate(const std::string& string, const char delim) noexcept;
-   static std::vector<std::string> split(const std::string& string, const char delim) noexcept;
 
    friend class URL;
 };

@@ -21,23 +21,26 @@
 // SOFTWARE.
 //
 
-#include <coffee/http/HttpRequest.hpp>
-#include <coffee/http/url/URL.hpp>
+#include <string.h>
+#include <algorithm>
+
+#include <coffee/http/protocol/state/HttpProtocolState.hpp>
 #include <coffee/http/protocol/defines.hpp>
 
 using namespace coffee;
+using namespace coffee::http::protocol::state;
 
-std::string http::HttpRequest::encodeFirstLine() const
-   throw(basis::RuntimeException)
+bool HttpProtocolState::tryStandardType(const std::string& item, http::HttpHeader::Type::_v& value)
+noexcept
 {
-   basis::StreamString ss;
+   const char* typeName = item.c_str();
 
-   return ss << Method::asString(m_method) << " " << m_url->encode() << " " << encodeVersion();
-}
+   for (int type = 0; !protocol::headerNames[type].empty(); ++ type) {
+      if (strcasecmp(typeName, protocol::headerNames[type].c_str()) == 0) {
+         value = (HttpHeader::Type::_v) type;
+         return true;
+      }
+   }
 
-//static
-const char* http::HttpRequest::Method::asString(const http::HttpRequest::Method::_v method)
-   noexcept
-{
-   return protocol::requestMethodNames[method];
+   return false;
 }

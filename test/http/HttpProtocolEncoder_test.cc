@@ -27,42 +27,36 @@
 #include <coffee/http/protocol/HttpProtocolEncoder.hpp>
 #include <coffee/http/HttpRequest.hpp>
 #include <coffee/http/HttpResponse.hpp>
+#include <coffee/http/protocol/defines.hpp>
+#include <coffee/http/protocol/HttpProtocolDecoder.hpp>
 
 using namespace coffee;
 using namespace coffee::http;
 
 struct HttpTestSplitter {
-   HttpTestSplitter(const basis::DataBlock& dataBlock) :
-      m_dataBlock(dataBlock), pos(0), cursorPos(0), maxPos(dataBlock.size())
-   {;}
-
-   std::string readLine() noexcept;
-
+   HttpTestSplitter(const basis::DataBlock& dataBlock) : m_dataBlock(dataBlock) {;}
+   const std::string& readLine() throw (basis::RuntimeException);
+   const basis::DataBlock& readDataBlock() throw (basis::RuntimeException);
+   protocol::Token token;
    const basis::DataBlock& m_dataBlock;
-   std::string::size_type cursorPos, pos;
-   std::string::size_type maxPos;
 };
 
-std::string HttpTestSplitter::readLine()
-   noexcept
+const std::string& HttpTestSplitter::readLine()
+   throw (basis::RuntimeException)
 {
-   const int nchars = coffee_strlen(http::protocol::HttpProtocolEncoder::newLineCharacters);
+   if (protocol::HttpProtocolDecoder::readToken(m_dataBlock, token))
+      return token.value;
 
-   pos = m_dataBlock.find(http::protocol::HttpProtocolEncoder::newLineCharacters, cursorPos);
+   COFFEE_THROW_EXCEPTION("No read token");
+}
 
-   if (pos != std::string::npos) {
-      if (pos == cursorPos) {
-         cursorPos += nchars;
-         return std::string();
-      }
-      std::string result = m_dataBlock.substr(cursorPos, pos - cursorPos);
-      cursorPos = pos + nchars;
-      return result;
-   }
-   else {
-      std::string result = m_dataBlock.substr(cursorPos);
-      return result;
-   }
+const basis::DataBlock&  HttpTestSplitter::readDataBlock()
+   throw (basis::RuntimeException)
+{
+   if (protocol::HttpProtocolDecoder::readToken(m_dataBlock, token))
+      return token.value;
+
+   COFFEE_THROW_EXCEPTION("No read token");
 }
 
 BOOST_AUTO_TEST_CASE( http_protocol_encoder_basic_request )
@@ -131,10 +125,10 @@ BOOST_AUTO_TEST_CASE( http_protocol_encoder_header_body_request )
    BOOST_REQUIRE_EQUAL(splitter.readLine(), "Content-Length:1024");
    BOOST_REQUIRE(splitter.readLine().empty());
 
-   BOOST_REQUIRE_EQUAL(encode.size() - splitter.cursorPos, 1024);
+   const basis::DataBlock& readBody = splitter.readDataBlock();
 
-   basis::DataBlock encodeBody(encode.data() + splitter.cursorPos, 1024);
-   BOOST_REQUIRE(memcmp(encodeBody.data(), memory, 1024) == 0);
+   BOOST_REQUIRE_EQUAL(readBody.size(), 1024);
+   BOOST_REQUIRE(memcmp(readBody.data(), memory, 1024) == 0);
 }
 
 BOOST_AUTO_TEST_CASE( http_protocol_encoder_header_body_response )
@@ -157,8 +151,8 @@ BOOST_AUTO_TEST_CASE( http_protocol_encoder_header_body_response )
    BOOST_REQUIRE_EQUAL(splitter.readLine(), "Content-Length:1024");
    BOOST_REQUIRE(splitter.readLine().empty());
 
-   BOOST_REQUIRE_EQUAL(encode.size() - splitter.cursorPos, 1024);
+   const basis::DataBlock& readBody = splitter.readDataBlock();
 
-   basis::DataBlock encodeBody(encode.data() + splitter.cursorPos, 1024);
-   BOOST_REQUIRE(memcmp(encodeBody.data(), memory, 1024) == 0);
+   BOOST_REQUIRE_EQUAL(readBody.size(), 1024);
+   BOOST_REQUIRE(memcmp(readBody.data(), memory, 1024) == 0);
 }

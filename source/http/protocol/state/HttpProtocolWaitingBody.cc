@@ -21,23 +21,40 @@
 // SOFTWARE.
 //
 
-#include <coffee/http/HttpRequest.hpp>
-#include <coffee/http/url/URL.hpp>
+#include <string.h>
+#include <algorithm>
+
+#include <coffee/http/protocol/state/HttpProtocolWaitingBody.hpp>
+#include <coffee/http/protocol/HttpProtocolDecoder.hpp>
 #include <coffee/http/protocol/defines.hpp>
+#include <coffee/http/HttpResponse.hpp>
+#include <coffee/http/HttpRequest.hpp>
+#include <coffee/http/url/URLParser.hpp>
+#include <coffee/logger/Logger.hpp>
 
 using namespace coffee;
+using namespace coffee::http::protocol::state;
 
-std::string http::HttpRequest::encodeFirstLine() const
+HttpProtocolState::ProcessResult::_v HttpProtocolWaitingBody::process(HttpProtocolDecoder& context, const Token& token) const
    throw(basis::RuntimeException)
 {
-   basis::StreamString ss;
+   // First empty line after headers will mark the starting of body content
+   if (token.value.empty()) {
+      context.setState(HttpProtocolDecoder::State::ReadBody);
+      return ProcessResult::Continue;
+   }
 
-   return ss << Method::asString(m_method) << " " << m_url->encode() << " " << encodeVersion();
+   auto items = protocol::separate(token.value, ':');
+
+   HttpHeader::Type::_v type;
+
+   if (tryStandardType(items.first, type)) {
+      context.m_result->setHeader(type, items.second);
+   }
+   else {
+      context.m_result->setCustomHeader(items.first, items.second);
+   }
+
+   return ProcessResult::Continue;
 }
 
-//static
-const char* http::HttpRequest::Method::asString(const http::HttpRequest::Method::_v method)
-   noexcept
-{
-   return protocol::requestMethodNames[method];
-}

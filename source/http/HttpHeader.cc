@@ -22,26 +22,12 @@
 //
 
 #include <coffee/http/HttpHeader.hpp>
+#include <coffee/http/protocol/defines.hpp>
 
 using namespace coffee;
 
-namespace coffee {
-namespace http {
-static std::string headerNames[] = {
-   "Cache-Control", "Connection", "Date", "Pragma", "Trailer", "Transfer-Encoding",
-   "Upgrade", "Via", "Warning", "Accept", "Accept-Charset", "Accept-Encoding",
-   "Accept-Language", "Authorization", "Expect", "From", "Host", "If-Match", "If-Modified-Since",
-   "If-None-Match", "If-Range", "If-Unmodified-Since", "Max-Forwards", "Proxy-Authorization",
-   "Range", "Referer", "TE", "User-Agent", "Allow", "Content-Encoding", "Content-Language",
-   "Content-Length", "Content-Location", "Content-MD5", "Content-Range", "Content-Type",
-   "Expires", "Last-Modified", "Accept-Ranges", "Age", "ETAG", "Location", "Proxy-Authenticate",
-   "Retry-After", "Server", "Vary", "WWW-Authenticate"
-};
-}
-}
-
 //virtual
-const std::string& http::HttpHeader::getName () const
+const std::string& http::HttpHeader::getName() const
    throw(basis::RuntimeException)
 {
    if (m_type == Type::Custom) {
@@ -56,5 +42,5 @@ const std::string& http::HttpHeader::Type::asString(const Type::_v type)
 {
    static const std::string custom("Custom");
 
-   return (type == Type::Custom) ? custom: headerNames[type];
+   return (type == Type::Custom) ? custom: protocol::headerNames[type];
 }

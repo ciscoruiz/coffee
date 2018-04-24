@@ -21,34 +21,66 @@
 // SOFTWARE.
 //
 
-#ifndef _coffee_http_protocol_HttpProtocolEncoder_hpp_
-#define _coffee_http_protocol_HttpProtocolEncoder_hpp_
+#ifndef _coffee_http_protocol_HttpProtocolDecoder_hpp_
+#define _coffee_http_protocol_HttpProtocolDecoder_hpp_
 
 #include <memory>
 
-#include <coffee/basis/DataBlock.hpp>
 #include <coffee/basis/RuntimeException.hpp>
+#include <coffee/http/protocol/state/HttpProtocolWaitingContentLength.hpp>
 
 namespace coffee {
+
+namespace basis {
+   class DataBlock;
+}
+
 namespace http {
 
 class HttpMessage;
 
 namespace protocol {
 
-class HttpProtocolEncoder {
-public:
-   HttpProtocolEncoder() {;}
+struct Token;
 
-   const basis::DataBlock& apply(std::shared_ptr<HttpMessage> message) const throw(basis::RuntimeException);
+namespace state {
+   class HttpProtocolState;
+   class HttpProtocolWaitingMessage;
+   class HttpProtocolWaitingContentLength;
+   class HttpProtocolWaitingBody;
+   class HttpProtocolReadBody;
+}
+
+class HttpProtocolDecoder {
+public:
+   struct State {
+      enum _v {
+         WaitingMessage, WaitingContentLength, WaitingBody, ReadBody
+      };
+   };
+
+   HttpProtocolDecoder() : m_state(nullptr), m_bodyExpectedSize(0) { setState(State::WaitingMessage); }
+
+   static bool readToken(const basis::DataBlock& dataBlock, Token& token) throw(basis::RuntimeException);
+
+   std::shared_ptr<HttpMessage> apply(const basis::DataBlock& dataBlock) throw(basis::RuntimeException);
 
 private:
-   mutable basis::DataBlock m_buffer;
+   const state::HttpProtocolState* m_state;
+   uint32_t m_bodyExpectedSize;
+   std::shared_ptr<HttpMessage> m_result;
+
+   void setState(const State::_v state) noexcept;
+
+   friend class state::HttpProtocolWaitingMessage;
+   friend class state::HttpProtocolWaitingContentLength;
+   friend class state::HttpProtocolWaitingBody;
+   friend class state::HttpProtocolReadBody;
+
 };
 
 }
 }
 }
 
-
-#endif // _coffee_http_protocol_HttpProtocolEncoder_hpp_
+#endif // _coffee_http_protocol_HttpProtocolDecoder_hpp_

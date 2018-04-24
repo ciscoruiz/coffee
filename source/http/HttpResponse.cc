@@ -35,6 +35,12 @@ http::HttpResponse::HttpResponse(const int statusCode, const std::shared_ptr<Htt
 {
 }
 
+http::HttpResponse::HttpResponse(const uint16_t majorVersion, const uint16_t minorVersion, const int statusCode) :
+   http::HttpMessage(majorVersion, minorVersion),
+   m_statusCode(statusCode)
+{
+}
+
 std::string http::HttpResponse::encodeFirstLine() const
    throw(basis::RuntimeException)
 {

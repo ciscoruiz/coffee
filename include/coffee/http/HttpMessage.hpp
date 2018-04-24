@@ -57,10 +57,20 @@ public:
    HttpMessage& setCustomHeader(const std::string& headerName, const std::string& value) noexcept;
 
    /**
+    * @return The body of this HTTP message
+    */
+   const basis::DataBlock& getBody() const noexcept  { return m_body; }
+
+   /**
     * Sets the body of this Message.
     * @param body The new body of this message.
     */
    HttpMessage& setBody(const basis::DataBlock& body) throw () { m_body = body; return *this; }
+
+   /**
+    * Clear the body of this Message.
+    */
+   HttpMessage& clearBody() throw () { m_body.clear(); return *this; }
 
    /**
     * Resets all components of this message.
@@ -71,15 +81,15 @@ public:
       m_body.clear();
    }
 
-   uint32_t getMajorVersion() const noexcept { return m_majorVersion; }
+   uint16_t getMajorVersion() const noexcept { return m_majorVersion; }
 
-   uint32_t getMinorVersion() const noexcept { return m_minorVersion; }
+   uint16_t getMinorVersion() const noexcept { return m_minorVersion; }
 
 protected:
    /**
     * Constructor.
     */
-   HttpMessage(const uint32_t majorVersion, const uint32_t minorVersion) :
+   HttpMessage(const uint16_t majorVersion, const uint16_t minorVersion) :
       m_majorVersion(majorVersion),
       m_minorVersion(minorVersion)
    {}
@@ -95,8 +105,8 @@ protected:
    virtual std::string encodeFirstLine() const throw(basis::RuntimeException) = 0;
 
 private:
-   const uint32_t m_majorVersion;
-   const uint32_t m_minorVersion;
+   const uint16_t m_majorVersion;
+   const uint16_t m_minorVersion;
    typedef std::list<std::shared_ptr<HttpHeader> > SequentialHeaders;
    SequentialHeaders m_sequentialHeaders;
    std::unordered_map<std::string, SequentialHeaders::iterator> m_directory;

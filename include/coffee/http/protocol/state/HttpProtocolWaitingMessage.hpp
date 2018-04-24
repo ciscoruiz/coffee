@@ -20,24 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+#ifndef _coffee_http_protocol_state_HttpProtocolWaitingMessage_hpp_
+#define _coffee_http_protocol_state_HttpProtocolWaitingMessage_hpp_
 
+#include <coffee/http/protocol/state/HttpProtocolState.hpp>
 #include <coffee/http/HttpRequest.hpp>
-#include <coffee/http/url/URL.hpp>
-#include <coffee/http/protocol/defines.hpp>
 
-using namespace coffee;
+namespace coffee {
+namespace http {
+namespace protocol {
+namespace state {
 
-std::string http::HttpRequest::encodeFirstLine() const
-   throw(basis::RuntimeException)
-{
-   basis::StreamString ss;
+class HttpProtocolWaitingMessage : public HttpProtocolState {
+public:
+   HttpProtocolWaitingMessage() {;}
+   ~HttpProtocolWaitingMessage() {;}
 
-   return ss << Method::asString(m_method) << " " << m_url->encode() << " " << encodeVersion();
+private:
+   ProcessResult::_v process(HttpProtocolDecoder& context, const Token& token) const throw(basis::RuntimeException);
+
+   static std::shared_ptr<HttpMessage> tryResponse(const std::vector<std::string>& items) noexcept;
+   static std::shared_ptr<HttpMessage> tryRequest(const std::vector<std::string>& items) noexcept;
+
+   static bool tryMethod(const std::string& item, HttpRequest::Method::_v& value) noexcept;
+   static bool tryHttpVersion(const std::string& item, std::pair<uint16_t, uint16_t>& httpVersion) noexcept;
+   static std::shared_ptr<url::URL> tryURL(const std::string& item) noexcept;
+};
+
+}
+}
+}
 }
 
-//static
-const char* http::HttpRequest::Method::asString(const http::HttpRequest::Method::_v method)
-   noexcept
-{
-   return protocol::requestMethodNames[method];
-}
+#endif

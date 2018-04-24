@@ -34,4 +34,4 @@ coverage/
 CMakeDoxyfile.in
 DartConfiguration.tcl
 docs/Doxyfile
-
+.idea

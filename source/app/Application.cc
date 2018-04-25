@@ -21,38 +21,33 @@
 // SOFTWARE.
 //
 
-#include <iostream>
 #include <algorithm>
-#include <iomanip>
+#include <cctype>
 #include <fstream>
-#include <unistd.h>
+#include <iomanip>
+#include <iostream>
+#include <signal.h>
 #include <stdio.h>
 #include <string.h>
-#include <cctype>
-
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-#include <signal.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-
-#include <coffee/config/Release.hpp>
-#include <coffee/config/SCCSRepository.hpp>
-#include <coffee/config/defines.hpp>
-
-#include <coffee/basis/RuntimeException.hpp>
-
-#include <coffee/logger/Logger.hpp>
-#include <coffee/logger/TraceMethod.hpp>
-
-#include <coffee/xml/Node.hpp>
-#include <coffee/xml/Attribute.hpp>
-#include <coffee/xml/Compiler.hpp>
-#include <coffee/xml/SCCS.hpp>
 
 #include <coffee/app/Application.hpp>
 #include <coffee/app/SCCS.hpp>
 #include <coffee/app/Service.hpp>
+#include <coffee/app/Feature.hpp>
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/config/defines.hpp>
+#include <coffee/config/Release.hpp>
+#include <coffee/config/SCCSRepository.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
+#include <coffee/xml/Attribute.hpp>
+#include <coffee/xml/Compiler.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/SCCS.hpp>
 
 using namespace std;
 using namespace coffee;
@@ -86,19 +81,7 @@ app::Application::~Application()
    if(m_this == this) {
       m_this = nullptr;
    }
-   a_services.clear();
-}
-
-app::Application::service_iterator app::Application::service_find(const std::string& serviceName)
-   noexcept
-{
-   for(service_iterator ii = service_begin(), maxii = service_end(); ii != maxii; ii ++) {
-      auto service = Application::service(ii);
-      if(service->getClassName() == serviceName)
-         return ii;
-   }
-
-   return service_end();
+   m_services.clear();
 }
 
 void app::Application::start()
@@ -166,10 +149,9 @@ void app::Application::startServices()
 {
    LOG_THIS_METHOD();
 
-   for(service_iterator ii = service_begin(); ii != service_end(); ii ++) {
-      auto service = Application::service(ii);
-      LOG_INFO("Starting service | " <<  service->asString());
-      service->initialize();
+   for(auto ii = m_services.begin(); ii != m_services.end(); ii ++) {
+      LOG_INFO("Starting service | " <<  ii->second->asString());
+      ii->second->initialize();
    }
 }
 
@@ -182,8 +164,8 @@ void app::Application::do_stop()
    basis::StreamString ss("Some services do not accept the request stop { ");
    bool exception = false;
 
-   for(service_iterator ii = service_begin(), maxii = service_end(); ii != maxii; ii ++) {
-      auto service = Application::service(ii);
+   for(auto ii = m_services.begin(), maxii = m_services.end(); ii != maxii; ii ++) {
+      auto& service = ii->second;
 
       LOG_INFO("Send stop for service | " <<  service->asString());
 
@@ -203,28 +185,60 @@ void app::Application::do_stop()
    }
 }
 
-void app::Application::attach(std::shared_ptr<Service> service)
+bool app::Application::attach(std::shared_ptr<Service> service)
    throw(RuntimeException)
 {
    if(!service)
       COFFEE_THROW_EXCEPTION("Can not associate a NULL service");
 
-   auto ii = service_find(service->getName());
+   const Feature::_v feature = service->getFeature();
 
-   if(ii != service_end()) {
-      LOG_INFO(service->asString() << " | Already defined") ;
-      return;
+   auto range = m_services.equal_range(feature);
+
+   const std::string& implementation = service->getImplementation();
+
+   while(range.first != range.second) {
+      if (range.first->second->getImplementation() == implementation) {
+         LOG_INFO(service->asString() << " | Already defined");
+         return false;
+      }
+      ++ range.first;
    }
 
    LOG_DEBUG("Registering " << service->asString());
 
-   a_services.push_back(service);
+   m_services.insert(Services::value_type(feature, service));
 
    if(isRunning()) {
       LOG_INFO("Initializing service | " << service->asString());
       service->initialize();
    }
+
+   return true;
 }
+
+std::shared_ptr<app::Service> app::Application::select(const app::Feature::_v feature, const std::string& implementation)
+   throw(basis::RuntimeException)
+{
+   auto range = m_services.equal_range(feature);
+
+   if (range.first == range.second) {
+      COFFEE_THROW_EXCEPTION(getName() << " does not have any service for feature=" << Feature::asString(feature));
+   }
+
+   if (implementation != Service::WhateverImplementation) {
+      while(range.first != range.second) {
+         if (range.first->second->getImplementation() == implementation) {
+            return range.first->second;
+         }
+         ++ range.first;
+      }
+
+      COFFEE_THROW_EXCEPTION(getName() << " has service for feature=" << Feature::asString(feature) << "but no implementation=" << implementation);
+   }
+
+   return range.first->second;
+};
 
 void app::Application::writeContext(const boost::filesystem::path& file)
    throw(RuntimeException)
@@ -240,13 +254,9 @@ void app::Application::writeContext(const boost::filesystem::path& file)
    LOG_NOTICE("File: " << file.c_str());
 
    std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("Context");
-
    asXML(root);
-
    xml::Compiler compiler;
-
    out << compiler.apply(root) << std::endl;
-
    out.close();
 }
 
@@ -254,7 +264,7 @@ basis::StreamString app::Application::asString() const noexcept
 {
    basis::StreamString result("app::Application { ");
    result << app::Runnable::asString();
-   result << " | #services=" << a_services.size();
+   result << " | #services=" << m_services.size();
    return result += " }";
 }
 
@@ -275,8 +285,8 @@ std::shared_ptr<xml::Node> app::Application::asXML(std::shared_ptr<xml::Node>& r
    }
 
    std::shared_ptr<xml::Node> services = result->createChild("Services");
-   for(const_service_iterator ii = service_begin(), maxii = service_end(); ii != maxii; ii ++)
-      service(ii)->asXML(services);
+   for(auto ii = m_services.begin(), maxii = m_services.end(); ii != maxii; ii ++)
+      ii->second->asXML(services);
 
    return result;
 }

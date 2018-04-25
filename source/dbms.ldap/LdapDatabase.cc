@@ -40,6 +40,9 @@ using namespace coffee::dbms;
 using coffee::dbms::ldap::LdapDatabase;
 
 //static
+const std::string LdapDatabase::Implementation("ldap");
+
+//static
 std::shared_ptr<LdapDatabase> LdapDatabase::instantiate(app::Application& application, const std::string& url)
    throw(basis::RuntimeException)
 {
@@ -49,7 +52,7 @@ std::shared_ptr<LdapDatabase> LdapDatabase::instantiate(app::Application& applic
 }
 
 LdapDatabase::LdapDatabase(app::Application& application, const std::string& url) :
-   Database(application, "Ldap", url.c_str())
+   Database(application, Implementation, url.c_str())
 {
    ldap::SCCS::activate();
 

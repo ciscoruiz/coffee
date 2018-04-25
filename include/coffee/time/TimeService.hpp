@@ -47,6 +47,8 @@ class TimeEvent;
  */
 class TimeService : public app::Service, public basis::pattern::observer::Subject {
 public:
+   static const std::string Implementation;
+
    /**
     * Fast instantiation for this service.
     */

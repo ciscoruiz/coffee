@@ -166,10 +166,10 @@ protected:
    /**
       Contructor.
       \param app Application instance which will start database
-      \param rdbmsName RDBMS name for this database.
+      \param implementation RDBMS name for this database.
       \param dbmsName Logical name from this instance of the database.
    */
-   Database(app::Application& app, const char* rdbmsName, const char* dbmsName);
+   Database(app::Application& app, const std::string& implementation, const char* dbmsName);
 
    /**
     * This method will be called when some layer detect some fault in the connection

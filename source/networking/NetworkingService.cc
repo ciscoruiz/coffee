@@ -38,6 +38,9 @@
 
 using namespace coffee;
 
+//static
+const std::string networking::NetworkingService::Implementation("ZeroMQ");
+
 // static
 std::shared_ptr<networking::NetworkingService> networking::NetworkingService::instantiate(app::Application& application, const int zeroMQThreads)
    noexcept
@@ -48,7 +51,7 @@ std::shared_ptr<networking::NetworkingService> networking::NetworkingService::in
 }
 
 networking::NetworkingService::NetworkingService(app::Application &app, const int zeroMQThreads) :
-   app::Service(app, "networking.NetworkingService")
+   app::Service(app, app::Feature::Networking, Implementation)
 {
    m_context = std::make_shared<zmq::context_t>(zeroMQThreads);
 }

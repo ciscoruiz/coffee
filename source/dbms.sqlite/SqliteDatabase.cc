@@ -38,6 +38,9 @@ using namespace coffee;
 using namespace coffee::dbms;
 
 //static
+const std::string sqlite::SqliteDatabase::Implementation("sqlite3");
+
+//static
 std::shared_ptr<sqlite::SqliteDatabase> sqlite::SqliteDatabase::instantiate(app::Application& application, const boost::filesystem::path& dbFile)
    throw(basis::RuntimeException)
 {

@@ -47,6 +47,8 @@ class SubscriberSocket;
 
 class NetworkingService : public app::Service {
 public:
+   static const std::string Implementation;
+
    ~NetworkingService();
 
    static std::shared_ptr<NetworkingService> instantiate(app::Application& app, const int zeroMQThreads = 1) noexcept;

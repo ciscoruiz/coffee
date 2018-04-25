@@ -50,8 +50,8 @@ using namespace coffee;
 //static
 dbms::StatementParameters dbms::Database::defaultParameters(dbms::ActionOnError::Rollback);
 
-dbms::Database::Database(app::Application& app, const char* className, const char* dbmsName) :
-   app::Service(app, className),
+dbms::Database::Database(app::Application& app, const std::string& implementation, const char* dbmsName) :
+   app::Service(app, app::Feature::Database, implementation),
    m_name((dbmsName == NULL) ? "local": dbmsName),
    m_failRecoveryHandler(NULL),
    m_statementTranslator(NULL)

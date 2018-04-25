@@ -26,11 +26,11 @@
 
 #include <vector>
 
-#include <coffee/basis/RuntimeException.hpp>
-#include <coffee/basis/StreamString.hpp>
-#include <coffee/basis/Semaphore.hpp>
-
+#include <coffee/app/Feature.hpp>
 #include <coffee/app/Runnable.hpp>
+#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/basis/Semaphore.hpp>
+#include <coffee/basis/StreamString.hpp>
 
 namespace coffee {
 
@@ -51,6 +51,8 @@ class Application;
  */
 class Service : public Runnable  {
 public:
+   static const std::string WhateverImplementation;
+
    /**
       Destructor.
    */
@@ -62,9 +64,14 @@ public:
    Application& getApplication() noexcept { return a_app; }
 
    /**
-    * \return Logical name of this service.
+    * @return Feature offered by this service
     */
-   const std::string& getClassName() const noexcept { return getName(); }
+   const Feature::_v getFeature() const noexcept { return m_feature; }
+
+   /**
+    * @return Implementation used for this service for offering the feature
+    */
+   const std::string& getImplementation() const noexcept { return m_implementation; }
 
    /**
     * Method to call to be sure Service is fully prepared to accept requests
@@ -77,6 +84,12 @@ public:
     * it is prepared to accept request.
     */
    void notifyEffectiveRunning() noexcept;
+
+   /**
+    * \return The service selected to offer the feature received as parameter.
+    * \warning This method will no have an effective value until the application starts to run.
+    */
+   std::shared_ptr<Service> getRequirement(const Feature::_v feature) throw(basis::RuntimeException);
 
    /**
     * \return Summarize information of this instance in a StreamString.
@@ -93,25 +106,34 @@ public:
     */
    virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
+   /**
+    * Set the feature of a service that must be initialized before this service.
+    * \param feature Service that must be initialized before this service.
+    * \warning It will not have any effect it this service has been initialized before calling this method.
+    */
+   void require(const Feature::_v feature) throw(basis::RuntimeException) { require(feature, WhateverImplementation); }
+
+   /**
+    * Set the feature of a service that must be initialized before this service.
+    * \param feature Service that must be initialized before this service.
+    * \warning It will not have any effect it this service has been initialized before calling this method.
+    */
+   void require(const Feature::_v feature, const std::string& implementation) throw(basis::RuntimeException);
+
 protected:
    /**
     * Constructor.
     * \param app Application owner of this service.
     * \param className Logical name of this service.
     */
-   Service(Application& app, const char* className) :
-      Runnable(className),
+   Service(Application& app, const Feature::_v feature, const std::string& implementation) :
+      Runnable(std::string(Feature::asString(feature)).append(":").append(implementation)),
       a_app(app),
+      m_feature(feature),
+      m_implementation(implementation),
       effectiveRunning(0)
    {
    }
-
-   /**
-    * Set the name of a service that must be initialized before this service.
-    * \param serviceName Service that must be initialized before this service.
-    * \warning It will not have any effect it this service has been initialized before calling this method.
-    */
-   void addPredecessor(const char* serviceName) noexcept;
 
    /**
     * This method should be implemented to specialize the initialization of this instance.
@@ -120,16 +142,28 @@ protected:
    void initialize() throw(basis::RuntimeException);
 
 private:
-   typedef std::vector <std::string>::iterator iterator;
+   struct Requirement {
+      const Feature::_v m_feature;
+      const std::string m_implementation;
+      std::shared_ptr<Service> m_selection;
+
+      Requirement(const Feature::_v feature, const std::string& implementation) :
+         m_feature(feature),
+         m_implementation(implementation)
+      {}
+
+      std::string asString() const noexcept ;
+   };
+
+   typedef std::vector<Requirement> Requirements;
 
    Application& a_app;
-   std::vector <std::string> a_predecessors;
+   const Feature::_v m_feature;
+   const std::string m_implementation;
+   Requirements m_requirements;
    basis::Semaphore effectiveRunning;
 
    Service(const Service& other);
-   iterator begin() noexcept { return a_predecessors.begin(); }
-   iterator end() noexcept { return a_predecessors.end(); }
-   const std::string& data(iterator ii) noexcept { return *ii; }
 
    virtual void do_initialize() throw(basis::RuntimeException) = 0;
 

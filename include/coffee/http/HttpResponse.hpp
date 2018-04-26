@@ -48,31 +48,43 @@ class HttpRequest;
  */
 class HttpResponse : public HttpMessage {
 public:
-   /**
-    * Constructor.
-    */
-   HttpResponse(const int statusCode, const std::shared_ptr<HttpRequest>& request);
-
-   static std::shared_ptr<HttpResponse> instantiate(const int statusCode, const std::shared_ptr<HttpRequest>& request)
-   noexcept {
-      return std::make_shared<HttpResponse>(statusCode, request);
+   static std::shared_ptr<HttpResponse> instantiate(const std::shared_ptr<HttpRequest>& request)
+      noexcept
+   {
+      std::shared_ptr<HttpResponse> result(new HttpResponse(request));
+      return result;
    }
 
-   bool isOk() const noexcept { return m_statusCode == 200; }
+   static std::shared_ptr<HttpResponse> instantiate(const uint16_t majorVersion, const uint16_t minorVersion, const int statusCode, const std::string& errorDescription)
+      noexcept
+   {
+      std::shared_ptr<HttpResponse> result(new HttpResponse(majorVersion, minorVersion, statusCode, errorDescription));
+      return result;
+   }
 
+   HttpResponse& setStatusCode(const int statusCode) noexcept { m_statusCode = statusCode; return *this; }
+   HttpResponse& setErrorDescription(const std::string& errorDescription) noexcept { m_errorDescription = errorDescription; return *this; }
+
+   bool isOk() const noexcept { return m_statusCode == 200; }
    int getStatusCode() const noexcept { return m_statusCode; }
+   const std::string& getErrorDescription() const noexcept { return m_errorDescription; }
 
 protected:
    /**
- * @return the first line in the HTTP message.
- */
+    * Constructor.
+    */
+   HttpResponse(const std::shared_ptr<HttpRequest>& request);
+   HttpResponse(const uint16_t majorVersion, const uint16_t minorVersion, const int statusCode, const std::string& errorDescription);
+
+   /**
+    * @return the first line in the HTTP message.
+    */
    std::string encodeFirstLine() const throw(basis::RuntimeException);
 
 private:
-   const int m_statusCode;
+   int m_statusCode;
    std::shared_ptr<HttpRequest> m_request;
-
-   HttpResponse(const uint16_t majorVersion, const uint16_t minorVersion, const int statusCode);
+   std::string m_errorDescription;
 
    friend class protocol::state::HttpProtocolWaitingMessage;
 };

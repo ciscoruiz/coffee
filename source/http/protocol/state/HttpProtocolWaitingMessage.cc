@@ -78,7 +78,16 @@ std::shared_ptr<http::HttpMessage> HttpProtocolWaitingMessage::tryResponse(const
    if (!protocol::isNumeric(statusCode))
       return empty;
 
-   return std::shared_ptr<http::HttpMessage>(new http::HttpResponse(httpVersion.first, httpVersion.second, atoi(statusCode.c_str())));
+   std::string errorDescrption;
+   bool first = true;
+   for (auto ii = items.begin()+2, maxii = items.end(); ii != maxii; ++ ii) {
+      if (!first)
+         errorDescrption.append(" ");
+      errorDescrption.append(*ii);
+      first = false;
+   }
+
+   return HttpResponse::instantiate(httpVersion.first, httpVersion.second, atoi(statusCode.c_str()), errorDescrption);
 }
 
 std::shared_ptr<http::HttpMessage> HttpProtocolWaitingMessage::tryRequest(const std::vector<std::string>& items)

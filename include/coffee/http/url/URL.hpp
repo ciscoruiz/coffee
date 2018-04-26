@@ -60,16 +60,16 @@ public:
 
    const std::string& getComponent(const ComponentName::_v component) const throw(basis::RuntimeException);
 
-   bool hasKeysValues() const noexcept  { return !m_keyValues.empty(); }
-   keyvalue_iterator keyvalue_begin() const noexcept { return m_keyValues.begin(); }
-   keyvalue_iterator keyvalue_end() const noexcept { return m_keyValues.end(); }
+   bool hasQuery() const noexcept  { return !m_query.empty(); }
+   keyvalue_iterator query_begin() const noexcept { return m_query.begin(); }
+   keyvalue_iterator query_end() const noexcept { return m_query.end(); }
    static const KeyValue& keyValue(const keyvalue_iterator ii) noexcept { return *ii; }
 
    std::string encode() const throw(basis::RuntimeException);
 
 private:
    const std::map<ComponentName::_v, std::string> m_components;
-   const KeyValues m_keyValues;
+   const Query m_query;
 
    explicit URL(const URLBuilder& builder);
    explicit URL(const URLParser& parser);

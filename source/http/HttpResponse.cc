@@ -28,16 +28,18 @@
 
 using namespace coffee;
 
-http::HttpResponse::HttpResponse(const int statusCode, const std::shared_ptr<HttpRequest>& request) :
+http::HttpResponse::HttpResponse(const std::shared_ptr<HttpRequest>& request) :
    http::HttpMessage(request->getMajorVersion(), request->getMinorVersion()),
-   m_statusCode(statusCode),
+   m_statusCode(200),
+   m_errorDescription(""),
    m_request(request)
 {
 }
 
-http::HttpResponse::HttpResponse(const uint16_t majorVersion, const uint16_t minorVersion, const int statusCode) :
+http::HttpResponse::HttpResponse(const uint16_t majorVersion, const uint16_t minorVersion, const int statusCode, const std::string& errorDescription) :
    http::HttpMessage(majorVersion, minorVersion),
-   m_statusCode(statusCode)
+   m_statusCode(statusCode),
+   m_errorDescription(errorDescription)
 {
 }
 
@@ -91,10 +93,14 @@ std::string http::HttpResponse::encodeFirstLine() const
 
    const char* reason = "Unknown";
 
-   auto ii = reasons.find(m_statusCode);
+   if (m_errorDescription.empty()) {
+      auto ii = reasons.find(m_statusCode);
 
-   if (ii != reasons.end())
-      reason = ii->second;
+      if (ii != reasons.end())
+         reason = ii->second;
+   }
+   else
+      reason = m_errorDescription.c_str();
 
    return ss << encodeVersion() << " " << m_statusCode << " " << reason;
 }

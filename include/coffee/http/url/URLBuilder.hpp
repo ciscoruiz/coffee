@@ -64,7 +64,7 @@ public:
 
 private:
    std::map<ComponentName::_v, std::string> m_components;
-   KeyValues m_keyValues;
+   Query m_keyValues;
 
    friend class URL;
 };

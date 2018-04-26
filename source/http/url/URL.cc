@@ -29,13 +29,13 @@ using namespace coffee;
 
 http::url::URL::URL(const URLBuilder& builder) :
    m_components(builder.m_components),
-   m_keyValues(builder.m_keyValues)
+   m_query(builder.m_keyValues)
 {
 }
 
 http::url::URL::URL(const URLParser& builder) :
    m_components(builder.m_components),
-   m_keyValues(builder.m_keyValues)
+   m_query(builder.m_keyValues)
 {
 }
 
@@ -56,7 +56,9 @@ std::string http::url::URL::encode() const
 {
    basis::StreamString ss;
 
-   ss << getComponent(ComponentName::Scheme) << "://";
+   if (hasComponent(ComponentName::Scheme)) {
+      ss << getComponent(ComponentName::Scheme) << "://";
+   }
 
    bool hasUserInformation = false;
 
@@ -74,7 +76,9 @@ std::string http::url::URL::encode() const
       ss << "@";
    }
 
-   ss << getComponent(ComponentName::Host);
+   if (hasComponent(ComponentName::Host)) {
+      ss << getComponent(ComponentName::Host);
+   }
 
    if (hasComponent(ComponentName::Port)) {
       ss << ":" << getComponent(ComponentName::Port);
@@ -84,9 +88,9 @@ std::string http::url::URL::encode() const
       ss << getComponent(ComponentName::Path);
    }
 
-   if (!m_keyValues.empty()) {
+   if (!m_query.empty()) {
       bool isFirst = true;
-      for (auto& pair : m_keyValues) {
+      for (auto& pair : m_query) {
          if (isFirst) {
             ss << "?";
             isFirst = false;

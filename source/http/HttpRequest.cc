@@ -23,15 +23,26 @@
 
 #include <coffee/http/HttpRequest.hpp>
 #include <coffee/http/protocol/defines.hpp>
+#include <coffee/http/url/URLParser.hpp>
 
 using namespace coffee;
+
+//static
+std::shared_ptr<http::HttpRequest> http::HttpRequest::instantiate(const http::HttpRequest::Method::_v method, const std::string& url, const uint32_t majorVersion, const uint32_t minorVersion)
+   throw(basis::RuntimeException)
+{
+   http::url::URLParser parser(url);
+
+   std::shared_ptr<http::HttpRequest> result(new http::HttpRequest(method, parser.build(), majorVersion, minorVersion));
+   return result;
+}
 
 std::string http::HttpRequest::encodeFirstLine() const
    throw(basis::RuntimeException)
 {
    basis::StreamString ss;
 
-   return ss << Method::asString(m_method) << " " << m_uri << " " << encodeVersion();
+   return ss << Method::asString(m_method) << " " << m_url->encode() << " " << encodeVersion();
 }
 
 //static

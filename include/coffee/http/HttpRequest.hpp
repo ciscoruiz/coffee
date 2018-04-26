@@ -25,6 +25,8 @@
 #define _coffee_http_HttpRequest_hpp_
 
 #include <coffee/http/HttpMessage.hpp>
+#include <coffee/http/url/defines.hpp>
+#include <coffee/http/url/URL.hpp>
 
 namespace coffee {
 
@@ -48,33 +50,33 @@ public:
       };
       static const char* asString(const Method::_v value) noexcept;
    };
-      /**
-    * Constructor.
-    */
-    HttpRequest(const Method::_v method, const std::string& uri, const uint32_t majorVersion, const uint32_t minorVersion) :
-      HttpMessage(majorVersion, minorVersion),
-      m_method(method),
-      m_uri(uri)
-   {}
 
-   static std::shared_ptr<HttpRequest> instantiate(const Method::_v method, const std::string& uri, const uint32_t majorVersion = 1, const uint32_t minorVersion = 1)
-      noexcept
-   {
-      return std::make_shared<HttpRequest>(method, uri, majorVersion, minorVersion);
-   }
+   static std::shared_ptr<HttpRequest> instantiate(const Method::_v method, const std::string& url, const uint32_t majorVersion = 1, const uint32_t minorVersion = 1)
+      throw(basis::RuntimeException);
 
    const Method::_v getMethod() const noexcept { return m_method; }
-   const std::string& getURI() const noexcept { return m_uri; }
+   std::shared_ptr<url::URL> getURL() const noexcept { m_url; }
+
+   const std::string& getPath() const throw(basis::RuntimeException) { return m_url->getComponent(url::ComponentName::Path); }
 
 protected:
-      /**
+   /**
+    * Constructor.
+    */
+   HttpRequest(const Method::_v method, std::shared_ptr<url::URL> url, const uint32_t majorVersion, const uint32_t minorVersion) :
+      HttpMessage(majorVersion, minorVersion),
+      m_method(method),
+      m_url(url)
+   {}
+
+   /**
     * @return the first line in the HTTP message.
     */
    std::string encodeFirstLine() const throw(basis::RuntimeException);
 
 private:
    const Method::_v m_method;
-   const std::string m_uri;
+   std::shared_ptr<url::URL> m_url;
 };
 
 }

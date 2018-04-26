@@ -46,16 +46,22 @@ using namespace coffee;
 std::shared_ptr<http::url::URL> http::url::URLParser::build()
    throw(basis::RuntimeException)
 {
-   auto separation = protocol::separate(m_url, ':');
-   const std::string& scheme = separation.first;
-   addMandatoryComponent(ComponentName::Scheme, scheme);
+   if (m_url[0] == '/') {
+      auto endPath = readPath(m_url, 0);
+      auto endQuery = readQuery(m_url, endPath);
+      readFragment(m_url, endQuery);
+   }
+   else {
+      auto separation = protocol::separate(m_url, ':');
+      const std::string& scheme = separation.first;
+      addMandatoryComponent(ComponentName::Scheme, scheme);
 
-   const std::string& withoutScheme = separation.second;
-
-   auto endAuthority = readAuthority(withoutScheme);
-   auto endPath = readPath(withoutScheme, endAuthority);
-   auto endQuery = readQuery(withoutScheme, endPath);
-   readFragment(withoutScheme, endQuery);
+      const std::string& withoutScheme = separation.second;
+      auto endAuthority = readAuthority(withoutScheme);
+      auto endPath = readPath(withoutScheme, endAuthority);
+      auto endQuery = readQuery(withoutScheme, endPath);
+      readFragment(withoutScheme, endQuery);
+   }
 
    std::shared_ptr<http::url::URL> result(new URL(*this));
    return result;
@@ -199,8 +205,7 @@ const std::string& http::url::URLParser::verifyPortIsNumeric(const std::string& 
    if (value.empty())
       return value;
 
-   auto ii = std::find_if_not(value.begin(), value.end(), [](unsigned char cc) { return isdigit(cc); });
-   if (ii != value.end()) {
+   if (!protocol::isNumeric(value)) {
       COFFEE_THROW_EXCEPTION("Port " << value << " should be a numeric value");
    }
 

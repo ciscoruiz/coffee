@@ -22,26 +22,24 @@
 //
 
 
-#ifndef _coffee_http_url_defines_hpp_
-#define _coffee_http_url_defines_hpp_
+#ifndef _coffee_http_HttpServlet_hpp_
+#define _coffee_http_HttpServlet_hpp_
 
-#include <string>
-#include <vector>
-#include <map>
-
-#include <coffee/http/url/ComponentName.hpp>
+#include <memory>
+#include <coffee/basis/RuntimeException.hpp>
 
 namespace coffee {
 namespace http {
-namespace url {
 
-typedef std::pair<std::string, std::string> KeyValue;
-typedef std::vector<KeyValue> Query;
-typedef Query::const_iterator keyvalue_iterator;
+class HttpResponse;
+class HttpRequest;
 
-typedef std::map<ComponentName::_v, std::string> Compoments;
+class HttpServlet {
+public:
+   std::shared_ptr<http::HttpResponse> service(std::shared_ptr<http::HttpRequest> request) throw(basis::RuntimeException);
+};
+
 }
 }
-}
 
-#endif /* _coffee_http_url_defines_hpp_ */
+#endif /* _coffee_http_HttpServlet_hpp_ */

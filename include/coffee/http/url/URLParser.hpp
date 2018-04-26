@@ -65,7 +65,7 @@ private:
    typedef std::pair<std::string, std::string::size_type> Token;
 
    std::map<ComponentName::_v, std::string> m_components;
-   KeyValues m_keyValues;
+   Query m_keyValues;
 
    std::string::size_type readAuthority(const std::string& withoutScheme) throw(basis::RuntimeException);
    std::string::size_type readPath(const std::string& withoutScheme, const std::string::size_type endPrevious) noexcept ;

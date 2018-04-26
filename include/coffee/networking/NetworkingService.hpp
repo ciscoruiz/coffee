@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-#ifndef _coffee_networking_MessageBroker_hpp_
-#define _coffee_networking_MessageBroker_hpp_
+#ifndef _coffee_networking_NetworkingService_hpp_
+#define _coffee_networking_NetworkingService_hpp_
 
 #include <vector>
 #include <unordered_map>
@@ -98,4 +98,4 @@ private:
 }
 }
 
-#endif //_coffee_networking_MessageBroker_hpp_
+#endif //_coffee_networking_NetworkingService_hpp_

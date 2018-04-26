@@ -78,7 +78,7 @@ std::string::size_type http::url::URLParser::readAuthority(const std::string& wi
    if (token.first.find('@', start) == std::string::npos) {
       auto separation = protocol::separate(token.first, ':');
       addMandatoryComponent(ComponentName::Host, separation.first);
-      addOptionalComponent(ComponentName::Port, separation.second);
+      addOptionalComponent(ComponentName::Port, verifyPortIsNumeric(separation.second));
    }
    else {
       auto separation = protocol::separate(token.first, '@');
@@ -93,7 +93,7 @@ std::string::size_type http::url::URLParser::readAuthority(const std::string& wi
       {
          auto separation = protocol::separate(endPoint, ':');
          addMandatoryComponent(ComponentName::Host, separation.first);
-         addOptionalComponent(ComponentName::Port, separation.second);
+         addOptionalComponent(ComponentName::Port, verifyPortIsNumeric(separation.second));
       }
    }
 
@@ -192,3 +192,17 @@ http::url::URLParser::Token http::url::URLParser::extractToken(const std::string
    return result;
 }
 
+//static
+const std::string& http::url::URLParser::verifyPortIsNumeric(const std::string& value)
+   throw(basis::RuntimeException)
+{
+   if (value.empty())
+      return value;
+
+   auto ii = std::find_if_not(value.begin(), value.end(), [](unsigned char cc) { return isdigit(cc); });
+   if (ii != value.end()) {
+      COFFEE_THROW_EXCEPTION("Port " << value << " should be a numeric value");
+   }
+
+   return value;
+}

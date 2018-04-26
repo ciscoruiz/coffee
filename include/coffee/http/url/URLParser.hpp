@@ -74,6 +74,7 @@ private:
 
    void addMandatoryComponent(const ComponentName::_v componentName, const std::string& value) throw(basis::RuntimeException);
    void addOptionalComponent(const ComponentName::_v componentName, const std::string& value) noexcept ;
+   static const std::string& verifyPortIsNumeric(const std::string& value) throw(basis::RuntimeException);
 
    static Token extractToken(const std::string& withoutScheme, const std::string::size_type initpos, const char* finalDelims) noexcept;
 

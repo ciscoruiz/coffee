@@ -316,3 +316,9 @@ BOOST_AUTO_TEST_CASE(URLParser_bad_query)
    http::url::URLParser parser("http://localhost.me?=zzz");
    BOOST_REQUIRE_THROW(parser.build(), basis::RuntimeException);
 }
+
+BOOST_AUTO_TEST_CASE(URLParser_no_numeric_port)
+{
+   http::url::URLParser parser("tcp://host.com:123a");
+   BOOST_REQUIRE_THROW(parser.build(), basis::RuntimeException);
+}

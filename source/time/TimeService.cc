@@ -39,6 +39,9 @@ using std::chrono::microseconds;
 using std::chrono::milliseconds;
 
 //static
+const std::string time::TimeService::Implementation("native");
+
+//static
 std::shared_ptr<time::TimeService> time::TimeService::instantiate(app::Application& application, const milliseconds& maxTime, const milliseconds& resolution)
    throw(basis::RuntimeException)
 {
@@ -48,7 +51,7 @@ std::shared_ptr<time::TimeService> time::TimeService::instantiate(app::Applicati
 }
 
 time::TimeService::TimeService(app::Application& application, const milliseconds& _maxTime, const milliseconds& _resolution) :
-   app::Service(application, "TimeService"),
+   app::Service(application, app::Feature::Timing, Implementation),
    basis::pattern::observer::Subject("TimeService"),
    maxTime(_maxTime),
    resolution(_resolution),

@@ -23,6 +23,8 @@
 
 #include <coffee/networking/AsyncSocket.hpp>
 #include <coffee/networking/MessageHandler.hpp>
+#include <coffee/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
 
 using namespace coffee;
 
@@ -49,7 +51,7 @@ void networking::AsyncSocket::handle(const basis::DataBlock& message)
 basis::StreamString networking::AsyncSocket::asString() const
    noexcept
 {
-   basis::StreamString result("networking.AsyncSocket {");
+   basis::StreamString result("AsyncSocket {");
 
    result << Socket::asString();
 
@@ -59,3 +61,17 @@ basis::StreamString networking::AsyncSocket::asString() const
 
    return result << "}";
 }
+
+//virtual
+std::shared_ptr<xml::Node> networking::AsyncSocket::asXML(std::shared_ptr<xml::Node>& parent) const
+   noexcept
+{
+   std::shared_ptr<xml::Node> result = parent->createChild("AsyncSocket");
+
+   Socket::asXML(result);
+
+   result->createAttribute("MessageHandler", m_messageHandler->getName());
+
+   return result;
+}
+

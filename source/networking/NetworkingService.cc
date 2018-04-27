@@ -23,20 +23,22 @@
 
 #include <zmq.hpp>
 
+#include <coffee/app/Application.hpp>
 #include <coffee/basis/DataBlock.hpp>
-
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
-
-#include <coffee/app/Application.hpp>
-
-#include <coffee/networking/NetworkingService.hpp>
-#include <coffee/networking/ServerSocket.hpp>
 #include <coffee/networking/ClientSocket.hpp>
+#include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/PublisherSocket.hpp>
+#include <coffee/networking/ServerSocket.hpp>
 #include <coffee/networking/SubscriberSocket.hpp>
+#include <coffee/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
 
 using namespace coffee;
+
+//static
+const std::string networking::NetworkingService::Implementation("ZeroMQ");
 
 // static
 std::shared_ptr<networking::NetworkingService> networking::NetworkingService::instantiate(app::Application& application, const int zeroMQThreads)
@@ -48,7 +50,7 @@ std::shared_ptr<networking::NetworkingService> networking::NetworkingService::in
 }
 
 networking::NetworkingService::NetworkingService(app::Application &app, const int zeroMQThreads) :
-   app::Service(app, "networking.NetworkingService")
+   app::Service(app, app::Feature::Networking, Implementation)
 {
    m_context = std::make_shared<zmq::context_t>(zeroMQThreads);
 }
@@ -224,6 +226,21 @@ throw(basis::RuntimeException)
    }
 
    return ii->second;
+}
+
+std::shared_ptr<xml::Node> networking::NetworkingService::asXML(std::shared_ptr<xml::Node>& parent) const
+   noexcept
+{
+   std::shared_ptr<xml::Node> result = parent->createChild("networking.Service");
+
+   app::Service::asXML(result);
+
+   auto sockets = result->createChild("Sockets");
+   for (auto socket : m_sockets) {
+      socket->asXML(sockets);
+   }
+
+   return result;
 }
 
 networking::NetworkingService::Poll::Poll(networking::NetworkingService& networkingService) :

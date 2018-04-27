@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-#ifndef _coffee_networking_MessageBroker_hpp_
-#define _coffee_networking_MessageBroker_hpp_
+#ifndef _coffee_networking_NetworkingService_hpp_
+#define _coffee_networking_NetworkingService_hpp_
 
 #include <vector>
 #include <unordered_map>
@@ -47,6 +47,8 @@ class SubscriberSocket;
 
 class NetworkingService : public app::Service {
 public:
+   static const std::string Implementation;
+
    ~NetworkingService();
 
    static std::shared_ptr<NetworkingService> instantiate(app::Application& app, const int zeroMQThreads = 1) noexcept;
@@ -59,6 +61,8 @@ public:
    std::shared_ptr<networking::SubscriberSocket> createSubscriberSocket(const SocketArguments& socketArguments) throw(basis::RuntimeException);
 
    std::shared_ptr<networking::ClientSocket> findClientSocket(const std::string& name) throw(basis::RuntimeException);
+
+   std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
 private:
    struct Poll {
@@ -96,4 +100,4 @@ private:
 }
 }
 
-#endif //_coffee_networking_MessageBroker_hpp_
+#endif //_coffee_networking_NetworkingService_hpp_

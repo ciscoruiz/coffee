@@ -37,6 +37,8 @@ namespace ldap {
 
 class LdapDatabase : public Database {
 public:
+   static const std::string Implementation;
+
    static std::shared_ptr<LdapDatabase> instantiate(app::Application& application, const std::string& url)
       throw(basis::RuntimeException);
 

@@ -38,7 +38,7 @@ namespace basis {
    Class to facilitate access to data block of memory.
    @author frr@tid.es cisco.tierra@gmail.com.
 */
-class DataBlock : std::string {
+class DataBlock : public std::string {
 public:
    using std::string::append;
    using std::string::assign;

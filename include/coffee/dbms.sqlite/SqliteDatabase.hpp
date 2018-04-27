@@ -37,6 +37,8 @@ namespace sqlite {
 
 class SqliteDatabase : public Database {
 public:
+   static const std::string Implementation;
+
    static std::shared_ptr<SqliteDatabase> instantiate(app::Application& application, const boost::filesystem::path& dbFile)
       throw(basis::RuntimeException);
    ~SqliteDatabase();

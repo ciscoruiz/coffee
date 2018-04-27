@@ -30,3 +30,11 @@ test_*
 Testing/
 docs/api
 coverage/
+.scannerwork/
+CMakeDoxyfile.in
+DartConfiguration.tcl
+docs/Doxyfile
+.idea
+test/http/context.xml
+test/networking/context.xml
+

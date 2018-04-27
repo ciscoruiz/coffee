@@ -33,6 +33,7 @@
 #include <coffee/networking/AsyncSocket.hpp>
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/SocketArguments.hpp>
+#include <coffee/http/SCCS.hpp>
 
 using namespace coffee;
 
@@ -60,24 +61,20 @@ private:
 }
 
 //static
-std::shared_ptr<http::HttpService> http::HttpService::instantiate(app::Application& app)
+std::shared_ptr<http::HttpService> http::HttpService::instantiate(app::Application& app, std::shared_ptr<networking::NetworkingService> networkingService)
    noexcept
 {
-   std::shared_ptr<http::HttpService> result(new http::HttpService(app));
+   std::shared_ptr<http::HttpService> result(new http::HttpService(app, networkingService));
    app.attach(result);
    return result;
 }
 
-http::HttpService::HttpService(app::Application& app) :
-   app::Service(app, app::Feature::UserDefined, Implementation)
+http::HttpService::HttpService(app::Application& app, std::shared_ptr<networking::NetworkingService> networkingService) :
+   app::Service(app, app::Feature::UserDefined, Implementation),
+   m_networkingService(networkingService)
 {
    require(app::Feature::Networking);
-}
-
-void http::HttpService::do_initialize()
-   throw(basis::RuntimeException)
-{
-   m_networkingService = std::dynamic_pointer_cast<networking::NetworkingService>(getRequirement(app::Feature::Networking));
+   http::SCCS::activate();
 }
 
 void http::HttpService::createServer(std::shared_ptr<http::url::URL> url)

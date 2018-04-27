@@ -70,6 +70,12 @@ public:
    HttpMessage& setBody(const basis::DataBlock& body) throw () { m_body = body; return *this; }
 
    /**
+ * Sets the body of this Message.
+ * @param body The new body of this message.
+ */
+   HttpMessage& setBody(const char* body) throw () { m_body = body; return *this; }
+
+   /**
     * Clear the body of this Message.
     */
    HttpMessage& clearBody() throw () { m_body.clear(); return *this; }

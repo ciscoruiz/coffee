@@ -47,12 +47,17 @@ public:
 
    ~HttpService() { m_servlets.clear(); }
 
-   static std::shared_ptr<HttpService> instantiate(app::Application& app) noexcept;
+   static std::shared_ptr<HttpService> instantiate(app::Application& app, std::shared_ptr<networking::NetworkingService> networkingService) noexcept;
 
    void createServer(std::shared_ptr<http::url::URL> url) throw(basis::RuntimeException);
    std::shared_ptr<HttpClient> createClient(std::shared_ptr<http::url::URL> url) throw(basis::RuntimeException);
 
    void registerServlet(const std::string& path, std::shared_ptr<HttpServlet> servlet) throw(basis::RuntimeException);
+
+   template <typename _T> void registerServlet(const std::string& path) throw(basis::RuntimeException) {
+      registerServlet(path, std::make_shared<_T>());
+   }
+
    std::shared_ptr<HttpServlet> findServlet(const std::string& path) throw(basis::RuntimeException);
 
 private:
@@ -61,10 +66,10 @@ private:
    std::shared_ptr<networking::NetworkingService> m_networkingService;
    Servlets m_servlets;
 
-   HttpService(app::Application& app);
+   HttpService(app::Application& app, std::shared_ptr<networking::NetworkingService> networkingService);
 
    void do_stop() throw(basis::RuntimeException) {;}
-   void do_initialize() throw(basis::RuntimeException);
+   void do_initialize() throw(basis::RuntimeException) {;}
    static std::string calculateEndPoint(std::shared_ptr<http::url::URL> url) throw(basis::RuntimeException);
 };
 

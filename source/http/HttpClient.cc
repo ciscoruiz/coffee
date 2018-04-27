@@ -22,24 +22,22 @@
 //
 
 
-#ifndef _coffee_http_HttpServlet_hpp_
-#define _coffee_http_HttpServlet_hpp_
+#include <coffee/http/HttpClient.hpp>
+#include <coffee/http/HttpRequest.hpp>
+#include <coffee/http/HttpResponse.hpp>
 
-#include <memory>
-#include <coffee/basis/RuntimeException.hpp>
+using namespace coffee;
 
-namespace coffee {
-namespace http {
+std::shared_ptr<http::HttpResponse> http::HttpClient::send(std::shared_ptr<http::HttpRequest> request)
+   throw(basis::RuntimeException)
+{
+   auto httpMessage = m_decoder.apply(m_clientSocket->send(m_encoder.apply(request)));
 
-class HttpResponse;
-class HttpRequest;
+   auto httpResponse = std::dynamic_pointer_cast<http::HttpResponse>(httpMessage);
 
-class HttpServlet {
-public:
-   virtual std::shared_ptr<http::HttpResponse> service(std::shared_ptr<http::HttpRequest> request) throw(basis::RuntimeException) = 0;
-};
+   if (!httpResponse) {
+      COFFEE_THROW_EXCEPTION("HttpClient " << m_clientSocket->asString() << " did not receive an HTTP response");
+   }
 
+   return httpResponse;
 }
-}
-
-#endif /* _coffee_http_HttpServlet_hpp_ */

@@ -60,20 +60,21 @@ const basis::DataBlock&  HttpTestSplitter::readDataBlock()
 
 BOOST_AUTO_TEST_CASE( http_protocol_encoder_basic_request )
 {
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Connect, "uri.com");
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Connect, "/uri/com");
 
    protocol::HttpProtocolEncoder encoder;
 
    HttpTestSplitter splitter(encoder.apply(request));
 
-   BOOST_REQUIRE_EQUAL(splitter.readLine(), "CONNECT uri.com HTTP/1.1");
+   BOOST_REQUIRE_EQUAL(splitter.readLine(), "CONNECT /uri/com HTTP/1.1");
    BOOST_REQUIRE(splitter.readLine().empty());
 }
 
 BOOST_AUTO_TEST_CASE( http_protocol_encoder_basic_response )
 {
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Connect, "resource/id");
-   auto response = HttpResponse::instantiate(401, request);
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Connect, "/resource/id");
+   auto response = HttpResponse::instantiate(request);
+   response->setStatusCode(401);
 
    protocol::HttpProtocolEncoder encoder;
 
@@ -85,9 +86,9 @@ BOOST_AUTO_TEST_CASE( http_protocol_encoder_basic_response )
 
 BOOST_AUTO_TEST_CASE( http_protocol_encoder_header_request )
 {
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Get, "path/resource", 2);
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Get, "/path/resource", 2);
 
-   auto response = HttpResponse::instantiate(200, request);
+   auto response = HttpResponse::instantiate(request);
    response->setHeader(HttpHeader::Type::Age, "1234").setHeader(HttpHeader::Type::AcceptLanguage, "hava/x");
 
    protocol::HttpProtocolEncoder encoder;
@@ -105,14 +106,14 @@ BOOST_AUTO_TEST_CASE( http_protocol_encoder_header_body_request )
    char memory[1024];
    basis::DataBlock body(memory,sizeof(memory));
 
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "path/resource", 2);
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "/path/resource", 2);
    request->setHeader(HttpHeader::Type::Age, "1234").setHeader(HttpHeader::Type::Age, "333").setBody(body);
 
    protocol::HttpProtocolEncoder encoder;
    const basis::DataBlock& encode = encoder.apply(request);
    HttpTestSplitter splitter(encode);
 
-   BOOST_REQUIRE_EQUAL(splitter.readLine(), "HEAD path/resource HTTP/2.1");
+   BOOST_REQUIRE_EQUAL(splitter.readLine(), "HEAD /path/resource HTTP/2.1");
    BOOST_REQUIRE_EQUAL(splitter.readLine(), "Age:1234,333");
    BOOST_REQUIRE_EQUAL(splitter.readLine(), "Content-Length:1024");
    BOOST_REQUIRE(splitter.readLine().empty());
@@ -128,16 +129,17 @@ BOOST_AUTO_TEST_CASE( http_protocol_encoder_header_body_response )
    char memory[1024];
    basis::DataBlock body(memory,sizeof(memory));
 
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "uri/res", 2, 2);
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "/uri/res", 2, 2);
 
-   auto response = HttpResponse::instantiate(999, request);
+   auto response = HttpResponse::instantiate(request);
+   response->setStatusCode(999).setErrorDescription("This is my description");
    response->setHeader(HttpHeader::Type::Age, "1234").setHeader(HttpHeader::Type::Age, "333").setBody(body);
 
    protocol::HttpProtocolEncoder encoder;
    const basis::DataBlock& encode = encoder.apply(response);
    HttpTestSplitter splitter(encode);
 
-   BOOST_REQUIRE_EQUAL(splitter.readLine(), "HTTP/2.2 999 Unknown");
+   BOOST_REQUIRE_EQUAL(splitter.readLine(), "HTTP/2.2 999 This is my description");
    BOOST_REQUIRE_EQUAL(splitter.readLine(), "Age:1234,333");
    BOOST_REQUIRE_EQUAL(splitter.readLine(), "Content-Length:1024");
    BOOST_REQUIRE(splitter.readLine().empty());

@@ -35,7 +35,7 @@ using coffee::http::HttpHeader;
 
 BOOST_AUTO_TEST_CASE( message_has_header )
 {
-   auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "uri");
+   auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "/uri");
 
    BOOST_REQUIRE(!message->hasHeader(HttpHeader::Type::Host));
    message->setHeader(HttpHeader::Type::Host, "localhost");
@@ -44,28 +44,28 @@ BOOST_AUTO_TEST_CASE( message_has_header )
 
 BOOST_AUTO_TEST_CASE( message_has_header_bad_custom )
 {
-   auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "uri");
+   auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "/uri");
 
    BOOST_REQUIRE_THROW(message->hasHeader(HttpHeader::Type::Custom), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE( message_set_header_bad_custom )
 {
-   auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "uri");
+   auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "/uri");
 
    BOOST_REQUIRE_THROW(message->setHeader(HttpHeader::Type::Custom, "somevalue"), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE( message_get_header_bad_custom )
 {
-   auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "uri");
+   auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "/uri");
 
    BOOST_REQUIRE_THROW(message->getHeaderValue(HttpHeader::Type::Custom), basis::RuntimeException);
 }
 
 BOOST_AUTO_TEST_CASE( message_get_custom_header )
 {
-   auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "uri");
+   auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "/uri");
 
    BOOST_REQUIRE(!message->hasCustomHeader("SomeName"));
    BOOST_REQUIRE_THROW(message->getCustomHeaderValue("SomeName"), basis::RuntimeException);

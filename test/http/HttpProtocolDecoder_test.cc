@@ -42,7 +42,7 @@ std::shared_ptr<HttpMessage> encode(std::shared_ptr<HttpMessage> message)
 
 BOOST_AUTO_TEST_CASE( http_protocol_decoder_basic_request )
 {
-   auto message = encode(HttpRequest::instantiate(HttpRequest::Method::Connect, "uri/res"));
+   auto message = encode(HttpRequest::instantiate(HttpRequest::Method::Connect, "/uri/res"));
 
    BOOST_REQUIRE(message);
    BOOST_REQUIRE_EQUAL(message->getMajorVersion(), 1);
@@ -57,13 +57,16 @@ BOOST_AUTO_TEST_CASE( http_protocol_decoder_basic_request )
 
    BOOST_REQUIRE(request);
    BOOST_REQUIRE_EQUAL(request->getMethod(), HttpRequest::Method::Connect);
-   BOOST_REQUIRE_EQUAL(request->getURI(), "uri/res");
+   BOOST_REQUIRE_EQUAL(request->getPath(), "/uri/res");
    BOOST_REQUIRE(request->getBody().empty());
 }
 
 BOOST_AUTO_TEST_CASE( http_protocol_decoder_basic_response )
 {
-   auto message = encode(HttpResponse::instantiate(401, HttpRequest::instantiate(HttpRequest::Method::Connect, "uri")));
+   auto response = HttpResponse::instantiate(HttpRequest::instantiate(HttpRequest::Method::Connect, "/uri"));
+   response->setStatusCode(401);
+
+   auto message = encode(response);
 
    BOOST_REQUIRE(message);
    BOOST_REQUIRE_EQUAL(message->getMajorVersion(), 1);
@@ -74,7 +77,7 @@ BOOST_AUTO_TEST_CASE( http_protocol_decoder_basic_response )
       BOOST_REQUIRE(!request);
    }
 
-   auto response = std::dynamic_pointer_cast<http::HttpResponse>(message);
+   response = std::dynamic_pointer_cast<http::HttpResponse>(message);
 
    BOOST_REQUIRE(response);
    BOOST_REQUIRE_EQUAL(response->getStatusCode(), 401);
@@ -83,10 +86,10 @@ BOOST_AUTO_TEST_CASE( http_protocol_decoder_basic_response )
 
 BOOST_AUTO_TEST_CASE( http_protocol_decoder_header_request )
 {
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Get, "URI", 2);
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Get, "/URI", 2);
 
-   auto response = HttpResponse::instantiate(200, request);
-   response->setHeader(HttpHeader::Type::Age, "1234").setHeader(HttpHeader::Type::AcceptLanguage, "hava/x").setCustomHeader("MyHeader", "hello world");
+   auto response = HttpResponse::instantiate(request);
+   response->setStatusCode(200).setErrorDescription("Good!").setHeader(HttpHeader::Type::Age, "1234").setHeader(HttpHeader::Type::AcceptLanguage, "hava/x").setCustomHeader("MyHeader", "hello world");
 
    auto message = encode(response);
 
@@ -98,6 +101,8 @@ BOOST_AUTO_TEST_CASE( http_protocol_decoder_header_request )
 
    BOOST_REQUIRE(response);
    BOOST_REQUIRE_EQUAL(response->getStatusCode(), 200);
+   BOOST_REQUIRE(response->isOk());
+   BOOST_REQUIRE_EQUAL(response->getErrorDescription(), "Good!");
    BOOST_REQUIRE(response->hasHeader(HttpHeader::Type::Age));
    BOOST_REQUIRE(response->hasCustomHeader("MyHeader"));
    BOOST_REQUIRE(!response->hasHeader(HttpHeader::Type::AcceptEncoding));
@@ -113,7 +118,7 @@ BOOST_AUTO_TEST_CASE( http_protocol_decoder_header_body_request )
    char memory[1024];
    basis::DataBlock body(memory,sizeof(memory));
 
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "uri/res", 2);
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "/uri/res", 2);
    request->setHeader(HttpHeader::Type::Age, "1234").setHeader(HttpHeader::Type::Age, "333").setBody(body);
 
    auto message = encode(request);
@@ -126,7 +131,7 @@ BOOST_AUTO_TEST_CASE( http_protocol_decoder_header_body_request )
 
    BOOST_REQUIRE(request);
    BOOST_REQUIRE_EQUAL(request->getMethod(), HttpRequest::Method::Head);
-   BOOST_REQUIRE_EQUAL(request->getURI(), "uri/res");
+   BOOST_REQUIRE_EQUAL(request->getPath(), "/uri/res");
    BOOST_REQUIRE_EQUAL(request->getHeaderValue(HttpHeader::Type::Age), "1234,333");
    BOOST_REQUIRE_EQUAL(request->getHeaderValue(HttpHeader::Type::ContentLength), "1024");
    BOOST_REQUIRE_EQUAL(request->getBody().size(), 1024);
@@ -138,9 +143,9 @@ BOOST_AUTO_TEST_CASE( http_protocol_decoder_header_body_response )
    char memory[1024];
    basis::DataBlock body(memory,sizeof(memory));
 
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "uri", 2, 2);
-   auto response = HttpResponse::instantiate(999, request);
-   response->setCustomHeader("MyHeader", "1234").setCustomHeader("MyHeader", "333").setBody(body);
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "/path/resource", 2, 2);
+   auto response = HttpResponse::instantiate(request);
+   response->setStatusCode(1022).setCustomHeader("MyHeader", "1234").setCustomHeader("MyHeader", "333").setBody(body);
 
    auto message = encode(response);
 
@@ -151,7 +156,8 @@ BOOST_AUTO_TEST_CASE( http_protocol_decoder_header_body_response )
    response = std::dynamic_pointer_cast<http::HttpResponse>(message);
 
    BOOST_REQUIRE(response);
-   BOOST_REQUIRE_EQUAL(response->getStatusCode(), 999);
+   BOOST_REQUIRE_EQUAL(response->getStatusCode(), 1022);
+   BOOST_REQUIRE_EQUAL(response->getErrorDescription(), "Unknown");
    BOOST_REQUIRE_EQUAL(response->getCustomHeaderValue("MyHeader"), "1234,333");
    BOOST_REQUIRE_EQUAL(response->getHeaderValue(HttpHeader::Type::ContentLength), "1024");
    BOOST_REQUIRE_EQUAL(response->getBody().size(), 1024);
@@ -163,7 +169,7 @@ BOOST_AUTO_TEST_CASE( http_protocol_decoder_request_header_after_contentlength )
    char memory[1024];
    basis::DataBlock body(memory, sizeof(memory));
 
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "the:uri", 2);
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "/the:uri", 2);
    request->setHeader(HttpHeader::Type::Age, "1234").setBody(body);
    request->setHeader(HttpHeader::Type::ContentLength, "1024").setHeader(HttpHeader::Type::Allow, "allow");
 
@@ -188,7 +194,7 @@ BOOST_AUTO_TEST_CASE( http_protocol_decoder_request_custom_header_after_contentl
    char memory[1024];
    basis::DataBlock body(memory, sizeof(memory));
 
-   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "uri", 2);
+   auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "/uri", 2);
    request->setHeader(HttpHeader::Type::Age, "1234").setBody(body);
    request->setHeader(HttpHeader::Type::ContentLength, "1024").setCustomHeader("somename", "value");
 
@@ -263,13 +269,13 @@ BOOST_AUTO_TEST_CASE( http_protocol_decoder_request_bad_size ) {
    basis::DataBlock body(memory, sizeof(memory));
 
    {
-      auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "uri");
+      auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "/uri");
       request->setBody(body);
       request->setHeader(HttpHeader::Type::ContentLength, "1000");
       BOOST_REQUIRE_THROW(encode(request), basis::RuntimeException);
    }
    {
-      auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "uri", 2);
+      auto request = HttpRequest::instantiate(HttpRequest::Method::Head, "/uri", 2);
       request->setBody(body);
       request->setHeader(HttpHeader::Type::ContentLength, "2048");
       BOOST_REQUIRE_THROW(encode(request), basis::RuntimeException);

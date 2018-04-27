@@ -21,25 +21,41 @@
 // SOFTWARE.
 //
 
-
-#ifndef _coffee_http_HttpServlet_hpp_
-#define _coffee_http_HttpServlet_hpp_
+#ifndef _coffee_http_HttpClient_hpp_
+#define _coffee_http_HttpClient_hpp_
 
 #include <memory>
-#include <coffee/basis/RuntimeException.hpp>
+#include <coffee/networking/ClientSocket.hpp>
+#include <coffee/http/protocol/HttpProtocolEncoder.hpp>
+#include <coffee/http/protocol/HttpProtocolDecoder.hpp>
 
 namespace coffee {
 namespace http {
 
-class HttpResponse;
+class HttpService;
 class HttpRequest;
+class HttpResponse;
 
-class HttpServlet {
+class HttpClient {
 public:
-   virtual std::shared_ptr<http::HttpResponse> service(std::shared_ptr<http::HttpRequest> request) throw(basis::RuntimeException) = 0;
+   std::shared_ptr<HttpResponse> send(std::shared_ptr<HttpRequest> request) throw(basis::RuntimeException);
+
+private:
+   std::shared_ptr<networking::ClientSocket> m_clientSocket;
+   http::protocol::HttpProtocolEncoder m_encoder;
+   http::protocol::HttpProtocolDecoder m_decoder;
+
+   HttpClient(std::shared_ptr<networking::ClientSocket> clientSocket) : m_clientSocket(clientSocket) {}
+
+   static std::shared_ptr<HttpClient> instantiate(std::shared_ptr<networking::ClientSocket> clientSocket) noexcept {
+      std::shared_ptr<HttpClient> result(new HttpClient(clientSocket));
+      return result;
+   }
+
+   friend class HttpService;
 };
 
 }
 }
 
-#endif /* _coffee_http_HttpServlet_hpp_ */
+#endif /* _coffee_http_HttpClient_hpp_ */

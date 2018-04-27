@@ -22,6 +22,7 @@
 //
 
 #include <coffee/app/Application.hpp>
+#include <coffee/http/HttpClient.hpp>
 #include <coffee/http/HttpRequest.hpp>
 #include <coffee/http/HttpResponse.hpp>
 #include <coffee/http/HttpService.hpp>
@@ -67,8 +68,8 @@ std::shared_ptr<http::HttpService> http::HttpService::instantiate(app::Applicati
    return result;
 }
 
-http::HttpService::HttpService(coffee::app::Application& app) :
-   app::Service(app, app::Feature::Networking, Implementation)
+http::HttpService::HttpService(app::Application& app) :
+   app::Service(app, app::Feature::UserDefined, Implementation)
 {
    require(app::Feature::Networking);
 }
@@ -80,21 +81,60 @@ void http::HttpService::do_initialize()
 }
 
 void http::HttpService::createServer(std::shared_ptr<http::url::URL> url)
-   throw(basis::RuntimeException) {
-   basis::StreamString endpoint;
+   throw(basis::RuntimeException)
+{
+   networking::SocketArguments arguments;
+   auto handler = std::make_shared<HttpRequestHandler>(*this);
+   m_networkingService->createServerSocket(arguments.setMessageHandler(handler).addEndPoint(calculateEndPoint(url)));
+}
 
-   endpoint << "tcp://" << url->getComponent(http::url::ComponentName::Host);
+std::shared_ptr<http::HttpClient> http::HttpService::createClient(std::shared_ptr<http::url::URL> url)
+   throw(basis::RuntimeException)
+{
+   networking::SocketArguments arguments;
+   auto clientSocket = m_networkingService->createClientSocket(arguments.addEndPoint(calculateEndPoint(url)));
+   return http::HttpClient::instantiate(clientSocket);
+}
 
-   if (url->hasComponent(http::url::ComponentName::Port)) {
-      endpoint << ":" << url->getComponent(http::url::ComponentName::Port);
-   } else {
-      endpoint << ":" << DefaultHttpPort;
+void http::HttpService::registerServlet(const std::string& path, std::shared_ptr<HttpServlet> servlet)
+   throw(basis::RuntimeException)
+{
+   auto ii = m_servlets.find(path);
+
+   if (ii != m_servlets.end()) {
+      COFFEE_THROW_EXCEPTION("Path " << path << " already defined");
    }
 
-   networking::SocketArguments arguments;
+   m_servlets.insert(Servlets::value_type(path, servlet));
+}
 
-   auto handler = std::make_shared<HttpRequestHandler>(*this);
-   m_networkingService->createServerSocket(arguments.setMessageHandler(handler).addEndPoint(endpoint));
+std::shared_ptr<http::HttpServlet> http::HttpService::findServlet(const std::string& path)
+   throw(basis::RuntimeException)
+{
+   auto ii = m_servlets.find(path);
+
+   if (ii == m_servlets.end()) {
+      COFFEE_THROW_EXCEPTION("There is not Servlet defined for path " << path);
+   }
+
+   return ii->second;
+}
+
+//static
+std::string http::HttpService::calculateEndPoint(std::shared_ptr<http::url::URL> url)
+   throw(basis::RuntimeException)
+{
+   basis::StreamString result;
+
+   result << "tcp://" << url->getComponent(http::url::ComponentName::Host);
+
+   if (url->hasComponent(http::url::ComponentName::Port)) {
+      result << ":" << url->getComponent(http::url::ComponentName::Port);
+   } else {
+      result << ":" << DefaultHttpPort;
+   }
+
+   return result;
 }
 
 void http::HttpRequestHandler::apply(const basis::DataBlock& dataBlock, networking::AsyncSocket& serverSocket)
@@ -135,11 +175,11 @@ void http::HttpRequestHandler::apply(const basis::DataBlock& dataBlock, networki
    }
 
    try {
-      auto response = servlet->service(httpRequest);
-      serverSocket.send(encoder.apply(response));
+      serverSocket.send(encoder.apply(servlet->service(httpRequest)));
    }
    catch(basis::RuntimeException& ex) {
       logger::Logger::write(ex);
       serverSocket.send(encoder.apply(http::HttpResponse::instantiate(1, 1, 500, ex.what())));
    }
 }
+

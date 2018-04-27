@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(URLBuilder_set_all_components)
       BOOST_REQUIRE_EQUAL(url->getComponent((ComponentName::_v) ii), values[ii]);
    }
 
-   http::url::KeyValue kv = URL::keyValue(url->keyvalue_begin());
+   http::url::KeyValue kv = URL::keyValue(url->query_begin());
    BOOST_REQUIRE(kv.first == "key1");
    BOOST_REQUIRE(kv.second == "value1");
 }

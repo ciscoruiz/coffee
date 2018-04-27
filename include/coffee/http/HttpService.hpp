@@ -38,17 +38,19 @@ namespace networking {
 namespace http {
 
 class HttpServlet;
+class HttpClient;
 
 class HttpService : public app::Service {
 public:
    static const int DefaultHttpPort = 80;
    static const std::string Implementation;
 
-   ~HttpService();
+   ~HttpService() { m_servlets.clear(); }
 
    static std::shared_ptr<HttpService> instantiate(app::Application& app) noexcept;
 
    void createServer(std::shared_ptr<http::url::URL> url) throw(basis::RuntimeException);
+   std::shared_ptr<HttpClient> createClient(std::shared_ptr<http::url::URL> url) throw(basis::RuntimeException);
 
    void registerServlet(const std::string& path, std::shared_ptr<HttpServlet> servlet) throw(basis::RuntimeException);
    std::shared_ptr<HttpServlet> findServlet(const std::string& path) throw(basis::RuntimeException);
@@ -63,6 +65,7 @@ private:
 
    void do_stop() throw(basis::RuntimeException) {;}
    void do_initialize() throw(basis::RuntimeException);
+   static std::string calculateEndPoint(std::shared_ptr<http::url::URL> url) throw(basis::RuntimeException);
 };
 
 }

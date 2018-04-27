@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(URLParser_set_all_components)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Path), "/path/resource");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Fragment), "#fragment");
 
-   auto ii = url->keyvalue_begin();
+   auto ii = url->query_begin();
    auto keyValue = URL::keyValue(ii);
    BOOST_REQUIRE_EQUAL(keyValue.first, "key1");
    BOOST_REQUIRE_EQUAL(keyValue.second, "value1");
@@ -60,7 +60,38 @@ BOOST_AUTO_TEST_CASE(URLParser_set_all_components)
    BOOST_REQUIRE_EQUAL(keyValue.first, "key2");
    BOOST_REQUIRE_EQUAL(keyValue.second, "value2");
 
-   BOOST_REQUIRE(++ ii == url->keyvalue_end());
+   BOOST_REQUIRE(++ ii == url->query_end());
+
+   BOOST_REQUIRE_EQUAL(url->encode(), expression);
+}
+
+BOOST_AUTO_TEST_CASE(URLParser_short_url)
+{
+   const bool expected[] = { false, false, false, false, false, true, true};
+
+   const char* expression = "/path/resource?key1=value1&key2=value2#fragment";
+
+   http::url::URLParser parser(expression);
+
+   auto url = parser.build();
+
+   for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
+      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
+   }
+
+   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Path), "/path/resource");
+   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Fragment), "#fragment");
+
+   auto ii = url->query_begin();
+   auto keyValue = URL::keyValue(ii);
+   BOOST_REQUIRE_EQUAL(keyValue.first, "key1");
+   BOOST_REQUIRE_EQUAL(keyValue.second, "value1");
+
+   keyValue = URL::keyValue(++ ii);
+   BOOST_REQUIRE_EQUAL(keyValue.first, "key2");
+   BOOST_REQUIRE_EQUAL(keyValue.second, "value2");
+
+   BOOST_REQUIRE(++ ii == url->query_end());
 
    BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
@@ -78,7 +109,7 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal)
 
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE(!url->hasKeysValues());
+   BOOST_REQUIRE(!url->hasQuery());
 
    BOOST_REQUIRE_EQUAL(url->encode(), "tcp://localhost.me");
 }
@@ -96,7 +127,7 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_slash)
 
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE(!url->hasKeysValues());
+   BOOST_REQUIRE(!url->hasQuery());
 
    BOOST_REQUIRE_EQUAL(url->encode(), "tcp://localhost.me");
 }
@@ -116,7 +147,7 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_port)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Port), "8080");
-   BOOST_REQUIRE(!url->hasKeysValues());
+   BOOST_REQUIRE(!url->hasQuery());
 
    BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
@@ -136,7 +167,7 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_path)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Path), "/path/resource");
-   BOOST_REQUIRE(!url->hasKeysValues());
+   BOOST_REQUIRE(!url->hasQuery());
 
    BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
@@ -156,9 +187,9 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_query)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Port), "8080");
-   BOOST_REQUIRE(url->hasKeysValues());
+   BOOST_REQUIRE(url->hasQuery());
 
-   auto ii = url->keyvalue_begin();
+   auto ii = url->query_begin();
    auto keyValue = URL::keyValue(ii);
    BOOST_REQUIRE_EQUAL(keyValue.first, "key1");
    BOOST_REQUIRE_EQUAL(keyValue.second, "value1");
@@ -181,9 +212,9 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_query_empty_value)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Port), "8080");
-   BOOST_REQUIRE(url->hasKeysValues());
+   BOOST_REQUIRE(url->hasQuery());
 
-   auto ii = url->keyvalue_begin();
+   auto ii = url->query_begin();
    auto keyValue = URL::keyValue(ii);
    BOOST_REQUIRE_EQUAL(keyValue.first, "key1");
    BOOST_REQUIRE(keyValue.second.empty());
@@ -206,7 +237,7 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_fragment)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Fragment), "#reference");
-   BOOST_REQUIRE(!url->hasKeysValues());
+   BOOST_REQUIRE(!url->hasQuery());
 
    BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
@@ -227,7 +258,7 @@ BOOST_AUTO_TEST_CASE(URLParser_user)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::User), "user");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Fragment), "#reference");
-   BOOST_REQUIRE(!url->hasKeysValues());
+   BOOST_REQUIRE(!url->hasQuery());
 
    BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
@@ -247,7 +278,7 @@ BOOST_AUTO_TEST_CASE(URLParser_pwd)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Password), "pwd");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE(!url->hasKeysValues());
+   BOOST_REQUIRE(!url->hasQuery());
 
    BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
@@ -268,7 +299,7 @@ BOOST_AUTO_TEST_CASE(URLParser_user_pwd)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::User), "one_guy");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Password), "pwd");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE(!url->hasKeysValues());
+   BOOST_REQUIRE(!url->hasQuery());
 
    BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }
@@ -288,7 +319,7 @@ BOOST_AUTO_TEST_CASE(URLParser_empty_path)
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
    BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Path), "/");
-   BOOST_REQUIRE(!url->hasKeysValues());
+   BOOST_REQUIRE(!url->hasQuery());
 
    BOOST_REQUIRE_EQUAL(url->encode(), expression);
 }

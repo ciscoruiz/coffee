@@ -52,6 +52,7 @@ public:
 
    bool hasHeader(const HttpHeader::Type::_v type) const throw(basis::RuntimeException);
    bool hasCustomHeader(const std::string& headerName) const noexcept { return m_directory.find(headerName) != m_directory.end(); }
+   bool hasBody() const noexcept { return !m_body.empty(); }
    const std::string& getHeaderValue(const HttpHeader::Type::_v type) const throw(basis::RuntimeException);
    const std::string& getCustomHeaderValue(const std::string& headerName) const throw(basis::RuntimeException);
    HttpMessage& setHeader(const HttpHeader::Type::_v type, const std::string& value) throw(basis::RuntimeException);

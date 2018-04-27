@@ -21,10 +21,12 @@
 // SOFTWARE.
 //
 
-#include <coffee/networking/Socket.hpp>
-#include <coffee/networking/NetworkingService.hpp>
-#include <coffee/networking/SocketArguments.hpp>
 #include <coffee/logger/Logger.hpp>
+#include <coffee/networking/NetworkingService.hpp>
+#include <coffee/networking/Socket.hpp>
+#include <coffee/networking/SocketArguments.hpp>
+#include <coffee/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
 
 using namespace coffee;
 
@@ -106,7 +108,7 @@ void networking::Socket::disconnect()
 basis::StreamString networking::Socket::asString() const
    noexcept
 {
-   basis::StreamString result("networking.Socket {");
+   basis::StreamString result("Socket {");
 
    result << "IsValid=" << isValid();
    result << ", Type=" << m_socketType;
@@ -122,4 +124,20 @@ basis::StreamString networking::Socket::asString() const
 
 
    return result << "}";
+}
+
+//virtual
+std::shared_ptr<xml::Node> networking::Socket::asXML(std::shared_ptr<xml::Node>& parent) const
+   noexcept
+{
+   auto xmlNode = parent->createChild("Socket");
+   xmlNode->createAttribute("IsValid", basis::AsString::apply(isValid()));
+   xmlNode->createAttribute("Type", m_socketType);
+
+   auto xmlEndPoints = xmlNode->createChild("EndPoints");
+   for (auto& endPoint : m_endPoints) {
+      xmlEndPoints->createChild("EndPoint")->createText(endPoint);
+   }
+
+   return xmlNode;
 }

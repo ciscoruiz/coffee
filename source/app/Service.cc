@@ -140,6 +140,19 @@ std::shared_ptr<xml::Node> app::Service::asXML(std::shared_ptr<xml::Node>& paren
 {
    std::shared_ptr<xml::Node> result = parent->createChild("app.Service");
    Runnable::asXML(result);
+   auto requirements = result->createChild("Requirements");
+   for (auto requirement : m_requirements) {
+      auto xmlNode = requirements->createChild("Requirement");
+      xmlNode->createAttribute("Feature", Feature::asString(requirement.m_feature));
+
+      if (requirement.m_implementation != Service::WhateverImplementation) {
+         xmlNode->createAttribute("Implementation", requirement.m_implementation);
+      }
+
+      if (requirement.m_selection) {
+         xmlNode->createAttribute("Selection", requirement.m_selection->getName());
+      }
+   }
    return result;
 }
 

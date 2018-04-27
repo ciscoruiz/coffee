@@ -35,3 +35,6 @@ CMakeDoxyfile.in
 DartConfiguration.tcl
 docs/Doxyfile
 .idea
+test/http/context.xml
+test/networking/context.xml
+

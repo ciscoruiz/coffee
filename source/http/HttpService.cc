@@ -29,11 +29,14 @@
 #include <coffee/http/HttpServlet.hpp>
 #include <coffee/http/protocol/HttpProtocolDecoder.hpp>
 #include <coffee/http/protocol/HttpProtocolEncoder.hpp>
+#include <coffee/http/SCCS.hpp>
 #include <coffee/logger/Logger.hpp>
 #include <coffee/networking/AsyncSocket.hpp>
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/SocketArguments.hpp>
-#include <coffee/http/SCCS.hpp>
+#include <coffee/xml/Attribute.hpp>
+#include <coffee/xml/Document.hpp>
+#include <coffee/xml/Node.hpp>
 
 using namespace coffee;
 
@@ -115,6 +118,23 @@ std::shared_ptr<http::HttpServlet> http::HttpService::findServlet(const std::str
    }
 
    return ii->second;
+}
+
+std::shared_ptr<xml::Node> http::HttpService::asXML(std::shared_ptr<xml::Node>& parent) const
+   noexcept
+{
+   std::shared_ptr<xml::Node> result = parent->createChild("http.Service");
+
+   app::Service::asXML(result);
+
+   auto xmlServlets = result->createChild("Servlets");
+   for (auto servlet : m_servlets) {
+      auto xmlServlet = xmlServlets->createChild("Servlet");
+      xmlServlet->createAttribute("Path", servlet.first);
+      xmlServlet->createAttribute("Operation", typeid(*(servlet.second.get())).name());
+   }
+
+   return result;
 }
 
 //static

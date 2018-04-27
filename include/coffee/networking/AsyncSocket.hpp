@@ -38,6 +38,7 @@ class AsyncSocket : public Socket {
 public:
    virtual ~AsyncSocket() { m_messageHandler.reset(); }
    virtual basis::StreamString asString() const noexcept;
+   virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
    virtual void send(const basis::DataBlock& response) throw(basis::RuntimeException) = 0;
 
 protected:

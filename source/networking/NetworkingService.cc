@@ -23,18 +23,17 @@
 
 #include <zmq.hpp>
 
+#include <coffee/app/Application.hpp>
 #include <coffee/basis/DataBlock.hpp>
-
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
-
-#include <coffee/app/Application.hpp>
-
-#include <coffee/networking/NetworkingService.hpp>
-#include <coffee/networking/ServerSocket.hpp>
 #include <coffee/networking/ClientSocket.hpp>
+#include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/PublisherSocket.hpp>
+#include <coffee/networking/ServerSocket.hpp>
 #include <coffee/networking/SubscriberSocket.hpp>
+#include <coffee/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
 
 using namespace coffee;
 
@@ -227,6 +226,21 @@ throw(basis::RuntimeException)
    }
 
    return ii->second;
+}
+
+std::shared_ptr<xml::Node> networking::NetworkingService::asXML(std::shared_ptr<xml::Node>& parent) const
+   noexcept
+{
+   std::shared_ptr<xml::Node> result = parent->createChild("networking.Service");
+
+   app::Service::asXML(result);
+
+   auto sockets = result->createChild("Sockets");
+   for (auto socket : m_sockets) {
+      socket->asXML(sockets);
+   }
+
+   return result;
 }
 
 networking::NetworkingService::Poll::Poll(networking::NetworkingService& networkingService) :

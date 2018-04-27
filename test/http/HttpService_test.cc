@@ -23,18 +23,23 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <csignal>
+
 #include <coffee/app/ApplicationServiceStarter.hpp>
+#include <coffee/http/HttpClient.hpp>
 #include <coffee/http/HttpRequest.hpp>
 #include <coffee/http/HttpResponse.hpp>
 #include <coffee/http/HttpService.hpp>
 #include <coffee/http/HttpServlet.hpp>
-#include <coffee/http/HttpClient.hpp>
 #include <coffee/http/url/URLParser.hpp>
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
 #include <coffee/logger/UnlimitedTraceWriter.hpp>
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/SocketArguments.hpp>
+#include <coffee/xml/Attribute.hpp>
+#include <coffee/xml/Document.hpp>
+#include <coffee/xml/Node.hpp>
 
 using namespace coffee;
 
@@ -256,3 +261,27 @@ BOOST_FIXTURE_TEST_CASE(http_service_request_with_response, HttpFixture) {
    BOOST_REQUIRE_EQUAL(response->getErrorDescription(), "HTTP server can not work on HTTP responses");
 }
 
+
+BOOST_FIXTURE_TEST_CASE(networking_write_xml, HttpFixture)
+{
+   app.setOutputContextFilename("test/http/context.xml");
+
+   std::raise(SIGUSR1);
+
+   xml::Document document;
+
+   BOOST_CHECK_NO_THROW(document.parse(app.getOutputContextFilename()));
+
+   auto root = document.getRoot();
+
+   auto app = root->lookupChild("app.Application");
+   auto services = app->lookupChild("Services");
+
+   auto node = services->childAt(0);
+   BOOST_REQUIRE(node);
+
+   node = node->lookupChild("app.Service");
+   BOOST_REQUIRE(node);
+
+   BOOST_CHECK_EQUAL(node->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "Networking:ZeroMQ");
+}

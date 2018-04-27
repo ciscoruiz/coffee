@@ -34,6 +34,10 @@
 
 namespace coffee {
 
+namespace xml {
+   class Node;
+}
+
 namespace networking {
 
 class NetworkingService;
@@ -69,6 +73,11 @@ protected:
    void unbind() noexcept ;
    void connect() throw(basis::RuntimeException);
    void disconnect() noexcept ;
+
+   /**
+    * \return Summarize information of this instance in a coffee::xml::Node.
+    */
+   virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
 protected:
    std::shared_ptr<zmq::socket_t> m_zmqSocket;

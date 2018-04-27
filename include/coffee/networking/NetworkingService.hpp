@@ -62,6 +62,8 @@ public:
 
    std::shared_ptr<networking::ClientSocket> findClientSocket(const std::string& name) throw(basis::RuntimeException);
 
+   std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
+
 private:
    struct Poll {
       typedef std::unordered_map<int, std::shared_ptr<AsyncSocket> > AsyncSockets;

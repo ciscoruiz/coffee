@@ -23,8 +23,13 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <coffee/networking/NetworkingService.hpp>
+#include <csignal>
+
 #include <coffee/networking/ClientSocket.hpp>
+#include <coffee/networking/NetworkingService.hpp>
+#include <coffee/xml/Attribute.hpp>
+#include <coffee/xml/Document.hpp>
+#include <coffee/xml/Node.hpp>
 
 #include "NetworkingFixture.hpp"
 
@@ -125,4 +130,39 @@ BOOST_FIXTURE_TEST_CASE(networking_large_message, NetworkingFixture)
 
       delete []memory;
    }
+}
+
+BOOST_FIXTURE_TEST_CASE(networking_write_xml, NetworkingFixture)
+{
+   {
+      networking::SocketArguments arguments;
+      auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555").addEndPoint("tcp://localhost:5556"));
+      BOOST_REQUIRE(clientSocket);
+   }
+   {
+      networking::SocketArguments arguments;
+      auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555"));
+      BOOST_REQUIRE(clientSocket);
+   }
+
+   app.setOutputContextFilename("test/networking/context.xml");
+
+   std::raise(SIGUSR1);
+
+   xml::Document document;
+
+   BOOST_CHECK_NO_THROW(document.parse(app.getOutputContextFilename()));
+
+   auto root = document.getRoot();
+
+   auto app = root->lookupChild("app.Application");
+   auto services = app->lookupChild("Services");
+
+   auto node = services->childAt(0);
+   BOOST_REQUIRE(node);
+
+   node = node->lookupChild("app.Service");
+   BOOST_REQUIRE(node);
+
+   BOOST_CHECK_EQUAL(node->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "Networking:ZeroMQ");
 }

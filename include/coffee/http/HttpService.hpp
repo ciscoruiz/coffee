@@ -35,6 +35,10 @@ namespace networking {
    class NetworkingService;
 }
 
+namespace xml {
+   class Node;
+}
+
 namespace http {
 
 class HttpServlet;
@@ -59,6 +63,8 @@ public:
    }
 
    std::shared_ptr<HttpServlet> findServlet(const std::string& path) throw(basis::RuntimeException);
+
+   std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
 
 private:
    typedef std::unordered_map<std::string, std::shared_ptr<HttpServlet> > Servlets;

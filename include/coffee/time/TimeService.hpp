@@ -33,7 +33,6 @@
 #include <chrono>
 
 #include <coffee/app/Service.hpp>
-#include <coffee/basis/Semaphore.hpp>
 #include <coffee/basis/pattern/observer/Subject.hpp>
 #include <coffee/time/TimeEvent.hpp>
 
@@ -48,6 +47,8 @@ class TimeEvent;
  */
 class TimeService : public app::Service, public basis::pattern::observer::Subject {
 public:
+   static const std::string Implementation;
+
    /**
     * Fast instantiation for this service.
     */
@@ -93,13 +94,6 @@ public:
    size_t size() const noexcept { return events.size(); }
 
    /**
-    * Method to call to be sure TimeService is fully prepared to accept request of
-    * activation events.
-    * \include time/TimeFixture.hpp
-    */
-   void waitUntilRunning() noexcept { producerIsWorking.wait(); }
-
-   /**
     * \return Summarize information of the instance
     */
    basis::StreamString asString() const noexcept;
@@ -115,7 +109,6 @@ private:
    const std::chrono::milliseconds resolution;
    const int maxQuantum;
    int currentQuantum;
-   basis::Semaphore producerIsWorking;
    Quantum* timeTable;
    Events events;
    Quantum temporaryQuantum;

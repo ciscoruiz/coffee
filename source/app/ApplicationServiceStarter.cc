@@ -24,6 +24,7 @@
 #include "../../include/coffee/app/ApplicationServiceStarter.hpp"
 
 #include <coffee/config/SCCS.hpp>
+#include <coffee/logger/TraceMethod.hpp>
 
 using namespace coffee;
 
@@ -39,6 +40,8 @@ app::ApplicationServiceStarter::ApplicationServiceStarter(const char* shortName)
 void app::ApplicationServiceStarter::run()
    throw(basis::RuntimeException)
 {
+   LOG_THIS_METHOD();
+
    semaphoreForRun.signal();
    std::unique_lock <std::mutex> guard (mutex);
    while(!stopNow) {
@@ -49,6 +52,8 @@ void app::ApplicationServiceStarter::run()
 void app::ApplicationServiceStarter::do_stop()
    throw(basis::RuntimeException)
 {
+   LOG_THIS_METHOD();
+
    try {
       app::Application::do_stop();
       stopNow = true;

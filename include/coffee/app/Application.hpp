@@ -27,12 +27,14 @@
 
 #include <vector>
 #include <memory>
+#include <map>
 
 #include <boost/filesystem.hpp>
 
 #include <coffee/basis/RuntimeException.hpp>
 
 #include <coffee/app/Runnable.hpp>
+#include <coffee/app/Feature.hpp>
 
 namespace coffee {
 
@@ -53,10 +55,6 @@ class Service;
 */
 class Application : public Runnable {
 public:
-   typedef std::vector<std::shared_ptr<Service> > Services;
-   typedef Services::iterator service_iterator;
-   typedef Services::const_iterator const_service_iterator;
-
    /**
       Constructor.
 
@@ -102,11 +100,6 @@ public:
    const boost::filesystem::path& getOutputContextFilename() const noexcept { return a_outputContextFilename; }
 
    /**
-    * \return the service_iterator addresses the service received as parameter or #service_end if the name is not found.
-    */
-   service_iterator service_find(const std::string& serviceName) noexcept;
-
-   /**
     * Initialize all resources related to this application, and then it will call virtual method #initialize and #run.
     */
    void start() throw(basis::RuntimeException);
@@ -114,39 +107,14 @@ public:
    /**
     * Attach the service to this application. It will be started before this application start to run.
     */
-   virtual void attach(std::shared_ptr<Service> service) throw(basis::RuntimeException);
+   bool attach(std::shared_ptr<Service> service) throw(basis::RuntimeException);
 
    /**
-    * \return service_iterator to the first attached service.
+    * @param feature Feature required for the caller
+    * @param implementation  Implementation required for the caller. It could be Service::WhateverImplementation to not apply.
+    * @return One service instance that matches the requirements.
     */
-   service_iterator service_begin() noexcept { return a_services.begin(); }
-
-   /**
-    * \return service_iterator to the last attached service.
-    */
-   const_service_iterator service_end() const noexcept { return a_services.end(); }
-
-   /**
-    * \return the service addressed by the service_iterator.
-    * \warning the value ii must be contained in [#service_begin, #service_end)
-    */
-   static std::shared_ptr<Service>& service(service_iterator ii) noexcept { return std::ref(*ii); }
-
-   /**
-    * \return service_iterator to the first attached service.
-    */
-   const_service_iterator service_begin() const noexcept { return a_services.begin(); }
-
-   /**
-    * \return service_iterator to the last attached service.
-    */
-   service_iterator service_end() noexcept { return a_services.end(); }
-
-   /**
-    * \return the service addressed by the service_iterator.
-    * \warning the value ii must be contained in [#service_begin, #service_end)
-    */
-   static const std::shared_ptr<Service> service(const_service_iterator ii) noexcept { return std::ref(*ii); }
+   std::shared_ptr<Service> select(const Feature::_v feature, const std::string& implementation) throw(basis::RuntimeException);
 
    /**
     * Write the context as a coffee::xml::Node into the path indicated by file.
@@ -193,13 +161,14 @@ protected:
    virtual void signalUSR2() throw(basis::RuntimeException);
 
 private:
-   static Application* m_this;
+   typedef std::multimap<Feature::_v, std::shared_ptr<Service> > Services;
 
+   static Application* m_this;
    const std::string a_version;
    const std::string a_title;
    const pid_t a_pid;
    boost::filesystem::path a_outputContextFilename;
-   Services a_services;
+   Services m_services;
 
    void startServices() throw(basis::RuntimeException);
    void sendSignalToChilds(const int signal) noexcept;

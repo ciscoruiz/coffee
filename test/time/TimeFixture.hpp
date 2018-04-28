@@ -48,7 +48,7 @@ struct TimeFixture {
       timeService = coffee::time::TimeService::instantiate(app, maxTime, resolution);
       thr = std::thread(parallelRun, std::ref(app));
       app.waitUntilRunning();
-      timeService->waitUntilRunning();
+      timeService->waitEffectiveRunning();
    }
 
    virtual ~TimeFixture() {

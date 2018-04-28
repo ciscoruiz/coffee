@@ -64,6 +64,8 @@ add_subdirectory(source/dbms)
 add_subdirectory(source/dbms.sqlite)
 add_subdirectory(source/dbms.ldap)
 add_subdirectory(source/persistence)
+add_subdirectory(source/networking)
+add_subdirectory(source/http)
 
 enable_testing()
 
@@ -79,6 +81,8 @@ add_subdirectory(test/dbms)
 add_subdirectory(test/dbms.sqlite)
 add_subdirectory(test/dbms.ldap)
 add_subdirectory(test/persistence)
+add_subdirectory(test/networking)
+add_subdirectory(test/http)
 
 include(CTest)
 
@@ -93,4 +97,6 @@ add_test(test_coffee_time test/time/test_coffee_time)
 add_test(test_coffee_dbms_sqlite test/dbms.sqlite/test_coffee_dbms_sqlite)
 add_test(test_coffee_dbms_ldap test/dbms.ldap/test_coffee_dbms_ldap)
 add_test(test_coffee_persistence test/persistence/test_coffee_persistence)
+add_test(test_coffee_networking test/networking/test_coffee_networking)
+add_test(test_coffee_http test/http/test_coffee_http)
 

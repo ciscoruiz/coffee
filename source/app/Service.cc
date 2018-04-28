@@ -23,28 +23,71 @@
 
 #include <algorithm>
 
-#include <coffee/logger/Logger.hpp>
-
-#include <coffee/xml/Node.hpp>
-#include <coffee/xml/Attribute.hpp>
-
 #include <coffee/app/Application.hpp>
 #include <coffee/app/Service.hpp>
+#include <coffee/logger/Logger.hpp>
+#include <coffee/logger/TraceMethod.hpp>
+#include <coffee/xml/Attribute.hpp>
+#include <coffee/xml/Node.hpp>
 
 using namespace std;
 using namespace coffee;
 
-void app::Service::addPredecessor(const char* engineName)
+//static
+const std::string app::Service::WhateverImplementation = "*";
+
+void app::Service::waitEffectiveRunning()
+   throw(basis::RuntimeException)
+{
+   LOG_THIS_METHOD();
+
+   LOG_DEBUG(asString());
+
+   if (!isStarting() && !isRunning()) {
+      COFFEE_THROW_EXCEPTION(asString () << " could not wait for effective running");
+   }
+
+   effectiveRunning.wait();
+}
+
+void app::Service::notifyEffectiveRunning()
    noexcept
 {
-   const std::string name(engineName);
+   LOG_THIS_METHOD();
 
-   if((std::find(begin(), end(), name)) != end())
-      return;
+   LOG_DEBUG(asString());
 
-   a_predecessors.push_back(name);
+   effectiveRunning.signal();
+}
 
-   LOG_DEBUG(asString() << " requires " << name);
+void app::Service::require(const Feature::_v feature, const std::string& implementation)
+   throw(basis::RuntimeException)
+{
+   auto ii = std::find_if(m_requirements.begin(), m_requirements.end(), [feature](const Requirement& ii) { return ii.m_feature == feature; });
+
+   if (ii != m_requirements.end()) {
+      COFFEE_THROW_EXCEPTION(asString() << " feature " << Feature::asString(feature) << " already registered");
+   }
+
+   Requirement requirement(feature, implementation);
+   m_requirements.push_back(requirement);
+   LOG_DEBUG(asString() << " requires " << requirement.asString());
+}
+
+std::shared_ptr<app::Service> app::Service::getRequirement(const Feature::_v feature)
+   throw(basis::RuntimeException)
+{
+   auto ii = std::find_if(m_requirements.begin(), m_requirements.end(), [feature](const Requirement& ii) { return ii.m_feature == feature; });
+
+   if (ii == m_requirements.end()) {
+      COFFEE_THROW_EXCEPTION(asString() << " requirement " << Feature::asString(feature) << " was not registered");
+   }
+
+   if (!ii->m_selection) {
+      COFFEE_THROW_EXCEPTION(asString() << " requirement " << Feature::asString(feature) << " no selection was done yet");
+   }
+
+   return ii->m_selection;
 }
 
 void app::Service::initialize()
@@ -53,27 +96,17 @@ void app::Service::initialize()
    statusStarting();
 
    try {
-      for(iterator ii = begin(), maxii = end(); ii != maxii; ++ ii) {
-         const std::string& name = data(ii);
+      for (auto& requirement : m_requirements) {
+         requirement.m_selection = a_app.select(requirement.m_feature, requirement.m_implementation);
 
-         Application::service_iterator pp = a_app.service_find(name.c_str());
-
-         if(pp == a_app.service_end()) {
-            COFFEE_THROW_EXCEPTION(asString() << " requires '" << name << "' which was not defined");
-         }
-
-         auto predecessor = a_app.service(pp);
-
-         if(predecessor->isRunning() == true) {
-            LOG_DEBUG("Predecessor '" << name << "' already running");
+         if (requirement.m_selection->isRunning())
             continue;
+
+         if (requirement.m_selection->isStarting()) {
+            COFFEE_THROW_EXCEPTION(asString() << " has loop with requirement '" << requirement.m_selection->getName() << "'");
          }
 
-         if(predecessor->isStarting()) {
-            COFFEE_THROW_EXCEPTION(asString() << " has loop with requirement '" << name << "'");
-         }
-
-         predecessor->initialize();
+         requirement.m_selection->initialize();
       }
 
       do_initialize();
@@ -90,6 +123,15 @@ basis::StreamString app::Service::asString() const
 {
    basis::StreamString result("app.Service { ");
    result += Runnable::asString();
+   result << ", Requirements=[";
+   bool first = true;
+   for (auto& requirement : m_requirements) {
+      if (first == false)
+         result << ",";
+      result << requirement.asString();
+      first = false;
+   }
+   result << "]";
    return result += " }";
 }
 
@@ -98,6 +140,36 @@ std::shared_ptr<xml::Node> app::Service::asXML(std::shared_ptr<xml::Node>& paren
 {
    std::shared_ptr<xml::Node> result = parent->createChild("app.Service");
    Runnable::asXML(result);
+   auto requirements = result->createChild("Requirements");
+   for (auto requirement : m_requirements) {
+      auto xmlNode = requirements->createChild("Requirement");
+      xmlNode->createAttribute("Feature", Feature::asString(requirement.m_feature));
+
+      if (requirement.m_implementation != Service::WhateverImplementation) {
+         xmlNode->createAttribute("Implementation", requirement.m_implementation);
+      }
+
+      if (requirement.m_selection) {
+         xmlNode->createAttribute("Selection", requirement.m_selection->getName());
+      }
+   }
    return result;
 }
 
+std::string app::Service::Requirement::asString() const
+   noexcept
+{
+   basis::StreamString result("{ Feature=");
+
+   result << Feature::asString(m_feature);
+
+   if (m_implementation != Service::WhateverImplementation) {
+      result << ",Implementation=" << m_implementation;
+   }
+
+   if (m_selection) {
+      result << ",Selection=" << m_selection->getName();
+   }
+
+   return result << " }";
+}

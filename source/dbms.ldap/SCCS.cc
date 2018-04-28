@@ -33,7 +33,7 @@
 
 #include <coffee/dbms.ldap/SCCS.hpp>
 
-coffee_sccs_define_tag (dbms_ldap,release-18.03.29);
+coffee_sccs_define_tag (dbms_ldap,release-18.04.28);
 
 using namespace coffee;
 

@@ -43,7 +43,7 @@ public:
     * Constructor.
     * \param path file path to store the traces.
     */
-   UnlimitedTraceWriter (const std::string& path);
+   explicit UnlimitedTraceWriter (const std::string& path);
 
    /**
     * Destructor.

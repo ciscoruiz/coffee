@@ -79,7 +79,7 @@ BOOST_FIXTURE_TEST_CASE(publish_subscribers, NetworkingFixture)
    const int maxMessages = 100;
    for (int ii = 0; ii < maxMessages; ++ ii) {
       basis::StreamString str;
-      str << (ii % 2 ? "message=": "other=") << ii;
+      str << ((ii % 2) ? "message=": "other=") << ii;
       publisherSocket->send(basis::DataBlock(str.c_str()));
       usleep(1000);
    }

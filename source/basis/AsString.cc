@@ -82,7 +82,6 @@ std::string basis::AsString::apply (const DataBlock& dataBlock, const int charac
    char aux [8];
    std::string numbers;
    std::string characters;
-   unsigned char c;
    size_t i;
    size_t maxi = dataBlock.size();
    std::string result;
@@ -106,7 +105,7 @@ std::string basis::AsString::apply (const DataBlock& dataBlock, const int charac
          numbers = aux;
       }
 
-      c = (unsigned char) dataBlock [i];
+      unsigned char c = (unsigned char) dataBlock [i];
       sprintf (aux, "%02x ", c);
       numbers += aux;
       characters += (isprint (c) ? (char) c: '.');

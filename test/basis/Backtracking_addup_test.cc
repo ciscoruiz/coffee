@@ -68,7 +68,7 @@ class PrintAddUp : public AddUpIsANumber::Solution::Predicate {
    std::stringstream& ss;
 
 public:
-   PrintAddUp(std::stringstream& _ss) : ss(_ss) {;}
+   explicit PrintAddUp(std::stringstream& _ss) : ss(_ss) {;}
 
    void apply(const AddUpIsANumber::Solution& solution, const int margin) const noexcept {
       if (margin > 0) {

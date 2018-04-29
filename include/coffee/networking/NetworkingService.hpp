@@ -68,7 +68,7 @@ private:
    struct Poll {
       typedef std::unordered_map<int, std::shared_ptr<AsyncSocket> > AsyncSockets;
 
-      Poll(NetworkingService& networkingService);
+      explicit Poll(NetworkingService& networkingService);
       ~Poll();
 
       bool isOutdated() const noexcept;

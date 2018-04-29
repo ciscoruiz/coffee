@@ -48,7 +48,7 @@ namespace http {
 
 class HttpRequestHandler : public networking::MessageHandler {
 public:
-   HttpRequestHandler(http::HttpService& httpService) :
+   explicit HttpRequestHandler(http::HttpService& httpService) :
       coffee::networking::MessageHandler("HttpRequestHandler"),
       m_httpService(httpService)
    {;}

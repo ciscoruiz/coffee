@@ -33,7 +33,7 @@ using namespace coffee;
 using namespace coffee::http;
 
 struct HttpTestSplitter {
-   HttpTestSplitter(const basis::DataBlock& dataBlock) : m_dataBlock(dataBlock) {;}
+   explicit HttpTestSplitter(const basis::DataBlock& dataBlock) : m_dataBlock(dataBlock) {;}
    const std::string& readLine() throw (basis::RuntimeException);
    const basis::DataBlock& readDataBlock() throw (basis::RuntimeException);
    protocol::Token token;

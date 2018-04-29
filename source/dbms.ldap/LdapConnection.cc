@@ -67,9 +67,6 @@ void LdapConnection::open()
       checkResult(rc, COFFEE_FILE_LOCATION);
    }
 
-   const char* _user = (getPassword().empty()) ? nullptr: getPassword().c_str();
-   const char* _password = (getPassword().empty()) ? nullptr: getPassword().c_str();
-
    BerValue userCrendential;
 
    userCrendential.bv_val = (char*) getPassword().c_str();

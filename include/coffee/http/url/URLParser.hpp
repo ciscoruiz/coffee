@@ -56,7 +56,7 @@ scheme              path
  */
 class URLParser {
 public:
-   URLParser(const std::string& url) : m_url(url) {;}
+   explicit URLParser(const std::string& url) : m_url(url) {;}
    std::shared_ptr<URL> build() throw(basis::RuntimeException);
 
 private:

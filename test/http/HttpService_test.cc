@@ -60,17 +60,17 @@ struct HttpFixture {
 
 class UpperServlet : public http::HttpServlet {
 public:
-   std::shared_ptr<http::HttpResponse> service(std::shared_ptr<http::HttpRequest> request) throw(basis::RuntimeException);
+   std::shared_ptr<http::HttpResponse> service(const std::shared_ptr<http::HttpRequest>& request) throw(basis::RuntimeException);
 };
 
 class LowerServlet : public http::HttpServlet {
 public:
-   std::shared_ptr<http::HttpResponse> service(std::shared_ptr<http::HttpRequest> request) throw(basis::RuntimeException);
+   std::shared_ptr<http::HttpResponse> service(const std::shared_ptr<http::HttpRequest>& request) throw(basis::RuntimeException);
 };
 
 class EchoServlet : public http::HttpServlet {
 public:
-   std::shared_ptr<http::HttpResponse> service(std::shared_ptr<http::HttpRequest> request) throw(basis::RuntimeException);
+   std::shared_ptr<http::HttpResponse> service(const std::shared_ptr<http::HttpRequest>& request) throw(basis::RuntimeException);
 };
 
 HttpFixture::HttpFixture() : app("TestAppHttpFixture")
@@ -111,7 +111,7 @@ HttpFixture::~HttpFixture() {
    thr.join();
 }
 
-std::shared_ptr<http::HttpResponse> UpperServlet::service(std::shared_ptr<http::HttpRequest> request)
+std::shared_ptr<http::HttpResponse> UpperServlet::service(const std::shared_ptr<http::HttpRequest>& request)
    throw(basis::RuntimeException)
 {
    auto response = http::HttpResponse::instantiate(request);
@@ -128,7 +128,7 @@ std::shared_ptr<http::HttpResponse> UpperServlet::service(std::shared_ptr<http::
    return response;
 }
 
-std::shared_ptr<http::HttpResponse> LowerServlet::service(std::shared_ptr<http::HttpRequest> request)
+std::shared_ptr<http::HttpResponse> LowerServlet::service(const std::shared_ptr<http::HttpRequest>& request)
    throw(basis::RuntimeException)
 {
    basis::DataBlock body(request->getBody());
@@ -139,7 +139,7 @@ std::shared_ptr<http::HttpResponse> LowerServlet::service(std::shared_ptr<http::
    return response;
 }
 
-std::shared_ptr<http::HttpResponse> EchoServlet::service(std::shared_ptr<http::HttpRequest> request)
+std::shared_ptr<http::HttpResponse> EchoServlet::service(const std::shared_ptr<http::HttpRequest>& request)
    throw(basis::RuntimeException)
 {
    auto response = http::HttpResponse::instantiate(request);
@@ -211,7 +211,7 @@ BOOST_FIXTURE_TEST_CASE(http_service_send_unknow_path, HttpFixture)
 
 class ThrowServlet : public http::HttpServlet {
 public:
-   std::shared_ptr<http::HttpResponse> service(std::shared_ptr<http::HttpRequest> request)
+   std::shared_ptr<http::HttpResponse> service(const std::shared_ptr<http::HttpRequest>& request)
    throw(basis::RuntimeException)
    {
       COFFEE_THROW_EXCEPTION("This operation failed");

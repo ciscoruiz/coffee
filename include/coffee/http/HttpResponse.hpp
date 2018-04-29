@@ -73,7 +73,7 @@ protected:
    /**
     * Constructor.
     */
-   HttpResponse(const std::shared_ptr<HttpRequest>& request);
+   explicit HttpResponse(const std::shared_ptr<HttpRequest>& request);
    HttpResponse(const uint16_t majorVersion, const uint16_t minorVersion, const int statusCode, const std::string& errorDescription);
 
    /**

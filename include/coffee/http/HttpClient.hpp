@@ -38,16 +38,16 @@ class HttpResponse;
 
 class HttpClient {
 public:
-   std::shared_ptr<HttpResponse> send(std::shared_ptr<HttpRequest> request) throw(basis::RuntimeException);
+   std::shared_ptr<HttpResponse> send(const std::shared_ptr<HttpRequest>& request) throw(basis::RuntimeException);
 
 private:
    std::shared_ptr<networking::ClientSocket> m_clientSocket;
    http::protocol::HttpProtocolEncoder m_encoder;
    http::protocol::HttpProtocolDecoder m_decoder;
 
-   HttpClient(std::shared_ptr<networking::ClientSocket> clientSocket) : m_clientSocket(clientSocket) {}
+   explicit HttpClient(const std::shared_ptr<networking::ClientSocket>& clientSocket) : m_clientSocket(clientSocket) {}
 
-   static std::shared_ptr<HttpClient> instantiate(std::shared_ptr<networking::ClientSocket> clientSocket) noexcept {
+   static std::shared_ptr<HttpClient> instantiate(const std::shared_ptr<networking::ClientSocket>& clientSocket) noexcept {
       std::shared_ptr<HttpClient> result(new HttpClient(clientSocket));
       return result;
    }

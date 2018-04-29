@@ -57,7 +57,7 @@ public:
       Constructor.
       @param shortName Logical name.
    */
-   ApplicationServiceStarter(const char* shortName);
+   explicit ApplicationServiceStarter(const char* shortName);
 
    /**
     * Once you call start method from a thread you have to wait for the application really start

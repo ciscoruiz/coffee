@@ -41,7 +41,7 @@ private:
 
 class CounterStrategy : public logger::Writer {
 public:
-   CounterStrategy() : logger::Writer("CounterStrategy"),m_total(0) {;}
+   CounterStrategy() : logger::Writer("CounterStrategy"),m_total(0) { coffee_memset(m_counters, 0, sizeof(m_counters));}
 
    unsigned int getCounter(const logger::Level::_v level) const throw() { return m_counters [level]; }
    unsigned int getTotal() const throw() { return m_total; }

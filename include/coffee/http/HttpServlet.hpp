@@ -36,7 +36,7 @@ class HttpRequest;
 
 class HttpServlet {
 public:
-   virtual std::shared_ptr<http::HttpResponse> service(std::shared_ptr<http::HttpRequest> request) throw(basis::RuntimeException) = 0;
+   virtual std::shared_ptr<http::HttpResponse> service(const std::shared_ptr<http::HttpRequest>& request) throw(basis::RuntimeException) = 0;
 
 };
 

@@ -63,7 +63,7 @@ protected:
    /**
     * Constructor.
     */
-   HttpRequest(const Method::_v method, std::shared_ptr<url::URL> url, const uint32_t majorVersion, const uint32_t minorVersion) :
+   HttpRequest(const Method::_v method, const std::shared_ptr<url::URL>& url, const uint32_t majorVersion, const uint32_t minorVersion) :
       HttpMessage(majorVersion, minorVersion),
       m_method(method),
       m_url(url)

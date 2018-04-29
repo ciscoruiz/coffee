@@ -19,7 +19,7 @@ template <class _T> struct MockDatabaseFixture {
    std::shared_ptr<coffee::dbms::Connection> connection;
    std::thread thr;
 
-   MockDatabaseFixture(const char* appName) : app(appName) {
+   explicit MockDatabaseFixture(const char* appName) : app(appName) {
       database = _T::instantiate(app);
       thr = std::thread(dbmsParallelRun, std::ref(app));
       app.waitUntilRunning();

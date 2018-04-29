@@ -28,7 +28,7 @@
 
 using namespace coffee;
 
-std::shared_ptr<http::HttpResponse> http::HttpClient::send(std::shared_ptr<http::HttpRequest> request)
+std::shared_ptr<http::HttpResponse> http::HttpClient::send(const std::shared_ptr<http::HttpRequest>& request)
    throw(basis::RuntimeException)
 {
    auto httpMessage = m_decoder.apply(m_clientSocket->send(m_encoder.apply(request)));

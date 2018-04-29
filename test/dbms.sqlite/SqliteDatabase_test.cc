@@ -559,11 +559,10 @@ BOOST_FIXTURE_TEST_CASE(sqlite_insert_all_types, SqliteFixture)
    StatementCountAllTypes count(database, connection);
    SelectAllType select(database, connection);
 
-   char buffer[1024];
-
    {
       dbms::GuardConnection guardConnection(connection);
       dbms::GuardStatement guardStament(guardConnection, insert.statement);
+      char buffer[1024];
 
       for (int ii = 0; ii < 10; ++ ii) {
          insert.id->setValue(ii);

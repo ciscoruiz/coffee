@@ -210,8 +210,6 @@ std::shared_ptr<dbms::Statement>& dbms::Database::findStatement(const char* name
 {
    logger::TraceMethod ttmm(logger::Level::Local7, COFFEE_FILE_LOCATION);
 
-   Statement* result(NULL);
-
    LOG_DEBUG("Name=" << name);
 
    for(statement_iterator ii = statement_begin(), maxii = statement_end(); ii != maxii; ii ++) {

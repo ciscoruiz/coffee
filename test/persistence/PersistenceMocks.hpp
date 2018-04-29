@@ -53,12 +53,13 @@ class MyReadStatement : public dbms::Statement {
 public:
    MyReadStatement(const dbms::Database& database, const char* name, const char* expression, const StatementParameters& parameters) :
       dbms::Statement(database, name, expression, parameters),
-      m_isValid(false)
+      m_isValid(false),
+      m_id(std::make_shared<datatype::Integer>("ID")),
+      m_name(std::make_shared<datatype::String>("name", 64)),
+      m_selection()
    {
-      m_id = std::make_shared<datatype::Integer>("ID");
       createBinderInput(m_id);
 
-      m_name = std::make_shared<datatype::String>("name", 64);
       createBinderOutput(m_name);
    }
 
@@ -78,10 +79,11 @@ private:
 class MyWriteStatement : public dbms::Statement {
 public:
    MyWriteStatement(const dbms::Database& database, const char* name, const char* expression, const StatementParameters& parameters) :
-      dbms::Statement(database, name, expression, parameters)
+      dbms::Statement(database, name, expression, parameters),
+      m_id(std::make_shared<datatype::Integer>("ID")),
+      m_name(std::make_shared<datatype::String>("name", 64)),
+      m_selection()
    {
-      m_id = std::make_shared<datatype::Integer>("ID");
-      m_name = std::make_shared<datatype::String>("name", 64);
       createBinderInput(m_id);
       createBinderInput(m_name);
    }

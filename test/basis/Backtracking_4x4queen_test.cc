@@ -35,7 +35,7 @@ typedef std::pair <int, int> ColumnAndRow;
 
 class NQueen : public Solver<ColumnAndRow> {
 public:
-   NQueen(const int size) : m_size(size) {;}
+   explicit NQueen(const int size) : m_size(size) {;}
 
 private:
    const int m_size;
@@ -124,7 +124,7 @@ class PrintChessboard: public NQueen::Solution::Predicate {
    std::stringstream& ss;
 
 public:
-   PrintChessboard(std::stringstream& _ss) : ss(_ss) {;}
+   explicit PrintChessboard(std::stringstream& _ss) : ss(_ss) {;}
 
    void apply(const NQueen::Solution& solution, const int depth) const noexcept {
       if(depth == 0)

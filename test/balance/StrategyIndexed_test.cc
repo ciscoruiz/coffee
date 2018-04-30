@@ -163,3 +163,11 @@ BOOST_FIXTURE_TEST_CASE( inx_balance_multithread,  ResourceListFixture)
       BOOST_REQUIRE_EQUAL (ii->second, IndexedTest::MaxLoop);
    }
 }
+
+BOOST_FIXTURE_TEST_CASE( inx_asXML, ResourceListFixture )
+{
+   balance::StrategyIndexed strategy(resourceList);
+   xml::Compiler compiler;
+   auto root = std::make_shared<xml::Node>("root");
+   BOOST_REQUIRE_EQUAL(compiler.apply(strategy.asXML(root)).size(), 676);
+}

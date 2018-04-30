@@ -27,6 +27,8 @@
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
 #include <coffee/balance/GuardResourceList.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
 
 using namespace coffee;
 
@@ -38,7 +40,7 @@ balance::StrategyByRange::StrategyByRange() :
    setResourceList(m_unusedList);
 }
 
-void balance::StrategyByRange::addRange (const int bottom, const int top, std::shared_ptr<Strategy> strategy)
+void balance::StrategyByRange::addRange (const int newBottom, const int newTop, std::shared_ptr<Strategy> strategy)
    throw (basis::RuntimeException)
 {
    GuardResourceList guard(m_unusedList);
@@ -49,21 +51,47 @@ void balance::StrategyByRange::addRange (const int bottom, const int top, std::s
    if (strategy.get() == this)
       COFFEE_THROW_EXCEPTION(asString () << " can not generate a recursive association");
 
-   if (bottom > top)
+   if (newBottom > newTop)
       COFFEE_THROW_EXCEPTION(asString () << " | invalid range (bottom > top)");
 
-   for (range_iterator ii = range_begin(), maxii = range_end(); ii != maxii; ++ ii) {
-      Range& range = StrategyByRange::range(ii);
-      if (std::get<0>(range) >= bottom && std::get<1>(range) <= top) {
+   for (auto& range : m_ranges) {
+      const int theBottom = std::get<0>(range);
+      const int theTop = std::get<1>(range);
+
+      if (newBottom >= theBottom && newBottom <= theTop) {
+         COFFEE_THROW_EXCEPTION(std::get<2>(range)->asString () << " would be hidden by " << strategy->asString());
+      }
+      if (newTop >= theBottom && newTop <= theTop) {
+         COFFEE_THROW_EXCEPTION(std::get<2>(range)->asString () << " would be hidden by " << strategy->asString());
+      }
+
+      if (newBottom <= theBottom && newTop >= theTop) {
          COFFEE_THROW_EXCEPTION(std::get<2>(range)->asString () << " would be hidden by " << strategy->asString());
       }
    }
 
-   auto range = std::make_tuple(top, bottom, strategy);
+   auto range = std::make_tuple(newBottom, newTop, strategy);
 
-   LOG_DEBUG ("Range (" <<  bottom << "," << top << "): " << strategy->asString () << " has been created");
+   LOG_DEBUG ("Range (" <<  newBottom << "," << newTop << "): " << strategy->asString () << " has been created");
 
    m_ranges.push_back(range);
+}
+
+std::shared_ptr<xml::Node> balance::StrategyByRange::asXML (std::shared_ptr<xml::Node>& parent) const
+   noexcept
+{
+   std::shared_ptr<xml::Node> result = parent->createChild("StrategyByRange");
+
+   auto xmlRanges = result->createChild("Ranges");
+
+   for (auto& range : m_ranges) {
+      auto xmlRange = xmlRanges->createChild("Range");
+      xmlRange->createAttribute("Begin", std::get<0>(range));
+      xmlRange->createAttribute("End", std::get<1>(range));
+      xmlRange->createAttribute("Strategy", std::get<2>(range)->getName());
+   }
+
+   return result;
 }
 
 balance::StrategyByRange::range_iterator balance::StrategyByRange::findRange (GuardResourceList&, const int key)
@@ -73,7 +101,7 @@ balance::StrategyByRange::range_iterator balance::StrategyByRange::findRange (Gu
 
    for (range_iterator ii = range_begin(), maxii = range_end(); ii != maxii; ++ ii) {
       Range& range = StrategyByRange::range(ii);
-      if (std::get<0>(range) >= key && std::get<1>(range) <= key) {
+      if (std::get<0>(range) <= key && std::get<1>(range) >= key) {
          return ii;
       }
    }

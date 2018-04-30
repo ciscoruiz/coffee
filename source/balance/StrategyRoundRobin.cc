@@ -27,6 +27,8 @@
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
+#include <coffee/xml/Node.hpp>
+#include <coffee/xml/Attribute.hpp>
 
 using namespace coffee;
 
@@ -72,6 +74,16 @@ std::shared_ptr<balance::Resource> balance::StrategyRoundRobin::apply (GuardReso
    }
 
    LOG_LOCAL7("Result=" << result->asString());
+
+   return result;
+}
+
+std::shared_ptr<xml::Node> balance::StrategyRoundRobin::asXML (std::shared_ptr<xml::Node>& parent) const
+   noexcept
+{
+   std::shared_ptr<xml::Node> result = parent->createChild("StrategyRoundRobin");
+
+   m_resources->asXML(result);
 
    return result;
 }

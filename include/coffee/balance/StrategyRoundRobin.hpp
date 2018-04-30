@@ -54,6 +54,8 @@ public:
     */
    std::shared_ptr<Resource> apply() throw (ResourceUnavailableException);
 
+   std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
+
 private:
    class Position {
    public:

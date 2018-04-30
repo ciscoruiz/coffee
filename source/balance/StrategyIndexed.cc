@@ -30,6 +30,7 @@
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
+#include <coffee/xml/Node.hpp>
 
 using namespace coffee;
 
@@ -70,6 +71,16 @@ std::shared_ptr<balance::Resource> balance::StrategyIndexed::apply(GuardResource
    }
 
    LOG_LOCAL7("Result=" << result->asString());
+
+   return result;
+}
+
+std::shared_ptr<xml::Node> balance::StrategyIndexed::asXML (std::shared_ptr<xml::Node>& parent) const
+   noexcept
+{
+   std::shared_ptr<xml::Node> result = parent->createChild("StrategyIndexed");
+
+   m_resources->asXML(result);
 
    return result;
 }

@@ -25,8 +25,6 @@
 #include <thread>
 #include <mutex>
 
-#include <boost/ptr_container/ptr_vector.hpp>
-
 #include <boost/test/unit_test.hpp>
 
 #include <coffee/basis/AsString.hpp>
@@ -37,6 +35,8 @@
 #include <coffee/balance/Resource.hpp>
 #include <coffee/balance/StrategyRoundRobin.hpp>
 #include <coffee/balance/GuardResourceList.hpp>
+#include <coffee/xml/Compiler.hpp>
+#include <coffee/xml/Node.hpp>
 
 #include "TestResource.hpp"
 #include "ResourceListFixture.hpp"
@@ -123,6 +123,14 @@ BOOST_AUTO_TEST_CASE( rr_empty_list )
    std::shared_ptr<coffee::balance::ResourceList> emptyList = std::make_shared<coffee::balance::ResourceList>("EmptyList");
    balance::StrategyRoundRobin strategy(emptyList);
    BOOST_REQUIRE_THROW (strategy.apply(), ResourceUnavailableException);
+}
+
+BOOST_FIXTURE_TEST_CASE( rr_asXML, ResourceListFixture )
+{
+   balance::StrategyRoundRobin strategy(resourceList);
+   xml::Compiler compiler;
+   auto root = std::make_shared<xml::Node>("root");
+   BOOST_REQUIRE_EQUAL(compiler.apply(strategy.asXML(root)).size(), 682);
 }
 
 BOOST_FIXTURE_TEST_CASE( rr_balance_multithread, ResourceListFixture)

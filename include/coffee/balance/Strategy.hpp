@@ -60,7 +60,7 @@ public:
    /**
     * \return Summarize information of this instance in a coffee::xml::Node.
     */
-   virtual std::shared_ptr<xml::Node> asXML (std::shared_ptr<xml::Node>& parent) const noexcept;
+   virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept = 0;
 
    /**
     * \return The resource list associated to this instance.

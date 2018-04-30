@@ -90,6 +90,39 @@ BOOST_AUTO_TEST_CASE(byrange_sharing)
    {
       auto resourceList = ResourceListFixture::setup(ResourceListFixture::MaxResources, 0);
       std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
+      BOOST_REQUIRE_NO_THROW(mainStrategy.addRange(100, 200, strategy));
+   }
+
+   {
+      auto resourceList = ResourceListFixture::setup(ResourceListFixture::MaxResources, 100);
+      std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
+      BOOST_REQUIRE_NO_THROW(mainStrategy.addRange(205, 350, strategy));
+   }
+
+   {
+      auto resourceList = ResourceListFixture::setup(ResourceListFixture::MaxResources, 1000);
+      std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
+      BOOST_REQUIRE_NO_THROW(mainStrategy.addRange(351, 450, strategy));
+   }
+
+   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(120))->getKey(), 0);
+   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(220))->getKey(), 100);
+   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(420))->getKey(), 1000);
+
+   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(190))->getKey(), 1);
+   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(300))->getKey(), 101);
+   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(440))->getKey(), 1001);
+
+   BOOST_REQUIRE_THROW(mainStrategy.apply (2000), balance::ResourceUnavailableException);
+}
+
+BOOST_AUTO_TEST_CASE(byrange_asXML)
+{
+   balance::StrategyByRange mainStrategy;
+
+   {
+      auto resourceList = ResourceListFixture::setup(ResourceListFixture::MaxResources, 0);
+      std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
       mainStrategy.addRange(100, 200, strategy);
    }
 
@@ -105,13 +138,10 @@ BOOST_AUTO_TEST_CASE(byrange_sharing)
       mainStrategy.addRange(351, 450, strategy);
    }
 
-   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(120))->getKey(), 0);
-   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(220))->getKey(), 100);
-   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(420))->getKey(), 1000);
+   auto root = std::make_shared<xml::Node>("root");
+   auto asXML = mainStrategy.asXML(root);
 
-   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(190))->getKey(), 1);
-   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(300))->getKey(), 101);
-   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(440))->getKey(), 1001);
+   xml::Compiler compiler;
 
-   BOOST_REQUIRE_THROW(mainStrategy.apply (2000), balance::ResourceUnavailableException);
+   BOOST_REQUIRE_EQUAL(compiler.apply(root), "<root><StrategyByRange><Ranges><Range Begin=\"100\" End=\"200\" Strategy=\"balance::RoundRobin\"/><Range Begin=\"205\" End=\"350\" Strategy=\"balance::RoundRobin\"/><Range Begin=\"351\" End=\"450\" Strategy=\"balance::RoundRobin\"/></Ranges></StrategyByRange></root>");
 }

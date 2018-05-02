@@ -23,26 +23,13 @@ matrix:
       before_install:
         - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
       addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-5
-            - cmake
-            - libxml2-dev 
-            - libboost-filesystem-dev 
-            - libboost-test-dev 
-            - libsqlite3-dev:amd64 
-            - sqlite 
-            - sqlite3 
-            - libzmqpp-dev
         coverity_scan:
           project:
             name: "ciscoruiz/coffee"
             description: "A cross-platform C++14 project template"
           notification_email: cisco.tierra@gmail.com
-          build_command_prepend: "cov-configure --comptype gcc --compiler g++-5 --template && cmake -DCMAKE_CXX_COMPILER=g++-5 ."
-          build_command: "cmake --build ."
+          build_command_prepend: "cov-configure --comptype gcc --compiler g++ --template && cmake ."
+          build_command: "cmake -j 4"
           branch_pattern: develop
           
     - os: linux

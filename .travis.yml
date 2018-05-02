@@ -5,6 +5,25 @@ before_script:
    - sudo apt-get -qq update
    - sudo apt-get install -y libxml2-dev libboost-filesystem-dev libboost-test-dev libsqlite3-dev:amd64 sqlite sqlite3 libzmqpp-dev
 
+# See https://scan.coverity.com/projects/ciscoruiz-coffee/builds/new?tab=travis_ci
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "Fl+ffq9zCmboZ1Lha7oyY3A3aLt5S99cClyJHjMTc0jBaeETmy3BnJIhIQ7MsydL9wPFJ0SOMsNHOF65XsRw0cPOjtcX925ggirkthkN2MzWA2JxwCXRng7d7ktMTfCJt/44zpCnMQbaWAtqHRWNwUW2z9Urmy0k3DQZQ3K9JIKRPm/khmjARyc0YUaRgh0o7FaSuS9a637q9DGoq/cnWAq8cmda56XhVVbXuemPoYq0BFvdkQSAL0gvbU5lwSnaKDibGVF7t9KAxD/F/lFopWjVBVB+6kz4lISw2vzETmVE748uRJGBZaubzN21aPbgTV7OFaXD5wxRLlTNaAcUPYEohWKO3PxZX1WM0A5P9XxhhdmbYmT2atgQkyVaieFrnQCk2+DclJG6i09tEsIwWCGR8en8ceskk0dCTCS6Fg/5YRZQUucQ7ExbHJ1EYfK1QXEJrSldfeU/txst9Tu5qXcn+m9oImTPUCmbEVnugqd6dBIUi8TYEAjOmuSpj1MrU7gbJB6bUdlcJtM9ce8LaLl68JR2A6XtDuvm1dTuTuFX2PA+0iYA7NdenuBq+BjXW2FUcEAfWFw1k+nRSyEopMxVlrznD6/3OOgz97KyO/fXXGNh3zKDj3LS7zyGCHY7odexFhZsggND3Lyz8xVuGs8q7sh5dL7f4WKKqfUK8XI="
+
+before_install:
+  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+addons:
+  coverity_scan:
+    project:
+      name: "ciscoruiz/coffee"
+      description: "<Your project description here>"
+    notification_email: cisco.tierra@gmail.com
+    build_command_prepend: cmake .
+    build_command: make -j 4
+    branch_pattern: develop
    
 #
 # Build Matrix

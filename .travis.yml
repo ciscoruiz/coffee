@@ -10,27 +10,41 @@ env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
-   - secure: "Fl+ffq9zCmboZ1Lha7oyY3A3aLt5S99cClyJHjMTc0jBaeETmy3BnJIhIQ7MsydL9wPFJ0SOMsNHOF65XsRw0cPOjtcX925ggirkthkN2MzWA2JxwCXRng7d7ktMTfCJt/44zpCnMQbaWAtqHRWNwUW2z9Urmy0k3DQZQ3K9JIKRPm/khmjARyc0YUaRgh0o7FaSuS9a637q9DGoq/cnWAq8cmda56XhVVbXuemPoYq0BFvdkQSAL0gvbU5lwSnaKDibGVF7t9KAxD/F/lFopWjVBVB+6kz4lISw2vzETmVE748uRJGBZaubzN21aPbgTV7OFaXD5wxRLlTNaAcUPYEohWKO3PxZX1WM0A5P9XxhhdmbYmT2atgQkyVaieFrnQCk2+DclJG6i09tEsIwWCGR8en8ceskk0dCTCS6Fg/5YRZQUucQ7ExbHJ1EYfK1QXEJrSldfeU/txst9Tu5qXcn+m9oImTPUCmbEVnugqd6dBIUi8TYEAjOmuSpj1MrU7gbJB6bUdlcJtM9ce8LaLl68JR2A6XtDuvm1dTuTuFX2PA+0iYA7NdenuBq+BjXW2FUcEAfWFw1k+nRSyEopMxVlrznD6/3OOgz97KyO/fXXGNh3zKDj3LS7zyGCHY7odexFhZsggND3Lyz8xVuGs8q7sh5dL7f4WKKqfUK8XI="
+   - secure: "Z4ylcdiP4RBYqStUXOXD0MMQ1vHidkw63bRsQ1++XMejjoD6FdpxZywc2aVQ1AxoLKD/dEO/l/m9/GuFH8DojIrYkDr+k4Z84nC4rl9hsN2NsLp9xC1ShKgFEumf/pGJlVpjCEdTF6NEN0w8ejeJbS5EVlpPZz+4f2chgj1iR+IvaFx56OQApK/NtsTAIkHnrj2ZBwQ2/zKnTx3incXkGyf99irL/g3ErbkLWeiXXX280e/LnTGZ9fRHdyVCTb1T7KJc3PyXas8y0+g0EB7Adz24QHzDqSHlPjT/9+dIWFcNwMyLESQGA4QmfTtNQVTNq+dCX2YVtTofwisKzm5o85h237IpLiMNzbsThjx81SsiUnDNjh1OTe3/HFCurK9H6/2ToTp4UdddmEV6091D8QWXfJ3DnqC+HPCS0nxAPX2atkWZSfeppB+oB0j0+DtDb2m7z3zq/cm8TtoNa1/KjhG4EDTze4oyF/i0tbwuw1rfYrjajmqZhKLQy0nNSLvmcVQRo57U/HY2wJ/frJy/QiwvTd/f5R2Czm5c4xNI/4s1WppQseRCA7oi6Juxna2s0xTiIh4O+60AQV9vdXwJWeALWwy3PH8BjJbqhCSew9x+NXzXQwxWQMz1AafXFucAtseX9QL7irOsxglLRMRokGLiq9c6TC+p8kqWoQwDJ9U="
 
-before_install:
-  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
-
-addons:
-  coverity_scan:
-    project:
-      name: "ciscoruiz/coffee"
-      description: "<Your project description here>"
-    notification_email: cisco.tierra@gmail.com
-    build_command_prepend: cmake .
-    build_command: make -j 4
-    branch_pattern: develop
-   
 #
 # Build Matrix
 # 
 matrix: 
     include:
-
+   # Coverity Scan (Linux Debug)
+    - os: linux
+      compiler: gcc
+      before_install:
+        - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+            - cmake
+            - libxml2-dev 
+            - libboost-filesystem-dev 
+            - libboost-test-dev 
+            - libsqlite3-dev:amd64 
+            - sqlite 
+            - sqlite3 
+            - libzmqpp-dev
+        coverity_scan:
+          project:
+            name: "ciscoruiz/coffee"
+            description: "A cross-platform C++14 project template"
+          notification_email: cisco.tierra@gmail.com
+          build_command_prepend: "cov-configure --comptype gcc --compiler g++-5 --template && cmake -DCMAKE_CXX_COMPILER=g++-5 ."
+          build_command: "cmake --build ."
+          branch_pattern: develop
+          
     - os: linux
       env:
         - TEST="Codecov"

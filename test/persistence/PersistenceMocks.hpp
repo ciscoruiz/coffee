@@ -122,7 +122,7 @@ private:
       }
    }
    std::shared_ptr<Statement> allocateStatement(const char* name, const std::string& expression, const StatementParameters& parameters)
-      throw(std::bad_cast)
+      throw(basis::RuntimeException, std::bad_cast)
    {
       std::shared_ptr<Statement> result;
 
@@ -145,11 +145,11 @@ class CustomerObjectWrapper {
 public:
    explicit CustomerObjectWrapper(std::shared_ptr<persistence::Object> object) : m_object(object) { }
 
-   int getId() const throw(dbms::InvalidDataException) { return m_object->getPrimaryKey()->getInteger("id"); }
-   std::string getName() const throw(dbms::InvalidDataException) { return m_object->getString("name"); }
+   int getId() const throw(basis::RuntimeException, dbms::InvalidDataException) { return m_object->getPrimaryKey()->getInteger("id"); }
+   std::string getName() const throw(basis::RuntimeException, dbms::InvalidDataException) { return m_object->getString("name"); }
 
-   void setId(const int value) throw(dbms::InvalidDataException)  { m_object->getPrimaryKey()->setInteger("id", value); }
-   void setName(const std::string& value) throw(dbms::InvalidDataException) { m_object->setString("name", value); }
+   void setId(const int value) throw(basis::RuntimeException, dbms::InvalidDataException)  { m_object->getPrimaryKey()->setInteger("id", value); }
+   void setName(const std::string& value) throw(basis::RuntimeException, dbms::InvalidDataException) { m_object->setString("name", value); }
 
 private:
    std::shared_ptr<persistence::Object> m_object;

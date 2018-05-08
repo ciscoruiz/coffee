@@ -45,7 +45,7 @@ persistence::Class::Class(const ClassBuilder& classBuilder) :
 }
 
 std::shared_ptr<persistence::PrimaryKey> persistence::Class::createPrimaryKey() const
-   throw ()
+   throw(basis::RuntimeException)
 {
    PrimaryKeyBuilder builder;
 

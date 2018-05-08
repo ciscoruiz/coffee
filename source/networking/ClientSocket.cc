@@ -38,10 +38,16 @@ void networking::ClientSocket::initialize()
    static const std::chrono::milliseconds handshakeTime(50);
 
    connect();
-   int value = handshakeTime.count(); 
-   m_zmqSocket->setsockopt(ZMQ_SNDTIMEO, &value, sizeof(int));
-   m_zmqSocket->setsockopt(ZMQ_RCVTIMEO, &value, sizeof(int));
-   m_zmqSocket->setsockopt(ZMQ_LINGER, &value, sizeof(int));
+   int value = handshakeTime.count();
+   try {
+
+      m_zmqSocket->setsockopt(ZMQ_SNDTIMEO, &value, sizeof(int));
+      m_zmqSocket->setsockopt(ZMQ_RCVTIMEO, &value, sizeof(int));
+      m_zmqSocket->setsockopt(ZMQ_LINGER, &value, sizeof(int));
+   }
+   catch(zmq::error_t& ex) {
+      COFFEE_THROW_EXCEPTION(asString() << ",Error=" << ex.what());
+   }
 }
 
 void networking::ClientSocket::destroy()

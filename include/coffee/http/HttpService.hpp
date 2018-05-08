@@ -51,7 +51,7 @@ public:
 
    ~HttpService() { m_servlets.clear(); }
 
-   static std::shared_ptr<HttpService> instantiate(app::Application& app, std::shared_ptr<networking::NetworkingService> networkingService) noexcept;
+   static std::shared_ptr<HttpService> instantiate(app::Application& app, std::shared_ptr<networking::NetworkingService> networkingService) throw(basis::RuntimeException);
 
    void createServer(std::shared_ptr<http::url::URL> url) throw(basis::RuntimeException);
    std::shared_ptr<HttpClient> createClient(std::shared_ptr<http::url::URL> url) throw(basis::RuntimeException);

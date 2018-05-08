@@ -83,9 +83,13 @@ private:
    void attached(const Subject& subject) noexcept { }
    void update(const Subject& subject, const Event& event) noexcept {
       std::unique_lock <std::mutex> guard(mutex);
-      auto duration = static_cast<const time::TimeEvent&>(event).getDuration();
-      auto timeout = static_cast<const time::TimeEvent&>(event).getTimeout();
-      avgDeviation += duration - timeout;
+      try {
+         auto duration = static_cast<const time::TimeEvent&>(event).getDuration();
+         auto timeout = static_cast<const time::TimeEvent&>(event).getTimeout();
+         avgDeviation += duration - timeout;
+      }
+      catch(const basis::RuntimeException& ex) {
+      }
       conditionForStop.notify_one();
    }
    void detached(const Subject& subject) noexcept {  }

@@ -106,7 +106,7 @@ class MyDatabase : public mock::MockDatabase {
 public:
    explicit MyDatabase(app::Application& app) : mock::MockDatabase(app) {;}
 
-   static std::shared_ptr<MyDatabase> instantiate(app::Application& app) noexcept {
+   static std::shared_ptr<MyDatabase> instantiate(app::Application& app) throw(basis::RuntimeException) {
       auto result = std::make_shared<MyDatabase>(app);
       app.attach(result);
       return result;
@@ -358,7 +358,9 @@ struct DbmsDefineAndRun : public MockDatabaseFixture<test_dbms::MyDatabase> {
       mockConnection = std::dynamic_pointer_cast<mock::MockConnection>(connection);
    }
 
-   dbms::ResultCode  writeRecord(dbms::GuardStatement& writer, const int id) throw (dbms::DatabaseException) {
+   dbms::ResultCode writeRecord(dbms::GuardStatement& writer, const int id)
+      throw (dbms::DatabaseException, dbms::InvalidDataException)
+   {
       basis::StreamString name("the ");
       name << id;
 

@@ -83,7 +83,7 @@ public:
    static const std::shared_ptr<Abstract>& data(const_data_iterator ii) { return ii->second; }
    const_data_iterator search(const std::string& name) const noexcept { return m_datas.find(name); }
 
-   Set& operator=(const Set& other) noexcept;
+   Set& operator=(const Set& other) throw(basis::RuntimeException);
 
    int compare(const Set& other) const throw (basis::RuntimeException);
    int compare(const std::shared_ptr<Set>& other) const throw (basis::RuntimeException) { return compare(*other.get()); }
@@ -92,16 +92,16 @@ public:
    bool operator< (const Set& other) const throw (basis::RuntimeException){ return compare(other) < 0; }
    bool operator!=(const Set& other) const noexcept { return !operator==(other); }
 
-   int getInteger(const std::string& columnName) const throw(dbms::InvalidDataException);
+   int getInteger(const std::string& columnName) const throw(basis::RuntimeException, dbms::InvalidDataException);
    std::string getString(const std::string& columnName) const throw(basis::RuntimeException, dbms::InvalidDataException);
-   float getFloat(const std::string& columnName) const throw(dbms::InvalidDataException);
-   const basis::DataBlock& getDataBlock(const std::string& columnName) const throw(dbms::InvalidDataException);
-   const std::chrono::seconds& getDate(const std::string& columnName) const throw(dbms::InvalidDataException);
+   float getFloat(const std::string& columnName) const throw(basis::RuntimeException, dbms::InvalidDataException);
+   const basis::DataBlock& getDataBlock(const std::string& columnName) const throw(basis::RuntimeException, dbms::InvalidDataException);
+   const std::chrono::seconds& getDate(const std::string& columnName) const throw(basis::RuntimeException, dbms::InvalidDataException);
 
-   void setInteger(const std::string& columnName, const int value) throw(dbms::InvalidDataException);
+   void setInteger(const std::string& columnName, const int value) throw(basis::RuntimeException,dbms::InvalidDataException);
    void setString(const std::string& columnName, const std::string& value) throw(basis::RuntimeException, dbms::InvalidDataException);
-   void setFloat(const std::string& columnName, const float value) throw(dbms::InvalidDataException);
-   void setDataBlock(const std::string& columnName, const basis::DataBlock& value) throw(dbms::InvalidDataException);
+   void setFloat(const std::string& columnName, const float value) throw(basis::RuntimeException,dbms::InvalidDataException);
+   void setDataBlock(const std::string& columnName, const basis::DataBlock& value) throw(basis::RuntimeException,dbms::InvalidDataException);
    void setDate(const std::string& columnName, const std::chrono::seconds& date) throw(basis::RuntimeException, dbms::InvalidDataException);
 
 private:

@@ -73,6 +73,9 @@ void xml::DTD::initialize (const basis::DataBlock& buffer)
 {
    char filename[] = "/tmp/coffee_dtd.XXXXXX";
    int fd = mkstemp(filename);
+   if (fd < 0) {
+      COFFEE_THROW_EXCEPTION("Can not use temporary file " << filename);
+   }
    write(fd, buffer.data(), buffer.size());
    close(fd);
 

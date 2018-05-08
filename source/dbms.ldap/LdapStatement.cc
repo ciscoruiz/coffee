@@ -48,6 +48,8 @@ LdapStatement::LdapStatement(const Database& database, const char* name, const s
    handle(nullptr),
    currentEntry(nullptr)
 {
+   timeout.tv_sec = 0;
+   timeout.tv_usec = 0;
 }
 
 LdapStatement::~LdapStatement()

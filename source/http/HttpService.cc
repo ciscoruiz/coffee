@@ -65,7 +65,7 @@ private:
 
 //static
 std::shared_ptr<http::HttpService> http::HttpService::instantiate(app::Application& app, std::shared_ptr<networking::NetworkingService> networkingService)
-   noexcept
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<http::HttpService> result(new http::HttpService(app, networkingService));
    app.attach(result);

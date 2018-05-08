@@ -39,7 +39,12 @@ std::string DefaultFormatter::apply (const Level::_v level, const basis::StreamS
 
    basis::StreamString output;
 
-   output << "[" << basis::AsString::apply(second, "%d/%0m/%Y %T") << "] ";
+   try {
+      output << "[" << basis::AsString::apply(second, "%d/%0m/%Y %T") << "] ";
+   }
+   catch(const basis::Exception&) {
+   }
+
    output << "[thr=" << basis::AsHexString::apply((int64_t) pthread_self()) << "] ";
    output << Level::enumName(level) << " | ";
    output << methodName << " [" << file << "(" << lineno << ")]: ";

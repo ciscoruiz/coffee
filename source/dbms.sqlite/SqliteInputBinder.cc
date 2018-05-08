@@ -47,7 +47,7 @@ void sqlite::SqliteInputBinder::do_encode(Statement& statement, const int pos)
    std::shared_ptr<datatype::Abstract>& data(getData());
    sqlite3_stmt* impl = static_cast<SqliteStatement&>(statement).getImpl();
 
-   int rc;
+   int rc = SQLITE_OK;
 
    if (data->hasValue() == false) {
       rc = sqlite3_bind_null(impl, pos + 1);

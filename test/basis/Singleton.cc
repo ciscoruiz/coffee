@@ -37,7 +37,7 @@ public:
 private:
    int m_some;
 
-   TheClass () {;}
+   TheClass () : m_some(0) {;}
 
    friend class  coffee::basis::pattern::Singleton <TheClass>;
 };

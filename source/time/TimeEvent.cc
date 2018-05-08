@@ -52,7 +52,13 @@ basis::StreamString time::TimeEvent::asString() const
    result << " | Timeout=" << timeout;
 
    if (isStarted() && isFinished()) {
-      result << " | Duration=" << getDuration();
+      milliseconds ww(0);
+      try {
+         ww = getDuration();
+      }
+      catch(...) {
+      }
+      result << " | Duration=" << ww;
    }
 
    return result << "}";

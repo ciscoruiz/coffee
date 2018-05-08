@@ -24,7 +24,7 @@
 #ifndef _coffee_dbms_InvalidDataException_hpp
 #define _coffee_dbms_InvalidDataException_hpp
 
-#include <coffee/basis/Exception.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 namespace coffee {
 
@@ -35,13 +35,13 @@ namespace dbms {
  *
  * @see http://www.boost.org/doc/libs/1_39_0/libs/exception/doc/exception_types_as_simple_semantic_tags.html
  */
-class InvalidDataException : public basis::Exception {
+class InvalidDataException : public basis::RuntimeException {
 public:
    InvalidDataException (const std::string& str, const char* fromMethod, const char* fromFile, const unsigned fromLine) :
-      basis::Exception (str, fromMethod, fromFile, fromLine)
+      basis::RuntimeException (str, fromMethod, fromFile, fromLine)
    {;}
 
-   InvalidDataException (const InvalidDataException& other) : basis::Exception (other) {;}
+   InvalidDataException (const InvalidDataException& other) : basis::RuntimeException (other) {;}
 
    std::string asString () const noexcept {
       basis::StreamString str (this->filePosition());

@@ -79,7 +79,8 @@ basis::StreamString persistence::Class::asString() const noexcept {
    return result << " }";
 }
 
-std::shared_ptr<xml::Node> persistence::Class::asXML(std::shared_ptr<xml::Node>& parent) const noexcept
+std::shared_ptr<xml::Node> persistence::Class::asXML(std::shared_ptr<xml::Node>& parent) const
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<xml::Node> result = parent->createChild("persistence.Class");
    result->createAttribute("Name", this->getName());

@@ -79,7 +79,7 @@ std::shared_ptr<balance::Resource> balance::StrategyRoundRobin::apply (GuardReso
 }
 
 std::shared_ptr<xml::Node> balance::StrategyRoundRobin::asXML (std::shared_ptr<xml::Node>& parent) const
-   noexcept
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<xml::Node> result = parent->createChild("StrategyRoundRobin");
 

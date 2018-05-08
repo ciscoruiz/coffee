@@ -75,8 +75,8 @@ std::shared_ptr<balance::Resource> balance::StrategyIndexed::apply(GuardResource
    return result;
 }
 
-std::shared_ptr<xml::Node> balance::StrategyIndexed::asXML (std::shared_ptr<xml::Node>& parent) const
-   noexcept
+std::shared_ptr<xml::Node> balance::StrategyIndexed::asXML(std::shared_ptr<xml::Node>& parent) const
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<xml::Node> result = parent->createChild("StrategyIndexed");
 

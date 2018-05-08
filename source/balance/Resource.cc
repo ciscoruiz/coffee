@@ -44,7 +44,7 @@ basis::StreamString balance::Resource::asString() const
 
 //virtual
 std::shared_ptr<xml::Node> balance::Resource::asXML(std::shared_ptr<xml::Node>& parent) const
-   noexcept
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<xml::Node> result = parent->createChild("balance.Resource");
    result->createAttribute("Name", this->getName());

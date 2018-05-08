@@ -58,7 +58,7 @@ public:
    std::shared_ptr<PrimaryKey> createPrimaryKey() const throw ();
    std::shared_ptr<Object> createObject(const std::shared_ptr<PrimaryKey>& primaryKey) const throw(basis::RuntimeException);
 
-   std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
+   std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const throw(basis::RuntimeException);
 
    Class(const Class&) = delete;
 

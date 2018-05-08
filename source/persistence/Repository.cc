@@ -70,7 +70,7 @@ basis::StreamString persistence::Repository::asString() const
 }
 
 std::shared_ptr<xml::Node> persistence::Repository::asXML(std::shared_ptr<xml::Node>& parent) const
-   noexcept
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<xml::Node> result = parent->createChild("persistence.Repository");
 

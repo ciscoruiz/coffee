@@ -136,7 +136,7 @@ basis::StreamString app::Service::asString() const
 }
 
 std::shared_ptr<xml::Node> app::Service::asXML(std::shared_ptr<xml::Node>& parent) const
-   noexcept
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<xml::Node> result = parent->createChild("app.Service");
    Runnable::asXML(result);

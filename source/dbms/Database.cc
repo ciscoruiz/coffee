@@ -245,7 +245,7 @@ basis::StreamString dbms::Database::asString() const
 }
 
 std::shared_ptr<xml::Node> dbms::Database::asXML(std::shared_ptr<xml::Node>& parent) const
-   noexcept
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<xml::Node> result = parent->createChild("dbms.Database");
 

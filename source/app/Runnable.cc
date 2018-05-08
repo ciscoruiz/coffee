@@ -68,7 +68,7 @@ basis::StreamString app::Runnable::asString () const
 
 // virtual
 std::shared_ptr<xml::Node> app::Runnable::asXML (std::shared_ptr<xml::Node>& parent) const
-   noexcept
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<xml::Node> result = parent->createChild("Runnable");
 

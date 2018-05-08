@@ -58,7 +58,7 @@ public:
     */
    std::shared_ptr<Resource> apply(const int key) throw (ResourceUnavailableException);
 
-   std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
+   std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const throw(basis::RuntimeException);
 
 private:
    int m_key;

@@ -234,7 +234,7 @@ throw(basis::RuntimeException)
 }
 
 std::shared_ptr<xml::Node> networking::NetworkingService::asXML(std::shared_ptr<xml::Node>& parent) const
-   noexcept
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<xml::Node> result = parent->createChild("networking.Service");
 

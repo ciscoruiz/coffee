@@ -253,11 +253,16 @@ void app::Application::writeContext(const boost::filesystem::path& file)
 
    LOG_NOTICE("File: " << file.c_str());
 
-   std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("Context");
-   asXML(root);
-   xml::Compiler compiler;
-   out << compiler.apply(root) << std::endl;
-   out.close();
+   try {
+      std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("Context");
+      asXML(root);
+      xml::Compiler compiler;
+      out << compiler.apply(root) << std::endl;
+      out.close();
+   }
+   catch(const basis::RuntimeException& ex) {
+      logger::Logger::write(ex);
+   }
 }
 
 basis::StreamString app::Application::asString() const noexcept
@@ -269,7 +274,7 @@ basis::StreamString app::Application::asString() const noexcept
 }
 
 std::shared_ptr<xml::Node> app::Application::asXML(std::shared_ptr<xml::Node>& root) const
-   noexcept
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<xml::Node> result = root->createChild("app.Application");
 

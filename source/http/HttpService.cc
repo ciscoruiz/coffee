@@ -121,7 +121,7 @@ std::shared_ptr<http::HttpServlet> http::HttpService::findServlet(const std::str
 }
 
 std::shared_ptr<xml::Node> http::HttpService::asXML(std::shared_ptr<xml::Node>& parent) const
-   noexcept
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<xml::Node> result = parent->createChild("http.Service");
 

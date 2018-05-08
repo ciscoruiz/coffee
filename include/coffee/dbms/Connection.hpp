@@ -72,7 +72,7 @@ public:
 
    virtual basis::StreamString asString() const noexcept;
 
-   virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
+   virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const throw(basis::RuntimeException);
 
    Connection(const Connection&) = delete;
    Connection& operator=(const Connection&) = delete;

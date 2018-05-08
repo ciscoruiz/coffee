@@ -138,7 +138,7 @@ basis::StreamString balance::ResourceList::asString() const
 
 //virtual
 std::shared_ptr<xml::Node> balance::ResourceList::asXML(std::shared_ptr<xml::Node>& parent) const
-   noexcept
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<xml::Node> result = parent->createChild(this->getName());
 

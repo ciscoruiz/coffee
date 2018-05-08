@@ -154,7 +154,7 @@ basis::StreamString networking::Socket::asString() const
 
 //virtual
 std::shared_ptr<xml::Node> networking::Socket::asXML(std::shared_ptr<xml::Node>& parent) const
-   noexcept
+   throw(basis::RuntimeException)
 {
    auto xmlNode = parent->createChild("Socket");
    xmlNode->createAttribute("IsValid", basis::AsString::apply(isValid()));

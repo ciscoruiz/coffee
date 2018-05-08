@@ -64,7 +64,7 @@ public:
 
    std::shared_ptr<HttpServlet> findServlet(const std::string& path) throw(basis::RuntimeException);
 
-   std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
+   std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const throw(basis::RuntimeException);
 
 private:
    typedef std::unordered_map<std::string, std::shared_ptr<HttpServlet> > Servlets;

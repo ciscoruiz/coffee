@@ -72,7 +72,7 @@ public:
    /**
     * \return Summarize information of this instance in a coffee::xml::Node.
     */
-   virtual std::shared_ptr<xml::Node> asXML (std::shared_ptr<xml::Node>& parent) const noexcept;
+   virtual std::shared_ptr<xml::Node> asXML (std::shared_ptr<xml::Node>& parent) const throw(basis::RuntimeException);
 
 protected:
    explicit Resource(const std::string& name) : basis::NamedObject(name) {;}

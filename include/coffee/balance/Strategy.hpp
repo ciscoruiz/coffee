@@ -28,6 +28,7 @@
 
 #include <coffee/basis/NamedObject.hpp>
 #include <coffee/balance/ResourceUnavailableException.hpp>
+#include <coffee/basis/RuntimeException.hpp>
 
 namespace coffee {
 
@@ -60,7 +61,7 @@ public:
    /**
     * \return Summarize information of this instance in a coffee::xml::Node.
     */
-   virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept = 0;
+   virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const throw(basis::RuntimeException) = 0;
 
    /**
     * \return The resource list associated to this instance.

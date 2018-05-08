@@ -51,7 +51,7 @@ public:
 
    basis::StreamString asString() const noexcept;
 
-   std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const noexcept;
+   std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const throw(basis::RuntimeException);
 
    Repository(const Repository&) = delete;
 

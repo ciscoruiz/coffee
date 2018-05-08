@@ -78,7 +78,7 @@ void balance::StrategyByRange::addRange (const int newBottom, const int newTop, 
 }
 
 std::shared_ptr<xml::Node> balance::StrategyByRange::asXML (std::shared_ptr<xml::Node>& parent) const
-   noexcept
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<xml::Node> result = parent->createChild("StrategyByRange");
 

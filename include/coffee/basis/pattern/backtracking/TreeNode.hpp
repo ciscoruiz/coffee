@@ -178,7 +178,7 @@ public:
    }
 
 protected:
-   TreeNode() : m_predeccesor(NULL) {;}
+   TreeNode() : m_value(), m_predeccesor(NULL) {;}
 
    void clear() noexcept { m_successors.clear(); }
 

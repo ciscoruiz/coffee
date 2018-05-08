@@ -86,3 +86,10 @@ BOOST_FIXTURE_TEST_CASE(publish_subscribers, NetworkingFixture)
 
    BOOST_REQUIRE_EQUAL(counterHandler->getCounter(), maxMessages / 2 * maxSubscribers);
 }
+
+BOOST_FIXTURE_TEST_CASE(bad_publisher, NetworkingFixture) {
+   std::shared_ptr<networking::PublisherSocket> publisherSocket;
+
+   networking::SocketArguments arguments;
+   BOOST_REQUIRE_THROW(networkingService->createPublisherSocket(arguments.addEndPoint("tcp://1.1.1.1:5566")), basis::RuntimeException);
+}

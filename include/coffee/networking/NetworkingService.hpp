@@ -51,7 +51,7 @@ public:
 
    ~NetworkingService();
 
-   static std::shared_ptr<NetworkingService> instantiate(app::Application& app, const int zeroMQThreads = 1) noexcept;
+   static std::shared_ptr<NetworkingService> instantiate(app::Application& app, const int zeroMQThreads = 1) throw(basis::RuntimeException);
 
    std::shared_ptr<zmq::context_t>& getContext() noexcept { return m_context; }
 

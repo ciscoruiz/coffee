@@ -35,7 +35,12 @@ networking::Socket::Socket(networking::NetworkingService& networkingService, con
    m_socketType(socketType)
 {
    zmq::context_t& context = *networkingService.getContext();
-   m_zmqSocket = std::make_shared<zmq::socket_t>(context, m_socketType);
+   try {
+      m_zmqSocket = std::make_shared<zmq::socket_t>(context, m_socketType);
+   }
+   catch (zmq::error_t& ex) {
+      LOG_ERROR(asString() << ", Error=" << ex.what());
+   }
 }
 
 networking::Socket::~Socket()
@@ -51,24 +56,38 @@ void networking::Socket::Socket::bind()
       COFFEE_THROW_EXCEPTION(this->asString() << " does not have any end point");
    }
 
-   try {
-      for (auto& endPoint : m_endPoints) {
+   if (!m_zmqSocket) {
+      COFFEE_THROW_EXCEPTION("Socket was not initialized successfully");
+   }
+
+   bool someWorks = false;
+
+   for (auto& endPoint : m_endPoints) {
+      try {
          m_zmqSocket->bind(endPoint.c_str());
+         someWorks = true;
+      }
+      catch(const zmq::error_t& ex) {
+         LOG_ERROR(this->asString() << ", Error=" << ex.what());
       }
    }
-   catch(zmq::error_t& ex) {
-      COFFEE_THROW_EXCEPTION(this->asString() << ", Error=" << ex.what());
+
+   if (!someWorks) {
+      COFFEE_THROW_EXCEPTION(asString() << " does not have any valid end point");
    }
 }
 
 void networking::Socket::unbind()
    noexcept
 {
+   if (!m_zmqSocket)
+      return;
+
    for (auto& endPoint : m_endPoints) {
       try {
          m_zmqSocket->unbind(endPoint.c_str());
       }
-      catch (zmq::error_t& ex) {
+      catch (const zmq::error_t& ex) {
          LOG_WARN(asString() << ", Error=" << ex.what());
       }
    }
@@ -79,6 +98,10 @@ void networking::Socket::connect()
 {
    if (m_endPoints.empty()) {
       COFFEE_THROW_EXCEPTION(this->asString() << " does not have any end point");
+   }
+
+   if (!m_zmqSocket) {
+      COFFEE_THROW_EXCEPTION("Socket was not initialized successfully");
    }
 
    try {
@@ -94,6 +117,9 @@ void networking::Socket::connect()
 void networking::Socket::disconnect()
    noexcept
 {
+   if (!m_zmqSocket)
+      return;
+
    for (auto& endPoint : m_endPoints) {
       try {
          m_zmqSocket->disconnect(endPoint.c_str());

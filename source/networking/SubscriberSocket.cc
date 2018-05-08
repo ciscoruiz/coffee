@@ -47,7 +47,12 @@ void networking::SubscriberSocket::initialize()
    connect();
 
    for (auto& subscrition : m_subscriptions) {
-      m_zmqSocket->setsockopt(ZMQ_SUBSCRIBE, subscrition.c_str(), subscrition.size());
+      try {
+         m_zmqSocket->setsockopt(ZMQ_SUBSCRIBE, subscrition.c_str(), subscrition.size());
+      }
+      catch (const zmq::error_t& ex) {
+         LOG_WARN(asString() << ",Subscription=" << subscrition << ", Error=" << ex.what());
+      }
    }
 }
 

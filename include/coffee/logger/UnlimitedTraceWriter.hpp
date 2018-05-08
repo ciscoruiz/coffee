@@ -48,9 +48,9 @@ public:
    /**
     * Destructor.
     */
-   virtual ~UnlimitedTraceWriter () { closeStream (); }
+   virtual ~UnlimitedTraceWriter() { closeStream(); }
 
-   int getStream () const noexcept { return m_stream; }
+   int getStream() const noexcept { return m_stream; }
 
 protected:
    void apply (const Level::_v level, const std::string& line) noexcept;
@@ -60,10 +60,10 @@ private:
    const std::string m_path;
    int m_stream;
 
-   void initialize () throw (basis::RuntimeException);
+   void initialize() throw (basis::RuntimeException);
 
-   void openStream () throw (basis::RuntimeException);
-   void closeStream () noexcept;
+   void openStream() throw (basis::RuntimeException);
+   void closeStream() noexcept;
 };
 
 }

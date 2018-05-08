@@ -129,7 +129,7 @@ std::string basis::AsString::apply(const std::chrono::seconds& value)
 }
 
 std::string basis::AsString::apply(const std::chrono::seconds& value, const char* format)
-   noexcept
+   throw(basis::RuntimeException)
 {
    char aux[64];
 

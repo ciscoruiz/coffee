@@ -40,7 +40,7 @@ private:
    ProcessResult::_v process(HttpProtocolDecoder& context, const Token& token) const throw(basis::RuntimeException);
 
    static std::shared_ptr<HttpMessage> tryResponse(const std::vector<std::string>& items) noexcept;
-   static std::shared_ptr<HttpMessage> tryRequest(const std::vector<std::string>& items) noexcept;
+   static std::shared_ptr<HttpMessage> tryRequest(const std::vector<std::string>& items) throw(basis::RuntimeException);
 
    static bool tryMethod(const std::string& item, HttpRequest::Method::_v& value) noexcept;
    static bool tryHttpVersion(const std::string& item, std::pair<uint16_t, uint16_t>& httpVersion) noexcept;

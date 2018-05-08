@@ -42,7 +42,7 @@ const std::string networking::NetworkingService::Implementation("ZeroMQ");
 
 // static
 std::shared_ptr<networking::NetworkingService> networking::NetworkingService::instantiate(app::Application& application, const int zeroMQThreads)
-   noexcept
+   throw(basis::RuntimeException)
 {
    std::shared_ptr<NetworkingService> result(new NetworkingService(application, zeroMQThreads));
    application.attach(result);
@@ -112,13 +112,18 @@ void networking::NetworkingService::broker(NetworkingService& networkingService)
 
             if (iisocket != poll->m_asyncSockets.end()) {
                auto socket = iisocket->second;
-               socket->getZmqSocket()->recv(&zmqMessage);
-               basis::DataBlock message((const char*) zmqMessage.data(), zmqMessage.size());
                try {
-                  socket->handle(message);
+                  socket->getZmqSocket()->recv(&zmqMessage);
+                  basis::DataBlock message((const char*) zmqMessage.data(), zmqMessage.size());
+                  try {
+                     socket->handle(message);
+                  }
+                  catch(basis::RuntimeException& ex) {
+                     logger::Logger::write(ex);
+                  }
                }
-               catch(basis::RuntimeException& ex) {
-                  logger::Logger::write(ex);
+               catch (zmq::error_t& ex) {
+                  LOG_ERROR(iisocket->second->asString() << ", Error=" << ex.what());
                }
             }
          }

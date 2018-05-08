@@ -51,7 +51,13 @@ void networking::PublisherSocket::send(const basis::DataBlock& response)
 {
    zmq::message_t zmqMessage(response.size());
    coffee_memcpy(zmqMessage.data(), response.data(), response.size());
-   m_zmqSocket->send(zmqMessage);
+
+   try {
+      m_zmqSocket->send(zmqMessage);
+   }
+   catch (zmq::error_t& ex) {
+      COFFEE_THROW_EXCEPTION(asString() << ", Error=" << ex.what());
+   }
 }
 
 basis::StreamString networking::PublisherSocket::asString() const

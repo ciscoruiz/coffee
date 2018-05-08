@@ -28,7 +28,7 @@
 #include <string>
 
 #include <coffee/config/defines.hpp>
-
+#include <coffee/basis/RuntimeException.hpp>
 
 #include <chrono>
 
@@ -93,7 +93,7 @@ public:
    /**
     * \return A string with the seconds
     */
-   static std::string apply(const std::chrono::seconds& value, const char* format) noexcept;
+   static std::string apply(const std::chrono::seconds& value, const char* format) throw(RuntimeException);
 
    /**
     * \return A string with the milliseconds

@@ -91,7 +91,7 @@ std::shared_ptr<http::HttpMessage> HttpProtocolWaitingMessage::tryResponse(const
 }
 
 std::shared_ptr<http::HttpMessage> HttpProtocolWaitingMessage::tryRequest(const std::vector<std::string>& items)
-   noexcept
+   throw(basis::RuntimeException)
 {
    static std::shared_ptr<http::HttpMessage> empty;
 

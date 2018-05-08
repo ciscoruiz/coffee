@@ -60,9 +60,10 @@ void LdapConnection::open()
       if (rc == LDAP_CONNECT_ERROR) {
          char* errorMessage;
          ldap_get_option(ldapHandle, LDAP_OPT_DIAGNOSTIC_MESSAGE, (void*)&errorMessage);
-         basis::RuntimeException ex(std::string(errorMessage), COFFEE_FILE_LOCATION);
+         ResultCode resultCode(getDatabase(), rc, errorMessage);
+         coffee::dbms::DatabaseException dbex (resultCode, COFFEE_FILE_LOCATION);
          ldap_memfree(errorMessage);
-         throw ex;
+         throw dbex;
       }
       checkResult(rc, COFFEE_FILE_LOCATION);
    }

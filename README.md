@@ -37,7 +37,7 @@ This framework contains a set of modules to boost productivity while developing 
 | coffee.dbms.ldap | Module to work with LDAP directory. |
 | coffee.persistence | High Level of classes to work over a database without has to deal with SQL sentences, transactions and so on, it will work with classes, primrary keys and object that will be read/write from the DBMS. |
 | coffee.networking | Service to manage asynchronuos messages using [ZeroMQ](http://zguide.zeromq.org/page:all) library. |
-| coffee.http | This will not implement all cases defined by RFC 2616, but it will define cases which I needed to develop an HTTP server and client, in a very easy way. |
+| coffee.http | This will not implement all cases defined by RFC 2616, but it will define cases which I needed to develop microservices in a very easy way and very effective way |
 
 ### Prerequisites
 

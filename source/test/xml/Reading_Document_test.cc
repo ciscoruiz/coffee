@@ -261,7 +261,7 @@ BOOST_AUTO_TEST_CASE(file_document)
 {
    boost::filesystem::path coffeePath(boost::filesystem::current_path());
 
-   boost::filesystem::path xmlPath(coffeePath.native() + "/test/xml/example00.xml");
+   boost::filesystem::path xmlPath(coffeePath.native() + "/source/test/xml/example00.xml");
 
    boost::filesystem::path file(xmlPath);
 
@@ -311,7 +311,7 @@ BOOST_AUTO_TEST_CASE(file_notexisting_document)
 BOOST_AUTO_TEST_CASE(file_bad_document)
 {
    boost::filesystem::path coffeePath(boost::filesystem::current_path());
-   boost::filesystem::path xmlPath(coffeePath.native() + "/test/xml/bad.xml");
+   boost::filesystem::path xmlPath(coffeePath.native() + "/source/test/xml/bad.xml");
 
    Document doc;
 

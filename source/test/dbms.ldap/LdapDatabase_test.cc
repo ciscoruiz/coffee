@@ -54,7 +54,7 @@ static void ldapParallelRun(coffee::app::Application& app) {
 
 struct LdapFixture  {
    LdapFixture() : app ("TestLdapApplication"){
-      const char* logFileName = "test/dbms.ldap/trace.log";
+      const char* logFileName = "source/test/dbms.ldap/trace.log";
       unlink (logFileName);
       logger::Logger::initialize(std::make_shared<logger::UnlimitedTraceWriter>(logFileName));
       logger::Logger::setLevel(logger::Level::Debug);

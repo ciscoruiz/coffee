@@ -38,7 +38,7 @@ const char* NetworkingFixture::upperServerEndPoint = "tcp://*:5555";
 
 NetworkingFixture::NetworkingFixture() : app("TestAppNetworkingFixture")
 {
-   const char* logFileName = "test/networking/trace.log";
+   const char* logFileName = "source/test/networking/trace.log";
    unlink (logFileName);
    logger::Logger::initialize(std::make_shared<logger::UnlimitedTraceWriter>(logFileName));
 //   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());

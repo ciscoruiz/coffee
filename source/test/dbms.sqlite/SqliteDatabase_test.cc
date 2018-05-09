@@ -198,7 +198,7 @@ struct SqliteFixture  {
    static  boost::filesystem::path dbPath;
 
    SqliteFixture() : app ("TestSqliteApplication"){
-      const char* logFileName = "test/dbms.sqlite/trace.log";
+      const char* logFileName = "source/test/dbms.sqlite/trace.log";
       unlink (logFileName);
       logger::Logger::initialize(std::make_shared<logger::UnlimitedTraceWriter>(logFileName));
       logger::Logger::setLevel(logger::Level::Debug);

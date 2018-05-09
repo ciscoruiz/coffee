@@ -145,7 +145,7 @@ BOOST_FIXTURE_TEST_CASE(networking_write_xml, NetworkingFixture)
       BOOST_REQUIRE(clientSocket);
    }
 
-   app.setOutputContextFilename("test/networking/context.xml");
+   app.setOutputContextFilename("source/test/networking/context.xml");
 
    std::raise(SIGUSR1);
 

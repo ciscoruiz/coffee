@@ -33,7 +33,7 @@ using namespace coffee;
 mock::MockDatabase::MockDatabase(app::Application& app) :
    dbms::Database(app, "map", app.getTitle().c_str())
 {
-   const char* logFileName = "test/dbms/trace.log";
+   const char* logFileName = "source/test/dbms/trace.log";
 
    unlink (logFileName);
 

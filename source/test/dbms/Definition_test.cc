@@ -309,6 +309,8 @@ BOOST_AUTO_TEST_CASE(dbms_define_structure)
 
    auto database = test_dbms::MyDatabase::instantiate(application);
 
+   BOOST_REQUIRE(database);
+
    const coffee::dbms::ConnectionParameters zero("0", "0");
    auto connection = database->createConnection("0", zero);
 

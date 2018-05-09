@@ -40,7 +40,7 @@ struct TimeFixture {
       app("TestAppTimeFixture"),
       finalizeEmpty(true)
    {
-      const char* logFileName = "test/time/trace.log";
+      const char* logFileName = "source/test/time/trace.log";
       unlink (logFileName);
       coffee::logger::Logger::initialize(std::make_shared<coffee::logger::UnlimitedTraceWriter>(logFileName));
       coffee::logger::Logger::setLevel(coffee::logger::Level::Debug);

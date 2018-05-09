@@ -75,7 +75,7 @@ public:
 
 HttpFixture::HttpFixture() : app("TestAppHttpFixture")
 {
-   const char* logFileName = "test/http/trace.log";
+   const char* logFileName = "source/test/http/trace.log";
    unlink (logFileName);
    logger::Logger::initialize(std::make_shared<logger::UnlimitedTraceWriter>(logFileName));
 //   logger::Logger::initialize(std::make_shared<logger::TtyWriter>());
@@ -264,7 +264,7 @@ BOOST_FIXTURE_TEST_CASE(http_service_request_with_response, HttpFixture) {
 
 BOOST_FIXTURE_TEST_CASE(networking_write_xml, HttpFixture)
 {
-   app.setOutputContextFilename("test/http/context.xml");
+   app.setOutputContextFilename("source/test/http/context.xml");
 
    std::raise(SIGUSR1);
 

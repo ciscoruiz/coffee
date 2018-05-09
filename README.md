@@ -3,6 +3,10 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/765adc76c848465ba47a244973ef654a)](https://app.codacy.com/app/cisco.tierra/coffee?utm_source=github.com&utm_medium=referral&utm_content=ciscoruiz/coffee&utm_campaign=badger)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/ciscoruiz/coffee/graphs/commit-activity)
 [![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)](https://github.com/ciscoruiz)
+<a href="https://scan.coverity.com/projects/ciscoruiz-coffee">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/15097/badge.svg"/>
+</a>
 [![Build Status](https://travis-ci.org/ciscoruiz/coffee.svg?branch=master)](https://travis-ci.org/ciscoruiz/coffee)
 [![Build Status](https://semaphoreci.com/api/v1/ciscoruiz/coffee/branches/develop/badge.svg)](https://semaphoreci.com/ciscoruiz/coffee)
 [![codecov](https://codecov.io/gh/ciscoruiz/coffee/branch/master/graph/badge.svg)](https://codecov.io/gh/ciscoruiz/coffee)
@@ -33,7 +37,7 @@ This framework contains a set of modules to boost productivity while developing 
 | coffee.dbms.ldap | Module to work with LDAP directory. |
 | coffee.persistence | High Level of classes to work over a database without has to deal with SQL sentences, transactions and so on, it will work with classes, primrary keys and object that will be read/write from the DBMS. |
 | coffee.networking | Service to manage asynchronuos messages using [ZeroMQ](http://zguide.zeromq.org/page:all) library. |
-| coffee.http | This will not implement all cases defined by RFC 2616, but it will define cases which I needed to develop an HTTP server and client, in a very easy way. |
+| coffee.http | This will not implement all cases defined by RFC 2616, but it will define cases which I needed to develop microservices in a very easy way and very effective way |
 
 ### Prerequisites
 

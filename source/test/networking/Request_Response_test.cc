@@ -73,6 +73,27 @@ BOOST_FIXTURE_TEST_CASE(networking_multiple_ip, NetworkingFixture)
    }
 }
 
+BOOST_FIXTURE_TEST_CASE(networking_ipv6, NetworkingFixture)
+{
+   {
+      networking::SocketArguments arguments;
+      arguments.setMessageHandler(UpperStringHandler::instantiate()).addEndPoint("tcp://[::1]:5557").activateIPv6();
+      auto ipv6Server = networkingService->createServerSocket(arguments);
+      BOOST_REQUIRE(ipv6Server);
+   }
+
+   // To give time to NetworkingService to detect new server socket
+   usleep(100000);
+
+   networking::SocketArguments arguments;
+   auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://[0:0:0:0:0:0:0:1]:5557").activateIPv6());
+   BOOST_REQUIRE(clientSocket);
+
+   basis::DataBlock request("work");
+   auto response = clientSocket->send(request);
+   BOOST_REQUIRE_EQUAL(std::string(response.data()), "WORK");
+}
+
 BOOST_FIXTURE_TEST_CASE(networking_create_new_server, NetworkingFixture)
 {
    {

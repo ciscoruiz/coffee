@@ -37,24 +37,27 @@ class MessageHandler;
 
 class SocketArguments {
 public:
-   SocketArguments() {;}
+   SocketArguments() : m_useIPv6(false) {;}
    ~SocketArguments() { m_endPoints.clear(); }
 
    SocketArguments& addEndPoint(const EndPoints::value_type& endPoint) noexcept { m_endPoints.push_back(endPoint); return *this; }
    SocketArguments& setName(const std::string& name) noexcept { m_name = name; return *this; }
    SocketArguments& setMessageHandler(const std::shared_ptr<MessageHandler> messageHandler) { m_messageHandler = messageHandler; return *this; }
    SocketArguments& addSubscription(const Subscriptions::value_type& subscription) noexcept { m_subscriptions.push_back(subscription); return *this; }
+   SocketArguments& activateIPv6() noexcept { m_useIPv6 = true; return *this; }
 
    const EndPoints& getEndPoints() const noexcept { return m_endPoints; }
    const std::string& getName() const noexcept { return m_name; }
    std::shared_ptr<MessageHandler> getMessageHandler() const noexcept { return m_messageHandler; }
    const Subscriptions& getSubscriptions() const noexcept { return m_subscriptions; }
+   bool isActivatedIPv6() const noexcept { return m_useIPv6; }
 
 private:
    EndPoints m_endPoints;
    std::shared_ptr<MessageHandler> m_messageHandler;
    std::string m_name;
    Subscriptions m_subscriptions;
+   bool m_useIPv6;
 };
 
 }

@@ -53,6 +53,9 @@ else (DOXYGEN_FOUND)
   message("Doxygen need to be installed to generate the doxygen documentation")
 endif (DOXYGEN_FOUND)
 
+find_path(LDAP NAMES "ldap.h")
+find_path(ZMQ NAMES "zmq.hpp")
+
 add_subdirectory(source/src/config)
 add_subdirectory(source/src/basis)
 add_subdirectory(source/src/xml)
@@ -62,10 +65,21 @@ add_subdirectory(source/src/app)
 add_subdirectory(source/src/time)
 add_subdirectory(source/src/dbms)
 add_subdirectory(source/src/dbms.sqlite)
-add_subdirectory(source/src/dbms.ldap)
+
+if (LDAP STREQUAL "LDAP-NOTFOUND")
+   message ("ldap.h was not found, it will not compile LDAP module")
+else (LDAP STREQUAL "LDAP-NOTFOUND")
+   add_subdirectory(source/src/dbms.ldap)
+endif (LDAP STREQUAL "LDAP-NOTFOUND")
+
 add_subdirectory(source/src/persistence)
-add_subdirectory(source/src/networking)
-add_subdirectory(source/src/http)
+
+if (ZMQ STREQUAL "ZMQ-NOTFOUND")
+   message ("zmq.hpp was not found, it will not compile Networking module, nor HTTP module")
+else (ZMQ STREQUAL "ZMQ-NOTFOUND")
+   add_subdirectory(source/src/networking)
+   add_subdirectory(source/src/http)
+endif (ZMQ STREQUAL "ZMQ-NOTFOUND")
 
 enable_testing()
 
@@ -79,10 +93,17 @@ add_subdirectory(source/test/time)
 add_subdirectory(source/test/dbms.mock)
 add_subdirectory(source/test/dbms)
 add_subdirectory(source/test/dbms.sqlite)
-add_subdirectory(source/test/dbms.ldap)
+
+if (NOT LDAP STREQUAL "LDAP-NOTFOUND")
+   add_subdirectory(source/test/dbms.ldap)
+endif (NOT LDAP STREQUAL "LDAP-NOTFOUND")
+
 add_subdirectory(source/test/persistence)
-add_subdirectory(source/test/networking)
-add_subdirectory(source/test/http)
+
+if (NOT ZMQ STREQUAL "ZMQ-NOTFOUND")
+   add_subdirectory(source/test/networking)
+   add_subdirectory(source/test/http)
+endif (NOT ZMQ STREQUAL "ZMQ-NOTFOUND")
 
 include(CTest)
 
@@ -95,8 +116,15 @@ add_test(test_coffee_app source/test/app/test_coffee_app)
 add_test(test_coffee_dbms source/test/dbms/test_coffee_dbms)
 add_test(test_coffee_time source/test/time/test_coffee_time)
 add_test(test_coffee_dbms_sqlite source/test/dbms.sqlite/test_coffee_dbms_sqlite)
-add_test(test_coffee_dbms_ldap source/test/dbms.ldap/test_coffee_dbms_ldap)
+
+if (NOT LDAP STREQUAL "LDAP-NOTFOUND")
+   add_test(test_coffee_dbms_ldap source/test/dbms.ldap/test_coffee_dbms_ldap)
+endif (NOT LDAP STREQUAL "LDAP-NOTFOUND")
+
 add_test(test_coffee_persistence source/test/persistence/test_coffee_persistence)
-add_test(test_coffee_networking source/test/networking/test_coffee_networking)
-add_test(test_coffee_http source/test/http/test_coffee_http)
+
+if (NOT ZMQ STREQUAL "ZMQ-NOTFOUND")
+   add_test(test_coffee_networking source/test/networking/test_coffee_networking)
+   add_test(test_coffee_http source/test/http/test_coffee_http)
+endif (NOT ZMQ STREQUAL "ZMQ-NOTFOUND")
 

@@ -37,6 +37,12 @@ networking::Socket::Socket(networking::NetworkingService& networkingService, con
    zmq::context_t& context = *networkingService.getContext();
    try {
       m_zmqSocket = std::make_shared<zmq::socket_t>(context, m_socketType);
+
+      if (socketArguments.isActivatedIPv6()) {
+         LOG_DEBUG("Activate IPv6 for " << asString());
+         int value = 1;
+         m_zmqSocket->setsockopt(ZMQ_IPV6, &value, sizeof(int));
+      }
    }
    catch (zmq::error_t& ex) {
       LOG_ERROR(asString() << ", Error=" << ex.what());

@@ -30,6 +30,7 @@
 #include <coffee/xml/Attribute.hpp>
 #include <coffee/xml/Document.hpp>
 #include <coffee/xml/Node.hpp>
+#include <coffee/logger/Logger.hpp>
 
 #include "NetworkingFixture.hpp"
 
@@ -70,6 +71,63 @@ BOOST_FIXTURE_TEST_CASE(networking_multiple_ip, NetworkingFixture)
       basis::DataBlock request("this is other");
       auto response = clientSocket->send(request);
       BOOST_REQUIRE_EQUAL(std::string(response.data()), "THIS IS OTHER");
+   }
+}
+
+BOOST_FIXTURE_TEST_CASE(networking_ipv6, NetworkingFixture)
+{
+   {
+      networking::SocketArguments arguments;
+      arguments.setMessageHandler(UpperStringHandler::instantiate()).addEndPoint("tcp://[::1]:5557").activateIPv6();
+      auto ipv6Server = networkingService->createServerSocket(arguments);
+      BOOST_REQUIRE(ipv6Server);
+   }
+
+   // To give time to NetworkingService to detect new server socket
+   usleep(100000);
+
+   networking::SocketArguments arguments;
+   auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://[0:0:0:0:0:0:0:1]:5557").activateIPv6());
+   BOOST_REQUIRE(clientSocket);
+
+   basis::DataBlock request("work");
+   auto response = clientSocket->send(request);
+   BOOST_REQUIRE_EQUAL(std::string(response.data()), "WORK");
+}
+
+class MuteHandler : public coffee::networking::MessageHandler {
+public:
+   MuteHandler() : coffee::networking::MessageHandler("MuteHandler") {;}
+
+   static std::shared_ptr<MuteHandler> instantiate() { return std::make_shared<MuteHandler>(); }
+
+protected:
+   void apply(const coffee::basis::DataBlock& message, coffee::networking::AsyncSocket& serverSocket)
+      throw(coffee::basis::RuntimeException) { LOG_DEBUG("Ignore message"); }
+};
+
+BOOST_FIXTURE_TEST_CASE(networking_mute_server, NetworkingFixture) {
+   {
+      networking::SocketArguments arguments;
+      arguments.setMessageHandler(MuteHandler::instantiate()).addEndPoint("tcp://[::1]:5557").activateIPv6();
+      auto ipv6Server = networkingService->createServerSocket(arguments);
+      BOOST_REQUIRE(ipv6Server);
+   }
+
+   // To give time to NetworkingService to detect new server socket
+   usleep(100000);
+
+   networking::SocketArguments arguments;
+   auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://[0:0:0:0:0:0:0:1]:5557").activateIPv6());
+   BOOST_REQUIRE(clientSocket);
+
+   try {
+      basis::DataBlock request("work");
+      clientSocket->send(request);
+      BOOST_REQUIRE(false);
+   }
+   catch(const basis::RuntimeException& ex) {
+      BOOST_REQUIRE(ex.asString().find("did not receive any response"));
    }
 }
 

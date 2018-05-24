@@ -32,7 +32,7 @@
 
 #include <coffee/time/SCCS.hpp>
 
-coffee_sccs_define_tag (time,release-18.05.09);
+coffee_sccs_define_tag (time,release-18.05.24);
 
 using namespace coffee;
 

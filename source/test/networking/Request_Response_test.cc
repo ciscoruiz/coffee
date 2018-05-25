@@ -78,7 +78,7 @@ BOOST_FIXTURE_TEST_CASE(networking_ipv6, NetworkingFixture)
 {
    {
       networking::SocketArguments arguments;
-      arguments.setMessageHandler(UpperStringHandler::instantiate()).addEndPoint("tcp://[::1]:5557").activateIPv6();
+      BOOST_REQUIRE_NO_THROW(arguments.setMessageHandler(UpperStringHandler::instantiate()).addEndPoint("tcp://[::1]:5557").activateIPv6());
       auto ipv6Server = networkingService->createServerSocket(arguments);
       BOOST_REQUIRE(ipv6Server);
    }
@@ -109,7 +109,7 @@ protected:
 BOOST_FIXTURE_TEST_CASE(networking_mute_server, NetworkingFixture) {
    {
       networking::SocketArguments arguments;
-      arguments.setMessageHandler(MuteHandler::instantiate()).addEndPoint("tcp://[::1]:5557").activateIPv6();
+      BOOST_REQUIRE_NO_THROW(arguments.setMessageHandler(MuteHandler::instantiate()).addEndPoint("tcp://[::1]:5557").activateIPv6());
       auto ipv6Server = networkingService->createServerSocket(arguments);
       BOOST_REQUIRE(ipv6Server);
    }

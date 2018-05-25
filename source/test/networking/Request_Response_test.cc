@@ -31,6 +31,7 @@
 #include <coffee/xml/Document.hpp>
 #include <coffee/xml/Node.hpp>
 #include <coffee/logger/Logger.hpp>
+#include <iostream>
 
 #include "NetworkingFixture.hpp"
 
@@ -76,9 +77,19 @@ BOOST_FIXTURE_TEST_CASE(networking_multiple_ip, NetworkingFixture)
 
 BOOST_FIXTURE_TEST_CASE(networking_ipv6, NetworkingFixture)
 {
+   // In next version of BOOST unit test there is a better way to do this, but we are limited
+   // by the version used in TravisCI Boost 1.54.
+
+   const char* testValue = std::getenv("TEST");
+
+   if (testValue != nullptr && coffee_strcmp(testValue, "Codecov") == 0) {
+      std::cout << "TravisCI does not offer support for IPv6 networking, case networking_ipv6 can not be applied" << std::endl << std::endl;
+      return;
+   }
+
    {
       networking::SocketArguments arguments;
-      arguments.setMessageHandler(UpperStringHandler::instantiate()).addEndPoint("tcp://[::1]:5557").activateIPv6();
+      BOOST_REQUIRE_NO_THROW(arguments.setMessageHandler(UpperStringHandler::instantiate()).addEndPoint("tcp://[::1]:5557").activateIPv6());
       auto ipv6Server = networkingService->createServerSocket(arguments);
       BOOST_REQUIRE(ipv6Server);
    }
@@ -109,7 +120,7 @@ protected:
 BOOST_FIXTURE_TEST_CASE(networking_mute_server, NetworkingFixture) {
    {
       networking::SocketArguments arguments;
-      arguments.setMessageHandler(MuteHandler::instantiate()).addEndPoint("tcp://[::1]:5557").activateIPv6();
+      BOOST_REQUIRE_NO_THROW(arguments.setMessageHandler(MuteHandler::instantiate()).addEndPoint("tcp://127.0.0.1:5557"));
       auto ipv6Server = networkingService->createServerSocket(arguments);
       BOOST_REQUIRE(ipv6Server);
    }
@@ -118,7 +129,7 @@ BOOST_FIXTURE_TEST_CASE(networking_mute_server, NetworkingFixture) {
    usleep(100000);
 
    networking::SocketArguments arguments;
-   auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://[0:0:0:0:0:0:0:1]:5557").activateIPv6());
+   auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://127.0.0.1:5557"));
    BOOST_REQUIRE(clientSocket);
 
    try {

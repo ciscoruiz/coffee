@@ -33,7 +33,7 @@
 
 #include <coffee/dbms.sqlite/SCCS.hpp>
 
-coffee_sccs_define_tag (dbms_sqlite,release-18.05.24);
+coffee_sccs_define_tag (dbms_sqlite,release-18.05.25);
 
 using namespace coffee;
 

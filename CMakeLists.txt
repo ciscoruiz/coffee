@@ -21,12 +21,14 @@ if (COFFEE_XML_PATH)
 endif()
 
 set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
-SET(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage -fno-inline -fno-inline-small-functions -fno-default-inline")
 
+SET(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage -fno-inline -fno-inline-small-functions -fno-default-inline")
 SET(CMAKE_EXE_LINKER_FLAGS_COVERAGE "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage -lgcov")
 
 set(MEMORYCHECK_COMMAND_OPTIONS "--leak-check=full -v")
 set(MEMORYCHECK_SUPPRESSIONS_FILE ${PROJECT_SOURCE_DIR}/valgrind-suppression.txt)
+
+link_directories(${PROJECT_SOURCE_DIR}/libs/gtest)
 
 # first we can indicate the documentation build as an option and set it to ON by default
 option(BUILD_DOC "Build documentation" OFF)
@@ -81,6 +83,7 @@ else (ZMQ STREQUAL "ZMQ-NOTFOUND")
    add_subdirectory(source/src/http)
 endif (ZMQ STREQUAL "ZMQ-NOTFOUND")
 
+find_package (Threads)
 enable_testing()
 
 add_subdirectory(source/test/config)

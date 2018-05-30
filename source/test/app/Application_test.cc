@@ -29,7 +29,7 @@
 #include <signal.h>
 #include <thread>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/app/ApplicationServiceStarter.hpp>
 #include <coffee/app/Service.hpp>
@@ -72,25 +72,25 @@ private:
 void MyService::do_initialize() throw(basis::RuntimeException){ ++ m_initilized;}
 void MyService::do_stop() throw(basis::RuntimeException) { ++ m_stopped;}
 
-BOOST_AUTO_TEST_CASE( smallest_application )
+TEST(ApplicationTest, smallest )
 { 
    TestApplication application;
 
-   BOOST_REQUIRE_THROW(application.select(app::Feature::UserDefined, app::Service::WhateverImplementation), basis::RuntimeException);
+   ASSERT_THROW(application.select(app::Feature::UserDefined, app::Service::WhateverImplementation), basis::RuntimeException);
 
    std::shared_ptr<MyService> service = std::make_shared<MyService>(application, "TheMagical");
    application.attach(service);
    application.start();
 
-   BOOST_REQUIRE_EQUAL(application.getPid(), getpid());
-   BOOST_REQUIRE_EQUAL(application.getVersion().find("1.0/"), 0);
+   ASSERT_EQ(getpid(), application.getPid());
+   ASSERT_EQ(0, application.getVersion().find("1.0/"));
 
-   BOOST_REQUIRE(application.select(app::Feature::UserDefined, app::Service::WhateverImplementation) == service);
-   BOOST_REQUIRE_EQUAL(service->getInitializedCounter(), 1);
-   BOOST_REQUIRE_EQUAL(service->getStoppedCounter(), 1);
+   ASSERT_TRUE(application.select(app::Feature::UserDefined, app::Service::WhateverImplementation) == service);
+   ASSERT_EQ(1, service->getInitializedCounter());
+   ASSERT_EQ(1, service->getStoppedCounter());
 }
 
-BOOST_AUTO_TEST_CASE( application_select )
+TEST(ApplicationTest, select )
 {
    TestApplication application;
 
@@ -98,55 +98,55 @@ BOOST_AUTO_TEST_CASE( application_select )
    application.attach(service);
    application.start();
 
-   BOOST_REQUIRE(application.select(app::Feature::Database, app::Service::WhateverImplementation) == service);
-   BOOST_REQUIRE(application.select(app::Feature::Database, "TheMagical") == service);
-   BOOST_REQUIRE_THROW(application.select(app::Feature::Database, "Nonexisting"), basis::RuntimeException);
+   ASSERT_TRUE(application.select(app::Feature::Database, app::Service::WhateverImplementation) == service);
+   ASSERT_TRUE(application.select(app::Feature::Database, "TheMagical") == service);
+   ASSERT_THROW(application.select(app::Feature::Database, "Nonexisting"), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE( status_application )
+TEST(ApplicationTest, status )
 {
    TestApplication application;
 
-   BOOST_REQUIRE_EQUAL(application.isStopped(), true);
-   BOOST_REQUIRE_EQUAL(application.isRunning(), false);
+   ASSERT_TRUE(application.isStopped());
+   ASSERT_FALSE(application.isRunning());
 
    application.start();
 
-   BOOST_REQUIRE_EQUAL(application.isStopped(), true);
-   BOOST_REQUIRE_EQUAL(application.isRunning(), false);
+   ASSERT_TRUE(application.isStopped());
+   ASSERT_FALSE(application.isRunning());
 }
 
-BOOST_AUTO_TEST_CASE( undefined_requirement )
+TEST(ApplicationTest, undefined_requirement )
 {
    TestApplication application;
 
    std::shared_ptr<MyService> service = std::make_shared<MyService>(application, "00");
    application.attach(service);
 
-   BOOST_REQUIRE_NO_THROW(service->require(app::Feature::Database));
+   ASSERT_NO_THROW(service->require(app::Feature::Database));
 
-   BOOST_REQUIRE_THROW(application.start(), basis::RuntimeException);
+   ASSERT_THROW(application.start(), basis::RuntimeException);
 
-   BOOST_REQUIRE_EQUAL(service->getInitializedCounter(), 0);
-   BOOST_REQUIRE_EQUAL(service->getStoppedCounter(), 0);
+   ASSERT_EQ(0, service->getInitializedCounter());
+   ASSERT_EQ(0, service->getStoppedCounter());
 
-   BOOST_REQUIRE_EQUAL(application.isStopped(), true);
-   BOOST_REQUIRE_EQUAL(application.isRunning(), false);
+   ASSERT_TRUE(application.isStopped());
+   ASSERT_FALSE(application.isRunning());
 }
 
-BOOST_AUTO_TEST_CASE( repeat_requirement )
+TEST(ApplicationTest, repeat_requirement )
 {
    TestApplication application;
 
    std::shared_ptr<MyService> service = std::make_shared<MyService>(application, "00");
 
-   BOOST_REQUIRE_NO_THROW(service->require(app::Feature::Database));
-   BOOST_REQUIRE_THROW(service->require(app::Feature::Database), basis::RuntimeException);
+   ASSERT_NO_THROW(service->require(app::Feature::Database));
+   ASSERT_THROW(service->require(app::Feature::Database), basis::RuntimeException);
 
-   BOOST_REQUIRE_NO_THROW(application.start());
+   ASSERT_NO_THROW(application.start());
 }
 
-BOOST_AUTO_TEST_CASE( interdependence_requirement )
+TEST(ApplicationTest, interdependence_requirement )
 {
    TestApplication application;
 
@@ -159,19 +159,19 @@ BOOST_AUTO_TEST_CASE( interdependence_requirement )
    service00->require(app::Feature::UserDefined);
    service01->require(app::Feature::Database);
 
-   BOOST_REQUIRE_THROW(application.start(), basis::RuntimeException);;
+   ASSERT_THROW(application.start(), basis::RuntimeException);;
 
-   BOOST_REQUIRE_EQUAL(service00->getInitializedCounter(), 0);
-   BOOST_REQUIRE_EQUAL(service00->getStoppedCounter(), 0);
+   ASSERT_EQ(0, service00->getInitializedCounter());
+   ASSERT_EQ(0, service00->getStoppedCounter());
 
-   BOOST_REQUIRE_EQUAL(service01->getInitializedCounter(), 0);
-   BOOST_REQUIRE_EQUAL(service01->getStoppedCounter(), 0);
+   ASSERT_EQ(0, service01->getInitializedCounter());
+   ASSERT_EQ(0, service01->getStoppedCounter());
 
-   BOOST_REQUIRE_EQUAL(application.isStopped(), true);
-   BOOST_REQUIRE_EQUAL(application.isRunning(), false);
+   ASSERT_TRUE(application.isStopped());
+   ASSERT_FALSE(application.isRunning());
 }
 
-BOOST_AUTO_TEST_CASE( app_server_getrequirement )
+TEST(ApplicationTest, app_server_getrequirement )
 {
    TestApplication application;
 
@@ -183,23 +183,23 @@ BOOST_AUTO_TEST_CASE( app_server_getrequirement )
 
    service00->require(app::Feature::UserDefined);
 
-   BOOST_REQUIRE_NO_THROW(application.start());
+   ASSERT_NO_THROW(application.start());
 
-   BOOST_REQUIRE(service00->getRequirement(app::Feature::UserDefined) == service01);
+   ASSERT_TRUE(service00->getRequirement(app::Feature::UserDefined) == service01);
 }
 
-BOOST_AUTO_TEST_CASE( app_server_unknow_requirement )
+TEST(ApplicationTest, app_server_unknow_requirement )
 {
    TestApplication application;
 
    std::shared_ptr<MyService> service00 = std::make_shared<MyService>(application, "00", app::Feature::Database);
    application.attach(service00);
 
-   BOOST_REQUIRE_NO_THROW(application.start());
-   BOOST_REQUIRE_THROW(service00->getRequirement(app::Feature::UserDefined), basis::RuntimeException);
+   ASSERT_NO_THROW(application.start());
+   ASSERT_THROW(service00->getRequirement(app::Feature::UserDefined), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE( app_server_requirement_before_start )
+TEST(ApplicationTest, app_server_requirement_before_start )
 {
    TestApplication application;
 
@@ -211,39 +211,38 @@ BOOST_AUTO_TEST_CASE( app_server_requirement_before_start )
 
    service00->require(app::Feature::UserDefined);
 
-   BOOST_REQUIRE_THROW(service00->getRequirement(app::Feature::UserDefined), basis::RuntimeException);
+   ASSERT_THROW(service00->getRequirement(app::Feature::UserDefined), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE( app_server_asstring ) {
+TEST(ApplicationTest, app_server_asstring ) {
    TestApplication application;
 
    std::shared_ptr<MyService> service00 = std::make_shared<MyService>(application, "00", app::Feature::Database);
    application.attach(service00);
 
-   BOOST_REQUIRE_EQUAL(service00->asString(), "app.Service { app.Runnable { Name=Database:00 | Status= Stopped }, Requirements=[] }");
+   ASSERT_EQ("app.Service { app.Runnable { Name=Database:00 | Status= Stopped }, Requirements=[] }", service00->asString());
 
-   BOOST_REQUIRE_NO_THROW(service00->require(app::Feature::UserDefined));
-   BOOST_REQUIRE_EQUAL(service00->asString(), "app.Service { app.Runnable { Name=Database:00 | Status= Stopped }, Requirements=[{ Feature=UserDefined }] }");
+   ASSERT_NO_THROW(service00->require(app::Feature::UserDefined));
+   ASSERT_EQ("app.Service { app.Runnable { Name=Database:00 | Status= Stopped }, Requirements=[{ Feature=UserDefined }] }", service00->asString());
 
-   BOOST_REQUIRE_NO_THROW(service00->require(app::Feature::Networking, "native-sockets"));
-   BOOST_REQUIRE_EQUAL(service00->asString(), "app.Service { app.Runnable { Name=Database:00 | Status= Stopped }, Requirements=[{ Feature=UserDefined },{ Feature=Networking,Implementation=native-sockets }] }");
+   ASSERT_NO_THROW(service00->require(app::Feature::Networking, "native-sockets"));
+   ASSERT_EQ("app.Service { app.Runnable { Name=Database:00 | Status= Stopped }, Requirements=[{ Feature=UserDefined },{ Feature=Networking,Implementation=native-sockets }] }", service00->asString());
 }
 
-BOOST_AUTO_TEST_CASE( app_server_asstring_selected ) {
+TEST(ApplicationTest, app_server_asstring_selected ) {
    TestApplication application;
 
    std::shared_ptr<MyService> service00 = std::make_shared<MyService>(application, "00", app::Feature::Database);
    application.attach(service00);
    application.attach(std::make_shared<MyService>(application, "01", app::Feature::UserDefined));
 
-   BOOST_REQUIRE_NO_THROW(service00->require(app::Feature::UserDefined, "01"));
-   BOOST_REQUIRE_NO_THROW(application.start());
+   ASSERT_NO_THROW(service00->require(app::Feature::UserDefined, "01"));
+   ASSERT_NO_THROW(application.start());
 
-   BOOST_REQUIRE_EQUAL(service00->asString(), "app.Service { app.Runnable { Name=Database:00 | Status= Stopped }, Requirements=[{ Feature=UserDefined,Implementation=01,Selection=UserDefined:01 }] }");
-
+   ASSERT_EQ("app.Service { app.Runnable { Name=Database:00 | Status= Stopped }, Requirements=[{ Feature=UserDefined,Implementation=01,Selection=UserDefined:01 }] }", service00->asString());
 }
 
-BOOST_AUTO_TEST_CASE( app_requirement_already_prepared ) {
+TEST(ApplicationTest, requirement_already_prepared ) {
    TestApplication application;
 
    application.attach(std::make_shared<MyService>(application, "00", app::Feature::Database));
@@ -251,11 +250,11 @@ BOOST_AUTO_TEST_CASE( app_requirement_already_prepared ) {
    std::shared_ptr<MyService> service01 = std::make_shared<MyService>(application, "01", app::Feature::UserDefined);
    application.attach(service01);
 
-   BOOST_REQUIRE_NO_THROW(service01->require(app::Feature::Database));
-   BOOST_REQUIRE_NO_THROW(application.start());
+   ASSERT_NO_THROW(service01->require(app::Feature::Database));
+   ASSERT_NO_THROW(application.start());
 }
 
-BOOST_AUTO_TEST_CASE( app_already_run )
+TEST(ApplicationTest, app_already_run )
 {
    // Without "test" to cover the case in the coverage measurement
    app::ApplicationServiceStarter application("app_already_run");
@@ -263,13 +262,13 @@ BOOST_AUTO_TEST_CASE( app_already_run )
    auto thread = std::thread(parallelRun, std::ref(application));
 
    application.waitUntilRunning();
-   BOOST_CHECK_THROW(application.start(), basis::RuntimeException);
-   BOOST_CHECK(application.stop());
+   ASSERT_THROW(application.start(), basis::RuntimeException);
+   EXPECT_TRUE(application.stop());
    thread.join();
-   BOOST_CHECK(!application.stop());
+   EXPECT_TRUE(!application.stop());
 }
 
-BOOST_AUTO_TEST_CASE( app_stop_services )
+TEST(ApplicationTest, app_stop_services )
 {
    app::ApplicationServiceStarter application("test_app_stop_services");
    auto service = std::make_shared<MyService>(application, "00");
@@ -277,40 +276,40 @@ BOOST_AUTO_TEST_CASE( app_stop_services )
 
    auto thread = std::thread(parallelRun, std::ref(application));
    application.waitUntilRunning();
-   BOOST_CHECK(application.isRunning());
+   EXPECT_TRUE(application.isRunning());
 
-   BOOST_CHECK(service->isRunning());
-   BOOST_CHECK_EQUAL(service->getInitializedCounter(), 1);
-   BOOST_CHECK_EQUAL(service->getStoppedCounter(), 0);
+   EXPECT_TRUE(service->isRunning());
+   EXPECT_EQ(1, service->getInitializedCounter());
+   EXPECT_EQ(0, service->getStoppedCounter());
 
    application.stop();
    thread.join();
 
-   BOOST_CHECK(service->isStopped());
-   BOOST_CHECK_EQUAL(service->getInitializedCounter(), 1);
-   BOOST_CHECK_EQUAL(service->getStoppedCounter(), 1);
+   EXPECT_TRUE(service->isStopped());
+   EXPECT_EQ(1, service->getInitializedCounter());
+   EXPECT_EQ(1, service->getStoppedCounter());
 }
 
-BOOST_AUTO_TEST_CASE( app_null_service )
+TEST(ApplicationTest, app_null_service )
 {
    std::shared_ptr<MyService> service;
    TestApplication application;
-   BOOST_REQUIRE_THROW(application.attach(service), basis::RuntimeException);
+   ASSERT_THROW(application.attach(service), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE( app_already_defined )
+TEST(ApplicationTest, app_already_defined )
 {
    TestApplication application;
-   BOOST_REQUIRE(application.attach(std::make_shared<MyService>(application, "00")));
-   BOOST_REQUIRE(!application.attach(std::make_shared<MyService>(application, "00")));
+   ASSERT_TRUE(application.attach(std::make_shared<MyService>(application, "00")));
+   ASSERT_TRUE(!application.attach(std::make_shared<MyService>(application, "00")));
 
-   BOOST_REQUIRE(application.attach(std::make_shared<MyService>(application, "01")));
-   BOOST_REQUIRE(application.attach(std::make_shared<MyService>(application, "01", app::Feature::Database)));
-   BOOST_REQUIRE(application.attach(std::make_shared<MyService>(application, "02", app::Feature::Database)));
+   ASSERT_TRUE(application.attach(std::make_shared<MyService>(application, "01")));
+   ASSERT_TRUE(application.attach(std::make_shared<MyService>(application, "01", app::Feature::Database)));
+   ASSERT_TRUE(application.attach(std::make_shared<MyService>(application, "02", app::Feature::Database)));
 }
 
-struct ApplicationFixture {
-   ApplicationFixture() : application("TestApplicationFixture"),
+struct ApplicationRunningTest : public ::testing::Test {
+   ApplicationRunningTest() : application("TestApplicationRunningTest"),
       externalStop(false)
    {
       service = std::make_shared<MyService>(application, "my-service");
@@ -318,10 +317,10 @@ struct ApplicationFixture {
       thr = std::thread(parallelRun, std::ref(application));
 
       application.waitUntilRunning();
-      BOOST_CHECK(application.isRunning());
-      BOOST_CHECK(service->isRunning());
+      EXPECT_TRUE(application.isRunning());
+      EXPECT_TRUE(service->isRunning());
    }
-   virtual ~ApplicationFixture() {
+   virtual ~ApplicationRunningTest() {
       if (!externalStop) {
          try {
             application.stop();
@@ -332,8 +331,8 @@ struct ApplicationFixture {
          thr.join();
       }
 
-      BOOST_CHECK(application.isStopped());
-      BOOST_CHECK(service->isStopped());
+      EXPECT_TRUE(application.isStopped());
+      EXPECT_TRUE(service->isStopped());
 
    }
    app::ApplicationServiceStarter application;
@@ -359,54 +358,54 @@ void NoStopService::do_stop()
    COFFEE_THROW_EXCEPTION("I dont want to stop");
 }
 
-BOOST_FIXTURE_TEST_CASE( app_unstoppable_stop_services, ApplicationFixture)
+TEST_F(ApplicationRunningTest, unstoppable_stop_services)
 {
    auto service = std::make_shared<NoStopService>(application, "00");
    application.attach(service);
    application.attach(std::make_shared<NoStopService>(application, "01"));
    application.attach(std::make_shared<NoStopService>(application, "02"));
 
-   BOOST_CHECK_THROW(application.stop(), basis::RuntimeException);
+   EXPECT_THROW(application.stop(), basis::RuntimeException);
    thr.join();
    externalStop = true;
 
-   BOOST_CHECK(service->isStoppedWithError() == true);
+   EXPECT_TRUE(service->isStoppedWithError() == true);
 }
 
-BOOST_FIXTURE_TEST_CASE( service_attach_after_running, ApplicationFixture)
+TEST_F(ApplicationRunningTest, service_attach_after_running)
 {
    std::shared_ptr<MyService> secondService = std::make_shared<MyService>(application, "01");
-   BOOST_CHECK(!secondService->isRunning());
+   EXPECT_TRUE(!secondService->isRunning());
 
    application.attach(secondService);
-   BOOST_CHECK(secondService->isRunning());
+   EXPECT_TRUE(secondService->isRunning());
 }
 
-BOOST_FIXTURE_TEST_CASE( app_logger_level_change_onair, ApplicationFixture)
+TEST_F(ApplicationRunningTest, logger_level_change_onair)
 {
    logger::Logger::setLevel(logger::Level::Information);
 
    std::raise(SIGUSR2);
-   BOOST_CHECK_EQUAL(logger::Logger::getLevel(), logger::Level::Debug);
+   EXPECT_EQ(logger::Level::Debug, logger::Logger::getLevel());
 
    std::raise(SIGUSR2);
-   BOOST_CHECK_EQUAL(logger::Logger::getLevel(), logger::Level::Error);
+   EXPECT_EQ(logger::Level::Error, logger::Logger::getLevel());
 
    std::raise(SIGUSR2);
-   BOOST_CHECK_EQUAL(logger::Logger::getLevel(), logger::Level::Warning);
+   EXPECT_EQ(logger::Level::Warning, logger::Logger::getLevel());
 }
 
-struct RemoveContextFilenameFixture : ApplicationFixture {
-   RemoveContextFilenameFixture() {
+struct ApplicationContextTest : ApplicationRunningTest {
+   ApplicationContextTest() {
       remove(application.getOutputContextFilename().c_str());
 
    }
-   ~RemoveContextFilenameFixture() {
+   ~ApplicationContextTest() {
       remove(application.getOutputContextFilename().c_str());
    }
 };
 
-BOOST_FIXTURE_TEST_CASE( app_write_context, RemoveContextFilenameFixture )
+TEST_F(ApplicationContextTest, write_context)
 {
    application.attach(std::make_shared<MyService>(application, "00", app::Feature::Networking));
    application.attach(std::make_shared<MyService>(application, "01"));
@@ -415,24 +414,24 @@ BOOST_FIXTURE_TEST_CASE( app_write_context, RemoveContextFilenameFixture )
 
    xml::Document document;
 
-   BOOST_CHECK_NO_THROW(document.parse(application.getOutputContextFilename()));
+   EXPECT_NO_THROW(document.parse(application.getOutputContextFilename()));
 
    auto root = document.getRoot();
 
    auto app = root->lookupChild("app.Application");
    auto services = app->lookupChild("Services");
 
-   BOOST_CHECK_EQUAL(services->childAt(0)->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "Networking:00");
-   BOOST_CHECK_EQUAL(services->childAt(1)->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "UserDefined:my-service");
-   BOOST_CHECK_EQUAL(services->childAt(2)->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "UserDefined:01");
+   EXPECT_EQ("Networking:00", services->childAt(0)->lookupChild("Runnable")->lookupAttribute("Name")->getValue());
+   EXPECT_EQ("UserDefined:my-service", services->childAt(1)->lookupChild("Runnable")->lookupAttribute("Name")->getValue());
+   EXPECT_EQ("UserDefined:01", services->childAt(2)->lookupChild("Runnable")->lookupAttribute("Name")->getValue());
 }
 
-BOOST_FIXTURE_TEST_CASE( app_cannot_write_context, RemoveContextFilenameFixture )
+TEST_F(ApplicationContextTest, cannot_write_context)
 {
    application.setOutputContextFilename("/root/file-without-access.context");
 
    std::raise(SIGUSR1);
 
-   BOOST_REQUIRE_THROW(boost::filesystem::exists(application.getOutputContextFilename()), std::runtime_error);
+   ASSERT_THROW(boost::filesystem::exists(application.getOutputContextFilename()), std::runtime_error);
 }
 

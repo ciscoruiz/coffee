@@ -1,9 +1,9 @@
 // MIT License
 // 
-// Copyright (c) 2018 Francisco Ruiz (francisco.ruiz.rayo@gmail.com)
+// Copyright(c) 2018 Francisco Ruiz(francisco.ruiz.rayo@gmail.com)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
+// of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/basis/DataBlock.hpp>
 #include <coffee/basis/RuntimeException.hpp>
@@ -29,106 +29,102 @@
 using namespace std;
 using namespace coffee;
 
-BOOST_AUTO_TEST_CASE( datablock_size )
+TEST(DataBlockTest, size )
 {
-   basis::DataBlock var ("hello xxx", 5);
+   basis::DataBlock var("hello xxx", 5);
 
-   BOOST_REQUIRE_EQUAL (var.size (), 5);
+   ASSERT_EQ(5, var.size());
 
    var.assign("second");
 
-   BOOST_REQUIRE_EQUAL (var.size (), 6);
+   ASSERT_EQ(6, var.size());
 
-   var.assign ("three", 2);
-   BOOST_REQUIRE_EQUAL (var.size (), 2);
+   var.assign("three", 2);
+   ASSERT_EQ(2, var.size());
 }
 
-BOOST_AUTO_TEST_CASE( datablock_copy )
+TEST(DataBlockTest, copy )
 {
    const char* pp = "hello xxx";
 
-   basis::DataBlock var (pp, strlen (pp) + 1);
+   basis::DataBlock var(pp, strlen(pp) + 1);
 
-   BOOST_REQUIRE_EQUAL (var.size (), strlen (pp) + 1);
+   ASSERT_EQ(strlen(pp) + 1, var.size());
 
-   basis::DataBlock other (var);
+   basis::DataBlock other(var);
 
-   BOOST_REQUIRE_EQUAL (strcmp (other.data(), pp), 0);
+   ASSERT_EQ(0, strcmp(other.data(), pp));
 
    basis::DataBlock copy;
    copy = var;
-   BOOST_REQUIRE(copy == var);
+   ASSERT_TRUE(copy == var);
 }
 
-BOOST_AUTO_TEST_CASE( datablock_buffer )
-{
-   char buffer [128];
+TEST(DataBlockTest, buffer ) {
+   char buffer[128];
 
-   for (int ii = 0; ii < sizeof (buffer); ++ ii)
-      buffer [ii] = (char) ii;
+   for (int ii = 0; ii < sizeof(buffer); ++ii)
+      buffer[ii] = (char) ii;
 
-   basis::DataBlock var (buffer, sizeof (buffer));
+   basis::DataBlock var(buffer, sizeof(buffer));
 
-   BOOST_REQUIRE_EQUAL (var.size(), sizeof (buffer));
+   ASSERT_EQ(sizeof(buffer), var.size());
 
-   for (int ii = 0; ii < sizeof (buffer); ++ ii) {
-      BOOST_REQUIRE_EQUAL (buffer [ii], var [ii]);
+   for (int ii = 0; ii < sizeof(buffer); ++ii) {
+      ASSERT_EQ(var[ii], buffer[ii]) << " Fault on Index=" << ii;
    }
-
-   BOOST_REQUIRE_EQUAL (var.data(), &buffer[0]);
 }
 
-BOOST_AUTO_TEST_CASE( datablock_append )
+TEST(DataBlockTest, append )
 {
    char buffer [128];
    basis::DataBlock var;
 
-   for (int ii = 0; ii < sizeof (buffer); ++ ii) {
-      buffer [ii] = (char) ii;
+   for(int ii = 0; ii < sizeof(buffer); ++ ii) {
+      buffer [ii] =(char) ii;
       var.append((char) ii);
    }
 
-   BOOST_REQUIRE_EQUAL (var.size(), sizeof (buffer));
+   ASSERT_EQ(sizeof(buffer), var.size());
 
-   for (int ii = 0; ii < sizeof (buffer); ++ ii) {
-      BOOST_REQUIRE_EQUAL (buffer [ii], var [ii]);
+   for(int ii = 0; ii < sizeof(buffer); ++ ii) {
+      ASSERT_EQ(var [ii], buffer [ii]);
    }
 }
 
-BOOST_AUTO_TEST_CASE( datablock_clear )
+TEST(DataBlockTest, clear )
 {
-   basis::DataBlock var ("wow", 3);
+   basis::DataBlock var("wow", 3);
 
-   BOOST_REQUIRE_EQUAL (var.size(), 3);
+   ASSERT_EQ(3, var.size());
 
    var.clear();
-   BOOST_REQUIRE_EQUAL (var.size(), 0);
-   BOOST_REQUIRE_EQUAL (var.empty(), true);
+   ASSERT_EQ(0, var.size());
+   ASSERT_EQ(true, var.empty());
 }
 
-BOOST_AUTO_TEST_CASE( datablock_operator_parenthesis )
+TEST(DataBlockTest, operator_parenthesis )
 {
-   basis::DataBlock var ("wow", 3);
+   basis::DataBlock var("wow", 3);
 
    var [1] = 'i';
 
-   const basis::DataBlock copy (var);
+   const basis::DataBlock copy(var);
 
-   BOOST_REQUIRE_EQUAL (strcmp (var.data (), "wiw"), 0);
-   BOOST_REQUIRE_EQUAL (copy [1], 'i');
-   BOOST_REQUIRE_EQUAL (var [1], 'i');
+   ASSERT_EQ(0, strcmp(var.data(), "wiw"));
+   ASSERT_EQ('i', copy [1]);
+   ASSERT_EQ('i', var [1]);
 }
 
-BOOST_AUTO_TEST_CASE( datablock_out_of_range )
+TEST(DataBlockTest, out_of_range )
 {
-   basis::DataBlock var ("wow", 3);
+   basis::DataBlock var("wow", 3);
 
    char zz;
-   BOOST_CHECK_THROW (zz = var [10], basis::RuntimeException);
-   BOOST_CHECK_THROW (var [10] = 0, basis::RuntimeException);
+   ASSERT_THROW(zz = var [10], basis::RuntimeException);
+   ASSERT_THROW(var [10] = 0, basis::RuntimeException);
 
-   const basis::DataBlock copy (var);
-   BOOST_CHECK_THROW (copy [10] == 0, basis::RuntimeException);
-   BOOST_CHECK_THROW (copy.at(10), basis::RuntimeException);
-
+   const basis::DataBlock copy(var);
+   ASSERT_THROW(copy [10] == 0, basis::RuntimeException);
+   ASSERT_THROW(copy.at(10), basis::RuntimeException);
 }

@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <iostream>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/basis/pattern/backtracking/Solver.hpp>
 
@@ -77,62 +77,62 @@ public:
    }
 };
 
-BOOST_AUTO_TEST_CASE(addup_is_ten)
+TEST(BacktrakingAddupTest,addup_is_ten)
 {
    AddUpIsANumber solver;
 
    solver.setValueUnderStudy(10);
 
-   BOOST_REQUIRE(solver.apply());
+   ASSERT_TRUE(solver.apply());
 
    std::stringstream ss;
    PrintAddUp print(ss);
 
    solver.depthFirst(print);
 
-   BOOST_REQUIRE_EQUAL(solver.successors_size(), 6);
-   BOOST_REQUIRE_EQUAL(solver.countSolutions(), 9);
-   BOOST_REQUIRE_EQUAL(ss.str(), "{1,9}{2,1}{1,8}{2,2}{1,7}{2,3}{2,2}{3,1}{1,6}{2,4}{2,3}{3,1}{1,5}{2,4}{3,1}{2,3}{3,2}{1,4}{2,3}{3,2}{4,1}");
+   ASSERT_EQ(6, solver.successors_size());
+   ASSERT_EQ(9, solver.countSolutions());
+   ASSERT_EQ("{1,9}{2,1}{1,8}{2,2}{1,7}{2,3}{2,2}{3,1}{1,6}{2,4}{2,3}{3,1}{1,5}{2,4}{3,1}{2,3}{3,2}{1,4}{2,3}{3,2}{4,1}", ss.str());
 
    AddUpIsANumber::shared_solution step;
 
    step = solver.getNextStep(2);
 
    // You can get 10 by summing up (7 + 3) or (7 + 2 + 1)
-   BOOST_REQUIRE_EQUAL(step->getValue(), 7);
-   BOOST_REQUIRE_EQUAL(step->countSolutions(), 2);
-   BOOST_REQUIRE_EQUAL(step->getNextStep(0)->getValue(), 3);
-   BOOST_REQUIRE_EQUAL(step->getNextStep(1)->getValue(), 2);
+   ASSERT_EQ(7, step->getValue());
+   ASSERT_EQ(2, step->countSolutions());
+   ASSERT_EQ(3, step->getNextStep(0)->getValue());
+   ASSERT_EQ(2, step->getNextStep(1)->getValue());
 
-   BOOST_REQUIRE_EQUAL(step->getNextStep(1)->countSolutions(), 1);
-   BOOST_REQUIRE_EQUAL(step->getNextStep(1)->getNextStep(0)->getValue(), 1);
+   ASSERT_EQ(1, step->getNextStep(1)->countSolutions());
+   ASSERT_EQ(1, step->getNextStep(1)->getNextStep(0)->getValue());
 
-   BOOST_REQUIRE_THROW(solver.getNextStep(10), coffee::basis::RuntimeException);
+   ASSERT_THROW(solver.getNextStep(10), coffee::basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(addup_out_of_range)
+TEST(BacktrakingAddupTest,addup_out_of_range)
 {
    AddUpIsANumber solver;
 
    solver.setValueUnderStudy(10);
 
-   BOOST_REQUIRE(solver.apply());
-   BOOST_REQUIRE_EQUAL(solver.successors_size(), 6);
-   BOOST_REQUIRE_EQUAL(solver.countSolutions(), 9);
+   ASSERT_TRUE(solver.apply());
+   ASSERT_EQ(6, solver.successors_size());
+   ASSERT_EQ(9, solver.countSolutions());
 
-   BOOST_REQUIRE_THROW(solver.getNextStep(10), coffee::basis::RuntimeException);
+   ASSERT_THROW(solver.getNextStep(10), coffee::basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(addup_without_solution)
+TEST(BacktrakingAddupTest,addup_without_solution)
 {
    AddUpIsANumber solver;
 
    solver.setValueUnderStudy(2);
 
-   BOOST_REQUIRE(!solver.apply());
-   BOOST_REQUIRE(!solver.hasSuccessor());
+   ASSERT_FALSE(solver.apply());
+   ASSERT_FALSE(solver.hasSuccessor());
 
    solver.setValueUnderStudy(0);
 
-   BOOST_REQUIRE(!solver.apply());
+   ASSERT_FALSE(solver.apply());
 }

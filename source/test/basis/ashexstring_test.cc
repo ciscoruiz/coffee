@@ -1,9 +1,9 @@
 // MIT License
 // 
-// Copyright (c) 2018 Francisco Ruiz (francisco.ruiz.rayo@gmail.com)
+// Copyright(c) 2018 Francisco Ruiz(francisco.ruiz.rayo@gmail.com)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
+// of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
@@ -25,7 +25,7 @@
 
 #include <iostream>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/basis/AsHexString.hpp>
 #include <coffee/basis/DataBlock.hpp>
@@ -33,69 +33,53 @@
 using namespace std;
 using namespace coffee;
 
-BOOST_AUTO_TEST_CASE( ashexstring_integer )
+TEST(AsHexStringTest,integer)
 {
    int val = 10;
 
-   string result = basis::AsHexString::apply(val);
-
-   BOOST_REQUIRE_EQUAL(result, "0xa");
-
-   result = basis::AsHexString::apply (0);
-   BOOST_REQUIRE_EQUAL(result, "0x0");
+   ASSERT_EQ("0xa", basis::AsHexString::apply(val));
+   ASSERT_EQ("0x0", basis::AsHexString::apply(0));
 
    val = INT_MAX;
-   result = basis::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0x7fffffff");
+   ASSERT_EQ("0x7fffffff", basis::AsHexString::apply(val));
 
    val = INT_MIN;
-   result = basis::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0x80000000");
+   ASSERT_EQ("0x80000000", basis::AsHexString::apply(val));
 }
 
-BOOST_AUTO_TEST_CASE( ashexstring_uinteger )
+TEST(AsHexStringTest,uinteger)
 {
    unsigned int val = 10;
 
-   string result = basis::AsHexString::apply(val);
-
-   BOOST_REQUIRE_EQUAL(result, "0xa");
-
-   result = basis::AsHexString::apply (0);
-   BOOST_REQUIRE_EQUAL(result, "0x0");
+   ASSERT_EQ("0xa", basis::AsHexString::apply(val));
+   ASSERT_EQ("0x0", basis::AsHexString::apply(0));
 
    val = UINT_MAX;
-   result = basis::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0xffffffff");
+   ASSERT_EQ("0xffffffff", basis::AsHexString::apply(val));
 }
 
-BOOST_AUTO_TEST_CASE( ashexstring_integer64 )
+TEST(AsHexStringTest,integer64)
 {
    int64_t val = 0;
    string result;
 
    val --;
-   result = basis::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0xffffffffffffffff");
+   ASSERT_EQ("0xffffffffffffffff", basis::AsHexString::apply(val));
 
    val = LLONG_MAX;
-   result = basis::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0x7fffffffffffffff");
+   ASSERT_EQ("0x7fffffffffffffff", basis::AsHexString::apply(val));
 
    val = LLONG_MIN;
-   result = basis::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0x8000000000000000");
+   ASSERT_EQ("0x8000000000000000", basis::AsHexString::apply(val));
 }
 
-BOOST_AUTO_TEST_CASE( ashexstring_uinteger64 )
+TEST(AsHexStringTest,uinteger64)
 {
    uint64_t val = 0;
    string result;
 
-   result = basis::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0x0");
+   ASSERT_EQ("0x0", basis::AsHexString::apply(val));
 
    val = ULLONG_MAX;
-   result = basis::AsHexString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0xffffffffffffffff");
+   ASSERT_EQ("0xffffffffffffffff", basis::AsHexString::apply(val));
 }

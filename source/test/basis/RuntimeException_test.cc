@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/basis/RuntimeException.hpp>
 
@@ -55,14 +55,14 @@ public:
    }
 };
 
-BOOST_AUTO_TEST_CASE( RuntimeException_asString )
+TEST(RuntimeExceptionTest,asString )
 {
    try {
       foo ();
    }
    catch (basis::RuntimeException& ex) {
-      BOOST_REQUIRE ( strcmp ("this is goo", ex.what ()) == 0 );
-      BOOST_REQUIRE(ex.asString ().find("RuntimeException_test.cc(32): int goo()] this is goo") != std::string::npos);
+      ASSERT_STREQ("this is goo", ex.what ());
+      ASSERT_TRUE(ex.asString ().find("RuntimeException_test.cc(32): int goo()] this is goo") != std::string::npos);
    }
 
    AAA aaa;
@@ -71,16 +71,16 @@ BOOST_AUTO_TEST_CASE( RuntimeException_asString )
       aaa.member (10, 'z');
    }
    catch (basis::RuntimeException& ex) {
-      BOOST_REQUIRE(ex.asString ().find("RuntimeException_test.cc(51): void AAA::member(int, char)] xx:10 zz:z") != std::string::npos);
-      BOOST_REQUIRE(strcmp ("xx:10 zz:z", ex.what ()) == 0 );
+      ASSERT_STREQ("xx:10 zz:z", ex.what ());
+      ASSERT_TRUE(ex.asString ().find("RuntimeException_test.cc(51): void AAA::member(int, char)] xx:10 zz:z") != std::string::npos);
    }
 
    try {
       AAA::member2 (11.11);
    }
    catch (basis::RuntimeException& ex) {
-      BOOST_REQUIRE(ex.asString ().find("RuntimeException_test.cc(54): static void AAA::member2(float)] float: 11.110000") != std::string::npos);
-      BOOST_REQUIRE(strcmp ("float: 11.110000", ex.what ()) == 0 );
+      ASSERT_STREQ("float: 11.110000", ex.what ());
+      ASSERT_TRUE(ex.asString ().find("RuntimeException_test.cc(54): static void AAA::member2(float)] float: 11.110000") != std::string::npos);
    }
 }
 
@@ -90,14 +90,14 @@ void hoo () {
    throw ex;
 }
 
-BOOST_AUTO_TEST_CASE( RuntimeException_errorCode )
+TEST(RuntimeExceptionTest,errorCode )
 {
    try {
       hoo ();
    }
    catch (basis::RuntimeException& ex) {
-      BOOST_REQUIRE(ex.asString ().find("RuntimeException_test.cc(88): void hoo()] ErrorCode: 100 | this is hoo") != std::string::npos);
-      BOOST_REQUIRE(strcmp ("this is hoo", ex.what ()) == 0 );
+      ASSERT_STREQ("this is hoo", ex.what ());
+      ASSERT_TRUE(ex.asString ().find("RuntimeException_test.cc(88): void hoo()] ErrorCode: 100 | this is hoo") != std::string::npos);
    }
 }
 

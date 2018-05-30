@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/basis/Average.hpp>
 
@@ -29,34 +29,34 @@
 
 using namespace coffee;
 
-BOOST_AUTO_TEST_CASE( avg_basic)
+TEST(AverageTest, basic)
 {
    basis::Average <int> average ("basic");
 
-   BOOST_REQUIRE_EQUAL(average.isEmpty(), true);
-   BOOST_REQUIRE_EQUAL(average.isZero (), true);
+   ASSERT_TRUE(average.isEmpty());
+   ASSERT_TRUE(average.isZero ());
 
    average = 10;
    average = 5;
    average += 7;
 
-   BOOST_REQUIRE_EQUAL(average.value (), 6);
-   BOOST_REQUIRE_EQUAL(average, 6);
+   ASSERT_EQ(6, average.value ());
+   ASSERT_EQ(6, average);
 
-   BOOST_REQUIRE_EQUAL(average.isEmpty(), false);
-   BOOST_REQUIRE_EQUAL(average.isZero (), false);
-   BOOST_REQUIRE_EQUAL(average.size (), 2);
+   ASSERT_FALSE(average.isEmpty());
+   ASSERT_FALSE(average.isZero ());
+   ASSERT_EQ(2, average.size ());
 
-   BOOST_REQUIRE_EQUAL(average.getAccumulator(), 12);
+   ASSERT_EQ(12, average.getAccumulator());
 
    average.clear ();
-   BOOST_REQUIRE_EQUAL(average.isEmpty(), true);
-   BOOST_REQUIRE_EQUAL(average.isZero (), true);
-   BOOST_REQUIRE_EQUAL(average.value (), 0);
-   BOOST_REQUIRE_EQUAL(average, 0);
+   ASSERT_TRUE(average.isEmpty());
+   ASSERT_TRUE(average.isZero ());
+   ASSERT_EQ(0, average.value ());
+   ASSERT_EQ(0, average);
 }
 
-BOOST_AUTO_TEST_CASE( signed_overflow )
+TEST(AverageTest, signed_overflow )
 {
    basis::Average <int> average ("integer");
 
@@ -68,21 +68,21 @@ BOOST_AUTO_TEST_CASE( signed_overflow )
       average += someValue;
    }
 
-   BOOST_REQUIRE_EQUAL(average.size (), nloop);
-   BOOST_REQUIRE_EQUAL(average.value (), someValue);
+   ASSERT_EQ(nloop, average.size ());
+   ASSERT_EQ(someValue, average.value ());
 
    int overflow = INT_MAX - average.getAccumulator();
 
-   BOOST_REQUIRE_GT(overflow, 0);
+   ASSERT_GT(overflow, 0);
 
    average += (overflow + 1);
 
-   BOOST_REQUIRE_EQUAL(average.size (), 1);
-   BOOST_REQUIRE_EQUAL(average.value (), overflow + 1);
+   ASSERT_EQ(1, average.size ());
+   ASSERT_EQ(overflow + 1, average.value ());
 
 }
 
-BOOST_AUTO_TEST_CASE( unsigned_overflow )
+TEST(AverageTest, unsigned_overflow)
 {
    basis::Average <unsigned int> average ("unsigned");
 
@@ -94,16 +94,15 @@ BOOST_AUTO_TEST_CASE( unsigned_overflow )
       average += someValue;
    }
 
-   BOOST_REQUIRE_EQUAL(average.size (), nloop);
-   BOOST_REQUIRE_EQUAL(average.value (), someValue);
+   ASSERT_EQ(nloop, average.size ());
+   ASSERT_EQ(someValue, average.value ());
 
    unsigned int overflow = UINT_MAX - average.getAccumulator();
 
-   BOOST_REQUIRE_GT(overflow, 0);
+   ASSERT_GT(overflow, 0);
 
    average += (overflow + 1);
 
-   BOOST_REQUIRE_EQUAL(average.size (), 1);
-   BOOST_REQUIRE_EQUAL(average.value (), overflow + 1);
-
+   ASSERT_EQ(1, average.size ());
+   ASSERT_EQ(overflow + 1, average.value ());
 }

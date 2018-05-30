@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/Formatter.hpp>
@@ -64,7 +64,7 @@ private:
 
 using namespace coffee::logger;
 
-BOOST_AUTO_TEST_CASE(filter_level)
+TEST(FilteringLogTest,filter_level)
 {
    auto ss = std::make_shared<CounterStrategy>();
    auto second = std::make_shared<CounterStrategy>();
@@ -80,14 +80,14 @@ BOOST_AUTO_TEST_CASE(filter_level)
    LOG_INFO("line" << 3 << ". This will be filtered");
    LOG_DEBUG("line" << 4 << ". This will be filtered");
 
-   BOOST_REQUIRE_EQUAL(ss->getTotal(), 3);
-   BOOST_REQUIRE_EQUAL(ss->getTotal(), second->getTotal());
+   ASSERT_EQ(3, ss->getTotal());
+   ASSERT_EQ(second->getTotal(), ss->getTotal());
 
-   BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Error), 1);
-   BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Warning), 1);
-   BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Notice), 1);
-   BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Information), 0);
-   BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Debug), 0);
+   ASSERT_EQ(1, ss->getCounter(Level::Error));
+   ASSERT_EQ(1, ss->getCounter(Level::Warning));
+   ASSERT_EQ(1, ss->getCounter(Level::Notice));
+   ASSERT_EQ(0, ss->getCounter(Level::Information));
+   ASSERT_EQ(0, ss->getCounter(Level::Debug));
 
    Logger::setLevel(Level::Information);
 
@@ -97,14 +97,14 @@ BOOST_AUTO_TEST_CASE(filter_level)
    LOG_INFO("line" << 3);
    LOG_DEBUG("line" << 4 << ". This will be filtered");
 
-   BOOST_REQUIRE_EQUAL(ss->getTotal(), 7);
-   BOOST_REQUIRE_EQUAL(ss->getTotal(), second->getTotal());
+   ASSERT_EQ(7, ss->getTotal());
+   ASSERT_EQ(second->getTotal(), ss->getTotal());
 
-   BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Error), 2);
-   BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Warning), 2);
-   BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Notice), 2);
-   BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Information), 1);
-   BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Debug), 0);
+   ASSERT_EQ(2, ss->getCounter(Level::Error));
+   ASSERT_EQ(2, ss->getCounter(Level::Warning));
+   ASSERT_EQ(2, ss->getCounter(Level::Notice));
+   ASSERT_EQ(1, ss->getCounter(Level::Information));
+   ASSERT_EQ(0, ss->getCounter(Level::Debug));
 
    Logger::setLevel(Level::Emergency);
 
@@ -117,16 +117,16 @@ BOOST_AUTO_TEST_CASE(filter_level)
    LOG_INFO("line" << 3 << ". This will be filtered");
    LOG_DEBUG("line" << 4 << ". This will be filtered");
 
-   BOOST_REQUIRE_EQUAL(ss->getTotal(), 10);
+   ASSERT_EQ(10, ss->getTotal());
 
    basis::RuntimeException ex("None",COFFEE_FILE_LOCATION);
 
    Logger::write(ex);
-   BOOST_REQUIRE_EQUAL(ss->getTotal(), 11);
-   BOOST_REQUIRE_EQUAL(ss->getCounter(Level::Error), 4);
+   ASSERT_EQ(11, ss->getTotal());
+   ASSERT_EQ(4, ss->getCounter(Level::Error));
 }
 
-BOOST_AUTO_TEST_CASE(use_every_level)
+TEST(FilteringLogTest,use_every_level)
 {
    auto ss = std::make_shared<CounterStrategy>();
    Logger::initialize(ss, std::make_shared<DummyFormatter>());
@@ -138,9 +138,9 @@ BOOST_AUTO_TEST_CASE(use_every_level)
    }
 
    for(int ii = Level::Emergency; ii <= Level::Local7; ++ ii) {
-      BOOST_REQUIRE_EQUAL(ss->getCounter((Level::_v) ii), 1U);
+      ASSERT_EQ(1U, ss->getCounter((Level::_v) ii));
    }
 
-   BOOST_REQUIRE_EQUAL(ss->getTotal(), Level::Local7 + 1);
+   ASSERT_EQ(Level::Local7 + 1, ss->getTotal());
 }
 

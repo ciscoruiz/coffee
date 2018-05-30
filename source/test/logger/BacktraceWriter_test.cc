@@ -1,9 +1,9 @@
 // MIT License
 // 
-// Copyright (c) 2018 Francisco Ruiz (francisco.ruiz.rayo@gmail.com)
+// Copyright(c) 2018 Francisco Ruiz(francisco.ruiz.rayo@gmail.com)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
+// of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <iostream>
 #include <chrono>
@@ -35,50 +35,50 @@
 using namespace coffee;
 using namespace coffee::logger;
 
-struct BackTraceFixture {
-   BackTraceFixture() {
-      unlink ("backtrace.log");
-      unlink ("backtrace.log.old");
+struct BacktrakingTraceTest : public ::testing::Test {
+   BacktrakingTraceTest() {
+      unlink("backtrace.log");
+      unlink("backtrace.log.old");
 
    }
-   ~BackTraceFixture() {
-      unlink ("backtrace.log");
-      unlink ("backtrace.log.old");
+   ~BacktrakingTraceTest() {
+      unlink("backtrace.log");
+      unlink("backtrace.log.old");
    }
 };
 
-BOOST_FIXTURE_TEST_CASE (backtraking_test, BackTraceFixture)
+TEST_F(BacktrakingTraceTest, basic_work)
 {
    int backtrackingLength = 5;
 
    auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
-   Logger::initialize (writer);
+   Logger::initialize(writer);
 
-   for (int ii = 0; ii < backtrackingLength * 2; ++ ii)
-      LOG_DEBUG ("this is the line number " << ii);
+   for(int ii = 0; ii < backtrackingLength * 2; ++ ii)
+      LOG_DEBUG("this is the line number " << ii);
 
-   LOG_NOTICE ("notice line");
-   LOG_INFO ("info line");
+   LOG_NOTICE("notice line");
+   LOG_INFO("info line");
 
    Logger::write(Level::Local0, "ignored line", COFFEE_FILE_LOCATION);
 
-   LOG_ERROR ("This is the error");
+   LOG_ERROR("This is the error");
 
-   BOOST_REQUIRE_EQUAL(writer->getLineNo(), backtrackingLength + 1);
+   ASSERT_EQ(backtrackingLength + 1, writer->getLineNo());
 }
 
-BOOST_FIXTURE_TEST_CASE (backtraking_down_lowest_level_test, BackTraceFixture)
+TEST_F(BacktrakingTraceTest, down_lowest_level_test)
 {
    int backtrackingLength = 5;
 
    auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
-   Logger::initialize (writer);
+   Logger::initialize(writer);
 
    writer->setLowestLeveL(Level::Local0);
 
-   LOG_NOTICE ("notice line");
-   LOG_INFO ("info line");
-   LOG_DEBUG ("debug line");
+   LOG_NOTICE("notice line");
+   LOG_INFO("info line");
+   LOG_DEBUG("debug line");
 
    Logger::write(Level::Local0, "local0", COFFEE_FILE_LOCATION);
    Logger::write(Level::Local1, "ignored line", COFFEE_FILE_LOCATION);
@@ -86,21 +86,21 @@ BOOST_FIXTURE_TEST_CASE (backtraking_down_lowest_level_test, BackTraceFixture)
 
    Logger::write(Level::Alert, "this is the error", COFFEE_FILE_LOCATION);
 
-   BOOST_REQUIRE_EQUAL(writer->getLineNo(), backtrackingLength);
+   ASSERT_EQ(backtrackingLength, writer->getLineNo());
 }
 
-BOOST_FIXTURE_TEST_CASE (backtraking_up_lowest_level_test, BackTraceFixture)
+TEST_F(BacktrakingTraceTest, up_lowest_level_test)
 {
    int backtrackingLength = 5;
 
    auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
-   Logger::initialize (writer);
+   Logger::initialize(writer);
 
    writer->setLowestLeveL(Level::Information);
 
-   LOG_NOTICE ("notice line");
-   LOG_INFO ("info line");
-   LOG_DEBUG ("debug line");
+   LOG_NOTICE("notice line");
+   LOG_INFO("info line");
+   LOG_DEBUG("debug line");
 
    Logger::write(Level::Local0, "local0", COFFEE_FILE_LOCATION);
    Logger::write(Level::Local1, "ignored line", COFFEE_FILE_LOCATION);
@@ -108,38 +108,38 @@ BOOST_FIXTURE_TEST_CASE (backtraking_up_lowest_level_test, BackTraceFixture)
 
    Logger::write(Level::Alert, "this is the error", COFFEE_FILE_LOCATION);
 
-   BOOST_REQUIRE_EQUAL(writer->getLineNo(), 3);
+   ASSERT_EQ(3, writer->getLineNo());
 }
 
-BOOST_FIXTURE_TEST_CASE (backtraking_change_level_test, BackTraceFixture)
+TEST_F(BacktrakingTraceTest, change_level_test)
 {
    int backtrackingLength = 5;
 
    auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
-   Logger::initialize (writer);
+   Logger::initialize(writer);
 
-   Logger::setLevel (Level::Error);
+   Logger::setLevel(Level::Error);
 
-   for (int ii = 0; ii < backtrackingLength * 2; ++ ii)
-      LOG_DEBUG ("this is the line number " << ii);
+   for(int ii = 0; ii < backtrackingLength * 2; ++ ii)
+      LOG_DEBUG("this is the line number " << ii);
 
-   LOG_NOTICE (__PRETTY_FUNCTION__);
-   LOG_INFO (__PRETTY_FUNCTION__);
+   LOG_NOTICE(__PRETTY_FUNCTION__);
+   LOG_INFO(__PRETTY_FUNCTION__);
 
    Logger::write(Level::Local0, "ignored line", COFFEE_FILE_LOCATION);
 
-   LOG_ERROR (__PRETTY_FUNCTION__);
+   LOG_ERROR(__PRETTY_FUNCTION__);
 
-   BOOST_REQUIRE_EQUAL(writer->getLineNo(), backtrackingLength + 1);
+   ASSERT_EQ(backtrackingLength + 1, writer->getLineNo());
 }
 
-BOOST_FIXTURE_TEST_CASE (backtraking_performance_measure_test, BackTraceFixture)
+TEST_F(BacktrakingTraceTest, performance_measure_test)
 {
    int backtrackingLength = 32;
 
    auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
 
-   Logger::setLevel (Level::Error);
+   Logger::setLevel(Level::Error);
 
    auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -148,19 +148,19 @@ BOOST_FIXTURE_TEST_CASE (backtraking_performance_measure_test, BackTraceFixture)
    const int maxLine = 1000;
 
    Level::_v level = Level::Notice;
-   for (int ii = 0; ii < maxLine; ++ ii) {
-      if (Logger::wantsToProcess(level) == true) {
+   for(int ii = 0; ii < maxLine; ++ ii) {
+      if(Logger::wantsToProcess(level) == true) {
          basis::StreamString msg;
-         Logger::write (level, msg << "Line=" << ii, COFFEE_FILE_LOCATION);
+         Logger::write(level, msg << "Line=" << ii, COFFEE_FILE_LOCATION);
       }
 
-      if ((level + 1) == Level::Local0)
+      if((level + 1) == Level::Local0)
          level = Level::Notice;
       else
-         level = (Level::_v) (((int) level) + 1);
+         level =(Level::_v)(((int) level) + 1);
 
-      if ((ii % 100) == 0)
-         LOG_ERROR ("step " << ii / 100);
+      if((ii % 100) == 0)
+         LOG_ERROR("step " << ii / 100);
    }
 
    auto endTime = std::chrono::high_resolution_clock::now();

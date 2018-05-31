@@ -24,7 +24,7 @@
 #include <iostream>
 #include <time.h>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/dbms/datatype/Float.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
@@ -32,99 +32,98 @@
 using namespace coffee;
 using namespace coffee::dbms;
 
-
-BOOST_AUTO_TEST_CASE(float_is_nulleable)
+TEST(FloatTest,is_nulleable)
 {
    datatype::Float column("nulleable", datatype::Constraint::CanBeNull);
 
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
+   ASSERT_FALSE(column.hasValue());
 
    column.clear();
 
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
+   ASSERT_FALSE(column.hasValue());
 
-   BOOST_REQUIRE_THROW(column.getValue(), basis::RuntimeException);
-   BOOST_REQUIRE_THROW(column.getFloatValue(), basis::RuntimeException);
+   ASSERT_THROW(column.getValue(), basis::RuntimeException);
+   ASSERT_THROW(column.getFloatValue(), basis::RuntimeException);
 
    column.setValue(10.12);
 
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
-   BOOST_REQUIRE_CLOSE(column.getValue(),10.12, 0.1);
+   ASSERT_TRUE(column.hasValue());
+   ASSERT_FLOAT_EQ(10.12, column.getValue());
 
    column.clear();
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);;
+   ASSERT_FALSE(column.hasValue());;
 }
 
-BOOST_AUTO_TEST_CASE(float_is_not_nulleable)
+TEST(FloatTest,is_not_nulleable)
 {
    datatype::Float column("not_nulleable", datatype::Constraint::CanNotBeNull);
 
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+   ASSERT_TRUE(column.hasValue());
 
    column.setValue(0.0);
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
-   BOOST_REQUIRE_EQUAL(column.getValue(), 0.0);
+   ASSERT_TRUE(column.hasValue());
+   ASSERT_EQ(0.0, column.getValue());
 
    column.clear();
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+   ASSERT_TRUE(column.hasValue());
 }
 
-BOOST_AUTO_TEST_CASE(float_downcast)
+TEST(FloatTest,downcast)
 {
    datatype::Float column("float_downcast");
 
    datatype::Abstract& abs = column;
 
-   BOOST_REQUIRE_EQUAL(abs.hasValue(), true);
+   ASSERT_TRUE(abs.hasValue());
 
    const datatype::Float& other = coffee_datatype_downcast(datatype::Float, abs);
    column.setValue(0.0006);
 
-   BOOST_REQUIRE_EQUAL(other == column, true);
+   ASSERT_TRUE(other == column);
 
    datatype::Integer zzz("zzz");
 
-   BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::Float, zzz), dbms::InvalidDataException);
+   ASSERT_THROW(coffee_datatype_downcast(datatype::Float, zzz), dbms::InvalidDataException);
 }
 
-BOOST_AUTO_TEST_CASE(float_clone)
+TEST(FloatTest,clone)
 {
    datatype::Float cannotBeNull("cannotBeNull", datatype::Constraint::CanNotBeNull);
    datatype::Float canBeNull("canBeNull", datatype::Constraint::CanBeNull);
 
-   BOOST_REQUIRE_EQUAL(cannotBeNull.hasValue(), true);
-   BOOST_REQUIRE_EQUAL(canBeNull.hasValue(), false);
+   ASSERT_TRUE(cannotBeNull.hasValue());
+   ASSERT_FALSE(canBeNull.hasValue());
 
    auto notnull(cannotBeNull.clone());
    auto null(canBeNull.clone());
 
-   BOOST_REQUIRE_EQUAL(notnull->hasValue(), true);
-   BOOST_REQUIRE_EQUAL(null->hasValue(), false);
+   ASSERT_TRUE(notnull->hasValue());
+   ASSERT_FALSE(null->hasValue());
 
-   BOOST_REQUIRE_EQUAL(notnull->compare(cannotBeNull), 0);
+   ASSERT_EQ(0, notnull->compare(cannotBeNull));
 
    cannotBeNull.setValue(5.0);
 
-   BOOST_REQUIRE_EQUAL(cannotBeNull.getValue(), 5.0);
+   ASSERT_EQ(5.0, cannotBeNull.getValue());
 
    notnull = cannotBeNull.clone();
-   BOOST_REQUIRE_EQUAL(notnull->hasValue(), true);
-   BOOST_REQUIRE_EQUAL(notnull->compare(cannotBeNull), 0);
+   ASSERT_TRUE(notnull->hasValue());
+   ASSERT_EQ(0, notnull->compare(cannotBeNull));
 
    canBeNull.setValue(25);
    null = canBeNull.clone();
-   BOOST_REQUIRE_EQUAL(null->hasValue(), true);
-   BOOST_REQUIRE_EQUAL(null->compare(canBeNull), 0);
+   ASSERT_TRUE(null->hasValue());
+   ASSERT_EQ(0, null->compare(canBeNull));
 
-   BOOST_REQUIRE_EQUAL(null->compare(cannotBeNull), 1);
+   ASSERT_EQ(1, null->compare(cannotBeNull));
 
-   BOOST_REQUIRE_EQUAL(notnull->compare(canBeNull), -1);
+   ASSERT_EQ(-1, notnull->compare(canBeNull));
 }
 
-BOOST_AUTO_TEST_CASE(float_instantiate) {
+TEST(FloatTest,instantiate) {
    auto data = datatype::Float::instantiate("nulleable");
-   BOOST_REQUIRE(data->hasValue());
+   ASSERT_TRUE(data->hasValue());
 
    data = datatype::Float::instantiate("not-nulleable", datatype::Constraint::CanBeNull);
-   BOOST_REQUIRE(!data->hasValue());
+   ASSERT_TRUE(!data->hasValue());
 }

@@ -33,49 +33,47 @@
 #include <coffee/dbms/datatype/Date.hpp>
 #include <coffee/dbms/datatype/LongBlock.hpp>
 
-#include <boost/test/unit_test.hpp>
-
-#include "PrintChrono.hpp"
+#include <gtest/gtest.h>
 
 using namespace coffee;
 using namespace coffee::dbms;
 
-BOOST_AUTO_TEST_CASE(set_already_defined)
+TEST(SetTest,already_defined)
 {
   datatype::Set set;
   set.insert(std::make_shared<datatype::Integer>("integer"));
-  BOOST_REQUIRE_THROW(set.insert(std::make_shared<datatype::Integer>("integer")), basis::RuntimeException);
+  ASSERT_THROW(set.insert(std::make_shared<datatype::Integer>("integer")), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(set_empty_field)
+TEST(SetTest,empty_field)
 {
   datatype::Set set;
   std::shared_ptr<datatype::Integer> data;
-  BOOST_REQUIRE_THROW(set.insert(data), basis::RuntimeException);
+  ASSERT_THROW(set.insert(data), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(set_find)
+TEST(SetTest,find)
 {
   datatype::Set set;
 
   set.insert(std::make_shared<datatype::Integer>("integer"));
 
-  BOOST_REQUIRE_NO_THROW(set.find("integer"));
+  ASSERT_NO_THROW(set.find("integer"));
 
-  BOOST_REQUIRE_THROW(set.find("other-name"), basis::RuntimeException);
+  ASSERT_THROW(set.find("other-name"), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(set_constains)
+TEST(SetTest,constains)
 {
   datatype::Set set;
 
   set.insert(std::make_shared<datatype::Integer>("integer"));
 
-  BOOST_REQUIRE_EQUAL(set.constains("integer"), true);
-  BOOST_REQUIRE_EQUAL(set.constains("integer2"), false);
+  ASSERT_TRUE(set.constains("integer"));
+  ASSERT_FALSE(set.constains("integer2"));
 }
 
-BOOST_AUTO_TEST_CASE(set_access)
+TEST(SetTest,access)
 {
    datatype::Set set;
 
@@ -97,17 +95,17 @@ BOOST_AUTO_TEST_CASE(set_access)
    set.setDate("date", second);
    set.setDataBlock("longblock", data);
 
-   BOOST_REQUIRE_EQUAL(set.getInteger("integer"), 123);
-   BOOST_REQUIRE_EQUAL(set.getString("string"), "hello");
-   BOOST_REQUIRE_CLOSE(set.getFloat("float"), 0.123, 0.001);
-   BOOST_REQUIRE_EQUAL(set.getDate("date"), second);
+   ASSERT_EQ(123, set.getInteger("integer"));
+   ASSERT_EQ("hello", set.getString("string"));
+   ASSERT_FLOAT_EQ(0.123, set.getFloat("float"));
+   ASSERT_EQ(second, set.getDate("date"));
 
    const basis::DataBlock& read = set.getDataBlock("longblock");
 
-   BOOST_REQUIRE (memcmp(read.data(), buffer, maxSize) == 0);
+   ASSERT_TRUE(memcmp(read.data(), buffer, maxSize) == 0);
 }
 
-BOOST_AUTO_TEST_CASE(set_operator_compare)
+TEST(SetTest,operator_compare)
 {
   datatype::Set set;
 
@@ -127,11 +125,11 @@ BOOST_AUTO_TEST_CASE(set_operator_compare)
   other.setString("string", "hello");
   other.setFloat("float", 0.123);
 
-  BOOST_REQUIRE(set == other);
-  BOOST_REQUIRE_EQUAL(set < other, false);
+  ASSERT_TRUE(set == other);
+  ASSERT_FALSE(set < other);
 }
 
-BOOST_AUTO_TEST_CASE(set_operator_less)
+TEST(SetTest,operator_less)
 {
   datatype::Set set;
 
@@ -151,11 +149,11 @@ BOOST_AUTO_TEST_CASE(set_operator_less)
   other.setString("string", "hello");
   other.setFloat("float", 0.0);
 
-  BOOST_REQUIRE_EQUAL(set < other, false);
-  BOOST_REQUIRE_EQUAL(other < set, true);
+  ASSERT_FALSE(set < other);
+  ASSERT_TRUE(other < set);
 }
 
-BOOST_AUTO_TEST_CASE(set_self)
+TEST(SetTest,self)
 {
   datatype::Set set;
 
@@ -168,10 +166,10 @@ BOOST_AUTO_TEST_CASE(set_self)
   set.setString("string", "hello");
   set.setFloat("float", 0.123);
 
-  BOOST_REQUIRE(set == set);
+  ASSERT_TRUE(set == set);
 }
 
-BOOST_AUTO_TEST_CASE(set_compare_different_no_members_numbers)
+TEST(SetTest,compare_different_no_members_numbers)
 {
   datatype::Set set;
 
@@ -188,14 +186,14 @@ BOOST_AUTO_TEST_CASE(set_compare_different_no_members_numbers)
   set.setInteger("integer", 123);
   set.setString("string", "hello");
 
-  BOOST_REQUIRE_THROW(set.compare(other), basis::RuntimeException);
-  BOOST_REQUIRE(set != other);
+  ASSERT_THROW(set.compare(other), basis::RuntimeException);
+  ASSERT_TRUE(set != other);
 
-  BOOST_REQUIRE_THROW(other.compare(set), basis::RuntimeException);
-  BOOST_REQUIRE(other != set);
+  ASSERT_THROW(other.compare(set), basis::RuntimeException);
+  ASSERT_TRUE(other != set);
 }
 
-BOOST_AUTO_TEST_CASE(set_compare_different_members_names)
+TEST(SetTest,compare_different_members_names)
 {
   datatype::Set set;
 
@@ -214,10 +212,10 @@ BOOST_AUTO_TEST_CASE(set_compare_different_members_names)
   other.setString("string", "hello");
   other.setFloat("float-with-other-name", 0.123);
 
-  BOOST_REQUIRE_THROW(set.compare(other), basis::RuntimeException);
-  BOOST_REQUIRE_THROW(other.compare(set), basis::RuntimeException);
-  BOOST_REQUIRE(set != other);
-  BOOST_REQUIRE(other != set);
+  ASSERT_THROW(set.compare(other), basis::RuntimeException);
+  ASSERT_THROW(other.compare(set), basis::RuntimeException);
+  ASSERT_TRUE(set != other);
+  ASSERT_TRUE(other != set);
 }
 
 

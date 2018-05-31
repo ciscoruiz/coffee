@@ -13,25 +13,27 @@
 #include <coffee/dbms/ConnectionParameters.hpp>
 #include <coffee/app/ApplicationServiceStarter.hpp>
 
-template <class _T> struct MockDatabaseFixture {
+template <class _T> struct MockDatabaseFixture : public ::testing::Test {
    coffee::app::ApplicationServiceStarter app;
    std::shared_ptr<_T> database;
    std::shared_ptr<coffee::dbms::Connection> connection;
    std::thread thr;
 
-   explicit MockDatabaseFixture(const char* appName) : app(appName) {
+   explicit MockDatabaseFixture(const char* appName) : app(appName) { ; }
+
+   virtual void SetUp() {
       database = _T::instantiate(app);
       thr = std::thread(dbmsParallelRun, std::ref(app));
       app.waitUntilRunning();
-      BOOST_REQUIRE(database->isRunning());
+      ASSERT_TRUE(database->isRunning());
       const coffee::dbms::ConnectionParameters parameters("0", "0");
       connection = database->createConnection("0", parameters);
    }
 
-   virtual ~MockDatabaseFixture() {
-       app.stop();
-       thr.join();
-    }
+   void TearDown() {
+      app.stop();
+      thr.join();
+   }
 
    static void dbmsParallelRun(coffee::app::Application& app) {
       app.start();

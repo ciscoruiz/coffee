@@ -21,37 +21,37 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/config/defines.hpp>
 #include <coffee/dbms.ldap/LdapConnectionParameters.hpp>
 
 using coffee::dbms::ldap::LdapConnectionParameters;
 
-BOOST_AUTO_TEST_CASE(ldap_ccpp_version)
+TEST(LdapTest, ccpp_version)
 {
    LdapConnectionParameters parameters("0", "0");
    parameters.setVersion(LdapConnectionParameters::ProtocolVersion::V2);
-   BOOST_REQUIRE_EQUAL(parameters.getProtocolVersion(),LdapConnectionParameters::ProtocolVersion::V2);
+   ASSERT_EQ(LdapConnectionParameters::ProtocolVersion::V2, parameters.getProtocolVersion());
 }
 
-BOOST_AUTO_TEST_CASE(ldap_ccpp_tls)
+TEST(LdapTest, ccpp_tls)
 {
    LdapConnectionParameters parameters("0", "0");
 
    parameters.setVersion(LdapConnectionParameters::ProtocolVersion::V3).setUseTLS(true);
-   BOOST_REQUIRE(parameters.getUseTLS());
-   BOOST_REQUIRE_EQUAL(parameters.getProtocolVersion(),LdapConnectionParameters::ProtocolVersion::V3);
+   ASSERT_TRUE(parameters.getUseTLS());
+   ASSERT_EQ(LdapConnectionParameters::ProtocolVersion::V3, parameters.getProtocolVersion());
 
    parameters.setUseTLS(false);
-   BOOST_REQUIRE(!parameters.getUseTLS());
+   ASSERT_TRUE(!parameters.getUseTLS());
 }
 
-BOOST_AUTO_TEST_CASE(ldap_ccpp_asString)
+TEST(LdapTest, ccpp_asString)
 {
    LdapConnectionParameters parameters("uid=tesla,dc=example,dc=com", "----");
 
    parameters.setVersion(LdapConnectionParameters::ProtocolVersion::V3).setUseTLS(true);
-   BOOST_REQUIRE_EQUAL(parameters.asString(), "dbms.LdapConnectionParameters { dbms.ConnectionParameters { User=uid=tesla,dc=example,dc=com } | ProtocolVersion=V3(3) | UseTLS=true }");
+   ASSERT_EQ("dbms.LdapConnectionParameters { dbms.ConnectionParameters { User=uid=tesla,dc=example,dc=com } | ProtocolVersion=V3(3) | UseTLS=true }", parameters.asString());
 }
 

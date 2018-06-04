@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <vector>
 #include <map>
@@ -52,8 +52,10 @@ static void ldapParallelRun(coffee::app::Application& app) {
    app.start();
 }
 
-struct LdapFixture  {
-   LdapFixture() : app ("TestLdapApplication"){
+struct LdapTestFixture : ::testing::Test {
+   LdapTestFixture() : app ("TestLdapApplication"){}
+
+   void SetUp() {
       const char* logFileName = "source/test/dbms.ldap/trace.log";
       unlink (logFileName);
       logger::Logger::initialize(std::make_shared<logger::UnlimitedTraceWriter>(logFileName));
@@ -63,16 +65,15 @@ struct LdapFixture  {
       database = dbms::ldap::LdapDatabase::instantiate(app, "ldap://ldap.forumsys.com");
       thr = std::thread(ldapParallelRun, std::ref(app));
       app.waitUntilRunning();
-      BOOST_REQUIRE(database->isRunning());
+      ASSERT_TRUE(database->isRunning());
       dbms::ldap::LdapConnectionParameters connParameters("uid=tesla,dc=example,dc=com", "password");
-      BOOST_REQUIRE_NO_THROW(connection = database->createConnection("first", connParameters));
-      BOOST_REQUIRE_EQUAL(connection->isAvailable(), true);
+      ASSERT_NO_THROW(connection = database->createConnection("first", connParameters));
+      ASSERT_TRUE(connection->isAvailable());
 
       LdapStatementParameters stParameters(dbms::ActionOnError::Ignore, "dc=example,dc=com");
       readStatement = database->createStatement("persons", "objectClass=person", stParameters.setScope(LdapStatementParameters::Scope::SubTree));
-      BOOST_REQUIRE(readStatement);
    }
-   ~LdapFixture() {
+   ~LdapTestFixture() {
       app.stop();
       thr.join();
    }
@@ -83,7 +84,7 @@ struct LdapFixture  {
       for (auto ii = definition.begin(), maxii = definition.end(); ii != maxii; ++ ii) {
          auto outputBind = dbms::datatype::MultiString::instantiate(ii->first.c_str(), ii->second);
          variables.push_back(outputBind);
-         BOOST_REQUIRE_NO_THROW(readStatement->createBinderOutput(outputBind));
+         ASSERT_NO_THROW(readStatement->createBinderOutput(outputBind));
       }
    }
 
@@ -95,25 +96,25 @@ struct LdapFixture  {
    std::vector<std::shared_ptr<dbms::datatype::MultiString> > variables;
 };
 
-BOOST_FIXTURE_TEST_CASE(ldap_dbms_bad_cast, LdapFixture)
+TEST_F(LdapTestFixture, dbms_bad_cast)
 {
-   BOOST_REQUIRE_THROW(database->createConnection("second", coffee::dbms::ConnectionParameters("otheruser", "somepassword")), basis::RuntimeException);
+   ASSERT_THROW(database->createConnection("second", coffee::dbms::ConnectionParameters("otheruser", "somepassword")), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(ldap_dbms_bad_name) {
+TEST(LdapTest, bad_name) {
    app::ApplicationServiceStarter app("TestLdapApplication-badconnection");
    std::shared_ptr<dbms::ldap::LdapDatabase> database = dbms::ldap::LdapDatabase::instantiate(app, "ldap://bad.url");
    std::thread thr = std::thread(ldapParallelRun, std::ref(app));
    app.waitUntilRunning();
-   BOOST_REQUIRE(database->isRunning());
+   ASSERT_TRUE(database->isRunning());
    dbms::ldap::LdapConnectionParameters connParameters("uid=tesla,dc=example,dc=com", "password");
    std::shared_ptr<dbms::Connection> connection;
-   BOOST_REQUIRE_THROW(connection = database->createConnection("first", connParameters), dbms::DatabaseException);
+   ASSERT_THROW(connection = database->createConnection("first", connParameters), dbms::DatabaseException);
    app.stop();
    thr.join();
 }
 
-BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement, LdapFixture)
+TEST_F(LdapTestFixture, dbms_statement)
 {
    Definition definition = {
       {"sn", Constraint::CanNotBeNull}, {"cn", Constraint::CanNotBeNull}, {"objectClass", Constraint::CanNotBeNull},
@@ -126,7 +127,7 @@ BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement, LdapFixture)
    dbms::GuardStatement guardStament(guardConnection, readStatement);
    dbms::ResultCode resultCode = guardStament.execute();
 
-   BOOST_REQUIRE(resultCode.successful());
+   ASSERT_TRUE(resultCode.successful());
 
    std::map<std::string, int> mymap = {
       {"Isaac Newton", 4}, {"Albert Einstein", 4}, {"Nikola Tesla", 5}, {"Galileo Galilei", 4}, {"Leonhard Euler", 4},
@@ -139,22 +140,22 @@ BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement, LdapFixture)
    while(guardStament.fetch()) {
       auto cn = coffee_datatype_downcast(dbms::datatype::MultiString, guardStament.getOutputData(1));
 
-      BOOST_REQUIRE_EQUAL(cn->size(), 1);
+      ASSERT_EQ(1, cn->size());
       const std::string name = dbms::datatype::MultiString::value(cn->begin_value());
 
       auto ii = mymap.find(name);
-      BOOST_REQUIRE(ii != mymap.end());
+      ASSERT_TRUE(ii != mymap.end());
 
       auto objectClass = coffee_datatype_downcast(dbms::datatype::MultiString, guardStament.getOutputData(2));
-      BOOST_REQUIRE_EQUAL(objectClass->size(), ii->second);
+      ASSERT_EQ(ii->second, objectClass->size());
 
       counter ++;
    }
 
-   BOOST_REQUIRE_EQUAL(counter, 17);
+   ASSERT_EQ(17, counter);
 }
 
-BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement_notfound_var, LdapFixture)
+TEST_F(LdapTestFixture, dbms_statement_notfound_var)
 {
    Definition definition = {
       {"sn-not-exist", Constraint::CanBeNull}, {"cn", Constraint::CanNotBeNull}
@@ -166,19 +167,19 @@ BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement_notfound_var, LdapFixture)
    dbms::GuardStatement guardStament(guardConnection, readStatement);
    dbms::ResultCode resultCode = guardStament.execute();
 
-   BOOST_REQUIRE(resultCode.successful());
+   ASSERT_TRUE(resultCode.successful());
 
    int counter = 0;
    while(guardStament.fetch()) {
-      BOOST_REQUIRE(!guardStament.getOutputData(0)->hasValue());
-      BOOST_REQUIRE(guardStament.getOutputData(1)->hasValue());
+      ASSERT_TRUE(!guardStament.getOutputData(0)->hasValue());
+      ASSERT_TRUE(guardStament.getOutputData(1)->hasValue());
       counter ++;
    }
 
-   BOOST_REQUIRE_EQUAL(counter, 17);
+   ASSERT_EQ(17, counter);
 }
 
-BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement_input, LdapFixture)
+TEST_F(LdapTestFixture, dbms_statement_input)
 {
    Definition definition = {
       {"sn", Constraint::CanNotBeNull}, {"cn", Constraint::CanNotBeNull}, {"objectClass", Constraint::CanBeNull}
@@ -193,20 +194,20 @@ BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement_input, LdapFixture)
    dbms::GuardStatement guardStament(guardConnection, readStatement);
    dbms::ResultCode resultCode = guardStament.execute();
 
-   BOOST_REQUIRE(resultCode.successful());
+   ASSERT_TRUE(resultCode.successful());
 
    int counter = 0;
    while(guardStament.fetch()) {
-      BOOST_REQUIRE(guardStament.getOutputData(0)->hasValue());
-      BOOST_REQUIRE(guardStament.getOutputData(1)->hasValue());
-      BOOST_REQUIRE(!guardStament.getOutputData(2)->hasValue());
+      ASSERT_TRUE(guardStament.getOutputData(0)->hasValue());
+      ASSERT_TRUE(guardStament.getOutputData(1)->hasValue());
+      ASSERT_TRUE(!guardStament.getOutputData(2)->hasValue());
       counter ++;
    }
 
-   BOOST_REQUIRE_EQUAL(counter, 17);
+   ASSERT_EQ(17, counter);
 }
 
-BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement_output_not_nulleable, LdapFixture)
+TEST_F(LdapTestFixture, dbms_statement_output_not_nulleable)
 {
    Definition definition = {
       {"sn-not-exist", Constraint::CanNotBeNull}, {"cn", Constraint::CanNotBeNull}
@@ -218,11 +219,11 @@ BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement_output_not_nulleable, LdapFixture)
    dbms::GuardStatement guardStament(guardConnection, readStatement);
    dbms::ResultCode resultCode = guardStament.execute();
 
-   BOOST_REQUIRE(resultCode.successful());
-   BOOST_REQUIRE_THROW(guardStament.fetch(), basis::RuntimeException);
+   ASSERT_TRUE(resultCode.successful());
+   ASSERT_THROW(guardStament.fetch(), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement_close_before_end, LdapFixture)
+TEST_F(LdapTestFixture, dbms_statement_close_before_end)
 {
    Definition definition = {
       {"sn", Constraint::CanNotBeNull}, {"cn", Constraint::CanNotBeNull}, {"objectClass", Constraint::CanBeNull}
@@ -234,12 +235,12 @@ BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement_close_before_end, LdapFixture)
    dbms::GuardStatement guardStament(guardConnection, readStatement);
    dbms::ResultCode resultCode = guardStament.execute();
 
-   BOOST_REQUIRE(resultCode.successful());
+   ASSERT_TRUE(resultCode.successful());
 
-   BOOST_REQUIRE(guardStament.fetch());
+   ASSERT_TRUE(guardStament.fetch());
 }
 
-BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement_not_found, LdapFixture)
+TEST_F(LdapTestFixture, dbms_statement_not_found)
 {
    LdapStatementParameters stParameters(dbms::ActionOnError::Ignore, "dc=example,dc=com");
    readStatement = database->createStatement("not-found", "objectClass=zzzz", stParameters.setScope(LdapStatementParameters::Scope::SubTree));
@@ -248,7 +249,7 @@ BOOST_FIXTURE_TEST_CASE(ldap_dbms_statement_not_found, LdapFixture)
    dbms::GuardStatement guardStament(guardConnection, readStatement);
    dbms::ResultCode resultCode = guardStament.execute();
 
-   BOOST_REQUIRE(resultCode.notFound());
+   ASSERT_TRUE(resultCode.notFound());
 
-   BOOST_REQUIRE(!guardStament.fetch());
+   ASSERT_TRUE(!guardStament.fetch());
 }

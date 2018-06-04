@@ -100,7 +100,7 @@ TEST(DataBlockTest, clear )
 
    var.clear();
    ASSERT_EQ(0, var.size());
-   ASSERT_EQ(true, var.empty());
+   ASSERT_TRUE(var.empty());
 }
 
 TEST(DataBlockTest, operator_parenthesis )

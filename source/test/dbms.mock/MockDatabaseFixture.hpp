@@ -30,7 +30,7 @@ template <class _T> struct MockDatabaseFixture : public ::testing::Test {
       connection = database->createConnection("0", parameters);
    }
 
-   void TearDown() {
+   virtual void TearDown() {
       app.stop();
       thr.join();
    }

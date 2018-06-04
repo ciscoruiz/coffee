@@ -3,7 +3,7 @@ script: cmake . && make && ctest --output-on-failure
 
 before_script: 
    - sudo apt-get -qq update
-   - sudo apt-get install -y libxml2-dev libboost-filesystem-dev libboost-test-dev libsqlite3-dev:amd64 sqlite sqlite3 libzmqpp-dev
+   - sudo apt-get install -y libxml2-dev libboost-filesystem-dev libgtest-dev libsqlite3-dev sqlite sqlite3 libzmqpp-dev 
 
    
 #
@@ -16,6 +16,7 @@ matrix:
       env:
         - TEST="Codecov"
       script:
+        - mkdir -p libs && cp -r /usr/src/gtest libs && cd libs/gtest && cmake . && make -j 2 && cd -
         - cmake -DCMAKE_BUILD_TYPE=COVERAGE 
         - make --jobs=4 && ctest --verbose
         - bash <(curl -s https://codecov.io/bash)

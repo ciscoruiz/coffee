@@ -67,7 +67,7 @@ TEST_F(XmlReadingOnMemoryTest, simpliest_memory)
       ASSERT_EQ("param", child->getName());
       ASSERT_EQ(0, child->children_size());
       ASSERT_EQ(0, child->attributes_size());
-      ASSERT_EQ(true, child->hasText());
+      ASSERT_TRUE(child->hasText());
       ASSERT_EQ("the text", child->getText());
    }
 }
@@ -90,7 +90,7 @@ TEST_F(XmlReadingOnMemoryTest, memory_document)
       ASSERT_EQ("param", child->getName());
       ASSERT_EQ(0, child->children_size());
       ASSERT_EQ(1, child->attributes_size());
-      ASSERT_EQ(true, child->hasText());
+      ASSERT_TRUE(child->hasText());
    }
 }
 
@@ -100,7 +100,7 @@ TEST_F(XmlReadingOnMemoryTest, find_child_byname)
 
    setup(buffer);
 
-   ASSERT_EQ(false, root->hasText());
+   ASSERT_FALSE(root->hasText());
    ASSERT_EQ(2, root->children_size());
 
    ASSERT_NO_THROW(root->lookupChild("child_one"));
@@ -108,12 +108,12 @@ TEST_F(XmlReadingOnMemoryTest, find_child_byname)
 
    std::shared_ptr<Node> childOne = root->searchChild("child_one");
    ASSERT_TRUE(childOne != nullptr);
-   ASSERT_EQ(true, childOne->hasText());
+   ASSERT_TRUE(childOne->hasText());
    ASSERT_EQ("text one", childOne->getText());
 
    std::shared_ptr<Node> childTwo = root->searchChild("child_two");
    ASSERT_FALSE(!childTwo);
-   ASSERT_EQ(true, childTwo->hasText());
+   ASSERT_TRUE(childTwo->hasText());
    ASSERT_EQ("text two", childTwo->getText());
 
    std::shared_ptr<Node> found = root->searchChild("not_found");
@@ -128,19 +128,19 @@ TEST_F(XmlReadingOnMemoryTest, const_find_child_byname)
 
    setup(buffer);
 
-   ASSERT_EQ(false, root->hasText());
+   ASSERT_FALSE(root->hasText());
    ASSERT_EQ(2, root->children_size());
    ASSERT_NO_THROW(root->lookupChild("child_one"));
    ASSERT_NO_THROW(root->lookupChild("child_two"));
 
    std::shared_ptr<Node> childOne = root->searchChild("child_one");
    ASSERT_TRUE(childOne != nullptr);
-   ASSERT_EQ(true, childOne->hasText());
+   ASSERT_TRUE(childOne->hasText());
    ASSERT_EQ("text one", childOne->getText());
 
    std::shared_ptr<Node> childTwo = root->searchChild("child_two");
    ASSERT_TRUE(childTwo != nullptr);
-   ASSERT_EQ(true, childTwo->hasText());
+   ASSERT_TRUE(childTwo->hasText());
    ASSERT_EQ("text two", childTwo->getText());
 
    std::shared_ptr<Node> found = root->searchChild("not_found");
@@ -162,15 +162,15 @@ TEST_F(XmlReadingOnMemoryTest, locate_child_by_pos)
 
    setup(buffer);
 
-   ASSERT_EQ(false, root->hasText());
+   ASSERT_FALSE(root->hasText());
    ASSERT_EQ(2, root->children_size());
 
    std::shared_ptr<Node> child = root->childAt(0);
-   ASSERT_EQ(true, child->hasText());
+   ASSERT_TRUE(child->hasText());
    ASSERT_EQ("text one", child->getText());
 
    child  = root->childAt(1);
-   ASSERT_EQ(true, child->hasText());
+   ASSERT_TRUE(child->hasText());
    ASSERT_EQ("text two", child->getText());
 
    ASSERT_THROW(root->childAt(-1), basis::RuntimeException);
@@ -189,7 +189,7 @@ TEST_F(XmlReadingOnMemoryTest, const_iterate_attr)
 
    setup(buffer);
 
-   ASSERT_EQ(false, root->hasText());
+   ASSERT_FALSE(root->hasText());
    ASSERT_EQ(0, root->children_size());
    ASSERT_EQ(3, root->attributes_size());
 
@@ -288,7 +288,7 @@ TEST(XmlReadingDocumentTest, file_document)
       ASSERT_EQ("param", child->getName());
       ASSERT_EQ(0, child->children_size());
       ASSERT_EQ(1, child->attributes_size());
-      ASSERT_EQ(true, child->hasText());
+      ASSERT_TRUE(child->hasText());
    }
 }
 

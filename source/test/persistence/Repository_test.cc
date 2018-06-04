@@ -1,9 +1,9 @@
 // MIT License
 // 
-// Copyright (c) 2018 Francisco Ruiz (francisco.ruiz.rayo@gmail.com)
+// Copyright(c) 2018 Francisco Ruiz(francisco.ruiz.rayo@gmail.com)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
+// of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
@@ -22,7 +22,7 @@
 //
 
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <map>
 #include <functional>
@@ -44,42 +44,42 @@
 
 using namespace coffee;
 
-BOOST_AUTO_TEST_CASE (persistence_repository_repeat)
+TEST(RepositoryTest, repeat)
 {
-   persistence::Repository repository ("persistence_define_structure");
+   persistence::Repository repository("persistence_define_structure");
 
    auto ii = repository.createStorage("the 0", 128);
 
    std::shared_ptr<persistence::Storage>& find = repository.findStorage("the 0");
 
-   BOOST_REQUIRE_EQUAL (ii.get(), find.get());
+   ASSERT_EQ(find.get(), ii.get());
 
-   BOOST_REQUIRE_THROW(repository.createStorage("the 0", 16), basis::RuntimeException);
+   ASSERT_THROW(repository.createStorage("the 0", 16), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE (persistence_repository_as)
+TEST(RepositoryTest, asString)
 {
-   persistence::Repository repository ("persistence_define_structure");
+   persistence::Repository repository("persistence_define_structure");
 
    repository.createStorage("the 0", 16);
    repository.createStorage("the 1", persistence::Storage::DefaultMaxCacheSize);
 
-   basis::StreamString zz = repository.asString ();
+   basis::StreamString zz = repository.asString();
 
-   BOOST_REQUIRE_EQUAL (zz, "persistence.Repository { basis.NamedObject {Name=persistence_define_structure} | N-Size=2 }");
+   ASSERT_EQ("persistence.Repository { basis.NamedObject {Name=persistence_define_structure} | N-Size=2 }", zz);
 
-   xml::Node myNode ("root");
+   xml::Node myNode("root");
 
    std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("root");
 
    auto info = repository.asXML(root);
 
-   BOOST_REQUIRE_EQUAL (info->children_size(), 2);
+   ASSERT_EQ(2, info->children_size());
 }
 
-BOOST_AUTO_TEST_CASE (persistence_repository_notfound)
+TEST(RepositoryTest, notfound)
 {
-   persistence::Repository repository ("persistence_repository_notfound");
+   persistence::Repository repository("persistence_repository_notfound");
 
-   BOOST_REQUIRE_THROW(repository.findStorage("does-not-exist"), basis::RuntimeException);
+   ASSERT_THROW(repository.findStorage("does-not-exist"), basis::RuntimeException);
 }

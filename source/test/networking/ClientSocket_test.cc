@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/ClientSocket.hpp>
@@ -30,71 +30,72 @@
 
 using namespace coffee;
 
-BOOST_FIXTURE_TEST_CASE(clientsocket_service_on, NetworkingFixture)
+TEST_F(NetworkingFixture, clientsocket_service_on)
 {
-   BOOST_REQUIRE(networkingService->isRunning());
+   ASSERT_TRUE(networkingService->isRunning());
 }
 
-BOOST_FIXTURE_TEST_CASE(clientsocket_server_on, NetworkingFixture)
+TEST_F(NetworkingFixture, clientsocket_server_on)
 {
-   BOOST_REQUIRE(upperServer->isValid());
+   ASSERT_TRUE(upperServer->isValid());
 }
 
-BOOST_FIXTURE_TEST_CASE(clientsocket_without_endpoints, NetworkingFixture)
-{
-   networking::SocketArguments arguments;
-
-   BOOST_REQUIRE_THROW(networkingService->createClientSocket(arguments), basis::RuntimeException);
-}
-
-BOOST_FIXTURE_TEST_CASE(clientsocket_without_handler, NetworkingFixture)
+TEST_F(NetworkingFixture, clientsocket_without_endpoints)
 {
    networking::SocketArguments arguments;
-   arguments.addSubscription("12345");
-   BOOST_REQUIRE_NO_THROW(networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555")));
+
+   ASSERT_THROW(networkingService->createClientSocket(arguments), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(clientsocket_bad_address, NetworkingFixture)
+TEST_F(NetworkingFixture, clientsocket_without_handler)
 {
    networking::SocketArguments arguments;
    arguments.addSubscription("12345");
-   BOOST_REQUIRE_THROW(networkingService->createClientSocket(arguments.addEndPoint("bad-address")), basis::RuntimeException);
+   ASSERT_NO_THROW(networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555")));
 }
 
-BOOST_FIXTURE_TEST_CASE(clientsocket_not_found, NetworkingFixture)
+TEST_F(NetworkingFixture, clientsocket_bad_address)
 {
-   BOOST_REQUIRE_THROW(networkingService->findClientSocket("some-name"), basis::RuntimeException);
+   networking::SocketArguments arguments;
+   arguments.addSubscription("12345");
+   ASSERT_THROW(networkingService->createClientSocket(arguments.addEndPoint("bad-address")), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(clientsocket_found, NetworkingFixture)
+TEST_F(NetworkingFixture, clientsocket_not_found)
 {
+   ASSERT_THROW(networkingService->findClientSocket("some-name"), basis::RuntimeException);
+}
+
+TEST_F(NetworkingFixture, clientsocket_found)
+{
+   std::string ips[] = { "tcp://localhost:5555", "tcp://127.0.0.1:5556"};
+
    {
       networking::SocketArguments arguments;
-      arguments.setName("first").addEndPoint("tcp://localhost:5555");
+      arguments.setName("first").addEndPoint(ips[0]);
       auto clientSocket = networkingService->createClientSocket(arguments);
-      BOOST_REQUIRE(clientSocket);
+      ASSERT_TRUE(clientSocket != nullptr);
    }
 
    {
       networking::SocketArguments arguments;
-      arguments.setName("second").addEndPoint("tcp://127.0.0.1:5556");
+      arguments.setName("second").addEndPoint(ips[1]);
       auto clientSocket = networkingService->createClientSocket(arguments);
-      BOOST_REQUIRE(clientSocket);
+      ASSERT_TRUE(clientSocket != nullptr);
    }
 
    auto clientSocket = networkingService->findClientSocket("first");
-   BOOST_REQUIRE_EQUAL(clientSocket->getEndPoints().at(0), "tcp://localhost:5555");
+   ASSERT_EQ(ips[0], clientSocket->getEndPoints().at(0));
 
    clientSocket = networkingService->findClientSocket("second");
-   BOOST_REQUIRE_EQUAL(clientSocket->getEndPoints().at(0), "tcp://127.0.0.1:5556");
+   ASSERT_EQ(ips[1], clientSocket->getEndPoints().at(0));
 }
 
-BOOST_FIXTURE_TEST_CASE(clientsocket_unkwown_server, NetworkingFixture)
+TEST_F(NetworkingFixture, clientsocket_unkwown_server)
 {
    networking::SocketArguments arguments;
    auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:7777"));
-   BOOST_REQUIRE(clientSocket);
 
    basis::DataBlock request("Send to an non existant server");
-   BOOST_REQUIRE_THROW(clientSocket->send(request), basis::RuntimeException);
+   ASSERT_THROW(clientSocket->send(request), basis::RuntimeException);
 }

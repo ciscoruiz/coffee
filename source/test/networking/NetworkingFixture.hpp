@@ -30,8 +30,9 @@
 #include <coffee/networking/AsyncSocket.hpp>
 #include <coffee/networking/ServerSocket.hpp>
 #include <coffee/networking/MessageHandler.hpp>
+#include <gtest/gtest.h>
 
-struct NetworkingFixture {
+struct NetworkingFixture : ::testing::Test {
    class UpperStringHandler : public coffee::networking::MessageHandler {
    public:
       UpperStringHandler() : coffee::networking::MessageHandler("UpperStringHandler") {;}
@@ -78,8 +79,10 @@ struct NetworkingFixture {
 
    static const char* upperServerEndPoint;
 
-   NetworkingFixture();
-   ~NetworkingFixture();
+   NetworkingFixture() : app("TestAppNetworkingFixture") {;}
+
+   void SetUp();
+   void TearDown();
 
    static void parallelRun(coffee::app::Application& app) {
       app.start();

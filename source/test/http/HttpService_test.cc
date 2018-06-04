@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <csignal>
 
@@ -43,9 +43,12 @@
 
 using namespace coffee;
 
-struct HttpFixture {
-   HttpFixture();
-   ~HttpFixture();
+struct HttpServiceFixtureTest : ::testing::Test {
+   HttpServiceFixtureTest() : app("TestAppHttpServiceFixtureTest") {;}
+
+
+   void SetUp();
+   void TearDown();
 
    static void parallelRun(coffee::app::Application& app) {
       app.start();
@@ -73,7 +76,7 @@ public:
    std::shared_ptr<http::HttpResponse> service(const std::shared_ptr<http::HttpRequest>& request) throw(basis::RuntimeException);
 };
 
-HttpFixture::HttpFixture() : app("TestAppHttpFixture")
+void HttpServiceFixtureTest::SetUp()
 {
    const char* logFileName = "source/test/http/trace.log";
    unlink (logFileName);
@@ -82,30 +85,31 @@ HttpFixture::HttpFixture() : app("TestAppHttpFixture")
    logger::Logger::setLevel(logger::Level::Debug);
 
    networkingService = networking::NetworkingService::instantiate(app);
-   BOOST_REQUIRE(networkingService);
+   ASSERT_TRUE(networkingService != nullptr);
 
    httpService = http::HttpService::instantiate(app, networkingService);
-   BOOST_REQUIRE(httpService);
+   ASSERT_TRUE(httpService != nullptr);
 
    http::url::URLParser parser("http://127.0.0.1:5555");
-   BOOST_REQUIRE_NO_THROW(httpService->createServer(parser.build()));
+   ASSERT_NO_THROW(httpService->createServer(parser.build()));
 
-   BOOST_REQUIRE_NO_THROW(httpService->registerServlet("/upper", std::make_shared<UpperServlet>()));
-   BOOST_REQUIRE_NO_THROW(httpService->registerServlet<LowerServlet>("/lower"));
-   BOOST_REQUIRE_NO_THROW(httpService->registerServlet<EchoServlet>("/echo"));
+   ASSERT_NO_THROW(httpService->registerServlet("/upper", std::make_shared<UpperServlet>()));
+   ASSERT_NO_THROW(httpService->registerServlet<LowerServlet>("/lower"));
+   ASSERT_NO_THROW(httpService->registerServlet<EchoServlet>("/echo"));
 
    {
       http::url::URLParser parser("http://localhost:5555");
       httpClient = httpService->createClient(parser.build());
    }
-   BOOST_REQUIRE(httpClient);
+   ASSERT_TRUE(httpClient != nullptr);
 
    thr = std::thread(parallelRun, std::ref(app));
    app.waitUntilRunning();
    networkingService->waitEffectiveRunning();
 }
 
-HttpFixture::~HttpFixture() {
+void HttpServiceFixtureTest::TearDown()
+{
    LOG_THIS_METHOD();
    app.stop();
    thr.join();
@@ -147,16 +151,16 @@ std::shared_ptr<http::HttpResponse> EchoServlet::service(const std::shared_ptr<h
    return response;
 }
 
-BOOST_FIXTURE_TEST_CASE(http_service_send_response, HttpFixture)
+TEST_F(HttpServiceFixtureTest, http_service_send_response)
 {
    {
       auto request = http::HttpRequest::instantiate(http::HttpRequest::Method::Get, "/upper");
       request->setBody("hello world");
       auto response = httpClient->send(request);
 
-      BOOST_REQUIRE(response->isOk());
-      BOOST_REQUIRE(response->hasBody());
-      BOOST_REQUIRE_EQUAL(response->getBody(), "HELLO WORLD");
+      ASSERT_TRUE(response->isOk());
+      ASSERT_TRUE(response->hasBody());
+      ASSERT_EQ("HELLO WORLD", response->getBody());
    }
 
    {
@@ -164,9 +168,9 @@ BOOST_FIXTURE_TEST_CASE(http_service_send_response, HttpFixture)
       request->setBody("HELLO WORLD");
       auto response = httpClient->send(request);
 
-      BOOST_REQUIRE(response->isOk());
-      BOOST_REQUIRE(response->hasBody());
-      BOOST_REQUIRE_EQUAL(response->getBody(), "hello world");
+      ASSERT_TRUE(response->isOk());
+      ASSERT_TRUE(response->hasBody());
+      ASSERT_EQ("hello world", response->getBody());
    }
 
    {
@@ -174,39 +178,39 @@ BOOST_FIXTURE_TEST_CASE(http_service_send_response, HttpFixture)
       request->setBody("Some Text");
       auto response = httpClient->send(request);
 
-      BOOST_REQUIRE(response->isOk());
-      BOOST_REQUIRE(response->hasBody());
-      BOOST_REQUIRE_EQUAL(response->getBody(), "Some Text");
+      ASSERT_TRUE(response->isOk());
+      ASSERT_TRUE(response->hasBody());
+      ASSERT_EQ("Some Text", response->getBody());
    }
 }
 
-BOOST_FIXTURE_TEST_CASE(http_service_send_empty, HttpFixture)
+TEST_F(HttpServiceFixtureTest, http_service_send_empty)
 {
    auto request = http::HttpRequest::instantiate(http::HttpRequest::Method::Get, "/upper");
    auto response = httpClient->send(request);
 
-   BOOST_REQUIRE(!response->isOk());
-   BOOST_REQUIRE(!response->hasBody());
-   BOOST_REQUIRE_EQUAL(response->getStatusCode(), 400);
+   ASSERT_TRUE(!response->isOk());
+   ASSERT_TRUE(!response->hasBody());
+   ASSERT_EQ(400, response->getStatusCode());
 }
 
-BOOST_FIXTURE_TEST_CASE(http_service_repeat_path, HttpFixture)
+TEST_F(HttpServiceFixtureTest, http_service_repeat_path)
 {
-   BOOST_REQUIRE_THROW(httpService->registerServlet<EchoServlet>("/lower"), basis::RuntimeException);
+   ASSERT_THROW(httpService->registerServlet<EchoServlet>("/lower"), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(http_service_nopath, HttpFixture)
+TEST_F(HttpServiceFixtureTest, http_service_nopath)
 {
-   BOOST_REQUIRE_THROW(httpService->findServlet("/non-exist"), basis::RuntimeException);
+   ASSERT_THROW(httpService->findServlet("/non-exist"), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(http_service_send_unknow_path, HttpFixture)
+TEST_F(HttpServiceFixtureTest, http_service_send_unknow_path)
 {
    auto request = http::HttpRequest::instantiate(http::HttpRequest::Method::Get, "/non-exist");
    auto response = httpClient->send(request);
-   BOOST_REQUIRE(!response->isOk());
-   BOOST_REQUIRE(!response->hasBody());
-   BOOST_REQUIRE_EQUAL(response->getStatusCode(), 404);
+   ASSERT_TRUE(!response->isOk());
+   ASSERT_TRUE(!response->hasBody());
+   ASSERT_EQ(404, response->getStatusCode());
 }
 
 class ThrowServlet : public http::HttpServlet {
@@ -218,36 +222,36 @@ public:
    }
 };
 
-BOOST_FIXTURE_TEST_CASE(http_service_fails, HttpFixture)
+TEST_F(HttpServiceFixtureTest, http_service_fails)
 {
-   BOOST_REQUIRE_NO_THROW(httpService->registerServlet<ThrowServlet>("/throw"));
+   ASSERT_NO_THROW(httpService->registerServlet<ThrowServlet>("/throw"));
 
    auto response = httpClient->send(http::HttpRequest::instantiate(http::HttpRequest::Method::Get, "/throw"));
-   BOOST_REQUIRE(!response->isOk());
-   BOOST_REQUIRE(!response->hasBody());
-   BOOST_REQUIRE_EQUAL(response->getStatusCode(), 500);
-   BOOST_REQUIRE_EQUAL(response->getErrorDescription(), "This operation failed");
+   ASSERT_TRUE(!response->isOk());
+   ASSERT_TRUE(!response->hasBody());
+   ASSERT_EQ(500, response->getStatusCode());
+   ASSERT_EQ("This operation failed", response->getErrorDescription());
 }
 
-BOOST_FIXTURE_TEST_CASE(http_service_no_http, HttpFixture) {
+TEST_F(HttpServiceFixtureTest, http_service_no_http) {
    networking::SocketArguments arguments;
    auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555"));
-   BOOST_REQUIRE(clientSocket);
+   ASSERT_TRUE(clientSocket != nullptr);
    basis::DataBlock request("this is not a HTTP message");
 
    http::protocol::HttpProtocolDecoder decoder;
    auto response = std::dynamic_pointer_cast<http::HttpResponse>(decoder.apply(clientSocket->send(request)));
 
-   BOOST_REQUIRE(!response->isOk());
-   BOOST_REQUIRE(!response->hasBody());
-   BOOST_REQUIRE_EQUAL(response->getStatusCode(), 400);
-   BOOST_REQUIRE_EQUAL(response->getErrorDescription(), "Unable to allocate an HTTP message");
+   ASSERT_TRUE(!response->isOk());
+   ASSERT_TRUE(!response->hasBody());
+   ASSERT_EQ(400, response->getStatusCode());
+   ASSERT_EQ("Unable to allocate an HTTP message", response->getErrorDescription());
 }
 
-BOOST_FIXTURE_TEST_CASE(http_service_request_with_response, HttpFixture) {
+TEST_F(HttpServiceFixtureTest, http_service_request_with_response) {
    networking::SocketArguments arguments;
    auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555"));
-   BOOST_REQUIRE(clientSocket);
+   ASSERT_TRUE(clientSocket != nullptr);
 
    auto notRequest = http::HttpResponse::instantiate(1, 1, 200, "OK");
    http::protocol::HttpProtocolEncoder encoder;
@@ -255,14 +259,14 @@ BOOST_FIXTURE_TEST_CASE(http_service_request_with_response, HttpFixture) {
    http::protocol::HttpProtocolDecoder decoder;
    auto response = std::dynamic_pointer_cast<http::HttpResponse>(decoder.apply(clientSocket->send(encoder.apply(notRequest))));
 
-   BOOST_REQUIRE(!response->isOk());
-   BOOST_REQUIRE(!response->hasBody());
-   BOOST_REQUIRE_EQUAL(response->getStatusCode(), 400);
-   BOOST_REQUIRE_EQUAL(response->getErrorDescription(), "HTTP server can not work on HTTP responses");
+   ASSERT_TRUE(!response->isOk());
+   ASSERT_TRUE(!response->hasBody());
+   ASSERT_EQ(400, response->getStatusCode());
+   ASSERT_EQ("HTTP server can not work on HTTP responses", response->getErrorDescription());
 }
 
 
-BOOST_FIXTURE_TEST_CASE(networking_write_xml, HttpFixture)
+TEST_F(HttpServiceFixtureTest, networking_write_xml)
 {
    app.setOutputContextFilename("source/test/http/context.xml");
 
@@ -270,7 +274,7 @@ BOOST_FIXTURE_TEST_CASE(networking_write_xml, HttpFixture)
 
    xml::Document document;
 
-   BOOST_CHECK_NO_THROW(document.parse(app.getOutputContextFilename()));
+   ASSERT_NO_THROW(document.parse(app.getOutputContextFilename()));
 
    auto root = document.getRoot();
 
@@ -278,10 +282,10 @@ BOOST_FIXTURE_TEST_CASE(networking_write_xml, HttpFixture)
    auto services = app->lookupChild("Services");
 
    auto node = services->childAt(0);
-   BOOST_REQUIRE(node);
+   ASSERT_TRUE(node != nullptr);
 
    node = node->lookupChild("app.Service");
-   BOOST_REQUIRE(node);
+   ASSERT_TRUE(node != nullptr);
 
-   BOOST_CHECK_EQUAL(node->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "Networking:ZeroMQ");
+   ASSERT_EQ(node->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "Networking:ZeroMQ");
 }

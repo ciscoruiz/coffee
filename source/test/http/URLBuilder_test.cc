@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/http/url/URLBuilder.hpp>
 #include <coffee/http/url/URL.hpp>
@@ -31,7 +31,7 @@ using namespace coffee;
 using coffee::http::url::URL;
 using http::url::ComponentName;
 
-BOOST_AUTO_TEST_CASE(URLBuilder_set_all_components)
+TEST(HttpUrlBuilder, set_all_components)
 {
    http::url::URLBuilder builder;
 
@@ -46,16 +46,16 @@ BOOST_AUTO_TEST_CASE(URLBuilder_set_all_components)
    auto url = builder.build();
 
    for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
-      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii));
-      BOOST_REQUIRE_EQUAL(url->getComponent((ComponentName::_v) ii), values[ii]);
+      ASSERT_TRUE(url->hasComponent((ComponentName::_v) ii));
+      ASSERT_EQ(values[ii], url->getComponent((ComponentName::_v) ii));
    }
 
    http::url::KeyValue kv = URL::keyValue(url->query_begin());
-   BOOST_REQUIRE(kv.first == "key1");
-   BOOST_REQUIRE(kv.second == "value1");
+   ASSERT_TRUE(kv.first == "key1");
+   ASSERT_TRUE(kv.second == "value1");
 }
 
-BOOST_AUTO_TEST_CASE(URLBuilder_no_component_defined)
+TEST(HttpUrlBuilder, no_component_defined)
 {
    http::url::URLBuilder builder;
 
@@ -64,32 +64,32 @@ BOOST_AUTO_TEST_CASE(URLBuilder_no_component_defined)
 
    auto url = builder.build();
 
-   BOOST_REQUIRE(url->hasComponent(ComponentName::Scheme));
-   BOOST_REQUIRE(url->hasComponent(ComponentName::Host));
-   BOOST_REQUIRE(!url->hasComponent(ComponentName::User));
-   BOOST_REQUIRE(!url->hasComponent(ComponentName::Password));
-   BOOST_REQUIRE_THROW(url->getComponent(ComponentName::Path), basis::RuntimeException);
+   ASSERT_TRUE(url->hasComponent(ComponentName::Scheme));
+   ASSERT_TRUE(url->hasComponent(ComponentName::Host));
+   ASSERT_TRUE(!url->hasComponent(ComponentName::User));
+   ASSERT_TRUE(!url->hasComponent(ComponentName::Password));
+   ASSERT_THROW(url->getComponent(ComponentName::Path), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(URLBuilder_without_mandatories)
+TEST(HttpUrlBuilder, without_mandatories)
 {
    {
       http::url::URLBuilder builder;
       builder.setCompoment(ComponentName::Scheme, "tcp");
-      BOOST_REQUIRE_THROW(builder.build(), basis::RuntimeException);
+      ASSERT_THROW(builder.build(), basis::RuntimeException);
 
    }
    {
       http::url::URLBuilder builder;
       builder.setCompoment(ComponentName::Host, "localhost");
-      BOOST_REQUIRE_THROW(builder.build(), basis::RuntimeException);
+      ASSERT_THROW(builder.build(), basis::RuntimeException);
    }
 }
 
-BOOST_AUTO_TEST_CASE(URLBuilder_repeat_component)
+TEST(HttpUrlBuilder, repeat_component)
 {
    http::url::URLBuilder builder;
    builder.setCompoment(ComponentName::Port, "123");
 
-   BOOST_REQUIRE_THROW(builder.setCompoment(ComponentName::Port, "444"), basis::RuntimeException);
+   ASSERT_THROW(builder.setCompoment(ComponentName::Port, "444"), basis::RuntimeException);
 }

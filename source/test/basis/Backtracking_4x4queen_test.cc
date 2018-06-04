@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <iostream>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/basis/pattern/backtracking/Solver.hpp>
 
@@ -136,20 +136,19 @@ public:
    }
 };
 
-BOOST_AUTO_TEST_CASE(NQueen4x4)
+TEST(Backtraking4x4Test, NQueen4x4)
 {
    NQueen solver(4);
 
-   BOOST_REQUIRE(solver.apply());
+   ASSERT_TRUE(solver.apply());
 
    std::stringstream ss;
    PrintChessboard print(ss);
 
    solver.depthFirst(print);
 
-   BOOST_REQUIRE_EQUAL(solver.successors_size(), 2);
-   BOOST_REQUIRE_EQUAL(solver.countSolutions(), 2);
-   BOOST_REQUIRE_EQUAL(ss.str(), "{1,1,0}{2,3,1}{3,0,2}{4,2,3}{1,2,0}{2,0,1}{3,3,2}{4,1,3}");
+   ASSERT_EQ(solver.successors_size(), 2);
+   ASSERT_EQ(solver.countSolutions(), 2);
+   ASSERT_EQ("{1,1,0}{2,3,1}{3,0,2}{4,2,3}{1,2,0}{2,0,1}{3,3,2}{4,1,3}", ss.str());
 }
-
 

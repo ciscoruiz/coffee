@@ -25,147 +25,147 @@
 
 #include <iostream>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/basis/StreamString.hpp>
 
 using namespace std;
 using namespace coffee;
 
-BOOST_AUTO_TEST_CASE( StreamString_integer )
+TEST(StreamStringTest, integer )
 {
    int val = 10;
 
    basis::StreamString result;
 
    result = val;
-   BOOST_REQUIRE_EQUAL(result, "10");
+   ASSERT_EQ("10",result);
 
    result = 0;
-   BOOST_REQUIRE_EQUAL(result, "0");
+   ASSERT_EQ("0",result);
 
    val = INT_MAX;
    result = val;
-   BOOST_REQUIRE_EQUAL(result, "2147483647");
+   ASSERT_EQ("2147483647",result);
 
    val = INT_MIN;
    result = val;
-   BOOST_REQUIRE_EQUAL(result, "-2147483648");
+   ASSERT_EQ("-2147483648",result);
 }
 
-BOOST_AUTO_TEST_CASE( StreamString_uinteger )
+TEST(StreamStringTest, uinteger )
 {
    unsigned int val = 10;
 
    basis::StreamString result;
 
    result = val;
-   BOOST_REQUIRE_EQUAL(result, "10");
+   ASSERT_EQ("10",result);
 
    result = 0;
-   BOOST_REQUIRE_EQUAL(result, "0");
+   ASSERT_EQ("0",result);
 
    val = UINT_MAX;
    result = val;
-   BOOST_REQUIRE_EQUAL(result, "4294967295");
+   ASSERT_EQ("4294967295",result);
 }
 
-BOOST_AUTO_TEST_CASE( StreamString_integer64 )
+TEST(StreamStringTest, integer64 )
 {
    int64_t val = 0;
    basis::StreamString result;
 
    val --;
    result = val;
-   BOOST_REQUIRE_EQUAL(result, "-1");
+   ASSERT_EQ("-1",result);
 
    val = INT64_MAX;
    result = val;
-   BOOST_REQUIRE_EQUAL(result, "9223372036854775807");
+   ASSERT_EQ("9223372036854775807",result);
 
    val = INT64_MIN;
    result = val;
-   BOOST_REQUIRE_EQUAL(result, "-9223372036854775808");
+   ASSERT_EQ("-9223372036854775808",result);
 }
 
-BOOST_AUTO_TEST_CASE( StreamString_uinteger64 )
+TEST(StreamStringTest, uinteger64 )
 {
    uint64_t val = 0;
    basis::StreamString result;
 
    result = val;
-   BOOST_REQUIRE_EQUAL(result, "0");
+   ASSERT_EQ("0",result);
 
    val = UINT64_MAX;
    result = val;
-   BOOST_REQUIRE_EQUAL(result, "18446744073709551615");
+   ASSERT_EQ("18446744073709551615",result);
 }
 
-BOOST_AUTO_TEST_CASE( StreamString_bool )
+TEST(StreamStringTest, bool )
 {
    basis::StreamString result;
 
    result = true;
-   BOOST_REQUIRE_EQUAL(result, "true");
+   ASSERT_EQ("true",result);
 
    result = false;
-   BOOST_REQUIRE_EQUAL(result, "false");
+   ASSERT_EQ("false",result);
 }
 
-BOOST_AUTO_TEST_CASE( StreamString_char_char )
+TEST(StreamStringTest, char_char )
 {
    basis::StreamString result;
 
    result << "hello" << " " << "world";
 
-   BOOST_REQUIRE_EQUAL(result, "hello world");
+   ASSERT_EQ("hello world",result);
 }
 
-BOOST_AUTO_TEST_CASE( StreamString_char_int )
+TEST(StreamStringTest, char_int )
 {
    basis::StreamString result;
 
    result << "hello" << " " << 3 << "rd world";
 
-   BOOST_REQUIRE_EQUAL(result, "hello 3rd world");
+   ASSERT_EQ("hello 3rd world",result);
 }
 
-BOOST_AUTO_TEST_CASE( StreamString_string_bool )
+TEST(StreamStringTest, string_bool )
 {
    basis::StreamString result;
 
    std::string hello ("hello");
    result << hello << " " << true << " world";
 
-   BOOST_REQUIRE_EQUAL(result, "hello true world");
+   ASSERT_EQ("hello true world",result);
 }
 
-BOOST_AUTO_TEST_CASE( StreamString_string_int64 )
+TEST(StreamStringTest, string_int64 )
 {
    basis::StreamString result;
 
    result << "max_int64:" << INT64_MAX;
    result.toUpper();
-   BOOST_REQUIRE_EQUAL(result, "MAX_INT64:9223372036854775807");
+   ASSERT_EQ("MAX_INT64:9223372036854775807",result);
 }
 
-BOOST_AUTO_TEST_CASE( StreamString_string_null )
+TEST(StreamStringTest, string_null )
 {
    basis::StreamString result(basis::StreamString::Flag::ShowNull);
 
    result << "text=" << (const char*) NULL;
-   BOOST_REQUIRE_EQUAL(result, "text=<null>");
+   ASSERT_EQ("text=<null>",result);
 }
 
-BOOST_AUTO_TEST_CASE( StreamString_string_double )
+TEST(StreamStringTest, string_double )
 {
    basis::StreamString result;
 
    result << "double=" << (double) 0.000123;
-   BOOST_REQUIRE_EQUAL(result, "double=1.230000e-04");
+   ASSERT_EQ("double=1.230000e-04",result);
 }
 
-BOOST_AUTO_TEST_CASE( StreamString_chrono )
+TEST(StreamStringTest, chrono )
 {
    std::chrono::seconds sec (100);
    std::chrono::milliseconds ms(sec);
@@ -176,5 +176,5 @@ BOOST_AUTO_TEST_CASE( StreamString_chrono )
    result = sec;
    result << " | " << ms;
    result << " | " << us;
-   BOOST_REQUIRE_EQUAL(result, "100 sec | 100000 ms | 100000000 us");
+   ASSERT_EQ("100 sec | 100000 ms | 100000000 us",result);
 }

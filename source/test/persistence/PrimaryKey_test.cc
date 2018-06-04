@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <functional>
 #include <iostream>
@@ -41,7 +41,7 @@
 
 using namespace coffee;
 
-BOOST_AUTO_TEST_CASE(persistence_primary_key_compare)
+TEST(PrimaryKeyTest, compare)
 {
    std::shared_ptr<dbms::datatype::Integer> p00;
    std::shared_ptr<dbms::datatype::Integer> p01;
@@ -82,41 +82,29 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_compare)
       p21->setValue(0);
    }
 
-   BOOST_REQUIRE_EQUAL(pk0->compare(pk1) < 0, true);
-   BOOST_REQUIRE_EQUAL(pk0->compare(pk2) < 0, true);
-   BOOST_REQUIRE_EQUAL(pk0->compare(pk1) > 0, false);
-   BOOST_REQUIRE_EQUAL(pk0->compare(pk2) > 0, false);
+   ASSERT_TRUE(pk0->compare(pk1) < 0);
+   ASSERT_TRUE(pk0->compare(pk2) < 0);
+   ASSERT_FALSE(pk0->compare(pk1) > 0);
+   ASSERT_FALSE(pk0->compare(pk2) > 0);
 
-   BOOST_REQUIRE_EQUAL(pk1->compare(pk0) < 0, false);
-   BOOST_REQUIRE_EQUAL(pk1->compare(pk2) < 0, true);
-   BOOST_REQUIRE_EQUAL(pk1->compare(pk0) > 0, true);
-   BOOST_REQUIRE_EQUAL(pk1->compare(pk2) > 0, false);
+   ASSERT_FALSE(pk1->compare(pk0) < 0);
+   ASSERT_TRUE(pk1->compare(pk2) < 0);
+   ASSERT_TRUE(pk1->compare(pk0) > 0);
+   ASSERT_FALSE(pk1->compare(pk2) > 0);
 
-   BOOST_REQUIRE_EQUAL(pk2->compare(pk0) < 0, false);
-   BOOST_REQUIRE_EQUAL(pk2->compare(pk1) < 0, false);
-   BOOST_REQUIRE_EQUAL(pk2->compare(pk0) > 0, true);
-   BOOST_REQUIRE_EQUAL(pk2->compare(pk1) > 0, true);
+   ASSERT_FALSE(pk2->compare(pk0) < 0);
+   ASSERT_FALSE(pk2->compare(pk1) < 0);
+   ASSERT_TRUE(pk2->compare(pk0) > 0);
+   ASSERT_TRUE(pk2->compare(pk1) > 0);
 
    p00->setValue(1);
    p01->setValue(1);
 
-   BOOST_REQUIRE_EQUAL(pk0->compare(pk1), 0);
-   BOOST_REQUIRE_NE(pk0->compare(pk2), 0);
+   ASSERT_EQ(0, pk0->compare(pk1));
+   ASSERT_NE(pk0->compare(pk2), 0);
 }
 
-
-// See https://stackoverflow.com/questions/17572583/boost-check-fails-to-compile-operator-for-custom-types
-namespace boost {
-namespace test_tools {
-   template<> struct print_log_value<persistence::PrimaryKey> {
-      void operator()( std::ostream& os, persistence::PrimaryKey const& ts)
-      {
-          os << ts.asString();
-      }
-   };
-}}
-
-BOOST_AUTO_TEST_CASE(persistence_primary_key_copy_constructor)
+TEST(PrimaryKeyTest, copy_constructor)
 {
    persistence::PrimaryKeyBuilder builder;
 
@@ -128,10 +116,10 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_copy_constructor)
    persistence::PrimaryKey firstKey(builder);
    persistence::PrimaryKey secondKey(firstKey);
 
-   BOOST_REQUIRE_EQUAL(firstKey, secondKey);
+   ASSERT_EQ(secondKey, firstKey);
 }
 
-BOOST_AUTO_TEST_CASE(persistence_primary_key_assignmet_operator)
+TEST(PrimaryKeyTest, assignmet_operator)
 {
    persistence::PrimaryKeyBuilder builder;
 
@@ -148,10 +136,10 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_assignmet_operator)
 
    secondKey = firstKey;
 
-   BOOST_REQUIRE_EQUAL(firstKey, secondKey);
+   ASSERT_EQ(secondKey, firstKey);
 }
 
-BOOST_AUTO_TEST_CASE(persistence_primary_key_map)
+TEST(PrimaryKeyTest, map)
 {
    using persistence::PrimaryKey;
 
@@ -171,22 +159,22 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_map)
       entries.set(pk, key * key);
    }
 
-   BOOST_REQUIRE_EQUAL(entries.size(), 10);
+   ASSERT_EQ(10, entries.size());
 
    for(int key = 100; key < 110; ++ key) {
       integer->setValue(key);
-      BOOST_REQUIRE_EQUAL(entries.find(findKey) == entries.end(), true);
+      ASSERT_TRUE(entries.find(findKey) == entries.end());
    }
 
-   BOOST_REQUIRE_EQUAL(entries.size(), 10);
+   ASSERT_EQ(10, entries.size());
 
    for(int key = 0; key < 10; ++ key) {
       integer->setValue(key);
-      BOOST_REQUIRE_EQUAL(entries.find(findKey) == entries.end(), false);
+      ASSERT_FALSE(entries.find(findKey) == entries.end());
    }
 }
 
-BOOST_AUTO_TEST_CASE(persistence_primary_key_hash)
+TEST(PrimaryKeyTest, hash)
 {
    static const int maxSize = 10000;
 
@@ -212,6 +200,5 @@ BOOST_AUTO_TEST_CASE(persistence_primary_key_hash)
       }
    }
 
-   BOOST_CHECK_GT(collisions.size(), maxSize * 90 / 100);
-
+   ASSERT_GT(collisions.size(), maxSize * 90 / 100);
 }

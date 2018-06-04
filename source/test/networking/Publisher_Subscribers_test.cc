@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/PublisherSocket.hpp>
@@ -51,14 +51,16 @@ private:
 
 };
 
-BOOST_FIXTURE_TEST_CASE(publish_subscribers, NetworkingFixture)
+struct PublisherSocketTest : public NetworkingFixture {;};
+
+TEST_F(PublisherSocketTest, subscribers)
 {
    std::shared_ptr<networking::PublisherSocket> publisherSocket;
 
    {
       networking::SocketArguments arguments;
       publisherSocket = networkingService->createPublisherSocket(arguments.addEndPoint("tcp://*:5566"));
-      BOOST_REQUIRE(publisherSocket);
+      ASSERT_TRUE(publisherSocket != nullptr);
    }
 
    auto counterHandler = std::make_shared<Counter>();
@@ -69,12 +71,11 @@ BOOST_FIXTURE_TEST_CASE(publish_subscribers, NetworkingFixture)
       networking::SocketArguments arguments;
       arguments.addSubscription("message").setMessageHandler(counterHandler);
       auto subscriberSocket = networkingService->createSubscriberSocket(arguments.addEndPoint("tcp://127.0.0.1:5566"));
-      BOOST_REQUIRE(subscriberSocket);
+      ASSERT_TRUE(subscriberSocket != nullptr);
    }
 
    // To give time to NetworkingService to detect new subscribers
    usleep(100000);
-
 
    const int maxMessages = 100;
    for (int ii = 0; ii < maxMessages; ++ ii) {
@@ -84,12 +85,12 @@ BOOST_FIXTURE_TEST_CASE(publish_subscribers, NetworkingFixture)
       usleep(1000);
    }
 
-   BOOST_REQUIRE_EQUAL(counterHandler->getCounter(), maxMessages / 2 * maxSubscribers);
+   ASSERT_EQ(maxMessages / 2 * maxSubscribers, counterHandler->getCounter());
 }
 
-BOOST_FIXTURE_TEST_CASE(bad_publisher, NetworkingFixture) {
+TEST_F(PublisherSocketTest, bad_publisher) {
    std::shared_ptr<networking::PublisherSocket> publisherSocket;
 
    networking::SocketArguments arguments;
-   BOOST_REQUIRE_THROW(networkingService->createPublisherSocket(arguments.addEndPoint("tcp://1.1.1.1:5566")), basis::RuntimeException);
+   ASSERT_THROW(networkingService->createPublisherSocket(arguments.addEndPoint("tcp://1.1.1.1:5566")), basis::RuntimeException);
 }

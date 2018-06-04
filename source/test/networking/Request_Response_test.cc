@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <csignal>
 
@@ -37,45 +37,44 @@
 
 using namespace coffee;
 
-BOOST_FIXTURE_TEST_CASE(networking_single_ip, NetworkingFixture)
+struct RequestResponseTest : public NetworkingFixture {;};
+
+TEST_F(RequestResponseTest, single_ip)
 {
    {
       networking::SocketArguments arguments;
       auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555"));
-      BOOST_REQUIRE(clientSocket);
       basis::DataBlock request("work");
       auto response = clientSocket->send(request);
-      BOOST_REQUIRE_EQUAL(std::string(response.data()), "WORK");
+      ASSERT_EQ("WORK", std::string(response.data()));
    }
 
    {
       networking::SocketArguments arguments;
       auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://127.0.0.1:5556"));
-      BOOST_REQUIRE(clientSocket);
       basis::DataBlock request("this is other");
       auto response = clientSocket->send(request);
-      BOOST_REQUIRE_EQUAL(std::string(response.data()), "THIS IS OTHER");
+      ASSERT_EQ("THIS IS OTHER", std::string(response.data()));
    }
 }
 
-BOOST_FIXTURE_TEST_CASE(networking_multiple_ip, NetworkingFixture)
+TEST_F(RequestResponseTest, multiple_ip)
 {
    networking::SocketArguments arguments;
    auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555").addEndPoint("tcp://localhost:5556"));
-   BOOST_REQUIRE(clientSocket);
 
    basis::DataBlock request("work");
    auto response = clientSocket->send(request);
-   BOOST_REQUIRE_EQUAL(std::string(response.data()), "WORK");
+   ASSERT_EQ("WORK", std::string(response.data()));
 
    {
       basis::DataBlock request("this is other");
       auto response = clientSocket->send(request);
-      BOOST_REQUIRE_EQUAL(std::string(response.data()), "THIS IS OTHER");
+      ASSERT_EQ("THIS IS OTHER", std::string(response.data()));
    }
 }
 
-BOOST_FIXTURE_TEST_CASE(networking_ipv6, NetworkingFixture)
+TEST_F(RequestResponseTest, ipv6)
 {
    // In next version of BOOST unit test there is a better way to do this, but we are limited
    // by the version used in TravisCI Boost 1.54.
@@ -83,15 +82,15 @@ BOOST_FIXTURE_TEST_CASE(networking_ipv6, NetworkingFixture)
    const char* testValue = std::getenv("TEST");
 
    if (testValue != nullptr && coffee_strcmp(testValue, "Codecov") == 0) {
-      std::cout << "TravisCI does not offer support for IPv6 networking, case networking_ipv6 can not be applied" << std::endl << std::endl;
+      std::cout << "TravisCI does not offer support for IPv6 networking, case ipv6 can not be applied" << std::endl << std::endl;
       return;
    }
 
    {
       networking::SocketArguments arguments;
-      BOOST_REQUIRE_NO_THROW(arguments.setMessageHandler(UpperStringHandler::instantiate()).addEndPoint("tcp://[::1]:5557").activateIPv6());
+      ASSERT_NO_THROW(arguments.setMessageHandler(UpperStringHandler::instantiate()).addEndPoint("tcp://[::1]:5557").activateIPv6());
       auto ipv6Server = networkingService->createServerSocket(arguments);
-      BOOST_REQUIRE(ipv6Server);
+      ASSERT_TRUE(ipv6Server != nullptr);
    }
 
    // To give time to NetworkingService to detect new server socket
@@ -99,11 +98,11 @@ BOOST_FIXTURE_TEST_CASE(networking_ipv6, NetworkingFixture)
 
    networking::SocketArguments arguments;
    auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://[0:0:0:0:0:0:0:1]:5557").activateIPv6());
-   BOOST_REQUIRE(clientSocket);
+   ASSERT_TRUE(clientSocket != nullptr);
 
    basis::DataBlock request("work");
    auto response = clientSocket->send(request);
-   BOOST_REQUIRE_EQUAL(std::string(response.data()), "WORK");
+   ASSERT_EQ("WORK", std::string(response.data()));
 }
 
 class MuteHandler : public coffee::networking::MessageHandler {
@@ -117,12 +116,12 @@ protected:
       throw(coffee::basis::RuntimeException) { LOG_DEBUG("Ignore message"); }
 };
 
-BOOST_FIXTURE_TEST_CASE(networking_mute_server, NetworkingFixture) {
+TEST_F(RequestResponseTest, mute_server) {
    {
       networking::SocketArguments arguments;
-      BOOST_REQUIRE_NO_THROW(arguments.setMessageHandler(MuteHandler::instantiate()).addEndPoint("tcp://127.0.0.1:5557"));
+      ASSERT_NO_THROW(arguments.setMessageHandler(MuteHandler::instantiate()).addEndPoint("tcp://127.0.0.1:5557"));
       auto ipv6Server = networkingService->createServerSocket(arguments);
-      BOOST_REQUIRE(ipv6Server);
+      ASSERT_TRUE(ipv6Server != nullptr);
    }
 
    // To give time to NetworkingService to detect new server socket
@@ -130,33 +129,33 @@ BOOST_FIXTURE_TEST_CASE(networking_mute_server, NetworkingFixture) {
 
    networking::SocketArguments arguments;
    auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://127.0.0.1:5557"));
-   BOOST_REQUIRE(clientSocket);
+   ASSERT_TRUE(clientSocket != nullptr);
 
    try {
       basis::DataBlock request("work");
       clientSocket->send(request);
-      BOOST_REQUIRE(false);
+      ASSERT_TRUE(false);
    }
    catch(const basis::RuntimeException& ex) {
-      BOOST_REQUIRE(ex.asString().find("did not receive any response"));
+      ASSERT_TRUE(ex.asString().find("did not receive any response"));
    }
 }
 
-BOOST_FIXTURE_TEST_CASE(networking_create_new_server, NetworkingFixture)
+TEST_F(RequestResponseTest, create_new_server)
 {
    {
       networking::SocketArguments arguments;
       auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555"));
-      BOOST_REQUIRE(clientSocket);
+      ASSERT_TRUE(clientSocket != nullptr);
       basis::DataBlock request("work");
       auto response = clientSocket->send(request);
-      BOOST_REQUIRE_EQUAL(std::string(response.data()), "WORK");
+      ASSERT_EQ("WORK", std::string(response.data()));
    }
 
    networking::SocketArguments arguments;
    arguments.setMessageHandler(LowerStringHandler::instantiate()).addEndPoint("tcp://*:6666");
    auto newServerSocket = networkingService->createServerSocket(arguments);
-   BOOST_REQUIRE(newServerSocket->isValid());
+   ASSERT_TRUE(newServerSocket->isValid());
 
    // To give time to NetworkingService to detect new server socket
    usleep(100000);
@@ -164,19 +163,19 @@ BOOST_FIXTURE_TEST_CASE(networking_create_new_server, NetworkingFixture)
    {
       networking::SocketArguments arguments;
       auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:6666"));
-      BOOST_REQUIRE(clientSocket);
+      ASSERT_TRUE(clientSocket != nullptr);
       basis::DataBlock request("This is the NEW server");
       auto response = clientSocket->send(request);
-      BOOST_REQUIRE_EQUAL(std::string(response.data()), "this is the new server");
+      ASSERT_EQ("this is the new server", std::string(response.data()));
    }
 }
 
-BOOST_FIXTURE_TEST_CASE(networking_large_message, NetworkingFixture)
+TEST_F(RequestResponseTest, large_message)
 {
    networking::SocketArguments arguments;
    arguments.setMessageHandler(EchoHandler::instantiate()).addEndPoint("tcp://*:6667");
    auto echoServer = networkingService->createServerSocket(arguments);
-   BOOST_REQUIRE(echoServer);
+   ASSERT_TRUE(echoServer != nullptr);
 
    // To give time to NetworkingService to detect new server socket
    usleep(100000);
@@ -184,7 +183,7 @@ BOOST_FIXTURE_TEST_CASE(networking_large_message, NetworkingFixture)
    {
       networking::SocketArguments arguments;
       auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:6667"));
-      BOOST_REQUIRE(clientSocket);
+      ASSERT_TRUE(clientSocket != nullptr);
 
       static const int largeSize = 16384;
 
@@ -192,26 +191,26 @@ BOOST_FIXTURE_TEST_CASE(networking_large_message, NetworkingFixture)
 
       basis::DataBlock request(memory, largeSize);
       auto response = clientSocket->send(request);
-      BOOST_REQUIRE_EQUAL(response.size(), largeSize);
+      ASSERT_EQ(largeSize, response.size());
       for(int ii = 0; ii < largeSize; ++ ii) {
-         BOOST_REQUIRE(memory[ii] == response[ii]);
+         ASSERT_TRUE(memory[ii] == response[ii]);
       }
 
       delete []memory;
    }
 }
 
-BOOST_FIXTURE_TEST_CASE(networking_write_xml, NetworkingFixture)
+TEST_F(RequestResponseTest, write_xml)
 {
    {
       networking::SocketArguments arguments;
       auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555").addEndPoint("tcp://localhost:5556"));
-      BOOST_REQUIRE(clientSocket);
+      ASSERT_TRUE(clientSocket != nullptr);
    }
    {
       networking::SocketArguments arguments;
       auto clientSocket = networkingService->createClientSocket(arguments.addEndPoint("tcp://localhost:5555"));
-      BOOST_REQUIRE(clientSocket);
+      ASSERT_TRUE(clientSocket != nullptr);
    }
 
    app.setOutputContextFilename("source/test/networking/context.xml");
@@ -220,7 +219,7 @@ BOOST_FIXTURE_TEST_CASE(networking_write_xml, NetworkingFixture)
 
    xml::Document document;
 
-   BOOST_CHECK_NO_THROW(document.parse(app.getOutputContextFilename()));
+   ASSERT_NO_THROW(document.parse(app.getOutputContextFilename()));
 
    auto root = document.getRoot();
 
@@ -228,10 +227,10 @@ BOOST_FIXTURE_TEST_CASE(networking_write_xml, NetworkingFixture)
    auto services = app->lookupChild("Services");
 
    auto node = services->childAt(0);
-   BOOST_REQUIRE(node);
+   ASSERT_TRUE(node != nullptr);
 
    node = node->lookupChild("app.Service");
-   BOOST_REQUIRE(node);
+   ASSERT_TRUE(node != nullptr);
 
-   BOOST_CHECK_EQUAL(node->lookupChild("Runnable")->lookupAttribute("Name")->getValue(), "Networking:ZeroMQ");
+   ASSERT_EQ("Networking:ZeroMQ", node->lookupChild("Runnable")->lookupAttribute("Name")->getValue());
 }

@@ -1,9 +1,9 @@
 // MIT License
 // 
-// Copyright (c) 2018 Francisco Ruiz (francisco.ruiz.rayo@gmail.com)
+// Copyright(c) 2018 Francisco Ruiz(francisco.ruiz.rayo@gmail.com)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
+// of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
@@ -27,7 +27,7 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/basis/AsString.hpp>
 
@@ -56,13 +56,13 @@ namespace IndexedTest {
    static int MaxResources = 10;
    static int MaxLoop = 3;
 
-   void incrementUse (CounterContainer& counterContainer, const std::shared_ptr<Resource>& resource)
+   void incrementUse(CounterContainer& counterContainer, const std::shared_ptr<Resource>& resource)
    {
       std::shared_ptr<TestResource> myResource = TestResource::cast(resource);
 
-      counter_iterator cc = counterContainer.find (myResource->getKey());
+      counter_iterator cc = counterContainer.find(myResource->getKey());
 
-      if (cc == counterContainer.end ()) {
+      if(cc == counterContainer.end()) {
          counterContainer [myResource->getKey()] = 1;
       }
       else {
@@ -72,102 +72,102 @@ namespace IndexedTest {
 
    void parallel_work(std::mutex& mutexContainer, CounterContainer& counterContainer, balance::StrategyIndexed& strategy)
    {
-      for (int ii = 0; ii < MaxResources; ++ ii) {
-         auto resource = strategy.apply (ii);
+      for(int ii = 0; ii < MaxResources; ++ ii) {
+         auto resource = strategy.apply(ii);
 
-         if (true) {
-            std::lock_guard <std::mutex> guard (mutexContainer);
-            incrementUse (counterContainer, resource);
+         if(true) {
+            std::lock_guard <std::mutex> guard(mutexContainer);
+            incrementUse(counterContainer, resource);
          }
       }
    }
 }
 
-BOOST_FIXTURE_TEST_CASE( inx_dont_use_unavailables, ResourceListFixture )
+struct StrategyIndexedFixture : public ResourceListFixture {};
+
+TEST_F(StrategyIndexedFixture, dont_use_unavailables)
 {
    balance::StrategyIndexed strategy(resourceList);
 
    std::shared_ptr<TestResource> myResource = TestResource::cast_copy(strategy.apply(0));
-   BOOST_REQUIRE_EQUAL (myResource->getKey(), 0);
+   ASSERT_EQ(0, myResource->getKey());
 
-   if (true) {
+   if(true) {
       balance::GuardResourceList guard(resourceList);
       std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, 0));
       myResource->setAvailable(false);
    }
 
    myResource = TestResource::cast_copy(strategy.apply(0));
-   BOOST_REQUIRE_EQUAL (myResource->getKey(), 1);
+   ASSERT_EQ(1, myResource->getKey());
 
-   if (true) {
+   if(true) {
       balance::GuardResourceList guard(resourceList);
-      for (auto ii = resourceList->resource_begin(guard), maxii = resourceList->resource_end(guard); ii != maxii; ++ ii) {
+      for(auto ii = resourceList->resource_begin(guard), maxii = resourceList->resource_end(guard); ii != maxii; ++ ii) {
          std::shared_ptr<TestResource> myResource = TestResource::cast(ResourceList::resource(ii));
          myResource->setAvailable(false);
       }
    }
 
-   BOOST_REQUIRE_THROW (strategy.apply(0), ResourceUnavailableException);
+   ASSERT_THROW(strategy.apply(0), ResourceUnavailableException);
 }
 
-
-BOOST_FIXTURE_TEST_CASE( inx_balance_quality, ResourceListFixture )
+TEST_F(StrategyIndexedFixture, balance_quality)
 {
    balance::StrategyIndexed strategy(resourceList);
    IndexedTest::CounterContainer counterContainer;
 
-   for (int ii = 0; ii < IndexedTest::MaxResources * IndexedTest::MaxLoop; ++ ii){
-      IndexedTest::incrementUse (counterContainer, strategy.apply(ii));
+   for(int ii = 0; ii < IndexedTest::MaxResources * IndexedTest::MaxLoop; ++ ii){
+      IndexedTest::incrementUse(counterContainer, strategy.apply(ii));
    }
 
-   BOOST_REQUIRE_EQUAL (counterContainer.size (), IndexedTest::MaxResources);
+   ASSERT_EQ(IndexedTest::MaxResources, counterContainer.size());
 
-   for (IndexedTest::counter_iterator ii = counterContainer.begin (), maxii = counterContainer.end (); ii != maxii; ++ ii) {
-      BOOST_REQUIRE_EQUAL (ii->second, IndexedTest::MaxLoop);
+   for(IndexedTest::counter_iterator ii = counterContainer.begin(), maxii = counterContainer.end(); ii != maxii; ++ ii) {
+      ASSERT_EQ(IndexedTest::MaxLoop, ii->second);
    }
 }
 
-BOOST_AUTO_TEST_CASE( inx_empty_list )
+TEST(StrategyIndexedTest, empty_strategy)
 {
    std::shared_ptr<coffee::balance::ResourceList> emptyList = std::make_shared<coffee::balance::ResourceList>("EmptyList");
    balance::StrategyIndexed strategy(emptyList);
-   BOOST_REQUIRE_THROW (strategy.apply(0), ResourceUnavailableException);
+   ASSERT_THROW(strategy.apply(0), ResourceUnavailableException);
 }
 
-BOOST_FIXTURE_TEST_CASE( inx_balance_multithread,  ResourceListFixture)
+TEST_F( ResourceListFixture, balance_multithread)
 {
    balance::StrategyIndexed strategy(resourceList);
    IndexedTest::CounterContainer counterContainer;
    std::mutex mutexContainer;
 
-   std::thread t1(IndexedTest::parallel_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (strategy));
-   std::thread t2(IndexedTest::parallel_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (strategy));
-   std::thread t3(IndexedTest::parallel_work, std::ref (mutexContainer), std::ref (counterContainer), std::ref (strategy));
+   std::thread t1(IndexedTest::parallel_work, std::ref(mutexContainer), std::ref(counterContainer), std::ref(strategy));
+   std::thread t2(IndexedTest::parallel_work, std::ref(mutexContainer), std::ref(counterContainer), std::ref(strategy));
+   std::thread t3(IndexedTest::parallel_work, std::ref(mutexContainer), std::ref(counterContainer), std::ref(strategy));
 
-   t1.join ();
-   t2.join ();
-   t3.join ();
+   t1.join();
+   t2.join();
+   t3.join();
 
    int sumUse = 0;
 
-   for (auto& useCounter : counterContainer) {
-      BOOST_REQUIRE_GT (useCounter.second, 0);
+   for(auto& useCounter : counterContainer) {
+      ASSERT_GT(useCounter.second, 0);
       sumUse += useCounter.second;
    }
 
-   BOOST_REQUIRE_EQUAL(sumUse, IndexedTest::MaxResources * IndexedTest::MaxLoop);
+   ASSERT_EQ(IndexedTest::MaxResources * IndexedTest::MaxLoop, sumUse);
+   ASSERT_EQ(IndexedTest::MaxResources, counterContainer.size());
 
-   BOOST_REQUIRE_EQUAL (counterContainer.size (), IndexedTest::MaxResources);
-
-   for (IndexedTest::counter_iterator ii = counterContainer.begin (), maxii = counterContainer.end (); ii != maxii; ++ ii) {
-      BOOST_REQUIRE_EQUAL (ii->second, IndexedTest::MaxLoop);
+   for(IndexedTest::counter_iterator ii = counterContainer.begin(), maxii = counterContainer.end(); ii != maxii; ++ ii) {
+      ASSERT_EQ(IndexedTest::MaxLoop, ii->second);
    }
 }
 
-BOOST_FIXTURE_TEST_CASE( inx_asXML, ResourceListFixture )
+TEST_F(StrategyIndexedFixture, asXML)
 {
    balance::StrategyIndexed strategy(resourceList);
    xml::Compiler compiler;
    auto root = std::make_shared<xml::Node>("root");
-   BOOST_REQUIRE_EQUAL(compiler.apply(strategy.asXML(root)).size(), 676);
+   ASSERT_EQ(676, compiler.apply(strategy.asXML(root)).size());
 }

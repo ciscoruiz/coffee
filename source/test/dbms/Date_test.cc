@@ -24,7 +24,7 @@
 #include <iostream>
 #include <time.h>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/basis/AsString.hpp>
 
@@ -32,8 +32,6 @@
 #include <coffee/dbms/datatype/Integer.hpp>
 
 #include <coffee/time/TimeService.hpp>
-
-#include "PrintChrono.hpp"
 
 using namespace coffee;
 using namespace coffee::dbms;
@@ -52,19 +50,17 @@ struct tm* getLocalTime(const std::chrono::seconds& seconds)
 }
 
 // See http://www.mbari.org/staff/rich/utccalc.htm
-BOOST_AUTO_TEST_CASE(date_setter_second)
+TEST(DateTest, setter_second)
 {
    std::chrono::seconds date_01_31_1987_23_59_59(539110799);
    datatype::Date column("from_number");
 
    column.setValue(date_01_31_1987_23_59_59);
 
-   BOOST_REQUIRE_EQUAL(column.getValue().count(), 539110799);
+   ASSERT_EQ(539110799, column.getValue().count());
 }
 
-#include <iostream>
-
-BOOST_AUTO_TEST_CASE(date_setter_now)
+TEST(DateTest, setter_now)
 {
    auto now = coffee::time::TimeService::toSeconds(coffee::time::TimeService::now());
 
@@ -76,11 +72,11 @@ BOOST_AUTO_TEST_CASE(date_setter_now)
    datatype::Date other("from_text");
    other.setValue(text, datatype::Date::DefaultFormat);
 
-   BOOST_REQUIRE_EQUAL(column.getValue(), now);
-   BOOST_REQUIRE_EQUAL(column.getValue(), other.getValue());
+   ASSERT_EQ(now, column.getValue());
+   ASSERT_EQ(other.getValue(), column.getValue());
 }
 
-BOOST_AUTO_TEST_CASE(date_setter_text)
+TEST(DateTest, setter_text)
 {
    datatype::Date column("from_text");
 
@@ -91,76 +87,76 @@ BOOST_AUTO_TEST_CASE(date_setter_text)
 
       tm* localTime = getLocalTime(column.getValue());
 
-      BOOST_REQUIRE_EQUAL(localTime->tm_mday, 31);
-      BOOST_REQUIRE_EQUAL(localTime->tm_mon, 0);
-      BOOST_REQUIRE_EQUAL(localTime->tm_year, 1996 - 1900);
-      BOOST_REQUIRE_EQUAL(localTime->tm_hour, 22); // This test was written under GMT+1
-      BOOST_REQUIRE_EQUAL(localTime->tm_min, 17);
-      BOOST_REQUIRE_EQUAL(localTime->tm_sec, 10);
+      ASSERT_EQ(31, localTime->tm_mday);
+      ASSERT_EQ(0, localTime->tm_mon);
+      ASSERT_EQ(1996 - 1900, localTime->tm_year);
+      ASSERT_EQ(22, localTime->tm_hour); // This test was written under GMT+1
+      ASSERT_EQ(17, localTime->tm_min);
+      ASSERT_EQ(10, localTime->tm_sec);
    }
    catch(basis::RuntimeException& ex) {
       std::cout << ex.what() << std::endl;
    }
 
-   BOOST_REQUIRE_THROW(column.setValue("12:10", "%d/%m/%YT%T"), basis::RuntimeException);
+   ASSERT_THROW(column.setValue("12:10", "%d/%m/%YT%T"), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(date_is_nulleable)
+TEST(DateTest, is_nulleable)
 {
    datatype::Date column("date_is_nulleable", datatype::Constraint::CanBeNull);
 
    const char* format = "%d/%m/%YT%H:%M:%S";
 
-   BOOST_REQUIRE(!column.hasValue());
+   ASSERT_TRUE(!column.hasValue());
 
    column.clear();
-   BOOST_REQUIRE(!column.hasValue());
+   ASSERT_TRUE(!column.hasValue());
 
    std::string str_date("01/01/1970T12:30:50");
-   BOOST_REQUIRE_NO_THROW(column.setValue(str_date, format));
-   BOOST_REQUIRE(column.hasValue());
+   ASSERT_NO_THROW(column.setValue(str_date, format));
+   ASSERT_TRUE(column.hasValue());
 
-   BOOST_REQUIRE_NO_THROW(column.setValue("01/01/2000T00:00:00", format));
-   BOOST_REQUIRE(column.hasValue());
+   ASSERT_NO_THROW(column.setValue("01/01/2000T00:00:00", format));
+   ASSERT_TRUE(column.hasValue());
 
    column.clear();
-   BOOST_REQUIRE_THROW(column.getValue(), basis::RuntimeException);
+   ASSERT_THROW(column.getValue(), basis::RuntimeException);
 
    str_date = "25/10/2013T02:00:10";
 
    column.setValue(str_date, "%d/%m/%YT%H:%M:%S");
-   BOOST_REQUIRE(column.hasValue());
+   ASSERT_TRUE(column.hasValue());
 
    const tm* time_t = getLocalTime(column.getValue());
-   BOOST_REQUIRE_EQUAL(time_t->tm_year, 2013 - 1900);
-   BOOST_REQUIRE_EQUAL(time_t->tm_mon, 9);
-   BOOST_REQUIRE_EQUAL(time_t->tm_mday, 25);
+   ASSERT_EQ(2013 - 1900, time_t->tm_year);
+   ASSERT_EQ(9, time_t->tm_mon);
+   ASSERT_EQ(25, time_t->tm_mday);
 
    column.clear();
-   BOOST_REQUIRE(!column.hasValue());
+   ASSERT_TRUE(!column.hasValue());
 }
 
-BOOST_AUTO_TEST_CASE(date_is_not_nulleable)
+TEST(DateTest, is_not_nulleable)
 {
    datatype::Date column("not_nulleable", datatype::Constraint::CanNotBeNull);
 
-   BOOST_REQUIRE(column.hasValue());
+   ASSERT_TRUE(column.hasValue());
 
-   BOOST_REQUIRE_THROW(column.isNull(), basis::RuntimeException);
+   ASSERT_THROW(column.isNull(), basis::RuntimeException);
 
    column.clear();
-   BOOST_REQUIRE(column.hasValue());
+   ASSERT_TRUE(column.hasValue());
 
-   BOOST_REQUIRE(column.getValue() == std::chrono::seconds::zero());
+   ASSERT_TRUE(column.getValue() == std::chrono::seconds::zero());
 }
 
-BOOST_AUTO_TEST_CASE(date_downcast)
+TEST(DateTest, downcast)
 {
    datatype::Date column("not_nulleable", datatype::Constraint::CanNotBeNull);
 
    datatype::Abstract& abs(column);
 
-   BOOST_REQUIRE(abs.hasValue());
+   ASSERT_TRUE(abs.hasValue());
 
    const datatype::Date& other = coffee_datatype_downcast(datatype::Date, abs);
 
@@ -168,41 +164,41 @@ BOOST_AUTO_TEST_CASE(date_downcast)
    std::string str_date("01/01/1950T12:30:50");
    column.setValue(str_date, format);
 
-   BOOST_REQUIRE(other == column);
+   ASSERT_TRUE(other == column);
 
    datatype::Integer zzz("zzz");
 
-   BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::Date, zzz), dbms::InvalidDataException);
+   ASSERT_THROW(coffee_datatype_downcast(datatype::Date, zzz), dbms::InvalidDataException);
 }
 
-BOOST_AUTO_TEST_CASE(date_clone)
+TEST(DateTest, clone)
 {
    datatype::Date cannotBeNull("cannotBeNull", datatype::Constraint::CanNotBeNull);
    datatype::Date canBeNull("canBeNull", datatype::Constraint::CanBeNull);
 
-   BOOST_REQUIRE(cannotBeNull.hasValue());
-   BOOST_REQUIRE(!canBeNull.hasValue());
+   ASSERT_TRUE(cannotBeNull.hasValue());
+   ASSERT_TRUE(!canBeNull.hasValue());
 
    std::shared_ptr<datatype::Abstract> notnull(cannotBeNull.clone());
    std::shared_ptr<datatype::Abstract> null(canBeNull.clone());
 
-   BOOST_REQUIRE(notnull->hasValue());
-   BOOST_REQUIRE(!null->hasValue());
+   ASSERT_TRUE(notnull->hasValue());
+   ASSERT_TRUE(!null->hasValue());
 
-   BOOST_REQUIRE_EQUAL(notnull->compare(cannotBeNull), 0);
+   ASSERT_EQ(0, notnull->compare(cannotBeNull));
 
    const std::chrono::seconds fiveSeconds(5);
 
    cannotBeNull.setValue(fiveSeconds);
 
-   BOOST_REQUIRE_EQUAL(cannotBeNull.getValue(), fiveSeconds);
+   ASSERT_EQ(fiveSeconds, cannotBeNull.getValue());
 
    notnull = cannotBeNull.clone();
-   BOOST_REQUIRE(notnull->hasValue());
-   BOOST_REQUIRE_EQUAL(notnull->compare(cannotBeNull), 0);
+   ASSERT_TRUE(notnull->hasValue());
+   ASSERT_EQ(0, notnull->compare(cannotBeNull));
 }
 
-BOOST_AUTO_TEST_CASE(date_clone_nuleable)
+TEST(DateTest, clone_nuleable)
 {
    datatype::Date canBeNull("canBeNull", datatype::Constraint::CanBeNull);
    datatype::Date cannotBeNull("cannotBeNull", datatype::Constraint::CanNotBeNull);
@@ -211,17 +207,17 @@ BOOST_AUTO_TEST_CASE(date_clone_nuleable)
    canBeNull.setValue(std::chrono::seconds(25));
 
    auto null = canBeNull.clone();
-   BOOST_REQUIRE(null->hasValue());
-   BOOST_REQUIRE_EQUAL(null->compare(canBeNull), 0);
+   ASSERT_TRUE(null->hasValue());
+   ASSERT_EQ(0, null->compare(canBeNull));
 
-   BOOST_REQUIRE_EQUAL(null->compare(cannotBeNull), 20);
-   BOOST_REQUIRE_EQUAL(cannotBeNull.compare(null), -20);
+   ASSERT_EQ(20, null->compare(cannotBeNull));
+   ASSERT_EQ(-20, cannotBeNull.compare(null));
 }
 
-BOOST_AUTO_TEST_CASE(date_instantiate) {
+TEST(DateTest, instantiate) {
    auto data = datatype::Date::instantiate("nulleable");
-   BOOST_REQUIRE(data->hasValue());
+   ASSERT_TRUE(data->hasValue());
 
    data = datatype::Date::instantiate("not-nulleable", datatype::Constraint::CanBeNull);
-   BOOST_REQUIRE(!data->hasValue());
+   ASSERT_TRUE(!data->hasValue());
 }

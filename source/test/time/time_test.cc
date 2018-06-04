@@ -21,6 +21,9 @@
 // SOFTWARE.
 //
 
-#define BOOST_TEST_MODULE COFFEE_TIME_TEST
+#include <gtest/gtest.h>
 
-#include <boost/test/included/unit_test.hpp>
+int main(int argc, char **argv) {
+   testing::InitGoogleTest(&argc, argv);
+   return RUN_ALL_TESTS();
+}

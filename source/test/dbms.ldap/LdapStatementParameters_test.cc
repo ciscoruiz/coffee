@@ -21,53 +21,53 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/config/defines.hpp>
 #include <coffee/dbms.ldap/LdapStatementParameters.hpp>
 
 using coffee::dbms::ldap::LdapStatementParameters;
 
-BOOST_AUTO_TEST_CASE(ldap_sspp_scope)
+TEST(StatementParameterTest, sspp_scope)
 {
    LdapStatementParameters parameters(coffee::dbms::ActionOnError::Ignore, "my-dn");
 
    parameters.setSizeLimit(100).setScope(LdapStatementParameters::Scope::Base);
-   BOOST_REQUIRE_EQUAL(parameters.getScope(), LDAP_SCOPE_BASE);
-   BOOST_REQUIRE_EQUAL(parameters.getSizeLimit(), 100);
+   ASSERT_EQ(LDAP_SCOPE_BASE, parameters.getScope());
+   ASSERT_EQ(100, parameters.getSizeLimit());
 
    parameters.setSizeLimit(100).setScope(LdapStatementParameters::Scope::OneLevel);
-   BOOST_REQUIRE_EQUAL(parameters.getScope(), LDAP_SCOPE_ONELEVEL);
+   ASSERT_EQ(LDAP_SCOPE_ONELEVEL, parameters.getScope());
 
    parameters.setSizeLimit(100).setScope(LdapStatementParameters::Scope::SubTree);
-   BOOST_REQUIRE_EQUAL(parameters.getScope(), LDAP_SCOPE_SUBTREE);
+   ASSERT_EQ(LDAP_SCOPE_SUBTREE, parameters.getScope());
 }
 
-BOOST_AUTO_TEST_CASE(ldap_sspp_dn)
+TEST(StatementParameterTest, sspp_dn)
 {
    LdapStatementParameters parameters(coffee::dbms::ActionOnError::Ignore, "my-dn");
-   BOOST_REQUIRE_EQUAL(parameters.getBaseDN(), "my-dn");
+   ASSERT_EQ("my-dn", parameters.getBaseDN());
 }
 
-BOOST_AUTO_TEST_CASE(ldap_sspp_attronly)
+TEST(StatementParameterTest, sspp_attronly)
 {
    LdapStatementParameters parameters(coffee::dbms::ActionOnError::Ignore, "my-dn");
 
-   BOOST_REQUIRE(!parameters.getAttrOnly());
+   ASSERT_TRUE(!parameters.getAttrOnly());
    parameters.setScope(LdapStatementParameters::Scope::Base).setAttrOnly(true);
-   BOOST_REQUIRE_EQUAL(parameters.getScope(), LDAP_SCOPE_BASE);
-   BOOST_REQUIRE(parameters.getAttrOnly());
+   ASSERT_EQ(LDAP_SCOPE_BASE, parameters.getScope());
+   ASSERT_TRUE(parameters.getAttrOnly());
 }
 
-BOOST_AUTO_TEST_CASE(ldap_sspp_asstring)
+TEST(StatementParameterTest, sspp_asstring)
 {
    LdapStatementParameters parameters(coffee::dbms::ActionOnError::Ignore, "my-dn");
 
-   BOOST_REQUIRE_EQUAL(parameters.asString(), "dbms.ldap.LdapStatementParameters {dbms.StatementParameters { ActionOnError=Ignore } | BaseDN=my-dn | Scope=Base | AttrOnly=false | SizeLimit=0 }");
+   ASSERT_EQ("dbms.ldap.LdapStatementParameters {dbms.StatementParameters { ActionOnError=Ignore } | BaseDN=my-dn | Scope=Base | AttrOnly=false | SizeLimit=0 }", parameters.asString());
 
    parameters.setSizeLimit(200).setScope(LdapStatementParameters::Scope::OneLevel).setAttrOnly(true);
-   BOOST_REQUIRE_EQUAL(parameters.asString(), "dbms.ldap.LdapStatementParameters {dbms.StatementParameters { ActionOnError=Ignore } | BaseDN=my-dn | Scope=OneLevel | AttrOnly=true | SizeLimit=200 }");
+   ASSERT_EQ("dbms.ldap.LdapStatementParameters {dbms.StatementParameters { ActionOnError=Ignore } | BaseDN=my-dn | Scope=OneLevel | AttrOnly=true | SizeLimit=200 }", parameters.asString());
 
    parameters.setScope(LdapStatementParameters::Scope::SubTree);
-   BOOST_REQUIRE_EQUAL(parameters.asString(), "dbms.ldap.LdapStatementParameters {dbms.StatementParameters { ActionOnError=Ignore } | BaseDN=my-dn | Scope=SubTree | AttrOnly=true | SizeLimit=200 }");
+   ASSERT_EQ("dbms.ldap.LdapStatementParameters {dbms.StatementParameters { ActionOnError=Ignore } | BaseDN=my-dn | Scope=SubTree | AttrOnly=true | SizeLimit=200 }", parameters.asString());
 }

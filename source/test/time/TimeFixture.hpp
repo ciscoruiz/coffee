@@ -27,7 +27,7 @@
 #include <coffee/time/TimeService.hpp>
 #include <coffee/logger/UnlimitedTraceWriter.hpp>
 
-struct TimeFixture {
+struct TimeFixture : public ::testing::Test {
    static const std::chrono::milliseconds time100ms;
    static const std::chrono::milliseconds time200ms;
 
@@ -51,8 +51,8 @@ struct TimeFixture {
       timeService->waitEffectiveRunning();
    }
 
-   virtual ~TimeFixture() {
-      BOOST_CHECK_EQUAL(timeService->empty(), finalizeEmpty);
+   virtual void TearDown() {
+      ASSERT_EQ(finalizeEmpty, timeService->empty());
       app.stop();
       thr.join();
    }

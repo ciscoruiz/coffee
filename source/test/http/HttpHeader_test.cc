@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/http/HttpHeader.hpp>
 #include <coffee/http/HttpCustomHeader.hpp>
@@ -30,41 +30,41 @@ using namespace coffee;
 
 using coffee::http::HttpHeader;
 
-BOOST_AUTO_TEST_CASE( header_predefined_encode )
+TEST(HttpHeaderTest, predefined_encode)
 {
    HttpHeader header(HttpHeader::Type::LastModified);
    header.setValue("my value");
-   BOOST_REQUIRE_EQUAL(header.encode(), "Last-Modified:my value");
+   ASSERT_EQ("Last-Modified:my value", header.encode());
 }
 
-BOOST_AUTO_TEST_CASE( header_instantiate_encode )
+TEST(HttpHeaderTest, instantiate_encode)
 {
    auto header = HttpHeader::instantiate(HttpHeader::Type::AcceptLanguage);
    header->setValue("havax");
    basis::StreamString ss(HttpHeader::Type::asString(HttpHeader::Type::AcceptLanguage));
-   BOOST_REQUIRE_EQUAL(header->encode(), ss << ":havax");
+   ASSERT_EQ(ss << ":havax", header->encode());
 }
 
-BOOST_AUTO_TEST_CASE( header_exception_encode )
+TEST(HttpHeaderTest, exception_encode)
 {
    HttpHeader header(http::HttpHeader::Type::Custom);
    header.setValue("my value");
-   BOOST_REQUIRE_THROW(header.encode(), basis::RuntimeException);
+   ASSERT_THROW(header.encode(), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE( header_custom_encode )
+TEST(HttpHeaderTest, custom_encode)
 {
    auto header = http::HttpCustomHeader::instantiate("MyCustomHeader");
-   BOOST_REQUIRE(header->getType() == HttpHeader::Type::Custom);
+   ASSERT_TRUE(header->getType() == HttpHeader::Type::Custom);
    header->setValue("my value");
-   BOOST_REQUIRE_EQUAL(header->encode(), "MyCustomHeader:my value");
+   ASSERT_EQ("MyCustomHeader:my value", header->encode());
 }
 
-BOOST_AUTO_TEST_CASE( header_multivalue )
+TEST(HttpHeaderTest, multivalue)
 {
    auto header = http::HttpCustomHeader::instantiate("MyCustomHeader");
-   BOOST_REQUIRE(header->getType() == HttpHeader::Type::Custom);
+   ASSERT_TRUE(header->getType() == HttpHeader::Type::Custom);
    header->setValue(123);
    header->setValue("after");
-   BOOST_REQUIRE_EQUAL(header->encode(), "MyCustomHeader:123,after");
+   ASSERT_EQ("MyCustomHeader:123,after", header->encode());
 }

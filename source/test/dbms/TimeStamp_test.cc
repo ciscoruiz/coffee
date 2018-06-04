@@ -24,36 +24,34 @@
 #include <iostream>
 #include <time.h>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/dbms/datatype/TimeStamp.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
 
-#include "PrintChrono.hpp"
-
 using namespace coffee;
 using namespace coffee::dbms;
 
-BOOST_AUTO_TEST_CASE(timestamp_is_not_nulleable)
+TEST(TimeStampTest,is_not_nulleable)
 {
    datatype::TimeStamp column("not_nulleable", datatype::Constraint::CanNotBeNull);
 
-   BOOST_REQUIRE(column.hasValue());
+   ASSERT_TRUE(column.hasValue());
 
-   BOOST_REQUIRE_THROW(column.isNull(), basis::RuntimeException);
+   ASSERT_THROW(column.isNull(), basis::RuntimeException);
 
    column.clear();
-   BOOST_REQUIRE(column.hasValue());
-   BOOST_REQUIRE_EQUAL(column.getValue(), std::chrono::seconds::zero());
+   ASSERT_TRUE(column.hasValue());
+   ASSERT_EQ(std::chrono::seconds::zero(), column.getValue());
 }
 
-BOOST_AUTO_TEST_CASE(timestamp_downcast)
+TEST(TimeStampTest,downcast)
 {
    datatype::TimeStamp column("not_nulleable", datatype::Constraint::CanNotBeNull);
 
    datatype::Abstract& abs(column);
 
-   BOOST_REQUIRE(abs.hasValue());
+   ASSERT_TRUE(abs.hasValue());
 
    const datatype::TimeStamp& other = coffee_datatype_downcast(datatype::TimeStamp, abs);
 
@@ -61,17 +59,17 @@ BOOST_AUTO_TEST_CASE(timestamp_downcast)
    std::string str_TimeStamp("01/01/1920T12:30:50");
    column.setValue(str_TimeStamp, format);
 
-   BOOST_REQUIRE(other == column);
+   ASSERT_TRUE(other == column);
 
    datatype::Integer zzz("zzz");
 
-   BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::TimeStamp, zzz), dbms::InvalidDataException);
+   ASSERT_THROW(coffee_datatype_downcast(datatype::TimeStamp, zzz), dbms::InvalidDataException);
 }
 
-BOOST_AUTO_TEST_CASE(timestamp_instantiate) {
+TEST(TimeStampTest,instantiate) {
    auto data = datatype::TimeStamp::instantiate("nulleable");
-   BOOST_REQUIRE(data->hasValue());
+   ASSERT_TRUE(data->hasValue());
 
    data = datatype::TimeStamp::instantiate("not-nulleable", datatype::Constraint::CanBeNull);
-   BOOST_REQUIRE(!data->hasValue());
+   ASSERT_TRUE(!data->hasValue());
 }

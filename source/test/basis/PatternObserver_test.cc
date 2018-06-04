@@ -27,7 +27,7 @@
 #include <coffee/basis/pattern/observer/Event.hpp>
 #include <coffee/basis/pattern/observer/Observer.hpp>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 using namespace std;
 using namespace coffee::basis;
@@ -183,32 +183,32 @@ private:
    }
 };
 
-BOOST_AUTO_TEST_CASE(subscription_by_event)
+TEST(PatternObserverTest,by_event)
 {
    TheSubject subject;
    shared_ptr<TheObserverII> observer = make_shared<TheObserverII>();
 
    subject.attach(observer);
 
-   BOOST_REQUIRE_EQUAL(observer->getValue(), iiInitialValue);
+   ASSERT_EQ(iiInitialValue, observer->getValue());
 
    subject.setII(100);
 
-   BOOST_REQUIRE_EQUAL(observer->getValue(), 100);
+   ASSERT_EQ(100, observer->getValue());
 }
 
-BOOST_AUTO_TEST_CASE(subscription_initial_value)
+TEST(PatternObserverTest,initial_value)
 {
    TheSubject subject;
    shared_ptr<TheObserverSS> observer = make_shared<TheObserverSS>();
 
    subject.attach(observer);
 
-   BOOST_REQUIRE_EQUAL(observer->getValue(), ssInitialValue);
+   ASSERT_EQ(ssInitialValue, observer->getValue());
 
    subject.setSS("Wow!");
 
-   BOOST_REQUIRE_EQUAL(observer->getValue(), "Wow!");
+   ASSERT_EQ("Wow!", observer->getValue());
 }
 
 class NullObserver : public observer::Observer {
@@ -218,36 +218,36 @@ public:
    void update(const observer::Subject& subject, const observer::Event& event) noexcept {}
 };
 
-BOOST_AUTO_TEST_CASE(observer_detach)
+TEST(PatternObserverTest,detach)
 {
    shared_ptr<NullObserver> observer = make_shared<NullObserver>();
 
    TheSubject subject;
    subject.attach(observer);
-   BOOST_REQUIRE(observer->isSubscribed());
-   BOOST_REQUIRE(subject.detach(observer->getName()));
-   BOOST_REQUIRE(observer->isSubscribed() == false);
+   ASSERT_TRUE(observer->isSubscribed());
+   ASSERT_TRUE(subject.detach(observer->getName()));
+   ASSERT_FALSE(observer->isSubscribed());
 }
 
-BOOST_AUTO_TEST_CASE(observer_isnot_attached)
+TEST(PatternObserverTest,isnot_attached)
 {
    TheSubject subject;
-   BOOST_REQUIRE(subject.detach("undefinedObserver") == false);
+   ASSERT_FALSE(subject.detach("undefinedObserver"));
 }
 
-BOOST_AUTO_TEST_CASE(observer_repeat_attach)
+TEST(PatternObserverTest,repeat_attach)
 {
    shared_ptr<NullObserver> observer = make_shared<NullObserver>();
 
    TheSubject subject;
    subject.attach(observer);
-   BOOST_REQUIRE(subject.countObservers() == 1);
+   ASSERT_TRUE(subject.countObservers() == 1);
 
    subject.attach(observer);
-   BOOST_REQUIRE(subject.countObservers() == 1);
+   ASSERT_TRUE(subject.countObservers() == 1);
 }
 
-BOOST_AUTO_TEST_CASE(subscription_compare_both)
+TEST(PatternObserverTest,compare_both)
 {
    TheSubject subject;
    shared_ptr<TheObserverII> iiObserver = make_shared<TheObserverII>();
@@ -257,21 +257,20 @@ BOOST_AUTO_TEST_CASE(subscription_compare_both)
    shared_ptr<ObserverUUAndII> uuiiObserver = make_shared<ObserverUUAndII>();
    subject.attach(uuiiObserver);
 
-   BOOST_REQUIRE_EQUAL(uuiiObserver->sumUpUUAndII(), uuInitialValue + iiInitialValue);
+   ASSERT_EQ(uuiiObserver->sumUpUUAndII(), uuInitialValue + iiInitialValue);
 
    subject.setII(100);
 
-   BOOST_REQUIRE_EQUAL(iiObserver->getValue(), 100);
-   BOOST_REQUIRE_EQUAL(uuiiObserver->sumUpUUAndII(), uuInitialValue + 100);
+   ASSERT_EQ(100, iiObserver->getValue());
+   ASSERT_EQ(uuInitialValue + 100, uuiiObserver->sumUpUUAndII());
 
    subject.setUU(10);
 
-   BOOST_REQUIRE_EQUAL(iiObserver->getValue(), 100);
-   BOOST_REQUIRE_EQUAL(uuiiObserver->sumUpUUAndII(), 10 + 100);
+   ASSERT_EQ(100, iiObserver->getValue());
+   ASSERT_EQ(10 + 100, uuiiObserver->sumUpUUAndII());
 }
 
-
-BOOST_AUTO_TEST_CASE(optimal_subscription)
+TEST(PatternObserverTest, optimal_subscription)
 {
    TheSubject subject;
    shared_ptr<TimedObserver> observer = make_shared<TimedObserver>();
@@ -284,12 +283,12 @@ BOOST_AUTO_TEST_CASE(optimal_subscription)
 
    subject.setUU(3000);
 
-   BOOST_REQUIRE_EQUAL(observer->getII(), 100);
-   BOOST_REQUIRE_EQUAL(observer->getUU(), 3000);
-   BOOST_REQUIRE_LT(observer->getIITime().count(), observer->getUUTime().count());
+   ASSERT_EQ(100, observer->getII());
+   ASSERT_EQ(3000, observer->getUU());
+   ASSERT_GT(observer->getUUTime().count(), observer->getIITime().count());
 }
 
-BOOST_AUTO_TEST_CASE(promicuous_observer)
+TEST(PatternObserverTest, promicuous_observer)
 {
    TheSubject subject1;
    TheSubject subject2;
@@ -297,25 +296,24 @@ BOOST_AUTO_TEST_CASE(promicuous_observer)
    shared_ptr<NullObserver> observer = make_shared<NullObserver>();
    subject1.attach(observer);
 
-   BOOST_REQUIRE_THROW(subject2.attach(observer), coffee::basis::RuntimeException);
+   ASSERT_THROW(subject2.attach(observer), coffee::basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(observer_out_of_scope)
+TEST(PatternObserverTest,out_of_scope)
 {
    shared_ptr<NullObserver> observer = make_shared<NullObserver>();
 
    if (true) {
       TheSubject subject;
       subject.attach(observer);
-      BOOST_REQUIRE_EQUAL(subject.countObservers(), 1);
-      BOOST_REQUIRE(observer->isSubscribed() == true);
+      ASSERT_EQ(subject.countObservers(), 1);
+      ASSERT_TRUE(observer->isSubscribed());
    }
 
-   BOOST_REQUIRE(observer->isSubscribed() == false);
+   ASSERT_FALSE(observer->isSubscribed());
 }
 
-
-BOOST_AUTO_TEST_CASE(subscription_asstring)
+TEST(PatternObserverTest,asstring)
 {
    TheSubject subject;
    shared_ptr<TheObserverII> iiObserver = make_shared<TheObserverII>();
@@ -324,6 +322,5 @@ BOOST_AUTO_TEST_CASE(subscription_asstring)
    subject.attach(iiObserver);
    subject.attach(uuiiObserver);
 
-   BOOST_REQUIRE(subject.asString().find("#Observers=2") != std::string::npos);
+   ASSERT_TRUE(subject.asString().find("#Observers=2") != std::string::npos);
 }
-

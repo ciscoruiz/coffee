@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/persistence/ClassBuilder.hpp>
 #include <coffee/persistence/PrimaryKeyBuilder.hpp>
@@ -36,11 +36,9 @@
 #include <coffee/dbms/datatype/Date.hpp>
 #include <coffee/dbms/datatype/Float.hpp>
 
-#include "../dbms/PrintChrono.hpp"
-
 using namespace coffee;
 
-BOOST_AUTO_TEST_CASE(persistence_class)
+TEST(ClassTest, clazz)
 {
    persistence::PrimaryKeyBuilder pkBuilder;
    pkBuilder.add(std::make_shared<dbms::datatype::Integer>("id")).add(std::make_shared<dbms::datatype::String>("id2", 64));
@@ -54,30 +52,30 @@ BOOST_AUTO_TEST_CASE(persistence_class)
    std::shared_ptr<persistence::Class> clazz = classBuilder.build();
 
    auto pkObject = clazz->createPrimaryKey();
-   BOOST_REQUIRE_NO_THROW(pkObject->setInteger("id", 111));
-   BOOST_REQUIRE_NO_THROW(pkObject->setString("id2", "zzz"));
+   ASSERT_NO_THROW(pkObject->setInteger("id", 111));
+   ASSERT_NO_THROW(pkObject->setString("id2", "zzz"));
 
    auto object = clazz->createObject(pkObject);
 
-   BOOST_REQUIRE_EQUAL(object->getPrimaryKey()->getInteger("id"), 111);
-   BOOST_REQUIRE_EQUAL(object->getPrimaryKey()->getString("id2"), "zzz");
+   ASSERT_EQ(111, object->getPrimaryKey()->getInteger("id"));
+   ASSERT_EQ("zzz", object->getPrimaryKey()->getString("id2"));
 
    auto now = time::TimeService::toSeconds(time::TimeService::now());
 
-   BOOST_REQUIRE_NO_THROW(object->setString("name", "the name"));
-   BOOST_REQUIRE_NO_THROW(object->setDate("date", now));
-   BOOST_REQUIRE_NO_THROW(object->setFloat("the-float", 1111.22));
+   ASSERT_NO_THROW(object->setString("name", "the name"));
+   ASSERT_NO_THROW(object->setDate("date", now));
+   ASSERT_NO_THROW(object->setFloat("the-float", 1111.22));
 
-   BOOST_REQUIRE_EQUAL(object->getString("name"), "the name");
-   BOOST_REQUIRE_EQUAL(object->getDate("date"), now);
-   BOOST_REQUIRE_CLOSE(object->getFloat("the-float"), 1111.22, 0.1);
+   ASSERT_EQ("the name", object->getString("name"));
+   ASSERT_EQ(now, object->getDate("date"));
+   ASSERT_FLOAT_EQ(object->getFloat("the-float"), 1111.22);
 
    auto object2 = clazz->createObject(pkObject);
 
-   BOOST_REQUIRE(object->getInternalId() != object2->getInternalId());
+   ASSERT_TRUE(object->getInternalId() != object2->getInternalId());
 }
 
-BOOST_AUTO_TEST_CASE(persistence_object_asstring)
+TEST(ClassTest, object_asstring)
 {
    persistence::PrimaryKeyBuilder pkBuilder;
    pkBuilder.add(std::make_shared<dbms::datatype::Integer>("id")).add(std::make_shared<dbms::datatype::String>("id2", 64));
@@ -91,8 +89,8 @@ BOOST_AUTO_TEST_CASE(persistence_object_asstring)
    std::shared_ptr<persistence::Class> clazz = classBuilder.build();
 
    auto pkObject = clazz->createPrimaryKey();
-   BOOST_REQUIRE_NO_THROW(pkObject->setInteger("id", 111));
-   BOOST_REQUIRE_NO_THROW(pkObject->setString("id2", "zzz"));
+   ASSERT_NO_THROW(pkObject->setInteger("id", 111));
+   ASSERT_NO_THROW(pkObject->setString("id2", "zzz"));
 
    auto object = clazz->createObject(pkObject);
 
@@ -111,6 +109,6 @@ BOOST_AUTO_TEST_CASE(persistence_object_asstring)
 
    int ii = 0;
    while(lines[ii] != nullptr) {
-      BOOST_REQUIRE(str.find(lines[ii ++]) != std::string::npos);
+      ASSERT_TRUE(str.find(lines[ii ++]) != std::string::npos);
    }
 }

@@ -24,7 +24,7 @@
 #include <iostream>
 #include <time.h>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/dbms/datatype/String.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
@@ -32,71 +32,71 @@
 using namespace coffee;
 using namespace coffee::dbms;
 
-BOOST_AUTO_TEST_CASE(string_is_nulleable)
+TEST(StringTest,is_nulleable)
 {
    datatype::String column("nulleable", 16, datatype::Constraint::CanBeNull);
 
    void* init = column.getBuffer();
 
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
+   ASSERT_FALSE(column.hasValue());
 
    column.clear();
 
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
-   BOOST_REQUIRE_THROW(column.getValue(), basis::RuntimeException);
-   BOOST_REQUIRE_EQUAL(column.getSize(), 0);
+   ASSERT_FALSE(column.hasValue());
+   ASSERT_THROW(column.getValue(), basis::RuntimeException);
+   ASSERT_EQ(0, column.getSize());
 
    column.setValue("hello world");
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
-   BOOST_REQUIRE_EQUAL(column.getSize(), coffee_strlen("hello world"));
-   BOOST_REQUIRE_EQUAL(strncmp(column.getValue(), "hello world", coffee_strlen("hello world")), 0);
+   ASSERT_TRUE(column.hasValue());
+   ASSERT_EQ(coffee_strlen("hello world"), column.getSize());
+   ASSERT_EQ(0, strncmp(column.getValue(), "hello world", coffee_strlen("hello world")));
 
    column.clear();
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
-   BOOST_REQUIRE_EQUAL(column.getSize(), 0);
+   ASSERT_FALSE(column.hasValue());
+   ASSERT_EQ(0, column.getSize());
 
    column.setValue("zzz");
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+   ASSERT_TRUE(column.hasValue());
 
    column.setValue(NULL);
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
+   ASSERT_FALSE(column.hasValue());
 
-   BOOST_REQUIRE_EQUAL(init, column.getBuffer());
+   ASSERT_EQ(column.getBuffer(), init);
 
-   BOOST_REQUIRE_THROW(column.setValue("size out of range"), basis::RuntimeException);
+   ASSERT_THROW(column.setValue("size out of range"), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(string_nulleable_asstring)
+TEST(StringTest,nulleable_asstring)
 {
    datatype::String column("nulleable", 16, datatype::Constraint::CanBeNull);
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
-   BOOST_REQUIRE_EQUAL(column.asString(), "datatype.String { datatype.Abstract { Name=nulleable | IsNull=true | Constraint=CanBeNull } | MaxSize=16 }");
+   ASSERT_FALSE(column.hasValue());
+   ASSERT_EQ("datatype.String { datatype.Abstract { Name=nulleable | IsNull=true | Constraint=CanBeNull } | MaxSize=16 }", column.asString());
 }
 
-BOOST_AUTO_TEST_CASE(string_is_not_nulleable)
+TEST(StringTest,is_not_nulleable)
 {
    datatype::String column("not_nulleable", 4, datatype::Constraint::CanNotBeNull);
 
    void* init = column.getBuffer();
 
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+   ASSERT_TRUE(column.hasValue());
 
    column.setValue("bye");
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
-   BOOST_REQUIRE_EQUAL(column.getSize(), coffee_strlen("bye"));
-   BOOST_REQUIRE_EQUAL(strncmp(column.getValue(), "bye", coffee_strlen("bye")), 0);
+   ASSERT_TRUE(column.hasValue());
+   ASSERT_EQ(coffee_strlen("bye"), column.getSize());
+   ASSERT_EQ(0, strncmp(column.getValue(), "bye", coffee_strlen("bye")));
 
    column.clear();
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
-   BOOST_REQUIRE_EQUAL(column.getSize(), 0);
+   ASSERT_TRUE(column.hasValue());
+   ASSERT_EQ(0, column.getSize());
 
-   BOOST_REQUIRE_EQUAL(init, column.getBuffer());
+   ASSERT_EQ(column.getBuffer(), init);
 
-   BOOST_REQUIRE_THROW(column.setValue("size out of range"), basis::RuntimeException);
-   BOOST_REQUIRE_THROW(column.setValue(NULL), basis::RuntimeException);
+   ASSERT_THROW(column.setValue("size out of range"), basis::RuntimeException);
+   ASSERT_THROW(column.setValue(NULL), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(string_downcast)
+TEST(StringTest,downcast)
 {
    datatype::String column("string_downcast", 4);
 
@@ -105,52 +105,52 @@ BOOST_AUTO_TEST_CASE(string_downcast)
    const datatype::String& other = coffee_datatype_downcast(datatype::String, abs);
    column.setValue("123");
 
-   BOOST_REQUIRE_EQUAL(other == column, true);
+   ASSERT_TRUE(other == column);
 
    datatype::Integer zzz("zzz");
 
-   BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::String, zzz), dbms::InvalidDataException);
+   ASSERT_THROW(coffee_datatype_downcast(datatype::String, zzz), dbms::InvalidDataException);
 }
 
-BOOST_AUTO_TEST_CASE(string_clone)
+TEST(StringTest,clone)
 {
    datatype::String cannotBeNull("cannotBeNull", 16, datatype::Constraint::CanNotBeNull);
    datatype::String canBeNull("canBeNull", 16, datatype::Constraint::CanBeNull);
 
-   BOOST_REQUIRE_EQUAL(cannotBeNull.hasValue(), true);
-   BOOST_REQUIRE_EQUAL(canBeNull.hasValue(), false);
+   ASSERT_TRUE(cannotBeNull.hasValue());
+   ASSERT_FALSE(canBeNull.hasValue());
 
    auto notnull(cannotBeNull.clone());
    auto null(canBeNull.clone());
 
-   BOOST_REQUIRE_EQUAL(notnull->hasValue(), true);
-   BOOST_REQUIRE_EQUAL(null->hasValue(), false);
+   ASSERT_TRUE(notnull->hasValue());
+   ASSERT_FALSE(null->hasValue());
 
-   BOOST_REQUIRE_EQUAL(notnull->compare(cannotBeNull), 0);
+   ASSERT_EQ(0, notnull->compare(cannotBeNull));
 
    cannotBeNull.setValue("abcd");
 
-   BOOST_REQUIRE_EQUAL(cannotBeNull.getValue(), "abcd");
+   ASSERT_STREQ("abcd", cannotBeNull.getValue());
 
    notnull = cannotBeNull.clone();
-   BOOST_REQUIRE_EQUAL(notnull->hasValue(), true);
-   BOOST_REQUIRE_EQUAL(notnull->compare(cannotBeNull), 0);
+   ASSERT_TRUE(notnull->hasValue());
+   ASSERT_EQ(0, notnull->compare(cannotBeNull));
 
    canBeNull.setValue("xzy");
    null = canBeNull.clone();
-   BOOST_REQUIRE_EQUAL(null->hasValue(), true);
-   BOOST_REQUIRE_EQUAL(null->compare(canBeNull), 0);
-   BOOST_REQUIRE_GT(null->compare(cannotBeNull), 0);
+   ASSERT_TRUE(null->hasValue());
+   ASSERT_EQ(0, null->compare(canBeNull));
+   ASSERT_GT(null->compare(cannotBeNull), 0);
 
-   BOOST_REQUIRE_LT(notnull->compare(canBeNull), 0);
+   ASSERT_LT(notnull->compare(canBeNull), 0);
 }
 
-BOOST_AUTO_TEST_CASE(string_instantiate) {
+TEST(StringTest,instantiate) {
    auto data = datatype::String::instantiate("nulleable", 10);
-   BOOST_REQUIRE(data->hasValue());
-   BOOST_REQUIRE_EQUAL(data->getMaxSize(), 10);
+   ASSERT_TRUE(data->hasValue());
+   ASSERT_EQ(10, data->getMaxSize());
 
    data = datatype::String::instantiate("not-nulleable", 20, datatype::Constraint::CanBeNull);
-   BOOST_REQUIRE(!data->hasValue());
-   BOOST_REQUIRE_EQUAL(data->getMaxSize(), 20);
+   ASSERT_TRUE(!data->hasValue());
+   ASSERT_EQ(20, data->getMaxSize());
 }

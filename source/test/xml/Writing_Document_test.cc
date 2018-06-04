@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
 
 #include <coffee/basis/DataBlock.hpp>
@@ -34,7 +34,7 @@
 using namespace coffee;
 using namespace coffee::xml;
 
-BOOST_AUTO_TEST_CASE(create_nodes)
+TEST(XmlWrittingDocumentTest,create_nodes)
 {
    std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("the root");
 
@@ -43,31 +43,31 @@ BOOST_AUTO_TEST_CASE(create_nodes)
    level00->createChild("level1-1");
    level00->createChild("level1-2");
    level00->createChild("level1-3")->createChild("2-0");
-   BOOST_REQUIRE_EQUAL(level00->children_size(), 4);
+   ASSERT_EQ(4, level00->children_size());
 
    root->createChild("level0-1");
    root->createChild("level0-2");
 
-   BOOST_REQUIRE_EQUAL(root->children_size(), 3);
+   ASSERT_EQ(3, root->children_size());
 
-   BOOST_REQUIRE_EQUAL(root->lookupChild("level0-0")->lookupChild("level1-0")->children_size(), 0);
-   BOOST_REQUIRE_EQUAL(root->lookupChild("level0-0")->lookupChild("level1-3")->children_size(), 1);
+   ASSERT_EQ(0, root->lookupChild("level0-0")->lookupChild("level1-0")->children_size());
+   ASSERT_EQ(1, root->lookupChild("level0-0")->lookupChild("level1-3")->children_size());
 }
 
-BOOST_AUTO_TEST_CASE(create_text)
+TEST(XmlWrittingDocumentTest,create_text)
 {
    std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("the root");
 
    std::shared_ptr<xml::Node> level00 = root->createChild("level0-0");
    level00->createText("0-0");
    level00->createChild("level1-3")->createText("2-0");
-   BOOST_REQUIRE_EQUAL(level00->children_size(), 1);
+   ASSERT_EQ(1, level00->children_size());
 
-   BOOST_REQUIRE_EQUAL(level00->getText(), "0-0");
-   BOOST_REQUIRE_EQUAL(level00->lookupChild("level1-3")->getText(), "2-0");
+   ASSERT_EQ("0-0", level00->getText());
+   ASSERT_EQ("2-0", level00->lookupChild("level1-3")->getText());
 }
 
-BOOST_AUTO_TEST_CASE(create_attribute)
+TEST(XmlWrittingDocumentTest,create_attribute)
 {
    std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("the root");
 
@@ -75,22 +75,22 @@ BOOST_AUTO_TEST_CASE(create_attribute)
    root->createAttribute("attr_int", 1024);
    root->createAttribute("attr_second", std::chrono::seconds(59));
 
-   BOOST_REQUIRE_EQUAL(root->attributes_size(), 3);
+   ASSERT_EQ(3, root->attributes_size());
 
-   BOOST_REQUIRE_EQUAL(root->lookupAttribute("attr_char")->getValue(), "This is the char");
-   BOOST_REQUIRE_EQUAL(root->lookupAttribute("attr_int")->getValue(), "1024");
-   BOOST_REQUIRE_EQUAL(root->lookupAttribute("attr_second")->getValue(), "59 sec");
+   ASSERT_EQ("This is the char", root->lookupAttribute("attr_char")->getValue());
+   ASSERT_EQ("1024", root->lookupAttribute("attr_int")->getValue());
+   ASSERT_EQ("59 sec", root->lookupAttribute("attr_second")->getValue());
 }
 
-BOOST_AUTO_TEST_CASE(change_attribute)
+TEST(XmlWrittingDocumentTest,change_attribute)
 {
    std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("the root");
 
    root->createAttribute("attr_char", "This is the char");
 
-   BOOST_REQUIRE_EQUAL(root->attributes_size(), 1);
+   ASSERT_EQ(1, root->attributes_size());
 
-   BOOST_REQUIRE_EQUAL(root->lookupAttribute("attr_char")->getValue(), "This is the char");
+   ASSERT_EQ("This is the char", root->lookupAttribute("attr_char")->getValue());
 
    {
       std::string innerScope = "zzz";
@@ -99,10 +99,10 @@ BOOST_AUTO_TEST_CASE(change_attribute)
 
    int ii;
 
-   BOOST_REQUIRE_EQUAL(root->lookupAttribute("attr_char")->getValue(), "zzz");
+   ASSERT_EQ("zzz", root->lookupAttribute("attr_char")->getValue());
 }
 
-BOOST_AUTO_TEST_CASE(compile_text)
+TEST(XmlWrittingDocumentTest,compile_text)
 {
    std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("the_root");
 
@@ -113,10 +113,10 @@ BOOST_AUTO_TEST_CASE(compile_text)
 
    std::string str = compiler.apply(root);
 
-   BOOST_REQUIRE_EQUAL(str, "<the_root><level0-0>aaaa-bbbb</level0-0></the_root>");
+   ASSERT_EQ("<the_root><level0-0>aaaa-bbbb</level0-0></the_root>", str);
 }
 
-BOOST_AUTO_TEST_CASE(compile_tree)
+TEST(XmlWrittingDocumentTest,compile_tree)
 {
    std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("the_root");
 
@@ -135,10 +135,10 @@ BOOST_AUTO_TEST_CASE(compile_tree)
    xml::Compiler compiler;
    std::string str = compiler.apply(root);
 
-   BOOST_REQUIRE_EQUAL(str, "<the_root><level0 MyAttr=\"It works\"><level1 ZZ=\"zz\"/><level2/><level3><LevelA first=\"111\" second=\"222\"/></level3></level0></the_root>");
+   ASSERT_EQ("<the_root><level0 MyAttr=\"It works\"><level1 ZZ=\"zz\"/><level2/><level3><LevelA first=\"111\" second=\"222\"/></level3></level0></the_root>", str);
 }
 
-BOOST_AUTO_TEST_CASE(compile_iso)
+TEST(XmlWrittingDocumentTest,compile_iso)
 {
    std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("the_root");
 
@@ -153,15 +153,15 @@ BOOST_AUTO_TEST_CASE(compile_iso)
    compiler.setEncoding("ISO-8859-1");
    std::string str = compiler.apply(root);
 
-   BOOST_REQUIRE_EQUAL(str, "<the_root><level00 Name=\"J&#xF6;rg1\" Other=\"B&#xFC;&#xF6;rg&#xE4;\"/><level01>Jörg2</level01></the_root>");
+   ASSERT_EQ("<the_root><level00 Name=\"J&#xF6;rg1\" Other=\"B&#xFC;&#xF6;rg&#xE4;\"/><level01>Jörg2</level01></the_root>", str);
 }
 
-BOOST_AUTO_TEST_CASE(compare_attribute)
+TEST(XmlWrittingDocumentTest,compare_attribute)
 {
    std::shared_ptr<xml::Node> root = std::make_shared<xml::Node>("the root");
 
    auto attr00 = root->createAttribute("attr00", "This is the char");
    auto attr01 = root->createAttribute("attr01", 1024);
 
-   BOOST_REQUIRE(*attr00 < *attr01);
+   ASSERT_TRUE(*attr00 < *attr01);
 }

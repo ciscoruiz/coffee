@@ -48,7 +48,7 @@ private:
 };
 
 
-TEST( DefaultFormatter,_basic )
+TEST( DefaultFormatter, basic)
 {
    auto writer = std::make_shared<TtyWriter>();
    logger::Logger::initialize(writer);

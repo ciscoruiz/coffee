@@ -36,24 +36,27 @@ using namespace coffee;
 using namespace coffee::logger;
 
 struct BacktrakingTraceTest : public ::testing::Test {
+   static int backtrackingLength;
+
    BacktrakingTraceTest() {
       unlink("backtrace.log");
       unlink("backtrace.log.old");
 
+      writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
+      Logger::initialize(writer);
    }
    ~BacktrakingTraceTest() {
       unlink("backtrace.log");
       unlink("backtrace.log.old");
    }
+
+   std::shared_ptr<BacktraceWriter> writer;
 };
+
+int BacktrakingTraceTest::backtrackingLength = 5;
 
 TEST_F(BacktrakingTraceTest, basic_work)
 {
-   int backtrackingLength = 5;
-
-   auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
-   Logger::initialize(writer);
-
    for(int ii = 0; ii < backtrackingLength * 2; ++ ii)
       LOG_DEBUG("this is the line number " << ii);
 
@@ -69,11 +72,6 @@ TEST_F(BacktrakingTraceTest, basic_work)
 
 TEST_F(BacktrakingTraceTest, down_lowest_level_test)
 {
-   int backtrackingLength = 5;
-
-   auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
-   Logger::initialize(writer);
-
    writer->setLowestLeveL(Level::Local0);
 
    LOG_NOTICE("notice line");
@@ -91,11 +89,6 @@ TEST_F(BacktrakingTraceTest, down_lowest_level_test)
 
 TEST_F(BacktrakingTraceTest, up_lowest_level_test)
 {
-   int backtrackingLength = 5;
-
-   auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
-   Logger::initialize(writer);
-
    writer->setLowestLeveL(Level::Information);
 
    LOG_NOTICE("notice line");
@@ -113,11 +106,6 @@ TEST_F(BacktrakingTraceTest, up_lowest_level_test)
 
 TEST_F(BacktrakingTraceTest, change_level_test)
 {
-   int backtrackingLength = 5;
-
-   auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
-   Logger::initialize(writer);
-
    Logger::setLevel(Level::Error);
 
    for(int ii = 0; ii < backtrackingLength * 2; ++ ii)
@@ -135,10 +123,6 @@ TEST_F(BacktrakingTraceTest, change_level_test)
 
 TEST_F(BacktrakingTraceTest, performance_measure_test)
 {
-   int backtrackingLength = 32;
-
-   auto writer = std::make_shared<BacktraceWriter>("backtrace.log", 256, backtrackingLength);
-
    Logger::setLevel(Level::Error);
 
    auto startTime = std::chrono::high_resolution_clock::now();

@@ -64,7 +64,7 @@ struct CircularTraceWriterFixture : public ::testing::Test {
    }
 };
 
-TEST_F(CircularTraceWriterFixture, CircularTraceWriter_oversized_file)
+TEST_F(CircularTraceWriterFixture, oversized_file)
 {
    auto writer = std::make_shared<CircularTraceWriter>("trace.log", 128);
    Logger::initialize(writer);
@@ -84,7 +84,7 @@ TEST_F(CircularTraceWriterFixture, CircularTraceWriter_oversized_file)
    ASSERT_TRUE(stream == -1 && errno == EEXIST);
 }
 
-TEST_F(CircularTraceWriterFixture, CircularTraceWriter_startwith_oversized_file)
+TEST_F(CircularTraceWriterFixture, startwith_oversized_file)
 {
    std::ofstream create("trace.log");
    create.close();

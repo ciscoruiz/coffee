@@ -41,8 +41,8 @@ using namespace coffee::dbms;
 TEST(SetTest,already_defined)
 {
   datatype::Set set;
-  set.insert(std::make_shared<datatype::Integer>("integer"));
-  ASSERT_THROW(set.insert(std::make_shared<datatype::Integer>("integer")), basis::RuntimeException);
+  set.insert(datatype::Integer::instantiate("integer"));
+  ASSERT_THROW(set.insert(datatype::Integer::instantiate("integer")), basis::RuntimeException);
 }
 
 TEST(SetTest,empty_field)
@@ -56,7 +56,7 @@ TEST(SetTest,find)
 {
   datatype::Set set;
 
-  set.insert(std::make_shared<datatype::Integer>("integer"));
+  set.insert(datatype::Integer::instantiate("integer"));
 
   ASSERT_NO_THROW(set.find("integer"));
 
@@ -67,7 +67,7 @@ TEST(SetTest,constains)
 {
   datatype::Set set;
 
-  set.insert(std::make_shared<datatype::Integer>("integer"));
+  set.insert(datatype::Integer::instantiate("integer"));
 
   ASSERT_TRUE(set.constains("integer"));
   ASSERT_FALSE(set.constains("integer2"));
@@ -79,11 +79,11 @@ TEST(SetTest,access)
 
    std::chrono::seconds second = time::TimeService::toSeconds(time::TimeService::now());
 
-   set.insert(std::make_shared<datatype::Integer>("integer"));
-   set.insert(std::make_shared<datatype::String>("string", 16));
-   set.insert(std::make_shared<datatype::Float>("float"));
-   set.insert(std::make_shared<datatype::Date>("date"));
-   set.insert(std::make_shared<datatype::LongBlock>("longblock"));
+   set.insert(datatype::Integer::instantiate("integer"));
+   set.insert(datatype::String::instantiate("string", 16));
+   set.insert(datatype::Float::instantiate("float"));
+   set.insert(datatype::Date::instantiate("date"));
+   set.insert(datatype::LongBlock::instantiate("longblock"));
 
    const int maxSize = 1024;
    char* buffer = new char[maxSize];
@@ -109,18 +109,18 @@ TEST(SetTest,operator_compare)
 {
   datatype::Set set;
 
-  set.insert(std::make_shared<datatype::Integer>("integer"));
-  set.insert(std::make_shared<datatype::String>("string", 16));
-  set.insert(std::make_shared<datatype::Float>("float"));
+  set.insert(datatype::Integer::instantiate("integer"));
+  set.insert(datatype::String::instantiate("string", 16));
+  set.insert(datatype::Float::instantiate("float"));
   set.setInteger("integer", 123);
   set.setString("string", "hello");
   set.setFloat("float", 0.123);
 
   datatype::Set other;
 
-  other.insert(std::make_shared<datatype::Integer>("integer"));
-  other.insert(std::make_shared<datatype::String>("string", 16));
-  other.insert(std::make_shared<datatype::Float>("float"));
+  other.insert(datatype::Integer::instantiate("integer"));
+  other.insert(datatype::String::instantiate("string", 16));
+  other.insert(datatype::Float::instantiate("float"));
   other.setInteger("integer", 123);
   other.setString("string", "hello");
   other.setFloat("float", 0.123);
@@ -133,18 +133,18 @@ TEST(SetTest,operator_less)
 {
   datatype::Set set;
 
-  set.insert(std::make_shared<datatype::Integer>("integer"));
-  set.insert(std::make_shared<datatype::String>("string", 16));
-  set.insert(std::make_shared<datatype::Float>("float"));
+  set.insert(datatype::Integer::instantiate("integer"));
+  set.insert(datatype::String::instantiate("string", 16));
+  set.insert(datatype::Float::instantiate("float"));
   set.setInteger("integer", 123);
   set.setString("string", "hello");
   set.setFloat("float", 0.123);
 
   datatype::Set other;
 
-  other.insert(std::make_shared<datatype::Integer>("integer"));
-  other.insert(std::make_shared<datatype::String>("string", 16));
-  other.insert(std::make_shared<datatype::Float>("float"));
+  other.insert(datatype::Integer::instantiate("integer"));
+  other.insert(datatype::String::instantiate("string", 16));
+  other.insert(datatype::Float::instantiate("float"));
   other.setInteger("integer", 123);
   other.setString("string", "hello");
   other.setFloat("float", 0.0);
@@ -159,9 +159,9 @@ TEST(SetTest,self)
 
   set = set;
 
-  set.insert(std::make_shared<datatype::Integer>("integer"));
-  set.insert(std::make_shared<datatype::String>("string", 16));
-  set.insert(std::make_shared<datatype::Float>("float"));
+  set.insert(datatype::Integer::instantiate("integer"));
+  set.insert(datatype::String::instantiate("string", 16));
+  set.insert(datatype::Float::instantiate("float"));
   set.setInteger("integer", 123);
   set.setString("string", "hello");
   set.setFloat("float", 0.123);
@@ -173,16 +173,16 @@ TEST(SetTest,compare_different_no_members_numbers)
 {
   datatype::Set set;
 
-  set.insert(std::make_shared<datatype::Integer>("integer"));
-  set.insert(std::make_shared<datatype::String>("string", 16));
-  set.insert(std::make_shared<datatype::Float>("float"));
+  set.insert(datatype::Integer::instantiate("integer"));
+  set.insert(datatype::String::instantiate("string", 16));
+  set.insert(datatype::Float::instantiate("float"));
   set.setInteger("integer", 123);
   set.setString("string", "hello");
   set.setFloat("float", 0.123);
 
   datatype::Set other;
-  other.insert(std::make_shared<datatype::Integer>("integer"));
-  other.insert(std::make_shared<datatype::String>("string", 16));
+  other.insert(datatype::Integer::instantiate("integer"));
+  other.insert(datatype::String::instantiate("string", 16));
   set.setInteger("integer", 123);
   set.setString("string", "hello");
 
@@ -197,17 +197,17 @@ TEST(SetTest,compare_different_members_names)
 {
   datatype::Set set;
 
-  set.insert(std::make_shared<datatype::Integer>("integer"));
-  set.insert(std::make_shared<datatype::String>("string", 16));
-  set.insert(std::make_shared<datatype::Float>("float"));
+  set.insert(datatype::Integer::instantiate("integer"));
+  set.insert(datatype::String::instantiate("string", 16));
+  set.insert(datatype::Float::instantiate("float"));
   set.setInteger("integer", 123);
   set.setString("string", "hello");
   set.setFloat("float", 0.123);
 
   datatype::Set other;
-  other.insert(std::make_shared<datatype::Integer>("integer"));
-  other.insert(std::make_shared<datatype::String>("string", 16));
-  other.insert(std::make_shared<datatype::Float>("float-with-other-name"));
+  other.insert(datatype::Integer::instantiate("integer"));
+  other.insert(datatype::String::instantiate("string", 16));
+  other.insert(datatype::Float::instantiate("float-with-other-name"));
   other.setInteger("integer", 123);
   other.setString("string", "hello");
   other.setFloat("float-with-other-name", 0.123);

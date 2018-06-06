@@ -58,9 +58,9 @@ struct StatementAgeGreater {
    StatementAgeGreater(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "select Name, age from employee where age > ?";
 
-      inputId = std::make_shared<dbms::datatype::Integer>("age");
-      outputId = std::make_shared<dbms::datatype::Integer>("age");
-      outputName = std::make_shared<dbms::datatype::String>("name", 20);
+      inputId = dbms::datatype::Integer::instantiate("age");
+      outputId = dbms::datatype::Integer::instantiate("age");
+      outputName = dbms::datatype::String::instantiate("name", 20);
 
       statement = database->createStatement("greater_age", sql);
       statement->createBinderInput(inputId);
@@ -77,8 +77,8 @@ struct StatementCountAgeGreater {
    StatementCountAgeGreater(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "select count(*) from employee where age > ?";
 
-      inputId = std::make_shared<dbms::datatype::Integer>("age");
-      outputId = std::make_shared<dbms::datatype::Integer>("count");
+      inputId = dbms::datatype::Integer::instantiate("age");
+      outputId = dbms::datatype::Integer::instantiate("count");
 
       statement = database->createStatement("count_greater_age", sql);
       statement->createBinderInput(inputId);
@@ -92,7 +92,7 @@ struct StatementCountAgeGreater {
 struct StatementCountAllTypes {
    StatementCountAllTypes(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "select count(*) from all_types";
-      counter = std::make_shared<dbms::datatype::Integer>("counter");
+      counter = dbms::datatype::Integer::instantiate("counter");
       statement = database->createStatement("count_all_types", sql);
       statement->createBinderOutput(counter);
    }
@@ -104,9 +104,9 @@ struct StatementBlob {
    StatementBlob(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "select id, myfloat, mydata from btest where id == ?";
 
-      id = std::make_shared<dbms::datatype::Integer>("id");
-      myfloat = std::make_shared<dbms::datatype::Float>("float");
-      mydata = std::make_shared<dbms::datatype::LongBlock>("data", dbms::datatype::Constraint::CanBeNull);
+      id = dbms::datatype::Integer::instantiate("id");
+      myfloat = dbms::datatype::Float::instantiate("float");
+      mydata = dbms::datatype::LongBlock::instantiate("data", dbms::datatype::Constraint::CanBeNull);
 
       statement = database->createStatement("select_blob", sql);
       statement->createBinderInput(id);
@@ -123,8 +123,8 @@ struct StatementBlob {
 struct StatementSyntaxError {
    StatementSyntaxError(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "select age where employee where age > ?";
-      input = std::make_shared<dbms::datatype::Integer>("age");
-      output = std::make_shared<dbms::datatype::Integer>("age");
+      input = dbms::datatype::Integer::instantiate("age");
+      output = dbms::datatype::Integer::instantiate("age");
       statement = database->createStatement("syntax_error", sql);
       statement->createBinderInput(input);
       statement->createBinderOutput(output);
@@ -137,12 +137,12 @@ struct StatementSyntaxError {
 struct InsertAllType {
    InsertAllType(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "insert into all_types(id, the_float, the_date, the_blob, the_time, the_long_blob) values (?, ?, ?, ?, ?, ?)";
-      id = std::make_shared<dbms::datatype::Integer>("id");
-      theFloat = std::make_shared<dbms::datatype::Float>("the_float", dbms::datatype::Constraint::CanBeNull);
-      theDate = std::make_shared<dbms::datatype::Date>("the_date", dbms::datatype::Constraint::CanBeNull);
-      theBlob = std::make_shared<dbms::datatype::ShortBlock>("the_blob", 128, dbms::datatype::Constraint::CanBeNull);
-      theTime = std::make_shared<dbms::datatype::TimeStamp>("the_time", dbms::datatype::Constraint::CanBeNull);
-      theLongBlob = std::make_shared<dbms::datatype::LongBlock>("the_long_blob", dbms::datatype::Constraint::CanBeNull);
+      id = dbms::datatype::Integer::instantiate("id");
+      theFloat = dbms::datatype::Float::instantiate("the_float", dbms::datatype::Constraint::CanBeNull);
+      theDate = dbms::datatype::Date::instantiate("the_date", dbms::datatype::Constraint::CanBeNull);
+      theBlob = dbms::datatype::ShortBlock::instantiate("the_blob", 128, dbms::datatype::Constraint::CanBeNull);
+      theTime = dbms::datatype::TimeStamp::instantiate("the_time", dbms::datatype::Constraint::CanBeNull);
+      theLongBlob = dbms::datatype::LongBlock::instantiate("the_long_blob", dbms::datatype::Constraint::CanBeNull);
       statement = database->createStatement("insert_all_types", sql);
       statement->createBinderInput(id);
       statement->createBinderInput(theFloat);
@@ -164,12 +164,12 @@ struct InsertAllType {
 struct SelectAllType {
    SelectAllType(std::shared_ptr<dbms::Database> database, std::shared_ptr<dbms::Connection>& connection) {
       const char* sql = "select id, the_float, the_date, the_blob, the_time, the_long_blob from all_types order by id";
-      id = std::make_shared<dbms::datatype::Integer>("id");
-      theFloat = std::make_shared<dbms::datatype::Float>("the_float", dbms::datatype::Constraint::CanBeNull);
-      theDate = std::make_shared<dbms::datatype::Date>("the_date", dbms::datatype::Constraint::CanBeNull);
-      theBlob = std::make_shared<dbms::datatype::ShortBlock>("the_blob", 128, dbms::datatype::Constraint::CanBeNull);
-      theTime = std::make_shared<dbms::datatype::TimeStamp>("the_time", dbms::datatype::Constraint::CanBeNull);
-      theLongBlob = std::make_shared<dbms::datatype::LongBlock>("the_long_blob", dbms::datatype::Constraint::CanBeNull);
+      id = dbms::datatype::Integer::instantiate("id");
+      theFloat = dbms::datatype::Float::instantiate("the_float", dbms::datatype::Constraint::CanBeNull);
+      theDate = dbms::datatype::Date::instantiate("the_date", dbms::datatype::Constraint::CanBeNull);
+      theBlob = dbms::datatype::ShortBlock::instantiate("the_blob", 128, dbms::datatype::Constraint::CanBeNull);
+      theTime = dbms::datatype::TimeStamp::instantiate("the_time", dbms::datatype::Constraint::CanBeNull);
+      theLongBlob = dbms::datatype::LongBlock::instantiate("the_long_blob", dbms::datatype::Constraint::CanBeNull);
       statement = database->createStatement("select_all_types", sql);
       statement->createBinderOutput(id);
       statement->createBinderOutput(theFloat);
@@ -200,7 +200,7 @@ struct SqliteDatabaseTestFixture  : public ::testing::Test {
    void SetUp() {
       const char* logFileName = "source/test/dbms.sqlite/trace.log";
       unlink (logFileName);
-      logger::Logger::initialize(std::make_shared<logger::UnlimitedTraceWriter>(logFileName));
+      logger::Logger::initialize(logger::UnlimitedTraceWriter::instantiate(logFileName));
       logger::Logger::setLevel(logger::Level::Debug);
 
       database = dbms::sqlite::SqliteDatabase::instantiate(app, dbPath);
@@ -283,7 +283,7 @@ TEST_F(SqliteDatabaseTestFixture, bad_output_parameters)
 {
    const char* sql = "select id from all_types where id = ?";
    auto statement = database->createStatement("bad_output_parameters", sql);
-   auto id = std::make_shared<dbms::datatype::Integer>("id");
+   auto id = dbms::datatype::Integer::instantiate("id");
    statement->createBinderInput(id);
    dbms::GuardConnection guardConnection(connection);
    dbms::GuardStatement guardStament(guardConnection, statement);
@@ -356,10 +356,10 @@ TEST_F(SqliteDatabaseTestFixture, insert)
 
    const char* sql = "INSERT INTO employee VALUES(?, ?, ?, ?)";
 
-   auto name = std::make_shared<dbms::datatype::String>("name", 20);
-   auto dept = std::make_shared<dbms::datatype::String>("dept", 20);
-   auto job = std::make_shared<dbms::datatype::String>("jobTitle", 20);
-   auto age = std::make_shared<dbms::datatype::Integer>("age");
+   auto name = dbms::datatype::String::instantiate("name", 20);
+   auto dept = dbms::datatype::String::instantiate("dept", 20);
+   auto job = dbms::datatype::String::instantiate("jobTitle", 20);
+   auto age = dbms::datatype::Integer::instantiate("age");
 
    auto insert = database->createStatement("insert_employee", sql);
    insert->createBinderInput(name);

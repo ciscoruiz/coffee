@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/http/url/URLParser.hpp>
 #include <coffee/http/url/URL.hpp>
@@ -31,7 +31,7 @@ using namespace coffee;
 using coffee::http::url::URL;
 using http::url::ComponentName;
 
-BOOST_AUTO_TEST_CASE(URLParser_set_all_components)
+TEST(HttpUrlParserTest, set_all_components)
 {
    const char* expression = "tcp://user:pwd@localhost.me:8080/path/resource?key1=value1&key2=value2#fragment";
 
@@ -40,32 +40,32 @@ BOOST_AUTO_TEST_CASE(URLParser_set_all_components)
    auto url = parser.build();
 
    for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
-      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii));
+      ASSERT_TRUE(url->hasComponent((ComponentName::_v) ii));
    }
 
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::User), "user");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Password), "pwd");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Port), "8080");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Path), "/path/resource");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Fragment), "#fragment");
+   ASSERT_EQ("tcp", url->getComponent(ComponentName::Scheme));
+   ASSERT_EQ("user", url->getComponent(ComponentName::User));
+   ASSERT_EQ("pwd", url->getComponent(ComponentName::Password));
+   ASSERT_EQ("localhost.me", url->getComponent(ComponentName::Host));
+   ASSERT_EQ("8080", url->getComponent(ComponentName::Port));
+   ASSERT_EQ("/path/resource", url->getComponent(ComponentName::Path));
+   ASSERT_EQ("#fragment", url->getComponent(ComponentName::Fragment));
 
    auto ii = url->query_begin();
    auto keyValue = URL::keyValue(ii);
-   BOOST_REQUIRE_EQUAL(keyValue.first, "key1");
-   BOOST_REQUIRE_EQUAL(keyValue.second, "value1");
+   ASSERT_EQ("key1", keyValue.first);
+   ASSERT_EQ("value1", keyValue.second);
 
    keyValue = URL::keyValue(++ ii);
-   BOOST_REQUIRE_EQUAL(keyValue.first, "key2");
-   BOOST_REQUIRE_EQUAL(keyValue.second, "value2");
+   ASSERT_EQ("key2", keyValue.first);
+   ASSERT_EQ("value2", keyValue.second);
 
-   BOOST_REQUIRE(++ ii == url->query_end());
+   ASSERT_TRUE(++ ii == url->query_end());
 
-   BOOST_REQUIRE_EQUAL(url->encode(), expression);
+   ASSERT_EQ(expression, url->encode());
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_short_url)
+TEST(HttpUrlParserTest, short_url)
 {
    const bool expected[] = { false, false, false, false, false, true, true};
 
@@ -76,27 +76,27 @@ BOOST_AUTO_TEST_CASE(URLParser_short_url)
    auto url = parser.build();
 
    for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
-      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
+      ASSERT_TRUE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
    }
 
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Path), "/path/resource");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Fragment), "#fragment");
+   ASSERT_EQ("/path/resource", url->getComponent(ComponentName::Path));
+   ASSERT_EQ("#fragment", url->getComponent(ComponentName::Fragment));
 
    auto ii = url->query_begin();
    auto keyValue = URL::keyValue(ii);
-   BOOST_REQUIRE_EQUAL(keyValue.first, "key1");
-   BOOST_REQUIRE_EQUAL(keyValue.second, "value1");
+   ASSERT_EQ("key1", keyValue.first);
+   ASSERT_EQ("value1", keyValue.second);
 
    keyValue = URL::keyValue(++ ii);
-   BOOST_REQUIRE_EQUAL(keyValue.first, "key2");
-   BOOST_REQUIRE_EQUAL(keyValue.second, "value2");
+   ASSERT_EQ("key2", keyValue.first);
+   ASSERT_EQ("value2", keyValue.second);
 
-   BOOST_REQUIRE(++ ii == url->query_end());
+   ASSERT_TRUE(++ ii == url->query_end());
 
-   BOOST_REQUIRE_EQUAL(url->encode(), expression);
+   ASSERT_EQ(expression, url->encode());
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_minimal)
+TEST(HttpUrlParserTest, minimal)
 {
    const bool expected[] = { true, false, false, true, false, false, false };
 
@@ -104,17 +104,17 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal)
    auto url = parser.build();
 
    for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
-      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
+      ASSERT_TRUE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
    }
 
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE(!url->hasQuery());
+   ASSERT_EQ("tcp", url->getComponent(ComponentName::Scheme));
+   ASSERT_EQ("localhost.me", url->getComponent(ComponentName::Host));
+   ASSERT_TRUE(!url->hasQuery());
 
-   BOOST_REQUIRE_EQUAL(url->encode(), "tcp://localhost.me");
+   ASSERT_EQ("tcp://localhost.me", url->encode());
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_minimal_slash)
+TEST(HttpUrlParserTest, minimal_slash)
 {
    const bool expected[] = { true, false, false, true, false, false, false };
 
@@ -122,17 +122,17 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_slash)
    auto url = parser.build();
 
    for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
-      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
+      ASSERT_TRUE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
    }
 
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE(!url->hasQuery());
+   ASSERT_EQ("tcp", url->getComponent(ComponentName::Scheme));
+   ASSERT_EQ("localhost.me", url->getComponent(ComponentName::Host));
+   ASSERT_TRUE(!url->hasQuery());
 
-   BOOST_REQUIRE_EQUAL(url->encode(), "tcp://localhost.me");
+   ASSERT_EQ("tcp://localhost.me", url->encode());
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_minimal_port)
+TEST(HttpUrlParserTest, minimal_port)
 {
    const bool expected[] = { true, false, false, true, true, false, false };
    const char* expression = "tcp://localhost.me:8080";
@@ -141,18 +141,18 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_port)
    auto url = parser.build();
 
    for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
-      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
+      ASSERT_TRUE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
    }
 
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Port), "8080");
-   BOOST_REQUIRE(!url->hasQuery());
+   ASSERT_EQ("tcp", url->getComponent(ComponentName::Scheme));
+   ASSERT_EQ("localhost.me", url->getComponent(ComponentName::Host));
+   ASSERT_EQ("8080", url->getComponent(ComponentName::Port));
+   ASSERT_TRUE(!url->hasQuery());
 
-   BOOST_REQUIRE_EQUAL(url->encode(), expression);
+   ASSERT_EQ(expression, url->encode());
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_minimal_path)
+TEST(HttpUrlParserTest, minimal_path)
 {
    const bool expected[] = { true, false, false, true, false, true, false };
    const char* expression = "tcp://localhost.me/path/resource";
@@ -161,18 +161,18 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_path)
    auto url = parser.build();
 
    for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
-      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
+      ASSERT_TRUE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
    }
 
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Path), "/path/resource");
-   BOOST_REQUIRE(!url->hasQuery());
+   ASSERT_EQ("tcp", url->getComponent(ComponentName::Scheme));
+   ASSERT_EQ("localhost.me", url->getComponent(ComponentName::Host));
+   ASSERT_EQ("/path/resource", url->getComponent(ComponentName::Path));
+   ASSERT_TRUE(!url->hasQuery());
 
-   BOOST_REQUIRE_EQUAL(url->encode(), expression);
+   ASSERT_EQ(expression, url->encode());
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_minimal_query)
+TEST(HttpUrlParserTest, minimal_query)
 {
    const bool expected[] = { true, false, false, true, true, false, false };
    const char* expression = "tcp://localhost.me:8080?key1=value1&key2=value2";
@@ -181,23 +181,23 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_query)
    auto url = parser.build();
 
    for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
-      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
+      ASSERT_TRUE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
    }
 
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Port), "8080");
-   BOOST_REQUIRE(url->hasQuery());
+   ASSERT_EQ("tcp", url->getComponent(ComponentName::Scheme));
+   ASSERT_EQ("localhost.me", url->getComponent(ComponentName::Host));
+   ASSERT_EQ("8080", url->getComponent(ComponentName::Port));
+   ASSERT_TRUE(url->hasQuery());
 
    auto ii = url->query_begin();
    auto keyValue = URL::keyValue(ii);
-   BOOST_REQUIRE_EQUAL(keyValue.first, "key1");
-   BOOST_REQUIRE_EQUAL(keyValue.second, "value1");
+   ASSERT_EQ("key1", keyValue.first);
+   ASSERT_EQ("value1", keyValue.second);
 
-   BOOST_REQUIRE_EQUAL(url->encode(), expression);
+   ASSERT_EQ(expression, url->encode());
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_minimal_query_empty_value)
+TEST(HttpUrlParserTest, minimal_query_empty_value)
 {
    const bool expected[] = { true, false, false, true, true, false, false };
    const char* expression = "tcp://localhost.me:8080?key1";
@@ -206,23 +206,23 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_query_empty_value)
    auto url = parser.build();
 
    for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
-      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
+      ASSERT_TRUE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
    }
 
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Port), "8080");
-   BOOST_REQUIRE(url->hasQuery());
+   ASSERT_EQ("tcp", url->getComponent(ComponentName::Scheme));
+   ASSERT_EQ("localhost.me", url->getComponent(ComponentName::Host));
+   ASSERT_EQ("8080", url->getComponent(ComponentName::Port));
+   ASSERT_TRUE(url->hasQuery());
 
    auto ii = url->query_begin();
    auto keyValue = URL::keyValue(ii);
-   BOOST_REQUIRE_EQUAL(keyValue.first, "key1");
-   BOOST_REQUIRE(keyValue.second.empty());
+   ASSERT_EQ("key1", keyValue.first);
+   ASSERT_TRUE(keyValue.second.empty());
 
-   BOOST_REQUIRE_EQUAL(url->encode(), expression);
+   ASSERT_EQ(expression, url->encode());
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_minimal_fragment)
+TEST(HttpUrlParserTest, minimal_fragment)
 {
    const bool expected[] = { true, false, false, true, false, false, true };
    const char* expression = "tcp://localhost.me#reference";
@@ -231,18 +231,18 @@ BOOST_AUTO_TEST_CASE(URLParser_minimal_fragment)
    auto url = parser.build();
 
    for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
-      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
+      ASSERT_TRUE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
    }
 
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Fragment), "#reference");
-   BOOST_REQUIRE(!url->hasQuery());
+   ASSERT_EQ("tcp", url->getComponent(ComponentName::Scheme));
+   ASSERT_EQ("localhost.me", url->getComponent(ComponentName::Host));
+   ASSERT_EQ("#reference", url->getComponent(ComponentName::Fragment));
+   ASSERT_TRUE(!url->hasQuery());
 
-   BOOST_REQUIRE_EQUAL(url->encode(), expression);
+   ASSERT_EQ(expression, url->encode());
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_user)
+TEST(HttpUrlParserTest, user)
 {
    const bool expected[] = { true, true, false, true, false, false, true };
    const char* expression = "tcp://user@localhost.me#reference";
@@ -251,19 +251,19 @@ BOOST_AUTO_TEST_CASE(URLParser_user)
    auto url = parser.build();
 
    for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
-      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
+      ASSERT_TRUE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
    }
 
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::User), "user");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Fragment), "#reference");
-   BOOST_REQUIRE(!url->hasQuery());
+   ASSERT_EQ("tcp", url->getComponent(ComponentName::Scheme));
+   ASSERT_EQ("user", url->getComponent(ComponentName::User));
+   ASSERT_EQ("localhost.me", url->getComponent(ComponentName::Host));
+   ASSERT_EQ("#reference", url->getComponent(ComponentName::Fragment));
+   ASSERT_TRUE(!url->hasQuery());
 
-   BOOST_REQUIRE_EQUAL(url->encode(), expression);
+   ASSERT_EQ(expression, url->encode());
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_pwd)
+TEST(HttpUrlParserTest, pwd)
 {
    const bool expected[] = { true, false, true, true, false, false, false };
    const char* expression = "tcp://:pwd@localhost.me";
@@ -272,18 +272,18 @@ BOOST_AUTO_TEST_CASE(URLParser_pwd)
    auto url = parser.build();
 
    for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
-      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
+      ASSERT_TRUE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
    }
 
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Password), "pwd");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE(!url->hasQuery());
+   ASSERT_EQ("tcp", url->getComponent(ComponentName::Scheme));
+   ASSERT_EQ("pwd", url->getComponent(ComponentName::Password));
+   ASSERT_EQ("localhost.me", url->getComponent(ComponentName::Host));
+   ASSERT_TRUE(!url->hasQuery());
 
-   BOOST_REQUIRE_EQUAL(url->encode(), expression);
+   ASSERT_EQ(expression, url->encode());
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_user_pwd)
+TEST(HttpUrlParserTest, user_pwd)
 {
    const bool expected[] = { true, true, true, true, false, false, false };
    const char* expression = "sctp://one_guy:pwd@localhost.me";
@@ -292,19 +292,19 @@ BOOST_AUTO_TEST_CASE(URLParser_user_pwd)
    auto url = parser.build();
 
    for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
-      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
+      ASSERT_TRUE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
    }
 
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "sctp");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::User), "one_guy");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Password), "pwd");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE(!url->hasQuery());
+   ASSERT_EQ("sctp", url->getComponent(ComponentName::Scheme));
+   ASSERT_EQ("one_guy", url->getComponent(ComponentName::User));
+   ASSERT_EQ("pwd", url->getComponent(ComponentName::Password));
+   ASSERT_EQ("localhost.me", url->getComponent(ComponentName::Host));
+   ASSERT_TRUE(!url->hasQuery());
 
-   BOOST_REQUIRE_EQUAL(url->encode(), expression);
+   ASSERT_EQ(expression, url->encode());
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_empty_path)
+TEST(HttpUrlParserTest, empty_path)
 {
    const bool expected[] = { true, false, false, true, false, true, false };
    const char* expression = "tcp://localhost.me/";
@@ -313,43 +313,43 @@ BOOST_AUTO_TEST_CASE(URLParser_empty_path)
    auto url = parser.build();
 
    for (int ii = 0; ii < ComponentName::Fragment; ++ ii) {
-      BOOST_REQUIRE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
+      ASSERT_TRUE(url->hasComponent((ComponentName::_v) ii) == expected[ii]);
    }
 
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Scheme), "tcp");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Host), "localhost.me");
-   BOOST_REQUIRE_EQUAL(url->getComponent(ComponentName::Path), "/");
-   BOOST_REQUIRE(!url->hasQuery());
+   ASSERT_EQ("tcp", url->getComponent(ComponentName::Scheme));
+   ASSERT_EQ("localhost.me", url->getComponent(ComponentName::Host));
+   ASSERT_EQ("/", url->getComponent(ComponentName::Path));
+   ASSERT_TRUE(!url->hasQuery());
 
-   BOOST_REQUIRE_EQUAL(url->encode(), expression);
+   ASSERT_EQ(expression, url->encode());
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_no_scheme)
+TEST(HttpUrlParserTest, no_scheme)
 {
    http::url::URLParser parser("localhost.me/");
-   BOOST_REQUIRE_THROW(parser.build(), basis::RuntimeException);
+   ASSERT_THROW(parser.build(), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_empty_scheme)
+TEST(HttpUrlParserTest, empty_scheme)
 {
    http::url::URLParser parser(":localhost.me");
-   BOOST_REQUIRE_THROW(parser.build(), basis::RuntimeException);
+   ASSERT_THROW(parser.build(), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_no_host)
+TEST(HttpUrlParserTest, no_host)
 {
    http::url::URLParser parser("tcp://:8080");
-   BOOST_REQUIRE_THROW(parser.build(), basis::RuntimeException);
+   ASSERT_THROW(parser.build(), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_bad_query)
+TEST(HttpUrlParserTest, bad_query)
 {
    http::url::URLParser parser("http://localhost.me?=zzz");
-   BOOST_REQUIRE_THROW(parser.build(), basis::RuntimeException);
+   ASSERT_THROW(parser.build(), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(URLParser_no_numeric_port)
+TEST(HttpUrlParserTest, no_numeric_port)
 {
    http::url::URLParser parser("tcp://host.com:123a");
-   BOOST_REQUIRE_THROW(parser.build(), basis::RuntimeException);
+   ASSERT_THROW(parser.build(), basis::RuntimeException);
 }

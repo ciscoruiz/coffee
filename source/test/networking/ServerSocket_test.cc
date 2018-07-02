@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/ClientSocket.hpp>
@@ -30,34 +30,37 @@
 
 using namespace coffee;
 
-BOOST_FIXTURE_TEST_CASE(serversocket_service_on, NetworkingFixture)
+struct ServerSocketTest : public NetworkingFixture {;};
+
+
+TEST_F(ServerSocketTest, serversocket_service_on)
 {
-   BOOST_REQUIRE(networkingService->isRunning());
+   ASSERT_TRUE(networkingService->isRunning());
 }
 
-BOOST_FIXTURE_TEST_CASE(serversocket_server_on, NetworkingFixture)
+TEST_F(ServerSocketTest, serversocket_server_on)
 {
-   BOOST_REQUIRE(upperServer->isValid());
+   ASSERT_TRUE(upperServer->isValid());
 }
 
-BOOST_FIXTURE_TEST_CASE(serversocket_without_endpoints, NetworkingFixture)
-{
-   networking::SocketArguments arguments;
-
-   BOOST_REQUIRE_THROW(networkingService->createServerSocket(arguments.setMessageHandler(UpperStringHandler::instantiate())), basis::RuntimeException);
-}
-
-BOOST_FIXTURE_TEST_CASE(serversocket_without_handler, NetworkingFixture)
+TEST_F(ServerSocketTest, serversocket_without_endpoints)
 {
    networking::SocketArguments arguments;
 
-   BOOST_REQUIRE_THROW(networkingService->createServerSocket(arguments.addEndPoint(upperServerEndPoint)), basis::RuntimeException);
+   ASSERT_THROW(networkingService->createServerSocket(arguments.setMessageHandler(UpperStringHandler::instantiate())), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(serversocket_bad_address, NetworkingFixture)
+TEST_F(ServerSocketTest, serversocket_without_handler)
+{
+   networking::SocketArguments arguments;
+
+   ASSERT_THROW(networkingService->createServerSocket(arguments.addEndPoint(upperServerEndPoint)), basis::RuntimeException);
+}
+
+TEST_F(ServerSocketTest, serversocket_bad_address)
 {
    networking::SocketArguments arguments;
 
    arguments.addEndPoint("bad-address").setMessageHandler(UpperStringHandler::instantiate());
-   BOOST_REQUIRE_THROW(networkingService->createServerSocket(arguments), basis::RuntimeException);
+   ASSERT_THROW(networkingService->createServerSocket(arguments), basis::RuntimeException);
 }

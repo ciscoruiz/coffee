@@ -1,9 +1,9 @@
 // MIT License
 // 
-// Copyright (c) 2018 Francisco Ruiz (francisco.ruiz.rayo@gmail.com)
+// Copyright(c) 2018 Francisco Ruiz(francisco.ruiz.rayo@gmail.com)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
+// of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
@@ -26,7 +26,7 @@
 
 #include <iostream>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/basis/AsString.hpp>
 #include <coffee/basis/DataBlock.hpp>
@@ -34,102 +34,82 @@
 using namespace std;
 using namespace coffee;
 
-BOOST_AUTO_TEST_CASE( asstring_integer )
+TEST(AsStringTest, integer)
 {
    int val = 10;
 
-   string result = basis::AsString::apply(val);
-
-   BOOST_REQUIRE_EQUAL(result, "10");
-
-   BOOST_REQUIRE_EQUAL (basis::AsString::apply(val, "%05d"), "00010");
-
-   result = basis::AsString::apply (0);
-   BOOST_REQUIRE_EQUAL(result, "0");
+   ASSERT_EQ("10", basis::AsString::apply(val));
+   ASSERT_EQ("00010", basis::AsString::apply(val, "%05d"));
+   ASSERT_EQ("0", basis::AsString::apply(0));
 
    val = INT_MAX;
-   result = basis::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "2147483647");
+   ASSERT_EQ("2147483647", basis::AsString::apply(val));
 
    val = INT_MIN;
-   result = basis::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "-2147483648");
+   ASSERT_EQ("-2147483648", basis::AsString::apply(val));
 }
 
-BOOST_AUTO_TEST_CASE( asstring_uinteger )
+TEST(AsStringTest, uinteger)
 {
    unsigned int val = 10;
 
-   string result = basis::AsString::apply(val);
-
-   BOOST_REQUIRE_EQUAL(result, "10");
-
-   result = basis::AsString::apply (0);
-   BOOST_REQUIRE_EQUAL(result, "0");
+   ASSERT_EQ("10", basis::AsString::apply(val));
+   ASSERT_EQ("0", basis::AsString::apply(0));
 
    val = UINT_MAX;
-   result = basis::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "4294967295");
+   ASSERT_EQ("4294967295", basis::AsString::apply(val));
 }
 
-BOOST_AUTO_TEST_CASE( asstring_integer64 )
+TEST(AsStringTest, integer64)
 {
    int64_t val = 0;
-   string result;
 
    val --;
-   result = basis::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "-1");
+   ASSERT_EQ("-1", basis::AsString::apply(val));
 
    val = INT64_MAX;
-   result = basis::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "9223372036854775807");
+   ASSERT_EQ("9223372036854775807", basis::AsString::apply(val));
 
    val = INT64_MIN;
-   result = basis::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "-9223372036854775808");
+   ASSERT_EQ("-9223372036854775808", basis::AsString::apply(val));
 }
 
-BOOST_AUTO_TEST_CASE( asstring_uinteger64 )
+TEST(AsStringTest, uinteger64)
 {
    uint64_t val = 0;
-   string result;
 
-   result = basis::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "0");
+   ASSERT_EQ("0", basis::AsString::apply(val));
 
    val = UINT64_MAX;
-   result = basis::AsString::apply(val);
-   BOOST_REQUIRE_EQUAL(result, "18446744073709551615");
+   ASSERT_EQ("18446744073709551615", basis::AsString::apply(val));
 }
 
-BOOST_AUTO_TEST_CASE( asstring_bool )
+TEST(AsStringTest, bool)
 {
-   BOOST_REQUIRE_EQUAL(basis::AsString::apply(true), "true");
-   BOOST_REQUIRE_EQUAL(basis::AsString::apply(false), "false");
+   ASSERT_EQ("true", basis::AsString::apply(true));
+   ASSERT_EQ("false", basis::AsString::apply(false));
 }
 
-BOOST_AUTO_TEST_CASE( asstring_datablock )
+TEST(AsStringTest, datablock)
 {
    char buffer[1024];
-   basis::DataBlock value (buffer, 1024);
+   basis::DataBlock value(buffer, 1024);
 
    const string result = basis::AsString::apply(value);
 
    char number[5];
-   for (int ii = 0; ii <= (1024 - basis::AsString::DefaultCharactersByLine); ii += basis::AsString::DefaultCharactersByLine) {
-      sprintf (number, "%4d: ", ii);
-      BOOST_REQUIRE(result.find(number) != std::string::npos);
+   for(int ii = 0; ii <=(1024 - basis::AsString::DefaultCharactersByLine); ii += basis::AsString::DefaultCharactersByLine) {
+      sprintf(number, "%4d: ", ii);
+      ASSERT_TRUE(result.find(number) != std::string::npos) << "Number=" << ii;
    }
 
-   BOOST_REQUIRE_GT (result.size (), 0);
+   ASSERT_GT(result.size(), 0);
 
    value.clear();
-   BOOST_REQUIRE_EQUAL(basis::AsString::apply(value), "<null>");
+   ASSERT_EQ("<null>", basis::AsString::apply(value));
 }
 
-BOOST_AUTO_TEST_CASE( asstring_double )
+TEST(AsStringTest, double)
 {
-   string result = basis::AsString::apply(123.127, "%.02f");
-   BOOST_REQUIRE_EQUAL(result, "123.13");
+   ASSERT_EQ("123.13", basis::AsString::apply(123.127, "%.02f"));
 }

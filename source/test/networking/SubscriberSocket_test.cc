@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/SubscriberSocket.hpp>
@@ -30,42 +30,43 @@
 
 using namespace coffee;
 
-BOOST_FIXTURE_TEST_CASE(subscribersocket_without_endpoints, NetworkingFixture)
+struct SubscriberSocketTest : public NetworkingFixture {;};
+
+TEST_F(SubscriberSocketTest, subscribersocket_without_endpoints)
 {
    networking::SocketArguments arguments;
    arguments.addSubscription("12345").setMessageHandler(UpperStringHandler::instantiate());
-   BOOST_REQUIRE_THROW(networkingService->createSubscriberSocket(arguments), basis::RuntimeException);
+   ASSERT_THROW(networkingService->createSubscriberSocket(arguments), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(subscribersocket_without_handler, NetworkingFixture)
+TEST_F(SubscriberSocketTest, subscribersocket_without_handler)
 {
    networking::SocketArguments arguments;
    arguments.addSubscription("12345").addEndPoint("tcp://localhost:5566");
-   BOOST_REQUIRE_THROW(networkingService->createSubscriberSocket(arguments), basis::RuntimeException);
+   ASSERT_THROW(networkingService->createSubscriberSocket(arguments), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(subscribersocket_without_subscription, NetworkingFixture)
+TEST_F(SubscriberSocketTest, subscribersocket_without_subscription)
 {
    networking::SocketArguments arguments;
    arguments.addEndPoint("tcp://localhost:5566").setMessageHandler(UpperStringHandler::instantiate());
-   BOOST_REQUIRE_THROW(networkingService->createSubscriberSocket(arguments), basis::RuntimeException);
+   ASSERT_THROW(networkingService->createSubscriberSocket(arguments), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(subscribersocket_bad_address, NetworkingFixture)
+TEST_F(SubscriberSocketTest, subscribersocket_bad_address)
 {
    networking::SocketArguments arguments;
 
    arguments.addSubscription("123").addEndPoint("bad-address").setMessageHandler(UpperStringHandler::instantiate());
-   BOOST_REQUIRE_THROW(networkingService->createSubscriberSocket(arguments), basis::RuntimeException);
+   ASSERT_THROW(networkingService->createSubscriberSocket(arguments), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(subscribersocket_must_not_send, NetworkingFixture)
+TEST_F(SubscriberSocketTest, subscribersocket_must_not_send)
 {
    networking::SocketArguments arguments;
 
    arguments.addSubscription("123").addEndPoint("tcp://localhost:5566").setMessageHandler(UpperStringHandler::instantiate());
    auto subscriber = networkingService->createSubscriberSocket(arguments);
-   BOOST_REQUIRE(subscriber);
-   BOOST_REQUIRE_THROW(subscriber->send(basis::DataBlock("world", 5)), basis::RuntimeException);
-
+   ASSERT_TRUE(subscriber != nullptr);
+   ASSERT_THROW(subscriber->send(basis::DataBlock("world", 5)), basis::RuntimeException);
 }

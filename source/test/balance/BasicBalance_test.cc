@@ -1,9 +1,9 @@
 // MIT License
 // 
-// Copyright (c) 2018 Francisco Ruiz (francisco.ruiz.rayo@gmail.com)
+// Copyright(c) 2018 Francisco Ruiz(francisco.ruiz.rayo@gmail.com)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
+// of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
@@ -23,9 +23,7 @@
 
 #include <memory>
 
-#include <boost/ptr_container/ptr_vector.hpp>
-
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/basis/AsString.hpp>
 
@@ -50,31 +48,31 @@ using namespace coffee::test::balance;
 
 const int ResourceListFixture::MaxResources = 10;
 
-BOOST_AUTO_TEST_CASE( avoid_empties )
+TEST(BasicBalanceTest, avoid_empties)
 {
    ResourceList resourceList("otherList");
    std::shared_ptr<Resource> emptyResource;
-   BOOST_REQUIRE_THROW (resourceList.add (emptyResource), basis::RuntimeException);
+   ASSERT_THROW(resourceList.add(emptyResource), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE( count_availables, ResourceListFixture)
+TEST_F(ResourceListFixture, count_availables)
 {
    GuardResourceList guard(resourceList);
 
-   BOOST_REQUIRE_EQUAL(resourceList->size(guard), MaxResources);
-   BOOST_REQUIRE_EQUAL(resourceList->countAvailableResources(guard), MaxResources);
+   ASSERT_EQ(MaxResources, resourceList->size(guard));
+   ASSERT_EQ(MaxResources, resourceList->countAvailableResources(guard));
 
    bool available = false;
-   for (auto ii = resourceList->resource_begin(guard), maxii = resourceList->resource_end(guard); ii != maxii; ++ ii) {
+   for(auto ii = resourceList->resource_begin(guard), maxii = resourceList->resource_end(guard); ii != maxii; ++ ii) {
       std::shared_ptr<TestResource> myResource = TestResource::cast(ResourceList::resource(ii));
       myResource->setAvailable(available);
       available = !available;
    }
 
-   BOOST_REQUIRE_EQUAL(resourceList->countAvailableResources(guard), MaxResources / 2);
+   ASSERT_EQ(MaxResources / 2, resourceList->countAvailableResources(guard));
 }
 
-BOOST_AUTO_TEST_CASE( error_while_initialize )
+TEST(BasicBalanceTest,error_while_initialize )
 {
    std::shared_ptr<coffee::balance::ResourceList> resourceList = std::make_shared<coffee::balance::ResourceList>("TestResources");
 
@@ -86,42 +84,42 @@ BOOST_AUTO_TEST_CASE( error_while_initialize )
 
    GuardResourceList guard(resourceList);
 
-   BOOST_REQUIRE_EQUAL(resourceList->countAvailableResources(guard), 2);
+   ASSERT_EQ(2, resourceList->countAvailableResources(guard));
 }
 
-BOOST_AUTO_TEST_CASE( initialize_empty_list )
+TEST(BasicBalanceTest,initialize_empty_list )
 {
    std::shared_ptr<coffee::balance::ResourceList> resourceList = std::make_shared<coffee::balance::ResourceList>("TestResources");
-   BOOST_REQUIRE_NO_THROW(resourceList->initialize());
+   ASSERT_NO_THROW(resourceList->initialize());
 }
 
-BOOST_AUTO_TEST_CASE( initialize_without_available_resources )
+TEST(BasicBalanceTest,initialize_without_available_resources )
 {
    std::shared_ptr<coffee::balance::ResourceList> resourceList = std::make_shared<coffee::balance::ResourceList>("TestResources");
    resourceList->add(std::make_shared<UnusableResource>());
    resourceList->add(std::make_shared<UnusableResource>());
-   BOOST_REQUIRE_NO_THROW(resourceList->initialize());
+   ASSERT_NO_THROW(resourceList->initialize());
 
    GuardResourceList guard(resourceList);
-   BOOST_REQUIRE_EQUAL(resourceList->countAvailableResources(guard), 0);
+   ASSERT_EQ(0, resourceList->countAvailableResources(guard));
 }
 
-BOOST_FIXTURE_TEST_CASE (as_string, ResourceListFixture)
+TEST_F(ResourceListFixture, as_string)
 {
-   if (true) {
+   if(true) {
       GuardResourceList guard(resourceList);
       std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, 0));
       myResource->setAvailable(false);
    }
 
-   BOOST_REQUIRE_EQUAL (resourceList->asString (), "balance.ResourceList { basis.NamedObject {Name=TestResources} | Available = 9 of 10 }");
+   ASSERT_EQ("balance.ResourceList { basis.NamedObject {Name=TestResources} | Available = 9 of 10 }", resourceList->asString());
 }
 
-BOOST_FIXTURE_TEST_CASE (as_xml, ResourceListFixture)
+TEST_F(ResourceListFixture, as_xml)
 {
    const int hotIndex = ResourceListFixture::MaxResources / 2;
 
-   if (true) {
+   if(true) {
       GuardResourceList guard(resourceList);
       std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, hotIndex));
       myResource->setAvailable(false);
@@ -133,11 +131,11 @@ BOOST_FIXTURE_TEST_CASE (as_xml, ResourceListFixture)
 
    std::string str = compiler.apply(root);
 
-   for (int ii = 0; ii < ResourceListFixture::MaxResources; ++ ii) {
+   for(int ii = 0; ii < ResourceListFixture::MaxResources; ++ ii) {
       basis::StreamString ss("<balance.Resource IsAvailable=\"");
       ss << basis::AsString::apply(ii != hotIndex) << "\" Name=\"TestResource-";
       ss << basis::AsString::apply(ii, "%02d") << "\"/>";
-      BOOST_REQUIRE(str.find(ss) != std::string::npos);
+      ASSERT_TRUE(str.find(ss) != std::string::npos);
    }
 }
 

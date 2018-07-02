@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/networking/NetworkingService.hpp>
 #include <coffee/networking/ClientSocket.hpp>
@@ -30,24 +30,26 @@
 
 using namespace coffee;
 
-BOOST_FIXTURE_TEST_CASE(publishersocket_without_endpoints, NetworkingFixture)
+struct PublisherSocketTest : public  NetworkingFixture {;};
+
+TEST_F(PublisherSocketTest, without_endpoints)
 {
    networking::SocketArguments arguments;
    arguments.addSubscription("12345");
-   BOOST_REQUIRE_THROW(networkingService->createPublisherSocket(arguments), basis::RuntimeException);
+   ASSERT_THROW(networkingService->createPublisherSocket(arguments), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(publishersocket_without_handler, NetworkingFixture)
+TEST_F(PublisherSocketTest, without_handler)
 {
    networking::SocketArguments arguments;
    arguments.addSubscription("12345");
-   BOOST_REQUIRE_NO_THROW(networkingService->createPublisherSocket(arguments.addEndPoint("tcp://*:5566")));
+   ASSERT_NO_THROW(networkingService->createPublisherSocket(arguments.addEndPoint("tcp://*:5566")));
 }
 
-BOOST_FIXTURE_TEST_CASE(publishersocket_bad_address, NetworkingFixture)
+TEST_F(PublisherSocketTest, bad_address)
 {
    networking::SocketArguments arguments;
 
    arguments.addSubscription("123").addEndPoint("bad-address").setMessageHandler(UpperStringHandler::instantiate());
-   BOOST_REQUIRE_THROW(networkingService->createPublisherSocket(arguments), basis::RuntimeException);
+   ASSERT_THROW(networkingService->createPublisherSocket(arguments), basis::RuntimeException);
 }

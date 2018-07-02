@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/http/HttpCustomHeader.hpp>
 #include <coffee/http/HttpHeader.hpp>
@@ -33,42 +33,42 @@ using namespace coffee;
 using coffee::http::HttpMessage;
 using coffee::http::HttpHeader;
 
-BOOST_AUTO_TEST_CASE( message_has_header )
+TEST(HttpMessageTest, has_header )
 {
    auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "/uri");
 
-   BOOST_REQUIRE(!message->hasHeader(HttpHeader::Type::Host));
+   ASSERT_TRUE(!message->hasHeader(HttpHeader::Type::Host));
    message->setHeader(HttpHeader::Type::Host, "localhost");
-   BOOST_REQUIRE(message->hasHeader(HttpHeader::Type::Host));
+   ASSERT_TRUE(message->hasHeader(HttpHeader::Type::Host));
 }
 
-BOOST_AUTO_TEST_CASE( message_has_header_bad_custom )
+TEST(HttpMessageTest, has_header_bad_custom )
 {
    auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "/uri");
 
-   BOOST_REQUIRE_THROW(message->hasHeader(HttpHeader::Type::Custom), basis::RuntimeException);
+   ASSERT_THROW(message->hasHeader(HttpHeader::Type::Custom), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE( message_set_header_bad_custom )
+TEST(HttpMessageTest, set_header_bad_custom )
 {
    auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "/uri");
 
-   BOOST_REQUIRE_THROW(message->setHeader(HttpHeader::Type::Custom, "somevalue"), basis::RuntimeException);
+   ASSERT_THROW(message->setHeader(HttpHeader::Type::Custom, "somevalue"), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE( message_get_header_bad_custom )
+TEST(HttpMessageTest, get_header_bad_custom )
 {
    auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "/uri");
 
-   BOOST_REQUIRE_THROW(message->getHeaderValue(HttpHeader::Type::Custom), basis::RuntimeException);
+   ASSERT_THROW(message->getHeaderValue(HttpHeader::Type::Custom), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE( message_get_custom_header )
+TEST(HttpMessageTest, get_custom_header )
 {
    auto message = http::HttpRequest::instantiate(http::HttpRequest::Method::Delete, "/uri");
 
-   BOOST_REQUIRE(!message->hasCustomHeader("SomeName"));
-   BOOST_REQUIRE_THROW(message->getCustomHeaderValue("SomeName"), basis::RuntimeException);
+   ASSERT_TRUE(!message->hasCustomHeader("SomeName"));
+   ASSERT_THROW(message->getCustomHeaderValue("SomeName"), basis::RuntimeException);
    message->setCustomHeader("SomeName", "localhost");
-   BOOST_REQUIRE_EQUAL(message->getCustomHeaderValue("SomeName"), "localhost");
+   ASSERT_EQ("localhost", message->getCustomHeaderValue("SomeName"));
 }

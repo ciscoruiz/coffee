@@ -1,9 +1,9 @@
 // MIT License
 // 
-// Copyright (c) 2018 Francisco Ruiz (francisco.ruiz.rayo@gmail.com)
+// Copyright(c) 2018 Francisco Ruiz(francisco.ruiz.rayo@gmail.com)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
+// of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
@@ -25,19 +25,19 @@
 
 #include <iostream>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/basis/pattern/Singleton.hpp>
 
 class TheClass : public coffee::basis::pattern::Singleton <TheClass> {
 public:
-   void setSome (const int some) { m_some = some; }
-   int getSome () const noexcept { return m_some; }
+   void setSome(const int some) { m_some = some; }
+   int getSome() const noexcept { return m_some; }
 
 private:
    int m_some;
 
-   TheClass () : m_some(0) {;}
+   TheClass() : m_some(0) {;}
 
    friend class  coffee::basis::pattern::Singleton <TheClass>;
 };
@@ -45,21 +45,21 @@ private:
 using namespace std;
 using namespace coffee;
 
-BOOST_AUTO_TEST_CASE( basic_use )
+TEST(SingletonTest, basic_use)
 { 
    {
-      TheClass& clazz = TheClass::getInstance ();
-      clazz.setSome (100);
+      TheClass& clazz = TheClass::getInstance();
+      clazz.setSome(100);
    }
    {
-      TheClass& clazz = TheClass::getInstance ();
-      BOOST_REQUIRE_EQUAL (clazz.getSome (), 100);
+      TheClass& clazz = TheClass::getInstance();
+      ASSERT_EQ(clazz.getSome(), 100);
    }
 }
 
-BOOST_AUTO_TEST_CASE( compare_pointer )
+TEST(SingletonTest, compare_pointer)
 { 
-   const TheClass* p1 = TheClass::getConstPointer ();
-   const TheClass* p2 = TheClass::getConstPointer ();
-   BOOST_REQUIRE_EQUAL (p1, p2);
+   const TheClass* p1 = TheClass::getConstPointer();
+   const TheClass* p2 = TheClass::getConstPointer();
+   ASSERT_EQ(p1, p2);
 }

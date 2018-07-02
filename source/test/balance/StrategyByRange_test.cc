@@ -27,7 +27,7 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/basis/AsString.hpp>
 
@@ -49,27 +49,29 @@ using namespace coffee;
 using namespace coffee::balance;
 using namespace coffee::test::balance;
 
-BOOST_AUTO_TEST_CASE(byrange_empty_strategy)
+TEST(StrategyByRangeTest, empty_strategy)
 {
    balance::StrategyByRange mainStrategy;
    std::shared_ptr<balance::Strategy> foo;
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (0, 10, foo), basis::RuntimeException);
+   ASSERT_THROW (mainStrategy.addRange (0, 10, foo), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(byrange_recursive)
+TEST(StrategyByRangeTest, byrange_recursive)
 {
    std::shared_ptr<balance::StrategyByRange> strategy = std::make_shared<balance::StrategyByRange>();
-   BOOST_REQUIRE_THROW (strategy->addRange (0, 10, strategy), basis::RuntimeException);
+   ASSERT_THROW (strategy->addRange (0, 10, strategy), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(byrange_bad_limits, ResourceListFixture)
+struct StrategyByRangeFixture : public ResourceListFixture {};
+
+TEST_F(StrategyByRangeFixture, bad_limits)
 {
    balance::StrategyByRange mainStrategy;
    std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (10, 0, strategy), basis::RuntimeException);
+   ASSERT_THROW (mainStrategy.addRange (10, 0, strategy), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(byrange_overlapping, ResourceListFixture)
+TEST_F(StrategyByRangeFixture, overlapping)
 {
    balance::StrategyByRange mainStrategy;
 
@@ -77,46 +79,46 @@ BOOST_FIXTURE_TEST_CASE(byrange_overlapping, ResourceListFixture)
 
    mainStrategy.addRange (10, 20, strategy);
 
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (5, 14, strategy), basis::RuntimeException);
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (5, 25, strategy), basis::RuntimeException);
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (15, 25, strategy), basis::RuntimeException);
-   BOOST_REQUIRE_THROW (mainStrategy.addRange (11, 19, strategy), basis::RuntimeException);
+   ASSERT_THROW (mainStrategy.addRange (5, 14, strategy), basis::RuntimeException);
+   ASSERT_THROW (mainStrategy.addRange (5, 25, strategy), basis::RuntimeException);
+   ASSERT_THROW (mainStrategy.addRange (15, 25, strategy), basis::RuntimeException);
+   ASSERT_THROW (mainStrategy.addRange (11, 19, strategy), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(byrange_sharing)
+TEST(StrategyByRangeTest, sharing)
 {
    balance::StrategyByRange mainStrategy;
 
    {
       auto resourceList = ResourceListFixture::setup(ResourceListFixture::MaxResources, 0);
       std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
-      BOOST_REQUIRE_NO_THROW(mainStrategy.addRange(100, 200, strategy));
+      ASSERT_NO_THROW(mainStrategy.addRange(100, 200, strategy));
    }
 
    {
       auto resourceList = ResourceListFixture::setup(ResourceListFixture::MaxResources, 100);
       std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
-      BOOST_REQUIRE_NO_THROW(mainStrategy.addRange(205, 350, strategy));
+      ASSERT_NO_THROW(mainStrategy.addRange(205, 350, strategy));
    }
 
    {
       auto resourceList = ResourceListFixture::setup(ResourceListFixture::MaxResources, 1000);
       std::shared_ptr<balance::StrategyRoundRobin> strategy = std::make_shared<balance::StrategyRoundRobin>(resourceList);
-      BOOST_REQUIRE_NO_THROW(mainStrategy.addRange(351, 450, strategy));
+      ASSERT_NO_THROW(mainStrategy.addRange(351, 450, strategy));
    }
 
-   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(120))->getKey(), 0);
-   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(220))->getKey(), 100);
-   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(420))->getKey(), 1000);
+   ASSERT_EQ(0, TestResource::cast(mainStrategy.apply(120))->getKey());
+   ASSERT_EQ(100, TestResource::cast(mainStrategy.apply(220))->getKey());
+   ASSERT_EQ(1000, TestResource::cast(mainStrategy.apply(420))->getKey());
 
-   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(190))->getKey(), 1);
-   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(300))->getKey(), 101);
-   BOOST_REQUIRE_EQUAL(TestResource::cast(mainStrategy.apply(440))->getKey(), 1001);
+   ASSERT_EQ(1, TestResource::cast(mainStrategy.apply(190))->getKey());
+   ASSERT_EQ(101, TestResource::cast(mainStrategy.apply(300))->getKey());
+   ASSERT_EQ(1001, TestResource::cast(mainStrategy.apply(440))->getKey());
 
-   BOOST_REQUIRE_THROW(mainStrategy.apply (2000), balance::ResourceUnavailableException);
+   ASSERT_THROW(mainStrategy.apply (2000), balance::ResourceUnavailableException);
 }
 
-BOOST_AUTO_TEST_CASE(byrange_asXML)
+TEST(StrategyByRangeTest, byrange_asXML)
 {
    balance::StrategyByRange mainStrategy;
 
@@ -143,5 +145,5 @@ BOOST_AUTO_TEST_CASE(byrange_asXML)
 
    xml::Compiler compiler;
 
-   BOOST_REQUIRE_EQUAL(compiler.apply(root), "<root><StrategyByRange><Ranges><Range Begin=\"100\" End=\"200\" Strategy=\"balance::RoundRobin\"/><Range Begin=\"205\" End=\"350\" Strategy=\"balance::RoundRobin\"/><Range Begin=\"351\" End=\"450\" Strategy=\"balance::RoundRobin\"/></Ranges></StrategyByRange></root>");
+   ASSERT_EQ("<root><StrategyByRange><Ranges><Range Begin=\"100\" End=\"200\" Strategy=\"balance::RoundRobin\"/><Range Begin=\"205\" End=\"350\" Strategy=\"balance::RoundRobin\"/><Range Begin=\"351\" End=\"450\" Strategy=\"balance::RoundRobin\"/></Ranges></StrategyByRange></root>", compiler.apply(root));
 }

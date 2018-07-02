@@ -23,7 +23,7 @@
 
 #include <iostream>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
 
 #include <coffee/basis/DataBlock.hpp>
@@ -37,43 +37,42 @@
 using namespace coffee;
 using namespace coffee::xml;
 
-struct XmlFixture {
+struct XmlReadingOnMemoryTest : public ::testing::Test {
    void setup(const char* buffer) {
       basis::DataBlock content(buffer, strlen(buffer) + 1);
-      BOOST_REQUIRE(document.getHandler() == NULL);
+      ASSERT_TRUE(document.getHandler() == NULL);
       document.parse(content);
-      BOOST_REQUIRE(document.getHandler() != NULL);
+      ASSERT_TRUE(document.getHandler() != NULL);
       root = document.getRoot();
 
-      BOOST_REQUIRE(root);
+      ASSERT_TRUE(root != nullptr);
    }
 
    xml::Document document;
    std::shared_ptr<xml::Node> root;
-
 };
 
-BOOST_FIXTURE_TEST_CASE(simpliest_memory, XmlFixture)
+TEST_F(XmlReadingOnMemoryTest, simpliest_memory)
 {
    const char* buffer = "<?xml version='1.0' encoding='ISO-8859-1'?> <one_node><param>the text</param><param>the text</param></one_node>";
 
    setup(buffer);
 
-   BOOST_REQUIRE_EQUAL(root->hasText(), false);
+   ASSERT_FALSE(root->hasText());
 
-   BOOST_REQUIRE_EQUAL(root->children_size(), 2);
+   ASSERT_EQ(2, root->children_size());
 
    for(xml::Node::child_iterator ii = root->child_begin(), maxii = root->child_end(); ii != maxii; ++ ii) {
       std::shared_ptr<xml::Node> child = xml::Node::get_child(ii);
-      BOOST_REQUIRE_EQUAL(child->getName(), "param");
-      BOOST_REQUIRE_EQUAL(child->children_size(), 0);
-      BOOST_REQUIRE_EQUAL(child->attributes_size(), 0);
-      BOOST_REQUIRE_EQUAL(child->hasText(), true);
-      BOOST_REQUIRE_EQUAL(child->getText(), "the text");
+      ASSERT_EQ("param", child->getName());
+      ASSERT_EQ(0, child->children_size());
+      ASSERT_EQ(0, child->attributes_size());
+      ASSERT_TRUE(child->hasText());
+      ASSERT_EQ("the text", child->getText());
    }
 }
 
-BOOST_FIXTURE_TEST_CASE(memory_document, XmlFixture)
+TEST_F(XmlReadingOnMemoryTest, memory_document)
 {
    const char* buffer = "<?xml version='1.0' encoding='ISO-8859-1'?> \
    <peticion> \
@@ -84,105 +83,105 @@ BOOST_FIXTURE_TEST_CASE(memory_document, XmlFixture)
 
    setup(buffer);
 
-   BOOST_REQUIRE_EQUAL(root->children_size(), 3);
+   ASSERT_EQ(3, root->children_size());
 
    for(xml::Node::child_iterator ii = root->child_begin(), maxii = root->child_end(); ii != maxii; ++ ii) {
       std::shared_ptr<xml::Node> child = xml::Node::get_child(ii);
-      BOOST_REQUIRE_EQUAL(child->getName(), "param");
-      BOOST_REQUIRE_EQUAL(child->children_size(), 0);
-      BOOST_REQUIRE_EQUAL(child->attributes_size(), 1);
-      BOOST_REQUIRE_EQUAL(child->hasText(), true);
+      ASSERT_EQ("param", child->getName());
+      ASSERT_EQ(0, child->children_size());
+      ASSERT_EQ(1, child->attributes_size());
+      ASSERT_TRUE(child->hasText());
    }
 }
 
-BOOST_FIXTURE_TEST_CASE(find_child_byname, XmlFixture)
+TEST_F(XmlReadingOnMemoryTest, find_child_byname)
 {
    const char* buffer = "<?xml version='1.0' encoding='ISO-8859-1'?> <root_node><child_one>text one</child_one><child_two>text two</child_two></root_node>";
 
    setup(buffer);
 
-   BOOST_REQUIRE_EQUAL(root->hasText(), false);
-   BOOST_REQUIRE_EQUAL(root->children_size(), 2);
+   ASSERT_FALSE(root->hasText());
+   ASSERT_EQ(2, root->children_size());
 
-   BOOST_REQUIRE_NO_THROW(root->lookupChild("child_one"));
-   BOOST_REQUIRE_NO_THROW(root->lookupChild("child_two"));
+   ASSERT_NO_THROW(root->lookupChild("child_one"));
+   ASSERT_NO_THROW(root->lookupChild("child_two"));
 
    std::shared_ptr<Node> childOne = root->searchChild("child_one");
-   BOOST_REQUIRE(childOne);
-   BOOST_REQUIRE_EQUAL(childOne->hasText(), true);
-   BOOST_REQUIRE_EQUAL(childOne->getText(), "text one");
+   ASSERT_TRUE(childOne != nullptr);
+   ASSERT_TRUE(childOne->hasText());
+   ASSERT_EQ("text one", childOne->getText());
 
    std::shared_ptr<Node> childTwo = root->searchChild("child_two");
-   BOOST_REQUIRE(childTwo);
-   BOOST_REQUIRE_EQUAL(childTwo->hasText(), true);
-   BOOST_REQUIRE_EQUAL(childTwo->getText(), "text two");
+   ASSERT_FALSE(!childTwo);
+   ASSERT_TRUE(childTwo->hasText());
+   ASSERT_EQ("text two", childTwo->getText());
 
    std::shared_ptr<Node> found = root->searchChild("not_found");
-   BOOST_REQUIRE(!found);
+   ASSERT_TRUE(!found);
 
-   BOOST_REQUIRE_THROW(root->lookupChild("not_found"), basis::RuntimeException);
+   ASSERT_THROW(root->lookupChild("not_found"), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(const_find_child_byname, XmlFixture)
+TEST_F(XmlReadingOnMemoryTest, const_find_child_byname)
 {
    const char* buffer = "<?xml version='1.0' encoding='ISO-8859-1'?> <root_node><child_one>text one</child_one><child_two>text two</child_two></root_node>";
 
    setup(buffer);
 
-   BOOST_REQUIRE_EQUAL(root->hasText(), false);
-   BOOST_REQUIRE_EQUAL(root->children_size(), 2);
-   BOOST_REQUIRE_NO_THROW(root->lookupChild("child_one"));
-   BOOST_REQUIRE_NO_THROW(root->lookupChild("child_two"));
+   ASSERT_FALSE(root->hasText());
+   ASSERT_EQ(2, root->children_size());
+   ASSERT_NO_THROW(root->lookupChild("child_one"));
+   ASSERT_NO_THROW(root->lookupChild("child_two"));
 
    std::shared_ptr<Node> childOne = root->searchChild("child_one");
-   BOOST_REQUIRE(childOne);
-   BOOST_REQUIRE_EQUAL(childOne->hasText(), true);
-   BOOST_REQUIRE_EQUAL(childOne->getText(), "text one");
+   ASSERT_TRUE(childOne != nullptr);
+   ASSERT_TRUE(childOne->hasText());
+   ASSERT_EQ("text one", childOne->getText());
 
    std::shared_ptr<Node> childTwo = root->searchChild("child_two");
-   BOOST_REQUIRE(childTwo);
-   BOOST_REQUIRE_EQUAL(childTwo->hasText(), true);
-   BOOST_REQUIRE_EQUAL(childTwo->getText(), "text two");
+   ASSERT_TRUE(childTwo != nullptr);
+   ASSERT_TRUE(childTwo->hasText());
+   ASSERT_EQ("text two", childTwo->getText());
 
    std::shared_ptr<Node> found = root->searchChild("not_found");
-   BOOST_REQUIRE(!found);
+   ASSERT_TRUE(!found);
 
-   BOOST_REQUIRE_THROW(root->lookupChild("not_found"), basis::RuntimeException);
+   ASSERT_THROW(root->lookupChild("not_found"), basis::RuntimeException);
 
    const Node& constRoot = *root;
-   BOOST_REQUIRE_NO_THROW(constRoot.lookupChild("child_one"));
-   BOOST_REQUIRE(constRoot.searchChild("child_two"));
-   BOOST_REQUIRE_THROW(constRoot.lookupChild("not_found"), basis::RuntimeException);
-   BOOST_REQUIRE(!constRoot.searchChild("not_found"));
-   BOOST_REQUIRE_NO_THROW(constRoot.childAt(0));
+   ASSERT_NO_THROW(constRoot.lookupChild("child_one"));
+   ASSERT_FALSE(!constRoot.searchChild("child_two"));
+   ASSERT_THROW(constRoot.lookupChild("not_found"), basis::RuntimeException);
+   ASSERT_TRUE(!constRoot.searchChild("not_found"));
+   ASSERT_NO_THROW(constRoot.childAt(0));
 }
 
-BOOST_FIXTURE_TEST_CASE(locate_child_by_pos, XmlFixture)
+TEST_F(XmlReadingOnMemoryTest, locate_child_by_pos)
 {
    const char* buffer = "<?xml version='1.0' encoding='ISO-8859-1'?> <root_node><child_one>text one</child_one><child_two>text two</child_two></root_node>";
 
    setup(buffer);
 
-   BOOST_REQUIRE_EQUAL(root->hasText(), false);
-   BOOST_REQUIRE_EQUAL(root->children_size(), 2);
+   ASSERT_FALSE(root->hasText());
+   ASSERT_EQ(2, root->children_size());
 
    std::shared_ptr<Node> child = root->childAt(0);
-   BOOST_REQUIRE_EQUAL(child->hasText(), true);
-   BOOST_REQUIRE_EQUAL(child->getText(), "text one");
+   ASSERT_TRUE(child->hasText());
+   ASSERT_EQ("text one", child->getText());
 
    child  = root->childAt(1);
-   BOOST_REQUIRE_EQUAL(child->hasText(), true);
-   BOOST_REQUIRE_EQUAL(child->getText(), "text two");
+   ASSERT_TRUE(child->hasText());
+   ASSERT_EQ("text two", child->getText());
 
-   BOOST_REQUIRE_THROW(root->childAt(-1), basis::RuntimeException);
-   BOOST_REQUIRE_THROW(root->childAt(10), basis::RuntimeException);
+   ASSERT_THROW(root->childAt(-1), basis::RuntimeException);
+   ASSERT_THROW(root->childAt(10), basis::RuntimeException);
 
    const Node& constRoot = *root;
-   BOOST_REQUIRE_THROW(constRoot.childAt(-1), basis::RuntimeException);
-   BOOST_REQUIRE_THROW(constRoot.childAt(10), basis::RuntimeException);
+   ASSERT_THROW(constRoot.childAt(-1), basis::RuntimeException);
+   ASSERT_THROW(constRoot.childAt(10), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(const_iterate_attr, XmlFixture)
+TEST_F(XmlReadingOnMemoryTest, const_iterate_attr)
 {
    const char* buffer = "<?xml version='1.0' encoding='ISO-8859-1'?> <root_node attr_aaa='text one' attr_bbb='text two' attr_ccc='text three'/>";
    const char* names [] = { "attr_aaa", "attr_bbb", "attr_ccc" };
@@ -190,21 +189,21 @@ BOOST_FIXTURE_TEST_CASE(const_iterate_attr, XmlFixture)
 
    setup(buffer);
 
-   BOOST_REQUIRE_EQUAL(root->hasText(), false);
-   BOOST_REQUIRE_EQUAL(root->children_size(), 0);
-   BOOST_REQUIRE_EQUAL(root->attributes_size(), 3);
+   ASSERT_FALSE(root->hasText());
+   ASSERT_EQ(0, root->children_size());
+   ASSERT_EQ(3, root->attributes_size());
 
    int index = 0;
    for(xml::Node::const_attribute_iterator ii = root->attribute_begin(), maxii = root->attribute_end(); ii != maxii; ++ ii) {
       const std::shared_ptr<xml::Attribute>& attr = xml::Node::get_attribute(ii);
 
-      BOOST_REQUIRE_EQUAL(attr->getName(), names[index]);
-      BOOST_REQUIRE_EQUAL(attr->getValue(), texts[index]);
+      ASSERT_EQ(names[index], attr->getName());
+      ASSERT_EQ(texts[index], attr->getValue());
       ++ index;
    }
 }
 
-BOOST_FIXTURE_TEST_CASE(locate_attr_by_name, XmlFixture)
+TEST_F(XmlReadingOnMemoryTest, locate_attr_by_name)
 {
    const char* buffer = "<?xml version='1.0' encoding='ISO-8859-1'?> <root_node attr_aaa='text one' attr_bbb='text two' attr_ccc='text three'/>";
    const char* names [] = { "attr_aaa", "attr_bbb", "attr_ccc" };
@@ -214,21 +213,21 @@ BOOST_FIXTURE_TEST_CASE(locate_attr_by_name, XmlFixture)
 
    for (int ii = 0; ii < 3; ++ ii) {
       std::shared_ptr<xml::Attribute> attr = root->lookupAttribute(names[ii]);
-      BOOST_REQUIRE_EQUAL(attr->getValue(), texts[ii]);
+      ASSERT_EQ(texts[ii], attr->getValue());
    }
 
-   BOOST_REQUIRE_THROW(root->lookupAttribute("not_found"), basis::RuntimeException);
-   BOOST_REQUIRE_THROW(root->getText(), basis::RuntimeException);
+   ASSERT_THROW(root->lookupAttribute("not_found"), basis::RuntimeException);
+   ASSERT_THROW(root->getText(), basis::RuntimeException);
 
    std::shared_ptr<xml::Attribute> found = root->searchAttribute("not_found");
-   BOOST_REQUIRE(!found);
+   ASSERT_TRUE(!found);
 
    const Node& constRoot = *root;
-   BOOST_REQUIRE_THROW(constRoot.lookupAttribute("not_found"), basis::RuntimeException);
-   BOOST_REQUIRE(!constRoot.searchAttribute("not_found"));
+   ASSERT_THROW(constRoot.lookupAttribute("not_found"), basis::RuntimeException);
+   ASSERT_TRUE(!constRoot.searchAttribute("not_found"));
 }
 
-BOOST_FIXTURE_TEST_CASE(locate_attr_duplicate, XmlFixture)
+TEST_F(XmlReadingOnMemoryTest, locate_attr_duplicate)
 {
    const char* buffer = "<?xml version='1.0' encoding='ISO-8859-1'?> <root_node attr_aaa='text one' attr_bbb='text two' attr_ccc='text three'/>";
    const char* names [] = { "attr_aaa", "attr_bbb", "attr_ccc" };
@@ -236,10 +235,10 @@ BOOST_FIXTURE_TEST_CASE(locate_attr_duplicate, XmlFixture)
 
    setup(buffer);
 
-   BOOST_REQUIRE_THROW(root->createAttribute("attr_aaa", 22), basis::RuntimeException);
+   ASSERT_THROW(root->createAttribute("attr_aaa", 22), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(encoding, XmlFixture)
+TEST_F(XmlReadingOnMemoryTest, encoding)
 {
    const char* buffer = "<?xml version='1.0' encoding='ISO-8859-1'?> \
    <peticion> \
@@ -251,13 +250,13 @@ BOOST_FIXTURE_TEST_CASE(encoding, XmlFixture)
    setup(buffer);
 
    std::shared_ptr<xml::Node> node = root->lookupChild("param1");
-   BOOST_REQUIRE_EQUAL(node->lookupAttribute("nombre")->getValue(), "Cita Médica");
+   ASSERT_EQ("Cita Médica", node->lookupAttribute("nombre")->getValue());
 
    node  = root->lookupChild("param2");
-   BOOST_REQUIRE_EQUAL(node->getText(), "Cita Médica");
+   ASSERT_EQ("Cita Médica", node->getText());
 }
 
-BOOST_AUTO_TEST_CASE(file_document)
+TEST(XmlReadingDocumentTest, file_document)
 {
    boost::filesystem::path coffeePath(boost::filesystem::current_path());
 
@@ -267,7 +266,7 @@ BOOST_AUTO_TEST_CASE(file_document)
 
    Document doc;
 
-   BOOST_REQUIRE(doc.getHandler() == NULL);
+   ASSERT_TRUE(doc.getHandler() == NULL);
 
    try {
       doc.parse(file);
@@ -276,24 +275,24 @@ BOOST_AUTO_TEST_CASE(file_document)
       std::cout << ex.asString() << std::endl << std::endl;
    }
 
-   BOOST_REQUIRE(doc.getHandler() != NULL);
+   ASSERT_TRUE(doc.getHandler() != NULL);
 
    std::shared_ptr<Node> root = doc.getRoot();
 
-   BOOST_REQUIRE(root);
+   ASSERT_TRUE(root != nullptr);
 
-   BOOST_REQUIRE_EQUAL(root->children_size(), 3);
+   ASSERT_EQ(3, root->children_size());
 
    for(xml::Node::child_iterator ii = root->child_begin(), maxii = root->child_end(); ii != maxii; ++ ii) {
       std::shared_ptr<xml::Node> child = xml::Node::get_child(ii);
-      BOOST_REQUIRE_EQUAL(child->getName(), "param");
-      BOOST_REQUIRE_EQUAL(child->children_size(), 0);
-      BOOST_REQUIRE_EQUAL(child->attributes_size(), 1);
-      BOOST_REQUIRE_EQUAL(child->hasText(), true);
+      ASSERT_EQ("param", child->getName());
+      ASSERT_EQ(0, child->children_size());
+      ASSERT_EQ(1, child->attributes_size());
+      ASSERT_TRUE(child->hasText());
    }
 }
 
-BOOST_AUTO_TEST_CASE(file_notexisting_document)
+TEST(XmlReadingDocumentTest, file_notexisting_document)
 {
    boost::filesystem::path coffeePath(boost::filesystem::current_path());
 
@@ -303,56 +302,56 @@ BOOST_AUTO_TEST_CASE(file_notexisting_document)
 
    Document doc;
 
-   BOOST_REQUIRE(doc.getHandler() == NULL);
+   ASSERT_TRUE(doc.getHandler() == NULL);
 
-   BOOST_REQUIRE_THROW(doc.parse(file), basis::RuntimeException);
+   ASSERT_THROW(doc.parse(file), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(file_bad_document)
+TEST(XmlReadingDocumentTest, file_bad_document)
 {
    boost::filesystem::path coffeePath(boost::filesystem::current_path());
    boost::filesystem::path xmlPath(coffeePath.native() + "/source/test/xml/bad.xml");
 
    Document doc;
 
-   BOOST_REQUIRE_THROW(doc.parse(xmlPath), basis::RuntimeException);
+   ASSERT_THROW(doc.parse(xmlPath), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(memory_bad_document)
+TEST(XmlReadingDocumentTest, memory_bad_document)
 {
    const basis::DataBlock content("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node attr_aaa=\"text one\" attr_bbb=");
 
    Document doc;
 
-   BOOST_REQUIRE_THROW(doc.parse(content), basis::RuntimeException);
+   ASSERT_THROW(doc.parse(content), basis::RuntimeException);
 }
 
-BOOST_AUTO_TEST_CASE(compile_document)
+TEST(XmlReadingDocumentTest, compile_document)
 {
    const basis::DataBlock content("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node attr_aaa=\"text one\" attr_bbb=\"text two\" attr_ccc=\"text three\"/>\n");
    Document doc;
 
-   BOOST_REQUIRE(doc.getHandler() == NULL);
+   ASSERT_TRUE(doc.getHandler() == NULL);
 
    Compiler compiler;
 
    std::string str = compiler.apply(doc.parse(content));
 
-   BOOST_REQUIRE_EQUAL(str, content.data());
+   ASSERT_EQ(content.data(), str);
 }
 
-BOOST_AUTO_TEST_CASE(compile_document_iso)
+TEST(XmlReadingDocumentTest, compile_document_iso)
 {
    const basis::DataBlock content("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<root_node>Jörg</root_node>\n");
 
    Document doc;
 
-   BOOST_REQUIRE(doc.getHandler() == NULL);
+   ASSERT_TRUE(doc.getHandler() == NULL);
 
    Compiler compiler;
 
    std::string str = compiler.apply(doc.parse(content));
 
-   BOOST_REQUIRE_EQUAL(str, content.data());
+   ASSERT_EQ(content.data(), str);
 }
 

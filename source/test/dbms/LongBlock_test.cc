@@ -1,9 +1,9 @@
 // MIT License
 // 
-// Copyright (c) 2018 Francisco Ruiz (francisco.ruiz.rayo@gmail.com)
+// Copyright(c) 2018 Francisco Ruiz(francisco.ruiz.rayo@gmail.com)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
+// of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
@@ -24,7 +24,7 @@
 #include <iostream>
 #include <time.h>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/dbms/datatype/LongBlock.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
@@ -32,66 +32,65 @@
 using namespace coffee;
 using namespace coffee::dbms;
 
-
-BOOST_AUTO_TEST_CASE (longblock_is_nulleable)
+TEST(LongBlockTest,is_nulleable)
 {
-   datatype::LongBlock column ("nulleable", datatype::Constraint::CanBeNull);
+   datatype::LongBlock column("nulleable", datatype::Constraint::CanBeNull);
 
-   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
-
-   column.clear ();
-
-   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
-
-   basis::DataBlock other;
-   BOOST_REQUIRE_THROW (column.getValue (), basis::RuntimeException);
-
-   other.assign ("hello world", 7);
-
-   column.setValue (other);
-   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
-   BOOST_REQUIRE_EQUAL (column.getSize(), 7);
-   BOOST_REQUIRE_EQUAL (strncmp(column.getValue().data(), "hello w", 7), 0);
-
-   column.clear ();
-   BOOST_REQUIRE_EQUAL (column.hasValue (), false);
-   BOOST_REQUIRE_EQUAL(column.getSize(), 0);
-}
-
-BOOST_AUTO_TEST_CASE (longblock_is_not_nulleable)
-{
-   datatype::LongBlock column ("not_nulleable", datatype::Constraint::CanNotBeNull);
-
-   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
-
-   basis::DataBlock other ("hello world", 7);
-
-   column.setValue (other);
-   BOOST_REQUIRE_EQUAL (column.hasValue (), true);
-   BOOST_REQUIRE_EQUAL (column.getSize(), 7);
-   BOOST_REQUIRE_EQUAL (strncmp(column.getValue().data(), "hello w", 7), 0);
+   ASSERT_FALSE(column.hasValue());
 
    column.clear();
-   BOOST_REQUIRE_EQUAL (column.hasValue(), true);
-   BOOST_REQUIRE_EQUAL(column.getSize(), 0);
+
+   ASSERT_FALSE(column.hasValue());
+
+   basis::DataBlock other;
+   ASSERT_THROW(column.getValue(), basis::RuntimeException);
+
+   other.assign("hello world", 7);
+
+   column.setValue(other);
+   ASSERT_TRUE(column.hasValue());
+   ASSERT_EQ(7, column.getSize());
+   ASSERT_EQ(0, strncmp(column.getValue().data(), "hello w", 7));
+
+   column.clear();
+   ASSERT_FALSE(column.hasValue());
+   ASSERT_EQ(0, column.getSize());
 }
 
-BOOST_AUTO_TEST_CASE (longblock_downcast)
+TEST(LongBlockTest,is_not_nulleable)
 {
-   datatype::LongBlock column ("not_nulleable");
+   datatype::LongBlock column("not_nulleable", datatype::Constraint::CanNotBeNull);
+
+   ASSERT_TRUE(column.hasValue());
+
+   basis::DataBlock other("hello world", 7);
+
+   column.setValue(other);
+   ASSERT_TRUE(column.hasValue());
+   ASSERT_EQ(7, column.getSize());
+   ASSERT_EQ(0, strncmp(column.getValue().data(), "hello w", 7));
+
+   column.clear();
+   ASSERT_TRUE(column.hasValue());
+   ASSERT_EQ(0, column.getSize());
+}
+
+TEST(LongBlockTest,downcast)
+{
+   datatype::LongBlock column("not_nulleable");
 
    datatype::Abstract& abs = column;
 
    auto other = coffee_datatype_downcast(datatype::LongBlock, abs);
 
-   datatype::Integer zzz ("zzz");
+   datatype::Integer zzz("zzz");
 
-   BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::LongBlock, zzz), dbms::InvalidDataException);
+   ASSERT_THROW(coffee_datatype_downcast(datatype::LongBlock, zzz), dbms::InvalidDataException);
 }
 
-BOOST_AUTO_TEST_CASE (longblock_clone)
+TEST(LongBlockTest,clone)
 {
-   datatype::LongBlock column ("not_nulleable");
+   datatype::LongBlock column("not_nulleable");
 
    const char* buffer = new char[1024];
    basis::DataBlock memory(buffer, 1024);
@@ -100,28 +99,28 @@ BOOST_AUTO_TEST_CASE (longblock_clone)
 
    auto clone = coffee_datatype_downcast(datatype::LongBlock, column.clone());
 
-   BOOST_REQUIRE(clone->getValue() == column.getValue());
+   ASSERT_TRUE(clone->getValue() == column.getValue());
 }
 
-BOOST_AUTO_TEST_CASE (longblock_clone_innerscope)
+TEST(LongBlockTest,clone_innerscope)
 {
    std::shared_ptr<datatype::LongBlock> clone;
 
    {
-      datatype::LongBlock column ("not_nulleable");
+      datatype::LongBlock column("not_nulleable");
       basis::DataBlock memory("1234", 4);
       column.setValue(memory);
       clone = coffee_datatype_downcast(datatype::LongBlock, column.clone());
    }
 
-   BOOST_REQUIRE(clone->getValue().size() == 4);
-   BOOST_REQUIRE(memcmp(clone->getValue().data(), "1234", 4) == 0);
+   ASSERT_TRUE(clone->getValue().size() == 4);
+   ASSERT_TRUE(memcmp(clone->getValue().data(), "1234", 4) == 0);
 }
 
-BOOST_AUTO_TEST_CASE(longblock_instantiate) {
+TEST(LongBlockTest,instantiate) {
    auto data = datatype::LongBlock::instantiate("nulleable");
-   BOOST_REQUIRE(data->hasValue());
+   ASSERT_TRUE(data->hasValue());
 
    data = datatype::LongBlock::instantiate("not-nulleable", datatype::Constraint::CanBeNull);
-   BOOST_REQUIRE(!data->hasValue());
+   ASSERT_TRUE(!data->hasValue());
 }

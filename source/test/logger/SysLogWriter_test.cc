@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/auto_unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/logger/SysLogWriter.hpp>
 #include <coffee/logger/Logger.hpp>
@@ -31,15 +31,15 @@
 using namespace coffee;
 using namespace coffee::logger;
 
-BOOST_AUTO_TEST_CASE (syslog_option_builder)
+TEST(SysLogTest, builder)
 {
    SysLogWriter::OptionBuilder option;
 
    int flags = option.consoleWhenError().noDelayOpen().delayOpen().showPid().logToStdErr().build();
-   BOOST_REQUIRE_EQUAL(flags, LOG_CONS + LOG_ODELAY + LOG_NDELAY + LOG_PID + LOG_PERROR);
+   ASSERT_EQ(LOG_CONS + LOG_ODELAY + LOG_NDELAY + LOG_PID + LOG_PERROR, flags);
 }
 
-BOOST_AUTO_TEST_CASE (syslog_test)
+TEST(SysLogTest, basic)
 {
    SysLogWriter::OptionBuilder option;
 

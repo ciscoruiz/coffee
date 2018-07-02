@@ -31,7 +31,7 @@
 
 #include <coffee/app/SCCS.hpp>
 
-coffee_sccs_define_tag (app,release-18.05.25);
+coffee_sccs_define_tag (app,release-18.07.02);
 
 using namespace coffee;
 

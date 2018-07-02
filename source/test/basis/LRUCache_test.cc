@@ -21,17 +21,22 @@
 // SOFTWARE.
 //
 
+#include <memory>
+
 #include <coffee/basis/pattern/lru/Cache.hpp>
 #include <coffee/basis/StreamString.hpp>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 using namespace coffee::basis::pattern;
 
-struct LRUCacheFixture {
+struct LRUCacheFixture : public ::testing::Test {
    static const int MaxCacheSize;
 
    LRUCacheFixture() : cache(MaxCacheSize) {
+   }
+
+   void SetUp() {
       for(int ii = 0; ii < MaxCacheSize; ++ ii) {
          coffee::basis::StreamString string;
          string << "Number-" << ii;
@@ -44,7 +49,7 @@ struct LRUCacheFixture {
 
 const int LRUCacheFixture::MaxCacheSize = 5;
 
-BOOST_AUTO_TEST_CASE(lrucache_insert_twice)
+TEST(LruCacheTest, insert_twice)
 {
    const int MaxCacheSize = 5;
 
@@ -53,92 +58,92 @@ BOOST_AUTO_TEST_CASE(lrucache_insert_twice)
    TheCache cache(MaxCacheSize);
 
    cache.set(0, "text");
-   BOOST_REQUIRE_EQUAL(cache.size(), 1);
+   ASSERT_EQ(1, cache.size());
 
    cache.set(0, "other");
-   BOOST_REQUIRE_EQUAL(cache.size(), 1);
+   ASSERT_EQ(1, cache.size());
 
-   BOOST_REQUIRE_EQUAL(cache.value(cache.begin()), "other");
+   ASSERT_EQ("other", cache.value(cache.begin()));
 }
 
-BOOST_AUTO_TEST_CASE(lrucache_no_find)
+TEST(LruCacheTest, no_find)
 {
    const int MaxCacheSize = 5;
 
    lru::Cache<int, coffee::basis::StreamString> cache(MaxCacheSize);
 
    auto ii = cache.find(0);
-   BOOST_REQUIRE_EQUAL(ii == cache.end(), true);
+   ASSERT_TRUE(ii == cache.end());
 }
 
-BOOST_FIXTURE_TEST_CASE(lrucache_find, LRUCacheFixture)
+TEST_F(LRUCacheFixture, lrucache_find)
 {
    for(int ii = 0; ii < MaxCacheSize; ++ ii) {
       auto ww = cache.find(ii);
-      BOOST_REQUIRE_EQUAL(ww == cache.end(), false);
+      ASSERT_FALSE(ww == cache.end());
    }
 }
 
-BOOST_FIXTURE_TEST_CASE(lrucache_erase, LRUCacheFixture)
+TEST_F(LRUCacheFixture, lrucache_erase)
 {
-   BOOST_REQUIRE_EQUAL(cache.erase(3), true);
-   BOOST_REQUIRE_EQUAL(cache.size(), MaxCacheSize - 1);
+   ASSERT_TRUE(cache.erase(3));
+   ASSERT_EQ(MaxCacheSize - 1, cache.size());
 
-   BOOST_REQUIRE_EQUAL(cache.erase(3), false);
-   BOOST_REQUIRE_EQUAL(cache.size(), MaxCacheSize - 1);
+   ASSERT_FALSE(cache.erase(3));
+   ASSERT_EQ(MaxCacheSize - 1, cache.size());
 
-   BOOST_REQUIRE_EQUAL(cache.erase(0), true);
-   BOOST_REQUIRE_EQUAL(cache.size(), MaxCacheSize - 2);
+   ASSERT_TRUE(cache.erase(0));
+   ASSERT_EQ(MaxCacheSize - 2, cache.size());
 
    std::vector<int> expectedOrder = { 1, 2, 4 };
    int jj = 0;
    for (auto ii = cache.begin(), maxii = cache.end(); ii != maxii; ++ ii) {
-      BOOST_REQUIRE_EQUAL(cache.key(ii), expectedOrder[jj ++]);
+      ASSERT_EQ(expectedOrder[jj ++], cache.key(ii));
    }
 }
 
-BOOST_FIXTURE_TEST_CASE(lrucache_max_size, LRUCacheFixture)
+TEST_F(LRUCacheFixture, lrucache_max_size)
 {
    coffee::basis::StreamString string;
    string << "Number-" << MaxCacheSize;
    cache.set(MaxCacheSize, string);
 
-   BOOST_REQUIRE_EQUAL(cache.find(0) == cache.end(), true);
-   BOOST_REQUIRE_EQUAL(cache.size(), MaxCacheSize);
+   ASSERT_TRUE(cache.find(0) == cache.end());
+   ASSERT_EQ(MaxCacheSize, cache.size());
 
    int jj = 1;
    for (auto ii = cache.begin(), maxii = cache.end(); ii != maxii; ++ ii) {
       coffee::basis::StreamString string;
       string << "Number-" << jj;
-      BOOST_REQUIRE_EQUAL(cache.key(ii), jj);
-      BOOST_REQUIRE_EQUAL(cache.value(ii), string);
+      ASSERT_EQ(jj, cache.key(ii));
+      ASSERT_EQ(string, cache.value(ii));
       ++ jj;
    }
 }
 
-BOOST_FIXTURE_TEST_CASE(lrucache_update, LRUCacheFixture)
+TEST_F(LRUCacheFixture, lrucache_update)
 {
    cache.set(0, "new text");
 
    std::vector<int> expectedOrder = { 1, 2, 3, 4, 0 };
    int jj = 0;
    for (auto ii = cache.begin(), maxii = cache.end(); ii != maxii; ++ ii) {
-      BOOST_REQUIRE_EQUAL(cache.key(ii), expectedOrder[jj ++]);
+      ASSERT_EQ(expectedOrder[jj ++], cache.key(ii));
    }
 }
 
-BOOST_FIXTURE_TEST_CASE(lrucache_refresh, LRUCacheFixture)
+TEST_F(LRUCacheFixture, lrucache_refresh)
 {
    cache.find(0);
 
    std::vector<int> expectedOrder = { 1, 2, 3, 4, 0 };
    int jj = 0;
    for (auto ii = cache.begin(), maxii = cache.end(); ii != maxii; ++ ii) {
-      BOOST_REQUIRE_EQUAL(cache.key(ii), expectedOrder[jj ++]);
+      ASSERT_EQ(expectedOrder[jj ++], cache.key(ii));
    }
 }
 
-BOOST_AUTO_TEST_CASE(lrucache_shared_ptr)
+TEST(LruCacheTest, shared_ptr)
 {
    typedef std::pair<int,int> Complex;
    typedef std::shared_ptr<Complex> Key;
@@ -159,12 +164,12 @@ BOOST_AUTO_TEST_CASE(lrucache_shared_ptr)
       }
    }
 
-   BOOST_REQUIRE_EQUAL(cache.size(), MaxSecondLevel);
+   ASSERT_EQ(cache.size(), MaxSecondLevel);
 
    int counter = 0;
    for (TheCache::pair_iterator ii = cache.begin(), maxii = cache.end(); ii != maxii; ++ ii) {
       const Key& key = TheCache::key(ii);
-      BOOST_REQUIRE_EQUAL(key->first, MaxFirstLevel - 1);
-      BOOST_REQUIRE_EQUAL(key->second, counter ++);
+      ASSERT_EQ(MaxFirstLevel - 1, key->first);
+      ASSERT_EQ(counter ++, key->second);
    }
 }

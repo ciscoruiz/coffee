@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <condition_variable>
 #include <chrono>
@@ -41,25 +41,25 @@
 using namespace coffee;
 using std::chrono::milliseconds;
 
-struct ShortTimeFixture : public TimeFixture {
+struct TimerTestFixture : public TimeFixture {
    static const milliseconds MaxShortDuration;
    static const milliseconds ShortResolution;
 
-   ShortTimeFixture() : TimeFixture(MaxShortDuration, ShortResolution) {;}
+   TimerTestFixture() : TimeFixture(MaxShortDuration, ShortResolution) {;}
 };
 
-const milliseconds ShortTimeFixture::MaxShortDuration(1000);
-const milliseconds ShortTimeFixture::ShortResolution(50);
+const milliseconds TimerTestFixture::MaxShortDuration(1000);
+const milliseconds TimerTestFixture::ShortResolution(50);
 
-struct LongTimeFixture : public TimeFixture {
+struct LongTimerTestFixture : public TimeFixture {
    static const milliseconds MaxLongDuration;
    static const milliseconds LongResolution;
 
-   LongTimeFixture() : TimeFixture(MaxLongDuration, LongResolution) {;}
+   LongTimerTestFixture() : TimeFixture(MaxLongDuration, LongResolution) {;}
 };
 
-const milliseconds LongTimeFixture::MaxLongDuration(5000);
-const milliseconds LongTimeFixture::LongResolution(100);
+const milliseconds LongTimerTestFixture::MaxLongDuration(5000);
+const milliseconds LongTimerTestFixture::LongResolution(100);
 
 using Subject = coffee::basis::pattern::observer::Subject;
 using Event = coffee::basis::pattern::observer::Event;
@@ -115,100 +115,100 @@ bool TimerObserver::receiveTimedouts(std::shared_ptr<coffee::time::TimeService>&
 const milliseconds TimeFixture::time100ms(100);
 const milliseconds TimeFixture::time200ms(200);
 
-BOOST_FIXTURE_TEST_CASE(timer_first_case, ShortTimeFixture)
-{
-   BOOST_REQUIRE(timeService->isRunning());
-}
-
-BOOST_AUTO_TEST_CASE(timer_activate_service_stopped)
-{
-   app::ApplicationServiceStarter app("timer_activate_service_stopped");
-   std::shared_ptr<time::TimeService> timeService = time::TimeService::instantiate(app, milliseconds(1000), milliseconds(200));
-   BOOST_REQUIRE(app.isStopped());
-   BOOST_REQUIRE(timeService->isStopped());
-   auto timer = time::Timer::instantiate(100, milliseconds(100));
-   BOOST_REQUIRE_THROW(timeService->activate(timer), basis::RuntimeException);
-}
-
-BOOST_FIXTURE_TEST_CASE(timer_empty, ShortTimeFixture)
-{
-   std::shared_ptr<time::Timer> emptyTimer;
-   BOOST_REQUIRE_THROW(timeService->activate(emptyTimer), basis::RuntimeException);
-}
-
-BOOST_FIXTURE_TEST_CASE(timer_zero_timeout, ShortTimeFixture)
-{
-   auto timer = time::Timer::instantiate(100, milliseconds(0));
-   BOOST_REQUIRE_THROW(timeService->activate(timer), basis::RuntimeException);
-}
-
-BOOST_FIXTURE_TEST_CASE(timer_over_maxtimeout, ShortTimeFixture)
-{
-   auto timer = time::Timer::instantiate(100, milliseconds(1500));
-   BOOST_REQUIRE_THROW(timeService->activate(timer), basis::RuntimeException);
-}
-
-BOOST_FIXTURE_TEST_CASE(timer_below_resolution, ShortTimeFixture)
-{
-   auto timer = time::Timer::instantiate(100, milliseconds(10));
-   BOOST_REQUIRE_THROW(timeService->activate(timer), basis::RuntimeException);
-}
-
-BOOST_AUTO_TEST_CASE(timer_bad_resolution_maxtime)
+TEST(TimerTest, bad_resolution_maxtime)
 {
    app::ApplicationServiceStarter app("test_timer_bad_resolution_maxtime");
    std::shared_ptr<time::TimeService> timeService = time::TimeService::instantiate(app, milliseconds(1000), milliseconds(5555));
-   BOOST_REQUIRE_THROW(app.start(), basis::RuntimeException);
+   ASSERT_THROW(app.start(), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(timer_repeat_id, ShortTimeFixture)
+TEST(TimerTest, activate_while_service_stopped)
+{
+   app::ApplicationServiceStarter app("timer_activate_service_stopped");
+   std::shared_ptr<time::TimeService> timeService = time::TimeService::instantiate(app, milliseconds(1000), milliseconds(200));
+   ASSERT_TRUE(app.isStopped());
+   ASSERT_TRUE(timeService->isStopped());
+   auto timer = time::Timer::instantiate(100, milliseconds(100));
+   ASSERT_THROW(timeService->activate(timer), basis::RuntimeException);
+}
+
+TEST_F(TimerTestFixture, time_service_running)
+{
+   ASSERT_TRUE(timeService->isRunning());
+}
+
+TEST_F(TimerTestFixture, empty_timer)
+{
+   std::shared_ptr<time::Timer> emptyTimer;
+   ASSERT_THROW(timeService->activate(emptyTimer), basis::RuntimeException);
+}
+
+TEST_F(TimerTestFixture, zero_timeout)
+{
+   auto timer = time::Timer::instantiate(100, milliseconds(0));
+   ASSERT_THROW(timeService->activate(timer), basis::RuntimeException);
+}
+
+TEST_F(TimerTestFixture, over_maxtimeout)
+{
+   auto timer = time::Timer::instantiate(100, milliseconds(1500));
+   ASSERT_THROW(timeService->activate(timer), basis::RuntimeException);
+}
+
+TEST_F(TimerTestFixture, below_resolution)
+{
+   auto timer = time::Timer::instantiate(100, milliseconds(10));
+   ASSERT_THROW(timeService->activate(timer), basis::RuntimeException);
+}
+
+TEST_F(TimerTestFixture, repeat_id)
 {
    auto observer = std::make_shared<TimerObserver>();
    timeService->attach(observer);
 
    auto firstTimer = time::Timer::instantiate(3333, time100ms);
-   BOOST_CHECK_NO_THROW(timeService->activate(firstTimer));
+   EXPECT_NO_THROW(timeService->activate(firstTimer));
 
    auto secondTimer = time::Timer::instantiate(3333, time200ms);
-   BOOST_REQUIRE_THROW(timeService->activate(secondTimer), basis::RuntimeException);
+   ASSERT_THROW(timeService->activate(secondTimer), basis::RuntimeException);
 
-   BOOST_REQUIRE(observer->receiveTimedouts(timeService, time200ms));
+   ASSERT_TRUE(observer->receiveTimedouts(timeService, time200ms));
 }
 
-BOOST_FIXTURE_TEST_CASE(timer_timeout, ShortTimeFixture)
+TEST_F(TimerTestFixture, timeout)
 {
    auto observer = std::make_shared<TimerObserver>();
    timeService->attach(observer);
 
    auto firstTimer = time::Timer::instantiate(1111, time100ms);
-   BOOST_CHECK_NO_THROW(timeService->activate(firstTimer));
+   EXPECT_NO_THROW(timeService->activate(firstTimer));
 
    auto secondTimer = time::Timer::instantiate(2222, time200ms);
-   BOOST_CHECK_NO_THROW(timeService->activate(secondTimer));
+   EXPECT_NO_THROW(timeService->activate(secondTimer));
 
-   BOOST_REQUIRE(observer->receiveTimedouts(timeService, time200ms));
+   ASSERT_TRUE(observer->receiveTimedouts(timeService, time200ms));
 }
 
-BOOST_FIXTURE_TEST_CASE(timer_max_timeout, ShortTimeFixture)
+TEST_F(TimerTestFixture, max_timeout)
 {
    auto observer = std::make_shared<TimerObserver>();
    timeService->attach(observer);
 
    auto maxTimer = time::Timer::instantiate(12345, MaxShortDuration);
-   BOOST_CHECK_NO_THROW(timeService->activate(maxTimer));
+   EXPECT_NO_THROW(timeService->activate(maxTimer));
 
    usleep(200000);
    auto firstTimer = time::Timer::instantiate(123, time100ms);
-   BOOST_CHECK_NO_THROW(timeService->activate(firstTimer));
+   EXPECT_NO_THROW(timeService->activate(firstTimer));
 
    usleep(200000);
    auto secondTimer = time::Timer::instantiate(1234, MaxShortDuration / 2);
-   BOOST_CHECK_NO_THROW(timeService->activate(secondTimer));
+   EXPECT_NO_THROW(timeService->activate(secondTimer));
 
-   BOOST_REQUIRE(observer->receiveTimedouts(timeService, MaxShortDuration));
+   ASSERT_TRUE(observer->receiveTimedouts(timeService, MaxShortDuration));
 }
 
-BOOST_FIXTURE_TEST_CASE(timer_populate, LongTimeFixture)
+TEST_F(LongTimerTestFixture, populate)
 {
    auto observer = std::make_shared<TimerObserver>();
    timeService->attach(observer);
@@ -217,15 +217,15 @@ BOOST_FIXTURE_TEST_CASE(timer_populate, LongTimeFixture)
       const milliseconds timeout((rand() % MaxLongDuration.count()) / LongResolution.count() * LongResolution.count());
       if (timeout.count() > 0) {
          auto timer = time::Timer::instantiate(ii, timeout);
-         BOOST_REQUIRE_NO_THROW(timeService->activate(timer));
+         ASSERT_NO_THROW(timeService->activate(timer));
          usleep(rand() % 200000);
       }
    }
 
-   BOOST_REQUIRE(observer->receiveTimedouts(timeService, MaxLongDuration));
+   ASSERT_TRUE(observer->receiveTimedouts(timeService, MaxLongDuration));
 
    auto avgDeviation = observer->getAvgDeviation();
-   BOOST_REQUIRE(!avgDeviation.isEmpty());
-   BOOST_REQUIRE_LE(avgDeviation.value().count(), LongResolution.count());
+   ASSERT_TRUE(!avgDeviation.isEmpty());
+   ASSERT_LE(avgDeviation.value().count(), LongResolution.count());
 }
 

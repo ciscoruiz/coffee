@@ -36,7 +36,7 @@ using namespace coffee;
 //static
 const char* NetworkingFixture::upperServerEndPoint = "tcp://*:5555";
 
-NetworkingFixture::NetworkingFixture() : app("TestAppNetworkingFixture")
+void NetworkingFixture::SetUp()
 {
    const char* logFileName = "source/test/networking/trace.log";
    unlink (logFileName);
@@ -53,7 +53,8 @@ NetworkingFixture::NetworkingFixture() : app("TestAppNetworkingFixture")
    networkingService->waitEffectiveRunning();
 }
 
-NetworkingFixture::~NetworkingFixture() {
+void NetworkingFixture::TearDown()
+{
    LOG_THIS_METHOD();
    app.stop();
    thr.join();

@@ -27,7 +27,7 @@
 
 #include "TestResource.hpp"
 
-struct ResourceListFixture {
+struct ResourceListFixture : public ::testing::Test {
    static const int MaxResources;
 
    ResourceListFixture()

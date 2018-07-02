@@ -21,67 +21,69 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/dbms/datatype/MultiString.hpp>
 #include <coffee/dbms/datatype/Integer.hpp>
 
 using namespace coffee::dbms;
 
-struct MultiStringFixture {
+struct MultiStringTestFixture : ::testing::Test {
    static const char* values[];
 
-   MultiStringFixture() : column("the-column", datatype::Constraint::CanNotBeNull) {
+   MultiStringTestFixture() : column("the-column", datatype::Constraint::CanNotBeNull) {;}
+
+   void SetUp() {
       int index = 0;
       while (values[index]) {
          column.addValue(values[index ++]);
       }
-      BOOST_REQUIRE(column.size() == index);
+      ASSERT_TRUE(column.size() == index);
    }
 
    datatype::MultiString column;
 };
 
 // static
-const char* MultiStringFixture::values[] = { "1234", "3456", "1234", nullptr };
+const char* MultiStringTestFixture::values[] = { "1234", "3456", "1234", nullptr };
 
-BOOST_AUTO_TEST_CASE(multistring_is_nulleable)
+TEST(MultiStringTest,is_nulleable)
 {
    datatype::MultiString column("nulleable", datatype::Constraint::CanBeNull);
-   BOOST_REQUIRE(!column.hasValue());
+   ASSERT_TRUE(!column.hasValue());
    column.addValue("the value");
-   BOOST_REQUIRE(column.hasValue());
+   ASSERT_TRUE(column.hasValue());
 }
 
-BOOST_FIXTURE_TEST_CASE(multistring_iterator, MultiStringFixture)
+TEST_F(MultiStringTestFixture, iterator)
 {
-   BOOST_REQUIRE(column.hasValue());
+   ASSERT_TRUE(column.hasValue());
 
    int index = 0;
    for (auto ii = column.begin_value(), maxii = column.end_value(); ii != maxii; ++ ii) {
-      BOOST_REQUIRE_EQUAL(datatype::MultiString::value(ii), values[index ++]);
+      ASSERT_EQ(values[index ++], datatype::MultiString::value(ii));
    }
 }
 
-BOOST_FIXTURE_TEST_CASE(multistring_clone, MultiStringFixture)
+TEST_F(MultiStringTestFixture, clone)
 {
-   BOOST_REQUIRE(column.hasValue());
+   ASSERT_TRUE(column.hasValue());
 
    auto clone = column.clone();
 
-   BOOST_REQUIRE(clone->compare(column) == 0);
-   BOOST_REQUIRE(clone->hash() == column.hash());
+   ASSERT_TRUE(clone->compare(column) == 0);
+   ASSERT_TRUE(clone->hash() == column.hash());
 }
 
-BOOST_FIXTURE_TEST_CASE(multistring_clear, MultiStringFixture)
+TEST_F(MultiStringTestFixture, clear)
 {
-   BOOST_REQUIRE(column.hasValue());
+   ASSERT_TRUE(column.hasValue());
    column.clear();
-   BOOST_REQUIRE(column.hasValue());
-   BOOST_REQUIRE(column.size() == 0);
+   ASSERT_TRUE(column.hasValue());
+   ASSERT_EQ(0, column.size());
 }
 
-BOOST_AUTO_TEST_CASE(multistring_downcast)
+TEST(MultiStringTest, downcast)
 {
    datatype::MultiString column("multistring_downcast");
 
@@ -90,17 +92,17 @@ BOOST_AUTO_TEST_CASE(multistring_downcast)
    const datatype::MultiString& other = coffee_datatype_downcast(datatype::MultiString, abs);
    column.addValue("123");
 
-   BOOST_REQUIRE(other == column);
+   ASSERT_TRUE(other == column);
 
    datatype::Integer zzz("zzz");
 
-   BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::MultiString, zzz), InvalidDataException);
+   ASSERT_THROW(coffee_datatype_downcast(datatype::MultiString, zzz), InvalidDataException);
 }
 
-BOOST_AUTO_TEST_CASE(multistring_instantiate) {
+TEST(MultiStringTest, instantiate) {
    auto data = datatype::MultiString::instantiate("nulleable");
-   BOOST_REQUIRE(data->hasValue());
+   ASSERT_TRUE(data->hasValue());
 
    data = datatype::MultiString::instantiate("not-nulleable", datatype::Constraint::CanBeNull);
-   BOOST_REQUIRE(!data->hasValue());
+   ASSERT_TRUE(!data->hasValue());
 }

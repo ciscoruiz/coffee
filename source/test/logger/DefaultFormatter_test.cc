@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/Writer.hpp>
@@ -48,7 +48,7 @@ private:
 };
 
 
-BOOST_AUTO_TEST_CASE( DefaultFormatter_test )
+TEST( DefaultFormatter, basic)
 {
    auto writer = std::make_shared<TtyWriter>();
    logger::Logger::initialize(writer);
@@ -61,6 +61,6 @@ BOOST_AUTO_TEST_CASE( DefaultFormatter_test )
       logger::Logger::write((logger::Level::_v)ii, msg << " numeric value=" << ii, COFFEE_FILE_LOCATION);
    }
 
-   BOOST_REQUIRE_EQUAL(writer->getCounter (), logger::Level::Local2 + 1);
+   ASSERT_EQ(logger::Level::Local2 + 1, writer->getCounter ());
 }
 

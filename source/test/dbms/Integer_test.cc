@@ -24,7 +24,7 @@
 #include <iostream>
 #include <time.h>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <coffee/dbms/datatype/Integer.hpp>
 #include <coffee/dbms/datatype/Float.hpp>
@@ -32,42 +32,41 @@
 using namespace coffee;
 using namespace coffee::dbms;
 
-
-BOOST_AUTO_TEST_CASE(integer_is_nulleable)
+TEST(IntegerTest,is_nulleable)
 {
    datatype::Integer column("nulleable", datatype::Constraint::CanBeNull);
 
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
+   ASSERT_FALSE(column.hasValue());
 
    column.clear();
 
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
+   ASSERT_FALSE(column.hasValue());
 
-   BOOST_REQUIRE_THROW(column.getValue(), basis::RuntimeException);
+   ASSERT_THROW(column.getValue(), basis::RuntimeException);
 
    column.setValue(10);
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
-   BOOST_REQUIRE_EQUAL(column.getValue(),10);
+   ASSERT_TRUE(column.hasValue());
+   ASSERT_EQ(10, column.getValue());
 
    column.clear();
-   BOOST_REQUIRE_EQUAL(column.hasValue(), false);
+   ASSERT_FALSE(column.hasValue());
 }
 
-BOOST_AUTO_TEST_CASE(integer_is_not_nulleable)
+TEST(IntegerTest,is_not_nulleable)
 {
    datatype::Integer column("not_nulleable", datatype::Constraint::CanNotBeNull);
 
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+   ASSERT_TRUE(column.hasValue());
 
    column.setValue(11);
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
-   BOOST_REQUIRE_EQUAL(column.getValue(), 11);
+   ASSERT_TRUE(column.hasValue());
+   ASSERT_EQ(11, column.getValue());
 
    column.clear();
-   BOOST_REQUIRE_EQUAL(column.hasValue(), true);
+   ASSERT_TRUE(column.hasValue());
 }
 
-BOOST_AUTO_TEST_CASE(integer_downcast)
+TEST(IntegerTest,downcast)
 {
    datatype::Integer column("integer_downcast");
 
@@ -76,51 +75,51 @@ BOOST_AUTO_TEST_CASE(integer_downcast)
    const datatype::Integer& other = coffee_datatype_downcast(datatype::Integer, abs);
    column.setValue(1234);
 
-   BOOST_REQUIRE_EQUAL(other == column, true);
+   ASSERT_TRUE(other == column);
 
    datatype::Float zzz("zzz");
 
-   BOOST_REQUIRE_THROW(coffee_datatype_downcast(datatype::Integer, zzz), dbms::InvalidDataException);
+   ASSERT_THROW(coffee_datatype_downcast(datatype::Integer, zzz), dbms::InvalidDataException);
 }
 
-BOOST_AUTO_TEST_CASE(integer_clone)
+TEST(IntegerTest,clone)
 {
    datatype::Integer cannotBeNull("cannotBeNull", datatype::Constraint::CanNotBeNull);
    datatype::Integer canBeNull("canBeNull", datatype::Constraint::CanBeNull);
 
-   BOOST_REQUIRE_EQUAL(cannotBeNull.hasValue(), true);
-   BOOST_REQUIRE_EQUAL(canBeNull.hasValue(), false);
+   ASSERT_TRUE(cannotBeNull.hasValue());
+   ASSERT_FALSE(canBeNull.hasValue());
 
    auto notnull(cannotBeNull.clone());
    auto null(canBeNull.clone());
 
-   BOOST_REQUIRE_EQUAL(notnull->hasValue(), true);
-   BOOST_REQUIRE_EQUAL(null->hasValue(), false);
+   ASSERT_TRUE(notnull->hasValue());
+   ASSERT_FALSE(null->hasValue());
 
-   BOOST_REQUIRE_EQUAL(notnull->compare(cannotBeNull), 0);
+   ASSERT_EQ(0, notnull->compare(cannotBeNull));
 
    cannotBeNull.setValue(5.0);
 
-   BOOST_REQUIRE_EQUAL(cannotBeNull.getValue(), 5.0);
+   ASSERT_EQ(5.0, cannotBeNull.getValue());
 
    notnull = cannotBeNull.clone();
-   BOOST_REQUIRE_EQUAL(notnull->hasValue(), true);
-   BOOST_REQUIRE_EQUAL(notnull->compare(cannotBeNull), 0);
+   ASSERT_TRUE(notnull->hasValue());
+   ASSERT_EQ(0, notnull->compare(cannotBeNull));
 
    canBeNull.setValue(25);
    null = canBeNull.clone();
-   BOOST_REQUIRE_EQUAL(null->hasValue(), true);
-   BOOST_REQUIRE_EQUAL(null->compare(canBeNull), 0);
+   ASSERT_TRUE(null->hasValue());
+   ASSERT_EQ(0, null->compare(canBeNull));
 
-   BOOST_REQUIRE_EQUAL(null->compare(cannotBeNull), 20);
+   ASSERT_EQ(20, null->compare(cannotBeNull));
 
-   BOOST_REQUIRE_EQUAL(notnull->compare(canBeNull), -20);
+   ASSERT_EQ(-20, notnull->compare(canBeNull));
 }
 
-BOOST_AUTO_TEST_CASE(integer_instantiate) {
+TEST(IntegerTest,instantiate) {
    auto data = datatype::Integer::instantiate("nulleable");
-   BOOST_REQUIRE(data->hasValue());
+   ASSERT_TRUE(data->hasValue());
 
    data = datatype::Integer::instantiate("not-nulleable", datatype::Constraint::CanBeNull);
-   BOOST_REQUIRE(!data->hasValue());
+   ASSERT_TRUE(!data->hasValue());
 }

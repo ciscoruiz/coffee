@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include <condition_variable>
 #include <chrono>
@@ -46,15 +46,15 @@ using std::chrono::milliseconds;
 using Subject = coffee::basis::pattern::observer::Subject;
 using Event = coffee::basis::pattern::observer::Event;
 
-struct ClockFixture : public TimeFixture {
+struct ClockTestFixture : public TimeFixture {
    static const milliseconds MaxShortDuration;
    static const milliseconds ShortResolution;
 
-   ClockFixture() : TimeFixture(MaxShortDuration, ShortResolution) {;}
+   ClockTestFixture() : TimeFixture(MaxShortDuration, ShortResolution) {;}
 };
 
-const milliseconds ClockFixture::MaxShortDuration(1000);
-const milliseconds ClockFixture::ShortResolution(50);
+const milliseconds ClockTestFixture::MaxShortDuration(1000);
+const milliseconds ClockTestFixture::ShortResolution(50);
 
 class ClockObserver : public basis::pattern::observer::Observer {
 public:
@@ -83,7 +83,7 @@ private:
 bool ClockObserver::receiveTicks(const int ticks, const milliseconds& maxWait)
    noexcept
 {
-   milliseconds ww(maxWait+ ClockFixture::ShortResolution);
+   milliseconds ww(maxWait+ ClockTestFixture::ShortResolution);
 
    LOG_DEBUG("Waiting " << ticks << " | " << maxWait);
 
@@ -99,38 +99,38 @@ bool ClockObserver::receiveTicks(const int ticks, const milliseconds& maxWait)
    return true;
 }
 
-BOOST_FIXTURE_TEST_CASE(clock_cancel_inactive, ClockFixture)
+TEST_F(ClockTestFixture, cancel_inactive)
 {
    auto clock = time::Clock::instantiate(111, milliseconds(200));
-   BOOST_REQUIRE(!timeService->cancel(clock));
+   ASSERT_TRUE(!timeService->cancel(clock));
 }
 
-BOOST_FIXTURE_TEST_CASE(clock_cancel_empty, ClockFixture)
+TEST_F(ClockTestFixture, cancel_empty)
 {
    std::shared_ptr<time::Clock> empty;
-   BOOST_REQUIRE(!timeService->cancel(empty));
+   ASSERT_TRUE(!timeService->cancel(empty));
 }
 
-BOOST_FIXTURE_TEST_CASE(clock_bad_duration, ClockFixture)
+TEST_F(ClockTestFixture, bad_duration)
 {
    auto clock = time::Clock::instantiate(111, milliseconds(200));
-   BOOST_REQUIRE_THROW(clock->getDuration(), basis::RuntimeException);
+   ASSERT_THROW(clock->getDuration(), basis::RuntimeException);
 }
 
-BOOST_FIXTURE_TEST_CASE(clock_basic, ClockFixture)
+TEST_F(ClockTestFixture, basic)
 {
    auto observer = std::make_shared<ClockObserver>();
    timeService->attach(observer);
 
    auto clock = time::Clock::instantiate(111, milliseconds(200));
-   BOOST_REQUIRE_NO_THROW(timeService->activate(clock));
-   BOOST_CHECK(observer->receiveTicks(4, MaxShortDuration));
-   BOOST_CHECK(timeService->cancel(clock));
+   ASSERT_NO_THROW(timeService->activate(clock));
+   ASSERT_TRUE(observer->receiveTicks(4, MaxShortDuration));
+   ASSERT_TRUE(timeService->cancel(clock));
 }
 
-BOOST_FIXTURE_TEST_CASE(clock_terminate_noempty, ClockFixture)
+TEST_F(ClockTestFixture, terminate_noempty)
 {
    auto clock = time::Clock::instantiate(111, milliseconds(200));
-   BOOST_REQUIRE_NO_THROW(timeService->activate(clock));
+   ASSERT_NO_THROW(timeService->activate(clock));
    finalizeEmpty = false;
 }

@@ -24,6 +24,8 @@
 #ifndef __coffee_logger_UnlimitedTraceWriter_hpp
 #define __coffee_logger_UnlimitedTraceWriter_hpp
 
+#include <memory>
+
 #include <coffee/logger/Writer.hpp>
 
 namespace coffee {
@@ -38,6 +40,13 @@ namespace logger {
 class UnlimitedTraceWriter : public Writer {
 public:
    static const int NullStream ;
+
+   /**
+ * Fast shared creator
+ */
+   static std::shared_ptr<UnlimitedTraceWriter> instantiate(const std::string& path) {
+      return std::make_shared<UnlimitedTraceWriter>(path);
+   }
 
    /**
     * Constructor.

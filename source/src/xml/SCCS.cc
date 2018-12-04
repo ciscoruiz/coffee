@@ -29,7 +29,7 @@
 
 #include <coffee/xml/SCCS.hpp>
 
-coffee_sccs_define_tag (xml,release-18.07.02);
+coffee_sccs_define_tag (xml,release-18.12.04);
 
 using namespace coffee;
 

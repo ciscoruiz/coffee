@@ -33,7 +33,7 @@
 
 #include <coffee/dbms/SCCS.hpp>
 
-coffee_sccs_define_tag (dbms,release-18.07.02);
+coffee_sccs_define_tag (dbms,release-18.12.04);
 
 using namespace coffee;
 

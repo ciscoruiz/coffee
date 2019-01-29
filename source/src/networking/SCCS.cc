@@ -33,7 +33,7 @@
 
 #include <coffee/networking/SCCS.hpp>
 
-coffee_sccs_define_tag (networking,release-18.12.04);
+coffee_sccs_define_tag (networking,release-19.01.29);
 
 using namespace coffee;
 

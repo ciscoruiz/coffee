@@ -52,7 +52,7 @@ public:
     * will start a sequential search for the first available resource.
     * \return the selected resource.
     */
-   std::shared_ptr<Resource> apply() throw (ResourceUnavailableException);
+    std::shared_ptr<Resource> apply(const Request& request) throw (ResourceUnavailableException) ;
 
    std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const throw(basis::RuntimeException);
 
@@ -74,8 +74,6 @@ private:
       ResourceList::resource_iterator iterator;
    };
    Position m_position;
-
-   std::shared_ptr<Resource> apply(GuardResourceList& guard) throw (ResourceUnavailableException);
 };
 
 } /* namespace balance */

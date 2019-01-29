@@ -47,13 +47,21 @@ class ResourceList;
  */
 class Strategy : public basis::NamedObject {
 public:
+    class Request {
+    public:
+        virtual int calculateIdentifier() const noexcept = 0;
+    };
+
    /**
     * Method that will choose one Resource from the ResourceList.
     * It will be done in exclusive access protected by the guard.
+    * \param request Request that will calcuate the  access identifier that will be used
+    * to calculate the best resource to address the request.
+    * \return  the selected resource
     */
-   virtual std::shared_ptr<Resource> apply(GuardResourceList& guard) throw (ResourceUnavailableException) = 0;
+   virtual std::shared_ptr<Resource> apply(const Request& request) throw (ResourceUnavailableException) = 0;
 
-   /**
+    /**
     * \return Summarize information of this instance in a StreamString.
     */
    virtual basis::StreamString asString () const noexcept;
@@ -83,11 +91,6 @@ protected:
     * \param name Logical name.
     */
    explicit Strategy(const std::string& name) : basis::NamedObject(name) {;}
-
-   /**
-    * Set the resource list to work with.
-    */
-   void setResourceList(std::shared_ptr<ResourceList>& resources) { m_resources = resources; }
 };
 
 }

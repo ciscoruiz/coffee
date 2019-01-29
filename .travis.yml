@@ -16,7 +16,7 @@ matrix:
       env:
         - TEST="Codecov"
       script:
-        - mkdir -p libs && cp -r /usr/src/gtest libs && cd libs/gtest && cmake . && make -j 2 && cd -
+        - mkdir -p libs && cp -Lr /usr/src/gtest libs && cd libs/gtest && cmake . && make -j 2 && cd -
         - cmake -DCMAKE_BUILD_TYPE=COVERAGE 
         - make --jobs=4 && ctest --verbose
         - bash <(curl -s https://codecov.io/bash)

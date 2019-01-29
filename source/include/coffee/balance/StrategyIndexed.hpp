@@ -45,8 +45,7 @@ public:
     * \param resources List of resources to work with.
     */
    explicit StrategyIndexed (std::shared_ptr<ResourceList>& resources) :
-      balance::Strategy("balance::Indexed", resources),
-      m_key(0)
+      balance::Strategy("balance::Indexed", resources)
    {
    }
 
@@ -56,14 +55,9 @@ public:
     * for the first available resource.
     * \return the selected resource start to checking at the element key % #coffee::balance::ResourceList::size
     */
-   std::shared_ptr<Resource> apply(const int key) throw (ResourceUnavailableException);
+   std::shared_ptr<Resource> apply(const Request& request) throw (ResourceUnavailableException) ;
 
    std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const throw(basis::RuntimeException);
-
-private:
-   int m_key;
-
-   std::shared_ptr<Resource> apply(GuardResourceList& guard) throw (ResourceUnavailableException);
 };
 
 } /* namespace balance */

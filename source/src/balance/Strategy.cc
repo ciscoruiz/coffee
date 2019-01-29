@@ -32,8 +32,10 @@ basis::StreamString balance::Strategy::asString() const noexcept
 {
    basis::StreamString result("balance.Strategy { ");
    result += basis::NamedObject::asString();
-   result += "|";
-   result += m_resources->asString();
+   if (m_resources) {
+      result += "|";
+      result += m_resources->asString();
+   }
    return result += " }";
 
 }

@@ -34,18 +34,12 @@
 
 using namespace coffee;
 
-std::shared_ptr<balance::Resource> balance::StrategyIndexed::apply(const int key)
-   throw (ResourceUnavailableException)
-{
-   GuardResourceList guard(m_resources);
-   m_key = key;
-   return apply(guard);
-}
-
-std::shared_ptr<balance::Resource> balance::StrategyIndexed::apply(GuardResourceList& guard)
+std::shared_ptr<balance::Resource> balance::StrategyIndexed::apply(const Request& request)
    throw (ResourceUnavailableException)
 {
    logger::TraceMethod tm (logger::Level::Local7, COFFEE_FILE_LOCATION);
+
+   GuardResourceList guard(m_resources);
 
    if (m_resources->size(guard) == 0) {
       COFFEE_THROW_NAMED_EXCEPTION(ResourceUnavailableException, m_resources->getName() << " is empty");
@@ -55,7 +49,9 @@ std::shared_ptr<balance::Resource> balance::StrategyIndexed::apply(GuardResource
    ResourceList::resource_iterator ww;
    ResourceList::resource_iterator end;
 
-   ww = end = m_resources->resource_begin(guard) + (m_key % m_resources->size(guard));
+   const int identifier = request.calculateIdentifier();
+
+   ww = end = m_resources->resource_begin(guard) + (identifier % m_resources->size(guard));
 
    do {
       std::shared_ptr<Resource>& w = ResourceList::resource(ww);

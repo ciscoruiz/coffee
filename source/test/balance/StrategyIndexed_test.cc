@@ -56,6 +56,16 @@ namespace IndexedTest {
    static int MaxResources = 10;
    static int MaxLoop = 3;
 
+  class Identifier : public balance::Strategy::Request {
+  public:
+      explicit Identifier(const int value) : m_value(value){;}
+
+      int calculateIdentifier() const noexcept { return m_value;   }
+
+  private:
+      const int m_value;
+  };
+
    void incrementUse(CounterContainer& counterContainer, const std::shared_ptr<Resource>& resource)
    {
       std::shared_ptr<TestResource> myResource = TestResource::cast(resource);
@@ -73,7 +83,8 @@ namespace IndexedTest {
    void parallel_work(std::mutex& mutexContainer, CounterContainer& counterContainer, balance::StrategyIndexed& strategy)
    {
       for(int ii = 0; ii < MaxResources; ++ ii) {
-         auto resource = strategy.apply(ii);
+          Identifier id(ii);
+         auto resource = strategy.apply(id);
 
          if(true) {
             std::lock_guard <std::mutex> guard(mutexContainer);
@@ -89,7 +100,9 @@ TEST_F(StrategyIndexedFixture, dont_use_unavailables)
 {
    balance::StrategyIndexed strategy(resourceList);
 
-   std::shared_ptr<TestResource> myResource = TestResource::cast_copy(strategy.apply(0));
+   IndexedTest::Identifier id(0);
+
+   std::shared_ptr<TestResource> myResource = TestResource::cast_copy(strategy.apply(id));
    ASSERT_EQ(0, myResource->getKey());
 
    if(true) {
@@ -98,7 +111,7 @@ TEST_F(StrategyIndexedFixture, dont_use_unavailables)
       myResource->setAvailable(false);
    }
 
-   myResource = TestResource::cast_copy(strategy.apply(0));
+   myResource = TestResource::cast_copy(strategy.apply(id));
    ASSERT_EQ(1, myResource->getKey());
 
    if(true) {
@@ -109,7 +122,7 @@ TEST_F(StrategyIndexedFixture, dont_use_unavailables)
       }
    }
 
-   ASSERT_THROW(strategy.apply(0), ResourceUnavailableException);
+   ASSERT_THROW(strategy.apply(id), ResourceUnavailableException);
 }
 
 TEST_F(StrategyIndexedFixture, balance_quality)
@@ -118,7 +131,8 @@ TEST_F(StrategyIndexedFixture, balance_quality)
    IndexedTest::CounterContainer counterContainer;
 
    for(int ii = 0; ii < IndexedTest::MaxResources * IndexedTest::MaxLoop; ++ ii){
-      IndexedTest::incrementUse(counterContainer, strategy.apply(ii));
+       IndexedTest::Identifier id(ii);
+       IndexedTest::incrementUse(counterContainer, strategy.apply(id));
    }
 
    ASSERT_EQ(IndexedTest::MaxResources, counterContainer.size());
@@ -132,7 +146,8 @@ TEST(StrategyIndexedTest, empty_strategy)
 {
    std::shared_ptr<coffee::balance::ResourceList> emptyList = std::make_shared<coffee::balance::ResourceList>("EmptyList");
    balance::StrategyIndexed strategy(emptyList);
-   ASSERT_THROW(strategy.apply(0), ResourceUnavailableException);
+    IndexedTest::Identifier id(0);
+    ASSERT_THROW(strategy.apply(id), ResourceUnavailableException);
 }
 
 TEST_F( ResourceListFixture, balance_multithread)

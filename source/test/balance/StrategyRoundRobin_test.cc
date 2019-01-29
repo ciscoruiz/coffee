@@ -65,10 +65,16 @@ namespace RoundRobinTest {
       }
    }
 
-   void parallel_work(std::mutex& mutexContainer, CounterContainer& counterContainer, balance::StrategyRoundRobin& strategy)
+    class Identifier : public balance::Strategy::Request {
+    public:
+       Identifier() {;}
+        int calculateIdentifier() const noexcept { return  0;}
+    };
+
+    void parallel_work(std::mutex& mutexContainer, CounterContainer& counterContainer, balance::StrategyRoundRobin& strategy)
    {
       for(int ii = 0; ii < ResourceListFixture::MaxResources; ++ ii) {
-         auto resource = strategy.apply();
+         auto resource = strategy.apply(Identifier());
 
          if(true) {
             std::lock_guard <std::mutex> guard(mutexContainer);
@@ -90,7 +96,7 @@ TEST_F(StrategyRoundRobinFixture, dont_use_unavailables)
       myResource->setAvailable(false);
    }
 
-   std::shared_ptr<TestResource> myResource = TestResource::cast_copy(strategy.apply());
+   std::shared_ptr<TestResource> myResource = TestResource::cast_copy(strategy.apply(RoundRobinTest::Identifier()));
    ASSERT_EQ(1, myResource->getKey());
 
    if(true) {
@@ -101,7 +107,8 @@ TEST_F(StrategyRoundRobinFixture, dont_use_unavailables)
       }
    }
 
-   ASSERT_THROW(strategy.apply(), ResourceUnavailableException);
+
+   ASSERT_THROW(strategy.apply(RoundRobinTest::Identifier()), ResourceUnavailableException);
 }
 
 TEST_F(StrategyRoundRobinFixture, balance_quality)
@@ -110,7 +117,7 @@ TEST_F(StrategyRoundRobinFixture, balance_quality)
    RoundRobinTest::CounterContainer counterContainer;
 
    for(int ii = 0; ii < MaxResources * RoundRobinTest::MaxLoop; ++ ii){
-      RoundRobinTest::incrementUse(counterContainer, strategy.apply());
+      RoundRobinTest::incrementUse(counterContainer, strategy.apply(RoundRobinTest::Identifier()));
    }
 
    ASSERT_EQ(MaxResources, counterContainer.size());
@@ -124,7 +131,7 @@ TEST(StrategyRoundRobinTest, empty_strategy)
 {
    std::shared_ptr<coffee::balance::ResourceList> emptyList = std::make_shared<coffee::balance::ResourceList>("EmptyList");
    balance::StrategyRoundRobin strategy(emptyList);
-   ASSERT_THROW(strategy.apply(), ResourceUnavailableException);
+   ASSERT_THROW(strategy.apply(RoundRobinTest::Identifier()), ResourceUnavailableException);
 }
 
 TEST_F(StrategyRoundRobinFixture, asXML)

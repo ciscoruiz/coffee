@@ -68,26 +68,17 @@ public:
     */
    void addRange (const int bottom, const int top, std::shared_ptr<Strategy> strategy) throw (basis::RuntimeException);
 
-   /**
-    * \param key to be used to select the range that contains the strategy to be used.
-    * \return The selected resource.
-    * \throw It will be throw and exception in case that the received key would not be cover by any range.
-    */
-   std::shared_ptr<Resource> apply(const int key) throw (ResourceUnavailableException);
+   std::shared_ptr<Resource> apply(const Request& request) throw (ResourceUnavailableException) ;
 
    std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const throw(basis::RuntimeException);
 
 private:
-   std::shared_ptr<ResourceList> m_unusedList;
    Ranges m_ranges;
-   int m_key;
 
-   range_iterator findRange (GuardResourceList&, const int key) noexcept;
+   range_iterator findRange ( const int identifier) noexcept;
    range_iterator range_begin() noexcept { return m_ranges.begin (); }
    range_iterator range_end() noexcept { return m_ranges.end (); }
    static Range& range(range_iterator ii) noexcept { return *ii; }
-
-   std::shared_ptr<Resource> apply(GuardResourceList& guard) throw (ResourceUnavailableException);
 };
 
 } /* namespace balance */

@@ -85,6 +85,23 @@ TEST_F(StrategyByRangeFixture, overlapping)
    ASSERT_THROW (mainStrategy.addRange (11, 19, strategy), basis::RuntimeException);
 }
 
+class RequestId : public balance::Strategy::Request {
+public:
+    RequestId(const std::vector<int>& identifiers) : m_identifiers(identifiers),  m_ii(m_identifiers.begin()){;}
+    int calculateIdentifier() const  noexcept {
+       if (m_ii == m_identifiers.end())
+          return 0;
+
+       int result = *m_ii;
+       ++m_ii;
+       return result;
+    }
+
+private:
+    const std::vector<int> m_identifiers;
+    mutable std::vector<int>::const_iterator m_ii;
+};
+
 TEST(StrategyByRangeTest, sharing)
 {
    balance::StrategyByRange mainStrategy;
@@ -107,15 +124,18 @@ TEST(StrategyByRangeTest, sharing)
       ASSERT_NO_THROW(mainStrategy.addRange(351, 450, strategy));
    }
 
-   ASSERT_EQ(0, TestResource::cast(mainStrategy.apply(120))->getKey());
-   ASSERT_EQ(100, TestResource::cast(mainStrategy.apply(220))->getKey());
-   ASSERT_EQ(1000, TestResource::cast(mainStrategy.apply(420))->getKey());
+   std::vector<int> identifiers = { 120, 220, 420, 190, 300, 400, 2000 };
+   RequestId requestId(identifiers);
 
-   ASSERT_EQ(1, TestResource::cast(mainStrategy.apply(190))->getKey());
-   ASSERT_EQ(101, TestResource::cast(mainStrategy.apply(300))->getKey());
-   ASSERT_EQ(1001, TestResource::cast(mainStrategy.apply(440))->getKey());
+   ASSERT_EQ(0, TestResource::cast(mainStrategy.apply(requestId))->getKey());
+   ASSERT_EQ(100, TestResource::cast(mainStrategy.apply(requestId))->getKey());
+   ASSERT_EQ(1000, TestResource::cast(mainStrategy.apply(requestId))->getKey());
 
-   ASSERT_THROW(mainStrategy.apply (2000), balance::ResourceUnavailableException);
+   ASSERT_EQ(1, TestResource::cast(mainStrategy.apply(requestId))->getKey());
+   ASSERT_EQ(101, TestResource::cast(mainStrategy.apply(requestId))->getKey());
+   ASSERT_EQ(1001, TestResource::cast(mainStrategy.apply(requestId))->getKey());
+
+   ASSERT_THROW(mainStrategy.apply (requestId), balance::ResourceUnavailableException);
 }
 
 TEST(StrategyByRangeTest, byrange_asXML)

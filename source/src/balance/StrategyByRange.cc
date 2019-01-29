@@ -33,18 +33,13 @@
 using namespace coffee;
 
 balance::StrategyByRange::StrategyByRange() :
-   balance::Strategy("balance::ByRange"),
-   m_unusedList(std::make_shared<ResourceList>("balance::ByRange::unused")),
-   m_key(0)
+   balance::Strategy("balance::ByRange")
 {
-   setResourceList(m_unusedList);
 }
 
 void balance::StrategyByRange::addRange (const int newBottom, const int newTop, std::shared_ptr<Strategy> strategy)
    throw (basis::RuntimeException)
 {
-   GuardResourceList guard(m_unusedList);
-
    if (!strategy)
       COFFEE_THROW_EXCEPTION(asString () << " can not associate a null Strategy");
 
@@ -94,14 +89,14 @@ std::shared_ptr<xml::Node> balance::StrategyByRange::asXML (std::shared_ptr<xml:
    return result;
 }
 
-balance::StrategyByRange::range_iterator balance::StrategyByRange::findRange (GuardResourceList&, const int key)
+balance::StrategyByRange::range_iterator balance::StrategyByRange::findRange (const int identifier)
    noexcept
 {
    static std::shared_ptr<balance::Strategy> empty;
 
    for (range_iterator ii = range_begin(), maxii = range_end(); ii != maxii; ++ ii) {
       Range& range = StrategyByRange::range(ii);
-      if (std::get<0>(range) <= key && std::get<1>(range) >= key) {
+      if (std::get<0>(range) <= identifier && std::get<1>(range) >= identifier) {
          return ii;
       }
    }
@@ -109,34 +104,21 @@ balance::StrategyByRange::range_iterator balance::StrategyByRange::findRange (Gu
    return range_end();
 }
 
-std::shared_ptr<balance::Resource> balance::StrategyByRange::apply(const int key)
+std::shared_ptr<balance::Resource> balance::StrategyByRange::apply(const Request& request)
    throw (ResourceUnavailableException)
-{
-   GuardResourceList guard(m_unusedList);
-   m_key = key;
-   return apply(guard);
-}
-
-std::shared_ptr<balance::Resource> balance::StrategyByRange::apply(GuardResourceList& guard)
-   throw (balance::ResourceUnavailableException)
 {
    logger::TraceMethod tm (logger::Level::Local7, COFFEE_FILE_LOCATION);
 
-   std::shared_ptr<balance::Strategy> strategy;
+   const auto identifier = request.calculateIdentifier();
 
-   if (true) {
-      range_iterator ii = findRange (guard, m_key);
+   range_iterator ii = findRange (identifier);
 
-      if (ii == range_end()) {
-         COFFEE_THROW_NAMED_EXCEPTION(balance::ResourceUnavailableException, "Key=" << m_key << " does not have a defined range");
-      }
-
-      strategy = std::get<2>(range(ii));
+   if (ii == range_end()) {
+      COFFEE_THROW_NAMED_EXCEPTION(balance::ResourceUnavailableException, "Key=" << identifier << " does not have a defined range");
    }
 
-   GuardResourceList guard2(strategy->getResourceList());
+   auto strategy = std::get<2>(range(ii));
 
-   return strategy->apply(guard2);
+   return strategy->apply(request);
 }
-
 

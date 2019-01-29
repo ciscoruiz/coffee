@@ -32,19 +32,14 @@
 
 using namespace coffee;
 
-std::shared_ptr<balance::Resource> balance::StrategyRoundRobin::apply()
-   throw (ResourceUnavailableException)
-{
-   GuardResourceList guard(m_resources);
-   return apply(guard);
-}
-
-std::shared_ptr<balance::Resource> balance::StrategyRoundRobin::apply (GuardResourceList& guard)
+std::shared_ptr<balance::Resource> balance::StrategyRoundRobin::apply (const Request& request)
    throw (ResourceUnavailableException)
 {
    logger::TraceMethod tm (logger::Level::Local7, COFFEE_FILE_LOCATION);
 
-   if (!m_position) {
+    GuardResourceList guard(m_resources);
+
+    if (!m_position) {
       m_position = m_resources->resource_begin(guard);
    }
 

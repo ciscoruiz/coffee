@@ -24,9 +24,9 @@
 #include <mutex>
 
 #include <coffee/balance/Resource.hpp>
-#include <coffee/balance/ResourceList.hpp>
+#include <coffee/balance/ResourceContainer.hpp>
 #include <coffee/balance/StrategyIndexed.hpp>
-#include <coffee/balance/GuardResourceList.hpp>
+#include <coffee/balance/GuardResourceContainer.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
@@ -39,36 +39,24 @@ std::shared_ptr<balance::Resource> balance::StrategyIndexed::apply(const Request
 {
    logger::TraceMethod tm (logger::Level::Local7, COFFEE_FILE_LOCATION);
 
-   GuardResourceList guard(m_resources);
-
-   if (m_resources->size(guard) == 0) {
-      COFFEE_THROW_NAMED_EXCEPTION(ResourceUnavailableException, m_resources->getName() << " is empty");
-   }
-
-   std::shared_ptr<Resource> result;
-   ResourceList::resource_iterator ww;
-   ResourceList::resource_iterator end;
+   GuardResourceContainer guard(m_resources);
 
    const int identifier = request.calculateIdentifier();
 
-   ww = end = m_resources->resource_begin(guard) + (identifier % m_resources->size(guard));
-
-   do {
-      std::shared_ptr<Resource>& w = ResourceList::resource(ww);
-
-      if (w->isAvailable() == true) {
-         result = w;
-         break;
-      }
-   } while ((ww = m_resources->next(guard, ww)) != end);
-
-   if (!result) {
-      COFFEE_THROW_NAMED_EXCEPTION(ResourceUnavailableException, this->asString() << " there is not any available resource");
+   if (m_resources->fullAvailableResources(guard)) {
+      return apply(identifier, guard, m_resources);
    }
 
-   LOG_LOCAL7("Result=" << result->asString());
+   auto availableResources = std::make_shared<balance::ResourceContainer>("AvailableResources");
 
-   return result;
+   for (auto ii = m_resources->resource_begin(guard), maxii = m_resources->resource_end(guard); ii != maxii; ++ ii) {
+      auto& resource = ResourceContainer::resource(ii);
+      if (resource->isAvailable()) {
+         availableResources->add(resource);
+      }
+   }
+
+   return apply(identifier, guard, availableResources);
 }
 
 std::shared_ptr<xml::Node> balance::StrategyIndexed::asXML(std::shared_ptr<xml::Node>& parent) const
@@ -81,3 +69,34 @@ std::shared_ptr<xml::Node> balance::StrategyIndexed::asXML(std::shared_ptr<xml::
    return result;
 }
 
+std::shared_ptr<balance::Resource> balance::StrategyIndexed::apply(const int identifier, GuardResourceContainer& guard, std::shared_ptr<ResourceContainer>& resourceContainer)
+   throw (ResourceUnavailableException)
+{
+   if (resourceContainer->size(guard) == 0) {
+      COFFEE_THROW_NAMED_EXCEPTION(ResourceUnavailableException, resourceContainer->getName() << " is empty");
+   }
+
+   std::shared_ptr<Resource> result;
+   ResourceContainer::resource_iterator ww;
+   ResourceContainer::resource_iterator end;
+
+   ww = end = resourceContainer->resource_begin(guard) + (identifier % resourceContainer->size(guard));
+
+   do {
+      std::shared_ptr<Resource>& w = ResourceContainer::resource(ww);
+
+      if (w->isAvailable() == true) {
+         result = w;
+         break;
+      }
+   } while ((ww = resourceContainer->next(guard, ww)) != end);
+
+   if (!result) {
+      COFFEE_THROW_NAMED_EXCEPTION(ResourceUnavailableException, this->asString() << " there is not any available resource");
+   }
+
+   LOG_LOCAL7("Result=" << result->asString());
+
+   return result;
+
+}

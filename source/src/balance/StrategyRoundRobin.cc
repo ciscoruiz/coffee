@@ -23,7 +23,7 @@
 
 #include <coffee/balance/Resource.hpp>
 #include <coffee/balance/StrategyRoundRobin.hpp>
-#include <coffee/balance/GuardResourceList.hpp>
+#include <coffee/balance/GuardResourceContainer.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
@@ -37,7 +37,7 @@ std::shared_ptr<balance::Resource> balance::StrategyRoundRobin::apply (const Req
 {
    logger::TraceMethod tm (logger::Level::Local7, COFFEE_FILE_LOCATION);
 
-    GuardResourceList guard(m_resources);
+    GuardResourceContainer guard(m_resources);
 
     if (!m_position) {
       m_position = m_resources->resource_begin(guard);
@@ -48,13 +48,13 @@ std::shared_ptr<balance::Resource> balance::StrategyRoundRobin::apply (const Req
    }
 
    std::shared_ptr<Resource> result;
-   ResourceList::resource_iterator ww;
-   ResourceList::resource_iterator end;
+   ResourceContainer::resource_iterator ww;
+   ResourceContainer::resource_iterator end;
 
    ww = end = m_position.value();
 
    do {
-      std::shared_ptr<Resource>& w = ResourceList::resource(ww);
+      std::shared_ptr<Resource>& w = ResourceContainer::resource(ww);
 
       if (w->isAvailable () == true) {
          // prepare the next call to this method

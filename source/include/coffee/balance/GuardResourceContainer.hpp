@@ -21,8 +21,8 @@
 // SOFTWARE.
 //
 
-#ifndef __coffee_balance_GuardResourceList_hpp
-#define __coffee_balance_GuardResourceList_hpp
+#ifndef __coffee_balance_GuardResourceContainer_hpp
+#define __coffee_balance_GuardResourceContainer_hpp
 
 #include <memory>
 #include <mutex>
@@ -31,34 +31,34 @@ namespace coffee {
 
 namespace balance {
 
-class ResourceList;
+class ResourceContainer;
 
 /**
  * Guard to access a ResourceList in exclusive access.
  */
-class GuardResourceList {
+class GuardResourceContainer {
 public:
    /**
     * Constructor.
     * \param resourceList to be accessed in exclusive mode.
     */
-   explicit GuardResourceList(std::shared_ptr<ResourceList>& resourceList);
+   explicit GuardResourceContainer(std::shared_ptr<ResourceContainer>& resourceList);
 
    /**
     * Constructor.
     * \param mutex Mutex to be used to prepare the exclusive mode.
     */
-   explicit GuardResourceList(std::mutex& mutex) : m_guard(mutex) {}
+   explicit GuardResourceContainer(std::mutex& mutex) : m_guard(mutex) {}
 
    /**
     * Destructor.
     */
-   ~GuardResourceList() { ; }
+   ~GuardResourceContainer() { ; }
 
 private:
    std::lock_guard<std::mutex> m_guard;
 
-   friend class ResourceList;
+   friend class ResourceContainer;
 };
 
 }

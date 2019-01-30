@@ -33,7 +33,7 @@
 namespace coffee {
 namespace balance {
 
-class GuardResourceList;
+class GuardResourceContainer;
 
 /**
  * Select a resource by using two level of selections.

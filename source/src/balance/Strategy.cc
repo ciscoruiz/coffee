@@ -23,7 +23,7 @@
 
 
 #include <coffee/balance/Strategy.hpp>
-#include <coffee/balance/ResourceList.hpp>
+#include <coffee/balance/ResourceContainer.hpp>
 
 using namespace coffee;
 

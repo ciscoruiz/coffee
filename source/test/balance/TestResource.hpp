@@ -27,7 +27,7 @@
 #include <coffee/balance/Resource.hpp>
 #include <coffee/basis/AsString.hpp>
 
-#include <coffee/balance/ResourceList.hpp>
+#include <coffee/balance/ResourceContainer.hpp>
 
 namespace coffee {
 

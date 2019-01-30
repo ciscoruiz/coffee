@@ -31,8 +31,8 @@
 #include <coffee/logger/TtyWriter.hpp>
 
 #include <coffee/balance/Resource.hpp>
-#include <coffee/balance/ResourceList.hpp>
-#include <coffee/balance/GuardResourceList.hpp>
+#include <coffee/balance/ResourceContainer.hpp>
+#include <coffee/balance/GuardResourceContainer.hpp>
 #include <coffee/balance/StrategyRoundRobin.hpp>
 
 #include <coffee/xml/Node.hpp>
@@ -50,21 +50,21 @@ const int ResourceListFixture::MaxResources = 10;
 
 TEST(BasicBalanceTest, avoid_empties)
 {
-   ResourceList resourceList("otherList");
+   ResourceContainer resourceList("otherList");
    std::shared_ptr<Resource> emptyResource;
    ASSERT_THROW(resourceList.add(emptyResource), basis::RuntimeException);
 }
 
 TEST_F(ResourceListFixture, count_availables)
 {
-   GuardResourceList guard(resourceList);
+   GuardResourceContainer guard(resourceList);
 
    ASSERT_EQ(MaxResources, resourceList->size(guard));
    ASSERT_EQ(MaxResources, resourceList->countAvailableResources(guard));
 
    bool available = false;
    for(auto ii = resourceList->resource_begin(guard), maxii = resourceList->resource_end(guard); ii != maxii; ++ ii) {
-      std::shared_ptr<TestResource> myResource = TestResource::cast(ResourceList::resource(ii));
+      std::shared_ptr<TestResource> myResource = TestResource::cast(ResourceContainer::resource(ii));
       myResource->setAvailable(available);
       available = !available;
    }
@@ -74,7 +74,7 @@ TEST_F(ResourceListFixture, count_availables)
 
 TEST(BasicBalanceTest,error_while_initialize )
 {
-   std::shared_ptr<coffee::balance::ResourceList> resourceList = std::make_shared<coffee::balance::ResourceList>("TestResources");
+   std::shared_ptr<coffee::balance::ResourceContainer> resourceList = std::make_shared<coffee::balance::ResourceContainer>("TestResources");
 
    resourceList->add(std::make_shared<TestResource>(0));
    resourceList->add(std::make_shared<UnusableResource>());
@@ -82,37 +82,88 @@ TEST(BasicBalanceTest,error_while_initialize )
 
    resourceList->initialize();
 
-   GuardResourceList guard(resourceList);
+   GuardResourceContainer guard(resourceList);
 
    ASSERT_EQ(2, resourceList->countAvailableResources(guard));
 }
 
+TEST(BasicBalanceTest,avoid_repeated_resource )
+{
+   std::shared_ptr<coffee::balance::ResourceContainer> resourceList = std::make_shared<coffee::balance::ResourceContainer>("TestResources");
+
+   ASSERT_TRUE(resourceList->add(std::make_shared<TestResource>(0)));
+   ASSERT_TRUE(resourceList->add(std::make_shared<TestResource>(1)));
+   ASSERT_FALSE(resourceList->add(std::make_shared<TestResource>(0)));
+
+   GuardResourceContainer guard(resourceList);
+
+   ASSERT_EQ(2, resourceList->size(guard));
+}
+
+TEST(BasicBalanceTest,remove_resource )
+{
+   std::shared_ptr<coffee::balance::ResourceContainer> resourceList = std::make_shared<coffee::balance::ResourceContainer>("TestResources");
+
+   auto resource = std::make_shared<TestResource>(1);
+
+   ASSERT_TRUE(resourceList->add(std::make_shared<TestResource>(0)));
+   ASSERT_TRUE(resourceList->add(resource));
+   ASSERT_TRUE(resourceList->add(std::make_shared<TestResource>(2)));
+
+   {
+      GuardResourceContainer guard(resourceList);
+      ASSERT_EQ(3, resourceList->size(guard));
+   }
+
+   ASSERT_TRUE(resourceList->remove(resource->getName()));
+
+   {
+      GuardResourceContainer guard(resourceList);
+      ASSERT_EQ(2, resourceList->size(guard));
+   }
+}
+
+TEST(BasicBalanceTest,remove_unknow_resource )
+{
+   std::shared_ptr<coffee::balance::ResourceContainer> resourceList = std::make_shared<coffee::balance::ResourceContainer>("TestResources");
+
+   ASSERT_TRUE(resourceList->add(std::make_shared<TestResource>(0)));
+   ASSERT_TRUE(resourceList->add(std::make_shared<TestResource>(2)));
+
+   ASSERT_FALSE(resourceList->remove("not-exist"));
+
+   {
+      GuardResourceContainer guard(resourceList);
+      ASSERT_EQ(2, resourceList->size(guard));
+   }
+}
+
 TEST(BasicBalanceTest,initialize_empty_list )
 {
-   std::shared_ptr<coffee::balance::ResourceList> resourceList = std::make_shared<coffee::balance::ResourceList>("TestResources");
+   std::shared_ptr<coffee::balance::ResourceContainer> resourceList = std::make_shared<coffee::balance::ResourceContainer>("TestResources");
    ASSERT_NO_THROW(resourceList->initialize());
 }
 
 TEST(BasicBalanceTest,initialize_without_available_resources )
 {
-   std::shared_ptr<coffee::balance::ResourceList> resourceList = std::make_shared<coffee::balance::ResourceList>("TestResources");
+   std::shared_ptr<coffee::balance::ResourceContainer> resourceList = std::make_shared<coffee::balance::ResourceContainer>("TestResources");
    resourceList->add(std::make_shared<UnusableResource>());
    resourceList->add(std::make_shared<UnusableResource>());
    ASSERT_NO_THROW(resourceList->initialize());
 
-   GuardResourceList guard(resourceList);
+   GuardResourceContainer guard(resourceList);
    ASSERT_EQ(0, resourceList->countAvailableResources(guard));
 }
 
 TEST_F(ResourceListFixture, as_string)
 {
    if(true) {
-      GuardResourceList guard(resourceList);
+      GuardResourceContainer guard(resourceList);
       std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, 0));
       myResource->setAvailable(false);
    }
 
-   ASSERT_EQ("balance.ResourceList { basis.NamedObject {Name=TestResources} | Available = 9 of 10 }", resourceList->asString());
+   ASSERT_EQ("balance.ResourceContainer { basis.NamedObject {Name=TestResources} | Available = 9 of 10 }", resourceList->asString());
 }
 
 TEST_F(ResourceListFixture, as_xml)
@@ -120,7 +171,7 @@ TEST_F(ResourceListFixture, as_xml)
    const int hotIndex = ResourceListFixture::MaxResources / 2;
 
    if(true) {
-      GuardResourceList guard(resourceList);
+      GuardResourceContainer guard(resourceList);
       std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, hotIndex));
       myResource->setAvailable(false);
    }

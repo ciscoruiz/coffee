@@ -25,12 +25,12 @@
 #define __coffee_balance_StrategyRoundRobin_hpp
 
 #include "Strategy.hpp"
-#include "ResourceList.hpp"
+#include "ResourceContainer.hpp"
 
 namespace coffee {
 namespace balance {
 
-class GuardResourceList;
+class GuardResourceContainer;
 
 /**
  * Select a resource by using a Round Robin technique. If the candidate resource would not be available
@@ -45,7 +45,7 @@ public:
     * Constuctor.
     * \param resources List of resources to work with.
     */
-   explicit StrategyRoundRobin (std::shared_ptr<ResourceList>& resources) : Strategy("balance::RoundRobin", resources) {;}
+   explicit StrategyRoundRobin (std::shared_ptr<ResourceContainer>& resources) : Strategy("balance::RoundRobin", resources) {;}
 
    /**
     * Select a resource by using a Round Robin technique. If the candidate resource would not be available
@@ -66,12 +66,12 @@ private:
       Position() : valid(false) {;}
 
       operator bool() { return valid; }
-      Position& operator=(ResourceList::resource_iterator other)  { iterator = other; valid = true; return *this; }
-      ResourceList::resource_iterator value() { return iterator; }
+      Position& operator=(ResourceContainer::resource_iterator other)  { iterator = other; valid = true; return *this; }
+      ResourceContainer::resource_iterator value() { return iterator; }
 
    private:
       bool valid;
-      ResourceList::resource_iterator iterator;
+      ResourceContainer::resource_iterator iterator;
    };
    Position m_position;
 };

@@ -22,11 +22,11 @@
 //
 
 #include <coffee/balance/Resource.hpp>
-#include <coffee/balance/ResourceList.hpp>
+#include <coffee/balance/ResourceContainer.hpp>
 #include <coffee/balance/StrategyByRange.hpp>
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
-#include <coffee/balance/GuardResourceList.hpp>
+#include <coffee/balance/GuardResourceContainer.hpp>
 #include <coffee/xml/Node.hpp>
 #include <coffee/xml/Attribute.hpp>
 

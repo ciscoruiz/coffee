@@ -23,7 +23,7 @@
 #ifndef TEST_BALANCE_RESOURCELISTFIXTURE_HPP_
 #define TEST_BALANCE_RESOURCELISTFIXTURE_HPP_
 
-#include <coffee/balance/ResourceList.hpp>
+#include <coffee/balance/ResourceContainer.hpp>
 
 #include "TestResource.hpp"
 
@@ -36,8 +36,8 @@ struct ResourceListFixture : public ::testing::Test {
       resourceList = setup(MaxResources, 0);
    }
 
-   static std::shared_ptr<coffee::balance::ResourceList> setup(const int maxResources, const int firstId) {
-      auto result = std::make_shared<coffee::balance::ResourceList>("TestResources");
+   static std::shared_ptr<coffee::balance::ResourceContainer> setup(const int maxResources, const int firstId) {
+      auto result = std::make_shared<coffee::balance::ResourceContainer>("TestResources");
 
       int id = firstId;
       for (int ii = 0; ii < maxResources; ++ ii) {
@@ -48,7 +48,7 @@ struct ResourceListFixture : public ::testing::Test {
       return result;
    }
 
-   std::shared_ptr<coffee::balance::ResourceList> resourceList;
+   std::shared_ptr<coffee::balance::ResourceContainer> resourceList;
 };
 
 #endif /* TEST_BALANCE_RESOURCELISTFIXTURE_HPP_ */

@@ -39,8 +39,8 @@ namespace xml {
 namespace balance {
 
 class Resource;
-class GuardResourceList;
-class ResourceList;
+class GuardResourceContainer;
+class ResourceContainer;
 
 /**
  * Generic strategy for selecting a resource from a ResourceList.
@@ -71,26 +71,27 @@ public:
     */
    virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const throw(basis::RuntimeException) = 0;
 
-   /**
-    * \return The resource list associated to this instance.
-    */
-   std::shared_ptr<ResourceList>& getResourceList() { return m_resources; }
 
 protected:
-   std::shared_ptr<ResourceList> m_resources;
+   std::shared_ptr<ResourceContainer> m_resources;
 
    /**
     * Constuctor.
     * \param name Logical name.
     * \param resources List of resources to work with.
     */
-   Strategy(const std::string& name, std::shared_ptr<ResourceList>& resources) : basis::NamedObject(name), m_resources(resources) {;}
+   Strategy(const std::string& name, std::shared_ptr<ResourceContainer>& resources) : basis::NamedObject(name), m_resources(resources) {;}
 
    /**
     * Constuctor.
     * \param name Logical name.
     */
    explicit Strategy(const std::string& name) : basis::NamedObject(name) {;}
+
+    /**
+     * \return The resource list associated to this instance.
+     */
+    std::shared_ptr<ResourceContainer>& getResourceList() { return m_resources; }
 };
 
 }

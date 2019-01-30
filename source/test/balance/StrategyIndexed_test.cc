@@ -142,6 +142,33 @@ TEST_F(StrategyIndexedFixture, balance_quality)
    }
 }
 
+TEST_F(StrategyIndexedFixture, balance_quality_with_unavailables)
+{
+   balance::StrategyIndexed strategy(resourceList);
+   IndexedTest::CounterContainer counterContainer;
+
+   {
+      balance::GuardResourceContainer guard(resourceList);
+      for (int ii = IndexedTest::MaxResources / 2; ii < IndexedTest::MaxResources; ++ ii) {
+         std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, ii));
+         myResource->setAvailable(false);
+      }
+   }
+
+   for(int ii = 0; ii < IndexedTest::MaxResources * IndexedTest::MaxLoop; ++ ii){
+      IndexedTest::Identifier id(ii);
+      IndexedTest::incrementUse(counterContainer, strategy.apply(id));
+   }
+
+   ASSERT_EQ(IndexedTest::MaxResources / 2, counterContainer.size());
+
+   auto counterUse = (IndexedTest::MaxResources * IndexedTest::MaxLoop) / (IndexedTest::MaxResources / 2);
+
+   for(IndexedTest::counter_iterator ii = counterContainer.begin(), maxii = counterContainer.end(); ii != maxii; ++ ii) {
+      ASSERT_EQ(counterUse, ii->second);
+   }
+}
+
 TEST(StrategyIndexedTest, empty_strategy)
 {
    std::shared_ptr<coffee::balance::ResourceContainer> emptyList = std::make_shared<coffee::balance::ResourceContainer>("EmptyList");

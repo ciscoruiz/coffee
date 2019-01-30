@@ -129,6 +129,17 @@ size_t balance::ResourceContainer::countAvailableResources(balance::GuardResourc
    return result;
 }
 
+bool balance::ResourceContainer::fullAvailableResources(GuardResourceContainer& guard) const
+   noexcept
+{
+   for(const_resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
+      if(!resource(ii)->isAvailable())
+         return false;
+   }
+
+   return true;
+}
+
 balance::ResourceContainer::resource_iterator balance::ResourceContainer::next(balance::GuardResourceContainer& guard, resource_iterator ii)
    noexcept
 {

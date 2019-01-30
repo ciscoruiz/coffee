@@ -119,6 +119,11 @@ public:
    size_t countAvailableResources(GuardResourceContainer&) const noexcept;
 
    /**
+    * \return true if all defined resources are available.
+    */
+   bool fullAvailableResources(GuardResourceContainer&) const noexcept;
+
+   /**
     * \return resource_iterator to the first attached resource.
     */
    const_resource_iterator resource_begin(GuardResourceContainer&) const noexcept { return m_resources.begin(); }

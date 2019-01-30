@@ -58,6 +58,9 @@ public:
    std::shared_ptr<Resource> apply(const Request& request) throw (ResourceUnavailableException) ;
 
    std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const throw(basis::RuntimeException);
+
+private:
+    std::shared_ptr<Resource> apply(const int identifier, GuardResourceContainer& guard, std::shared_ptr<ResourceContainer>& resourceContainer) throw (ResourceUnavailableException);
 };
 
 } /* namespace balance */

@@ -57,23 +57,7 @@ public:
    std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const throw(basis::RuntimeException);
 
 private:
-   class Position {
-   public:
-      /**
-       * Constuctor.
-       * \param resources List of resources to work with.
-       */
-      Position() : valid(false) {;}
-
-      operator bool() { return valid; }
-      Position& operator=(ResourceContainer::resource_iterator other)  { iterator = other; valid = true; return *this; }
-      ResourceContainer::resource_iterator value() { return iterator; }
-
-   private:
-      bool valid;
-      ResourceContainer::resource_iterator iterator;
-   };
-   Position m_position;
+   std::pair<bool, ResourceContainer::resource_iterator> m_position;
 };
 
 } /* namespace balance */

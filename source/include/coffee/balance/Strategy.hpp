@@ -87,11 +87,6 @@ protected:
     * \param name Logical name.
     */
    explicit Strategy(const std::string& name) : basis::NamedObject(name) {;}
-
-    /**
-     * \return The resource list associated to this instance.
-     */
-    std::shared_ptr<ResourceContainer>& getResourceList() { return m_resources; }
 };
 
 }

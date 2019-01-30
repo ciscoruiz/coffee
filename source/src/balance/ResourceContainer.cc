@@ -65,12 +65,12 @@ void balance::ResourceContainer::initialize()
       LOG_WARN(asString() << " does not have any available resource");
 }
 
-bool balance::ResourceContainer::add(std::shared_ptr<Resource> resource)
+bool balance::ResourceContainer::add(std::shared_ptr<Resource> newResource)
    throw(basis::RuntimeException)
 {
    logger::TraceMethod tm(logger::Level::Local7, COFFEE_FILE_LOCATION);
 
-   if(!resource) {
+   if(!newResource) {
       COFFEE_THROW_EXCEPTION(asString() << " can not add an empty resource");
    }
 
@@ -79,21 +79,41 @@ bool balance::ResourceContainer::add(std::shared_ptr<Resource> resource)
    if(true) {
       GuardResourceContainer guard(m_mutex);
 
-      for(const_resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
-         if(ResourceContainer::resource(ii)->getName() == resource->getName()) {
-            result = false;
-            break;
-         }
+      for (auto& resource : m_resources) {
+          if (resource->getName()  == newResource->getName()) {
+              result = false;
+              break;
+          }
       }
 
       if(result == true) {
-         m_resources.push_back(resource);
+         m_resources.push_back(newResource);
       }
    }
 
-   LOG_INFO(asString() << " | Add: " << resource->asString() << " | Result=" << basis::AsString::apply(result));
+   LOG_INFO(asString() << " | Add: " << newResource->asString() << " | Result=" << basis::AsString::apply(result));
 
    return result;
+}
+
+bool balance::ResourceContainer::remove(const std::string &resourceName)
+    noexcept
+{
+    GuardResourceContainer guard(m_mutex);
+
+    bool result = false;
+
+    for (auto ii = m_resources.begin(), maxii = m_resources.end(); ii != maxii; ++ ii) {
+        if (ResourceContainer::resource(ii)->getName() == resourceName) {
+            m_resources.erase(ii);
+            result = true;
+            break;
+        }
+    }
+
+    LOG_INFO(asString() << " | Remove: " << resourceName << " | Result=" << basis::AsString::apply(result));
+
+    return result;
 }
 
 size_t balance::ResourceContainer::countAvailableResources(balance::GuardResourceContainer& guard) const
@@ -147,3 +167,4 @@ std::shared_ptr<xml::Node> balance::ResourceContainer::asXML(std::shared_ptr<xml
 
    return result;
 }
+

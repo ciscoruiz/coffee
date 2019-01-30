@@ -87,6 +87,57 @@ TEST(BasicBalanceTest,error_while_initialize )
    ASSERT_EQ(2, resourceList->countAvailableResources(guard));
 }
 
+TEST(BasicBalanceTest,avoid_repeated_resource )
+{
+   std::shared_ptr<coffee::balance::ResourceContainer> resourceList = std::make_shared<coffee::balance::ResourceContainer>("TestResources");
+
+   ASSERT_TRUE(resourceList->add(std::make_shared<TestResource>(0)));
+   ASSERT_TRUE(resourceList->add(std::make_shared<TestResource>(1)));
+   ASSERT_FALSE(resourceList->add(std::make_shared<TestResource>(0)));
+
+   GuardResourceContainer guard(resourceList);
+
+   ASSERT_EQ(2, resourceList->size(guard));
+}
+
+TEST(BasicBalanceTest,remove_resource )
+{
+   std::shared_ptr<coffee::balance::ResourceContainer> resourceList = std::make_shared<coffee::balance::ResourceContainer>("TestResources");
+
+   auto resource = std::make_shared<TestResource>(1);
+
+   ASSERT_TRUE(resourceList->add(std::make_shared<TestResource>(0)));
+   ASSERT_TRUE(resourceList->add(resource));
+   ASSERT_TRUE(resourceList->add(std::make_shared<TestResource>(2)));
+
+   {
+      GuardResourceContainer guard(resourceList);
+      ASSERT_EQ(3, resourceList->size(guard));
+   }
+
+   ASSERT_TRUE(resourceList->remove(resource->getName()));
+
+   {
+      GuardResourceContainer guard(resourceList);
+      ASSERT_EQ(2, resourceList->size(guard));
+   }
+}
+
+TEST(BasicBalanceTest,remove_unknow_resource )
+{
+   std::shared_ptr<coffee::balance::ResourceContainer> resourceList = std::make_shared<coffee::balance::ResourceContainer>("TestResources");
+
+   ASSERT_TRUE(resourceList->add(std::make_shared<TestResource>(0)));
+   ASSERT_TRUE(resourceList->add(std::make_shared<TestResource>(2)));
+
+   ASSERT_FALSE(resourceList->remove("not-exist"));
+
+   {
+      GuardResourceContainer guard(resourceList);
+      ASSERT_EQ(2, resourceList->size(guard));
+   }
+}
+
 TEST(BasicBalanceTest,initialize_empty_list )
 {
    std::shared_ptr<coffee::balance::ResourceContainer> resourceList = std::make_shared<coffee::balance::ResourceContainer>("TestResources");

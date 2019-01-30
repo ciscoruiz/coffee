@@ -65,10 +65,18 @@ public:
 
    /**
     * Add resource to the list. It is thread-safe.
+    * \return true if the resource could be added or false otherwise.
     */
    bool add(std::shared_ptr<Resource> resource) throw(basis::RuntimeException);
 
-   /**
+    /**
+     * Add resource to the list. It is thread-safe.
+     * \param resourceName Resource name to be removed
+     * \return true if the resource could be removed or false otherwise.
+     */
+    bool remove(const std::string& resourceName) noexcept;
+
+    /**
     * It will call to pure virtual method \em do_initialize and do_initializer for every one of the associated resources.
     */
    virtual void initialize() throw(basis::RuntimeException);

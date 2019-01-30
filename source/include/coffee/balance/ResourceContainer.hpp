@@ -159,6 +159,14 @@ public:
     */
    virtual std::shared_ptr<xml::Node> asXML(std::shared_ptr<xml::Node>& parent) const throw(basis::RuntimeException);
 
+   /**
+    * @param name Logical name which will use in the constructor of this instance.
+    * @return The new instance.
+    */
+   static std::shared_ptr<ResourceContainer> instantiate(const char* name) {
+      return std::make_shared<ResourceContainer>(name);
+   }
+
 private:
    mutable std::mutex m_mutex;
    resource_container m_resources;

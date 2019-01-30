@@ -129,7 +129,7 @@ TEST_F(StrategyRoundRobinFixture, balance_quality)
 
 TEST(StrategyRoundRobinTest, empty_strategy)
 {
-   std::shared_ptr<coffee::balance::ResourceContainer> emptyList = std::make_shared<coffee::balance::ResourceContainer>("EmptyList");
+   auto emptyList = coffee::balance::ResourceContainer::instantiate("EmptyList");
    balance::StrategyRoundRobin strategy(emptyList);
    ASSERT_THROW(strategy.apply(RoundRobinTest::Identifier()), ResourceUnavailableException);
 }

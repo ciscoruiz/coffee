@@ -34,7 +34,7 @@
 
 #include <coffee/balance/Resource.hpp>
 #include <coffee/balance/StrategyRoundRobin.hpp>
-#include <coffee/balance/GuardResourceList.hpp>
+#include <coffee/balance/GuardResourceContainer.hpp>
 #include <coffee/xml/Compiler.hpp>
 #include <coffee/xml/Node.hpp>
 
@@ -91,7 +91,7 @@ TEST_F(StrategyRoundRobinFixture, dont_use_unavailables)
    balance::StrategyRoundRobin strategy(resourceList);
 
    if(true) {
-      balance::GuardResourceList guard(resourceList);
+      balance::GuardResourceContainer guard(resourceList);
       std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, 0));
       myResource->setAvailable(false);
    }
@@ -100,9 +100,9 @@ TEST_F(StrategyRoundRobinFixture, dont_use_unavailables)
    ASSERT_EQ(1, myResource->getKey());
 
    if(true) {
-      balance::GuardResourceList guard(resourceList);
+      balance::GuardResourceContainer guard(resourceList);
       for(auto ii = resourceList->resource_begin(guard), maxii = resourceList->resource_end(guard); ii != maxii; ++ ii) {
-         std::shared_ptr<TestResource> myResource = TestResource::cast(ResourceList::resource(ii));
+         std::shared_ptr<TestResource> myResource = TestResource::cast(ResourceContainer::resource(ii));
          myResource->setAvailable(false);
       }
    }
@@ -129,7 +129,7 @@ TEST_F(StrategyRoundRobinFixture, balance_quality)
 
 TEST(StrategyRoundRobinTest, empty_strategy)
 {
-   std::shared_ptr<coffee::balance::ResourceList> emptyList = std::make_shared<coffee::balance::ResourceList>("EmptyList");
+   std::shared_ptr<coffee::balance::ResourceContainer> emptyList = std::make_shared<coffee::balance::ResourceContainer>("EmptyList");
    balance::StrategyRoundRobin strategy(emptyList);
    ASSERT_THROW(strategy.apply(RoundRobinTest::Identifier()), ResourceUnavailableException);
 }

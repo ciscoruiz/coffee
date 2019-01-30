@@ -22,8 +22,8 @@
 //
 
 #include <coffee/balance/Resource.hpp>
-#include <coffee/balance/ResourceList.hpp>
-#include <coffee/balance/GuardResourceList.hpp>
+#include <coffee/balance/ResourceContainer.hpp>
+#include <coffee/balance/GuardResourceContainer.hpp>
 
 #include <mutex>
 
@@ -39,14 +39,14 @@
 
 using namespace coffee;
 
-void balance::ResourceList::initialize()
+void balance::ResourceContainer::initialize()
    throw(basis::RuntimeException)
 {
    LOG_THIS_METHOD();
 
    SCCS::activate();
 
-   GuardResourceList guard(m_mutex);
+   GuardResourceContainer guard(m_mutex);
 
    for(resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
       try {
@@ -65,7 +65,7 @@ void balance::ResourceList::initialize()
       LOG_WARN(asString() << " does not have any available resource");
 }
 
-bool balance::ResourceList::add(std::shared_ptr<Resource> resource)
+bool balance::ResourceContainer::add(std::shared_ptr<Resource> resource)
    throw(basis::RuntimeException)
 {
    logger::TraceMethod tm(logger::Level::Local7, COFFEE_FILE_LOCATION);
@@ -77,10 +77,10 @@ bool balance::ResourceList::add(std::shared_ptr<Resource> resource)
    bool result = true;
 
    if(true) {
-      GuardResourceList guard(m_mutex);
+      GuardResourceContainer guard(m_mutex);
 
       for(const_resource_iterator ii = resource_begin(guard), maxii = resource_end(guard); ii != maxii; ++ ii) {
-         if(ResourceList::resource(ii)->getName() == resource->getName()) {
+         if(ResourceContainer::resource(ii)->getName() == resource->getName()) {
             result = false;
             break;
          }
@@ -96,7 +96,7 @@ bool balance::ResourceList::add(std::shared_ptr<Resource> resource)
    return result;
 }
 
-size_t balance::ResourceList::countAvailableResources(balance::GuardResourceList& guard) const
+size_t balance::ResourceContainer::countAvailableResources(balance::GuardResourceContainer& guard) const
    noexcept
 {
    size_t result = 0;
@@ -109,7 +109,7 @@ size_t balance::ResourceList::countAvailableResources(balance::GuardResourceList
    return result;
 }
 
-balance::ResourceList::resource_iterator balance::ResourceList::next(balance::GuardResourceList& guard, resource_iterator ii)
+balance::ResourceContainer::resource_iterator balance::ResourceContainer::next(balance::GuardResourceContainer& guard, resource_iterator ii)
    noexcept
 {
    ii ++;
@@ -121,10 +121,10 @@ balance::ResourceList::resource_iterator balance::ResourceList::next(balance::Gu
 }
 
 //virtual
-basis::StreamString balance::ResourceList::asString() const
+basis::StreamString balance::ResourceContainer::asString() const
    noexcept
 {
-   basis::StreamString result("balance.ResourceList { ");
+   basis::StreamString result("balance.ResourceContainer { ");
    result += basis::NamedObject::asString();
    result += " | Available = ";
 
@@ -137,7 +137,7 @@ basis::StreamString balance::ResourceList::asString() const
 }
 
 //virtual
-std::shared_ptr<xml::Node> balance::ResourceList::asXML(std::shared_ptr<xml::Node>& parent) const
+std::shared_ptr<xml::Node> balance::ResourceContainer::asXML(std::shared_ptr<xml::Node>& parent) const
    throw(basis::RuntimeException)
 {
    std::shared_ptr<xml::Node> result = parent->createChild(this->getName());

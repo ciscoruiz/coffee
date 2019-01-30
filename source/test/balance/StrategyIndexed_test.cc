@@ -36,8 +36,8 @@
 
 #include <coffee/balance/Resource.hpp>
 #include <coffee/balance/StrategyIndexed.hpp>
-#include <coffee/balance/GuardResourceList.hpp>
-#include <coffee/balance/ResourceList.hpp>
+#include <coffee/balance/GuardResourceContainer.hpp>
+#include <coffee/balance/ResourceContainer.hpp>
 
 #include <coffee/xml/Node.hpp>
 #include <coffee/xml/Compiler.hpp>
@@ -106,7 +106,7 @@ TEST_F(StrategyIndexedFixture, dont_use_unavailables)
    ASSERT_EQ(0, myResource->getKey());
 
    if(true) {
-      balance::GuardResourceList guard(resourceList);
+      balance::GuardResourceContainer guard(resourceList);
       std::shared_ptr<TestResource> myResource = TestResource::cast(resourceList->at(guard, 0));
       myResource->setAvailable(false);
    }
@@ -115,9 +115,9 @@ TEST_F(StrategyIndexedFixture, dont_use_unavailables)
    ASSERT_EQ(1, myResource->getKey());
 
    if(true) {
-      balance::GuardResourceList guard(resourceList);
+      balance::GuardResourceContainer guard(resourceList);
       for(auto ii = resourceList->resource_begin(guard), maxii = resourceList->resource_end(guard); ii != maxii; ++ ii) {
-         std::shared_ptr<TestResource> myResource = TestResource::cast(ResourceList::resource(ii));
+         std::shared_ptr<TestResource> myResource = TestResource::cast(ResourceContainer::resource(ii));
          myResource->setAvailable(false);
       }
    }
@@ -144,7 +144,7 @@ TEST_F(StrategyIndexedFixture, balance_quality)
 
 TEST(StrategyIndexedTest, empty_strategy)
 {
-   std::shared_ptr<coffee::balance::ResourceList> emptyList = std::make_shared<coffee::balance::ResourceList>("EmptyList");
+   std::shared_ptr<coffee::balance::ResourceContainer> emptyList = std::make_shared<coffee::balance::ResourceContainer>("EmptyList");
    balance::StrategyIndexed strategy(emptyList);
     IndexedTest::Identifier id(0);
     ASSERT_THROW(strategy.apply(id), ResourceUnavailableException);

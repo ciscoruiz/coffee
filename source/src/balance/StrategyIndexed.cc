@@ -24,9 +24,9 @@
 #include <mutex>
 
 #include <coffee/balance/Resource.hpp>
-#include <coffee/balance/ResourceList.hpp>
+#include <coffee/balance/ResourceContainer.hpp>
 #include <coffee/balance/StrategyIndexed.hpp>
-#include <coffee/balance/GuardResourceList.hpp>
+#include <coffee/balance/GuardResourceContainer.hpp>
 
 #include <coffee/logger/Logger.hpp>
 #include <coffee/logger/TraceMethod.hpp>
@@ -39,22 +39,22 @@ std::shared_ptr<balance::Resource> balance::StrategyIndexed::apply(const Request
 {
    logger::TraceMethod tm (logger::Level::Local7, COFFEE_FILE_LOCATION);
 
-   GuardResourceList guard(m_resources);
+   GuardResourceContainer guard(m_resources);
 
    if (m_resources->size(guard) == 0) {
       COFFEE_THROW_NAMED_EXCEPTION(ResourceUnavailableException, m_resources->getName() << " is empty");
    }
 
    std::shared_ptr<Resource> result;
-   ResourceList::resource_iterator ww;
-   ResourceList::resource_iterator end;
+   ResourceContainer::resource_iterator ww;
+   ResourceContainer::resource_iterator end;
 
    const int identifier = request.calculateIdentifier();
 
    ww = end = m_resources->resource_begin(guard) + (identifier % m_resources->size(guard));
 
    do {
-      std::shared_ptr<Resource>& w = ResourceList::resource(ww);
+      std::shared_ptr<Resource>& w = ResourceContainer::resource(ww);
 
       if (w->isAvailable() == true) {
          result = w;

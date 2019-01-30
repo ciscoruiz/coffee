@@ -21,12 +21,12 @@
 // SOFTWARE.
 //
 
-#include <coffee/balance/GuardResourceList.hpp>
-#include <coffee/balance/ResourceList.hpp>
+#include <coffee/balance/GuardResourceContainer.hpp>
+#include <coffee/balance/ResourceContainer.hpp>
 
 using namespace coffee;
 
-balance::GuardResourceList::GuardResourceList(std::shared_ptr<ResourceList>& resourceList) :
+balance::GuardResourceContainer::GuardResourceContainer(std::shared_ptr<ResourceContainer>& resourceList) :
    m_guard(resourceList->m_mutex)
 {}
 

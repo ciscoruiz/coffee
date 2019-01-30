@@ -35,7 +35,7 @@
 #include <coffee/logger/TtyWriter.hpp>
 
 #include <coffee/balance/Resource.hpp>
-#include <coffee/balance/GuardResourceList.hpp>
+#include <coffee/balance/GuardResourceContainer.hpp>
 #include <coffee/balance/StrategyByRange.hpp>
 #include <coffee/balance/StrategyRoundRobin.hpp>
 

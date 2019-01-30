@@ -29,7 +29,7 @@
 namespace coffee {
 namespace balance {
 
-class GuardResourceList;
+class GuardResourceContainer;
 
 /**
  * Select a resource by using a numeric value. This numeric value will be used as index in the list
@@ -44,7 +44,7 @@ public:
     * Constuctor.
     * \param resources List of resources to work with.
     */
-   explicit StrategyIndexed (std::shared_ptr<ResourceList>& resources) :
+   explicit StrategyIndexed (std::shared_ptr<ResourceContainer>& resources) :
       balance::Strategy("balance::Indexed", resources)
    {
    }

@@ -37,13 +37,14 @@ std::shared_ptr<balance::Resource> balance::StrategyRoundRobin::apply (const Req
 {
    logger::TraceMethod tm (logger::Level::Local7, COFFEE_FILE_LOCATION);
 
-    GuardResourceContainer guard(m_resources);
+   GuardResourceContainer guard(m_resources);
 
-    if (!m_position) {
-      m_position = m_resources->resource_begin(guard);
+   if (!m_position.first) {
+      m_position.second = m_resources->resource_begin(guard);
+      m_position.first = true;
    }
 
-   if (m_position.value() == m_resources->resource_end(guard)) {
+   if (m_position.second == m_resources->resource_end(guard)) {
       COFFEE_THROW_NAMED_EXCEPTION(ResourceUnavailableException, m_resources->getName() << " is empty");
    }
 
@@ -51,14 +52,14 @@ std::shared_ptr<balance::Resource> balance::StrategyRoundRobin::apply (const Req
    ResourceContainer::resource_iterator ww;
    ResourceContainer::resource_iterator end;
 
-   ww = end = m_position.value();
+   ww = end = m_position.second;
 
    do {
       std::shared_ptr<Resource>& w = ResourceContainer::resource(ww);
 
       if (w->isAvailable () == true) {
          // prepare the next call to this method
-         m_position = m_resources->next(guard, ww);
+         m_position.second = m_resources->next(guard, ww);
          result = w;
          break;
       }

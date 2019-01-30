@@ -76,20 +76,7 @@ std::shared_ptr<balance::Resource> balance::StrategyIndexed::apply(const int ide
       COFFEE_THROW_NAMED_EXCEPTION(ResourceUnavailableException, resourceContainer->getName() << " is empty");
    }
 
-   std::shared_ptr<Resource> result;
-   ResourceContainer::resource_iterator ww;
-   ResourceContainer::resource_iterator end;
-
-   ww = end = resourceContainer->resource_begin(guard) + (identifier % resourceContainer->size(guard));
-
-   do {
-      std::shared_ptr<Resource>& w = ResourceContainer::resource(ww);
-
-      if (w->isAvailable() == true) {
-         result = w;
-         break;
-      }
-   } while ((ww = resourceContainer->next(guard, ww)) != end);
+   auto result = ResourceContainer::resource(resourceContainer->resource_begin(guard) + (identifier % resourceContainer->size(guard)));
 
    if (!result) {
       COFFEE_THROW_NAMED_EXCEPTION(ResourceUnavailableException, this->asString() << " there is not any available resource");
